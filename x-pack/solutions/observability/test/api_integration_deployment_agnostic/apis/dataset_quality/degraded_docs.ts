@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

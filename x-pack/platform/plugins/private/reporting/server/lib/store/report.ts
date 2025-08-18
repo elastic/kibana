@@ -11,7 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { JOB_STATUS } from '@kbn/reporting-common';
 import { REPORTING_DATA_STREAM_ALIAS } from '@kbn/reporting-server';
-import {
+import type {
   ReportApiJSON,
   ReportDocumentHead,
   ReportFields,

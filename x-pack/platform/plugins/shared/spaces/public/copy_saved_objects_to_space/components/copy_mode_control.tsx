@@ -149,6 +149,7 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
             onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
             disabled={createNewCopies}
             data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
+            name="overwriteOption"
           />
         </EuiCheckableCard>
       </EuiFormFieldset>

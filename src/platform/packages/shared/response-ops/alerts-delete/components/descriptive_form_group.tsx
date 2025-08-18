@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import type { AlertDeleteCategoryIds } from '@kbn/alerting-plugin/common/constants/alert_delete';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import * as i18n from '../translations';

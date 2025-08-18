@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useBoolean } from '@kbn/react-hooks';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AIFeatures } from './use_ai_features';
+import type { AIFeatures } from './use_ai_features';
 import { useKibana } from '../../../../../hooks/use_kibana';
 
 export interface GeneratePatternButtonProps {
@@ -101,6 +101,7 @@ export const GeneratePatternButton = ({
               <EuiPopover
                 id={splitButtonPopoverId}
                 isOpen={isPopoverOpen}
+                closePopover={() => closePopover()}
                 button={
                   <EuiButtonIcon
                     data-test-subj="streamsAppGrokAiPickConnectorButton"

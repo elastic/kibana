@@ -7,8 +7,9 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { IngestStreamLifecycleILM } from '@kbn/streams-schema';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamLifecycleILM } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 

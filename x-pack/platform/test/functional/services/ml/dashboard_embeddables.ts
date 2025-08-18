@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlDashboardJobSelectionTable } from './dashboard_job_selection_table';
 
 export function MachineLearningDashboardEmbeddablesProvider(
   { getService }: FtrProviderContext,

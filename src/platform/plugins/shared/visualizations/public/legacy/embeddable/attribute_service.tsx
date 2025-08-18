@@ -10,14 +10,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import {
-  SavedObjectSaveModal,
-  OnSaveProps,
-  SaveResult,
-  showSaveModal,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { getNotifications } from '../../services';
-import {
+import type {
   VisualizeByReferenceInput,
   VisualizeByValueInput,
   VisualizeSavedObjectAttributes,

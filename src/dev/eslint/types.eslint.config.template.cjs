@@ -35,7 +35,10 @@ module.exports = {
       },
     },
     {
-      files: ['*spaces_api_integration/common/services/basic_auth_supertest.ts'],
+      files: [
+        '*spaces_api_integration/common/services/basic_auth_supertest.ts',
+        // TODO: high chances missing awaits cause test flakiness, 37 errors spotted
+        'x-pack/solutions/security/test/security_solution_api_integration/**/*'],
       rules: {
         '@typescript-eslint/no-floating-promises': 'off',
       },

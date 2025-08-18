@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
-import { flattenMappings, MappingField } from './utils';
-import { getIndexMappings, performMatchSearch, PerformMatchSearchResponse } from './steps';
+import type { MappingField } from './utils';
+import { flattenMappings } from './utils';
+import type { PerformMatchSearchResponse } from './steps';
+import { getIndexMappings, performMatchSearch } from './steps';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
@@ -34,7 +36,7 @@ export const relevanceSearch = async ({
   // if no index was specified, we use the index explorer to select the best one
   if (!selectedIndex) {
     const { indices } = await indexExplorer({
-      query: term,
+      nlQuery: term,
       esClient,
       model,
     });

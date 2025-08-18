@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   copyToClipboard,
   EuiButton,
@@ -14,7 +15,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiSpacer,
-  EuiSwitchEvent,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

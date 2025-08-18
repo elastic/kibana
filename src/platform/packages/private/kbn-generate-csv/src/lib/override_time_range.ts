@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger } from '@kbn/core/server';
 import { cloneDeep, get, has, isArray } from 'lodash';

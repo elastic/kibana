@@ -5,32 +5,34 @@
  * 2.0.
  */
 
-import { EuiHealth, EuiText } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
 import type { QualityIndicators, InfoIndicators } from '../../../common/types';
 
 export function QualityIndicator({
   quality,
   description,
-  isColoredDescription,
-  textSize = 's',
 }: {
   quality: QualityIndicators;
   description: string | ReactNode;
-  isColoredDescription?: boolean;
-  textSize?: 'xs' | 's' | 'm';
 }) {
   const qualityColors: Record<QualityIndicators, InfoIndicators> = {
     poor: 'danger',
-    degraded: 'warning',
+    warning: 'warning',
     good: 'success',
   };
 
+  const qualityIcons: Record<QualityIndicators, IconType> = {
+    poor: 'error',
+    warning: 'warning',
+    good: 'checkCircle',
+  };
+
   return (
-    <EuiHealth color={qualityColors[quality]} textSize={textSize}>
-      <EuiText size="relative" color={isColoredDescription ? qualityColors[quality] : 'white'}>
-        {description}
-      </EuiText>
-    </EuiHealth>
+    <EuiBadge color={qualityColors[quality]} iconType={qualityIcons[quality]}>
+      <EuiText size="relative">{description}</EuiText>
+    </EuiBadge>
   );
 }

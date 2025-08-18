@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import {
   indexDocument,
   putStream,
@@ -14,17 +14,17 @@ import {
   enableStreams,
   forkStream,
 } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   let apiClient: StreamsSupertestRepositoryClient;
   const esClient = getService('es');
 
-  describe('conflicts', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/231906
+  // Failing: See https://github.com/elastic/kibana/issues/231905
+  describe.skip('conflicts', function () {
     describe('concurrency handling', function () {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -40,20 +40,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme',
+            eq: 'routeme',
           },
         };
         const stream2 = {
           stream: {
             name: 'logs.apache',
           },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme2',
+            eq: 'routeme2',
           },
         };
         const responses = await Promise.allSettled([
@@ -112,10 +110,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to create a wired stream with the same name as an existing index', async () => {
         const stream = {
           stream: { name: 'logs.existingindex' },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme',
+            eq: 'routeme',
           },
         };
         await forkStream(apiClient, 'logs', stream, 400);
@@ -124,10 +121,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('should not allow to create a wired stream with the same name as an existing data stream', async () => {
         const stream = {
           stream: { name: 'logs.existingstream' },
-          if: {
+          where: {
             field: 'resource.attributes.host.name',
-            operator: 'eq' as const,
-            value: 'routeme',
+            eq: 'routeme',
           },
         };
         await forkStream(apiClient, 'logs', stream, 409);
@@ -144,9 +140,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 lifecycle: {
                   dsl: {},
                 },
-                processing: [
-                  {
-                    manual_ingest_pipeline: {
+                processing: {
+                  steps: [
+                    {
+                      action: 'manual_ingest_pipeline',
                       processors: [
                         {
                           set: {
@@ -157,8 +154,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       ],
                     },
-                  },
-                ],
+                  ],
+                },
                 wired: {
                   routing: [],
                   fields: {},
@@ -184,9 +181,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 lifecycle: {
                   dsl: {},
                 },
-                processing: [
-                  {
-                    manual_ingest_pipeline: {
+                processing: {
+                  steps: [
+                    {
+                      action: 'manual_ingest_pipeline',
                       processors: [
                         {
                           set: {
@@ -196,8 +194,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                         },
                       ],
                     },
-                  },
-                ],
+                  ],
+                },
                 wired: {
                   routing: [],
                   fields: {},

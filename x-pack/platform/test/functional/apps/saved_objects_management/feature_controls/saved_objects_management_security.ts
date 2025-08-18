@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
@@ -22,13 +22,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Using the version below instead because we don't need the extra `-SNAPSHOT` bit
       version = (await kibanaServer.status.get()).version.number;
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/feature_controls/security'
       );
     });
 
     after(async () => {
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/feature_controls/security'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/feature_controls/security'
       );
     });
 

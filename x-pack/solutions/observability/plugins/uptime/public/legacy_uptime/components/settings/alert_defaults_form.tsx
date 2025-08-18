@@ -7,6 +7,7 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -14,14 +15,13 @@ import {
   EuiSpacer,
   EuiComboBox,
   EuiIcon,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import { SettingsFormProps } from '../../pages/settings';
+import type { SettingsFormProps } from '../../pages/settings';
 import { connectorsSelector } from '../../state/alerts/alerts';
 import { AddConnectorFlyout } from './add_connector_flyout';
 import { useGetUrlParams, useUrlParams } from '../../hooks';

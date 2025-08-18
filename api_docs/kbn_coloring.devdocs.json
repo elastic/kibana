@@ -4099,7 +4099,12 @@
             "label": "specialAssignments",
             "description": [],
             "signature": [
-              "{ rules: { type: \"other\"; }[]; color: { type: \"loop\"; }; touched: false; }[]"
+              "AssignmentBase",
+              "<",
+              "RuleOthers",
+              ", ",
+              "LoopColor",
+              ">[]"
             ],
             "path": "src/platform/packages/shared/kbn-coloring/src/shared_components/color_mapping/config/default_color_mapping.ts",
             "deprecated": false,

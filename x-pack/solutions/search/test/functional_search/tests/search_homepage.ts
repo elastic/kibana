@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -136,19 +136,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
               await testSubjects.existOrFail('sampleDataSection');
             });
 
-            describe('when sample-data-elasticsearch index does not exist', function () {
+            describe('when kibana_sample_data_elasticsearch_documentation index does not exist', function () {
               it('renders the "Install sample data" button', async () => {
                 await testSubjects.existOrFail('installSampleBtn');
               });
             });
 
-            describe('when sample-data-elasticsearch index exists', function () {
+            describe('when kibana_sample_data_elasticsearch_documentation index exists', function () {
               before(async () => {
-                await es.indices.create({ index: 'sample-data-elasticsearch' });
+                await es.indices.create({
+                  index: 'kibana_sample_data_elasticsearch_documentation',
+                });
               });
 
               after(async () => {
-                await esDeleteAllIndices(['sample-data-elasticsearch']);
+                await esDeleteAllIndices(['kibana_sample_data_elasticsearch_documentation']);
               });
 
               it('renders the "View data" button', async () => {

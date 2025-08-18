@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
-import { DataStreamDocsStat, NonAggregatableDatasets } from '../../../common/api_types';
-import {
+import type { HttpStart } from '@kbn/core/public';
+import type { DataStreamDocsStat, NonAggregatableDatasets } from '../../../common/api_types';
+import type {
   DataStreamStatServiceResponse,
   GetDataStreamsDegradedDocsStatsQuery,
   GetDataStreamsFailedDocsStatsQuery,
   GetDataStreamsStatsQuery,
   GetDataStreamsTotalDocsQuery,
+  GetDataStreamsTypesPrivilegesQuery,
+  GetDataStreamsTypesPrivilegesResponse,
   GetNonAggregatableDataStreamsParams,
 } from '../../../common/data_streams_stats';
-import { Integration } from '../../../common/data_streams_stats/integration';
+import type { Integration } from '../../../common/data_streams_stats/integration';
 
 export type DataStreamsStatsServiceSetup = void;
 
@@ -28,6 +30,9 @@ export interface DataStreamsStatsServiceStartDeps {
 }
 
 export interface IDataStreamsStatsClient {
+  getDataStreamsTypesPrivileges(
+    params: GetDataStreamsTypesPrivilegesQuery
+  ): Promise<GetDataStreamsTypesPrivilegesResponse>;
   getDataStreamsStats(params?: GetDataStreamsStatsQuery): Promise<DataStreamStatServiceResponse>;
   getDataStreamsDegradedStats(
     params?: GetDataStreamsDegradedDocsStatsQuery

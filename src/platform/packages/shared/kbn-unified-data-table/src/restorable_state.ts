@@ -10,6 +10,7 @@
 import type { InTableSearchRestorableState } from '@kbn/data-grid-in-table-search/src/types';
 import { createRestorableStateProvider } from '@kbn/restorable-state';
 import type { DocumentDiffMode } from './components/compare_documents/types';
+import type { DataGridDensity } from './constants';
 
 type SelectedDocId = string;
 
@@ -26,6 +27,11 @@ export interface UnifiedDataTableRestorableState {
   comparisonSettingShowAllFields: boolean;
   comparisonSettingShowMatchingValues: boolean;
   comparisonSettingDiffMode: DocumentDiffMode;
+
+  // settings
+  density: DataGridDensity;
+  rowHeight: number;
+  headerRowHeight: number;
 }
 
 export const {

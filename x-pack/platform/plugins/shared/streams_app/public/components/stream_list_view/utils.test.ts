@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { buildStreamRows } from './utils';
+import { asTrees, buildStreamRows, enrichStream } from './utils';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
-import { Direction } from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 import { ms } from '@kbn/test/src/functional_test_runner/lib/mocha/reporter/ms';
 
 const createStream = (name: string, retention: string | undefined): ListStreamDetail => {
@@ -35,7 +35,7 @@ describe('buildStreamRows', () => {
   const cChild2 = createStream('metrics-c.child2', '30m');
   const cChild3 = createStream('metrics-c.child3', '45m');
 
-  const allStreams: ListStreamDetail[] = [
+  const allStreams = asTrees([
     rootA,
     aChild2,
     aChild1,
@@ -48,7 +48,7 @@ describe('buildStreamRows', () => {
     cChild2,
     cChild3,
     cChild1,
-  ];
+  ]).map(enrichStream);
 
   it('sorts by name ascending', () => {
     const expected = [
@@ -66,7 +66,7 @@ describe('buildStreamRows', () => {
       'metrics-c.child3',
     ];
     const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
-    expect(rows.map((r) => r.name)).toEqual(expected);
+    expect(rows.map((r) => r.stream.name)).toEqual(expected);
   });
 
   it('sorts by name descending', () => {
@@ -85,7 +85,7 @@ describe('buildStreamRows', () => {
       'logs-a.child1',
     ];
     const rows = buildStreamRows(allStreams, 'nameSortKey', 'desc' as Direction);
-    expect(rows.map((r) => r.name)).toEqual(expected);
+    expect(rows.map((r) => r.stream.name)).toEqual(expected);
   });
 
   it('sorts by retention ascending', () => {
@@ -104,7 +104,7 @@ describe('buildStreamRows', () => {
       'logs-b.child3 (5.0h)',
     ];
     const rows = buildStreamRows(allStreams, 'retentionMs', 'asc' as Direction);
-    expect(rows.map((r) => `${r.name} (${ms(r.retentionMs)})`)).toEqual(expected);
+    expect(rows.map((r) => `${r.stream.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
   it('sorts by retention descending', () => {
@@ -123,12 +123,12 @@ describe('buildStreamRows', () => {
       'logs-a.child2 (4.0h)',
     ];
     const rows = buildStreamRows(allStreams, 'retentionMs', 'desc' as Direction);
-    expect(rows.map((r) => `${r.name} (${ms(r.retentionMs)})`)).toEqual(expected);
+    expect(rows.map((r) => `${r.stream.name} (${ms(r.retentionMs)})`)).toEqual(expected);
   });
 
   it('always lists a child immediately after its parent', () => {
     const rows = buildStreamRows(allStreams, 'nameSortKey', 'asc' as Direction);
-    const indexOf = (n: string) => rows.findIndex((r) => r.name === n);
+    const indexOf = (n: string) => rows.findIndex((r) => r.stream.name === n);
     expect(indexOf('logs-a.child1')).toBeGreaterThan(indexOf('logs-a'));
     expect(indexOf('logs-a.child2')).toBeGreaterThan(indexOf('logs-a'));
     expect(indexOf('logs-a.child3')).toBeGreaterThan(indexOf('logs-a'));

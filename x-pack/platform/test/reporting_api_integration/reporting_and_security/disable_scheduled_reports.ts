@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');

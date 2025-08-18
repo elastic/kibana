@@ -5,13 +5,10 @@
  * 2.0.
  */
 
-import { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
-import { AgentRunEvents } from '../types';
-import {
-  EventConverter,
-  getSimpleGraphConverter,
-  getSearchAgentGraphConverter,
-} from './converters';
+import type { StreamEvent as LangchainEvent } from '@langchain/core/tracers/log_stream';
+import type { AgentRunEvents } from '../types';
+import type { EventConverter } from './converters';
+import { getSimpleGraphConverter, getSearchAgentGraphConverter } from './converters';
 import { graphNames } from '../constants';
 
 export type GraphEventConverter = (event: LangchainEvent) => AgentRunEvents[];

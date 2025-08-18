@@ -9,8 +9,12 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
-import { InputControlVisParams } from './types';
+import type {
+  ExpressionFunctionDefinition,
+  Datatable,
+  Render,
+} from '@kbn/expressions-plugin/public';
+import type { InputControlVisParams } from './types';
 
 interface Arguments {
   visConfig: string;

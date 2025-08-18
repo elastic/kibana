@@ -6,16 +6,18 @@
  */
 
 import { NodeType } from '@kbn/wc-framework-types-common';
-import { NodeDefinition } from '@kbn/wc-framework-types-server';
+import type { NodeDefinition } from '@kbn/wc-framework-types-server';
 import type { ScopedNodeRunnerFn } from './types';
-import {
-  createMockWorkflowRunnerInternalContext,
-  createMockedState,
-  getMockedPromptNodeTypeDefinition,
+import type {
   MockedWorkflowRunnerInternalContext,
   MockedState,
   MockedNodeTypeDefinition,
   MockedNodeRunner,
+} from '../test_utils';
+import {
+  createMockWorkflowRunnerInternalContext,
+  createMockedState,
+  getMockedPromptNodeTypeDefinition,
 } from '../test_utils';
 import { createNodeRunner } from './run_node';
 

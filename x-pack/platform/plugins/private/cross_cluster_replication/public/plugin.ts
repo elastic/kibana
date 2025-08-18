@@ -8,12 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { firstValueFrom } from 'rxjs';
-import { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
 import { PLUGIN, MANAGEMENT_ID } from '../common/constants';
 import { init as initUiMetric } from './app/services/track_ui_metric';
 import { init as initNotification } from './app/services/notifications';
-import { PluginDependencies, ClientConfigType } from './types';
+import type { PluginDependencies, ClientConfigType } from './types';
 
 // @ts-ignore;
 import { setHttpClient } from './app/services/api';

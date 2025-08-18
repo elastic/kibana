@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MapCrudTypes } from './types';
+import type { MapCrudTypes } from './types';
 export type { MapCrudTypes, MapAttributes } from './types';
 export type MapItem = MapCrudTypes['Item'];
 export type MapsSearchOut = MapCrudTypes['SearchOut'];

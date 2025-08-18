@@ -9,10 +9,11 @@ import { errors as esErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/onechat-common';
-import { ToolCreateParams, ToolTypeUpdateParams } from '../tool_provider';
-import { ToolStorage, createStorage } from './storage';
+import type { ToolCreateParams, ToolTypeUpdateParams } from '../tool_provider';
+import type { ToolStorage } from './storage';
+import { createStorage } from './storage';
 import { fromEs, createAttributes, updateDocument } from './converters';
-import { ToolDocument, ToolPersistedDefinition } from './types';
+import type { ToolDocument, ToolPersistedDefinition } from './types';
 
 /**
  * Client for persisted tool definitions.

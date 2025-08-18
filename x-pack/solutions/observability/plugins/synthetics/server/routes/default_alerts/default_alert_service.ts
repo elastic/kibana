@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { parseDuration } from '@kbn/alerting-plugin/server';
-import { FindActionResult } from '@kbn/actions-plugin/server';
+import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { getSyntheticsDynamicSettings } from '../../saved_objects/synthetics_settings';
-import { DynamicSettingsAttributes } from '../../runtime_types/settings';
+import type { DynamicSettingsAttributes } from '../../runtime_types/settings';
 import { populateAlertActions } from '../../../common/rules/alert_actions';
 import {
   SyntheticsMonitorStatusTranslations,
   TlsTranslations,
 } from '../../../common/rules/synthetics/translations';
-import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
+import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
 import {
   ACTION_GROUP_DEFINITIONS,
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-import { DefaultRuleType } from '../../../common/types/default_alerts';
+import type { DefaultRuleType } from '../../../common/types/default_alerts';
 export class DefaultAlertService {
   context: UptimeRequestHandlerContext;
   soClient: SavedObjectsClientContract;

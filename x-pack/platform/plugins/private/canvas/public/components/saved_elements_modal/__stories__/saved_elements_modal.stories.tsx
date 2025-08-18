@@ -11,7 +11,7 @@ import type { StoryObj } from '@storybook/react';
 import { waitFor } from '@kbn/presentation-util-plugin/public/__stories__';
 import { SavedElementsModal } from '../saved_elements_modal.component';
 import { getTestCustomElements } from './fixtures/test_elements';
-import { CustomElement } from '../../../../types';
+import type { CustomElement } from '../../../../types';
 
 export default {
   title: 'components/SavedElementsModal',

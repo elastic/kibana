@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog, Writer } from '@kbn/tooling-log';
+import type { Writer } from '@kbn/tooling-log';
+import { ToolingLog } from '@kbn/tooling-log';
 import { logPerf } from './log_perf';
 
 export enum LogLevel {

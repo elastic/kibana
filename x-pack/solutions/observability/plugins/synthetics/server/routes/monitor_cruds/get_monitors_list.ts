@@ -4,14 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
 import { mapSavedObjectToMonitor } from './formatters/saved_object_to_monitor';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
+import type { MonitorsQuery } from '../common';
 import {
   getMonitorFilters,
   isMonitorsQueryFiltered,
-  MonitorsQuery,
   parseMappingKey,
   QuerySchema,
   MONITOR_SEARCH_FIELDS,

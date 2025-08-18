@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_INDEX_PATTERN = 'logstash-*';
 const TEST_ANCHOR_ID = 'AU_x3_BrGFA8no6QjjaI';

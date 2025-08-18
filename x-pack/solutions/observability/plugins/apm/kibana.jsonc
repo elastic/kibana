@@ -15,6 +15,7 @@
       "apmDataAccess",
       "data",
       "dashboard",
+      "contentManagement",
       "controls",
       "embeddable",
       "features",

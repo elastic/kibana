@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
@@ -108,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should allow resetting column width in surrounding docs view', async () => {
       await unifiedFieldList.clickFieldListItemAdd('@message');
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const [, surroundingActionEl] = await dataGrid.getRowActions({ rowIndex: 0 });
+      const [, surroundingActionEl] = await dataGrid.getRowActions();
       await surroundingActionEl.click();
       await header.waitUntilLoadingHasFinished();
       await testResizeColumn('@message');

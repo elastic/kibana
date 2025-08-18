@@ -24,7 +24,7 @@ import {
   VERSION,
 } from '@kbn/rule-data-utils';
 
-import { ConfigSchema } from '../plugin';
+import type { ConfigSchema } from '../plugin';
 import { isAlertDetailsEnabledPerApp } from './is_alert_details_enabled';
 import type { TopAlert } from '../typings/alerts';
 

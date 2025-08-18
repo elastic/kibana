@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import {
-  Message,
-  ChatCompletionEvent,
-  MessageRole,
-  AnonymizationOutput,
-} from '@kbn/inference-common';
-import {
-  ChatCompletionEventType,
-  ChatCompletionChunkEvent,
-} from '@kbn/inference-common/src/chat_complete/events';
-import { OperatorFunction, mergeMap, filter, of, identity } from 'rxjs';
+import type { Message, ChatCompletionEvent, AnonymizationOutput } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
+import type { ChatCompletionChunkEvent } from '@kbn/inference-common/src/chat_complete/events';
+import { ChatCompletionEventType } from '@kbn/inference-common/src/chat_complete/events';
+import type { OperatorFunction } from 'rxjs';
+import { mergeMap, filter, of, identity } from 'rxjs';
 import { deanonymize } from './deanonymize';
 
 export function deanonymizeMessage<T extends ChatCompletionEvent>(

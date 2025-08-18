@@ -8,7 +8,7 @@
 import { mergeWith, isObject } from 'lodash';
 
 import { ACTION_STATES } from '../../../common/constants';
-import { ActionStatusModelEs } from '../../../common/types';
+import type { ActionStatusModelEs } from '../../../common/types';
 import { buildServerActionStatusModel, buildClientActionStatusModel } from './action_status_model';
 
 // Treat all nested properties of type as optional.

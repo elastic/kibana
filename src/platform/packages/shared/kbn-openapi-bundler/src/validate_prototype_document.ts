@@ -8,7 +8,7 @@
  */
 
 import chalk from 'chalk';
-import { PrototypeDocument } from './prototype_document';
+import type { PrototypeDocument } from './prototype_document';
 import { readDocument } from './utils/read_document';
 
 /**

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { tracing } from '@elastic/opentelemetry-node/sdk';
-import { InferenceTracingPhoenixExportConfig } from '@kbn/inference-tracing-config';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { InferenceTracingPhoenixExportConfig } from '@kbn/inference-tracing-config';
 import { memoize } from 'lodash';
 import {
   SEMRESATTRS_PROJECT_NAME,

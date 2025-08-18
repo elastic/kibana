@@ -942,4 +942,44 @@ export function defineRoutes(
       }
     }
   );
+
+  router.post(
+    {
+      path: '/api/alerts_fixture/rule/internally_managed',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
+      validate: {},
+    },
+    async (
+      context: RequestHandlerContext,
+      req: KibanaRequest<any, any, any, any>,
+      res: KibanaResponseFactory
+    ): Promise<IKibanaResponse<any>> => {
+      try {
+        const [_, { alerting }] = await core.getStartServices();
+        const rulesClient = await alerting.getRulesClientWithRequest(req);
+
+        return res.ok({
+          body: await rulesClient.create({
+            data: {
+              enabled: true,
+              name: 'Internal Rule',
+              schedule: { interval: '1m' },
+              tags: [],
+              alertTypeId: 'test.internal-rule-type',
+              consumer: 'alertsFixture',
+              params: {},
+              actions: [],
+            },
+          }),
+        });
+      } catch (err) {
+        return res.badRequest({ body: err });
+      }
+    }
+  );
 }

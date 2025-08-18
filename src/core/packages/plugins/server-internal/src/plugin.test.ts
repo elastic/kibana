@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ContainerModule } from 'inversify';
 import { join } from 'path';
 import { BehaviorSubject } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -21,16 +22,23 @@ import { nodeServiceMock } from '@kbn/core-node-server-mocks';
 import type { PluginManifest } from '@kbn/core-plugins-server';
 import { PluginType } from '@kbn/core-base-common';
 import { coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
+import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 import { PluginWrapper } from './plugin';
 
+import type { InstanceInfo } from './plugin_context';
 import {
   createPluginInitializerContext,
   createPluginSetupContext,
-  InstanceInfo,
+  createPluginStartContext,
 } from './plugin_context';
 
 const mockPluginInitializer = jest.fn();
+const mockContainerModuleCallback: jest.MockedFunction<
+  ConstructorParameters<typeof ContainerModule>[0]
+> = jest.fn();
+const pluginModule = new ContainerModule(mockContainerModuleCallback);
 const logger = loggingSystemMock.create();
 jest.doMock(
   join('plugin-with-initializer-path', 'server'),
@@ -41,6 +49,9 @@ jest.doMock(join('plugin-without-initializer-path', 'server'), () => ({}), {
   virtual: true,
 });
 jest.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => ({ plugin: {} }), {
+  virtual: true,
+});
+jest.doMock(join('plugin-with-module', 'server'), () => ({ module: pluginModule }), {
   virtual: true,
 });
 
@@ -181,7 +192,7 @@ test('`setup` fails if the plugin has not been initialized', () => {
   );
 });
 
-test('`init` fails if `plugin` initializer is not exported', async () => {
+test('`init` fails if no `plugin` initializer nor `module` is exported', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
   const plugin = new PluginWrapper({
@@ -198,7 +209,7 @@ test('`init` fails if `plugin` initializer is not exported', async () => {
   });
 
   await expect(() => plugin.init()).rejects.toThrowErrorMatchingInlineSnapshot(
-    `"Plugin \\"some-plugin-id\\" does not export \\"plugin\\" definition (plugin-without-initializer-path)."`
+    `"Plugin \\"some-plugin-id\\" does not export the \\"plugin\\" definition or \\"module\\" (plugin-without-initializer-path)."`
   );
 });
 
@@ -301,6 +312,43 @@ test('`setup` initializes plugin and calls appropriate lifecycle hook', async ()
 
   expect(mockPluginInstance.setup).toHaveBeenCalledTimes(1);
   expect(mockPluginInstance.setup).toHaveBeenCalledWith(setupContext, setupDependencies);
+});
+
+test('`setup` initializes the plugin container module', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-module',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  await plugin.init();
+
+  const setupContext = createPluginSetupContext({
+    deps: coreInternalLifecycleMock.createInternalSetup(),
+    plugin,
+    runtimeResolver,
+  });
+  const setupDependencies = { 'some-required-dep': { contract: 'no' } };
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(Setup).toConstantValue({ contract: 'yes' });
+  });
+  expect(plugin.setup(setupContext, setupDependencies)).toEqual({ contract: 'yes' });
+
+  expect(mockContainerModuleCallback).toHaveBeenCalledTimes(1);
+
+  const container = setupContext.injection.getContainer();
+  expect(container.get(PluginInitializer('opaqueId'))).toBe(opaqueId);
+  expect(container.get(CoreSetup('injection'))).toBeDefined();
+  expect(container.get(PluginSetup('some-required-dep'))).toEqual({ contract: 'no' });
 });
 
 test('`start` fails if setup is not called first', () => {
@@ -433,6 +481,49 @@ test("`start` resolves `startDependencies` Promise after plugin's start", async 
   await startDependenciesCheck;
 });
 
+test('`start` loads start dependencies into the plugin container', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-module',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+  const setupContext = createPluginSetupContext({
+    deps: coreInternalLifecycleMock.createInternalSetup(),
+    plugin,
+    runtimeResolver,
+  });
+  const startContext = createPluginStartContext({
+    deps: coreInternalLifecycleMock.createInternalStart(),
+    plugin,
+    runtimeResolver,
+  });
+  const startDependencies = { someDep: 'value' };
+  const startContract = {
+    someApi: () => 'foo',
+  };
+
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(Setup).toConstantValue({});
+    bind(Start).toConstantValue(startContract);
+  });
+
+  await plugin.init();
+  await plugin.setup(setupContext, {} as any);
+  expect(plugin.start(startContext, startDependencies)).toBe(startContract);
+  const container = setupContext.injection.getContainer();
+  expect(container.get(CoreStart('injection'))).toBeDefined();
+  expect(container.get(PluginStart('someDep'))).toBe('value');
+});
+
 test('`stop` fails if plugin is not set up', async () => {
   const manifest = createPluginManifest();
   const opaqueId = Symbol();
@@ -504,6 +595,41 @@ test('`stop` calls `stop` defined by the plugin instance', async () => {
 
   await expect(plugin.stop()).resolves.toBeUndefined();
   expect(mockPluginInstance.stop).toHaveBeenCalledTimes(1);
+});
+
+test('`stop` cleans up the plugin container', async () => {
+  const manifest = createPluginManifest();
+  const opaqueId = Symbol();
+  const plugin = new PluginWrapper({
+    path: 'plugin-with-module',
+    manifest,
+    opaqueId,
+    initializerContext: createPluginInitializerContext({
+      coreContext,
+      opaqueId,
+      manifest,
+      instanceInfo,
+      nodeInfo,
+    }),
+  });
+
+  await plugin.init();
+
+  const setupContext = createPluginSetupContext({
+    deps: coreInternalLifecycleMock.createInternalSetup(),
+    plugin,
+    runtimeResolver,
+  });
+  const setupDependencies = { 'some-required-dep': { contract: 'no' } };
+  mockContainerModuleCallback.mockImplementationOnce(({ bind }) => {
+    bind(Setup).toConstantValue({ contract: 'yes' });
+  });
+  expect(plugin.setup(setupContext, setupDependencies)).toEqual({ contract: 'yes' });
+
+  const container = setupContext.injection.getContainer();
+  expect(container.isBound(CoreSetup('injection'))).toBe(true);
+  await plugin.stop();
+  expect(container.isBound(CoreSetup('injection'))).toBe(false);
 });
 
 describe('#getConfigSchema()', () => {

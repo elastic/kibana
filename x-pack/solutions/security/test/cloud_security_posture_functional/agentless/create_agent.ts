@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as http from 'http';
+import type * as http from 'http';
 import expect from '@kbn/expect';
 import equals from 'fast-deep-equal';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';

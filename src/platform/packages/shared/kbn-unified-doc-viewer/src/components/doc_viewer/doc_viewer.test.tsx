@@ -10,7 +10,8 @@
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import { DocViewer, DocViewerProps, INITIAL_TAB } from './doc_viewer';
+import type { DocViewerProps } from './doc_viewer';
+import { DocViewer, INITIAL_TAB } from './doc_viewer';
 import type { DocViewRenderProps } from '../../types';
 import { DocViewsRegistry } from '../..';
 import { dataViewMock, esHitsMockWithSort } from '@kbn/discover-utils/src/__mocks__';

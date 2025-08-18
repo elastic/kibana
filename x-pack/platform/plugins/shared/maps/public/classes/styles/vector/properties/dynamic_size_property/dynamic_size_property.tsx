@@ -10,8 +10,8 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from '../dynamic_style_property';
 import { MarkerSizeLegend, OrdinalLegend } from '../../components/legend/size';
 import { makeMbClampedNumberExpression } from '../../style_util';
+import type { FieldFormatter } from '../../../../../../common/constants';
 import {
-  FieldFormatter,
   HALF_MAKI_ICON_SIZE,
   MB_LOOKUP_FUNCTION,
   VECTOR_STYLES,

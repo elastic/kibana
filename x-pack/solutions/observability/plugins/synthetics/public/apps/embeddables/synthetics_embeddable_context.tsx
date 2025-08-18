@@ -8,8 +8,8 @@
 import React from 'react';
 import { createBrowserHistory } from 'history';
 import { Router } from '@kbn/shared-ux-router';
-import { Subject } from 'rxjs';
-import { Store } from 'redux';
+import type { Subject } from 'rxjs';
+import type { Store } from 'redux';
 import { SyntheticsSharedContext } from '../synthetics/contexts/synthetics_shared_context';
 import { SyntheticsEmbeddableStateContextProvider } from '../synthetics/contexts/synthetics_embeddable_context';
 import { getSyntheticsAppProps } from '../synthetics/render_app';

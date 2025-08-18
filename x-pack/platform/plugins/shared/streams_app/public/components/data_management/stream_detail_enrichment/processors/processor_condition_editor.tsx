@@ -8,10 +8,10 @@
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { ConditionEditor } from '../../condition_editor';
-import { ProcessorFormState } from '../types';
+import type { ProcessorFormState } from '../types';
 
 export const ProcessorConditionEditor = () => {
-  const { field } = useController<ProcessorFormState, 'if'>({ name: 'if' });
+  const { field } = useController<ProcessorFormState, 'where'>({ name: 'where' });
 
   if (field.value === undefined) {
     return null;

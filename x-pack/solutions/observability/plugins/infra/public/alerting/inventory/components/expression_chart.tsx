@@ -34,7 +34,7 @@ import { ThresholdAnnotations } from '../../common/criterion_preview_chart/thres
 
 interface Props {
   expression: InventoryMetricConditions;
-  filterQuery?: string | symbol;
+  kuery?: string;
   nodeType: InventoryItemType;
   sourceId: string;
   accountId?: string;
@@ -43,7 +43,7 @@ interface Props {
 
 export const ExpressionChart: React.FC<Props> = ({
   expression,
-  filterQuery,
+  kuery,
   nodeType,
   sourceId,
   accountId = '',
@@ -68,7 +68,7 @@ export const ExpressionChart: React.FC<Props> = ({
   });
 
   const { loading, nodes } = useSnapshot({
-    filterQuery,
+    kuery,
     metrics:
       expression.metric === 'custom'
         ? [buildCustomMetric(expression.customMetric)]

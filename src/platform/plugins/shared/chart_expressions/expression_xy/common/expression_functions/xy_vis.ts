@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { XyVisFn } from '../types';
+import type { XyVisFn } from '../types';
 import { XY_VIS, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';
 import { commonXYArgs } from './common_xy_args';

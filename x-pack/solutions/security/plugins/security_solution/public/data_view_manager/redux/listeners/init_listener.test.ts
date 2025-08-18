@@ -107,7 +107,7 @@ describe('createInitListener', () => {
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
-        id: DEFAULT_ALERT_DATA_VIEW_ID,
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.detections,
       })
     );

@@ -120,6 +120,30 @@ The helper will spin up one `local` project per available connector so results a
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
 
+### Running evaluations against your local/development Kibana instance
+
+To run evaluations against your local Kibana instance instead of the Scout server, manually create a Scout configuration file. This approach provides more control over the testing environment (running Kibana in Debug mode, connecting to local/remote test cluster, etc.). Running the Scout server is also not required for this approach.
+
+To do this, you need to create (or override) a configuration file at `.scout/servers/local.json` and add host and auth details for your target Kibana instance:
+
+```json
+{
+  "serverless": false,
+  "isCloud": false,
+  "hosts": {
+    "kibana": "http://localhost:5601/<basePath>"
+  },
+  "auth": {
+    "username": "elastic",
+    "password": "changeme"
+  }
+}
+```
+
+Then you can run the evaluations as normal. The Playwright tests will use the provided configuration details to target your Kibana instance.
+
+> **Note:** Running the Scout server with `node scripts/scout.js start-server --stateful` will override any manual configuration in `.scout/servers/local.json` so you may need to update this file every time you want to switch between the two.
+
 ## Regenerating Phoenix GraphQL types
 
 ```bash

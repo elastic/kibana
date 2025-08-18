@@ -10,7 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { RootComponent } from './app';
-import { AppDependencies } from '../types';
+import type { AppDependencies } from '../types';
 
 import { apiService } from './lib/api';
 import { breadcrumbService } from './lib/breadcrumbs';
@@ -21,7 +21,10 @@ export function mountManagementSection(
 ) {
   const { element, setBreadcrumbs } = params;
 
-  apiService.setup(dependencies.services.core.http);
+  apiService.setup(
+    dependencies.services.core.http,
+    dependencies.plugins.reindexService.reindexService
+  );
   breadcrumbService.setup(setBreadcrumbs);
 
   render(<RootComponent {...dependencies} />, element);

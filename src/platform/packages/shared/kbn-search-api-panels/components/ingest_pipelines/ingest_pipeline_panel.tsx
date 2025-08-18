@@ -19,7 +19,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
 import { createIngestPipelineOptions } from './ingest_pipeline_options';
 
 interface IngestPipelinePanelProps {

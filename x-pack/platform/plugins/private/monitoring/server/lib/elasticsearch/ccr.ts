@@ -8,8 +8,8 @@
 import moment from 'moment';
 import { ElasticsearchMetric } from '../metrics';
 import { createQuery } from '../create_query';
-import { ElasticsearchResponse } from '../../../common/types/es';
-import { LegacyRequest } from '../../types';
+import type { ElasticsearchResponse } from '../../../common/types/es';
+import type { LegacyRequest } from '../../types';
 import { getIndexPatterns, getElasticsearchDataset } from '../../../common/get_index_patterns';
 import { Globals } from '../../static_globals';
 

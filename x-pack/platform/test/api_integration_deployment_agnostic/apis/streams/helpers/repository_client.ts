@@ -5,10 +5,10 @@
  * 2.0.
  */
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { CustomRoleScopedSupertestProvider } from '../../../services/custom_role_scoped_supertest';
-import { RoleScopedSupertestProvider } from '../../../services/role_scoped_supertest';
+import type { CustomRoleScopedSupertestProvider } from '../../../services/custom_role_scoped_supertest';
+import type { RoleScopedSupertestProvider } from '../../../services/role_scoped_supertest';
+import type { RepositorySupertestClient } from '../../../../common/utils/server_route_repository/create_admin_service_from_repository';
 import {
-  RepositorySupertestClient,
   getAdminApiClient,
   getCustomRoleApiClient,
   getEditorApiClient,

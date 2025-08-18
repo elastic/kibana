@@ -17,7 +17,7 @@ import {
   EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useStyles } from './styles';
 
 const TIMESTAMP_OPTION_KEY = 'Timestamp';

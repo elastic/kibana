@@ -10,13 +10,15 @@
 import _ from 'lodash';
 import React from 'react';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { TutorialsCategory } from '../../../common/constants';
 import { Synopsis } from './synopsis';
-import { HomeKibanaServices, getServices } from '../kibana_services';
+import type { HomeKibanaServices } from '../kibana_services';
+import { getServices } from '../kibana_services';
 import { getTutorials } from '../load_tutorials';
 import type { TutorialType } from '../../services/tutorials/types';
 

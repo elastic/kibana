@@ -8,7 +8,7 @@
 import execa from 'execa';
 import Path from 'path';
 import { promises as Fs } from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { DATA_DIR, createDirIfNotExists, fileExists } from '../util/file_utils';
 
 const CERTS_DIR = Path.join(DATA_DIR, 'certs');

@@ -7,18 +7,15 @@
 
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import {
+import type {
   InferenceInferenceEndpointInfo,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import {
-  Instruction,
-  KnowledgeBaseEntry,
-  KnowledgeBaseEntryRole,
-  KnowledgeBaseState,
-} from '../../../common/types';
+import type { Instruction, KnowledgeBaseEntry } from '../../../common/types';
+import { KnowledgeBaseEntryRole, InferenceModelState } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
   endpoint: 'GET /internal/observability_ai_assistant/kb/status',
@@ -34,10 +31,11 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     enabled: boolean;
     endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
-    kbState: KnowledgeBaseState;
+    inferenceModelState: InferenceModelState;
     currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
+    productDocStatus: InstallationStatus;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
     return client.getKnowledgeBaseStatus();
@@ -282,9 +280,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    const { kbState } = await client.getKnowledgeBaseStatus();
+    const { inferenceModelState } = await client.getKnowledgeBaseStatus();
 
-    if (kbState !== KnowledgeBaseState.READY) {
+    if (inferenceModelState !== InferenceModelState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 

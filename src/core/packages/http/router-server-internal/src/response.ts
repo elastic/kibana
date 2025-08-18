@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Stream } from 'stream';
+import type { Stream } from 'stream';
 import type {
   IKibanaResponse,
   HttpResponsePayload,

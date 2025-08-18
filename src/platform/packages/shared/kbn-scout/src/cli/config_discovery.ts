@@ -8,10 +8,10 @@
  */
 
 import fs from 'fs';
-import { Command, FlagsReader } from '@kbn/dev-cli-runner';
+import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
 import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
 import { measurePerformance } from '../common';
 import { validateWithScoutCiConfig } from '../config/discovery';

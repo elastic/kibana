@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import dedent from 'dedent';
 import { TryInConsoleButton } from '@kbn/try-in-console';
-import { EuiButtonColor } from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
 import { useFetchQueryRuleset } from './use_fetch_query_ruleset';
 import { useKibana } from './use_kibana';
 export interface UseRunQueryRulesetProps {

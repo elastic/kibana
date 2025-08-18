@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FetchHistoricalResultsQueryState } from '../../types';
-import { FetchHistoricalResultsQueryAction } from '../types';
+import type { FetchHistoricalResultsQueryState } from '../../types';
+import type { FetchHistoricalResultsQueryAction } from '../types';
 
 export const fetchHistoricalResultsQueryReducer = (
   state: FetchHistoricalResultsQueryState,

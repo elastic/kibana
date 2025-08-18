@@ -31,9 +31,10 @@ import {
   EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
+import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { ShareProvider, type IShareContext, useShareTypeContext } from '../context';
-import { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
+import type { ExportShareConfig, ExportShareDerivativesConfig } from '../../types';
 
 export const ExportMenu: FC<{ shareContext: IShareContext }> = ({ shareContext }) => {
   return (

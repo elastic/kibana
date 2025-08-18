@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_LOGS_SHARED_NEW_LOGS_OVERVIEW_ID } from '@kbn/management-settings-ids';
 
@@ -16,7 +16,7 @@ export const featureFlagUiSettings: Record<string, UiSettingsParams> = {
     name: i18n.translate('xpack.logsShared.newLogsOverviewSettingName', {
       defaultMessage: 'New logs overview',
     }),
-    value: false,
+    value: true,
     description: i18n.translate('xpack.logsShared.newLogsOverviewSettingDescription', {
       defaultMessage: 'Enable the new logs overview experience.',
     }),

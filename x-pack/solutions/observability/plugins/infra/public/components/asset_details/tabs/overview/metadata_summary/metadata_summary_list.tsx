@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -27,16 +27,19 @@ import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
 import { SectionTitle } from '../../../components/section_title';
 import { Section } from '../../../components/section';
+import { getContainerMetadata, getHostMetadataBySchema } from './metadata_by_schema';
 
 interface MetadataSummaryProps {
   metadata?: InfraMetadata;
   loading: boolean;
   entityType: InventoryItemType;
+  schema: DataSchemaFormat | null;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
   loading: boolean;
   entityType: InventoryItemType;
+  schema: DataSchemaFormat | null;
 }
 
 export interface MetadataData {
@@ -46,79 +49,11 @@ export interface MetadataData {
   tooltipLink?: string;
 }
 
-const hostExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
-  {
-    field: 'cloudProvider',
-    value: metadataInfo?.cloud?.provider,
-    tooltipFieldLabel: 'cloud.provider',
-    tooltipLink: 'https://www.elastic.co/guide/en/ecs/current/ecs-cloud.html#field-cloud-provider',
-  },
-  {
-    field: 'operatingSystem',
-    value: metadataInfo?.host?.os?.name,
-    tooltipFieldLabel: 'host.os.name',
-  },
-];
-
-const hostMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
-  {
-    field: 'hostIp',
-    value: metadataInfo?.host?.ip,
-    tooltipFieldLabel: 'host.ip',
-    tooltipLink: 'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-ip',
-  },
-  {
-    field: 'hostOsVersion',
-    value: metadataInfo?.host?.os?.version,
-    tooltipFieldLabel: 'host.os.version',
-  },
-];
-
-const containerExtendedMetadata = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
-  {
-    field: 'runtime',
-    value: metadataInfo?.container?.runtime,
-    tooltipFieldLabel: 'container.runtime',
-  },
-  {
-    field: 'cloudInstanceId',
-    value: metadataInfo?.cloud?.instance?.id,
-    tooltipFieldLabel: 'cloud.instance.id',
-  },
-  {
-    field: 'cloudImageId',
-    value: metadataInfo?.cloud?.imageId,
-    tooltipFieldLabel: 'cloud.image.id',
-  },
-  {
-    field: 'cloudProvider',
-    value: metadataInfo?.cloud?.provider,
-    tooltipFieldLabel: 'cloud.provider',
-  },
-];
-
-const containerMetadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
-  {
-    field: 'containerId',
-    value: metadataInfo?.container?.id,
-    tooltipFieldLabel: 'container.id',
-  },
-  {
-    field: 'containerImageName',
-    value: metadataInfo?.container?.image?.name,
-    tooltipFieldLabel: 'container.image.name',
-  },
-  {
-    field: 'hostName',
-    value: metadataInfo?.host?.name,
-    tooltipFieldLabel: 'host.name',
-  },
-];
-
 const MetadataSummaryListWrapper = ({
   loading: metadataLoading,
   visibleMetadata,
   entityType,
+  schema,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
 
@@ -166,7 +101,7 @@ const MetadataSummaryListWrapper = ({
       }
     >
       <>
-        <MetadataExplanationMessage entityType={entityType} />
+        <MetadataExplanationMessage entityType={entityType} schema={schema} />
         <EuiSpacer size="s" />
         <EuiFlexGroup>
           {visibleMetadata
@@ -190,28 +125,32 @@ const MetadataSummaryListWrapper = ({
     </Section>
   );
 };
-export const MetadataSummaryList = ({ metadata, loading, entityType }: MetadataSummaryProps) => {
+export const MetadataSummaryList = ({
+  metadata,
+  loading,
+  entityType,
+  schema,
+}: MetadataSummaryProps) => {
+  const host = getHostMetadataBySchema(metadata?.info, schema);
+  const container = getContainerMetadata(metadata?.info);
+
   switch (entityType) {
     case 'host':
       return (
         <MetadataSummaryListWrapper
-          visibleMetadata={[
-            ...hostMetadataData(metadata?.info),
-            ...hostExtendedMetadata(metadata?.info),
-          ]}
+          visibleMetadata={[...host.metadata, ...host.extended]}
           loading={loading}
           entityType={entityType}
+          schema={schema}
         />
       );
     case 'container':
       return (
         <MetadataSummaryListWrapper
-          visibleMetadata={[
-            ...containerMetadataData(metadata?.info),
-            ...containerExtendedMetadata(metadata?.info),
-          ]}
+          visibleMetadata={[...container.metadata, ...container.extended]}
           loading={loading}
           entityType={entityType}
+          schema={schema}
         />
       );
     default:
@@ -220,6 +159,7 @@ export const MetadataSummaryList = ({ metadata, loading, entityType }: MetadataS
           visibleMetadata={[]}
           loading={loading}
           entityType={entityType}
+          schema={schema}
         />
       );
   }
@@ -229,22 +169,28 @@ export const MetadataSummaryListCompact = ({
   metadata,
   loading,
   entityType,
+  schema,
 }: MetadataSummaryProps) => {
+  const host = getHostMetadataBySchema(metadata?.info, schema);
+  const container = getContainerMetadata(metadata?.info);
+
   switch (entityType) {
     case 'host':
       return (
         <MetadataSummaryListWrapper
-          visibleMetadata={hostMetadataData(metadata?.info)}
+          visibleMetadata={host.metadata}
           loading={loading}
           entityType={entityType}
+          schema={schema}
         />
       );
     case 'container':
       return (
         <MetadataSummaryListWrapper
-          visibleMetadata={containerMetadataData(metadata?.info)}
+          visibleMetadata={container.metadata}
           loading={loading}
           entityType={entityType}
+          schema={schema}
         />
       );
     default:
@@ -253,6 +199,7 @@ export const MetadataSummaryListCompact = ({
           visibleMetadata={[]}
           loading={loading}
           entityType={entityType}
+          schema={schema}
         />
       );
   }

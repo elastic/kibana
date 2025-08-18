@@ -8,8 +8,9 @@
 import { DataViewPicker as UnifiedDataViewPicker } from '@kbn/unified-search-plugin/public';
 import React, { useCallback, useRef, useMemo, memo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-
 import { DataView } from '@kbn/data-views-plugin/public';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { EXPLORE_DATA_VIEW_PREFIX } from '../../../../common/constants';
 import type { SourcererUrlState } from '../../../sourcerer/store/model';
 import { useUpdateUrlParam } from '../../../common/utils/global_query_string';
@@ -21,7 +22,7 @@ import { useSelectDataView } from '../../hooks/use_select_data_view';
 import { DataViewManagerScopeName } from '../../constants';
 import { useManagedDataViews } from '../../hooks/use_managed_data_views';
 import { useSavedDataViews } from '../../hooks/use_saved_data_views';
-import { DEFAULT_SECURITY_DATA_VIEW, LOADING } from './translations';
+import { LOADING } from './translations';
 import { DATA_VIEW_PICKER_TEST_ID } from './constants';
 import { useDataView } from '../../hooks/use_data_view';
 import { browserFieldsManager } from '../../utils/security_browser_fields_manager';
@@ -137,6 +138,20 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
     [dataViewId, data.dataViews, scope, dataViewFieldEditor, handleChangeDataView]
   );
 
+  const getDataViewHelpText = useCallback(
+    (dv: DataView) =>
+      dv.id === defaultDataViewId ? (
+        <FormattedMessage
+          id="xpack.securitySolution.dataViewManager.getDataViewHelpText"
+          defaultMessage="Changes made here won't be saved permanently. To update the default Security indices, edit {code} in Advanced Settings."
+          values={{
+            code: <EuiCode>{'securitySolution:defaultIndex'}</EuiCode>,
+          }}
+        />
+      ) : undefined,
+    [defaultDataViewId]
+  );
+
   /**
    * Selects data view again. After changes are made to the data view, this results in cache invalidation and will force the reload everywhere.
    */
@@ -162,16 +177,10 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       return { label: LOADING };
     }
 
-    if (dataView?.id === defaultDataViewId) {
-      return {
-        label: DEFAULT_SECURITY_DATA_VIEW,
-      };
-    }
-
     return {
       label: dataView?.name || dataView?.id || 'Data view',
     };
-  }, [dataView?.id, dataView?.name, defaultDataViewId, status]);
+  }, [dataView?.id, dataView?.name, status]);
 
   return (
     <div data-test-subj={DATA_VIEW_PICKER_TEST_ID}>
@@ -187,6 +196,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
         savedDataViews={savedDataViews}
         managedDataViews={managedDataViews}
         onClosePopover={onClosePopover}
+        getDataViewHelpText={getDataViewHelpText}
       />
     </div>
   );

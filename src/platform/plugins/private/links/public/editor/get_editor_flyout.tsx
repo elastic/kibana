@@ -11,21 +11,30 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
 import { apiPublishesSavedObjectId } from '@kbn/presentation-publishing';
-import { LinksLayoutType } from '../../common/content_management';
+import type { LinksLayoutType } from '../../common/content_management';
 import { linksClient, runSaveToLibrary } from '../content_management';
-import { LinksRuntimeState, ResolvedLink } from '../types';
-import { serializeLinksAttributes } from '../lib/serialize_attributes';
+import type { ResolvedLink } from '../types';
 import LinksEditor from '../components/editor/links_editor';
+import { serializeResolvedLinks } from '../lib/resolve_links';
 
-export async function getEditorFlyout({
+export interface EditorState {
+  description?: string;
+  layout?: LinksLayoutType;
+  links?: ResolvedLink[];
+  savedObjectId?: string;
+  title?: string;
+  error?: Error;
+}
+
+export function getEditorFlyout({
   initialState,
   parentDashboard,
   onCompleteEdit,
   closeFlyout,
 }: {
-  initialState?: LinksRuntimeState;
+  initialState?: EditorState;
   parentDashboard?: unknown;
-  onCompleteEdit?: (newState?: LinksRuntimeState) => void;
+  onCompleteEdit?: (newState?: EditorState) => void;
   closeFlyout: () => void;
 }) {
   const flyoutId = `linksEditorFlyout-${uuidv4()}`;
@@ -39,23 +48,26 @@ export async function getEditorFlyout({
         closeFlyout();
       }}
       onSaveToLibrary={async (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => {
-        const newState: LinksRuntimeState = {
+        const newState = {
           ...initialState,
           links: newLinks,
           layout: newLayout,
         };
-
         if (initialState?.savedObjectId) {
-          const { attributes, references } = serializeLinksAttributes(newState);
+          const { savedObjectId, ...updateState } = newState;
           await linksClient.update({
             id: initialState.savedObjectId,
-            data: attributes,
-            options: { references },
+            data: {
+              ...updateState,
+              links: serializeResolvedLinks(newLinks),
+            },
+            options: { references: [] },
           });
           onCompleteEdit?.(newState);
           closeFlyout();
         } else {
           const saveResult = await runSaveToLibrary(newState);
+          if (saveResult?.error) throw saveResult.error;
           onCompleteEdit?.(saveResult);
           // If saveResult is undefined, the user cancelled the save as modal and we should not close the flyout
           if (saveResult) closeFlyout();

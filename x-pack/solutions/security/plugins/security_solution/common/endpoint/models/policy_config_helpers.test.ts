@@ -16,6 +16,7 @@ import {
   getPolicyProtectionsReference,
   checkIfPopupMessagesContainCustomNotifications,
   resetCustomNotifications,
+  removeDeviceControl,
 } from './policy_config_helpers';
 import { get, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -329,6 +330,120 @@ describe('Policy Config helpers', () => {
       );
     });
   });
+
+  describe('removeDeviceControl', () => {
+    let policy: PolicyConfig;
+
+    beforeEach(() => {
+      policy = policyFactory();
+    });
+
+    it('removes device_control fields from Windows OS configuration', () => {
+      const result = removeDeviceControl(policy);
+
+      expect(result.windows).not.toHaveProperty('device_control');
+      expect(result.windows.popup).not.toHaveProperty('device_control');
+    });
+
+    it('removes device_control fields from Mac OS configuration', () => {
+      const result = removeDeviceControl(policy);
+
+      expect(result.mac).not.toHaveProperty('device_control');
+      expect(result.mac.popup).not.toHaveProperty('device_control');
+    });
+
+    it('preserves all other Windows fields when removing device_control', () => {
+      const result = removeDeviceControl(policy);
+
+      // Check that all other Windows fields are preserved
+      expect(result.windows.malware).toEqual(policy.windows.malware);
+      expect(result.windows.ransomware).toEqual(policy.windows.ransomware);
+      expect(result.windows.memory_protection).toEqual(policy.windows.memory_protection);
+      expect(result.windows.behavior_protection).toEqual(policy.windows.behavior_protection);
+      expect(result.windows.events).toEqual(policy.windows.events);
+      expect(result.windows.logging).toEqual(policy.windows.logging);
+      expect(result.windows.antivirus_registration).toEqual(policy.windows.antivirus_registration);
+      expect(result.windows.attack_surface_reduction).toEqual(
+        policy.windows.attack_surface_reduction
+      );
+
+      // Check that all other Windows popup fields are preserved
+      expect(result.windows.popup.malware).toEqual(policy.windows.popup.malware);
+      expect(result.windows.popup.ransomware).toEqual(policy.windows.popup.ransomware);
+      expect(result.windows.popup.memory_protection).toEqual(
+        policy.windows.popup.memory_protection
+      );
+      expect(result.windows.popup.behavior_protection).toEqual(
+        policy.windows.popup.behavior_protection
+      );
+    });
+
+    it('preserves all other Mac fields when removing device_control', () => {
+      const result = removeDeviceControl(policy);
+
+      // Check that all other Mac fields are preserved
+      expect(result.mac.malware).toEqual(policy.mac.malware);
+      expect(result.mac.memory_protection).toEqual(policy.mac.memory_protection);
+      expect(result.mac.behavior_protection).toEqual(policy.mac.behavior_protection);
+      expect(result.mac.events).toEqual(policy.mac.events);
+      expect(result.mac.logging).toEqual(policy.mac.logging);
+      expect(result.mac.advanced).toEqual(policy.mac.advanced);
+
+      // Check that all other Mac popup fields are preserved
+      expect(result.mac.popup.malware).toEqual(policy.mac.popup.malware);
+      expect(result.mac.popup.memory_protection).toEqual(policy.mac.popup.memory_protection);
+      expect(result.mac.popup.behavior_protection).toEqual(policy.mac.popup.behavior_protection);
+    });
+
+    it('preserves global and Linux configurations unchanged', () => {
+      const result = removeDeviceControl(policy);
+
+      // Check that global fields are preserved
+      expect(result.global_manifest_version).toEqual(policy.global_manifest_version);
+      expect(result.global_telemetry_enabled).toEqual(policy.global_telemetry_enabled);
+      expect(result.meta).toEqual(policy.meta);
+
+      // Check that Linux configuration is completely preserved (no device_control in Linux)
+      expect(result.linux).toEqual(policy.linux);
+    });
+
+    it('works correctly with custom device_control values', () => {
+      // Set custom device_control values
+      policy.windows.device_control = { enabled: true, usb_storage: 'deny_all' };
+      policy.mac.device_control = { enabled: true, usb_storage: 'audit' };
+      policy.windows.popup.device_control = { enabled: true, message: 'Windows custom message' };
+      policy.mac.popup.device_control = { enabled: false, message: 'Mac custom message' };
+
+      const result = removeDeviceControl(policy);
+
+      // Verify device_control fields are completely removed
+      expect(result.windows).not.toHaveProperty('device_control');
+      expect(result.mac).not.toHaveProperty('device_control');
+      expect(result.windows.popup).not.toHaveProperty('device_control');
+      expect(result.mac.popup).not.toHaveProperty('device_control');
+
+      // Verify other fields are still preserved
+      expect(result.windows.malware).toEqual(policy.windows.malware);
+      expect(result.mac.malware).toEqual(policy.mac.malware);
+    });
+
+    it('returns a new policy object without mutating the original', () => {
+      const originalPolicy = JSON.parse(JSON.stringify(policy)); // Deep clone for comparison
+      const result = removeDeviceControl(policy);
+
+      // Verify original policy is unchanged
+      expect(policy).toEqual(originalPolicy);
+      expect(policy.windows.device_control).toBeDefined();
+      expect(policy.mac.device_control).toBeDefined();
+      expect(policy.windows.popup.device_control).toBeDefined();
+      expect(policy.mac.popup.device_control).toBeDefined();
+
+      // Verify result is a different object
+      expect(result).not.toBe(policy);
+      expect(result.windows).not.toBe(policy.windows);
+      expect(result.mac).not.toBe(policy.mac);
+    });
+  });
 });
 
 // This constant makes sure that if the type `PolicyConfig` is ever modified,
@@ -360,11 +475,13 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     ransomware: { mode: ProtectionModes.off, supported: true },
     memory_protection: { mode: ProtectionModes.off, supported: true },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
+    device_control: { enabled: false, usb_storage: 'audit' },
     popup: {
       malware: { message: '', enabled: false },
       ransomware: { message: '', enabled: false },
       memory_protection: { message: '', enabled: false },
       behavior_protection: { message: '', enabled: false },
+      device_control: { message: '', enabled: false },
     },
     logging: { file: 'info' },
     antivirus_registration: { enabled: false, mode: AntivirusRegistrationModes.disabled },
@@ -375,10 +492,12 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: { mode: ProtectionModes.off, supported: true },
+    device_control: { enabled: false, usb_storage: 'audit' },
     popup: {
       malware: { message: '', enabled: false },
       behavior_protection: { message: '', enabled: false },
       memory_protection: { message: '', enabled: false },
+      device_control: { message: '', enabled: false },
     },
     logging: { file: 'info' },
     advanced: {

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { TaggingUsageData } from './types';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { TaggingUsageData } from './types';
 import { fetchTagUsageData } from './fetch_tag_usage_data';
 import { tagUsageCollectorSchema } from './schema';
 

@@ -12,12 +12,12 @@ import {
   CaseStatuses,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { UserProfile } from '@kbn/user-profile-components';
+import type { UserProfile } from '@kbn/user-profile-components';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {

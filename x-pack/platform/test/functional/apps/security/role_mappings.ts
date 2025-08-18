@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { parse } from 'url';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['common', 'security', 'roleMappings']);

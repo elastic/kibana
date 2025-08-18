@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import { uiSettings } from '../common/ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<AiAssistantManagementPlugin['setup']>;

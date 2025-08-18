@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption, EuiComboBox, EuiFormRow } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import React from 'react';
 import { useController } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { FieldConfiguration } from '../types';
+import type { FieldConfiguration } from '../types';
 
 export const ArrayField = ({ fieldConfiguration }: { fieldConfiguration: FieldConfiguration }) => {
   const { field: fieldName, label, helpText, required } = fieldConfiguration;

@@ -6,13 +6,9 @@
  */
 
 import { shareReplay, switchMap, Observable } from 'rxjs';
-import { KibanaRequest } from '@kbn/core-http-server';
-import {
-  AgentMode,
-  type RoundInput,
-  type Conversation,
-  type ChatAgentEvent,
-} from '@kbn/onechat-common';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { AgentMode } from '@kbn/onechat-common';
+import { type RoundInput, type Conversation, type ChatAgentEvent } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../../agents';
 
 export const executeAgent$ = ({

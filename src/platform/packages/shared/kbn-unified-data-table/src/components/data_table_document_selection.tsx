@@ -10,11 +10,11 @@
 import React, { useCallback, useContext, useMemo, useState } from 'react';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
-  EuiDataGridCellValueElementProps,
   EuiDataGridToolbarControl,
   EuiPopover,
   EuiFlexGroup,

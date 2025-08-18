@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/unified-metrics-grid",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/unified-metrics-grid",
+        "id": "def-common.MetricsGridSection",
+        "type": "Function",
+        "tags": [],
+        "label": "MetricsGridSection",
+        "description": [],
+        "signature": [
+          "({ fields, timeRange, headerActions }: { indexPattern: string; timeRange: { from?: string | undefined; to?: string | undefined; }; fields: ",
+          "MetricField",
+          "[]; headerActions?: { hasExploreAction?: boolean | undefined; hasMetricsInsightsAction?: boolean | undefined; } | undefined; }) => React.JSX.Element"
+        ],
+        "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metrics_grid_section.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/unified-metrics-grid",
+            "id": "def-common.MetricsGridSection.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ fields, timeRange, headerActions }",
+            "description": [],
+            "signature": [
+              "{ indexPattern: string; timeRange: { from?: string | undefined; to?: string | undefined; }; fields: ",
+              "MetricField",
+              "[]; headerActions?: { hasExploreAction?: boolean | undefined; hasMetricsInsightsAction?: boolean | undefined; } | undefined; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-unified-metrics-grid/src/components/metrics_grid_section.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

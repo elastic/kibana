@@ -8,8 +8,8 @@
  */
 
 import React from 'react';
-import { CSSObject } from '@emotion/react';
-import { LogDocumentOverview } from '@kbn/discover-utils';
+import type { CSSObject } from '@emotion/react';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
 import { LogLevelBadge } from '@kbn/discover-utils';
 
 const dataTestSubj = 'unifiedDocViewLogsOverviewLogLevel';

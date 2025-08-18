@@ -7,29 +7,32 @@
 
 import React from 'react';
 
+import type {
+  EuiButtonEmptyProps,
+  EuiButtonIconProps,
+  EuiButtonProps,
+  EuiLinkAnchorProps,
+  EuiListGroupItemProps,
+  EuiCardProps,
+  EuiBadgeProps,
+} from '@elastic/eui';
 import {
   EuiLink,
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonEmptyProps,
   EuiButtonIcon,
-  EuiButtonIconProps,
-  EuiButtonProps,
-  EuiLinkAnchorProps,
   EuiListGroupItem,
-  EuiListGroupItemProps,
   EuiPanel,
   EuiCard,
-  EuiCardProps,
   EuiBadge,
-  EuiBadgeProps,
 } from '@elastic/eui';
-import { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
+import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useHistory } from 'react-router-dom';
-import { ScopedHistory } from '@kbn/core/public';
-import { CreateHrefOptions, generateReactRouterProps, ReactRouterProps } from '.';
+import type { ScopedHistory } from '@kbn/core/public';
+import type { CreateHrefOptions, ReactRouterProps } from '.';
+import { generateReactRouterProps } from '.';
 /**
  * Correctly typed component helpers with React-Router-friendly `href` and `onClick` props
  */

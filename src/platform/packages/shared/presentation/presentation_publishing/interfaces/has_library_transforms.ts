@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from './has_serializable_state';
+import type { SerializedPanelState } from './has_serializable_state';
 
 /**
  * APIs that inherit this interface can be linked to and unlinked from the library.

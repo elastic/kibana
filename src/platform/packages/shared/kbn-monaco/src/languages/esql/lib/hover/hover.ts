@@ -8,13 +8,13 @@
  */
 
 import { Walker, parse, type ESQLAstItem, TIME_SYSTEM_PARAMS } from '@kbn/esql-ast';
-import {
+import type {
   ESQLAstQueryExpression,
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLSource,
-  isESQLNamedParamLiteral,
 } from '@kbn/esql-ast/src/types';
+import { isESQLNamedParamLiteral } from '@kbn/esql-ast/src/types';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import {
   getFunctionSignatures,
@@ -28,10 +28,10 @@ import {
   ENRICH_MODES,
 } from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
 import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
-import { within } from '@kbn/esql-validation-autocomplete/src/shared/helpers';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '../../../../monaco_imports';
+import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
+import type { monaco } from '../../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
 import { getVariablesHoverContent } from './helpers';
 

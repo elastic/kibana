@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import { Condition, Streams } from '@kbn/streams-schema';
-import { Readable, Transform, pipeline } from 'stream';
-import { Required } from 'utility-types';
-import {
-  SynthtraceEsClientBase,
-  SynthtraceEsClient,
-  SynthtraceEsClientOptions,
-} from '../shared/base_client';
+import type { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
+import type { Streams } from '@kbn/streams-schema';
+import type { Readable } from 'stream';
+import { Transform, pipeline } from 'stream';
+import type { Required } from 'utility-types';
+import type { Condition } from '@kbn/streamlang';
+import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
+import { SynthtraceEsClientBase } from '../shared/base_client';
 import { internalKibanaHeaders } from '../shared/client_headers';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 

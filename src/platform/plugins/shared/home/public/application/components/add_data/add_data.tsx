@@ -8,8 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { FC, MouseEvent } from 'react';
+import type { FC, MouseEvent } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -19,14 +21,13 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  UseEuiTheme,
   mathWithUnits,
   useEuiMinBreakpoint,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { MoveData } from '../move_data';
 import { createAppNavigationHandler } from '../app_navigation_handler';
@@ -40,7 +41,7 @@ interface Props {
 }
 
 export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isCloudEnabled }) => {
-  const { trackUiMetric, guidedOnboardingService } = getServices();
+  const { trackUiMetric } = getServices();
   const euiBreakpointM = useEuiMinBreakpoint('m');
   const euiBreakpointL = useEuiMinBreakpoint('l');
   const styles = ({ euiTheme }: UseEuiTheme) =>
@@ -98,9 +99,7 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
                   {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
                   <EuiButton
                     data-test-subj="homeAddData"
-                    // when guided onboarding is disabled, this button is primary
-                    // otherwise it's secondary, because there is a "guided onboarding" button
-                    fill={!guidedOnboardingService?.isEnabled}
+                    fill={true}
                     href={addBasePath('/app/integrations/browse')}
                     iconType="plusInCircle"
                     onClick={(event: MouseEvent) => {

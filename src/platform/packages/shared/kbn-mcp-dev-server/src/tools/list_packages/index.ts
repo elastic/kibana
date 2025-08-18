@@ -10,7 +10,7 @@ import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { partition } from 'lodash';
 import { fromExternalVariant } from '@kbn/std';
-import { PackageItem } from './types';
+import type { PackageItem } from './types';
 
 export function listPackages({
   excludePlugins,

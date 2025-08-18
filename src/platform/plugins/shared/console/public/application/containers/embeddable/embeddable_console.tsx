@@ -10,12 +10,12 @@
 import React, { useReducer, useEffect, useState } from 'react';
 import classNames from 'classnames';
 import useObservable from 'react-use/lib/useObservable';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFocusTrap,
   EuiPortal,
   EuiScreenReaderOnly,
-  EuiThemeComputed,
   EuiThemeProvider,
   EuiWindowEvent,
   keys,
@@ -25,10 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { dynamic } from '@kbn/shared-ux-utility';
 
-import {
-  EmbeddableConsoleDependencies,
-  EmbeddableConsoleView,
-} from '../../../types/embeddable_console';
+import type { EmbeddableConsoleDependencies } from '../../../types/embeddable_console';
+import { EmbeddableConsoleView } from '../../../types/embeddable_console';
 
 import * as store from '../../stores/embeddable_console';
 import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';

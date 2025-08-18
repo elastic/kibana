@@ -6,11 +6,11 @@
  */
 
 import { Streams, getParentId, isRoot } from '@kbn/streams-schema';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import { transpileIngestPipeline } from '@kbn/streamlang';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getLogsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
-import { formatToIngestProcessors } from '../helpers/processing';
 
 export function generateIngestPipeline(
   name: string,
@@ -52,7 +52,7 @@ export function generateIngestPipeline(
           },
         },
       },
-      ...((isWiredStream && formatToIngestProcessors(definition.ingest.processing)) || []),
+      ...(isWiredStream ? transpileIngestPipeline(definition.ingest.processing).processors : []),
       {
         pipeline: {
           name: `${name}@stream.reroutes`,
@@ -69,8 +69,9 @@ export function generateIngestPipeline(
 }
 
 export function generateClassicIngestPipelineBody(definition: Streams.ingest.all.Definition) {
+  const transpiledIngestPipeline = transpileIngestPipeline(definition.ingest.processing);
   return {
-    processors: formatToIngestProcessors(definition.ingest.processing),
+    processors: transpiledIngestPipeline.processors,
     _meta: {
       description: `Stream-managed pipeline for the ${definition.name} stream`,
       managed: true,

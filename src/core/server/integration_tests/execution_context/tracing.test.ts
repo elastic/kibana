@@ -8,15 +8,15 @@
  */
 
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
+import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
-  createRoot,
   createTestServers,
   createRootWithCorePlugins,
   request as kbnServerRequest,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import { RequestHandlerContext } from '../..';
+import type { RequestHandlerContext } from '../..';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 

@@ -11,8 +11,9 @@ import React from 'react';
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { getDepsMock, getIndexPatternMock } from '../../test_utils';
-import ControlsTab, { ControlsTabProps } from './controls_tab';
-import { Vis } from '@kbn/visualizations-plugin/public';
+import type { ControlsTabProps } from './controls_tab';
+import ControlsTab from './controls_tab';
+import type { Vis } from '@kbn/visualizations-plugin/public';
 import { EuiThemeProvider } from '@elastic/eui';
 
 const indexPatternsMock = {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Message, MessageRole } from '@kbn/inference-common';
+import type { Message } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 
 type MessageRoleSequenceResult =
   | {

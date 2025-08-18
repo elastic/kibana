@@ -13,9 +13,9 @@ import {
   streamRoutingMachine,
   createStreamRoutingMachineImplementations,
 } from './stream_routing_state_machine';
-import { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
-import { RoutingDefinitionWithUIAttributes } from '../../types';
-import {
+import type { StreamRoutingInput, StreamRoutingServiceDependencies } from './types';
+import type { RoutingDefinitionWithUIAttributes } from '../../types';
+import type {
   RoutingSamplesActorRef,
   RoutingSamplesActorSnapshot,
 } from './routing_samples_state_machine';

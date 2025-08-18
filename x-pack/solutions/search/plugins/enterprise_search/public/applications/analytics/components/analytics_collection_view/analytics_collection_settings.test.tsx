@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButton, EuiPanel } from '@elastic/eui';
 
-import { AnalyticsCollection } from '../../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 
 import { AnalyticsCollectionSettings } from './analytics_collection_settings';
 

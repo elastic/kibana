@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ALL_PRODUCT_FEATURE_KEYS } from '@kbn/security-solution-features/keys';
@@ -24,6 +24,7 @@ import type {
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 import { createProductFeaturesServiceMock } from '../../lib/product_features_service/mocks';
 import { createTelemetryConfigProviderMock } from '../../../common/telemetry_config/mocks';
+import type { ExperimentalFeatures } from '../../../common';
 
 describe('Create Default Policy tests ', () => {
   const cloud = cloudMock.createSetup();
@@ -35,6 +36,9 @@ describe('Create Default Policy tests ', () => {
   let licenseService: LicenseService;
   let productFeaturesService: ProductFeaturesService;
   const telemetryConfigProviderMock = createTelemetryConfigProviderMock();
+  const experimentalFeatures = {
+    trustedDevices: true,
+  } as ExperimentalFeatures;
 
   const createDefaultPolicyCallback = async (
     config?: AnyPolicyCreateConfig
@@ -48,7 +52,8 @@ describe('Create Default Policy tests ', () => {
       cloud,
       esClientInfo,
       productFeaturesService,
-      telemetryConfigProviderMock
+      telemetryConfigProviderMock,
+      experimentalFeatures
     );
   };
 
@@ -315,6 +320,95 @@ describe('Create Default Policy tests ', () => {
       telemetryConfigProviderMock.getIsOptedIn.mockReturnValue(undefined);
       const policyConfig = await createDefaultPolicyCallback();
       expect(policyConfig.global_telemetry_enabled).toBe(false);
+    });
+  });
+
+  describe('Device Control Removal', () => {
+    it('should remove device control when endpointTrustedDevices product feature is disabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
+      );
+
+      await createDefaultPolicyCallback();
+
+      expect(removeDeviceControlSpy).toHaveBeenCalledTimes(1);
+      removeDeviceControlSpy.mockRestore();
+    });
+
+    it('should remove device control when trustedDevices experimental feature is disabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      const experimentalFeaturesWithTrustedDevicesDisabled = {
+        trustedDevices: false,
+      } as ExperimentalFeatures;
+
+      const createDefaultPolicyCallbackWithDisabledFeature = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithTrustedDevicesDisabled
+        );
+      };
+
+      await createDefaultPolicyCallbackWithDisabledFeature();
+
+      expect(removeDeviceControlSpy).toHaveBeenCalledTimes(1);
+      removeDeviceControlSpy.mockRestore();
+    });
+
+    it('should remove device control when both endpointTrustedDevices product feature and experimental feature are disabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      productFeaturesService = createProductFeaturesServiceMock(
+        ALL_PRODUCT_FEATURE_KEYS.filter((key) => key !== 'endpoint_trusted_devices')
+      );
+      const experimentalFeaturesWithTrustedDevicesDisabled = {
+        trustedDevices: false,
+      } as ExperimentalFeatures;
+
+      const createDefaultPolicyCallbackWithBothDisabled = async (
+        config?: AnyPolicyCreateConfig
+      ): Promise<PolicyConfig> => {
+        const esClientInfo = await elasticsearchServiceMock
+          .createClusterClient()
+          .asInternalUser.info();
+        esClientInfo.cluster_name = '';
+        esClientInfo.cluster_uuid = '';
+        return createDefaultPolicy(
+          licenseService,
+          config,
+          cloud,
+          esClientInfo,
+          productFeaturesService,
+          telemetryConfigProviderMock,
+          experimentalFeaturesWithTrustedDevicesDisabled
+        );
+      };
+
+      await createDefaultPolicyCallbackWithBothDisabled();
+
+      expect(removeDeviceControlSpy).toHaveBeenCalledTimes(1);
+      removeDeviceControlSpy.mockRestore();
+    });
+
+    it('should NOT remove device control when both endpointTrustedDevices product feature and trustedDevices experimental feature are enabled', async () => {
+      const removeDeviceControlSpy = jest.spyOn(PolicyConfigHelpers, 'removeDeviceControl');
+      // Both features are enabled by default in the test setup
+
+      await createDefaultPolicyCallback();
+
+      expect(removeDeviceControlSpy).not.toHaveBeenCalled();
+      removeDeviceControlSpy.mockRestore();
     });
   });
 });

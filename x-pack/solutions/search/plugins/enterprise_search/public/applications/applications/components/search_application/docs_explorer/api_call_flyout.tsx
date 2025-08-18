@@ -18,7 +18,7 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
+import type { SearchRequest, SearchResponse } from '@elastic/search-ui-engines-connector';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';

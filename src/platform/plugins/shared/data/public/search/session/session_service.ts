@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PublicContract, SerializableRecord } from '@kbn/utility-types';
+import type { PublicContract, SerializableRecord } from '@kbn/utility-types';
 import {
   distinctUntilChanged,
   filter,
@@ -20,26 +20,17 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  EMPTY,
-  from,
-  merge,
-  Observable,
-  of,
-  Subscription,
-  timer,
-} from 'rxjs';
-import {
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, from, merge, of, Subscription, timer } from 'rxjs';
+import type {
   PluginInitializerContext,
   StartServicesAccessor,
   ToastsStart as ToastService,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { ISearchOptions } from '@kbn/search-types';
-import { SearchUsageCollector } from '../..';
+import type { ISearchOptions } from '@kbn/search-types';
+import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
 import type {
   SessionMeta,
@@ -51,8 +42,8 @@ import {
   SearchSessionState,
   TrackedSearchState,
 } from './search_session_state';
-import { ISessionsClient } from './sessions_client';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { ISessionsClient } from './sessions_client';
+import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
 

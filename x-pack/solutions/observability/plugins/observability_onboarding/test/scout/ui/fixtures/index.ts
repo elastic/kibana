@@ -13,7 +13,8 @@ import type {
   ObltTestFixtures,
   ObltWorkerFixtures,
 } from '@kbn/scout-oblt';
-import { getOnboardingApiHelper, OnboardingApiService } from './apis/onboarding';
+import type { OnboardingApiService } from './apis/onboarding';
+import { getOnboardingApiHelper } from './apis/onboarding';
 
 export type ExtendedScoutTestFixtures = ObltTestFixtures;
 

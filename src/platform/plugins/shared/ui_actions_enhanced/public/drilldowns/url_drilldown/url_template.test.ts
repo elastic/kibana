@@ -15,16 +15,29 @@ test('should compile url without variables', async () => {
   expect(await compile(url, {})).toBe(url);
 });
 
-test('by default, encodes URI', async () => {
-  const url = 'https://elastic.co?foo=head%26shoulders';
-  expect(await compile(url, {})).not.toBe(url);
-  expect(await compile(url, {})).toBe('https://elastic.co?foo=head%2526shoulders');
-});
+describe('encoding', () => {
+  test('by default, encodes URI', async () => {
+    const url = 'https://elastic.co?foo=head%26shoulders';
+    expect(await compile(url, {})).not.toBe(url);
+    expect(await compile(url, {})).toBe('https://elastic.co?foo=head%2526shoulders');
+  });
 
-test('when URI encoding is disabled, should not encode URI', async () => {
-  const url =
-    'https://xxxxx.service-now.com/nav_to.do?uri=incident.do%3Fsys_id%3D-1%26sysparm_query%3Dshort_description%3DHello';
-  expect(await compile(url, {}, false)).toBe(url);
+  test('when URI encoding is disabled, should not encode URI', async () => {
+    const url =
+      'https://xxxxx.service-now.com/nav_to.do?uri=incident.do%3Fsys_id%3D-1%26sysparm_query%3Dshort_description%3DHello';
+    expect(await compile(url, {}, false)).toBe(url);
+  });
+
+  test(`should encode "+" when it's part of date math expression`, async () => {
+    const url = `https://elastic.co??_g=(time:(from:'2025-06-23T03:00:29.080Z||-2m',to:'2025-06-23T03:00:29.080Z||+2m'))`;
+    const result = `https://elastic.co??_g=(time:(from:'2025-06-23T03:00:29.080Z%7C%7C-2m',to:'2025-06-23T03:00:29.080Z%7C%7C%2B2m'))`;
+    expect(await compile(url, {}, true)).toBe(result);
+  });
+
+  test(`should not encode "+" when it's not part of date math expression`, async () => {
+    const url = `https://elastic.co??_g=foo+bar`;
+    expect(await compile(url, {}, true)).toBe(url);
+  });
 });
 
 test('should fail on unknown syntax', async () => {

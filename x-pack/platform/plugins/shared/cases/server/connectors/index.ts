@@ -14,7 +14,7 @@ import type { ServerlessProjectType } from '../../common/constants/types';
 import type { CasesClient } from '../client';
 import { getCasesConnectorAdapter, getCasesConnectorType } from './cases';
 
-export * from './types';
+export type * from './types';
 export { casesConnectors } from './factory';
 
 export function registerConnectorTypes({

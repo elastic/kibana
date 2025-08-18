@@ -28,7 +28,7 @@ import {
   buildSavedPlaygroundFromForm,
   validatePlaygroundName,
 } from '../../utils/saved_playgrounds';
-import { SavedPlaygroundForm } from '../../types';
+import type { SavedPlaygroundForm } from '../../types';
 import { useSavePlayground } from '../../hooks/use_save_playground';
 import { useKibana } from '../../hooks/use_kibana';
 

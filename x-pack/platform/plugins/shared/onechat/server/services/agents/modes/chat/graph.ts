@@ -6,12 +6,12 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
+import type { BaseMessage, BaseMessageLike, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { StructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getActPrompt } from './prompts';
 
 const StateAnnotation = Annotation.Root({
@@ -34,6 +34,7 @@ export const createAgentGraph = ({
   tools,
   customInstructions,
   noPrompt,
+  logger,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -72,6 +73,7 @@ export const createAgentGraph = ({
 
   const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
+
     return {
       addedMessages: [...toolNodeResult],
     };

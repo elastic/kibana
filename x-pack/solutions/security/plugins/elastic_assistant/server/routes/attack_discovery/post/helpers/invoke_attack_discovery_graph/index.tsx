@@ -6,12 +6,12 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
 

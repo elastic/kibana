@@ -84,5 +84,11 @@ export type DashboardLocatorParams = Partial<
      * (Background search)
      */
     searchSessionId?: string;
+
+    /**
+     * Set to pass state from solution to embeddables.
+     * See PassThroughContext presentation container interface for details
+     */
+    passThroughContext?: SerializableRecord;
   }
 >;

@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
-import { GridLayout, GridPanelData, GridSectionData, type GridLayoutData } from '@kbn/grid-layout';
+import type { GridPanelData, GridSectionData } from '@kbn/grid-layout';
+import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import classNames from 'classnames';
 import { default as React, useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -274,6 +275,11 @@ const dashboardGridStyles = {
         '.dshDashboardGrid__item--expanded': {
           position: 'absolute',
           width: '100%',
+        },
+
+        [`@media (max-width: ${euiTheme.breakpoint.m}px)`]: {
+          // on smaller screens, the maximized panel should take the full height of the screen minus the sticky top nav
+          minHeight: 'calc(100vh - var(--kbn-application--sticky-headers-offset, 0px))',
         },
       },
       // LAYOUT MODES

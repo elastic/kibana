@@ -8,7 +8,7 @@
  */
 
 import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_factory';
-import { KbnFieldType } from './kbn_field_type';
+import type { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
 
 /** @internal */

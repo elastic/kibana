@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { isAtLeast } from './license';
 import type { PolicyConfig } from '../endpoint/types';
 import {
@@ -244,6 +244,49 @@ function isEndpointAdvancedPolicyValidForLicense(policy: PolicyConfig, license: 
   return true;
 }
 
+function isEndpointDeviceControlPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  if (policy.windows.device_control && policy.windows.device_control.enabled === true) {
+    return false;
+  }
+
+  if (policy.windows.popup.device_control) {
+    if (policy.windows.popup.device_control.enabled === true) {
+      return false;
+    }
+    if (
+      policy.windows.popup.device_control.message !== '' &&
+      policy.windows.popup.device_control.message !== DefaultPolicyRuleNotificationMessage
+    ) {
+      return false;
+    }
+  }
+
+  if (policy.mac.device_control && policy.mac.device_control.enabled === true) {
+    return false;
+  }
+
+  if (policy.mac.popup.device_control) {
+    if (policy.mac.popup.device_control.enabled === true) {
+      return false;
+    }
+    if (
+      policy.mac.popup.device_control.message !== '' &&
+      policy.mac.popup.device_control.message !== DefaultPolicyRuleNotificationMessage
+    ) {
+      return false;
+    }
+  }
+
+  return true;
+}
+
 function isEndpointProtectionUpdatesValidForLicense(
   policy: PolicyConfig,
   license: ILicense | null
@@ -272,6 +315,7 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointBehaviorPolicyValidForLicense(policy, license) &&
     isEndpointAdvancedPolicyValidForLicense(policy, license) &&
     isEndpointCredentialDumpingPolicyValidForLicense(policy, license) &&
+    isEndpointDeviceControlPolicyValidForLicense(policy, license) &&
     isEndpointProtectionUpdatesValidForLicense(policy, license)
   );
 };

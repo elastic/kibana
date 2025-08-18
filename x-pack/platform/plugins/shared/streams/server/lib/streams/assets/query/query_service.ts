@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { StreamsPluginStartDependencies } from '../../../../types';
+import type { StreamsPluginStartDependencies } from '../../../../types';
 import { createFakeRequestBoundToDefaultSpace } from '../../helpers/fake_request_factory';
-import { AssetClient } from '../asset_client';
+import type { AssetClient } from '../asset_client';
 import { QueryClient } from './query_client';
 
 export class QueryService {

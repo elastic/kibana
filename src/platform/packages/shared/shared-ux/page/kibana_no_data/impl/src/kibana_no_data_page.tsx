@@ -11,7 +11,7 @@ import React, { useEffect, useState } from 'react';
 import { EuiLoadingElastic, EuiLoadingSpinner } from '@elastic/eui';
 import { NoDataConfigPage } from '@kbn/shared-ux-page-no-data-config';
 import { NoDataViewsPrompt } from '@kbn/shared-ux-prompt-no-data-views';
-import { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
+import type { KibanaNoDataPageProps } from '@kbn/shared-ux-page-kibana-no-data-types';
 
 import { useServices } from './services';
 

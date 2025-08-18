@@ -8,7 +8,7 @@
  */
 
 import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionStatus } from '@kbn/workflows';
 import React from 'react';
 
 export function StatusBadge({ status }: { status: ExecutionStatus | undefined }) {

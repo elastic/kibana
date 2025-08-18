@@ -9,10 +9,8 @@ import React from 'react';
 import { screen, render } from '@testing-library/react';
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import {
-  UrlSyncedAlertsSearchBar,
-  UrlSyncedAlertsSearchBarProps,
-} from './url_synced_alerts_search_bar';
+import type { UrlSyncedAlertsSearchBarProps } from './url_synced_alerts_search_bar';
+import { UrlSyncedAlertsSearchBar } from './url_synced_alerts_search_bar';
 import { useKibana } from '../../../common/lib/kibana';
 import { alertSearchBarStateContainer, Provider } from './use_alert_search_bar_state_container';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';

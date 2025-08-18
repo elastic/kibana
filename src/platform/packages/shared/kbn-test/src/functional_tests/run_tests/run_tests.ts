@@ -11,7 +11,7 @@ import Path from 'path';
 import { setTimeout } from 'timers/promises';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import { applyFipsOverrides } from '../lib/fips_overrides';
@@ -20,7 +20,7 @@ import { Config, readConfigFile } from '../../functional_test_runner';
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';
-import { RunTestsOptions } from './flags';
+import type { RunTestsOptions } from './flags';
 
 /**
  * Run servers and tests for each config

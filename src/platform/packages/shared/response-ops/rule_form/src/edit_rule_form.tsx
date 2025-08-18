@@ -26,7 +26,8 @@ import {
 } from './rule_form_errors';
 import { RULE_EDIT_ERROR_TEXT, RULE_EDIT_SUCCESS_TEXT } from './translations';
 import { getAvailableRuleTypes, parseRuleCircuitBreakerErrorMessage } from './utils';
-import { DEFAULT_VALID_CONSUMERS, RuleFormStepId, getDefaultFormData } from './constants';
+import type { RuleFormStepId } from './constants';
+import { DEFAULT_VALID_CONSUMERS, getDefaultFormData } from './constants';
 
 export interface EditRuleFormProps {
   id: string;

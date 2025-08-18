@@ -9,8 +9,8 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
-import { timeUnitsToSuggest } from '../../../definitions/constants';
 import { capitalize } from 'lodash';
+import { DATE_PERIOD_UNITS, TIME_DURATION_UNITS } from '../../../parser/constants';
 
 const rowExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'row', validate);
@@ -113,34 +113,33 @@ describe('ROW Validation', () => {
     rowExpectErrors(`row col0 = mv_sort(["a", "b"], "DESC")`, []);
   });
 
-  describe('date math', () => {
-    rowExpectErrors('row 1 anno', ['ROW does not support [date_period] in expression [1 anno]']);
-    rowExpectErrors('row col0 = 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
-    rowExpectErrors('row now() + 1 anno', ["Unexpected time interval qualifier: 'anno'"]);
-    for (const timeLiteral of timeUnitsToSuggest) {
-      rowExpectErrors(`row 1 ${timeLiteral.name}`, [
-        `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
-      ]);
-      rowExpectErrors(`row 1                ${timeLiteral.name}`, [
-        `ROW does not support [date_period] in expression [1 ${timeLiteral.name}]`,
-      ]);
-
+  test('date math', () => {
+    for (const unit of [...TIME_DURATION_UNITS, ...DATE_PERIOD_UNITS]) {
       // this is not possible for now
-      // rowExpectErrors(`row col0 = 1 ${timeLiteral.name}`, [
-      //   `Row does not support [date_period] in expression [1 ${timeLiteral.name}]`,
+      // rowExpectErrors(`row col0 = 1 ${unit}`, [
+      //   `Row does not support [date_period] in expression [1 ${unit}]`,
       // ]);
-      rowExpectErrors(`row col0 = now() - 1 ${timeLiteral.name}`, []);
-      rowExpectErrors(`row col0 = now() - 1 ${timeLiteral.name.toUpperCase()}`, []);
-      rowExpectErrors(`row col0 = now() - 1 ${capitalize(timeLiteral.name)}`, []);
-      rowExpectErrors(`row col0 = now() + 1 ${timeLiteral.name}`, []);
-      rowExpectErrors(`row 1 ${timeLiteral.name} + 1 year`, []);
+      rowExpectErrors(`row col0 = now() - 1 ${unit}`, []);
+      rowExpectErrors(`row col0 = now() - 1 ${unit.toUpperCase()}`, []);
+      rowExpectErrors(`row col0 = now() - 1 ${capitalize(unit)}`, []);
+      rowExpectErrors(`row col0 = now() + 1 ${unit}`, []);
+    }
+
+    for (const unit of TIME_DURATION_UNITS)
       for (const op of ['*', '/', '%']) {
-        rowExpectErrors(`row col0 = now() ${op} 1 ${timeLiteral.name}`, [
+        rowExpectErrors(`ROW col0 = now() ${op} 1 ${unit}`, [
           `Argument of [${op}] must be [double], found value [now()] type [date]`,
-          `Argument of [${op}] must be [double], found value [1 ${timeLiteral.name}] type [duration]`,
+          `Argument of [${op}] must be [double], found value [1${unit}] type [time_duration]`,
         ]);
       }
-    }
+
+    for (const unit of DATE_PERIOD_UNITS)
+      for (const op of ['*', '/', '%']) {
+        rowExpectErrors(`ROW col0 = now() ${op} 1 ${unit}`, [
+          `Argument of [${op}] must be [double], found value [now()] type [date]`,
+          `Argument of [${op}] must be [double], found value [1${unit}] type [date_period]`,
+        ]);
+      }
   });
 
   test('date_diff', () => {

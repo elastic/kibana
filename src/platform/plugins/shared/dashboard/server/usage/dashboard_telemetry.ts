@@ -14,10 +14,13 @@ import {
   initializeControlGroupTelemetry,
   type ControlGroupTelemetry,
 } from '@kbn/controls-plugin/server';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { DashboardSavedObjectAttributes, SavedDashboardPanel } from '../dashboard_saved_object';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 
@@ -40,6 +43,9 @@ export interface DashboardCollectorData {
     };
   };
   controls: ControlGroupTelemetry;
+  sections: {
+    total: number;
+  };
 }
 
 export const getEmptyDashboardData = (): DashboardCollectorData => ({
@@ -50,6 +56,9 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_type: {},
   },
   controls: initializeControlGroupTelemetry({}),
+  sections: {
+    total: 0,
+  },
 });
 
 export const getEmptyPanelTypeData = () => ({
@@ -90,6 +99,14 @@ export const collectPanelsByType = (
       collectorData.panels.by_type[type].details
     );
   }
+};
+
+export const collectDashboardSections = (
+  attributes: DashboardSavedObjectAttributes,
+  collectorData: DashboardCollectorData
+) => {
+  collectorData.sections.total += attributes.sections?.length ?? 0;
+  return collectorData;
 };
 
 export const controlsCollectorFactory =

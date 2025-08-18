@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import numeral from '@elastic/numeral';
 import { useKibana } from '../../../hooks/use_kibana';
 import { displayStatus } from './slo_status_badge';

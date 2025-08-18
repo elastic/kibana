@@ -8,29 +8,18 @@
  */
 
 import { filter, map as lodashMap, max } from 'lodash';
-import {
-  BehaviorSubject,
-  Observable,
-  combineLatestWith,
-  debounceTime,
-  map,
-  merge,
-  tap,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, debounceTime, map, merge, tap } from 'rxjs';
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
-import {
-  DefaultEmbeddableApi,
-  EmbeddablePackageState,
-  PanelNotFoundError,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { PanelPackage } from '@kbn/presentation-containers';
+import type { PanelPackage } from '@kbn/presentation-containers';
+import type { SerializedPanelState, SerializedTitles } from '@kbn/presentation-publishing';
 import {
-  SerializedPanelState,
-  SerializedTitles,
   apiHasLibraryTransforms,
   apiHasSerializableState,
   apiPublishesTitle,
@@ -296,8 +285,14 @@ export function initializeLayoutManager(
   };
 
   const getChildApi = async (uuid: string): Promise<DefaultEmbeddableApi | undefined> => {
-    if (!layout$.value.panels[uuid]) throw new PanelNotFoundError();
+    const panelLayout = layout$.value.panels[uuid];
+    if (!panelLayout) throw new PanelNotFoundError();
     if (children$.value[uuid]) return children$.value[uuid];
+
+    // if the panel is in a collapsed section and has never been built, then childApi will be undefined
+    if (isSectionCollapsed(panelLayout.gridData.sectionId)) {
+      return undefined;
+    }
 
     return new Promise((resolve) => {
       const subscription = merge(children$, layout$).subscribe(() => {
@@ -314,6 +309,11 @@ export function initializeLayoutManager(
       });
     });
   };
+
+  function isSectionCollapsed(sectionId?: string): boolean {
+    const { sections } = layout$.getValue();
+    return Boolean(sectionId && sections[sectionId].collapsed);
+  }
 
   return {
     internalApi: {
@@ -354,10 +354,7 @@ export function initializeLayoutManager(
       setChildState: (uuid: string, state: SerializedPanelState<object>) => {
         currentChildState[uuid] = state;
       },
-      isSectionCollapsed: (sectionId?: string): boolean => {
-        const { sections } = layout$.getValue();
-        return Boolean(sectionId && sections[sectionId].collapsed);
-      },
+      isSectionCollapsed,
     },
     api: {
       /** Panels */

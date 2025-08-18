@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 
 import { uploadAllEventsFromPath } from './upload_events';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 jest.mock('node:fs');
 

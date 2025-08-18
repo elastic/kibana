@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -42,10 +42,6 @@ export default function ({ getService }: FtrProviderContext) {
           log.warning(`Failed to delete agent ${agentId}: ${error.message}`);
         }
       }
-
-      await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': false,
-      });
     });
 
     describe('POST /api/chat/agents', () => {

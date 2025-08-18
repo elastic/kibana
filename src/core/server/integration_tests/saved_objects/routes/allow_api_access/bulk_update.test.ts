@@ -13,11 +13,8 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import {
-  createHiddenTypeVariants,
-  setupServer,
-  SetupServerReturn,
-} from '@kbn/core-test-helpers-test-utils';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { createHiddenTypeVariants, setupServer } from '@kbn/core-test-helpers-test-utils';
 import {
   registerBulkUpdateRoute,
   type InternalSavedObjectsRequestHandlerContext,

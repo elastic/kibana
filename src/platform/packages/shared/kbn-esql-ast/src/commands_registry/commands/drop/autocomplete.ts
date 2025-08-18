@@ -14,7 +14,8 @@ import {
   handleFragment,
   columnExists,
 } from '../../../definitions/utils/autocomplete/helpers';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
 export async function autocomplete(

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { mergeMap, OperatorFunction, of } from 'rxjs';
-import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import { AgentRunEvents } from '../types';
+import type { OperatorFunction } from 'rxjs';
+import { mergeMap, of } from 'rxjs';
+import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
+import type { AgentRunEvents } from '../types';
 import { buildEventsConverter } from './build_events_converter';
 
 function filterMap<T, R>(project: (value: T) => R[]): OperatorFunction<T, R> {

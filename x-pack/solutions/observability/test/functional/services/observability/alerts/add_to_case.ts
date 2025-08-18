@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const ADD_TO_EXISTING_CASE_SELECTOR = 'add-to-existing-case-action';
 const ADD_TO_NEW_CASE_SELECTOR = 'add-to-new-case-action';

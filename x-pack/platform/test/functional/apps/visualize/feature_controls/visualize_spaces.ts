@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // a space deletes all of the associated saved objects
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
         );
         await spacesService.create({
           id: 'custom_space',
@@ -40,7 +40,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           disabledFeatures: [],
         });
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/visualize/custom_space',
+          'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/custom_space',
           { space: 'custom_space' }
         );
       });
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // a space deletes all of the associated saved objects
         await kibanaServer.savedObjects.cleanStandardList();
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
         );
         await spacesService.create({
           id: 'custom_space',

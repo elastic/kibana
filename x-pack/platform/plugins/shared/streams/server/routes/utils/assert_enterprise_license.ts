@@ -6,7 +6,7 @@
  */
 
 import { forbidden } from '@hapi/boom';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export const assertEnterpriseLicense = async (licensing: LicensingPluginStart): Promise<void> => {
   const hasCorrectLicense = (await licensing.getLicense()).hasAtLeast('enterprise');

@@ -11,7 +11,7 @@ import {
   DEFAULT_EMS_ROADMAP_ID,
 } from '@kbn/maps-ems-plugin/common';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS, SCALING_TYPES, SOURCE_TYPES } from '../constants';
-import {
+import type {
   EMSTMSSourceDescriptor,
   EMSFileSourceDescriptor,
   ESGeoGridSourceDescriptor,
@@ -63,8 +63,9 @@ export class LayerStatsCollector {
       if (layerDescriptor.type) {
         this._updateCounts(layerDescriptor.type, this._layerTypeCounts);
       }
-      if (layerDescriptor.sourceDescriptor?.id) {
-        this._sourceIds.add(layerDescriptor.sourceDescriptor.id);
+      const sourceId = (layerDescriptor.sourceDescriptor as { id?: string })?.id;
+      if (sourceId) {
+        this._sourceIds.add(sourceId);
       }
     });
   }

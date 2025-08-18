@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
 import React from 'react';
 
 import styled from 'styled-components';
 
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
-import { ContextEditorRow, FIELDS } from '../types';
-import { HandleRowChecked } from '../selection/types';
+import type { ContextEditorRow } from '../types';
+import { FIELDS } from '../types';
+import type { HandleRowChecked } from '../selection/types';
 import type { OnListUpdated } from '../../../assistant/settings/use_settings_updater/use_anonymization_updater';
 
 const AnonymizedButton = styled(EuiButtonEmpty)`

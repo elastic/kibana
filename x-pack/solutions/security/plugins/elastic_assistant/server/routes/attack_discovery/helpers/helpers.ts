@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup, AuthenticatedUser, Logger } from '@kbn/core/server';
-import {
+import type { AnalyticsServiceSetup, AuthenticatedUser, Logger } from '@kbn/core/server';
+import type {
   ApiConfig,
   AttackDiscovery,
   AttackDiscoveryResponse,
@@ -16,11 +16,11 @@ import {
   Replacements,
 } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import moment from 'moment/moment';
 
-import { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
+import type { AttackDiscoveryDataClient } from '../../../lib/attack_discovery/persistence';
 import {
   reportAttackDiscoveryGenerationFailure,
   reportAttackDiscoveryGenerationSuccess,

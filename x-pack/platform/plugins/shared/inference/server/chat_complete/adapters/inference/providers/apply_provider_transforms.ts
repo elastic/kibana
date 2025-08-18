@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { InferenceEndpointProvider, MessageRole, ToolOptions } from '@kbn/inference-common';
+import type { ToolOptions } from '@kbn/inference-common';
+import { InferenceEndpointProvider, MessageRole } from '@kbn/inference-common';
 import { fixSchemaArrayProperties } from '../../bedrock/convert_tools';
 import type { CreateOpenAIRequestOptions } from '../types';
 import { getProvider, getElasticModelProvider } from '../utils';

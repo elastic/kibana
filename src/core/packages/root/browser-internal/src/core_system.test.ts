@@ -51,6 +51,8 @@ import {
   UserProfileServiceConstructor,
   MockPricingService,
   PricingServiceConstructor,
+  MockCoreInjectionService,
+  CoreInjectionServiceConstructor,
 } from './core_system.test.mocks';
 import type { EnvironmentMode } from '@kbn/config';
 import { CoreSystem } from './core_system';
@@ -160,6 +162,7 @@ describe('constructor', () => {
     expect(SecurityServiceConstructor).toHaveBeenCalledTimes(1);
     expect(UserProfileServiceConstructor).toHaveBeenCalledTimes(1);
     expect(PricingServiceConstructor).toHaveBeenCalledTimes(1);
+    expect(CoreInjectionServiceConstructor).toHaveBeenCalledTimes(1);
   });
 
   it('passes injectedMetadata param to InjectedMetadataService', () => {
@@ -328,6 +331,11 @@ describe('#setup()', () => {
   it('calls userProfile#setup()', async () => {
     await setupCore();
     expect(MockUserProfileService.setup).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls injection#setup()', async () => {
+    await setupCore();
+    expect(MockCoreInjectionService.setup).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -528,6 +536,11 @@ describe('#start()', () => {
   it('calls pricing#start()', async () => {
     await startCore();
     expect(MockPricingService.start).toHaveBeenCalledTimes(1);
+  });
+
+  it('calls injection#start()', async () => {
+    await startCore();
+    expect(MockCoreInjectionService.start).toHaveBeenCalledTimes(1);
   });
 });
 

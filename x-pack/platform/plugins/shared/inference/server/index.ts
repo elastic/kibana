@@ -10,7 +10,8 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { InferenceConfig, configSchema } from './config';
+import type { InferenceConfig } from './config';
+import { configSchema } from './config';
 import type {
   InferenceServerSetup,
   InferenceServerStart,

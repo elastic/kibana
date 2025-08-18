@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { SystemCell } from './system_cell';
-import { AdditionalContext, CellComponentProps, RenderContext } from '../types';
+import type { AdditionalContext, CellComponentProps, RenderContext } from '../types';
 import { getCasesMapMock } from '../mocks/cases.mock';
 import { getMaintenanceWindowsMapMock } from '../mocks/maintenance_windows.mock';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { createPartialObjectMock } from '../utils/test';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_STATUS } from '@kbn/rule-data-utils';

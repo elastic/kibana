@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { FieldBaseProps } from './types';
+import type { FieldBaseProps } from './types';
 import { useEsField } from './use_es_field';
 
 const AS_PLAIN_TEXT = { asPlainText: true };

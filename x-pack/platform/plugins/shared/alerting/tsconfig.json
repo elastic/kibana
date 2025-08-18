@@ -57,7 +57,6 @@
     "@kbn/serverless",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-application-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/alerts-ui-shared",
     "@kbn/core-http-browser",
@@ -78,7 +77,8 @@
     "@kbn/response-ops-rule-params",
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
-    "@kbn/response-ops-recurring-schedule-form"
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/licensing-types"
   ],
   "exclude": [
     "target/**/*"

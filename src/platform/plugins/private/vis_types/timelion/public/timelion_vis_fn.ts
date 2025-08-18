@@ -9,12 +9,12 @@
 
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
-import { KibanaContext } from '@kbn/data-plugin/public';
-import { TimelionSuccessResponse } from './helpers/timelion_request_handler';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
+import type { KibanaContext } from '@kbn/data-plugin/public';
+import type { TimelionSuccessResponse } from './helpers/timelion_request_handler';
 import { TIMELION_VIS_NAME } from '../common/constants';
-import { TimelionVisDependencies } from './plugin';
+import type { TimelionVisDependencies } from './plugin';
 
 type Input = KibanaContext | null;
 type Output = Promise<Render<TimelionRenderValue>>;

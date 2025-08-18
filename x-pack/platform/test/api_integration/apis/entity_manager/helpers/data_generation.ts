@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
-import { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
+import type { Client } from '@elastic/elasticsearch';
+import type { MappingProperty, PropertyName } from '@elastic/elasticsearch/lib/api/types';
 
 export async function createIndexWithDocuments(
   client: Client,

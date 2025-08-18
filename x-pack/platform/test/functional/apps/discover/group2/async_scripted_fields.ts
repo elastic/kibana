@@ -7,7 +7,7 @@
 
 // Tests for scripted field in default distribution where async search is used
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash'
       );
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'

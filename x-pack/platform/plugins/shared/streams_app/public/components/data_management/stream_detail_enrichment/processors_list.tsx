@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiDraggable, EuiTimelineItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ProcessorConfiguration, ProcessorConfigurationProps } from './processors';
+import type { ProcessorConfigurationProps } from './processors';
+import { ProcessorConfiguration } from './processors';
 import { ProcessorStatusIndicator } from './processor_status_indicator';
 
 export const DraggableProcessorListItem = ({

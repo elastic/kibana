@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import type { Agent } from 'supertest';
-import {
+import type {
   CreateAgentPolicyRequest,
   CreateAgentPolicyResponse,
   CreatePackagePolicyResponse,
@@ -18,7 +18,7 @@ import {
   GetOnePackagePolicyResponse,
   GetPackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
-import {
+import type {
   GetEnrollmentAPIKeysResponse,
   GetOneEnrollmentAPIKeyResponse,
   PostEnrollmentAPIKeyResponse,
@@ -40,11 +40,11 @@ import {
   PostOutputRequest,
   GetOneOutputResponse,
 } from '@kbn/fleet-plugin/common/types';
-import {
+import type {
   GetUninstallTokenResponse,
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
+import type { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
 import { type FleetUsage } from '@kbn/fleet-plugin/server/collectors/register';
 import { testUsers } from '../test_users';
 

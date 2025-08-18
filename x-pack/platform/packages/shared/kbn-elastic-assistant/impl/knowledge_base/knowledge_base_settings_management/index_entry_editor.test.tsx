@@ -9,13 +9,14 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { IndexEntryEditor } from './index_entry_editor';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
-import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
-import { HttpSetup } from '@kbn/core-http-browser';
+import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('../../assistant/api/knowledge_base/use_knowledge_base_indices');
+const Wrapper = ({ children }: { children?: React.ReactNode }) => (
+  <I18nProvider>{children}</I18nProvider>
+);
 
 describe('IndexEntryEditor', () => {
   const mockSetEntry = jest.fn();
@@ -26,13 +27,15 @@ describe('IndexEntryEditor', () => {
       { name: 'field-3', esTypes: ['semantic_text'] },
     ]),
     getExistingIndices: jest.fn().mockResolvedValue(['index-1']),
+    getIndices: jest.fn().mockResolvedValue([
+      { name: 'index-1', attributes: ['open'] },
+      { name: 'index-2', attributes: ['open'] },
+    ]),
   } as unknown as DataViewsContract;
-  const http = {
-    get: jest.fn(),
-  } as unknown as HttpSetup;
 
   const defaultProps = {
     dataViews: mockDataViews,
+    docLink: 'www.elastic.co',
     setEntry: mockSetEntry,
     hasManageGlobalKnowledgeBase: true,
     entry: {
@@ -43,18 +46,16 @@ describe('IndexEntryEditor', () => {
       queryDescription: 'Test Query Description',
       users: [],
     } as unknown as IndexEntry,
-    http,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useKnowledgeBaseIndices as jest.Mock).mockReturnValue({
-      data: { 'index-1': ['field-1'], 'index-2': ['field-2'] },
-    });
   });
 
   it('renders the form fields with initial values', async () => {
-    const { getByDisplayValue } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByDisplayValue } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       expect(getByDisplayValue('Test Entry')).toBeInTheDocument();
@@ -66,7 +67,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('updates the name field on change', async () => {
-    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       const nameInput = getByTestId('entry-name');
@@ -76,7 +79,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('updates the description field on change', async () => {
-    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       const descriptionInput = getByTestId('entry-description');
@@ -89,7 +94,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('updates the query description field on change', async () => {
-    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       const queryDescriptionInput = getByTestId('query-description');
@@ -99,7 +106,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('displays sharing options and updates on selection', async () => {
-    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       fireEvent.click(getByTestId('sharing-select'));
@@ -109,7 +118,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('fetches index options and updates on selection', async () => {
-    const { getAllByTestId, getByTestId } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getAllByTestId, getByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       fireEvent.click(getByTestId('index-combobox'));
@@ -120,7 +131,9 @@ describe('IndexEntryEditor', () => {
   });
 
   it('fetches field options based on selected index and updates on selection', async () => {
-    const { getByTestId, getAllByTestId } = render(<IndexEntryEditor {...defaultProps} />);
+    const { getByTestId, getAllByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
+      wrapper: Wrapper,
+    });
 
     await waitFor(() => {
       expect(mockDataViews.getFieldsForWildcard).toHaveBeenCalledWith({
@@ -150,7 +163,10 @@ describe('IndexEntryEditor', () => {
 
   it('disables the field combo box if no index is selected', () => {
     const { getByRole } = render(
-      <IndexEntryEditor {...defaultProps} entry={{ ...defaultProps.entry, index: '' }} />
+      <IndexEntryEditor {...defaultProps} entry={{ ...defaultProps.entry, index: '' }} />,
+      {
+        wrapper: Wrapper,
+      }
     );
 
     waitFor(() => {
@@ -164,7 +180,10 @@ describe('IndexEntryEditor', () => {
       <IndexEntryEditor
         {...defaultProps}
         entry={{ ...defaultProps.entry, index: 'missing-index' }}
-      />
+      />,
+      {
+        wrapper: Wrapper,
+      }
     );
 
     await waitFor(() => {

@@ -6,12 +6,12 @@
  */
 
 import { expect } from 'expect';
-import {
+import type {
   CookieCredentials,
   InternalRequestHeader,
   RoleCredentials,
 } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -28,7 +28,7 @@ export default function ({ getService }: FtrProviderContext) {
   const archives: Record<string, { data: string; savedObjects: string }> = {
     ecommerce: {
       data: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
-      savedObjects: 'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce',
+      savedObjects: 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce',
     },
   };
 

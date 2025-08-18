@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiButtonEmpty,
   EuiFlyoutBody,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 
 import { JobCreatorContext } from '../../job_creator_context';
@@ -31,6 +32,7 @@ interface Props {
 export const DatafeedPreviewFlyout: FC<Props> = ({ isDisabled }) => {
   const { jobCreator } = useContext(JobCreatorContext);
   const [showFlyout, setShowFlyout] = useState(false);
+  const flyoutTitleId = useGeneratedHtmlId();
 
   function toggleFlyout() {
     setShowFlyout(!showFlyout);
@@ -41,9 +43,15 @@ export const DatafeedPreviewFlyout: FC<Props> = ({ isDisabled }) => {
       <FlyoutButton onClick={toggleFlyout} isDisabled={isDisabled} />
 
       {showFlyout === true && isDisabled === false && (
-        <EuiFlyout onClose={() => setShowFlyout(false)} hideCloseButton size="m">
+        <EuiFlyout
+          aria-labelledby={flyoutTitleId}
+          onClose={() => setShowFlyout(false)}
+          hideCloseButton
+          size="m"
+        >
           <EuiFlyoutBody>
             <DatafeedPreview
+              flyoutTitleId={flyoutTitleId}
               combinedJob={{
                 ...jobCreator.jobConfig,
                 datafeed_config: jobCreator.datafeedConfig,

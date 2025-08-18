@@ -10,7 +10,7 @@ import {
   SINGLE_METRIC_JOB_CONFIG,
   MULTI_METRIC_JOB_CONFIG,
 } from '../../../../api_integration/apis/ml/jobs/common_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');

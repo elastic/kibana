@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { api, tracing } from '@elastic/opentelemetry-node/sdk';
-import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
+import type { api } from '@elastic/opentelemetry-node/sdk';
+import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-proto';
 import { isInInferenceContext } from './is_in_inference_context';
 import { IS_ROOT_INFERENCE_SPAN_ATTRIBUTE_NAME } from './root_inference_span';
 

@@ -7,7 +7,7 @@
 
 import { after, before, expect, journey, step } from '@elastic/synthetics';
 import { omit } from 'lodash';
-import { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { SyntheticsMonitor } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SyntheticsServices } from './services/synthetics_services';
 import { cleanTestMonitors } from './services/add_monitor';
 import { addTestMonitorProject } from './services/add_monitor_project';

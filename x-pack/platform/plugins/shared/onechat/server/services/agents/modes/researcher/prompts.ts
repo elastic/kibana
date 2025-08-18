@@ -8,15 +8,8 @@
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 import type { ResearchGoal } from './graph';
-import {
-  isSearchResult,
-  isReflectionResult,
-  isResearchGoalResult,
-  BacklogItem,
-  ReflectionResult,
-  ResearchGoalResult,
-  SearchResult,
-} from './backlog';
+import type { BacklogItem, ReflectionResult, ResearchGoalResult, SearchResult } from './backlog';
+import { isSearchResult, isReflectionResult, isResearchGoalResult } from './backlog';
 
 export const getIdentifyResearchGoalPrompt = ({
   customInstructions,

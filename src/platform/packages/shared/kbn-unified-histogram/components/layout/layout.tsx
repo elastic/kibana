@@ -8,7 +8,8 @@
  */
 
 import { euiFullHeight, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactNode, useState } from 'react';
+import type { PropsWithChildren, ReactNode } from 'react';
+import React, { useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import {
   ResizableLayout,
@@ -16,7 +17,7 @@ import {
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
 import { css } from '@emotion/react';
-import { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../../types';
+import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../../types';
 
 export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**

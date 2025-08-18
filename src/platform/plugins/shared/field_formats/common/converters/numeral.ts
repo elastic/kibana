@@ -13,7 +13,7 @@ import numeral from '@elastic/numeral';
 import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
 
@@ -36,6 +36,8 @@ export abstract class NumeralFormat extends FieldFormat {
   });
 
   protected getConvertedValue(val: number | string | object): string {
+    const originalVal = val;
+
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val === 'object') {
@@ -43,6 +45,18 @@ export abstract class NumeralFormat extends FieldFormat {
       return JSON.stringify(val);
     } else if (typeof val !== 'number') {
       val = parseFloat(val);
+    }
+
+    if (isNaN(val) && typeof originalVal === 'string') {
+      // if the value is a string that cannot be parsed as a number, try to parse it as a JSON object
+      try {
+        const parsedVal = JSON.parse(originalVal);
+        if (typeof parsedVal === 'object' && parsedVal !== null) {
+          return originalVal; // return the original string if it's a JSON object
+        }
+      } catch {
+        // if parsing fails, continue to a next step
+      }
     }
 
     if (isNaN(val)) return '';

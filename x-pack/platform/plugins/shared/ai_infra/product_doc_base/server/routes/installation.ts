@@ -9,16 +9,18 @@ import type { IRouter } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 import { schema } from '@kbn/config-schema';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import {
-  INSTALLATION_STATUS_API_PATH,
-  INSTALL_ALL_API_PATH,
-  UNINSTALL_ALL_API_PATH,
+import type {
   InstallationStatusResponse,
   PerformInstallResponse,
   UninstallResponse,
 } from '../../common/http_api/installation';
+import {
+  INSTALLATION_STATUS_API_PATH,
+  INSTALL_ALL_API_PATH,
+  UNINSTALL_ALL_API_PATH,
+} from '../../common/http_api/installation';
 import type { InternalServices } from '../types';
-import { ProductInstallState } from '../../common/install_status';
+import type { ProductInstallState } from '../../common/install_status';
 
 export const registerInstallationRoutes = ({
   router,

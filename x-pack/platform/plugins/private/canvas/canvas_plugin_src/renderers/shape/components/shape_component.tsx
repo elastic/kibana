@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useCallback, RefCallback } from 'react';
+import type { RefCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import {
+import type {
   ShapeRef,
   ShapeAttributes,
   ShapeContentAttributes,
   SvgConfig,
-  getDefaultShapeData,
-  getViewBox,
 } from '../../../../public/components/shape_drawer';
-import { Dimensions, ShapeComponentProps } from './types';
+import { getDefaultShapeData, getViewBox } from '../../../../public/components/shape_drawer';
+import type { Dimensions, ShapeComponentProps } from './types';
 import { ShapeDrawerComponent } from './shape_drawer';
 
 export function ShapeComponent({

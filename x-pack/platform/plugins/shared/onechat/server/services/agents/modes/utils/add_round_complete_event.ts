@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { map, merge, OperatorFunction, share, toArray } from 'rxjs';
-import {
+import type { OperatorFunction } from 'rxjs';
+import { map, merge, share, toArray } from 'rxjs';
+import type {
   ChatAgentEvent,
-  ChatEventType,
-  ConversationRoundStepType,
-  isMessageCompleteEvent,
-  isToolCallEvent,
-  isToolResultEvent,
-  isReasoningEvent,
   RoundCompleteEvent,
   RoundInput,
   ConversationRound,
   ConversationRoundStep,
   ReasoningEvent,
   ToolCallEvent,
+} from '@kbn/onechat-common';
+import {
+  ChatEventType,
+  ConversationRoundStepType,
+  isMessageCompleteEvent,
+  isToolCallEvent,
+  isToolResultEvent,
+  isReasoningEvent,
 } from '@kbn/onechat-common';
 import { getCurrentTraceId } from '../../../../tracing';
 
@@ -76,12 +79,13 @@ const createRoundFromEvents = ({
       const toolResult = toolResults.find(
         (result) => result.tool_call_id === toolCall.tool_call_id
       );
+
       return {
         type: ConversationRoundStepType.toolCall,
         tool_call_id: toolCall.tool_call_id,
         tool_id: toolCall.tool_id,
         params: toolCall.params,
-        result: toolResult?.result ?? 'unknown',
+        results: toolResult?.results ?? [],
       };
     }
     if (isReasoningEvent(event)) {

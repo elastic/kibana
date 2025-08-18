@@ -13,7 +13,7 @@ import { packetbeatWithSomeErrors } from '../mock/pattern_rollup/mock_packetbeat
 import { mockStatsAuditbeatIndex } from '../mock/stats/mock_stats_auditbeat_index';
 import { mockStatsPacketbeatIndex } from '../mock/stats/mock_stats_packetbeat_index';
 
-import { DataQualityCheckResult } from '../types';
+import type { DataQualityCheckResult } from '../types';
 import {
   getDocsCount,
   getDocsCountPercent,

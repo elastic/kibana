@@ -6,14 +6,14 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { EuiCheckbox } from '@elastic/eui';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
-import {
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
+import type {
   HandlePageChecked,
   HandlePageUnchecked,
   HandleRowChecked,
   HandleRowUnChecked,
 } from './types';
-import { ContextEditorRow } from '../types';
+import type { ContextEditorRow } from '../types';
 
 export const PageSelectionCheckbox = ({
   anonymizationPageFields = [],

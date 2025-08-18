@@ -8,9 +8,9 @@
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
 import type { ReportingJobResponse } from '@kbn/reporting-plugin/server/types';
 import rison from '@kbn/rison';
-import { CookieCredentials } from '@kbn/ftr-common-functional-services';
-import { FtrProviderContext } from '../ftr_provider_context';
-import { InternalRequestHeader } from '.';
+import type { CookieCredentials } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import type { InternalRequestHeader } from '.';
 
 const API_HEADER: [string, string] = ['kbn-xsrf', 'reporting'];
 

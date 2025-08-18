@@ -8,16 +8,14 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiCard, EuiButtonEmpty, EuiFlexGroup, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SampleDataActionButton } from './sample_data_action_button';
-import { useIngestSampleData } from '../hooks/use_ingest_data';
+
 import { useKibana } from '../hooks/use_kibana';
 import { useUserPrivilegesQuery } from '../hooks/api/use_user_permissions';
 import { generateRandomIndexName } from '../utils/indices';
+import { SampleDataActionButton } from './sample_data_action_button';
 
 export const ConnectToElasticsearchSidePanel = () => {
   const { application, sampleDataIngest } = useKibana().services;
-
-  const { ingestSampleData, isLoading } = useIngestSampleData();
 
   const onFileUpload = useCallback(() => {
     application.navigateToApp('ml', { path: 'filedatavisualizer' });
@@ -75,9 +73,7 @@ export const ConnectToElasticsearchSidePanel = () => {
                 defaultMessage="Add data sets with sample visualizations, dashboards, and more."
               />
             }
-            footer={
-              <SampleDataActionButton isLoading={isLoading} onIngestSampleData={ingestSampleData} />
-            }
+            footer={<SampleDataActionButton />}
           />
         )}
 

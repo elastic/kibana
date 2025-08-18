@@ -9,7 +9,7 @@ import { EuiButton, EuiFlexGroup, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
-import { TimeBounds } from '../../types';
+import type { TimeBounds } from '../../types';
 
 interface Props {
   period: 'week' | 'month';

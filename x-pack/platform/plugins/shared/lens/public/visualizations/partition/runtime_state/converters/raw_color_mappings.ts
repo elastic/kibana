@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { PieLayerState, PieVisualizationState } from '../../../../../common/types';
+import type { PieLayerState, PieVisualizationState } from '../../../../../common/types';
+import type { DeprecatedColorMappingConfig } from '../../../../runtime_state/converters/raw_color_mappings';
 import {
-  DeprecatedColorMappingConfig,
   convertToRawColorMappings,
   isDeprecatedColorMapping,
   getColumnMetaFn,
 } from '../../../../runtime_state/converters/raw_color_mappings';
-import { GeneralDatasourceStates } from '../../../../state_management';
+import type { GeneralDatasourceStates } from '../../../../state_management';
 
 /** @deprecated */
 interface DeprecatedColorMappingLayer extends Omit<PieLayerState, 'colorMapping'> {

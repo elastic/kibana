@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { monaco } from '@kbn/monaco';
 
@@ -168,7 +168,9 @@ describe('<CodeEditor />', () => {
     test('should detect that the suggestion menu is open and not show the hint on ESC', async () => {
       getHint().simulate('keydown', { key: keys.ENTER });
 
-      // expect((getHint().props() as any).className).toContain('isInactive');
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--inactive`
+      );
       expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
 
       // Show the suggestions in the editor
@@ -183,14 +185,50 @@ describe('<CodeEditor />', () => {
       expect(mockedEditorInstance?.__helpers__.areSuggestionsVisible()).toBe(false);
 
       // The keyboard hint is still **not** active
-      // expect((getHint().props() as any).className).toContain('isInactive');
-
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--inactive`
+      );
       // Hitting a second time the ESC key should now show the hint
       findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
         keyCode: monaco.KeyCode.Escape,
       });
 
-      // expect((getHint().props() as any).className).not.toContain('isInactive');
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--active`
+      );
+    });
+
+    test('should detect that the inspect tokens widget is open and not show the hint on ESC', async () => {
+      getHint().simulate('keydown', { key: keys.ENTER });
+
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--inactive`
+      );
+      expect(mockedEditorInstance?.__helpers__.isInspectTokensWidgetVisible()).toBe(false);
+
+      // Show the inspect tokens widget in the editor
+      mockedEditorInstance?.__helpers__.showInspectTokensWidget();
+      expect(mockedEditorInstance?.__helpers__.isInspectTokensWidgetVisible()).toBe(true);
+
+      // Hitting the ESC key with the inspect tokens widget visible
+      findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
+        keyCode: monaco.KeyCode.Escape,
+      });
+
+      expect(mockedEditorInstance?.__helpers__.isInspectTokensWidgetVisible()).toBe(false);
+
+      // The keyboard hint is still **not** active
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--inactive`
+      );
+      // Hitting a second time the ESC key should now show the hint
+      findTestSubject(component, 'monacoEditorTextarea').simulate('keydown', {
+        keyCode: monaco.KeyCode.Escape,
+      });
+
+      expect(getHint().find('[data-test-subj~="codeEditorHint"]').prop('data-test-subj')).toContain(
+        `codeEditorHint--active`
+      );
     });
   });
 

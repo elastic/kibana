@@ -10,8 +10,8 @@
 import { SUGGESTION_TYPE, suggest } from './timelion_expression_input_helpers';
 import { getArgValueSuggestions } from '../helpers/arg_value_suggestions';
 import { setIndexPatterns } from '../helpers/plugin_services';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { ITimelionFunction } from '../../common/types';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { ITimelionFunction } from '../../common/types';
 
 describe('Timelion expression suggestions', () => {
   setIndexPatterns({} as DataViewsContract);

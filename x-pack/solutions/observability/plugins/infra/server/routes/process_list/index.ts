@@ -10,9 +10,9 @@ import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
 import { identity } from 'fp-ts/function';
 import { schema } from '@kbn/config-schema';
-import { throwErrors } from '@kbn/io-ts-utils';
+import { createRouteValidationFunction, throwErrors } from '@kbn/io-ts-utils';
 import type { InfraBackendLibs } from '../../lib/infra_types';
-import { createSearchClient } from '../../lib/create_search_client';
+import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 import { getProcessList } from '../../lib/host_details/process_list';
 import { getProcessListChart } from '../../lib/host_details/process_list_chart';
 import {
@@ -31,28 +31,38 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
       method: 'post',
       path: '/api/metrics/process_list',
       validate: {
-        body: escapeHatch,
+        body: createRouteValidationFunction(ProcessListAPIRequestRT),
       },
     },
-    async (requestContext, request, response) => {
-      const options = pipe(
-        ProcessListAPIRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+    async (context, request, response) => {
+      try {
+        const options = pipe(
+          ProcessListAPIRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
 
-      const client = createSearchClient(requestContext, framework);
-      const soClient = (await requestContext.core).savedObjects.client;
+        const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
 
-      const { configuration } = await libs.sources.getSourceConfiguration(
-        soClient,
-        options.sourceId
-      );
+        const processListResponse = await getProcessList(infraMetricsClient, options);
 
-      const processListResponse = await getProcessList(client, configuration, options);
+        return response.ok({
+          body: ProcessListAPIResponseRT.encode(processListResponse),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
 
-      return response.ok({
-        body: ProcessListAPIResponseRT.encode(processListResponse),
-      });
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 
@@ -64,18 +74,33 @@ export const initProcessListRoute = (libs: InfraBackendLibs) => {
         body: escapeHatch,
       },
     },
-    async (requestContext, request, response) => {
-      const options = pipe(
-        ProcessListAPIChartRequestRT.decode(request.body),
-        fold(throwErrors(Boom.badRequest), identity)
-      );
+    async (context, request, response) => {
+      try {
+        const options = pipe(
+          ProcessListAPIChartRequestRT.decode(request.body),
+          fold(throwErrors(Boom.badRequest), identity)
+        );
+        const infraMetricsClient = await getInfraMetricsClient({ request, libs, context });
+        const processListResponse = await getProcessListChart(infraMetricsClient, options);
 
-      const client = createSearchClient(requestContext, framework);
-      const processListResponse = await getProcessListChart(client, options);
+        return response.ok({
+          body: ProcessListAPIChartResponseRT.encode(processListResponse),
+        });
+      } catch (err) {
+        if (Boom.isBoom(err)) {
+          return response.customError({
+            statusCode: err.output.statusCode,
+            body: { message: err.output.payload.message },
+          });
+        }
 
-      return response.ok({
-        body: ProcessListAPIChartResponseRT.encode(processListResponse),
-      });
+        return response.customError({
+          statusCode: err.statusCode ?? 500,
+          body: {
+            message: err.message ?? 'An unexpected error occurred',
+          },
+        });
+      }
     }
   );
 };

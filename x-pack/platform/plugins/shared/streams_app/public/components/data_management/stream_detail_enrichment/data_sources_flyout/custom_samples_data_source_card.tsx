@@ -10,11 +10,9 @@ import { EuiCallOut, EuiSpacer, EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { isSchema } from '@kbn/streams-schema';
 import { customSamplesDataSourceDocumentsSchema } from '../../../../../common/url_schema';
-import {
-  DataSourceActorRef,
-  useDataSourceSelector,
-} from '../state_management/data_source_state_machine';
-import { CustomSamplesDataSourceWithUIAttributes } from '../types';
+import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
+import { useDataSourceSelector } from '../state_management/data_source_state_machine';
+import type { CustomSamplesDataSourceWithUIAttributes } from '../types';
 import { deserializeJson, serializeXJson } from '../helpers';
 import { DataSourceCard } from './data_source_card';
 import { NameField } from './name_field';
@@ -71,6 +69,7 @@ export const CustomSamplesDataSourceCard = ({
         fullWidth
       >
         <CodeEditor
+          dataTestSubj="streamsAppCustomSamplesDataSourceEditor"
           height={200}
           value={editorValue}
           onChange={handleEditorChange}

@@ -9,9 +9,9 @@ import React from 'react';
 
 import { useValues, useActions } from 'kea';
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -25,7 +25,7 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../../../common/types/search_applications';
 
 import { healthColorsMap } from '../../../shared/constants/health_colors';
 

@@ -6,23 +6,38 @@
  */
 
 import { combineReducers } from 'redux';
-import { monitorReducer, MonitorState } from './monitor';
-import { uiReducer, UiState } from './ui';
-import { monitorStatusReducer, MonitorStatusState } from './monitor_status';
-import { monitorListReducer, MonitorList } from './monitor_list';
-import { dynamicSettingsReducer, DynamicSettingsState } from './dynamic_settings';
-import { pingReducer, PingState } from './ping';
-import { pingListReducer, PingListState } from './ping_list';
-import { monitorDurationReducer, MonitorDuration } from './monitor_duration';
-import { indexStatusReducer, IndexStatusState } from './index_status';
-import { mlJobsReducer, MLJobState } from './ml_anomaly';
-import { certificatesReducer, CertificatesState } from '../certificates/certificates';
+import type { MonitorState } from './monitor';
+import { monitorReducer } from './monitor';
+import type { UiState } from './ui';
+import { uiReducer } from './ui';
+import type { MonitorStatusState } from './monitor_status';
+import { monitorStatusReducer } from './monitor_status';
+import type { MonitorList } from './monitor_list';
+import { monitorListReducer } from './monitor_list';
+import type { DynamicSettingsState } from './dynamic_settings';
+import { dynamicSettingsReducer } from './dynamic_settings';
+import type { PingState } from './ping';
+import { pingReducer } from './ping';
+import type { PingListState } from './ping_list';
+import { pingListReducer } from './ping_list';
+import type { MonitorDuration } from './monitor_duration';
+import { monitorDurationReducer } from './monitor_duration';
+import type { IndexStatusState } from './index_status';
+import { indexStatusReducer } from './index_status';
+import type { MLJobState } from './ml_anomaly';
+import { mlJobsReducer } from './ml_anomaly';
+import type { CertificatesState } from '../certificates/certificates';
+import { certificatesReducer } from '../certificates/certificates';
 import { selectedFiltersReducer } from './selected_filters';
-import { SelectedFilters } from '../actions/selected_filters';
-import { alertsReducer, AlertState } from '../alerts/alerts';
-import { JourneyKVP, journeyReducer } from './journey';
-import { networkEventsReducer, NetworkEventsState } from './network_events';
-import { syntheticsReducer, SyntheticsReducerState } from './synthetics';
+import type { SelectedFilters } from '../actions/selected_filters';
+import type { AlertState } from '../alerts/alerts';
+import { alertsReducer } from '../alerts/alerts';
+import type { JourneyKVP } from './journey';
+import { journeyReducer } from './journey';
+import type { NetworkEventsState } from './network_events';
+import { networkEventsReducer } from './network_events';
+import type { SyntheticsReducerState } from './synthetics';
+import { syntheticsReducer } from './synthetics';
 
 export interface RootState {
   monitor: MonitorState;

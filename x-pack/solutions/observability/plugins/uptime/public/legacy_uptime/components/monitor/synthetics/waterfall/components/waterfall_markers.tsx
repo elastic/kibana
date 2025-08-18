@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useWaterfallContext } from '..';
-import { MarkerItems } from '../context/waterfall_chart';
+import type { MarkerItems } from '../context/waterfall_chart';
 import { WaterfallMarkerIcon } from './waterfall_marker_icon';
 
 export const FIELD_SYNTHETICS_LCP = 'browser.experience.lcp.us';

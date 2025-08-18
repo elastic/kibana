@@ -5,7 +5,6 @@
  * 2.0.
  */
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type {
   AuthenticatedUser,
@@ -17,14 +16,13 @@ import type { InferenceClient } from '@kbn/inference-common';
 
 export interface SiemMigrationsClientDependencies {
   inferenceClient: InferenceClient;
-  rulesClient: RulesClient;
   actionsClient: ActionsClient;
   savedObjectsClient: SavedObjectsClientContract;
   packageService?: PackageService;
   telemetry: AnalyticsServiceSetup;
 }
 
-export interface SiemMigrationsCreateClientParams {
+export interface SiemMigrationsCommonCreateClientParams {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;

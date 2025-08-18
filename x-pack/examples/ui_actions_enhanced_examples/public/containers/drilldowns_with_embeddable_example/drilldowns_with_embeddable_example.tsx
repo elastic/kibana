@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiSpacer,
-  EuiContextMenuPanelDescriptor,
   EuiButton,
   EuiPopover,
   EuiContextMenu,
@@ -107,7 +107,7 @@ export const DrilldownsWithEmbeddableExample: React.FC = () => {
       </EuiFlexGroup>
 
       {showManager && (
-        <EuiFlyout onClose={() => setShowManager(false)} aria-labelledby="Drilldown Manager">
+        <EuiFlyout onClose={() => setShowManager(false)} aria-label="Drilldown Manager">
           <plugins.uiActionsEnhanced.DrilldownManager
             key={viewRef.current}
             initialRoute={viewRef.current}

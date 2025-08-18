@@ -19,13 +19,13 @@ import { createToolEventEmitter } from './utils/events';
 import type { RunnerManager } from './runner';
 import type { InternalToolDefinition } from '../tools/tool_provider';
 
-export const runTool = async <TParams = Record<string, unknown>, TResult = unknown>({
+export const runTool = async <TParams = Record<string, unknown>>({
   toolExecutionParams,
   parentManager,
 }: {
   toolExecutionParams: ScopedRunnerRunToolsParams<TParams>;
   parentManager: RunnerManager;
-}): Promise<RunToolReturn<TResult>> => {
+}): Promise<RunToolReturn> => {
   const { toolId, toolParams } = toolExecutionParams;
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
@@ -33,31 +33,31 @@ export const runTool = async <TParams = Record<string, unknown>, TResult = unkno
   const { toolsService, request } = manager.deps;
 
   const toolRegistry = await toolsService.getRegistry({ request });
-  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
-    any,
-    ZodObject<any>,
-    TResult
-  >;
+  const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<any, ZodObject<any>>;
 
-  const toolReturn = await withExecuteToolSpan({ name: tool.id, input: toolParams }, async () => {
-    const validation = tool.schema.safeParse(toolParams);
-    if (validation.error) {
-      throw createBadRequestError(
-        `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+  const toolReturn = await withExecuteToolSpan(
+    tool.id,
+    { tool: { input: toolParams } },
+    async () => {
+      const validation = tool.schema.safeParse(toolParams);
+      if (validation.error) {
+        throw createBadRequestError(
+          `Tool ${toolId} was called with invalid parameters: ${validation.error.message}`
+        );
+      }
+
+      const toolHandlerContext = await createToolHandlerContext<TParams>({
+        toolExecutionParams,
+        manager,
+      });
+      const toolReturnInternal = await tool.handler(
+        validation.data as Record<string, any>,
+        toolHandlerContext
       );
+
+      return toolReturnInternal;
     }
-
-    const toolHandlerContext = await createToolHandlerContext<TParams>({
-      toolExecutionParams,
-      manager,
-    });
-    const toolReturnInternal = await tool.handler(
-      validation.data as Record<string, any>,
-      toolHandlerContext
-    );
-
-    return toolReturnInternal;
-  });
+  );
 
   return {
     runId: manager.context.runId,

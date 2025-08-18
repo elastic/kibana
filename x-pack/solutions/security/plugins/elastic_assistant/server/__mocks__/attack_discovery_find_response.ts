@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryFindResponse } from '@kbn/elastic-assistant-common';
 
 export const getMockAttackDiscoveryFindResponse = (): AttackDiscoveryFindResponse => ({
   connector_names: ['Claude Sonnet 3.5', 'GPT-4.1', 'GPT-4o'],

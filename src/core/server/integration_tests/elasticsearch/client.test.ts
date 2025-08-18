@@ -11,15 +11,15 @@ import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
 import { firstValueFrom, ReplaySubject } from 'rxjs';
 
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import {
   createRootWithCorePlugins,
   createTestServers,
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { ServiceStatus } from '@kbn/core-status-common';
-import { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
+import type { ServiceStatus } from '@kbn/core-status-common';
+import type { ElasticsearchStatusMeta } from '@kbn/core-elasticsearch-server-internal';
 
 describe('elasticsearch clients', () => {
   let esServer: TestElasticsearchUtils;

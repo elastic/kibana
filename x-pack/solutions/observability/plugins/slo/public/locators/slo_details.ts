@@ -9,7 +9,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID } from '@kbn/observability-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
-import { SloTabId } from '../pages/slo_details/components/slo_details';
+import type { SloTabId } from '../pages/slo_details/components/slo_details';
 
 export interface SloDetailsLocatorParams extends SerializableRecord {
   sloId: string;

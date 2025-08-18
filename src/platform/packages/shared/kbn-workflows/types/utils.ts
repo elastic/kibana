@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml } from '../spec/schema';
-import { EsWorkflow, WorkflowStatus } from './v1';
+import type { WorkflowYaml } from '../spec/schema';
+import type { EsWorkflow } from './v1';
+import { WorkflowStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
@@ -16,10 +17,10 @@ export function transformWorkflowYamlJsontoEsWorkflow(
   // TODO: handle merge, if, foreach, etc.
 
   return {
-    name: workflowDefinition.workflow.name,
-    description: workflowDefinition.workflow.description,
-    tags: workflowDefinition.workflow.tags ?? [],
-    status: workflowDefinition.workflow.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
+    name: workflowDefinition.name,
+    description: workflowDefinition.description,
+    tags: workflowDefinition.tags ?? [],
+    status: workflowDefinition.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
     definition: workflowDefinition,
   };
 }

@@ -6,9 +6,9 @@
  */
 
 import React, { Suspense } from 'react';
-import { ActionType } from '@kbn/actions-plugin/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
 import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import {
+import type {
   ActionConnector,
   ActionTypeRegistryContract,
 } from '@kbn/triggers-actions-ui-plugin/public';

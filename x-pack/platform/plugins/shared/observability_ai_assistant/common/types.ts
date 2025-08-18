@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import type { ToolSchema } from '@kbn/inference-common';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantChatService } from '../public';
@@ -148,7 +148,7 @@ export enum KnowledgeBaseType {
   Contextual = 'contextual',
 }
 
-export enum KnowledgeBaseState {
+export enum InferenceModelState {
   NOT_INSTALLED = 'NOT_INSTALLED',
   MODEL_PENDING_DEPLOYMENT = 'MODEL_PENDING_DEPLOYMENT',
   DEPLOYING_MODEL = 'DEPLOYING_MODEL',

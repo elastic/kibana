@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { lastValueFrom } from 'rxjs';
 import dedent from 'dedent';
-import { Message, MessageRole } from '../../../../common';
-import { FunctionCallChatFunction } from '../../../service/types';
+import type { Message } from '../../../../common';
+import { MessageRole } from '../../../../common';
+import type { FunctionCallChatFunction } from '../../../service/types';
 import { getLastUserMessage } from './get_last_user_message';
 
 export async function queryRewrite({

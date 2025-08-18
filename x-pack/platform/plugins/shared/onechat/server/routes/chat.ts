@@ -6,20 +6,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Observable, firstValueFrom, toArray } from 'rxjs';
-import { ServerSentEvent } from '@kbn/sse-utils';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, toArray } from 'rxjs';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
 import {
   AgentMode,
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
-  ConversationUpdatedEvent,
-  ConversationCreatedEvent,
 } from '@kbn/onechat-common';
-import { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';

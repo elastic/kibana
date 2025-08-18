@@ -7,8 +7,10 @@
 
 import { z } from '@kbn/zod';
 import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { relevanceSearch } from '@kbn/onechat-genai-utils';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const relevanceSearchSchema = z.object({
   term: z.string().describe('Term to search for'),
@@ -41,10 +43,7 @@ export interface SearchFulltextResponse {
   results: SearchFulltextResult[];
 }
 
-export const relevanceSearchTool = (): BuiltinToolDefinition<
-  typeof relevanceSearchSchema,
-  SearchFulltextResponse
-> => {
+export const relevanceSearchTool = (): BuiltinToolDefinition<typeof relevanceSearchSchema> => {
   return {
     id: builtinToolIds.relevanceSearch,
     description: `Find relevant documents in an index based on a simple fulltext search.
@@ -57,7 +56,7 @@ export const relevanceSearchTool = (): BuiltinToolDefinition<
     schema: relevanceSearchSchema,
     handler: async ({ term, index, fields = [], size }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await relevanceSearch({
+      const searchResult = await relevanceSearch({
         term,
         index,
         fields,
@@ -65,9 +64,22 @@ export const relevanceSearchTool = (): BuiltinToolDefinition<
         model,
         esClient: esClient.asCurrentUser,
       });
-      return {
-        result,
-      };
+
+      const results: ToolResult[] = searchResult.results.map((result) => ({
+        type: ToolResultType.resource,
+        data: {
+          reference: {
+            id: result.id,
+            index: result.index,
+          },
+          partial: true,
+          content: {
+            highlights: result.highlights,
+          },
+        },
+      }));
+
+      return { results };
     },
     tags: [builtinTags.retrieval],
   };

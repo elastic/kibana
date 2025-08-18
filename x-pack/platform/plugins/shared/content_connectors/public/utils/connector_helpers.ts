@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Connector, FeatureName } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { FeatureName } from '@kbn/search-connectors';
 
 import { isAdvancedSyncRuleSnippetEmpty } from './sync_rules_helpers';
 

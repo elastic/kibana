@@ -15,7 +15,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { registerReactEmbeddableFactory } from './react_embeddable_registry';
 import { EmbeddableRenderer } from './react_embeddable_renderer';
-import { EmbeddableFactory } from './types';
+import type { EmbeddableFactory } from './types';
 
 const testEmbeddableFactory: EmbeddableFactory<{ name: string; bork: string }> = {
   type: 'test',

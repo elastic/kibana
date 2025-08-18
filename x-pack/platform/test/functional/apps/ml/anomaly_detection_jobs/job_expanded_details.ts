@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JOB_STATE } from '@kbn/ml-plugin/common';
 import { QuickFilterButtonTypes } from '../../../services/ml/job_table';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

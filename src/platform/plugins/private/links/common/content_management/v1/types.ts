@@ -12,20 +12,19 @@ import type {
   SavedObjectCreateOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { type UrlDrilldownOptions } from '@kbn/ui-actions-enhanced-plugin/public';
-import { type DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
 
-import { LinksContentType } from '../../types';
-import {
+import type { LinksContentType } from '../../types';
+import type {
   DASHBOARD_LINK_TYPE,
   EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
 } from './constants';
+import type { LinksState } from '../../../server';
 
 export type LinksCrudTypes = ContentManagementCrudTypes<
   LinksContentType,
-  Omit<LinksAttributes, 'title'> & { title: string }, // saved object attributes always have a title
+  LinksState,
   Pick<SavedObjectCreateOptions, 'references'>,
   Pick<SavedObjectUpdateOptions, 'references'>,
   {
@@ -36,33 +35,4 @@ export type LinksCrudTypes = ContentManagementCrudTypes<
 
 export type LinkType = typeof DASHBOARD_LINK_TYPE | typeof EXTERNAL_LINK_TYPE;
 
-export type LinkOptions = DashboardDrilldownOptions | UrlDrilldownOptions;
-interface BaseLink {
-  id: string;
-  label?: string;
-  order: number;
-  options?: LinkOptions;
-  destination?: string;
-}
-
-interface DashboardLink extends BaseLink {
-  type: typeof DASHBOARD_LINK_TYPE;
-  destinationRefName?: string;
-}
-
-interface ExternalLink extends BaseLink {
-  type: typeof EXTERNAL_LINK_TYPE;
-  destination: string;
-}
-
-export type Link = DashboardLink | ExternalLink;
-
 export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERTICAL_LAYOUT;
-
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type LinksAttributes = {
-  title?: string;
-  description?: string;
-  links?: Link[];
-  layout?: LinksLayoutType;
-};

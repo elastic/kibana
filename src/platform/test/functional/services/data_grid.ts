@@ -17,7 +17,10 @@ import {
   COUNTER_TEST_SUBJ,
   HIGHLIGHT_CLASS_NAME,
 } from '@kbn/data-grid-in-table-search';
-import { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
+import type {
+  WebElementWrapper,
+  CustomCheerioStatic,
+} from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {
@@ -534,10 +537,8 @@ export class DataGridService extends FtrService {
     return textArr;
   }
 
-  public async getRowActions(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
-  ): Promise<WebElementWrapper[]> {
-    const detailsRow = (await this.getDetailsRows())[options.rowIndex || 0];
+  public async getRowActions(): Promise<WebElementWrapper[]> {
+    const detailsRow = await this.testSubjects.find('docViewerFlyout');
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
   }
 

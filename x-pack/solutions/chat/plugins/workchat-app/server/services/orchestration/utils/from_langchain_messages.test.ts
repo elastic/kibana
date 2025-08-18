@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AIMessage, HumanMessage, BaseMessage, MessageType } from '@langchain/core/messages';
+import type { MessageType } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, BaseMessage } from '@langchain/core/messages';
 import { messageFromLangchain } from './from_langchain_messages';
 import { ConversationEventType } from '../../../../common/conversation_events';
 

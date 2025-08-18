@@ -74,7 +74,10 @@ const getApiKey = async (deps: ApiKeyManagerDependencies) => {
     return (
       await encryptedSavedObjectsClient.getDecryptedAsInternalUser<PrivilegeMonitoringAPIKey>(
         PrivilegeMonitoringApiKeyType.name,
-        getPrivmonEncryptedSavedObjectId(deps.namespace)
+        getPrivmonEncryptedSavedObjectId(deps.namespace),
+        {
+          namespace: deps.namespace,
+        }
       )
     ).attributes;
   } catch (err) {
@@ -93,14 +96,21 @@ const getRequestFromApiKey = async (apiKey: PrivilegeMonitoringAPIKey) => {
 };
 const getClient = async (deps: ApiKeyManagerDependencies) => {
   const apiKey = await getApiKey(deps);
+
   if (!apiKey) return undefined;
   const fakeRequest = getFakeKibanaRequest({
     id: apiKey.id,
     api_key: apiKey.apiKey,
   });
+
   const clusterClient = deps.core.elasticsearch.client.asScoped(fakeRequest);
+
+  const soClient = deps.core.savedObjects.getScopedClient(fakeRequest, {
+    includedHiddenTypes: [monitoringEntitySourceType.name],
+  });
   return {
     clusterClient,
+    soClient,
   };
 };
 

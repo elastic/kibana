@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { Frequency } from '@kbn/rrule';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
+import type { ScheduledReportApiJSON } from '@kbn/reporting-common/types';
 
 interface ReportScheduleIndicatorProps {
   schedule: ScheduledReportApiJSON['schedule'];

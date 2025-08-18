@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RouteMap } from '../types';
+import type { RouteMap } from '../types';
 import { RouterBreadcrumb } from './breadcrumb';
 
 export function createRouterBreadcrumbComponent<

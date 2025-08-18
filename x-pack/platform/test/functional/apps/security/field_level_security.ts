@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { keyBy } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -25,7 +25,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/platform/test/fixtures/es_archives/security/flstest/data'
       ); // ( data)
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
       );
       await browser.setWindowSize(1600, 1000);
     });
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await PageObjects.security.forceLogout();
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/security/flstest/index_pattern'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/security/flstest/index_pattern'
       );
       await security.testUser.restoreDefaults();
     });

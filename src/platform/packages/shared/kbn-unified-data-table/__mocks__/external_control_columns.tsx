@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiButtonIcon,
@@ -16,9 +17,8 @@ import {
   EuiFlexItem,
   EuiPopoverTitle,
   EuiSpacer,
-  EuiDataGridControlColumn,
 } from '@elastic/eui';
-import { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 
 const SelectionHeaderCell = () => {
   return (

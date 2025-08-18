@@ -8,7 +8,9 @@
  */
 
 import _ from 'lodash';
-import React, { Fragment, FC, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { Fragment, useMemo } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
@@ -21,15 +23,19 @@ import {
   EuiHorizontalRule,
   EuiTitle,
   EuiSpacer,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SavedObjectsImportSuccess, SavedObjectsImportWarning, IBasePath } from '@kbn/core/public';
+import type {
+  SavedObjectsImportSuccess,
+  SavedObjectsImportWarning,
+  IBasePath,
+} from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import { getDefaultTitle, getSavedObjectLabel, FailedImport } from '../../../lib';
+import type { FailedImport } from '../../../lib';
+import { getDefaultTitle, getSavedObjectLabel } from '../../../lib';
 
 const DEFAULT_ICON = 'apps';
 

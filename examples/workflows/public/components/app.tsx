@@ -65,7 +65,7 @@ workflow:
   name: New workflow
   enabled: false
   triggers:
-    - type: triggers.elastic.manual
+    - type: manual
   steps:
     - name: step-with-console-log-1
       type: console
@@ -74,7 +74,7 @@ workflow:
         message: Step 1 executed for rule"{{event.ruleName}}"
     
     - name: slack-connector-step
-      type: slack.sendMessage
+      type: slack
       connector-id: keep-playground
       with:
         message: |

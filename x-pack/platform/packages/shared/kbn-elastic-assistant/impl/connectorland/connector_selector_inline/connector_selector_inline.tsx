@@ -10,8 +10,9 @@ import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
 import type { ApiConfig, AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
-import { AIConnector, ConnectorSelector } from '../connector_selector';
-import { Conversation } from '../../..';
+import type { AIConnector } from '../connector_selector';
+import { ConnectorSelector } from '../connector_selector';
+import type { Conversation } from '../../..';
 import { useAssistantContext } from '../../assistant_context';
 import { useConversation } from '../../assistant/use_conversation';
 import { getGenAiConfig } from '../helpers';

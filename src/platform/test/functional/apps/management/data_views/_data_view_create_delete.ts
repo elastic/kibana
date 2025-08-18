@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -139,6 +139,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'Searchable',
             'Aggregatable',
             'Excluded',
+            'Actions',
           ];
 
           expect(headers.length).to.be(expectedHeaders.length);

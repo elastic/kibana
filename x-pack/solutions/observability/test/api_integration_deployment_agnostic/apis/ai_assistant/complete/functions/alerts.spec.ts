@@ -6,12 +6,14 @@
  */
 
 import expect from '@kbn/expect';
-import { MessageRole, MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
-import { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
-import { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { MessageAddEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { InternalRequestHeader, RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { ApmRuleType } from '@kbn/rule-data-utils';
-import { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { SearchAlertsResult } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
+import type { LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import {
   getMessageAddedEvents,
   invokeChatCompleteWithFunctionRequest,

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import type { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { isUrl } from '../../../validators/string';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 export const urlField =
   (message: string, { requireTld = true }: { requireTld?: boolean } = {}) =>

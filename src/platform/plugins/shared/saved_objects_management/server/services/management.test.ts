@@ -8,7 +8,8 @@
  */
 
 import { SavedObjectsManagement } from './management';
-import { SavedObjectsType, SavedObjectTypeRegistry } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectTypeRegistry } from '@kbn/core/server';
 
 describe('SavedObjectsManagement', () => {
   let registry: SavedObjectTypeRegistry;

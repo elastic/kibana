@@ -6,7 +6,7 @@
  */
 
 import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { chatCompleteSuite } from './chat_complete';
 
 // eslint-disable-next-line import/no-default-export

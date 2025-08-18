@@ -8,7 +8,8 @@
  */
 
 import { extractReferences } from '@kbn/data-plugin/common';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
+import { logger } from '../../../../kibana_services';
 
 export function transformSearchSourceIn(
   kibanaSavedObjectMeta?: DashboardAttributes['kibanaSavedObjectMeta']
@@ -18,11 +19,18 @@ export function transformSearchSourceIn(
   }
   const { searchSource } = kibanaSavedObjectMeta;
 
-  // Extract references expects an object with singular `filter` and `query`.
-  // But `DashboardState` uses plural `filters` and singular `query`.
-  const [extractedState, references] = extractReferences({
-    filter: searchSource.filters,
-    query: searchSource.query,
-  });
-  return { searchSourceJSON: JSON.stringify(extractedState), references };
+  try {
+    // Extract references expects an object with singular `filter` and `query`.
+    // But `DashboardState` uses plural `filters` and singular `query`.
+    const [extractedState, references] = extractReferences({
+      filter: searchSource.filters,
+      query: searchSource.query,
+    });
+    return { searchSourceJSON: JSON.stringify(extractedState), references };
+  } catch (error) {
+    // If the references can not be extracted, we log a warning
+    // and return the original searchSource stringified.
+    logger.warn(`Unable to transform filter and query state on save. Error: ${error.message}`);
+    return { searchSourceJSON: JSON.stringify(searchSource), references: [] };
+  }
 }

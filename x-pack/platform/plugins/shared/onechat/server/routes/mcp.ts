@@ -12,7 +12,7 @@ import { createToolIdMappings } from '@kbn/onechat-genai-utils/langchain';
 import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { KibanaMcpHttpTransport } from '../utils/kibana_mcp_http_transport';
+import { KibanaMcpHttpTransport } from '../utils/mcp/kibana_mcp_http_transport';
 import { ONECHAT_MCP_SERVER_UI_SETTING_ID } from '../../common/constants';
 import { getTechnicalPreviewWarning } from './utils';
 

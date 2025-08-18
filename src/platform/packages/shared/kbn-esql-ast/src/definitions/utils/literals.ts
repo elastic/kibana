@@ -9,11 +9,11 @@
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLAstItem, ESQLLiteral } from '../../types';
-import { FunctionParameterType } from '../types';
-import { ISuggestionItem } from '../../commands_registry/types';
+import type { FunctionParameterType } from '../types';
+import type { ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { getControlSuggestion } from './autocomplete/helpers';
-import { timeUnits, timeUnitsToSuggest } from '../constants';
+import { timeUnitsToSuggest } from '../constants';
 import { isLiteral } from '../../ast/is';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
@@ -108,6 +108,7 @@ export function getCompatibleLiterals(
 ) {
   const suggestions: ISuggestionItem[] = [];
   if (types.includes('time_duration')) {
+    // TODO distinction between date_period and time durations!
     const timeLiteralSuggestions = [
       ...buildConstantsDefinitions(getUnitDuration(1), undefined, undefined, options),
     ];
@@ -137,32 +138,6 @@ export function getCompatibleLiterals(
   }
   return suggestions;
 }
-
-export function inKnownTimeInterval(timeIntervalUnit: string): boolean {
-  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
-}
-
-/**
- * Compares two types, taking into account literal types
- * @TODO strengthen typing here (remove `string`)
- * @TODO — clean up time duration and date period
- */
-export const compareTypesWithLiterals = (
-  a: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string,
-  b: ESQLLiteral['literalType'] | FunctionParameterType | 'timeInterval' | string
-) => {
-  if (a === b) {
-    return true;
-  }
-  // In Elasticsearch function definitions, time_duration and date_period are used
-  // time_duration is seconds/min/hour interval
-  // date_period is day/week/month/year interval
-  // So they are equivalent AST's 'timeInterval' (a date unit constant: e.g. 1 year, 15 month)
-  if (a === 'time_duration' || a === 'date_period') return b === 'timeInterval';
-  if (b === 'time_duration' || b === 'date_period') return a === 'timeInterval';
-
-  return false;
-};
 
 /**
  * Checks if both types are string types.

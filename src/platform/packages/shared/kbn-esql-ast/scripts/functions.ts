@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition, FunctionDefinitionTypes } from '../src/definitions/types';
-import { validateLogFunctions } from './validators';
+import type { FunctionDefinition } from '../src/definitions/types';
+import { FunctionDefinitionTypes } from '../src/definitions/types';
 import {
   defaultScalarFunctionLocations,
   dateDiffSuggestions,
@@ -48,12 +48,6 @@ export const extraFunctions: FunctionDefinition[] = [
  * and, hence, won't be present in the JSON file.
  */
 export const functionEnrichments: Record<string, RecursivePartial<FunctionDefinition>> = {
-  log10: {
-    validate: validateLogFunctions,
-  },
-  log: {
-    validate: validateLogFunctions,
-  },
   date_diff: {
     signatures: [
       {

@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ComparatorFunction } from '../../state_manager';
-import { initializeTitleManager, SerializedTitles, titleComparators } from './title_manager';
+import type { ComparatorFunction } from '../../state_manager';
+import type { SerializedTitles } from './title_manager';
+import { initializeTitleManager, titleComparators } from './title_manager';
 
 describe('titles api', () => {
   const rawState: SerializedTitles = {

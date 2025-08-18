@@ -7,5 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { EnterIfNode, ExitIfNode } from './nodes/branching_nodes';
+export type {
+  EnterIfNode,
+  ExitIfNode,
+  EnterConditionBranchNode,
+  EnterConditionBranchNodeSchema,
+  ExitConditionBranchNode,
+  ExitConditionBranchNodeSchema,
+} from './nodes/branching_nodes';
 export type { EnterForeachNode, ExitForeachNode } from './nodes/loop_nodes';
+export type { AtomicGraphNode, WaitGraphNodeSchema, WaitGraphNode } from './nodes/base';

@@ -7,36 +7,37 @@
 
 import React, { useCallback } from 'react';
 import { get } from 'lodash/fp';
-import { DataTableRecord } from '@kbn/discover-utils/types';
+import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import { EuiDataGridCellValueElementProps, EuiSpacer, EuiText } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiSpacer, EuiText } from '@elastic/eui';
+import type { Filter } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
+import type { MultiValueCellAction } from '@kbn/cloud-security-posture';
 import {
   ActionableBadge,
   CVSScoreBadge,
   SeverityStatusBadge,
   getNormalizedSeverity,
-  MultiValueCellAction,
   MultiValueCellPopover,
   findReferenceLink,
 } from '@kbn/cloud-security-posture';
 import { getVendorName } from '@kbn/cloud-security-posture/src/utils/get_vendor_name';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { useLatestVulnerabilitiesTable } from './hooks/use_latest_vulnerabilities_table';
 import { LATEST_VULNERABILITIES_TABLE } from './test_subjects';
 import { getDefaultQuery, defaultColumns } from './constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { createDetectionRuleFromVulnerabilityFinding } from './utils/create_detection_rule_from_vulnerability';
 import { vulnerabilitiesTableFieldLabels } from './vulnerabilities_table_field_labels';
-import { FindingsBaseURLQuery } from '../../common/types';
+import type { FindingsBaseURLQuery } from '../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { useDataViewContext } from '../../common/contexts/data_view_context';
 import { usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 import { EMPTY_VALUE } from '../configurations/findings_flyout/findings_flyout';
-import { AddFieldFilterHandler } from './types';
+import type { AddFieldFilterHandler } from './types';
 import { CloudSecurityDataTable } from '../../components/cloud_security_data_table';
 
 type URLQuery = FindingsBaseURLQuery & Record<string, any>;

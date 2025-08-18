@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import type { VisualizationsServerSetup } from '@kbn/visualizations-plugin/server';
-import { configSchema, TableConfig } from './config';
+import type { TableConfig } from './config';
+import { configSchema } from './config';
 import { VIS_TYPE_TABLE } from '../common';
 
 export const config: PluginConfigDescriptor<TableConfig> = {

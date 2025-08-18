@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { MisconfigurationEvaluationStatus } from '@kbn/cloud-security-posture-common';
 import {
   VULNERABILITIES_SEVERITY,

@@ -7,9 +7,10 @@
 
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { createRestClient } from '@kbn/inference-plugin/common';
-import { KibanaClient, createKibanaClient, toHttpHandler } from '@kbn/kibana-api-cli';
-import { ToolingLog } from '@kbn/tooling-log';
-import { InferenceCliClient } from './client';
+import type { KibanaClient } from '@kbn/kibana-api-cli';
+import { createKibanaClient, toHttpHandler } from '@kbn/kibana-api-cli';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { InferenceCliClient } from './client';
 import { selectConnector } from './select_connector';
 
 class InvalidLicenseLevelError extends Error {

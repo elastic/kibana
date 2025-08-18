@@ -6,7 +6,10 @@
  */
 
 import type { RuleUpdateProps } from '../../../model/rule_schema';
-import { getUpdateRulesSchemaMock } from '../../../model/rule_schema/mocks';
+import {
+  getUpdateRulesSchemaMock,
+  getUpdateThreatMatchRuleSchemaMock,
+} from '../../../model/rule_schema/mocks';
 import { validateUpdateRuleProps } from './request_schema_validation';
 
 describe('Update rule request schema, additional validation', () => {
@@ -68,5 +71,77 @@ describe('Update rule request schema, additional validation', () => {
     delete schema.rule_id;
     const errors = validateUpdateRuleProps(schema);
     expect(errors).toEqual(['either "id" or "rule_id" must be set']);
+  });
+
+  describe('threat mapping validation', () => {
+    test('validates threat mapping fields', () => {
+      const payload: RuleUpdateProps = {
+        ...getUpdateThreatMatchRuleSchemaMock(),
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'user.name',
+                value: 'threat.indicator.user.name',
+                type: 'mapping',
+                negate: false,
+              },
+            ],
+          },
+        ],
+      };
+      const errors = validateUpdateRuleProps(payload);
+      expect(errors).toEqual([]);
+    });
+
+    test('does not validate single negate entry', () => {
+      const payload: RuleUpdateProps = {
+        ...getUpdateThreatMatchRuleSchemaMock(),
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'user.name',
+                value: 'user.name',
+                type: 'mapping',
+                negate: true,
+              },
+            ],
+          },
+        ],
+      };
+      const errors = validateUpdateRuleProps(payload);
+      expect(errors).toEqual([
+        'Negate mappings cannot be used as a single entry in the AND condition. Please use at least one matching mapping entry.',
+      ]);
+    });
+
+    test('does not validate entries with identical fields and values and negate=true', () => {
+      const payload: RuleUpdateProps = {
+        ...getUpdateThreatMatchRuleSchemaMock(),
+        threat_mapping: [
+          {
+            entries: [
+              {
+                field: 'user.name',
+                value: 'user.name',
+                type: 'mapping',
+                negate: false,
+              },
+              {
+                field: 'user.name',
+                value: 'user.name',
+                type: 'mapping',
+                negate: true,
+              },
+            ],
+          },
+        ],
+      };
+      const errors = validateUpdateRuleProps(payload);
+      expect(errors).toEqual([
+        'Negate and matching mappings cannot have identical fields and values in the same AND condition.',
+      ]);
+    });
   });
 });

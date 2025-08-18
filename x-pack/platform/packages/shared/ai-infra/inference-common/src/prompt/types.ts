@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
-import { MessageRole, ToolOptions } from '../chat_complete';
-import { Model } from '../model_provider';
+import type { z } from '@kbn/zod';
+import type { MessageRole, ToolOptions } from '../chat_complete';
+import type { Model } from '../model_provider';
 
 export interface ModelMatch extends Model {
   id?: string;

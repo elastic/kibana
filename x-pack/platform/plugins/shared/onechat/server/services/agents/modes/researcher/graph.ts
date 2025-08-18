@@ -7,11 +7,12 @@
 
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation, Send } from '@langchain/langgraph';
-import { BaseMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
-import { StructuredTool, DynamicStructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
+import { DynamicStructuredTool } from '@langchain/core/tools';
 import type { Logger } from '@kbn/core/server';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { extractToolCalls, extractTextContent } from '@kbn/onechat-genai-utils/langchain';
 import { createAgentGraph } from '../chat/graph';
 import {
@@ -20,7 +21,8 @@ import {
   getExecutionPrompt,
   getAnswerPrompt,
 } from './prompts';
-import { SearchResult, ReflectionResult, BacklogItem, lastReflectionResult } from './backlog';
+import type { SearchResult, ReflectionResult, BacklogItem } from './backlog';
+import { lastReflectionResult } from './backlog';
 
 const setResearchGoalToolName = 'set_research_goal';
 

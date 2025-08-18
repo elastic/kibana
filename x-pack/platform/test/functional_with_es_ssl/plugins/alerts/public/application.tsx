@@ -12,7 +12,7 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route } from '@kbn/shared-ux-router';
 
 import { EuiPage, EuiText } from '@elastic/eui';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 
 export interface AlertingExampleComponentParams {
   basename: string;

@@ -14,6 +14,7 @@
  */
 
 import React, { useEffect } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiTitle,
   EuiSpacer,
@@ -21,7 +22,6 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiPortal,
-  UseEuiTheme,
   useEuiShadow,
   mathWithUnits,
 } from '@elastic/eui';

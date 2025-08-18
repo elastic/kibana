@@ -13,14 +13,15 @@ import {
   type Dispatch,
   type MiddlewareAPI,
 } from '@reduxjs/toolkit';
-import { useDispatch, useSelector, TypedUseSelectorHook } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { makeLensReducer, lensActions, getPreloadedState } from './lens_slice';
-import { LensState, LensStoreDeps } from './types';
+import type { LensState, LensStoreDeps } from './types';
 import { initMiddleware } from './init_middleware';
 import { optimizingMiddleware } from './optimizing_middleware';
 import { contextMiddleware } from './context_middleware';
 import { fullscreenMiddleware } from './fullscreen_middleware';
-export * from './types';
+export type * from './types';
 export * from './selectors';
 
 export const {

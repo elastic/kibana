@@ -14,7 +14,9 @@ describe('isRootStreamDefinition', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: {
+          steps: [],
+        },
         wired: { fields: {}, routing: [] },
       },
     };
@@ -27,7 +29,7 @@ describe('isRootStreamDefinition', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         wired: { fields: {}, routing: [] },
       },
     };
@@ -40,7 +42,7 @@ describe('isRootStreamDefinition', () => {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
+        processing: { steps: [] },
         classic: {},
       },
     };

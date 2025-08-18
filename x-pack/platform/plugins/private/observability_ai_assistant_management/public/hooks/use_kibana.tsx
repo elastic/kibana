@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { StartDependencies } from '../plugin';
+import type { StartDependencies } from '../plugin';
 
 export type CoreStartWithStartDeps = CoreStart & {
   plugins: { start: StartDependencies };

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 import {
+  type EuiThemeComputed,
   type EuiIconProps,
   type EuiTextProps,
   type CommonProps,
@@ -18,9 +20,17 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { rgba } from 'polished';
+import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+
+/**
+ * The total height of an entity node including the shape and details below, in pixels.
+ * Required to calculate total node's height in layout_graph.ts
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_TOTAL_HEIGHT = 200;
 
 /**
  * The width of a node in the graph, in pixels.
@@ -122,18 +132,40 @@ export const LabelShapeOnHover = styled.div`
   }
 `;
 
+export const NodeContainer = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: ${NODE_WIDTH}px;
+`;
+
 export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
 `;
 
-export const NodeShapeSvg = styled.svg`
+export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
+
+  ${({ shadow }) => `
+    /* Apply shadow when node is selected */
+    .react-flow__node.selected & {
+      ${shadow};
+    }
+
+    /* Apply shadow when node is pressed but still not selected */
+    .react-flow__node:active:not(.selected) & {
+      ${shadow};
+    }
+
+    /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
+  `};
 `;
 
 export interface NodeButtonProps extends CommonProps {
@@ -194,7 +226,8 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &, ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &,
+  ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
@@ -262,3 +295,40 @@ export const GroupStyleOverride = (size: {
   width: size.width,
   height: size.height,
 });
+
+export const RoundedBadge = styled.div<{
+  euiTheme: EuiThemeComputed;
+  bgColor?: string;
+}>`
+  display: inline-flex;
+  align-items: center;
+
+  height: 20px;
+  padding: ${({ euiTheme }) => `${euiTheme.size.xxs} ${euiTheme.size.xs}`};
+  gap: ${({ euiTheme }) => euiTheme.size.xxs};
+
+  background-color: ${({ euiTheme, bgColor }) => bgColor || euiTheme.colors.backgroundBasePlain};
+  border: ${({ euiTheme }) =>
+    `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
+  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
+
+  font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
+`;
+
+export const ToolTipButton = (props: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <button
+      {...props}
+      css={css`
+        appearance: none; /* Reset native button styles provided by browsers */
+
+        &:focus {
+          /* Tooltip injects its own outline that uses "currentColor" so we style it setting "color" */
+          color: ${euiTheme.colors.primary};
+        }
+      `}
+      type="button"
+    />
+  );
+};

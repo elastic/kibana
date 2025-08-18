@@ -5,37 +5,37 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiComboBoxOptionOption,
   EuiText,
   EuiTextArea,
   EuiIcon,
   EuiSuperSelect,
+  EuiLink,
 } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback, useMemo } from 'react';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { IndexEntry } from '@kbn/elastic-assistant-common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
-import { useKnowledgeBaseIndices } from '../../assistant/api/knowledge_base/use_knowledge_base_indices';
 
 interface Props {
-  http: HttpSetup;
   dataViews: DataViewsContract;
   entry?: IndexEntry;
   originalEntry?: IndexEntry;
   setEntry: React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>;
   hasManageGlobalKnowledgeBase: boolean;
+  docLink: string;
 }
 
-export const IndexEntryEditor: React.FC<Props> = React.memo(
-  ({ http, dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry }) => {
+export const IndexEntryEditor: React.FC<Props> = React.memo<Props>(
+  ({ dataViews, entry, setEntry, hasManageGlobalKnowledgeBase, originalEntry, docLink }) => {
     const privateUsers = useMemo(() => {
       const originalUsers = originalEntry?.users;
       if (originalEntry && !isGlobalEntry(originalEntry)) {
@@ -97,17 +97,23 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
       entry?.users?.length === 0 ? sharingOptions[1].value : sharingOptions[0].value;
 
     // Index
-    const { data: kbIndices } = useKnowledgeBaseIndices({
-      http,
-    });
+    const indicesAsync = useAsync(async () => {
+      const result = await dataViews.getIndices({
+        isRollupIndex: () => false,
+        // exclude system indices
+        pattern: '*,-.*',
+      });
+      return result ?? [];
+    }, [dataViews]);
+
     const indexOptions = useMemo(
       () =>
-        Object.keys(kbIndices ?? {}).map((index) => ({
-          'data-test-subj': index,
-          label: index,
-          value: index,
-        })),
-      [kbIndices]
+        indicesAsync.value?.map((idx) => ({
+          'data-test-subj': idx.name,
+          label: idx.name,
+          value: idx.name,
+        })) ?? [],
+      [indicesAsync.value]
     );
 
     const { value: isMissingIndex } = useAsync(async () => {
@@ -126,12 +132,16 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
 
     const fieldOptions = useMemo(
       () =>
-        kbIndices?.[entry?.index ?? '']?.map((field) => ({
-          'data-test-subj': field,
-          label: field,
-          value: field,
-        })) ?? [],
-      [entry?.index, kbIndices]
+        Array.isArray(indexFields?.value)
+          ? indexFields.value
+              .filter((field) => field.esTypes?.includes('text'))
+              .map((field) => ({
+                'data-test-subj': field.name,
+                label: field.name,
+                value: field.name,
+              }))
+          : [],
+      [indexFields?.value]
     );
 
     const outputFieldOptions = useMemo(
@@ -274,7 +284,23 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
           fullWidth
           isInvalid={isMissingIndex}
           error={isMissingIndex && <>{i18n.MISSING_INDEX_ERROR}</>}
-          helpText={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION}
+          helpText={
+            <FormattedMessage
+              id={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION.id}
+              defaultMessage={i18n.ENTRY_INDEX_NAME_INPUT_DESCRIPTION.defaultMessage}
+              values={{
+                docLink: (
+                  <EuiLink
+                    href={docLink}
+                    target="_blank"
+                    data-test-subj="knowledgeBaseIndexEntryDocLink"
+                  >
+                    {i18n.KNOWLEDGE_BASE_DOCUMENTATION_LINK}
+                  </EuiLink>
+                ),
+              }}
+            />
+          }
         >
           <EuiComboBox
             data-test-subj="index-combobox"
@@ -289,8 +315,8 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
               entry?.index
                 ? [
                     {
-                      label: entry?.index,
-                      value: entry?.index,
+                      label: entry.index,
+                      value: entry.index,
                     },
                   ]
                 : []
@@ -311,8 +337,8 @@ export const IndexEntryEditor: React.FC<Props> = React.memo(
               entry?.field
                 ? [
                     {
-                      label: entry?.field,
-                      value: entry?.field,
+                      label: entry.field,
+                      value: entry.field,
                     },
                   ]
                 : []

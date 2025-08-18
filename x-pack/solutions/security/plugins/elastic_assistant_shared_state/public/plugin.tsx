@@ -14,7 +14,7 @@ import {
   AugmentMessageCodeBlocksService,
   SignalIndexService,
 } from '@kbn/elastic-assistant-shared-state';
-import {
+import type {
   ElasticAssistantSharedStatePublicPluginSetupDependencies,
   ElasticAssistantSharedStatePublicPluginStartDependencies,
 } from './types';

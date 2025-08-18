@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import { KnownTypeToValue, SettingType } from './setting_type';
+import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import type { KnownTypeToValue, SettingType } from './setting_type';
 
 /**
  * A {@link UnsavedFieldChange} represents local changes to a field that have not

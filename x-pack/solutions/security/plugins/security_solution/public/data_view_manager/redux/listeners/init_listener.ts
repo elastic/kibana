@@ -96,15 +96,6 @@ export const createInitListener = (dependencies: {
           // NOTE: only init default data view for slices that are not initialized yet
           .filter((scope) => !listenerApi.getState().dataViewManager[scope].dataViewId)
           .forEach((scope) => {
-            if (scope === DataViewManagerScopeName.detections) {
-              return listenerApi.dispatch(
-                selectDataViewAsync({
-                  id: alertDataView.id,
-                  scope,
-                })
-              );
-            }
-
             if (scope === DataViewManagerScopeName.explore) {
               return listenerApi.dispatch(
                 selectDataViewAsync({

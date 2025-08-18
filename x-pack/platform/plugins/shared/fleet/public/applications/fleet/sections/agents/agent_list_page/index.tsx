@@ -84,7 +84,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
     undefined
   );
 
-  const [showAgentActivityTour, setShowAgentActivityTour] = useState({ isOpen: false });
+  const [showAgentActivityTour, setShowAgentActivityTour] = useState(false);
 
   // migrateAgentState
   const [agentsToMigrate, setAgentsToMigrate] = useState<Agent[] | undefined>(undefined);
@@ -301,7 +301,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
 
   const refreshAgents = ({ refreshTags = false }: { refreshTags?: boolean } = {}) => {
     fetchData({ refreshTags });
-    setShowAgentActivityTour({ isOpen: true });
+    setShowAgentActivityTour(true);
   };
 
   const isCurrentRequestIncremented = currentRequestRef?.current === 1;
@@ -494,7 +494,7 @@ export const AgentListPage: React.FunctionComponent<{}> = () => {
         onClickAddFleetServer={onClickAddFleetServer}
         agentsOnCurrentPage={agentsOnCurrentPage}
         onClickAgentActivity={onClickAgentActivity}
-        showAgentActivityTour={showAgentActivityTour}
+        shouldShowAgentActivityTour={showAgentActivityTour}
         latestAgentActionErrors={latestAgentActionErrors.length}
         sortField={sortField}
         sortOrder={sortOrder}

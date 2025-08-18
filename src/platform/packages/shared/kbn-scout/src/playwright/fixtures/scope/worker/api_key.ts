@@ -8,8 +8,8 @@
  */
 
 import { coreWorkerFixtures } from './core_fixtures';
-import { ApiClientFixture } from './api_client';
-import { DefaultRolesFixture } from './default_roles';
+import type { ApiClientFixture } from './api_client';
+import type { DefaultRolesFixture } from './default_roles';
 import { measurePerformanceAsync } from '../../../../common';
 
 export interface ApiKey {

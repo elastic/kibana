@@ -24,11 +24,11 @@ import {
   EuiNotificationBadge,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRule } from '@elastic/elasticsearch/lib/api/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useUsageTracker } from '../../../hooks/use_usage_tracker';
-import { SearchQueryRulesQueryRule } from '../../../../common/types';
+import type { SearchQueryRulesQueryRule } from '../../../../common/types';
 import { DroppableContainer } from '../styles';
 import { QueryRuleDraggableListHeader } from './query_rule_draggable_list_header';
 import { QueryRuleDraggableListItemActionTypeBadge } from './query_rule_draggable_item_action_type_badge';

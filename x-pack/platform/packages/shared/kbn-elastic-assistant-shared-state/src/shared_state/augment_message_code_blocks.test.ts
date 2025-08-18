@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-import {
-  AugmentMessageCodeBlocks,
-  AugmentMessageCodeBlocksService,
-  defaultValue,
-} from './augment_message_code_blocks';
-import { Conversation } from '@kbn/elastic-assistant';
+import type { AugmentMessageCodeBlocks } from './augment_message_code_blocks';
+import { AugmentMessageCodeBlocksService, defaultValue } from './augment_message_code_blocks';
+import type { Conversation } from '@kbn/elastic-assistant';
 
 describe('AugmentMessageCodeBlocksService', () => {
   it('start returns correct object', () => {

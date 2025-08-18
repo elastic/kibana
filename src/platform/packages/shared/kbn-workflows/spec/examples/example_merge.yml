@@ -4,7 +4,7 @@ workflow:
   description: "Investigate a reported phishing email with parallel analysis and AI summary."
   enabled: true
   triggers:
-    - type: triggers.elastic.manual
+    - type: manual
   steps:
     - name: Parallel analysis
       type: parallel

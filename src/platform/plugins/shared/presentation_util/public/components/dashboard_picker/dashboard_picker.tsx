@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { SearchIn, SearchResult } from '@kbn/content-management-plugin/common';
 
 import { contentManagementService } from '../../services/kibana_services';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { docLinks } from '@kbn/search-connectors/constants/doc_links';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { type ClientConfigType } from '../common/types/config';
 import { getConnectorFullTypes, getConnectorTypes } from '../common/lib/connector_types';
-import {
+import type {
   SearchConnectorsPluginSetup,
   SearchConnectorsPluginSetupDependencies,
   SearchConnectorsPluginStart,

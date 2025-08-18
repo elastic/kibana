@@ -6,16 +6,17 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
-import { PaletteOutput } from '@kbn/coloring';
-import { CustomPaletteState } from '@kbn/charts-plugin/common';
-import { RawValue } from '@kbn/data-plugin/common';
+import type { PaletteOutput } from '@kbn/coloring';
+import type { CustomPaletteState } from '@kbn/charts-plugin/common';
+import type { RawValue } from '@kbn/data-plugin/common';
 import type { FormatFactory } from '../../../../common/types';
 import type { DatatableColumnConfig } from '../../../../common/expressions';
 import type { DataContextType } from './types';
 import { getContrastColor } from '../../../shared_components/coloring/utils';
-import { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
+import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 
 export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,

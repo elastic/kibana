@@ -8,19 +8,19 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { createActorContext, useSelector } from '@xstate5/react';
 import { createConsoleInspector } from '@kbn/xstate-utils';
-import { ProcessorDefinition } from '@kbn/streams-schema';
-import { EnrichmentDataSource } from '../../../../../../common/url_schema';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
   streamEnrichmentMachine,
   createStreamEnrichmentMachineImplementations,
 } from './stream_enrichment_state_machine';
-import { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
-import {
+import type { StreamEnrichmentInput, StreamEnrichmentServiceDependencies } from './types';
+import type {
   PreviewDocsFilterOption,
   SimulationActorSnapshot,
   SimulationContext,
 } from '../simulation_state_machine';
-import { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
 import { isGrokProcessor } from '../../utils';
 
 const consoleInspector = createConsoleInspector();
@@ -41,7 +41,7 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
-      addProcessor: (processor?: ProcessorDefinition) => {
+      addProcessor: (processor?: StreamlangProcessorDefinition) => {
         service.send({ type: 'processors.add', processor });
       },
       reorderProcessors: (from: number, to: number) => {

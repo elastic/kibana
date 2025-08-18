@@ -11,7 +11,7 @@ import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from './rule_quic
 import { render, screen, waitFor } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { RuleTableItem } from '../../../../types';
+import type { RuleTableItem } from '../../../../types';
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn().mockReturnValue({

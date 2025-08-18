@@ -10,7 +10,7 @@ import { EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 
 import * as i18n from './translations';
 import { SystemPromptEditor } from './system_prompt_editor';
-import { SystemPromptSettingsProps } from './types';
+import type { SystemPromptSettingsProps } from './types';
 
 /**
  * Settings for adding/removing system prompts. Configure name, prompt and default conversations.

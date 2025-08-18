@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AgentType, AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
+import { AgentType } from '@kbn/onechat-common';
 import type { AgentsServiceStart } from '../services/agents';
 import type { AgentClient } from '../services/agents/client';
 

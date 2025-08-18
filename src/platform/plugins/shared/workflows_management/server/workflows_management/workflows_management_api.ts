@@ -7,21 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   CreateWorkflowCommand,
-  WorkflowListDto,
-  WorkflowExecutionDto,
-  WorkflowExecutionListDto,
-  WorkflowDetailDto,
   EsWorkflow,
-  WorkflowExecutionEngineModel,
   UpdatedWorkflowResponseDto,
-  transformWorkflowYamlJsontoEsWorkflow,
+  WorkflowDetailDto,
+  WorkflowExecutionDto,
+  WorkflowExecutionEngineModel,
+  WorkflowExecutionListDto,
+  WorkflowListDto,
+  WorkflowYaml,
 } from '@kbn/workflows';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import { WorkflowsService } from './workflows_management_service';
-import { SchedulerService } from '../scheduler/scheduler_service';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
+import type { SchedulerService } from '../scheduler/scheduler_service';
+import type { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -112,8 +113,7 @@ export class WorkflowsManagementApi {
       throw parsedYaml.error;
     }
 
-    // @ts-expect-error - TODO: fix this
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
+    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
 
     return await this.schedulerService.runWorkflow(
       {

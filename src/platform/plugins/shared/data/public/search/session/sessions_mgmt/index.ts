@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, HttpStart, I18nStart, IUiSettingsClient } from '@kbn/core/public';
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ISessionsClient, SearchUsageCollector } from '../../..';
@@ -18,8 +18,7 @@ import type { SearchSessionsMgmtAPI } from './lib/api';
 import type { AsyncSearchIntroDocumentation } from './lib/documentation';
 import type { SearchSessionsConfigSchema } from '../../../../server/config';
 
-// We want to expose the table from the start contract so we can use it in some other places
-export { SearchSessionsMgmtTable } from './components/table';
+export { openSearchSessionsFlyout } from './flyout/get_flyout';
 
 export interface IManagementSectionsPluginsSetup {
   management: ManagementSetup;

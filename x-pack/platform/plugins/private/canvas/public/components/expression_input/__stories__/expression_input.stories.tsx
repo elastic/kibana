@@ -7,7 +7,7 @@
 
 import { action } from '@storybook/addon-actions';
 import React from 'react';
-import {
+import type {
   ExpressionFunction,
   ExpressionFunctionParameter,
   Style,

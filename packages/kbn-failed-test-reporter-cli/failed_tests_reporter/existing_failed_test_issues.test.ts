@@ -11,7 +11,8 @@ import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 
 import type { TestFailure } from './get_failures';
-import { ExistingFailedTestIssues, FailedTestIssue } from './existing_failed_test_issues';
+import type { FailedTestIssue } from './existing_failed_test_issues';
+import { ExistingFailedTestIssues } from './existing_failed_test_issues';
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 

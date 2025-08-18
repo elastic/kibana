@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
+import type { AggParamsRange, AggParamsHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import { RANGE_MODES } from '../../constants';
-import { DataType, RangeParams } from '../../types';
+import type { DataType, RangeParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
-import { RangeColumn } from './types';
+import type { RangeColumn } from './types';
 
 const isHistogramAggParams = (
   aggParams: AggParamsRange | AggParamsHistogram

@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, waitFor, screen } from '@testing-library/react';
-import { InTableSearchControl, InTableSearchControlProps } from './in_table_search_control';
+import type { InTableSearchControlProps } from './in_table_search_control';
+import { InTableSearchControl } from './in_table_search_control';
 import {
   CELL_MATCH_INDEX_ATTRIBUTE,
   COUNTER_TEST_SUBJ,

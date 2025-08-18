@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
-import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
+import type { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
+import type { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
+import type { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 

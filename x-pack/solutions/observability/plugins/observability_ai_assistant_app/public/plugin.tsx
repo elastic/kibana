@@ -17,7 +17,8 @@ import {
 import type { Logger } from '@kbn/logging';
 import { i18n } from '@kbn/i18n';
 import { AI_ASSISTANT_APP_ID } from '@kbn/deeplinks-observability';
-import { createAppService, AIAssistantAppService } from '@kbn/ai-assistant';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
+import { createAppService } from '@kbn/ai-assistant';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import type {
   ObservabilityAIAssistantAppPluginSetupDependencies,

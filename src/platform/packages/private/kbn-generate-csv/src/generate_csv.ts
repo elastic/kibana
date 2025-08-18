@@ -10,7 +10,8 @@
 import moment from 'moment';
 import type { Writable } from 'stream';
 import type { Filter } from '@kbn/es-query';
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchClient } from '@kbn/search-types';
 import type { DataView, ISearchStartSearchSource } from '@kbn/data-plugin/common';
@@ -21,11 +22,10 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
 import {
   AuthenticationExpiredError,
   byteSizeValueToNumber,
-  CancellationToken,
-  ReportingError,
   ReportingSavedObjectNotFoundError,
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';

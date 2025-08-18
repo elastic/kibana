@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FunctionCallingMode } from '../chat_complete';
+import type { FunctionCallingMode } from '../chat_complete';
 
 export interface BoundOptions {
   functionCalling?: FunctionCallingMode;

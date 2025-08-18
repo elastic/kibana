@@ -9,10 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiHealth, EuiLink, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import type { UnmanagedElasticsearchAssetDetails } from '@kbn/streams-plugin/server/lib/streams/stream_crud';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
-import { LocatorPublic } from '@kbn/share-plugin/public';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { css } from '@emotion/css';
-import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
+import type { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import { ManagedBadge } from './managed_badge';
 
 interface DataStreamDetailsProps {

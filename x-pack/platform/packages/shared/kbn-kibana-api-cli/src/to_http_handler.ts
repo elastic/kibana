@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { HttpFetchOptions, HttpFetchOptionsWithPath, HttpHandler } from '@kbn/core-http-browser';
-import { KibanaClient } from './client';
+import type {
+  HttpFetchOptions,
+  HttpFetchOptionsWithPath,
+  HttpHandler,
+} from '@kbn/core-http-browser';
+import type { KibanaClient } from './client';
 
 type HttpHandlerArgs =
   | [string, HttpFetchOptions & { asResponse: true }]

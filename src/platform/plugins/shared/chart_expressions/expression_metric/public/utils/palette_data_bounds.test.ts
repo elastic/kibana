@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { getDataBoundsForPalette } from './palette_data_bounds';
 
 describe('palette data bounds', () => {

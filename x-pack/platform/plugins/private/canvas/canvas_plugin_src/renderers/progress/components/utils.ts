@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Progress, ViewBoxParams, SvgTextAttributes } from '../types';
+import type { ViewBoxParams, SvgTextAttributes } from '../types';
+import { Progress } from '../types';
 
 type GetViewBox = (
   shapeType: Progress,

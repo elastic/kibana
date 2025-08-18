@@ -77,7 +77,9 @@ export class RuleGroupEditor extends Component<Props, {}> {
           {this.renderSubRules()}
           {this.props.allowAdd && this.props.readOnly === false && (
             <EuiFlexItem>
-              <AddRuleButton onClick={this.onAddRuleClick} />
+              <div>
+                <AddRuleButton onClick={this.onAddRuleClick} />
+              </div>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

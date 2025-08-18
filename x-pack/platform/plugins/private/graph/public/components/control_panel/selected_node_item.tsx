@@ -8,7 +8,7 @@
 import React from 'react';
 import { useEuiFontSize, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { WorkspaceNode } from '../../types';
+import type { WorkspaceNode } from '../../types';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 
 interface SelectedNodeItemProps {

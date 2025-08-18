@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { cloneDeep } from 'lodash';
-import { MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../services/ml/security_common';
 import { getCommonRequestHeader } from '../../../services/ml/common_api';
 

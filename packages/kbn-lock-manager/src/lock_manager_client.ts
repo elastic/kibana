@@ -9,12 +9,11 @@
 
 // eslint-disable-next-line max-classes-per-file
 import { errors } from '@elastic/elasticsearch';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { v4 as uuid } from 'uuid';
 import prettyMilliseconds from 'pretty-ms';
-import { once } from 'lodash';
 import { duration } from 'moment';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { LOCKS_CONCRETE_INDEX_NAME, setupLockManagerIndex } from './setup_lock_manager_index';
 
 export type LockId = string;
@@ -39,10 +38,21 @@ export interface AcquireOptions {
 }
 
 // The index assets should only be set up once
+let runLockManagerSetupSuccessfully = false;
+export const runSetupIndexAssetOnce = async (
+  esClient: ElasticsearchClient,
+  logger: Logger
+): Promise<void> => {
+  if (runLockManagerSetupSuccessfully) {
+    return;
+  }
+  await setupLockManagerIndex(esClient, logger);
+  runLockManagerSetupSuccessfully = true;
+};
+
 // For testing purposes, we need to be able to set it up every time
-let runSetupIndexAssetOnce = once(setupLockManagerIndex);
-export function runSetupIndexAssetEveryTime() {
-  runSetupIndexAssetOnce = setupLockManagerIndex;
+export function rerunSetupIndexAsset() {
+  runLockManagerSetupSuccessfully = false;
 }
 
 export class LockManager {

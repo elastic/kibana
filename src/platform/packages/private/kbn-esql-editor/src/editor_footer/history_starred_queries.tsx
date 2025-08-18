@@ -9,16 +9,14 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn, CustomItemAction } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   useEuiTheme,
   EuiInMemoryTable,
-  EuiBasicTableColumn,
   EuiButtonEmpty,
   EuiButtonIcon,
-  CustomItemAction,
   EuiCopy,
   EuiToolTip,
   euiScrollBarStyles,
@@ -26,11 +24,15 @@ import {
   EuiTabs,
   EuiNotificationBadge,
   EuiText,
+  EuiIconTip,
+  EuiLink,
+  EuiIcon,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { cssFavoriteHoverWithinEuiTableRow } from '@kbn/content-management-favorites-public';
 import { FAVORITES_LIMIT as ESQL_STARRED_QUERIES_LIMIT } from '@kbn/content-management-favorites-common';
-import { css, Interpolation, Theme } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import {
   type QueryHistoryItem,
@@ -40,7 +42,8 @@ import {
 } from '../history_local_storage';
 import { type ESQLEditorDeps, HistoryTabId } from '../types';
 import { getReducedSpaceStyling, swapArrayElements } from './history_starred_queries_helpers';
-import { EsqlStarredQueriesService, StarredQueryItem } from './esql_starred_queries_service';
+import type { StarredQueryItem } from './esql_starred_queries_service';
+import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import { DiscardStarredQueryModal } from './discard_starred_query';
 import { useRestorableState } from '../restorable_state';
 
@@ -53,34 +56,31 @@ export function QueryHistoryAction({
   isHistoryOpen: boolean;
   isSpaceReduced?: boolean;
 }) {
-  const { euiTheme } = useEuiTheme();
   return (
     <>
       {isSpaceReduced && (
         <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
-          <EuiToolTip
-            position="top"
-            content={
-              isHistoryOpen
-                ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
-                    defaultMessage: 'Hide recent queries',
-                  })
-                : i18n.translate('esqlEditor.query.showQueriesLabel', {
-                    defaultMessage: 'Show recent queries',
-                  })
-            }
+          <EuiLink
+            onClick={toggleHistory}
+            external={false}
+            data-test-subj="ESQLEditor-hide-queries-link"
           >
-            <EuiIcon
+            <EuiIconTip
               type="clockCounter"
               color="primary"
               size="m"
-              onClick={toggleHistory}
-              css={css`
-                margin-right: ${euiTheme.size.s};
-                cursor: pointer;
-              `}
+              content={
+                isHistoryOpen
+                  ? i18n.translate('esqlEditor.query.hideQueriesLabel', {
+                      defaultMessage: 'Hide recent queries',
+                    })
+                  : i18n.translate('esqlEditor.query.showQueriesLabel', {
+                      defaultMessage: 'Show recent queries',
+                    })
+              }
+              position="top"
             />
-          </EuiToolTip>
+          </EuiLink>
         </EuiFlexItem>
       )}
       {!isSpaceReduced && (

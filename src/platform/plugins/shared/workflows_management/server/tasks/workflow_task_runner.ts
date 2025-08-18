@@ -10,10 +10,12 @@
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import { convertToSerializableGraph, convertToWorkflowGraph } from '../../common';
-import { extractConnectorIds } from '../scheduler/lib/extract_connector_ids';
+import {
+  convertToSerializableGraph,
+  convertToWorkflowGraph,
+} from '../../common/lib/build_execution_graph/build_execution_graph';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
@@ -56,7 +58,7 @@ export function createWorkflowTaskRunner({
           }
 
           // Convert to execution model
-          const executionGraph = convertToWorkflowGraph(workflow);
+          const executionGraph = convertToWorkflowGraph(workflow.definition);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
@@ -64,9 +66,6 @@ export function createWorkflowTaskRunner({
             definition: workflow.definition,
             executionGraph: convertToSerializableGraph(executionGraph),
           };
-
-          // Extract connector credentials for the workflow
-          const connectorCredentials = await extractConnectorIds(actionsClient);
 
           // Execute the workflow
           const executionId = await workflowsExecutionEngine.executeWorkflow(
@@ -79,7 +78,6 @@ export function createWorkflowTaskRunner({
                 timestamp: new Date().toISOString(),
                 source: 'task-manager',
               },
-              connectorCredentials,
               triggeredBy: 'scheduled', // <-- mark as scheduled
             }
           );

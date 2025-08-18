@@ -3785,6 +3785,21 @@
       },
       {
         "parentPluginId": "@kbn/apm-types",
+        "id": "def-common.KIND",
+        "type": "string",
+        "tags": [],
+        "label": "KIND",
+        "description": [],
+        "signature": [
+          "\"kind\""
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-apm-types/src/es_fields/otel.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-types",
         "id": "def-common.KUBERNETES",
         "type": "string",
         "tags": [],

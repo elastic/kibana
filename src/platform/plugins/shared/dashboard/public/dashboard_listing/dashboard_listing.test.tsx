@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 /**
  * Mock Table List view. This dashboard component is a wrapper around the shared UX table List view. We
@@ -17,7 +18,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { TableListView } from '@kbn/content-management-table-list-view';
 
 import { DashboardListing } from './dashboard_listing';
-import { DashboardListingProps } from './types';
+import type { DashboardListingProps } from './types';
 import { coreServices } from '../services/kibana_services';
 import { render } from '@testing-library/react';
 

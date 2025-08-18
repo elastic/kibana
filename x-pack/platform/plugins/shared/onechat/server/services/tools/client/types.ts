@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolProperties } from './storage';
 

@@ -8,7 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { noop } from 'lodash';
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public/types';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import {
   EuiButton,
@@ -20,12 +20,8 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import {
-  AlertStatus,
-  ALERT_RULE_UUID,
-  ALERT_STATUS_ACTIVE,
-  ALERT_UUID,
-} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
 
 import { useKibana } from '../../../utils/kibana_react';
 import type { TopAlert } from '../../../typings/alerts';
@@ -34,7 +30,7 @@ import { useBulkUntrackAlerts } from '../hooks/use_bulk_untrack_alerts';
 import {
   AlertDetailsRuleFormFlyout,
   type AlertDetailsRuleFormFlyoutBaseProps,
-} from './AlertDetailsRuleFormFlyout';
+} from './alert_details_rule_form_flyout';
 
 export interface HeaderActionsProps extends AlertDetailsRuleFormFlyoutBaseProps {
   alert: TopAlert | null;

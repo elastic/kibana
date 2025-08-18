@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type {
   BulkPurgeRollupResponse,
   BulkPurgeRollupParams,
 } from '@kbn/slo-schema/src/rest_specs/routes/bulk_purge_rollup';
@@ -14,9 +14,9 @@ import { calendarAlignedTimeWindowSchema } from '@kbn/slo-schema';
 import { assertNever } from '@elastic/eui';
 import moment from 'moment';
 import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 import { IllegalArgumentError } from '../errors';
-import { SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
 
 export class BulkPurgeRollupData {
   constructor(private esClient: ElasticsearchClient, private repository: SLORepository) {}

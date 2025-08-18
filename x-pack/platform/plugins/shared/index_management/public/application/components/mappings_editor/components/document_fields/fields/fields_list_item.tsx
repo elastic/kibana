@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NormalizedField, NormalizedFields, State } from '../../../types';
+import type { NormalizedField, NormalizedFields, State } from '../../../types';
 
 import { getTypeLabelFromField } from '../../../lib';
 import { CHILD_FIELD_INDENT_SIZE, LEFT_PADDING_SIZE_FIELD_ITEM_WRAPPER } from '../../../constants';

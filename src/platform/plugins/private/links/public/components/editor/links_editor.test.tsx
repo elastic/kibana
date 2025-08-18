@@ -11,10 +11,11 @@ import React from 'react';
 import userEvent from '@testing-library/user-event';
 import { render, screen, waitFor } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import LinksEditor, { LinksEditorProps } from './links_editor';
+import type { LinksEditorProps } from './links_editor';
+import LinksEditor from './links_editor';
 import { LinksStrings } from '../links_strings';
 import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
-import { ResolvedLink } from '../../types';
+import type { ResolvedLink } from '../../types';
 
 describe('LinksEditor', () => {
   const someLinks: ResolvedLink[] = [

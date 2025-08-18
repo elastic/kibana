@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClient } from '@kbn/core/server';
+import type { SavedObjectsClient } from '@kbn/core/server';
 import { findActiveGuide } from './guide_state_utils';
 import type { PluginState, PluginStatus } from '../../common';
-import {
-  pluginStateSavedObjectsId,
-  pluginStateSavedObjectsType,
-  PluginStateSO,
-} from '../saved_objects';
+import type { PluginStateSO } from '../saved_objects';
+import { pluginStateSavedObjectsId, pluginStateSavedObjectsType } from '../saved_objects';
 
 // hard code the duration to 30 days for now https://github.com/elastic/kibana/issues/144997
 const activePeriodDurationInMilliseconds = 30 * 24 * 60 * 60 * 1000;

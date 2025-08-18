@@ -7,10 +7,10 @@
 
 import { createSelector } from 'reselect';
 
-import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { SimulationContext } from './types';
+import type { SimulationContext } from './types';
 import { getFilterSimulationDocumentsFn } from './utils';
 
 /**
@@ -18,9 +18,9 @@ import { getFilterSimulationDocumentsFn } from './utils';
  */
 export const selectPreviewRecords = createSelector(
   [
-    (context: SimulationContext) => context.samples,
-    (context: SimulationContext) => context.previewDocsFilter,
-    (context: SimulationContext) => context.simulation?.documents,
+    (context: Pick<SimulationContext, 'samples'>) => context.samples,
+    (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
+    (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
   ],
   (samples, previewDocsFilter, documents) => {
     if (!previewDocsFilter || !documents) {

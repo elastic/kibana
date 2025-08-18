@@ -11,7 +11,7 @@ import { rpcSchemas } from '../../../common/schemas';
 import type { BulkGetIn } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { BulkGetResponse } from '../../core/crud';
+import type { BulkGetResponse } from '../../core/crud';
 import { getContentClientFactory } from '../../content_client';
 
 export const bulkGet: ProcedureDefinition<Context, BulkGetIn<string>, BulkGetResponse> = {

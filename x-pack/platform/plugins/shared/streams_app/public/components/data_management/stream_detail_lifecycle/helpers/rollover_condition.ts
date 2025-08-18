@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IlmPolicyHotPhase } from '@kbn/streams-schema';
+import type { IlmPolicyHotPhase } from '@kbn/streams-schema';
 
 export function rolloverCondition(rollover?: IlmPolicyHotPhase['rollover']) {
   const conditions = [

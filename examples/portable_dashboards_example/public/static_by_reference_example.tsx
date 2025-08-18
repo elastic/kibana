@@ -10,9 +10,11 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { buildPhraseFilter, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildPhraseFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DashboardRenderer, DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import type { DashboardCreationOptions } from '@kbn/dashboard-plugin/public';
+import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
 import { EuiCode, EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 
 export const StaticByReferenceExample = ({

@@ -9,13 +9,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
 
 import { SearchPlaygroundQueryKeys } from '../../common';
-import {
-  APIRoutes,
-  PlaygroundForm,
-  PlaygroundFormFields,
-  PlaygroundPageMode,
-  QueryTestResponse,
-} from '../types';
+import type { PlaygroundForm, QueryTestResponse } from '../types';
+import { APIRoutes, PlaygroundFormFields, PlaygroundPageMode } from '../types';
 import { elasticsearchQueryString } from '../utils/user_query';
 import { useKibana } from './use_kibana';
 

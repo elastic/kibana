@@ -9,6 +9,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -30,7 +31,6 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
   logicalCSS,
-  UseEuiTheme,
   mathWithUnits,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';

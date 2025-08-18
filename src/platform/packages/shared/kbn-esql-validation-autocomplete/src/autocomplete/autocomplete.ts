@@ -24,13 +24,14 @@ import {
   buildFieldsDefinitionsWithMetadata,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import {
+import type {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
   ISuggestionItem,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLLicenseType, ESQLVariableType } from '@kbn/esql-types';
+import { ESQLVariableType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { isSourceCommand } from '../shared/helpers';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';
 import { getAstContext } from '../shared/context';
@@ -69,6 +70,7 @@ export async function suggest(
   const getVariables = resourceRetriever?.getVariables;
   const getSources = getSourcesHelper(resourceRetriever);
 
+  const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
   const hasMinimumLicenseRequired = licenseInstance?.hasAtLeast;
 
@@ -80,9 +82,20 @@ export async function suggest(
       .getAllCommands()
       .filter((command) => {
         const license = command.metadata?.license;
-        return (
-          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as ESQLLicenseType)
-        );
+        const observabilityTier = command.metadata?.observabilityTier;
+
+        // Check license requirements
+        const hasLicenseAccess =
+          !license || hasMinimumLicenseRequired?.(license.toLocaleLowerCase() as LicenseType);
+
+        // Check observability tier requirements
+        const hasObservabilityAccess =
+          !observabilityTier ||
+          !activeProduct ||
+          activeProduct.type !== 'observability' ||
+          activeProduct.tier === observabilityTier.toLocaleLowerCase();
+
+        return hasLicenseAccess && hasObservabilityAccess;
       })
       .map((command) => command.name);
 
@@ -220,7 +233,7 @@ async function getSuggestionsWithinCommandExpression(
   getFieldsMap: GetFieldsMapFn,
   callbacks?: ESQLCallbacks,
   offset?: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
 ) {
   const innerText = fullText.substring(0, offset);
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
@@ -257,6 +270,7 @@ async function getSuggestionsWithinCommandExpression(
   const context = {
     ...references,
     ...additionalCommandContext,
+    activeProduct: callbacks?.getActiveProduct?.(),
   };
 
   // does it make sense to have a different context per command?

@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
-import type { FieldsConfiguration } from '../types/types';
+import { FieldType } from '../types/types';
+import type {
+  FieldsConfiguration,
+  Config,
+  ConfigEntryView,
+  InferenceProvider,
+} from '../types/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {
@@ -33,7 +38,7 @@ export const generateInferenceEndpointId = (config: Config) => {
 };
 
 export const getNonEmptyValidator = (
-  schema: ConfigEntryView[],
+  requiredFieldsSchema: ConfigEntryView[],
   validationEventHandler: (fieldsWithErrors: ConfigEntryView[]) => void,
   isSubmitting: boolean = false,
   isSecrets: boolean = false
@@ -44,8 +49,8 @@ export const getNonEmptyValidator = (
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
-    if (schema) {
-      schema.map((field: ConfigEntryView) => {
+    if (requiredFieldsSchema) {
+      requiredFieldsSchema.map((field: ConfigEntryView) => {
         // validate if submitting or on field edit - value is not default to null
         if (field.required && (configData[field.key] !== null || isSubmitting)) {
           // validate secrets fields separately from regular

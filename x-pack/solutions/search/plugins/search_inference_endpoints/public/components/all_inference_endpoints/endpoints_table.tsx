@@ -9,7 +9,7 @@ import React from 'react';
 
 import type { EuiBasicTableProps, Pagination } from '@elastic/eui';
 import { EuiBasicTable } from '@elastic/eui';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 
 interface EndpointsTableProps {
   columns: EuiBasicTableProps<InferenceInferenceEndpointInfo>['columns'];

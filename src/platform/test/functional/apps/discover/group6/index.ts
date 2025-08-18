@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -27,6 +27,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_sidebar_field_stats'));
     loadTestFile(require.resolve('./_time_field_column'));
+    loadTestFile(require.resolve('./_unsaved_changes_modal'));
     loadTestFile(require.resolve('./_unsaved_changes_badge'));
     loadTestFile(require.resolve('./_view_mode_toggle'));
     loadTestFile(require.resolve('./_field_stats_table'));

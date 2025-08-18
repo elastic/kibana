@@ -12,10 +12,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getHumanReadableComparator } from '@kbn/stack-alerts-plugin/common';
 import type { Comparator } from '@kbn/stack-alerts-plugin/common/comparator_types';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import moment from 'moment';
-import { TimeRangeConfig } from '../../common/types';
-import { AdditionalContext, DatasetQualityRuleParams } from './types';
+import type { TimeRangeConfig } from '../../common/types';
+import type { AdditionalContext, DatasetQualityRuleParams } from './types';
 
 export const getPaddedAlertTimeRange = (
   alertStart: string,

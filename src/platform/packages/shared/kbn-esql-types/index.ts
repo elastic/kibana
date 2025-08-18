@@ -23,6 +23,7 @@ export {
 export {
   type IndicesAutocompleteResult,
   type IndexAutocompleteItem,
+  type ESQLSourceResult,
 } from './src/sources_autocomplete_types';
 
 export {
@@ -35,7 +36,5 @@ export {
   type InferenceEndpointsAutocompleteResult,
   type InferenceEndpointAutocompleteItem,
 } from './src/inference_endpoint_autocomplete_types';
-
-export type { ESQLLicenseType, ESQLSignatureLicenseType, ESQLLicenseResult } from './src/license';
 
 export { REGISTRY_EXTENSIONS_ROUTE } from './src/constants';

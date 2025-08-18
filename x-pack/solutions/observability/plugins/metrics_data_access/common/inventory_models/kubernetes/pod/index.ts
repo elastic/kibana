@@ -15,7 +15,7 @@ export const pod = createInventoryModel('pod', {
   singularDisplayName: i18n.translate('xpack.metricsData.inventoryModels.pod.singularDisplayName', {
     defaultMessage: 'Kubernetes Pod',
   }),
-  requiredModule: 'kubernetes',
+  requiredIntegration: 'kubernetes',
   crosslinkSupport: {
     details: true,
     logs: true,

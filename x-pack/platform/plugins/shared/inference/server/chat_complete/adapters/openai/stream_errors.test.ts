@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  convertStreamError,
-  OpenAIErrorLine,
-  ElasticInferenceErrorLine,
-  UnknownErrorLine,
-} from './stream_errors';
+import type { OpenAIErrorLine, ElasticInferenceErrorLine, UnknownErrorLine } from './stream_errors';
+import { convertStreamError } from './stream_errors';
 
 describe('convertStreamError', () => {
   it('handles the openAI format', () => {

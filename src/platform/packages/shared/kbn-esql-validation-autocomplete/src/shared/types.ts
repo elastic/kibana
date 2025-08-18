@@ -6,19 +6,18 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  Location,
-  ESQLSourceResult,
-  ESQLFieldWithMetadata,
-} from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
+import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type {
   ESQLControlVariable,
   IndexAutocompleteItem,
   RecommendedQuery,
   RecommendedField,
   InferenceEndpointsAutocompleteResult,
-  ESQLLicenseResult,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
+import type { ILicense } from '@kbn/licensing-types';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 /** @internal **/
 type CallbackFn<Options = {}, Result = string> = (ctx?: Options) => Result[] | Promise<Result[]>;
@@ -59,7 +58,8 @@ export interface ESQLCallbacks {
   getInferenceEndpoints?: (
     taskType: InferenceTaskType
   ) => Promise<InferenceEndpointsAutocompleteResult>;
-  getLicense?: () => Promise<ESQLLicenseResult | undefined>;
+  getLicense?: () => Promise<Pick<ILicense, 'hasAtLeast'> | undefined>;
+  getActiveProduct?: () => PricingProduct | undefined;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

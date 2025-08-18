@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Response as SupertestResponse } from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Response as SupertestResponse } from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     'lowPriorityTask',
     'normalLongRunningPriorityTask',
     'sampleOneTimeTaskThrowingError',
+    'sampleRecurringTaskDisablesItself',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleRecurringTaskThatDeletesItself',
@@ -51,6 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
+        'IndicesMetadata:IndicesMetadataTask',
         'ML:saved-objects-sync',
         'ProductDocBase:EnsureUpToDate',
         'ProductDocBase:InstallAll',
@@ -186,6 +188,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security-solution-ea-asset-criticality-ecs-migration',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
+        'security:health-diagnostic',
         'security:indices-metadata-telemetry',
         'security:ingest-pipelines-stats-telemetry',
         'security:telemetry-configuration',

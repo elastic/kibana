@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ContentRef } from '@kbn/wci-common';
+import type { ContentRef } from '@kbn/wci-common';
 import {
   EuiPanel,
   EuiText,

@@ -71,6 +71,7 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           const rulesClient = await alertingContext.getRulesClient();
           const actionsClient = (await context.actions).getActionsClient();
           const rulesSettingsClient = (await context.alerting).getRulesSettingsClient(true);
+          const ruleTypes = alertingContext.listTypes();
 
           // Assert versioned inputs
           const createRuleData: CreateRuleRequestBodyV1<RuleParamsV1> = req.body;
@@ -83,6 +84,21 @@ export const createRuleRoute = ({ router, licenseState, usageCounter }: RouteOpt
           });
 
           try {
+            const ruleType = ruleTypes.get(createRuleData.rule_type_id);
+
+            /**
+             * Throws a bad request (400) if the rule type is internallyManaged
+             * ruleType will always exist here because ruleTypes.get will throw a 400
+             * error if the rule type is not registered.
+             */
+            if (ruleType?.internallyManaged) {
+              return res.badRequest({
+                body: {
+                  message: `Cannot create rule of type "${createRuleData.rule_type_id}" because it is internally managed.`,
+                },
+              });
+            }
+
             /**
              * Throws an error if the group is not defined in default actions
              */

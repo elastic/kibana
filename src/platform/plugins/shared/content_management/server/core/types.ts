@@ -15,6 +15,7 @@ import type {
 } from '@kbn/object-versioning';
 import type { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   GetResult,
   BulkGetResult,
@@ -32,6 +33,7 @@ export type StorageContextGetTransformFn = (
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
+  request: KibanaRequest;
   /** The Core HTTP request handler context */
   requestHandlerContext: RequestHandlerContext;
   version: {

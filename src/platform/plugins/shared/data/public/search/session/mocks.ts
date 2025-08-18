@@ -8,10 +8,11 @@
  */
 
 import { BehaviorSubject, of } from 'rxjs';
-import { ISessionsClient } from './sessions_client';
-import { ISessionService } from './session_service';
+import type { ISessionsClient } from './sessions_client';
+import type { ISessionService } from './session_service';
 import { SearchSessionState } from './search_session_state';
 import type { SessionMeta } from './search_session_state';
+import type { PersistedSearchSessionSavedObjectAttributes } from './sessions_mgmt/types';
 
 export function getSessionsClientMock(): jest.Mocked<ISessionsClient> {
   return {
@@ -60,3 +61,21 @@ export function getSessionServiceMock(): jest.Mocked<ISessionService> {
     continue: jest.fn(),
   };
 }
+
+export const getPersistedSearchSessionSavedObjectAttributesMock = (
+  overrides: Partial<PersistedSearchSessionSavedObjectAttributes> = {}
+): PersistedSearchSessionSavedObjectAttributes => {
+  return {
+    sessionId: 'test-session-id',
+    created: '2023-10-01T00:00:00Z',
+    expires: '2023-10-08T00:00:00Z',
+    idMapping: {},
+    version: '8.0.0',
+    name: 'Test Session',
+    appId: 'testApp',
+    locatorId: 'testLocator',
+    initialState: {},
+    restoreState: {},
+    ...overrides,
+  };
+};

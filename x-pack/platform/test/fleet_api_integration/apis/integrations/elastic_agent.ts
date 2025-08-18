@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FLEET_ELASTIC_AGENT_PACKAGE } from '@kbn/fleet-plugin/common/constants/epm';
 
 import { DASHBOARD_LOCATORS_IDS } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {

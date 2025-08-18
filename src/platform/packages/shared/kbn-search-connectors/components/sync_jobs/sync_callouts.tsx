@@ -17,7 +17,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { durationToText, getSyncJobDuration } from '../../utils/duration_to_text';
 import { FormattedDateTime } from '../../utils/formatted_date_time';
-import { ConnectorSyncJob, SyncStatus, TriggerMethod } from '../..';
+import type { ConnectorSyncJob } from '../..';
+import { SyncStatus, TriggerMethod } from '../..';
 
 interface SyncJobCalloutsProps {
   syncJob: ConnectorSyncJob;

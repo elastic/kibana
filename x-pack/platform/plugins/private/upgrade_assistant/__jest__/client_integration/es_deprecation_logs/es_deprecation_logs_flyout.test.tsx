@@ -6,12 +6,10 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import {
-  EsDeprecationLogsTestBed,
-  setupESDeprecationLogsPage,
-} from './es_deprecation_logs.helpers';
+import type { EsDeprecationLogsTestBed } from './es_deprecation_logs.helpers';
+import { setupESDeprecationLogsPage } from './es_deprecation_logs.helpers';
 import { setupEnvironment } from '../helpers';
-import { DeprecationLoggingStatus } from '../../../common/types';
+import type { DeprecationLoggingStatus } from '../../../common/types';
 import {
   APPS_WITH_DEPRECATION_LOGS,
   DEPRECATION_LOGS_ORIGIN_FIELD,

@@ -10,8 +10,8 @@
 import { EuiErrorBoundary, EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { PanelLoader } from '@kbn/panel-loader';
+import type { PublishesTitle } from '@kbn/presentation-publishing';
 import {
-  PublishesTitle,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
@@ -19,10 +19,10 @@ import {
 import classNames from 'classnames';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { PresentationPanelHeader } from './panel_header/presentation_panel_header';
-import { PresentationPanelHoverActions } from './panel_header/presentation_panel_hover_actions';
 import { PresentationPanelErrorInternal } from './presentation_panel_error_internal';
-import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
+import type { DefaultPresentationPanelApi, PresentationPanelInternalProps } from './types';
 import { usePanelErrorCss } from './use_panel_error_css';
+import { PresentationPanelHoverActionsWrapper } from './panel_header/presentation_panel_hover_actions_wrapper';
 
 export const PresentationPanelInternal = <
   ApiType extends DefaultPresentationPanelApi = DefaultPresentationPanelApi,
@@ -107,7 +107,7 @@ export const PresentationPanelInternal = <
   );
 
   return (
-    <PresentationPanelHoverActions
+    <PresentationPanelHoverActionsWrapper
       {...{
         index,
         api,
@@ -171,7 +171,7 @@ export const PresentationPanelInternal = <
           </EuiErrorBoundary>
         </div>
       </EuiPanel>
-    </PresentationPanelHoverActions>
+    </PresentationPanelHoverActionsWrapper>
   );
 };
 

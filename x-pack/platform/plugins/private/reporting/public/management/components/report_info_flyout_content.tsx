@@ -6,19 +6,16 @@
  */
 
 import moment from 'moment';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiDescriptionList,
-  EuiDescriptionListProps,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiDescriptionListProps } from '@elastic/eui';
+import { EuiCallOut, EuiDescriptionList, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { VisualReportingSoftDisabledError } from '@kbn/reporting-common/errors';
 
-import { ClientConfigType, Job, useKibana } from '@kbn/reporting-public';
+import type { ClientConfigType, Job } from '@kbn/reporting-public';
+import { useKibana } from '@kbn/reporting-public';
 import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 import { sharedI18nTexts } from '../../shared_i18n_texts';
 

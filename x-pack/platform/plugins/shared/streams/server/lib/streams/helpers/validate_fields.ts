@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  FieldDefinition,
-  Streams,
-  isRoot,
-  keepFields,
-  namespacePrefixes,
-} from '@kbn/streams-schema';
+import type { FieldDefinition, Streams } from '@kbn/streams-schema';
+import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 import { baseMappings } from '../component_templates/logs_layer';
 

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
+import { fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';

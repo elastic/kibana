@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ResourceFieldDescriptor } from './utils';
 

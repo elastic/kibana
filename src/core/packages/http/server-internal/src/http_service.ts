@@ -7,17 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, Subscription, combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
 import { map } from 'rxjs';
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
 import { pick, Semaphore } from '@kbn/std';
 import {
   generateOpenApiDocument,
   type GenerateOpenApiDocumentOptionsFilters,
 } from '@kbn/router-to-openapispec';
-import { Logger } from '@kbn/logging';
-import { Env } from '@kbn/config';
+import type { Logger } from '@kbn/logging';
+import type { Env } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { PluginOpaqueId } from '@kbn/core-base-common';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -31,20 +33,25 @@ import type {
   InternalContextSetup,
   InternalContextPreboot,
 } from '@kbn/core-http-context-server-internal';
-import { Router, RouterOptions } from '@kbn/core-http-router-server-internal';
+import type { RouterOptions } from '@kbn/core-http-router-server-internal';
+import { Router } from '@kbn/core-http-router-server-internal';
 
-import { CspConfigType, cspConfig } from './csp';
-import { PermissionsPolicyConfigType, permissionsPolicyConfig } from './permissions_policy';
-import { HttpConfig, HttpConfigType, config as httpConfig } from './http_config';
+import type { CspConfigType } from './csp';
+import { cspConfig } from './csp';
+import type { PermissionsPolicyConfigType } from './permissions_policy';
+import { permissionsPolicyConfig } from './permissions_policy';
+import type { HttpConfigType } from './http_config';
+import { HttpConfig, config as httpConfig } from './http_config';
 import { HttpServer } from './http_server';
 import { HttpsRedirectServer } from './https_redirect_server';
-import {
+import type {
   InternalHttpServicePreboot,
   InternalHttpServiceSetup,
   InternalHttpServiceStart,
 } from './types';
 import { registerCoreHandlers } from './register_lifecycle_handlers';
-import { ExternalUrlConfigType, externalUrlConfig, ExternalUrlConfig } from './external_url';
+import type { ExternalUrlConfigType } from './external_url';
+import { externalUrlConfig, ExternalUrlConfig } from './external_url';
 
 export interface PrebootDeps {
   context: InternalContextPreboot;

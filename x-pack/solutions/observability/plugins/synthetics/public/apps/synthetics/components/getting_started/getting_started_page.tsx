@@ -27,10 +27,8 @@ import { LoadingState } from '../monitors_page/overview/overview/monitor_detail_
 import { getServiceLocations, cleanMonitorListState } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import {
-  AddOrEditLocationFlyout,
-  NewLocation,
-} from '../settings/private_locations/add_or_edit_location_flyout';
+import type { NewLocation } from '../settings/private_locations/add_or_edit_location_flyout';
+import { AddOrEditLocationFlyout } from '../settings/private_locations/add_or_edit_location_flyout';
 import type { ClientPluginsStart } from '../../../../plugin';
 import { getAgentPoliciesAction, selectAgentPolicies } from '../../state/agent_policies';
 import { setIsPrivateLocationFlyoutVisible } from '../../state/private_locations/actions';

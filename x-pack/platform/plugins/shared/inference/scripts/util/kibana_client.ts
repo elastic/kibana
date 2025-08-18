@@ -5,26 +5,30 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import axios, { AxiosInstance, AxiosResponse, isAxiosError } from 'axios';
-import { IncomingMessage } from 'http';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { AxiosInstance, AxiosResponse } from 'axios';
+import axios, { isAxiosError } from 'axios';
+import type { IncomingMessage } from 'http';
 import { omit, pick } from 'lodash';
 import { from, map, switchMap, throwError } from 'rxjs';
-import { UrlObject, format, parse } from 'url';
+import type { UrlObject } from 'url';
+import { format, parse } from 'url';
 import { inspect } from 'util';
 import { isReadable } from 'stream';
-import {
+import type {
   ChatCompleteAPI,
   OutputAPI,
   ChatCompletionEvent,
-  InferenceTaskError,
   InferenceTaskErrorEvent,
+  ChatCompleteOptions,
+  ChatCompleteAPIResponse,
+} from '@kbn/inference-common';
+import {
+  InferenceTaskError,
   InferenceTaskEventType,
   createInferenceInternalError,
   withoutOutputUpdateEvents,
-  ChatCompleteOptions,
   type InferenceConnector,
-  ChatCompleteAPIResponse,
 } from '@kbn/inference-common';
 import type { ChatCompleteRequestBody } from '../../common/http_apis';
 import { createOutputApi } from '../../common/output/create_output_api';

@@ -7,7 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';
-import { AttackDiscoveryAlert, transformInternalReplacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
+import { transformInternalReplacements } from '@kbn/elastic-assistant-common';
 import {
   ALERT_RULE_EXECUTION_UUID,
   ALERT_RULE_UUID,
@@ -35,13 +36,13 @@ import {
   ALERT_ATTACK_DISCOVERY_USERS,
   ALERT_RISK_SCORE,
 } from '../../../schedules/fields/field_names';
-import { AttackDiscoveryAlertDocument } from '../../../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../../../schedules/types';
 
 interface HasNumericValue {
   value: number;
 }
 
-interface ConnectorNamesAggregation {
+interface TermsAggregation {
   buckets?: Array<{
     key?: string;
     doc_count?: number;
@@ -58,14 +59,17 @@ interface TransformSearchResponseToAlerts {
   connectorNames: string[];
   data: AttackDiscoveryAlert[];
   uniqueAlertIdsCount: number;
+  uniqueAlertIds: string[];
 }
 
 export const transformSearchResponseToAlerts = ({
   logger,
   response,
+  includeUniqueAlertIds = false,
 }: {
   logger: Logger;
   response: estypes.SearchResponse<AttackDiscoveryAlertDocument>;
+  includeUniqueAlertIds?: boolean;
 }): TransformSearchResponseToAlerts => {
   const data = response.hits.hits.flatMap((hit) => {
     if (hit._source == null || isMissingRequiredFields(hit)) {
@@ -127,8 +131,14 @@ export const transformSearchResponseToAlerts = ({
     ? uniqueAlertIdsCountAggregation.value
     : 0;
 
-  const connectorNamesAggregation: ConnectorNamesAggregation | undefined = response.aggregations
-    ?.api_config_name as ConnectorNamesAggregation;
+  const uniqueAttackAlertIdsAggregation: TermsAggregation | undefined = response.aggregations
+    ?.all_attack_alert_ids as TermsAggregation;
+  const uniqueAlertIds = includeUniqueAlertIds
+    ? uniqueAttackAlertIdsAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? []
+    : [];
+
+  const connectorNamesAggregation: TermsAggregation | undefined = response.aggregations
+    ?.api_config_name as TermsAggregation;
 
   const connectorNames =
     connectorNamesAggregation?.buckets?.flatMap((bucket) => bucket.key ?? []) ?? [];
@@ -137,5 +147,6 @@ export const transformSearchResponseToAlerts = ({
     connectorNames: [...connectorNames].sort(), // mutation
     data,
     uniqueAlertIdsCount,
+    uniqueAlertIds,
   };
 };

@@ -7,7 +7,8 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { ProductName, DocumentationProduct } from '@kbn/product-doc-common';
+import type { ProductName } from '@kbn/product-doc-common';
+import { DocumentationProduct } from '@kbn/product-doc-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
 import { isImpliedDefaultElserInferenceId } from '@kbn/product-doc-common/src/is_default_inference_endpoint';
@@ -96,6 +97,14 @@ export class ProductDocInstallClient {
     };
     await this.soClient.update<TypeAttributes>(typeName, objectId, attributes, {
       upsert: attributes,
+    });
+  }
+
+  async setUninstallationStarted(productName: ProductName, inferenceId: string | undefined) {
+    const objectId = getObjectIdFromProductName(productName, inferenceId);
+    await this.soClient.update<TypeAttributes>(typeName, objectId, {
+      installation_status: 'uninstalling',
+      inference_id: inferenceId,
     });
   }
 
