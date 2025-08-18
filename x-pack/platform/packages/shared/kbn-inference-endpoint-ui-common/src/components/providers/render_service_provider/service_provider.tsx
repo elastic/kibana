@@ -31,8 +31,8 @@ import ibmWatsonxIcon from '../assets/images/ibm_watsonx.svg';
 import jinaAIIcon from '../assets/images/jinaai.svg';
 import voyageAIIcon from '../assets/images/voyageai.svg';
 import deepSeekIcon from '../assets/images/deepseek.svg';
-import ai21Icon from '../assets/images/ai21_default.svg';
-import llamaIcon from '../assets/images/llama.svg';
+import ai21Icon from '../assets/images/ai21_labs_default.svg';
+import llamaIcon from '../assets/images/llama_stack_default.svg'; // todo: replace with real icon
 
 interface ServiceProviderProps {
   providerKey: ServiceProviderKeys;

@@ -21,6 +21,7 @@ export const useQueryInferenceEndpoints = () => {
         inference_endpoints: InferenceAPIConfigResponse[];
       }>(APIRoutes.GET_INFERENCE_ENDPOINTS, {});
 
+      // info: here is the place where we get inference endpoints from backend
       return response.inference_endpoints;
     },
   });
