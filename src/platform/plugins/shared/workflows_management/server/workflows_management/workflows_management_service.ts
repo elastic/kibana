@@ -24,14 +24,15 @@ import type {
   WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowListDto,
-  WorkflowStatus,
 } from '@kbn/workflows';
-import { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
-import {
+import { WorkflowStatus } from '@kbn/workflows';
+import type { WorkflowAggsDto, WorkflowStatsDto } from '@kbn/workflows/types/v1';
+import type {
   AggregationsAggregationContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import { getAuthenticatedUser } from '../lib/get_user';
@@ -50,6 +51,7 @@ import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type { GetWorkflowsParams } from './workflows_management_api';
 
 const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
+const WORKFLOW_EXECUTION_STATUS_STATS_INTERVAL = '30s';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -296,7 +298,11 @@ export class WorkflowsService {
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
-      name: isClone ? `${workflowToCreate.name} Copy` : workflowToCreate.name,
+      name: isClone
+        ? `${workflowToCreate.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+            defaultMessage: 'Copy',
+          })}`
+        : workflowToCreate.name,
       description: workflowToCreate.description,
       status: workflowToCreate.status,
       tags: workflowToCreate.tags || [],
@@ -716,7 +722,7 @@ export class WorkflowsService {
         by_time: {
           date_histogram: {
             field: 'startedAt',
-            fixed_interval: '30s',
+            fixed_interval: WORKFLOW_EXECUTION_STATUS_STATS_INTERVAL,
           },
           aggs: {
             by_status: {
@@ -732,13 +738,13 @@ export class WorkflowsService {
     const response = await this.esClient.search(query);
     const { by_time: by30sec } = response.aggregations as any;
 
-    return by30sec.buckets.map((day: any) => {
+    return by30sec.buckets.map((interval: any) => {
       // Default values
       let completed = 0;
       let failed = 0;
       let cancelled = 0;
 
-      for (const statusBucket of day.by_status.buckets) {
+      for (const statusBucket of interval.by_status.buckets) {
         switch (statusBucket.key) {
           case 'completed':
             completed = statusBucket.doc_count;
@@ -753,8 +759,8 @@ export class WorkflowsService {
       }
 
       return {
-        date: day.key_as_string,
-        timestamp: day.key,
+        date: interval.key_as_string,
+        timestamp: interval.key,
         completed,
         failed,
         cancelled,

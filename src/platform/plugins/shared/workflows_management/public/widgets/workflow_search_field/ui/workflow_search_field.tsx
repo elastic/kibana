@@ -11,6 +11,7 @@ import type { ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import styled from 'styled-components';
 import { EuiFieldSearch, EuiFlexItem } from '@elastic/eui';
+import * as i18n from '../../../../common/translations';
 
 const SearchBarWrapper = styled(EuiFlexItem)`
   min-width: 200px;
@@ -45,10 +46,10 @@ export function WorkflowSearchField({
   return (
     <SearchBarWrapper grow>
       <EuiFieldSearch
-        // aria-label={i18n.SEARCH_RULES}
+        aria-label={i18n.SEARCH_WORKFLOWS}
         fullWidth
         incremental={false}
-        // placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
+        placeholder={placeholder ?? i18n.SEARCH_PLACEHOLDER}
         value={searchText}
         onChange={handleChange}
         onSearch={onSearch}

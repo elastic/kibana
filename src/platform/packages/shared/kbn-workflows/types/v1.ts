@@ -233,9 +233,7 @@ export interface WorkflowStatsDto {
 
 export interface WorkflowAggsDto {
   [key: string]: {
-    value: {
-      value: string;
-      name: string;
-    }[];
-  };
+    value: string;
+    name: string;
+  }[];
 }

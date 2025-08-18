@@ -22,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useState } from 'react';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
-import { WorkflowsSearchParams } from '../../types';
+import type { WorkflowsSearchParams } from '../../types';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 import { WorkflowList } from '../../features/workflow_list/ui';

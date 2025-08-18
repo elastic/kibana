@@ -21,13 +21,14 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { WorkflowListItemDto, WorkflowStatus } from '@kbn/workflows';
+import type { WorkflowListItemDto } from '@kbn/workflows';
+import { WorkflowStatus } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
-import { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import type { WorkflowsSearchParams } from '../../../types';
