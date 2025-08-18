@@ -212,10 +212,7 @@ describe('filterByAgent', () => {
 
     it('opentelemetry/python/elastic', () => {
       expect(getSettingKeysForAgent('opentelemetry/python/elastic')).toEqual(
-        expect.arrayContaining([
-          'logging_level',
-          'sampling_rate',
-        ])
+        expect.arrayContaining(['logging_level', 'sampling_rate'])
       );
     });
 
