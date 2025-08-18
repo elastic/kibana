@@ -7,7 +7,7 @@
 
 import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   createInferenceRequestError,
   connectorToInference,
