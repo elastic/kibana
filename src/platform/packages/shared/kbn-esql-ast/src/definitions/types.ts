@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { LicenseType } from '@kbn/licensing-types';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLNumericLiteralType } from '../types';
-import { Location } from '../commands_registry/types';
+import type { Location } from '../commands_registry/types';
 
 /**
  * All supported field types in ES|QL. This is all the types

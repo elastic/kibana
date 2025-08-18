@@ -13,7 +13,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
-import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
+import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import {
   createLegacyRuleAction,
   createWebHookRuleAction,
@@ -39,7 +39,7 @@ import {
   waitForAlertsToBePresent,
 } from '../../../../../config/services/detections_response';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   checkRuleTypeUsageCustomizationInvariant,
   checkRuleTypeUsageFields,

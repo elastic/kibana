@@ -7,13 +7,13 @@
 
 import React from 'react';
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiSplitPanel,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiText,
 } from '@elastic/eui';
 

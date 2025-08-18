@@ -6,7 +6,7 @@
  */
 
 import { getIndexState } from './get_index_state';
-import { ResolveIndexResponseFromES } from './types';
+import type { ResolveIndexResponseFromES } from './types';
 
 describe('getIndexState', () => {
   const indexName1 = 'indexName';

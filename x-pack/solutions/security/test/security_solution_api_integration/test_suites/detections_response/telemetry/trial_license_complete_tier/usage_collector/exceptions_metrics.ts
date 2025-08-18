@@ -11,13 +11,13 @@ import { ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
-import { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
+import type { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { deleteAllEventLogExecutionEvents } from '../../../utils';
 import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { getCustomQueryRuleParams } from '../../../utils';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getExceptionsStats } from '../../../utils/get_exception_metrics_stats';
 
 const matchEntry = () => ({

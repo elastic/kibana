@@ -10,7 +10,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner, EuiIcon } from '@elastic/eui';
-import { YamlValidationError } from '../model/types';
+import type { YamlValidationError } from '../model/types';
 
 const severityOrder = ['error', 'warning', 'info'];
 
