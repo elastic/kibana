@@ -39,10 +39,10 @@ export const LOGSTASH_IN_RANGE_DATES = {
 };
 
 export const ES_ARCHIVES = {
-  LOGSTASH: 'x-pack/test/functional/es_archives/logstash_functional',
+  LOGSTASH: 'x-pack/platform/test/fixtures/es_archives/logstash_functional',
   NO_TIME_FIELD:
     'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield',
-  ECOMMERCE: 'x-pack/test/functional/es_archives/reporting/ecommerce',
+  ECOMMERCE: 'x-pack/platform/test/fixtures/es_archives/reporting/ecommerce',
 };
 
 export const KBN_ARCHIVES = {

@@ -57,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('POST anomaly_detectors results overall_buckets', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       for (const jobId of [jobId1, jobId2]) {

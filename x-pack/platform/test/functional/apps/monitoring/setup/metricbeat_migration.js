@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }) {
 
       before(async () => {
         await setup(
-          'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana',
+          'x-pack/platform/test/fixtures/es_archives/monitoring/setup/collection/es_and_kibana',
           {
             from: 'Apr 9, 2019 @ 00:00:00.741',
             to: 'Apr 9, 2019 @ 23:59:59.741',
