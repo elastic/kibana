@@ -439,6 +439,7 @@ src/platform/packages/shared/kbn-apm-ui-shared @elastic/obs-ux-infra_services-te
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-avc-banner @elastic/security-defend-workflows
 src/platform/packages/shared/kbn-axe-config @elastic/appex-qa
+src/platform/packages/shared/kbn-babel-data-path @elastic/appex-sharedux
 src/platform/packages/shared/kbn-babel-register @elastic/kibana-operations
 src/platform/packages/shared/kbn-cache-cli @elastic/kibana-operations
 src/platform/packages/shared/kbn-calculate-auto @elastic/obs-ux-management-team
@@ -737,6 +738,7 @@ src/platform/plugins/shared/field_formats @elastic/kibana-data-discovery
 src/platform/plugins/shared/files @elastic/appex-sharedux
 src/platform/plugins/shared/guided_onboarding @elastic/appex-sharedux
 src/platform/plugins/shared/home @elastic/appex-sharedux
+src/platform/plugins/shared/inspect_component @elastic/appex-sharedux
 src/platform/plugins/shared/inspector @elastic/kibana-presentation
 src/platform/plugins/shared/kibana_react @elastic/appex-sharedux
 src/platform/plugins/shared/kibana_utils @elastic/appex-sharedux

@@ -1,0 +1,12 @@
+{
+  "type": "plugin",
+  "id": "@kbn/inspect-component-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "inspectComponent",
+    "browser": true,
+    "server": true,
+  }
+}

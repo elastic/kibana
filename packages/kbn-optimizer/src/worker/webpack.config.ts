@@ -26,6 +26,7 @@ import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
 import type { Bundle, BundleRemotes, WorkerConfig } from '../common';
 import { parseDllManifest } from '../common';
+import { addDataPathAttributePlugin } from './add_data_path_attribute_plugin';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { BundleRemoteUsedExportsPlugin } from './bundle_remote_used_exports_plugin';
@@ -254,6 +255,7 @@ export function getWebpackConfig(
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
               presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
+              plugins: [[addDataPathAttributePlugin, { repoRoot: worker.repoRoot }]],
             },
           },
         },

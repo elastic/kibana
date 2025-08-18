@@ -4185,6 +4185,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/babel-data-path@link:src/platform/packages/shared/kbn-babel-data-path":
+  version "0.0.0"
+  uid ""
+
 "@kbn/babel-preset@link:packages/kbn-babel-preset":
   version "0.0.0"
   uid ""
@@ -6314,6 +6318,10 @@
   uid ""
 
 "@kbn/input-control-vis-plugin@link:src/platform/plugins/private/input_control_vis":
+  version "0.0.0"
+  uid ""
+
+"@kbn/inspect-component-plugin@link:src/platform/plugins/shared/inspect_component":
   version "0.0.0"
   uid ""
 
