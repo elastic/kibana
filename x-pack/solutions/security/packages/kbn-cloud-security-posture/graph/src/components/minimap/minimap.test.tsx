@@ -23,7 +23,7 @@ import {
 } from '../test_ids';
 import { NODE_HEIGHT, NODE_WIDTH, NODE_LABEL_HEIGHT, NODE_LABEL_WIDTH } from '../node/styles';
 import type { NodeViewModel } from '../types';
-import { graphSample } from './graph_test_case';
+import { graphSample } from '../mock/graph_sample';
 
 describe('Minimap', () => {
   it('should render empty', () => {

@@ -30,7 +30,7 @@ import {
   RectangleNode,
 } from '../node';
 import { DefaultEdge } from '../edge';
-import { graphSample } from './graph_test_case';
+import { graphSample } from '../mock/graph_sample';
 
 const nodeTypes = {
   hexagon: HexagonNode,

@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import { Graph } from '../graph/graph';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import type { NodeViewModel, EdgeViewModel } from '../types';
-import { graphSample } from './graph_test_case';
+import { graphSample } from '../mock/graph_sample';
 import { LargeGraph as LargeGraphStory } from '../graph_layout.stories';
 
 type GraphPropsAndCustomArgs = React.ComponentProps<typeof Graph> & {};
