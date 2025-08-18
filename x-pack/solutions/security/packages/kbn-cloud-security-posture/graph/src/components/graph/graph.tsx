@@ -188,9 +188,9 @@ export const Graph = memo<GraphProps>(
           )}
           {children}
           <Background id={backgroundId} />
-          {interactive && showMinimap ? (
+          {interactive && showMinimap && (
             <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
-          ) : null}
+          )}
         </ReactFlow>
         <GlobalGraphStyles />
       </div>
