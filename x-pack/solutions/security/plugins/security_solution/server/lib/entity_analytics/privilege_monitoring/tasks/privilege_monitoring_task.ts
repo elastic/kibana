@@ -194,7 +194,6 @@ export const startPrivilegeMonitoringTask = async ({
   taskManager,
 }: StartParams) => {
   const taskId = getTaskId(namespace);
-
   try {
     await taskManager.ensureScheduled({
       id: taskId,
