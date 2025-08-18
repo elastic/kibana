@@ -463,7 +463,7 @@ $$$search-includefrozen$$$`search:includeFrozen`
     This setting was deprecated in 7.16.0.
     :::
 
-    Includes [frozen indices](https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-unfreeze) in results. Searching through frozen indices might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
+    Includes [frozen indices](https://www.elastic.co/guide/en/elasticsearch/reference/8.18/frozen-indices.html) in results. Searching through frozen indices might increase the search time. This setting is off by default. Users must opt-in to include frozen indices.
 
 $$$search-timeout$$$`search:timeout`
 :   Change the maximum timeout, in milliseconds (ms), for search requests. To disable the timeout and allow queries to run to completion, set to 0. The default is `600000`, or 10 minutes.
