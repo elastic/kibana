@@ -6,15 +6,15 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { asyncForEach } from '@kbn/std';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { Client } from 'langsmith';
 import { evaluate } from 'langsmith/evaluation';
-import { DefendInsightType } from '@kbn/elastic-assistant-common';
+import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { getDefendInsightsCustomEvaluator } from '../helpers/get_custom_evaluator';
 import { getDefendInsightsGraphInputOverrides } from '../helpers/get_graph_input_overrides';
-import { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
+import type { DefaultDefendInsightsGraph } from '../../graphs/default_defend_insights_graph';
 
 /**
  * Runs an evaluation for each graph so they show up separately (resulting in

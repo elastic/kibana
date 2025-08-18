@@ -14,7 +14,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { Capabilities } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { RuleComponent, alertToListItem } from './rule';
-import { AlertListItem } from './types';
+import type { AlertListItem } from './types';
 import { RuleSummary, AlertStatus, RuleType, RuleTypeModel } from '../../../../types';
 import { AlertStatusValues } from '@kbn/alerting-plugin/common';
 import { mockRule, mockLogResponse } from './test_helpers';

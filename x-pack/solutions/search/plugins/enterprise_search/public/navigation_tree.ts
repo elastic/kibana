@@ -148,12 +148,6 @@ export const getNavigationTreeDefinition = ({
                       },
                       link: 'enterpriseSearchApplications:searchApplications',
                       renderAs: 'item',
-                      title: i18n.translate(
-                        'xpack.enterpriseSearch.searchNav.build.searchApplications',
-                        {
-                          defaultMessage: 'Search applications',
-                        }
-                      ),
                       ...(searchApps
                         ? {
                             children: searchApps.map(euiItemTypeToNodeDefinition),
@@ -293,11 +287,17 @@ export const getNavigationTreeDefinition = ({
                             { link: 'management:objects' },
                             { link: 'management:tags' },
                             { link: 'management:search_sessions' },
-                            { link: 'management:aiAssistantManagementSelection' },
                             { link: 'management:spaces' },
                             { link: 'management:settings' },
                           ],
                           title: 'Kibana',
+                        },
+                        {
+                          children: [
+                            { link: 'management:genAiSettings' },
+                            { link: 'management:aiAssistantManagementSelection' },
+                          ],
+                          title: 'AI',
                         },
                         {
                           children: [

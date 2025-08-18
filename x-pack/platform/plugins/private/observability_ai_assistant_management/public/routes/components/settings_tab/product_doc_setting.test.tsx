@@ -8,13 +8,13 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { ProductDocSetting } from './product_doc_setting';
+import type { APIReturnType } from '@kbn/observability-ai-assistant-plugin/public';
 import {
-  APIReturnType,
   ELSER_ON_ML_NODE_INFERENCE_ID,
   InferenceModelState,
   LEGACY_CUSTOM_INFERENCE_ID,
 } from '@kbn/observability-ai-assistant-plugin/public';
-import { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
 
 const createMockStatus = (
   overrides?: Partial<APIReturnType<'GET /internal/observability_ai_assistant/kb/status'>>

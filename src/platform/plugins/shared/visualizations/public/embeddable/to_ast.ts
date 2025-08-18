@@ -8,7 +8,8 @@
  */
 
 import type { ExpressionFunctionKibana } from '@kbn/data-plugin/public';
-import { ExpressionAstExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/public';
+import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 
 import type { VisToExpressionAst } from '../types';
 

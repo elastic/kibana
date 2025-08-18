@@ -10,8 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-
-import { Rule } from '../../../../types';
+import type { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
 import { useKibana } from '../../../../common/lib/kibana';
 

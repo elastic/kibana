@@ -16,7 +16,7 @@ import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLParamLiteral } from '@kbn/esql-ast/src/types';
+import type { ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';

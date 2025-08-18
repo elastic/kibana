@@ -8,12 +8,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { UISession } from '../../../types';
-import { OnActionComplete, PopoverActionsMenu } from '../actions';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { CoreStart } from '@kbn/core/public';
+import type { UISession } from '../../../types';
+import type { OnActionComplete } from '../actions';
+import { PopoverActionsMenu } from '../actions';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
 
 export const actionsColumn = ({
   api,
