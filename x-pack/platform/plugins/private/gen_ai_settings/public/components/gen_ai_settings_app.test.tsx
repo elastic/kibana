@@ -45,13 +45,13 @@ describe('GenAiSettingsApp', () => {
 
   const renderComponent = (props = {}) => {
     return renderWithI18n(
-          <QueryClientProvider client={new QueryClient()}>
-            <KibanaContextProvider services={coreStart}>
-              <SettingsContextProvider>
-                <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
-              </SettingsContextProvider>
-            </KibanaContextProvider>
-          </QueryClientProvider>
+      <QueryClientProvider client={new QueryClient()}>
+        <KibanaContextProvider services={coreStart}>
+          <SettingsContextProvider>
+            <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
+          </SettingsContextProvider>
+        </KibanaContextProvider>
+      </QueryClientProvider>
     );
   };
 
