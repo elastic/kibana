@@ -8,7 +8,7 @@ import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/common';
 import querystring from 'querystring';
-import { DataSchemaFormat } from './hosts_locator';
+import type { DataSchemaFormat } from './hosts_locator';
 
 export type InventoryLocator = LocatorPublic<InventoryLocatorParams>;
 
