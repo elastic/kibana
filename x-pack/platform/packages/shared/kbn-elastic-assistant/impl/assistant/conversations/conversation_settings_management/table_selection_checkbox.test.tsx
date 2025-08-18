@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { InputCheckbox, PageSelectionCheckbox } from './table_selection_checkbox';
-import { ConversationTableItem } from './types';
+import type { ConversationTableItem } from './types';
 
 describe('PageSelectionCheckbox', () => {
   it('should render null when conversationOptionsIds is empty', () => {

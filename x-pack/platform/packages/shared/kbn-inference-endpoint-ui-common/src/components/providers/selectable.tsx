@@ -5,27 +5,20 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectable,
-  EuiSelectableOption,
-  EuiSelectableProps,
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiBadge, EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiSelectable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
 import type { SolutionView } from '@kbn/spaces-plugin/common';
+import type { ProviderSolution } from './render_service_provider/service_provider';
 import {
-  ProviderSolution,
   SERVICE_PROVIDERS,
   ServiceProviderIcon,
   ServiceProviderName,
   solutionKeys,
 } from './render_service_provider/service_provider';
-import { ServiceProviderKeys } from '../../constants';
-import { InferenceProvider } from '../../types/types';
+import type { ServiceProviderKeys } from '../../constants';
+import type { InferenceProvider } from '../../types/types';
 import * as i18n from '../../translations';
 
 interface SelectableProviderProps {

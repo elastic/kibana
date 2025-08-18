@@ -6,9 +6,9 @@
  */
 
 import { describeDataset, getLogPatterns, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { ShortIdTable, type InferenceClient } from '@kbn/inference-common';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import pLimit from 'p-limit';
 import { v4 } from 'uuid';
