@@ -12,12 +12,12 @@
  * At the time of writing, this tool can be used to test it: https://devina.io/redos-checker
  */
 import type { RuleMigrationResourceBase } from '../../../model/rule_migration.gen';
-import type { ResourceIdentifier } from '../types';
+import type { VendorResourceIdentifier } from '../types';
 
 const lookupRegex = /\b(?:lookup)\s+([\w-]+)\b/g; // Captures only the lookup name
 const macrosRegex = /`([\w-]+)(?:\(([^`]*?)\))?`/g; // Captures only the macro name and arguments
 
-export const splResourceIdentifier: ResourceIdentifier = (input) => {
+export const splResourceIdentifier: VendorResourceIdentifier = (input) => {
   // sanitize the query to avoid mismatching macro and lookup names inside comments or literal strings
   const sanitizedInput = sanitizeInput(input);
 

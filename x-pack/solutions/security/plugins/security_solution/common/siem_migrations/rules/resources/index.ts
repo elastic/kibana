@@ -5,73 +5,18 @@
  * 2.0.
  */
 
-import type {
-  OriginalRule,
-  OriginalRuleVendor,
-  RuleMigrationResourceData,
-  RuleMigrationResourceBase,
-} from '../../model/rule_migration.gen';
-import type { ResourceIdentifiers } from './types';
-import { splResourceIdentifiers } from './splunk';
+import { ResourceIdentifier } from '../../common/resources';
+import type { SiemMigrationResourceBase } from '../../model/common.gen';
+import type { OriginalRule } from '../../model/rule_migration.gen';
+import type { SiemMigrationVendor } from '../../types';
 
-const ruleResourceIdentifiers: Record<OriginalRuleVendor, ResourceIdentifiers> = {
-  splunk: splResourceIdentifiers,
-};
-
-export const getRuleResourceIdentifier = (vendor: OriginalRuleVendor): ResourceIdentifiers => {
-  return ruleResourceIdentifiers[vendor];
-};
-
-export class ResourceIdentifier {
-  private identifiers: ResourceIdentifiers;
-
-  constructor(vendor: OriginalRuleVendor) {
-    // The constructor may need query_language as an argument for other vendors
-    this.identifiers = ruleResourceIdentifiers[vendor];
+export class RuleResourceIdentifier extends ResourceIdentifier<OriginalRule> {
+  protected getVendor(): SiemMigrationVendor {
+    return this.item.vendor;
   }
 
-  public fromOriginalRule(originalRule: OriginalRule): RuleMigrationResourceBase[] {
-    return this.identifiers.fromOriginalRule(originalRule);
-  }
-
-  public fromResource(resource: RuleMigrationResourceData): RuleMigrationResourceBase[] {
-    return this.identifiers.fromResource(resource);
-  }
-
-  public fromOriginalRules(originalRules: OriginalRule[]): RuleMigrationResourceBase[] {
-    const lookups = new Set<string>();
-    const macros = new Set<string>();
-    originalRules.forEach((rule) => {
-      const resources = this.identifiers.fromOriginalRule(rule);
-      resources.forEach((resource) => {
-        if (resource.type === 'macro') {
-          macros.add(resource.name);
-        } else if (resource.type === 'lookup') {
-          lookups.add(resource.name);
-        }
-      });
-    });
-    return [
-      ...Array.from(macros).map<RuleMigrationResourceBase>((name) => ({ type: 'macro', name })),
-      ...Array.from(lookups).map<RuleMigrationResourceBase>((name) => ({ type: 'lookup', name })),
-    ];
-  }
-
-  public fromResources(resources: RuleMigrationResourceData[]): RuleMigrationResourceBase[] {
-    const lookups = new Set<string>();
-    const macros = new Set<string>();
-    resources.forEach((resource) => {
-      this.identifiers.fromResource(resource).forEach((identifiedResource) => {
-        if (identifiedResource.type === 'macro') {
-          macros.add(identifiedResource.name);
-        } else if (identifiedResource.type === 'lookup') {
-          lookups.add(identifiedResource.name);
-        }
-      });
-    });
-    return [
-      ...Array.from(macros).map<RuleMigrationResourceBase>((name) => ({ type: 'macro', name })),
-      ...Array.from(lookups).map<RuleMigrationResourceBase>((name) => ({ type: 'lookup', name })),
-    ];
+  public fromOriginal(rule: OriginalRule = this.item): SiemMigrationResourceBase[] {
+    const originalRule = rule;
+    return this.identifier(originalRule.query);
   }
 }

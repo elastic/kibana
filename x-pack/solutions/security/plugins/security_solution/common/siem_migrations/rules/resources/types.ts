@@ -11,7 +11,7 @@ import type {
   RuleMigrationResourceData,
 } from '../../model/rule_migration.gen';
 
-export type ResourceIdentifier = (input: string) => RuleMigrationResourceBase[];
+export type VendorResourceIdentifier = (input: string) => RuleMigrationResourceBase[];
 
 export interface ResourceIdentifiers {
   fromOriginalRule: (originalRule: OriginalRule) => RuleMigrationResourceBase[];

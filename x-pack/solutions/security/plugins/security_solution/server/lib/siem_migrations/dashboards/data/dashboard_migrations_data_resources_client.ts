@@ -8,6 +8,7 @@
 import { sha256 } from 'js-sha256';
 import type { QueryDslQueryContainer, Duration } from '@elastic/elasticsearch/lib/api/types';
 
+import type { DashboardMigrationResource } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import type {
   SiemMigrationResourceBase,
   SiemMigrationResourceType,
@@ -15,9 +16,10 @@ import type {
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 
 export type CreateDashboardMigrationResourceInput = Pick<
-  SiemMigrationResourceBase,
+  DashboardMigrationResource,
   'migration_id' | 'type' | 'name' | 'content' | 'metadata'
 >;
+
 export interface DashboardMigrationResourceFilters {
   type?: SiemMigrationResourceType;
   names?: string[];
