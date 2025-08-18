@@ -81,7 +81,7 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
     const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
 
     const svlSharedConfig = await readConfigFile(
-      require.resolve('../../serverless/config.base.ts')
+      require.resolve('../../serverless/shared/config.base.ts')
     );
 
     return {
@@ -100,7 +100,7 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       esTestCluster: {
