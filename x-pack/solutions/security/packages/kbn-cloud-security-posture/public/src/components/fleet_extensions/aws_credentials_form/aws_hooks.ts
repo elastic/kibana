@@ -6,7 +6,11 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
 import {
   AWS_CREDENTIALS_TYPE,
   AWS_SETUP_FORMAT,
@@ -21,7 +25,7 @@ import {
   getAwsCredentialsFormOptions,
   getInputVarsFields,
 } from './get_aws_credentials_form_options';
-import { AwsCredentialsType, AwsSetupFormat, UpdatePolicy } from '../types';
+import type { AwsCredentialsType, AwsSetupFormat, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 /**
  * Update CloudFormation template and stack name in the Agent Policy

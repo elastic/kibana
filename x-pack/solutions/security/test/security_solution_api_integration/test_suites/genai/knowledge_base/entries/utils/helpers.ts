@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
+import type { CreateKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  CreateKnowledgeBaseResponse,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
 } from '@kbn/elastic-assistant-common';
 
@@ -17,7 +17,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { SUPPORTED_TRAINED_MODELS } from '@kbn/test-suites-xpack-platform/functional/services/ml/api';
 
-import { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml';
+import type { MachineLearningProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/ml';
 import { routeWithNamespace } from '../../../../../config/services/detections_response';
 
 export const TINY_ELSER = {

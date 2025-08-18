@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DateRange } from '../../../expressions';
+import type { DateRange } from '../../../expressions';
 
 export function convertDateRangeToString({ from, to }: DateRange, format: (val: any) => string) {
   if (!from) {

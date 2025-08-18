@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { Response as SupertestResponse } from 'supertest';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Response as SupertestResponse } from 'supertest';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     'lowPriorityTask',
     'normalLongRunningPriorityTask',
     'sampleOneTimeTaskThrowingError',
+    'sampleRecurringTaskDisablesItself',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleRecurringTaskThatDeletesItself',

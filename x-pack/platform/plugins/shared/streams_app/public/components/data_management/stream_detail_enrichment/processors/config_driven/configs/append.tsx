@@ -9,9 +9,14 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
-import { DocLinksStart } from '@kbn/core/public';
-import { ALWAYS_CONDITION, AppendProcessor } from '@kbn/streamlang';
-import { ConfigDrivenProcessorConfiguration, FieldConfiguration, FieldOptions } from '../types';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { AppendProcessor } from '@kbn/streamlang';
+import { ALWAYS_CONDITION } from '@kbn/streamlang';
+import type {
+  ConfigDrivenProcessorConfiguration,
+  FieldConfiguration,
+  FieldOptions,
+} from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
 export type AppendProcessorFormState = AppendProcessor;

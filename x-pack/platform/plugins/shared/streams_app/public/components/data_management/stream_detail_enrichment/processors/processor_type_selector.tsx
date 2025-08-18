@@ -6,15 +6,16 @@
  */
 
 import React from 'react';
-import { EuiLink, EuiFormRow, EuiSuperSelect, EuiSuperSelectProps } from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
-import { DocLinksStart } from '@kbn/core/public';
-import { ProcessorType } from '@kbn/streamlang';
+import type { DocLinksStart } from '@kbn/core/public';
+import type { ProcessorType } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getDefaultFormStateByType } from '../utils';
-import { ProcessorFormState } from '../types';
+import type { ProcessorFormState } from '../types';
 import { configDrivenProcessors } from './config_driven';
 import { useGetStreamEnrichmentState } from '../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';

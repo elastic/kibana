@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { UsageCounters } from '../../common';
 
 export interface UsageCounterParams {

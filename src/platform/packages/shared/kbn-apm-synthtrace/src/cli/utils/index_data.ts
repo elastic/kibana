@@ -9,11 +9,11 @@
 
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { castArray } from 'lodash';
-import { Logger } from '../../lib/utils/create_logger';
-import { SynthtraceClients } from './clients_manager';
+import type { Logger } from '../../lib/utils/create_logger';
+import type { SynthtraceClients } from './clients_manager';
 import { getScenario } from './get_scenario';
-import { BaseWorkerData } from './workers/types';
-import { StreamManager } from './stream_manager';
+import type { BaseWorkerData } from './workers/types';
+import type { StreamManager } from './stream_manager';
 import { startPerformanceLogger } from './performance_logger';
 
 export async function indexData({

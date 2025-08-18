@@ -15,7 +15,7 @@ import {
   PUBLIC_API_CONTENT_MANAGEMENT_VERSION,
   PUBLIC_API_ACCESS,
 } from '../../constants';
-import { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsDeleteAPIRoute: RegisterAPIRouteFn = (
   router,
