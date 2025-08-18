@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreRequestHandlerContext, KibanaResponseFactory } from '@kbn/core/server';
+import type { CoreRequestHandlerContext, KibanaResponseFactory } from '@kbn/core/server';
 import { checkPrivileges } from './privilege_check';
 
 const MOCK_CORE = {

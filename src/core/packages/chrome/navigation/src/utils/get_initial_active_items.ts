@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
 
 export interface InitialMenuState {
   primaryItem: MenuItem | null;

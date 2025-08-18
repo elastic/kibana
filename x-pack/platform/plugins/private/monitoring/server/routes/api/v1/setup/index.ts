@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import { clusterSetupStatusRoute } from './cluster_setup_status';
 import { disableElasticsearchInternalCollectionRoute } from './disable_elasticsearch_internal_collection';
 import { nodeSetupStatusRoute } from './node_setup_status';

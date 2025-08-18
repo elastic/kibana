@@ -15,10 +15,10 @@ import { removeFilesByGlob } from './utils/remove_files_by_glob';
 import { logger } from './logger';
 import { createBlankOpenApiDocument } from './bundler/merge_documents/create_blank_oas_document';
 import { writeDocuments } from './utils/write_documents';
-import { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
+import type { ResolvedDocument } from './bundler/ref_resolver/resolved_document';
 import { resolveGlobs } from './utils/resolve_globs';
 import { DEFAULT_BUNDLING_PROCESSORS, withIncludeLabelsProcessor } from './bundler/processor_sets';
-import { PrototypeDocument } from './prototype_document';
+import type { PrototypeDocument } from './prototype_document';
 import { validatePrototypeDocument } from './validate_prototype_document';
 
 export interface BundlerConfig {

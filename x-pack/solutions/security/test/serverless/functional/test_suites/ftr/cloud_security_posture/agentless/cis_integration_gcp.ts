@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import * as http from 'http';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../../../constants';
+import type * as http from 'http';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -35,9 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     after(async () => {
       await supertest
-        .delete(
-          `/api/fleet/epm/packages/cloud_security_posture/${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`
-        )
+        .delete(`/api/fleet/epm/packages/cloud_security_posture`)
         .set('kbn-xsrf', 'xxxx')
         .send({ force: true })
         .expect(200);
@@ -45,10 +42,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Agentless CIS_GCP Single Account Launch Cloud shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
-        );
+      it(`should show CIS_GCP Launch Cloud Shell button`, async () => {
+        await cisIntegration.navigateToAddIntegrationCspmPage();
 
         await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
@@ -62,10 +57,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('Agentless CIS_GCP ORG Account Launch Cloud Shell', () => {
-      it(`should show CIS_GCP Launch Cloud Shell button when package version is ${CLOUD_SECURITY_POSTURE_PACKAGE_VERSION}`, async () => {
-        await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-          CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
-        );
+      it(`should show CIS_GCP Launch Cloud Shell button`, async () => {
+        await cisIntegration.navigateToAddIntegrationCspmPage();
 
         await cisIntegration.clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
         await cisIntegration.selectSetupTechnology('agentless');

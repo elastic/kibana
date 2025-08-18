@@ -6,17 +6,14 @@
  */
 
 import React from 'react';
-import {
-  ALERT_STATUS,
-  ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED,
-  AlertStatus,
-} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
 import { alertWithGroupsAndTags } from '../mock/alert';
 import { useKibana } from '../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../utils/kibana_react.mock';
-import { StatusBar, StatusBarProps } from './status_bar';
+import type { StatusBarProps } from './status_bar';
+import { StatusBar } from './status_bar';
 
 jest.mock('../../../utils/kibana_react');
 

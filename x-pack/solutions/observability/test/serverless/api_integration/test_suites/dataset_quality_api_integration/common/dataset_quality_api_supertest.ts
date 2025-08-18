@@ -6,12 +6,13 @@
  */
 import { format } from 'url';
 import supertest from 'supertest';
-import request from 'superagent';
+import type request from 'superagent';
 import type { APIClientRequestParamsOf, APIReturnType } from '@kbn/dataset-quality-plugin/common';
-import { Config, kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
+import type { Config } from '@kbn/test';
+import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/dataset-quality-plugin/server/routes';
 import { formatRequest } from '@kbn/server-route-repository';
-import {
+import type {
   InternalRequestHeader,
   RoleCredentials,
   InheritedFtrProviderContext,
