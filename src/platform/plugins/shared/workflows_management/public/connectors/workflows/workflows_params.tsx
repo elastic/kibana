@@ -11,22 +11,32 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiInputPopover,
   EuiLink,
   EuiLoadingSpinner,
-  EuiSuperSelect,
+  EuiSelectable,
   EuiText,
 } from '@elastic/eui';
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { WorkflowListDto } from '@kbn/workflows';
+import { WorkflowStatus } from '@kbn/workflows';
 import React, { useCallback, useEffect, useState } from 'react';
 import * as i18n from './translations';
 import type { WorkflowsActionParams } from './types';
 
 interface WorkflowOption {
-  value: string;
-  inputDisplay: string;
-  dropdownDisplay: React.ReactNode;
+  id: string;
+  name: string;
+  description: string;
+  status: string;
+  label: string;
+  disabled?: boolean;
+  checked?: 'on' | 'off';
+  toolTipContent?: string;
+  prepend?: React.ReactNode;
+  [key: string]: any;
 }
 
 const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<WorkflowsActionParams>> = ({
@@ -39,6 +49,9 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [inputValue, setInputValue] = useState('');
+  const [isSearching, setIsSearching] = useState(true);
   const { http, application } = useKibana().services;
 
   // Ensure proper initialization of action parameters
@@ -60,9 +73,20 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     [actionParams.subActionParams, editAction, index]
   );
 
-  const onWorkflowIdChange = useCallback(
-    (selectedValue: string) => {
-      editSubActionParams('workflowId', selectedValue);
+  const onWorkflowChange = useCallback(
+    (newOptions: WorkflowOption[], event: any, changedOption: WorkflowOption) => {
+      setWorkflows(newOptions);
+      setIsPopoverOpen(false);
+
+      if (changedOption.checked === 'on') {
+        editSubActionParams('workflowId', changedOption.id);
+        setInputValue(changedOption.name);
+        setIsSearching(false);
+      } else {
+        editSubActionParams('workflowId', '');
+        setInputValue('');
+        setIsSearching(true);
+      }
     },
     [editSubActionParams]
   );
@@ -88,19 +112,27 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         const response = await http.post('/api/workflows/search');
         const workflowsMap = response as WorkflowListDto;
 
-        const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => ({
-          value: workflow.id,
-          inputDisplay: `${workflow.name} (${workflow.id})`,
-          dropdownDisplay: (
-            <div>
-              <strong>{workflow.name}</strong>
-              <br />
-              <EuiText size="s" color="subdued">
-                ID: {workflow.id}
-              </EuiText>
-            </div>
-          ),
-        }));
+        const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => {
+          const isDisabled =
+            workflow.status === WorkflowStatus.INACTIVE ||
+            workflow.status === WorkflowStatus.DELETED;
+          const isSelected = workflow.id === workflowId;
+          const wasSelectedButNowDisabled = isSelected && isDisabled;
+
+          return {
+            id: workflow.id,
+            name: workflow.name,
+            description: workflow.description,
+            status: workflow.status,
+            label: workflow.name,
+            disabled: isDisabled,
+            checked: isSelected ? 'on' : undefined,
+            toolTipContent: workflow.description,
+            prepend: wasSelectedButNowDisabled ? (
+              <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
+            ) : undefined,
+          };
+        });
 
         setWorkflows(workflowOptions);
       } catch (error) {
@@ -111,16 +143,33 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
     };
 
     fetchWorkflows();
-  }, [http]);
+  }, [http, workflowId]);
+
+  // Update input value when workflowId changes
+  useEffect(() => {
+    if (workflowId && workflows.length > 0) {
+      const selectedWorkflow = workflows.find((w) => w.id === workflowId);
+      if (selectedWorkflow) {
+        setInputValue(selectedWorkflow.name);
+        setIsSearching(false);
+      }
+    } else {
+      setInputValue('');
+      setIsSearching(true);
+    }
+  }, [workflowId, workflows]);
 
   const workflowOptions =
     workflows.length > 0
       ? workflows
       : [
           {
-            value: '',
-            inputDisplay: i18n.NO_WORKFLOWS_AVAILABLE,
-            dropdownDisplay: i18n.NO_WORKFLOWS_AVAILABLE,
+            id: '',
+            name: i18n.NO_WORKFLOWS_AVAILABLE,
+            description: '',
+            status: '',
+            label: i18n.NO_WORKFLOWS_AVAILABLE,
+            disabled: true,
           },
         ];
 
@@ -146,17 +195,47 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       {isLoading ? (
         <EuiLoadingSpinner size="m" />
       ) : (
-        <EuiSuperSelect
-          fullWidth
-          style={{ marginTop: '5px' }}
-          options={workflowOptions}
-          valueOfSelected={workflowId || ''}
-          onChange={onWorkflowIdChange}
+        <EuiSelectable
+          aria-label="Select workflow"
+          options={workflowOptions as any}
+          onChange={onWorkflowChange as any}
+          singleSelection
+          searchable
+          searchProps={{
+            value: inputValue,
+            onChange: (value) => {
+              setInputValue(value);
+              setIsSearching(true);
+            },
+            onKeyDown: (event) => {
+              if (event.key === 'Tab') return setIsPopoverOpen(false);
+              if (event.key !== 'Escape') return setIsPopoverOpen(true);
+            },
+            onClick: () => setIsPopoverOpen(true),
+            onFocus: () => setIsPopoverOpen(true),
+            placeholder: i18n.SELECT_WORKFLOW_PLACEHOLDER,
+          }}
+          isPreFiltered={isSearching ? false : { highlightSearch: false }}
+          listProps={{
+            css: { '.euiSelectableList__list': { maxBlockSize: 200 } },
+          }}
           data-test-subj="workflowIdSelect"
-          placeholder={i18n.SELECT_WORKFLOW_PLACEHOLDER}
-          isInvalid={displayError !== undefined}
-          disabled={workflows.length === 0}
-        />
+        >
+          {(list, search) => (
+            <EuiInputPopover
+              closePopover={() => setIsPopoverOpen(false)}
+              disableFocusTrap
+              closeOnScroll
+              isOpen={isPopoverOpen}
+              input={search!}
+              panelPaddingSize="none"
+              fullWidth
+              style={{ marginTop: '5px' }}
+            >
+              {list}
+            </EuiInputPopover>
+          )}
+        </EuiSelectable>
       )}
 
       {(displayError || helpText) && (
