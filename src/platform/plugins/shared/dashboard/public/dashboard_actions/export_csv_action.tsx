@@ -8,17 +8,16 @@
  */
 
 import { exporters } from '@kbn/data-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { FormatFactory } from '@kbn/field-formats-plugin/common';
 import { downloadMultipleAs } from '@kbn/share-plugin/public';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import {
-  HasInspectorAdapters,
-  apiHasInspectorAdapters,
-  type Adapters,
-} from '@kbn/inspector-plugin/public';
-import { EmbeddableApiContext, PublishesTitle, getTitle } from '@kbn/presentation-publishing';
+import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import { apiHasInspectorAdapters, type Adapters } from '@kbn/inspector-plugin/public';
+import type { EmbeddableApiContext, PublishesTitle } from '@kbn/presentation-publishing';
+import { getTitle } from '@kbn/presentation-publishing';
 import { coreServices, fieldFormatService } from '../services/kibana_services';
 import { dashboardExportCsvActionStrings } from './_dashboard_actions_strings';
 import { ACTION_EXPORT_CSV } from './constants';

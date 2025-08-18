@@ -6,17 +6,18 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import React, { CSSProperties } from 'react';
-import {
-  LogEventsControlBar,
+import type { CSSProperties } from 'react';
+import React from 'react';
+import type {
   LogEventsControlBarDependencies,
   LogEventsControlBarProps,
 } from './log_events_control_bar';
-import {
-  LogEventsResultContent,
+import { LogEventsControlBar } from './log_events_control_bar';
+import type {
   LogEventsResultContentDependencies,
   LogEventsResultContentProps,
 } from './log_events_result_content';
+import { LogEventsResultContent } from './log_events_result_content';
 
 export type LogEventsProps = LogEventsControlBarProps &
   LogEventsResultContentProps & {

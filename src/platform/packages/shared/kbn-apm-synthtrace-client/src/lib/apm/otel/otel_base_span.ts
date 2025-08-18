@@ -9,8 +9,8 @@
 
 import { generateLongId } from '../../utils/generate_id';
 import { AbstractSpan } from '../abstract_span';
-import { ApmOtelFields } from './apm_otel_fields';
-import { OtelSpan } from './otel_span';
+import type { ApmOtelFields } from './apm_otel_fields';
+import type { OtelSpan } from './otel_span';
 
 export class OtelBaseSpan extends AbstractSpan<ApmOtelFields, OtelBaseSpan> {
   constructor(fields: ApmOtelFields) {

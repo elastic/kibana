@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardPanel } from '../../types';
+import type { DashboardPanel } from '../../types';
 import { transformPanelsIn } from './transform_panels_in';
 
 jest.mock('uuid', () => ({
