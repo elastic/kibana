@@ -8,63 +8,9 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { KnowledgeBaseItem } from '../../../../common/types';
+import { appContextService } from '../../app_context';
 
 export const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
-
-export const INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE = {
-  index_patterns: [`${INTEGRATION_KNOWLEDGE_INDEX}*`], // Add wildcard support to template here so that we can reuse the const everywhere else
-  template: {
-    settings: {
-      'index.hidden': true,
-    },
-    mappings: {
-      properties: {
-        filename: { type: 'keyword' as const },
-        content: { type: 'semantic_text' as const },
-        version: { type: 'version' as const },
-        package_name: { type: 'keyword' as const },
-        installed_at: { type: 'date' as const },
-      },
-    },
-  },
-  _meta: {
-    description: 'Integration package knowledge base content storage',
-    managed: true,
-  },
-};
-
-export async function ensureIntegrationKnowledgeIndex(esClient: ElasticsearchClient) {
-  try {
-    // Check if index template exists
-    const templateExists = await esClient.indices.existsIndexTemplate({
-      name: 'integration-knowledge-template',
-    });
-
-    if (!templateExists) {
-      // Create index template
-      await esClient.indices.putIndexTemplate({
-        name: 'integration-knowledge-template',
-        ...INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE,
-      });
-    }
-
-    // Check if index exists
-    const indexExists = await esClient.indices.exists({
-      index: INTEGRATION_KNOWLEDGE_INDEX,
-    });
-
-    if (!indexExists) {
-      // Create the index
-      await esClient.indices.create({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
-        settings: INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE.template.settings,
-        mappings: INTEGRATION_KNOWLEDGE_INDEX_TEMPLATE.template.mappings,
-      });
-    }
-  } catch (error) {
-    throw new Error(`Failed to ensure integration knowledge index: ${error.message}`);
-  }
-}
 
 export async function saveKnowledgeBaseContentToIndex({
   esClient,
@@ -81,19 +27,8 @@ export async function saveKnowledgeBaseContentToIndex({
     return;
   }
 
-  // Ensure the system index exists
-  await ensureIntegrationKnowledgeIndex(esClient);
-
-  // Delete existing documents for this package version
-  await esClient.deleteByQuery({
-    index: INTEGRATION_KNOWLEDGE_INDEX,
-    query: {
-      bool: {
-        must: [{ term: { 'package_name.keyword': pkgName } }, { term: { version: pkgVersion } }],
-      },
-    },
-    refresh: true,
-  });
+  // Delete existing documents for this package version, but only if they exist
+  deletePackageKnowledgeBase(esClient, pkgName, pkgVersion);
 
   // Index each knowledge base file as a separate document
   const operations = [];
@@ -115,10 +50,16 @@ export async function saveKnowledgeBaseContentToIndex({
   }
 
   if (operations.length > 0) {
-    await esClient.bulk({
-      operations,
-      refresh: 'wait_for',
-    });
+    await esClient
+      .bulk({
+        operations,
+        refresh: 'wait_for',
+      })
+      .catch((error) => {
+        const logger = appContextService.getLogger();
+        logger.error('Bulk index operation failed', error);
+        throw error;
+      });
   }
 }
 
@@ -128,19 +69,23 @@ export async function getPackageKnowledgeBaseFromIndex(
   pkgVersion?: string
 ): Promise<KnowledgeBaseItem[]> {
   try {
-    const query: any = {
-      term: { 'package_name.keyword': pkgName },
-    };
+    let query: any;
 
     if (pkgVersion) {
-      query.bool = {
-        must: [{ term: { 'package_name.keyword': pkgName } }, { term: { version: pkgVersion } }],
+      query = {
+        bool: {
+          must: [{ term: { package_name: pkgName } }, { term: { version: pkgVersion } }],
+        },
+      };
+    } else {
+      query = {
+        term: { package_name: pkgName },
       };
     }
 
     const response = await esClient.search({
       index: INTEGRATION_KNOWLEDGE_INDEX,
-      query: pkgVersion ? query.bool : query,
+      query,
       sort: [{ filename: 'asc' }],
       size: 1000,
     });
@@ -164,21 +109,29 @@ export async function deletePackageKnowledgeBase(
   pkgName: string,
   pkgVersion?: string
 ) {
-  const query: any = {
-    term: { 'package_name.keyword': pkgName },
-  };
+  let query: any;
 
   if (pkgVersion) {
-    query.bool = {
-      must: [{ term: { 'package_name.keyword': pkgName } }, { term: { version: pkgVersion } }],
+    query = {
+      bool: {
+        must: [{ term: { package_name: pkgName } }, { term: { version: pkgVersion } }],
+      },
+    };
+  } else {
+    query = {
+      term: { package_name: pkgName },
     };
   }
 
-  await esClient.deleteByQuery({
-    index: INTEGRATION_KNOWLEDGE_INDEX,
-    query: pkgVersion ? query.bool : query,
-    refresh: true,
-  });
+  await esClient
+    .deleteByQuery({
+      index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+      query,
+    })
+    .catch((error) => {
+      const logger = appContextService.getLogger();
+      logger.error('Delete operation failed', error);
+    });
 }
 
 export async function updatePackageKnowledgeBaseVersion({
@@ -199,9 +152,6 @@ export async function updatePackageKnowledgeBaseVersion({
     await deletePackageKnowledgeBase(esClient, pkgName);
     return;
   }
-
-  // Ensure the system index exists
-  await ensureIntegrationKnowledgeIndex(esClient);
 
   // Delete ALL existing documents for this package (regardless of version)
   // This handles both fresh installs and upgrades

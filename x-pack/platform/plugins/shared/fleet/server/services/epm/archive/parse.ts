@@ -150,7 +150,16 @@ const PARSE_AND_VERIFY_ASSETS_NAME = [
  * Filter assets needed for the parse and verify archive function
  */
 export function filterAssetPathForParseAndVerifyArchive(assetPath: string): boolean {
-  return PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) => assetPath.endsWith(endWithPath));
+  // Check for specific asset files
+  const isSpecificAsset = PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) =>
+    assetPath.endsWith(endWithPath)
+  );
+
+  // Check for knowledge base markdown files
+  const isKnowledgeBaseFile =
+    assetPath.includes('/docs/knowledge_base/') && assetPath.endsWith('.md');
+
+  return isSpecificAsset || isKnowledgeBaseFile;
 }
 
 /*
