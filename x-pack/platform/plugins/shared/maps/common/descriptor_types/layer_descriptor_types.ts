@@ -9,16 +9,16 @@
 
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
-import { Feature } from 'geojson';
-import {
+import type { Feature } from 'geojson';
+import type {
   EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
-import { DataRequestDescriptor } from './data_request_descriptor_types';
+import type { DataRequestDescriptor } from './data_request_descriptor_types';
 import type { JoinSourceDescriptor, SourceDescriptor } from '.';
-import { LAYER_TYPE } from '../constants';
+import type { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
   label: string;

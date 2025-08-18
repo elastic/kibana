@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Condition, ProcessorDefinition } from '@kbn/streams-schema';
-import { type Ingest, IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import type { Condition, StreamlangDSL } from '@kbn/streamlang';
+import type { IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import { type Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
-import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
-import { ScoutSpaceParallelFixture } from '../../scout_space';
+import type { KbnClient, ScoutLogger } from '../../../../../../common';
+import { measurePerformanceAsync } from '../../../../../../common';
+import type { ScoutSpaceParallelFixture } from '../../scout_space';
 
 export interface StreamsApiService {
   enable: () => Promise<void>;
@@ -25,9 +27,7 @@ export interface StreamsApiService {
   clearStreamProcessors: (streamName: string) => Promise<void>;
   updateStreamProcessors: (
     streamName: string,
-    getProcessors:
-      | ProcessorDefinition[]
-      | ((prevProcessors: ProcessorDefinition[]) => ProcessorDefinition[])
+    getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
   ) => Promise<void>;
 }
 
@@ -65,7 +65,7 @@ export const getStreamsApiService = ({
           method: 'POST',
           path: `${basePath}/api/streams/${streamName}/_fork`,
           body: {
-            if: condition,
+            where: condition,
             stream: {
               name: newStreamName,
             },
@@ -134,20 +134,20 @@ export const getStreamsApiService = ({
         await service.updateStream(streamName, {
           ingest: {
             ...definition.stream.ingest,
-            processing: [],
+            processing: {
+              steps: [],
+            },
           },
         });
       });
     },
     updateStreamProcessors: async (
       streamName: string,
-      getProcessors:
-        | ProcessorDefinition[]
-        | ((prevProcessors: ProcessorDefinition[]) => ProcessorDefinition[])
+      getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
     ) => {
       await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
         const definition = await service.getStreamDefinition(streamName);
-        const processing = Array.isArray(getProcessors)
+        const processing = !(typeof getProcessors === 'function')
           ? getProcessors
           : getProcessors(definition.stream.ingest.processing);
         await service.updateStream(streamName, {

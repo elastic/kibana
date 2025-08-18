@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { MsearchRequestItem, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server/src/client/scoped_cluster_client';
+import type { MsearchRequestItem, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server/src/client/scoped_cluster_client';
 
-import { EnterpriseSearchApplicationIndex } from '../../../common/types/search_applications';
+import type { EnterpriseSearchApplicationIndex } from '../../../common/types/search_applications';
 
 import { availableIndices } from './available_indices';
 

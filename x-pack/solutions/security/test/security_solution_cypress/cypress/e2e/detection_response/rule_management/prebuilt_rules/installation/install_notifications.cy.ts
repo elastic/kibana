@@ -50,7 +50,6 @@ describe(
         cy.get(ADD_ELASTIC_RULES_BTN).should('have.text', 'Add Elastic rules');
       });
 
-      // https://github.com/elastic/kibana/issues/179967
       it(
         'does NOT display install notifications when latest rules are installed',
         { tags: ['@skipInServerlessMKI'] },
@@ -72,7 +71,6 @@ describe(
       );
     });
 
-    // https://github.com/elastic/kibana/issues/179968
     describe('Notifications', () => {
       const PREBUILT_RULE = createRuleAssetSavedObject({
         name: 'Test prebuilt rule 1',
