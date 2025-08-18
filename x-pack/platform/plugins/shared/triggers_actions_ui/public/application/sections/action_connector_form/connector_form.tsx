@@ -63,9 +63,9 @@ interface Props {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
-  const overrides = connectorOverrides(data.actionTypeId, data);
+  const overrides = connectorOverrides(data.actionTypeId);
   if (overrides?.formDeserializer) {
-    return overrides.formDeserializer;
+    return overrides.formDeserializer(data);
   }
 
   if (
@@ -93,9 +93,9 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
-  const overrides = connectorOverrides(formData.actionTypeId, formData);
+  const overrides = connectorOverrides(formData.actionTypeId);
   if (overrides?.formSerializer) {
-    return overrides.formSerializer;
+    return overrides.formSerializer(formData);
   }
 
   if (
