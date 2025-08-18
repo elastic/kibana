@@ -8,12 +8,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 
 interface Props {
   codeowners: string[];
+  path: string;
+  fullPath?: string;
 }
 
 export const flyoutOptions: OverlayFlyoutOpenOptions = {
@@ -21,7 +23,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   'data-test-subj': 'inspectComponentFlyout',
 };
 
-export const InspectFlyout = ({ codeowners }: Props) => {
+export const InspectFlyout = ({ codeowners, fullPath, path }: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -33,6 +35,24 @@ export const InspectFlyout = ({ codeowners }: Props) => {
           />
         </EuiText>
       </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButton href={`https://github.com/elastic/kibana/blob/main/${path}`} target="_blank">
+          <FormattedMessage
+            id="kbnInspectComponent.inspectFlyout.openOnGitHubText"
+            defaultMessage="Open on GitHub"
+          />
+        </EuiButton>
+      </EuiFlexItem>
+      {fullPath && (
+        <EuiFlexItem grow={false}>
+          <EuiButton href={`vscode://file/${fullPath}`} target="_blank" iconType="code">
+            <FormattedMessage
+              id="kbnInspectComponent.inspectFlyout.openInVSCodeText"
+              defaultMessage="Open in VSCode"
+            />
+          </EuiButton>
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 };

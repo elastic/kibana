@@ -9,4 +9,5 @@
 
 export interface InspectComponentResponse {
   codeowners: string[];
+  fullPath?: string;
 }

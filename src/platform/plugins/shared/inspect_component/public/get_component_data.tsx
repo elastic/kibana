@@ -21,12 +21,18 @@ export const getComponentData = async ({
   setIsInspecting,
 }: GetComponentDataOptions) => {
   try {
-    const { codeowners }: InspectComponentResponse = await core.http.post(INSPECT_COMPONENT_ROUTE, {
-      body: JSON.stringify({ path }),
-    });
+    const { codeowners, fullPath }: InspectComponentResponse = await core.http.post(
+      INSPECT_COMPONENT_ROUTE,
+      {
+        body: JSON.stringify({ path }),
+      }
+    );
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(<InspectFlyout codeowners={codeowners} />, core.rendering),
+      toMountPoint(
+        <InspectFlyout codeowners={codeowners} fullPath={fullPath} path={path} />,
+        core.rendering
+      ),
       flyoutOptions
     );
 
