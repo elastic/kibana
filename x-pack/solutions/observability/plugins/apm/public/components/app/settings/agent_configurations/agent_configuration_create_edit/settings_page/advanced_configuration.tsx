@@ -32,7 +32,7 @@ export function AdvancedConfiguration({
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitions: SettingDefinition[];
-  onChange: (key: string, value: string, oldKey?: string) => void;
+  onChange: ({ key, value, oldKey }: { key: string; value?: string; oldKey?: string }) => void;
   onDelete: (key: string, index: number) => void;
   addValidationError: (key: string) => void;
   removeValidationError: (key: string) => void;
@@ -52,10 +52,9 @@ export function AdvancedConfiguration({
 
   // Validations
   const checkIfAdvancedConfigKeyExists = useCallback(
-    (newKey: string, oldKey: string) => newKey !== oldKey && unknownAgentConfigs.has(newKey),
+    (key: string) => unknownAgentConfigs.has(key),
     [unknownAgentConfigs]
   );
-
   const checkIfPredefinedConfigKeyExists = useCallback(
     (key: string) => predefinedAgentConfigKeys.has(key),
     [predefinedAgentConfigKeys]
@@ -104,7 +103,7 @@ export function AdvancedConfiguration({
               <EuiButton
                 data-test-subj="apmSettingsAddAdvancedConfigurationButton"
                 iconType="plusInCircle"
-                onClick={() => onChange('', '')}
+                onClick={() => onChange({ key: '', value: '' })}
               >
                 {i18n.translate('xpack.apm.settingsPage.addCustomSettingButton', {
                   defaultMessage: 'Add custom setting',
@@ -125,7 +124,7 @@ export function AdvancedConfiguration({
                 configKey={configKey}
                 id={index}
                 showLabel={index === 0}
-                onChange={(newKey) => onChange(newKey, configValue, configKey)}
+                onChange={onChange}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
                 addValidationError={addValidationError}
@@ -135,10 +134,11 @@ export function AdvancedConfiguration({
             <EuiFlexItem>
               <AdvancedConfigValueInput
                 configValue={configValue}
+                configKey={configKey}
                 id={index}
                 showLabel={index === 0}
-                onChange={(newValue) => onChange(configKey, newValue)}
-                onDelete={() => onDelete(configKey, index)}
+                onChange={onChange}
+                onDelete={onDelete}
                 addValidationError={addValidationError}
                 removeValidationError={removeValidationError}
               />

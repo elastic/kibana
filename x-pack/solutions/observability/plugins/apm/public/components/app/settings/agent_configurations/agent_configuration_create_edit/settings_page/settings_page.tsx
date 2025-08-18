@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { isEDOTAgentName, type AgentName } from '@kbn/elastic-agent-utils';
 import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
@@ -76,19 +76,19 @@ export function SettingsPage({
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
   const isAdvancedConfigInvalid = validationErrors.size > 0;
 
-  const addValidationError = (key: string) => {
+  const addValidationError = useCallback((key: string) => {
     setValidationErrors((prev) => {
       prev.add(key);
       return new Set(prev);
     });
-  };
+  }, []);
 
-  const removeValidationError = (key: string) => {
+  const removeValidationError = useCallback((key: string) => {
     setValidationErrors((prev) => {
       prev.delete(key);
       return new Set(prev);
     });
-  };
+  }, []);
 
   const settingsDefinitionsByAgent = useMemo(
     () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
@@ -127,33 +127,36 @@ export function SettingsPage({
     });
   };
 
-  const handleChange = (key: string, value: string, oldKey?: string) => {
-    setNewConfig((prev) => {
-      let updatedSettings: Record<string, string>;
+  const handleChange = useCallback(
+    ({ key, value, oldKey }: { key: string; value?: string; oldKey?: string }) => {
+      setNewConfig((prev) => {
+        let updatedSettings: Record<string, string>;
 
-      if (oldKey !== undefined) {
-        // Handle key change
+        if (oldKey !== undefined) {
+          // Handle key change
 
-        // Maintain the order by recreating the config object while preserving key positions
-        updatedSettings = Object.fromEntries(
-          Object.entries(prev.settings).map(([currentKey, currentValue]) =>
-            currentKey === oldKey ? [key, currentValue] : [currentKey, currentValue]
-          )
-        );
-      } else if (key === '' && value === '' && prev.settings[''] === undefined) {
-        // Handle new row at the top of the list
-        updatedSettings = { ['']: '', ...prev.settings };
-      } else {
-        // Handle value change
-        updatedSettings = { ...prev.settings, [key]: value };
-      }
+          // Maintain the order by recreating the config object while preserving key positions
+          updatedSettings = Object.fromEntries(
+            Object.entries(prev.settings).map(([currentKey, currentValue]) =>
+              currentKey === oldKey ? [key, currentValue] : [currentKey, currentValue]
+            )
+          );
+        } else if (key === '' && value === '' && prev.settings[''] === undefined) {
+          // Handle new row at the top of the list
+          updatedSettings = { ['']: '', ...prev.settings };
+        } else {
+          // Handle value change
+          updatedSettings = { ...prev.settings, [key]: value };
+        }
 
-      return {
-        ...prev,
-        settings: updatedSettings,
-      };
-    });
-  };
+        return {
+          ...prev,
+          settings: updatedSettings,
+        };
+      });
+    },
+    [setNewConfig]
+  );
 
   const handleDelete = (key: string, id: number) => {
     // Detect removed config only when the key-value already existed before
@@ -322,7 +325,7 @@ function renderSettings({
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
   settingsDefinitionsByAgent: SettingDefinition[];
-  onChange: (key: string, value: string) => void;
+  onChange: ({ key, value }: { key: string; value: string }) => void;
 }) {
   return settingsDefinitionsByAgent.map((setting) => (
     <SettingFormRow

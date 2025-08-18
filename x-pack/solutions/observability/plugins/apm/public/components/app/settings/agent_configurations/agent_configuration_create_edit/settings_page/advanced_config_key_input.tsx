@@ -7,8 +7,15 @@
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useEffect, useState } from 'react';
+
+enum ErrorType {
+  None,
+  Empty,
+  AlreadyPredefined,
+  Duplicated,
+}
 
 export function AdvancedConfigKeyInput({
   configKey,
@@ -23,54 +30,80 @@ export function AdvancedConfigKeyInput({
   configKey: string;
   id: number;
   showLabel: boolean;
-  onChange: (newKey: string) => void;
-  checkIfAdvancedConfigKeyExists: (newKey: string, oldKey: string) => boolean;
+  onChange: ({ key, oldKey }: { key: string; oldKey: string }) => void;
+  checkIfAdvancedConfigKeyExists: (key: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
   addValidationError: (key: string) => void;
   removeValidationError: (key: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const isFormInvalid = localKey !== configKey && Boolean(errorMsg);
 
   useEffect(() => {
     setLocalKey(configKey);
   }, [configKey]);
 
-  const getErrorMsg = (newKey: string) => {
-    if (newKey === '') {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
-        defaultMessage: 'Key cannot be empty',
-      });
+  const errorType = useMemo(() => {
+    if (localKey === '') {
+      return ErrorType.Empty;
     }
-    if (checkIfPredefinedConfigKeyExists(newKey)) {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
-        defaultMessage: 'This key is already predefined in the standard configuration above',
-      });
+    if (checkIfPredefinedConfigKeyExists(localKey)) {
+      return ErrorType.AlreadyPredefined;
     }
-    if (checkIfAdvancedConfigKeyExists(newKey, configKey)) {
-      return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
-        defaultMessage: 'This key is already used in another advanced configuration',
-      });
+    if (checkIfAdvancedConfigKeyExists(localKey)) {
+      return ErrorType.Duplicated;
     }
-    return null;
-  };
+    return ErrorType.None;
+  }, [localKey, checkIfPredefinedConfigKeyExists, checkIfAdvancedConfigKeyExists]);
 
-  const handleKeyChange = (newKey: string) => {
-    const errorKey = `key${id}`;
-    const formErrorMsg = getErrorMsg(newKey);
+  const errorMsg = useMemo(() => {
+    switch (errorType) {
+      case ErrorType.Empty:
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+          defaultMessage: 'Key cannot be empty',
+        });
+      case ErrorType.AlreadyPredefined:
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
+          defaultMessage: 'This key is already predefined in the standard configuration above',
+        });
+      case ErrorType.Duplicated:
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
+          defaultMessage: 'This key is already used in another advanced configuration',
+        });
+      default:
+        return '';
+    }
+  }, [errorType]);
 
-    setLocalKey(newKey);
-    setErrorMsg(formErrorMsg);
+  const isKeyChanged = useMemo(() => localKey !== configKey, [localKey, configKey]);
 
-    if (Boolean(formErrorMsg)) {
-      addValidationError(errorKey);
+  const isFormInvalid = useMemo(
+    () => isKeyChanged && errorType !== ErrorType.None,
+    [isKeyChanged, errorType]
+  );
+
+  useEffect(() => {
+    const errorId = `key${id}`;
+
+    if (isFormInvalid) {
+      addValidationError(errorId);
     } else {
-      removeValidationError(errorKey);
-      onChange(newKey);
+      removeValidationError(errorId);
+
+      if (isKeyChanged) {
+        onChange({ key: localKey, oldKey: configKey });
+      }
     }
-  };
+  }, [
+    id,
+    addValidationError,
+    removeValidationError,
+    localKey,
+    configKey,
+    onChange,
+    isFormInvalid,
+    isKeyChanged,
+  ]);
 
   return (
     <EuiFormRow
@@ -91,7 +124,7 @@ export function AdvancedConfigKeyInput({
         fullWidth
         value={localKey}
         isInvalid={isFormInvalid}
-        onChange={(e) => handleKeyChange(e.target.value)}
+        onChange={(e) => setLocalKey(e.target.value)}
       />
     </EuiFormRow>
   );

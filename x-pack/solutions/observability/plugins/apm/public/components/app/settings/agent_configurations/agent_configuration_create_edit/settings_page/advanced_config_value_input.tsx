@@ -12,6 +12,7 @@ import { useState } from 'react';
 
 export function AdvancedConfigValueInput({
   configValue,
+  configKey,
   id,
   showLabel,
   onChange,
@@ -20,10 +21,11 @@ export function AdvancedConfigValueInput({
   removeValidationError,
 }: {
   configValue: string;
+  configKey: string;
   id: number;
   showLabel: boolean;
-  onChange: (newValue: string) => void;
-  onDelete: () => void;
+  onChange: ({ key, value }: { key: string; value: string }) => void;
+  onDelete: (key: string, index: number) => void;
   addValidationError: (key: string) => void;
   removeValidationError: (key: string) => void;
 }) {
@@ -33,15 +35,16 @@ export function AdvancedConfigValueInput({
     return value === '';
   };
 
-  const handleValueChange = (newValue: string) => {
-    setTouched(true);
-    onChange(newValue);
-    const errorKey = `value${id}`;
+  const handleValueChange = (value: string) => {
+    const errorId = `value${id}`;
 
-    if (isInvalidInput(newValue)) {
-      addValidationError(errorKey);
+    setTouched(true);
+    onChange({ key: configKey, value });
+
+    if (isInvalidInput(value)) {
+      addValidationError(errorId);
     } else {
-      removeValidationError(errorKey);
+      removeValidationError(errorId);
     }
   };
 
@@ -77,7 +80,7 @@ export function AdvancedConfigValueInput({
             })}
             iconType="trash"
             color={'danger'}
-            onClick={onDelete}
+            onClick={() => onDelete(configKey, id)}
           />
         }
       />
