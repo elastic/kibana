@@ -311,11 +311,15 @@ describe('actions_connectors_list', () => {
         </IntlProvider>
       );
 
-      // Find and click the next page button
       const nextPageButton = await screen.findByTestId('pagination-button-1');
       await user.click(nextPageButton);
-      // Check that the table is still present (pagination state is internal)
+      
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+      
+      // Expect an item from the second page to be visible
+      expect(await screen.findByText('My test 10')).toBeInTheDocument();
+      // And an item that was only on the first page to be gone (ensures page actually changed)
+      expect(screen.queryByText('My test 0')).not.toBeInTheDocument();
     });
 
     it('if delete item that is used in a rule should show a warning in the popup', async () => {
@@ -334,14 +338,12 @@ describe('actions_connectors_list', () => {
         </IntlProvider>
       );
 
-      // Wait for the table to be rendered
       await screen.findByTestId('actionsTable');
 
       const deleteButtons = await screen.findAllByTestId('deleteConnector');
-      // Click the first delete button (all mocked actions have referencedByCount: 1)
+
       await user.click(deleteButtons[0]);
 
-      // Wait for the confirmation dialog to appear
       await waitFor(() => {
         expect(screen.getByTestId('deleteIdsConfirmation')).toBeInTheDocument();
       });
@@ -525,6 +527,19 @@ describe('actions_connectors_list', () => {
       );
 
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
+
+      const edit1 = await screen.findByTestId('edit1');
+      const edit2 = await screen.findByTestId('edit2');
+      expect(edit1).toBeDisabled();
+      expect(edit2).toBeDisabled();
+
+      const edit3 = await screen.findByTestId('edit3');
+      expect(edit3).toBeDisabled();
+
+      const runButtons = await screen.findAllByTestId('runConnector');
+
+      expect(runButtons[0]).toBeDisabled();
+      expect(runButtons[1]).toBeDisabled();
     });
   });
 
@@ -629,7 +644,7 @@ describe('actions_connectors_list', () => {
       const warningIcons = screen
         .getByTestId('actionsTable')
         .querySelectorAll('[data-euiicon-type="warning"]');
-      expect(warningIcons.length).toBeGreaterThan(0);
+      expect(warningIcons.length).toEqual(2);
     });
   });
 });

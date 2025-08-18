@@ -73,7 +73,7 @@ describe('view in app', () => {
       const user = userEvent.setup();
 
       const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
-      const navigateToUrl = mockUseKibana().services.application.navigateToUrl;
+
       getNavigation.mockResolvedValueOnce('/rule');
 
       renderWithIntl(<ViewInApp rule={rule} />);
