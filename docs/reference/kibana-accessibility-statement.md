@@ -93,7 +93,7 @@ Despite our best efforts, some accessibility limitations remain. We are actively
 To view and track accessibility issues, visit our [GitHub Project: Accessibility issues](https://github.com/elastic/kibana/issues?q=label%3AProject%3AAccessibility).
 
 ## Progress and Continuous Improvement
-Between 2024 and 2025, Elastic identified over [2,500 accessibility issues across its products](https://github.com/elastic/kibana/issues?q=label%3AProject%3AAccessibility). More than 1,800 issues have been triaged and resolved, thanks to close collaboration between accessibility engineers and product development teams. As part of our phased approach to accessibility compliance, we are currently auditing and remediating all outstanding WCAG A issues. Once this baseline level is achieved, we will begin the audit and remediation process for WCAG AA conformance. 
+Between 2024 and 2025, Elastic identified over [2,500 accessibility issues across its products](https://github.com/elastic/kibana/issues?q=label%3AProject%3AAccessibility). More than 1,800 issues have been triaged and resolved, thanks to close collaboration between accessibility engineers and product development teams. As part of our phased approach to accessibility compliance, we are currently auditing and remediating all outstanding WCAG 2.2 Level A issues. Once this baseline level is achieved, we will begin the audit and remediation process for WCAG 2.2 Level AA conformance. 
 
 Accessibility is part of our product lifecycle, from early design through post-release, and our teams are constantly learning and adapting to evolving standards.
 
