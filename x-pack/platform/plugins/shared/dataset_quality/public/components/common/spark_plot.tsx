@@ -10,7 +10,7 @@ import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import { ScaleType, Settings, Tooltip, Chart, AreaSeries } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
-import { Coordinate } from '../../../common/types';
+import type { Coordinate } from '../../../common/types';
 
 export function SparkPlot({
   isLoading,

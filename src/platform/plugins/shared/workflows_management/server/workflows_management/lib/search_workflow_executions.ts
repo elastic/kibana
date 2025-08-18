@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryDslQueryContainer, SearchResponse, Sort } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
+import type {
+  QueryDslQueryContainer,
+  SearchResponse,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EsWorkflowExecution, WorkflowExecutionListDto } from '@kbn/workflows';
 
 interface SearchWorkflowExecutionsParams {
   esClient: ElasticsearchClient;

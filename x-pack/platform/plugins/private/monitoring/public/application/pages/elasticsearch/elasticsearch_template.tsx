@@ -9,9 +9,9 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { includes } from 'lodash';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
-import { MonitoringStartServices } from '../../../types';
+import type { MonitoringStartServices } from '../../../types';
 import { PageTemplate } from '../page_template';
-import { TabMenuItem, PageTemplateProps } from '../page_template';
+import type { TabMenuItem, PageTemplateProps } from '../page_template';
 import { ML_SUPPORTED_LICENSES } from '../../../../common/constants';
 import { ingestPipelineTabOnClick } from './ingest_pipeline_modal';
 

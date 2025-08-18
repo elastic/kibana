@@ -6,7 +6,7 @@
  */
 
 import { _IGNORED } from './es_fields';
-import { DataStreamType, QualityIndicators } from './types';
+import type { DataStreamType, QualityIndicators } from './types';
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
 export const DATASET_QUALITY_ALL_SIGNALS_ID = 'datasetQuality:all-signals-available';

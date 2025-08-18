@@ -6,7 +6,7 @@
  */
 
 import { textService } from '../text';
-import {
+import type {
   Repository,
   RepositoryType,
   FSRepository,

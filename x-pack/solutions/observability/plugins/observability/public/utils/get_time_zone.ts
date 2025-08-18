@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { UI_SETTINGS } from '../hooks/use_kibana_ui_settings';
 
 export function getTimeZone(uiSettings?: IUiSettingsClient) {

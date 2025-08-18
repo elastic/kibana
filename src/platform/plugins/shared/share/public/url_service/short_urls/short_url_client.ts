@@ -10,14 +10,10 @@
 import { parse as parseUrl } from 'url';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { convertRelativeTimeStringToAbsoluteTimeString } from '../../lib/time_utils';
-import {
-  LegacyShortUrlLocatorParams,
-  LEGACY_SHORT_URL_LOCATOR_ID,
-} from '../../../common/url_service/locators/legacy_short_url_locator';
-import {
-  SHORT_URL_REDIRECT_LOCATOR,
-  ShortUrlRedirectLocatorParams,
-} from '../../../common/url_service/locators/short_url_redirect_locator';
+import type { LegacyShortUrlLocatorParams } from '../../../common/url_service/locators/legacy_short_url_locator';
+import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../common/url_service/locators/legacy_short_url_locator';
+import type { ShortUrlRedirectLocatorParams } from '../../../common/url_service/locators/short_url_redirect_locator';
+import { SHORT_URL_REDIRECT_LOCATOR } from '../../../common/url_service/locators/short_url_redirect_locator';
 import type {
   IShortUrlClient,
   ShortUrl,

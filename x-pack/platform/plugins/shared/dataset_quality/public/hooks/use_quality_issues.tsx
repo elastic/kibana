@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 import { useSelector } from '@xstate/react';
 import { orderBy } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
-import { FailedDocsError, QualityIssue } from '../../common/api_types';
+import type { FailedDocsError, QualityIssue } from '../../common/api_types';
 import {
   DEFAULT_FAILED_DOCS_ERROR_SORT_DIRECTION,
   DEFAULT_FAILED_DOCS_ERROR_SORT_FIELD,
@@ -23,8 +23,8 @@ import {
   degradedFieldCauseFieldMalformed,
   degradedFieldCauseFieldMalformedTooltip,
 } from '../../common/translations';
-import { SortDirection } from '../../common/types';
-import { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
+import type { SortDirection } from '../../common/types';
+import type { QualityIssueType } from '../state_machines/dataset_quality_details_controller';
 import { useKibanaContextForPlugin } from '../utils';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { getFailedDocsErrorsColumns } from '../components/dataset_quality_details/quality_issue_flyout/failed_docs/columns';

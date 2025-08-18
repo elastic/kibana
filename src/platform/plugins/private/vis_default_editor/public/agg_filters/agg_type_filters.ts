@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IAggType, IAggConfig, search } from '@kbn/data-plugin/public';
+import type { IAggType, IAggConfig } from '@kbn/data-plugin/public';
+import { search } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
 const { propFilter } = search.aggs;
