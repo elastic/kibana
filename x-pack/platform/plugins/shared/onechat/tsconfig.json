@@ -58,5 +58,6 @@
     "@kbn/cloud-plugin",
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
+    "@kbn/inference-common",
   ]
 }

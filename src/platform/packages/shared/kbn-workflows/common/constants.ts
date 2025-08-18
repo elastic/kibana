@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './spec/lib/generate_yaml_schema';
-export * from './spec/schema';
-export * from './types/latest';
-export * from './types/utils';
-export * from './common/constants';
+/**
+ * UI Setting ID for enabling / disabling the workflows management UI
+ */
+export const WORKFLOWS_UI_SETTING_ID = 'workflows:ui:enabled';

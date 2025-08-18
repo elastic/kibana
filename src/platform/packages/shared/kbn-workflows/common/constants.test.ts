@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './spec/lib/generate_yaml_schema';
-export * from './spec/schema';
-export * from './types/latest';
-export * from './types/utils';
-export * from './common/constants';
+import { WORKFLOWS_UI_SETTING_ID } from './constants';
+
+describe('Workflow Feature Flag Constants', () => {
+  it('should export the correct UI setting ID', () => {
+    expect(WORKFLOWS_UI_SETTING_ID).toBe('workflows:ui:enabled');
+  });
+
+  it('should have consistent naming pattern', () => {
+    expect(WORKFLOWS_UI_SETTING_ID).toMatch(/^workflows:/);
+    expect(WORKFLOWS_UI_SETTING_ID).toMatch(/:enabled$/);
+  });
+});
