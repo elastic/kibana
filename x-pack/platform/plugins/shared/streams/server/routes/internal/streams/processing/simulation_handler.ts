@@ -8,7 +8,7 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { errors as esErrors } from '@elastic/elasticsearch';
-import {
+import type {
   IngestDocument,
   IngestProcessorContainer,
   IngestSimulateRequest,
@@ -20,21 +20,24 @@ import {
   SimulateIngestSimulateIngestDocumentResult,
   FieldCapsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils';
-import {
+import type {
   FlattenRecord,
-  getInheritedFieldsFromAncestors,
   NamedFieldDefinitionConfig,
   FieldDefinitionConfig,
   InheritedFieldDefinitionConfig,
-  isNamespacedEcsField,
   FieldDefinition,
+} from '@kbn/streams-schema';
+import {
+  getInheritedFieldsFromAncestors,
+  isNamespacedEcsField,
   Streams,
 } from '@kbn/streams-schema';
 import { mapValues, uniq, omit, isEmpty, uniqBy } from 'lodash';
-import { transpileIngestPipeline, StreamlangDSL } from '@kbn/streamlang';
-import { StreamsClient } from '../../../../lib/streams/client';
+import type { StreamlangDSL } from '@kbn/streamlang';
+import { transpileIngestPipeline } from '@kbn/streamlang';
+import type { StreamsClient } from '../../../../lib/streams/client';
 
 export interface ProcessingSimulationParams {
   path: {

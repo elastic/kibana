@@ -8,10 +8,12 @@
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
-import {
+import type {
   FindKnowledgeBaseEntriesResponse,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   FindKnowledgeBaseEntriesRequestQuery,
+} from '@kbn/elastic-assistant-common';
+import {
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import type { User } from '../../../utils/auth/types';

@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { PartialTheme, TickFormatter } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
   Chart,
   LineAnnotation,
   LineSeries,
-  PartialTheme,
   Settings,
-  TickFormatter,
   Tooltip,
 } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiTitle, useEuiTheme } from '@elastic/eui';

@@ -7,7 +7,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useMemo, useState } from 'react';
 import { useFetchSignificantEvents } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
@@ -20,7 +20,8 @@ import type { SaveData } from './add_significant_event_flyout/types';
 import { ChangePointSummary } from './change_point_summary';
 import { SignificantEventsViewEmptyState } from './empty_state/empty_state';
 import { SignificantEventsTable } from './significant_events_table';
-import { Timeline, TimelineEvent } from './timeline';
+import type { TimelineEvent } from './timeline';
+import { Timeline } from './timeline';
 import { formatChangePoint } from './utils/change_point';
 
 interface Props {

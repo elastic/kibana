@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover, IconType } from '@elastic/eui';
-import { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
+import type { IconType } from '@elastic/eui';
+import { EuiButton, EuiContextMenu, EuiFlexItem, EuiPopover } from '@elastic/eui';
+import type { CoreSetup, CoreStart, Plugin, SimpleSavedObject } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type {
   CustomizationCallback,
@@ -18,14 +19,15 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import { ControlGroupRendererApi, ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import image from './discover_customization_examples.png';

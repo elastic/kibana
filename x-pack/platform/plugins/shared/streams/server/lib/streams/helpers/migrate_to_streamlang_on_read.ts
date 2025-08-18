@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  ALWAYS_CONDITION,
-  Condition,
-  ManualIngestPipelineProcessor,
-  StreamlangDSL,
-  conditionToPainless,
-} from '@kbn/streamlang';
+import type { Condition, ManualIngestPipelineProcessor, StreamlangDSL } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, conditionToPainless } from '@kbn/streamlang';
 
 export const migrateRoutingIfConditionToStreamlang = (definition: Record<string, unknown>) => {
   const routingArr = (definition.ingest as { wired: { routing: OldRoutingDefinition[] } }).wired

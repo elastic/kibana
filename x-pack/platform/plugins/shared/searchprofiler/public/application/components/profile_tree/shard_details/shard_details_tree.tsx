@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ShardDetailsTreeNode } from './shard_details_tree_node';
-import { Index, Operation, Shard } from '../../../types';
+import type { Index, Operation, Shard } from '../../../types';
 
 export interface Props {
   data: Operation;

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
 import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
 import { analyzeDataset } from './helpers/analyze_dataset';
 import { assignShortIds } from './helpers/assign_short_ids';

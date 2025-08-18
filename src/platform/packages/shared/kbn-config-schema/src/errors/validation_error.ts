@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SchemaError, SchemaTypeError, SchemaTypesError } from '.';
+import type { SchemaTypeError } from '.';
+import { SchemaError, SchemaTypesError } from '.';
 
 export class ValidationError extends SchemaError {
   private static extractMessage(error: SchemaTypeError, namespace?: string, level?: number) {
