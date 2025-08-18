@@ -40,7 +40,9 @@ import { SettingFormRow } from './setting_form_row';
 import { AdvancedConfiguration } from './advanced_configuration';
 
 function removeEmpty(obj: { [key: string]: any }) {
-  return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v !== ''));
+  return Object.fromEntries(
+    Object.entries(obj).filter(([k, v]) => k !== '' && k != null && v !== '' && v != null)
+  );
 }
 
 export function SettingsPage({
@@ -304,7 +306,7 @@ export function SettingsPage({
           })}
           unsavedChangesCount={unsavedChangesCount + removedConfigCount}
           appTestSubj="apm"
-          areChangesInvalid={isAdvancedConfigInvalid}
+          areChangesInvalid={isAdvancedConfigInvalid || !isFormValid}
         />
       )}
     </>
