@@ -16,7 +16,7 @@ export default function ({ getService }) {
 
   describe('ccr shard - metricbeat and package', () => {
     ['mb', 'package'].forEach((source) => {
-      const archive = `x-pack/test/functional/es_archives/monitoring/ccr_${source}`;
+      const archive = `x-pack/platform/test/fixtures/es_archives/monitoring/ccr_${source}`;
 
       describe(`ccr shard ${source}`, () => {
         const timeRange = {

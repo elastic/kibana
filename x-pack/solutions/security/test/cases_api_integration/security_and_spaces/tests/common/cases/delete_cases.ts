@@ -374,11 +374,11 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         it('removes a case from the alert schema when deleting a case', async () => {
