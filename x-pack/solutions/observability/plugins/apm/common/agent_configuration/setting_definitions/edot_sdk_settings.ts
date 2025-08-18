@@ -100,7 +100,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
         'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
         'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
     }),
-    excludeAgents: ['android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
+    includeAgents: ['opentelemetry/java/elastic', 'opentelemetry/python/elastic'],
   },
   {
     key: 'send_traces',
