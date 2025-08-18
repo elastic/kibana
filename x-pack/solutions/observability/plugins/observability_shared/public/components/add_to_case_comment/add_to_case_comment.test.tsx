@@ -8,7 +8,6 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AddToCaseComment } from '.';
-import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 // Mock i18n
 jest.mock('@kbn/i18n-react', () => ({
@@ -21,28 +20,13 @@ jest.mock('@kbn/i18n-react', () => ({
 }));
 
 describe('AddToCaseComment', () => {
-  const addErrorMock = jest.fn();
-  const notificationsContractMock = notificationServiceMock.createStartContract();
-  const notificationsMock = {
-    ...notificationsContractMock,
-    toasts: {
-      ...notificationsContractMock.toasts,
-      addError: addErrorMock,
-    },
-  };
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('updates the comment when text is entered', () => {
     const onCommentChangeMock = jest.fn();
-    render(
-      <AddToCaseComment
-        comment=""
-        onCommentChange={onCommentChangeMock}
-        notifications={notificationsMock}
-      />
-    );
+    render(<AddToCaseComment comment="" onCommentChange={onCommentChangeMock} />);
 
     fireEvent.change(screen.getByLabelText('Add a comment (optional)'), {
       target: { value: 'New comment' },
