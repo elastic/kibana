@@ -409,8 +409,10 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
 
   const toggleSidebar = useCallback(
     (state: SidebarToggleState) => {
-      const newState = Boolean(isSidebarHidden) && state.isCollapsed === false;
-      state.toggle?.(newState, false);
+      const shouldToggle = (isSidebarHidden ?? false) !== state.isCollapsed;
+      if (shouldToggle) {
+        state.toggle?.(!state.isCollapsed, false);
+      }
     },
     [isSidebarHidden]
   );
