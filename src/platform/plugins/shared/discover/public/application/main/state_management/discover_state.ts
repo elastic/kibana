@@ -16,9 +16,13 @@ import { DataViewType } from '@kbn/data-views-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { merge } from 'rxjs';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
+import { getInitialESQLQuery, getQueryColumnsFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
-import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
+import {
+  isOfAggregateQueryType,
+  isOfQueryType,
+  getKqlFieldNamesFromExpression,
+} from '@kbn/es-query';
 import { isFunction } from 'lodash';
 import type { DiscoverServices } from '../../..';
 import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
@@ -37,6 +41,7 @@ import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 import { getDiscoverGlobalStateContainer } from './discover_global_state_container';
 import type { DiscoverCustomizationContext } from '../../../customizations';
+
 import {
   createDataViewDataSource,
   DataSourceType,
@@ -530,6 +535,16 @@ export function getDiscoverStateContainer({
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
     isUpdate?: boolean
   ) => {
+    let fields;
+
+    if (isOfAggregateQueryType(payload.query)) {
+      fields = getQueryColumnsFromESQLQuery(payload.query.esql);
+    } else if (isOfQueryType(payload.query) && typeof payload.query.query === 'string') {
+      fields = getKqlFieldNamesFromExpression(payload.query?.query);
+    }
+
+    console.log({ fields });
+
     if (isUpdate === false) {
       // remove the search session if the given query is not just updated
       searchSessionManager.removeSearchSessionIdFromURL({ replace: false });
