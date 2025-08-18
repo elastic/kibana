@@ -4,77 +4,97 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
-import '@testing-library/jest-dom';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { NoVulnerabilitiesStates } from './no_vulnerabilities_states';
-import * as useCspSetupStatusApi from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import * as useCspIntegrationLink from '../common/navigation/use_csp_integration_link';
-import * as useAdd3PIntegrationRoute from '../common/api/use_wiz_integration_route';
-import {
-  CNVM_NOT_INSTALLED_ACTION_SUBJ,
-  THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
-} from './test_subjects';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
+import { CNVM_NOT_INSTALLED_ACTION_SUBJ } from './test_subjects';
+import { setupMockServer, startMockServer } from '../test/mock_server/mock_server';
+import { renderWrapper } from '../test/mock_server/mock_server_test_provider';
+import * as statusHandlers from '../../server/routes/status/status.handlers.mock';
 
-jest.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
-jest.mock('../common/navigation/use_csp_integration_link');
-jest.mock('../common/api/use_wiz_integration_route');
+const server = setupMockServer();
 
-describe('NoVulnerabilitiesStates', () => {
-  const cnvmintegrationLink = 'fleet/integrations/cloud_security_posture/add-integration';
-  const thirdPartyIntegrationLink = 'fleet/integrations/wiz/add-integration';
-  const vulnerabilitiesPath = `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`;
+const renderNoVulnerabilitiesStates = (
+  route = `${CLOUD_SECURITY_POSTURE_BASE_PATH}/findings/vulnerabilities`
+) =>
+  renderWrapper(
+    <MemoryRouter initialEntries={[route]}>
+      <IntlProvider>
+        <NoVulnerabilitiesStates />
+      </IntlProvider>
+    </MemoryRouter>
+  );
 
-  beforeAll(() => {
-    (useCspIntegrationLink.useCspIntegrationLink as jest.Mock).mockReturnValue(cnvmintegrationLink);
-    (useAdd3PIntegrationRoute.useAdd3PIntegrationRoute as jest.Mock).mockReturnValue(
-      thirdPartyIntegrationLink
-    );
-  });
+describe('NoVulnerabilitiesStates - using mock server', () => {
+  startMockServer(server);
 
-  beforeEach(() => {
-    (useCspSetupStatusApi.useCspSetupStatusApi as jest.Mock).mockReturnValue({
-      data: {
-        vuln_mgmt: { status: 'not-installed' },
-        indicesDetails: [],
-      },
+  it('should show CNVM integration install prompt when vuln_mgmt is not-installed', async () => {
+    server.use(statusHandlers.notInstalledHandler);
+
+    renderNoVulnerabilitiesStates();
+
+    expect(screen.getByText(/loading/i)).toBeInTheDocument();
+
+    await waitFor(() => {
+      expect(
+        screen.getByText(/Elastic’s Cloud Native Vulnerability Management/i)
+      ).toBeInTheDocument();
     });
 
-    render(
-      <MemoryRouter initialEntries={[vulnerabilitiesPath]}>
-        <IntlProvider>
-          <NoVulnerabilitiesStates />
-        </IntlProvider>
-      </MemoryRouter>
-    );
+    const cnvmButton = screen.getByTestId(CNVM_NOT_INSTALLED_ACTION_SUBJ);
+    expect(cnvmButton).toBeInTheDocument();
+    expect(cnvmButton).toHaveAttribute('href', expect.stringContaining('cloud_security_posture'));
   });
 
-  it('Vulnerabilities - `Add CNVM integration`: should have link element to CNVM integration installation page', async () => {
-    await waitFor(() =>
-      expect(
-        screen.getByText(/Elastic’s Cloud Native\s+Vulnerability Management/i)
-      ).toBeInTheDocument()
+  it('should show third-party integration options when clicking popover button', async () => {
+    server.use(statusHandlers.notInstalledHandler);
+
+    renderNoVulnerabilitiesStates();
+
+    const addIntegrationButton = await waitFor(() =>
+      screen.getByTestId('thirdPartyVulnerabilityIntegrationPopoverButton')
     );
 
-    // Find the button
-    const button = screen.getByTestId(CNVM_NOT_INSTALLED_ACTION_SUBJ);
-    expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('href', expect.stringContaining(cnvmintegrationLink));
-  });
+    await userEvent.click(addIntegrationButton);
 
-  it('Vulnerabilities - `Add Wiz integration`: should have link element to wiz integration installation page', async () => {
-    await waitFor(() =>
-      expect(screen.getByText(/Already using a\s+cloud security product?/i)).toBeInTheDocument()
-    );
-
-    // Find the button
-    const button = screen.getByTestId(
-      THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
-    );
-    expect(button).toBeInTheDocument();
-    expect(button).toHaveAttribute('href', expect.stringContaining(thirdPartyIntegrationLink));
+    await waitFor(() => {
+      expect(screen.getByTestId('integrationOption-wiz')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/wiz/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-qualys')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/qualys_vmdr/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-tenable')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/tenable_io/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-rapid7')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/rapid7_insightvm/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-google_scc')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/google_scc/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-microsoft_365_defender')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/m365_defender/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-aws_security_hub')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/aws/add-integration/securityhub'
+      );
+      expect(screen.getByTestId('integrationOption-aws_inspector')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/aws/add-integration/inspector'
+      );
+    });
   });
 });

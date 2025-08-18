@@ -15,6 +15,7 @@ import * as benchmarksHandlers from '../../../server/routes/benchmarks/benchmark
 import { PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
 import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT } from '../test_subjects';
+import userEvent from '@testing-library/user-event';
 
 const server = setupMockServer();
 
@@ -33,7 +34,9 @@ describe('NoFindingsStates', () => {
 
   it('shows integrations installation prompt with installation links when integration is not-installed', async () => {
     server.use(statusHandlers.notInstalledHandler);
+
     renderNoFindingsStates('cspm', '/app/security/cloud_security_posture/findings/configurations');
+
     expect(screen.getByText(/loading/i)).toBeInTheDocument();
 
     await waitFor(() => {
@@ -60,10 +63,24 @@ describe('NoFindingsStates', () => {
       );
     });
 
+    const addIntegrationButton = await waitFor(() =>
+      screen.getByTestId('thirdPartyMisconfigurationIntegrationPopoverButton')
+    );
+
+    await userEvent.click(addIntegrationButton);
+
     await waitFor(() => {
-      expect(screen.getByRole('link', { name: /add wiz integration/i })).toHaveAttribute(
+      expect(screen.getByTestId('integrationOption-wiz')).toHaveAttribute(
         'href',
         '/app/fleet/integrations/wiz/add-integration'
+      );
+      expect(screen.getByTestId('integrationOption-aws_security_hub')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/aws/add-integration/securityhub'
+      );
+      expect(screen.getByTestId('integrationOption-microsoft_365_defender')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/m365_defender/add-integration'
       );
     });
   });

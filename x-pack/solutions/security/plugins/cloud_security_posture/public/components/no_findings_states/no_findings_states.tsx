@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiLoadingLogo,
   EuiButton,
@@ -17,6 +17,9 @@ import {
   EuiFlexItem,
   EuiImage,
   useEuiTheme,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -35,7 +38,6 @@ import {
   KSPM_NOT_INSTALLED_ACTION_SUBJ,
   NO_FINDINGS_STATUS_TEST_SUBJ,
   THIRD_PARTY_INTEGRATIONS_NO_MISCONFIGURATIONS_FINDINGS_PROMPT,
-  THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from '../test_subjects';
 import { CloudPosturePage, PACKAGE_NOT_INSTALLED_TEST_SUBJECT } from '../cloud_posture_page';
 import type { PostureTypes } from '../../../common/types_old';
@@ -183,8 +185,61 @@ const EmptySecurityFindingsPrompt = () => {
   const { euiTheme } = useEuiTheme();
   const kspmIntegrationLink = useCspIntegrationLink(KSPM_POLICY_TEMPLATE);
   const cspmIntegrationLink = useCspIntegrationLink(CSPM_POLICY_TEMPLATE);
-  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
+
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
+
+  // Pre-fetch all 3rd party integration links upfront
+  const wizLink = useAdd3PIntegrationRoute('wiz');
+  const microsoft365DefenderLink = useAdd3PIntegrationRoute('m365_defender');
+  const awsSecurityHubLink = useAdd3PIntegrationRoute('aws', 'securityhub');
+
+  // Popover state
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const togglePopover = () => setPopoverOpen((open) => !open);
+  const closePopover = () => setPopoverOpen(false);
+
+  const integrationLinks = [
+    { id: 'wiz', label: 'Wiz', href: wizLink },
+    { id: 'aws_security_hub', label: 'AWS Security Hub', href: awsSecurityHubLink },
+    {
+      id: 'microsoft_365_defender',
+      label: 'Microsoft 365 Defender',
+      href: microsoft365DefenderLink,
+    },
+  ]; // filter out missing links
+
+  // Button that toggles the popover
+  const popoverButton = (
+    <EuiButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopover}
+      aria-expanded={isPopoverOpen}
+      aria-haspopup="true"
+      color="primary"
+      fill
+      data-test-subj="thirdPartyMisconfigurationIntegrationPopoverButton"
+      isDisabled={integrationLinks.length === 0}
+    >
+      <FormattedMessage
+        id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.AddIntegrationButtonTitle"
+        defaultMessage="Add Integration"
+      />
+    </EuiButton>
+  );
+
+  // Each option inside the popover
+  const panelItems = integrationLinks.map(({ id, label, href }) => (
+    <EuiContextMenuItem
+      key={id}
+      href={href}
+      target="_self"
+      onClick={closePopover}
+      data-test-subj={`integrationOption-${id}`}
+    >
+      {label}
+    </EuiContextMenuItem>
+  ));
 
   return (
     <EuiFlexGroup>
@@ -202,9 +257,7 @@ const EmptySecurityFindingsPrompt = () => {
               <FormattedMessage
                 id="xpack.csp.cloudPosturePage.packageNotInstalledRenderer.promptTitle"
                 defaultMessage="Elastic’s Cloud Security {lineBreak} Posture Management"
-                values={{
-                  lineBreak: <br />,
-                }}
+                values={{ lineBreak: <br /> }}
               />
             </h2>
           }
@@ -263,6 +316,7 @@ const EmptySecurityFindingsPrompt = () => {
           }
         />
       </EuiFlexItem>
+
       {is3PSupportedPage && (
         <EuiFlexItem>
           <EuiEmptyPrompt
@@ -301,20 +355,15 @@ const EmptySecurityFindingsPrompt = () => {
             actions={
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    fill
-                    href={wizAddIntegrationLink}
-                    isDisabled={!wizAddIntegrationLink}
-                    data-test-subj={
-                      THIRD_PARTY_NO_MISCONFIGURATIONS_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
-                    }
+                  <EuiPopover
+                    id="thirdPartyIntegrationPopover"
+                    button={popoverButton}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    anchorPosition="downCenter"
                   >
-                    <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.addWizIntegrationButtonTitle"
-                      defaultMessage="Add Wiz Integration"
-                    />
-                  </EuiButton>
+                    <EuiContextMenuPanel items={panelItems} />
+                  </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }

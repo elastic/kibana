@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiLoadingLogo,
   EuiEmptyPrompt,
@@ -17,6 +17,9 @@ import {
   EuiImage,
   EuiLink,
   useEuiTheme,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +36,6 @@ import {
   NO_VULNERABILITIES_STATUS_TEST_SUBJ,
   CNVM_NOT_INSTALLED_ACTION_SUBJ,
   THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT,
-  THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON,
 } from './test_subjects';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
@@ -76,8 +78,67 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
 }) => {
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
-  const wizAddIntegrationLink = useAdd3PIntegrationRoute('wiz');
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
+
+  const wizLink = useAdd3PIntegrationRoute('wiz');
+  const googleSccLink = useAdd3PIntegrationRoute('google_scc');
+  const tenableLink = useAdd3PIntegrationRoute('tenable_io');
+  const qualysLink = useAdd3PIntegrationRoute('qualys_vmdr');
+  const rapid7Link = useAdd3PIntegrationRoute('rapid7_insightvm');
+  const microsoft365DefenderLink = useAdd3PIntegrationRoute('m365_defender');
+  const awsSecurityHubLink = useAdd3PIntegrationRoute('aws', 'securityhub');
+  const awsInspectorLink = useAdd3PIntegrationRoute('aws', 'inspector');
+
+  const [isPopoverOpen, setPopoverOpen] = useState(false);
+  const togglePopover = () => setPopoverOpen((open) => !open);
+  const closePopover = () => setPopoverOpen(false);
+
+  // Integration options and their respective dynamic links
+  const integrationLinks = [
+    { id: 'qualys', label: 'Qualys', href: qualysLink },
+    { id: 'tenable', label: 'tenable.io', href: tenableLink },
+    { id: 'rapid7', label: 'Rapid7', href: rapid7Link },
+    { id: 'wiz', label: 'Wiz', href: wizLink },
+    { id: 'aws_security_hub', label: 'AWS Security Hub', href: awsSecurityHubLink },
+    { id: 'aws_inspector', label: 'AWS Inspector', href: awsInspectorLink },
+    { id: 'google_scc', label: 'Google SCC', href: googleSccLink },
+    {
+      id: 'microsoft_365_defender',
+      label: 'Microsoft 365 Defender',
+      href: microsoft365DefenderLink,
+    },
+  ];
+
+  const popoverButton = (
+    <EuiButton
+      iconType="arrowDown"
+      iconSide="right"
+      onClick={togglePopover}
+      aria-expanded={isPopoverOpen}
+      aria-haspopup="true"
+      color="primary"
+      fill
+      data-test-subj="thirdPartyVulnerabilityIntegrationPopoverButton"
+    >
+      <FormattedMessage
+        id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addIntegrationButtonTitle"
+        defaultMessage="Add Integration"
+      />
+    </EuiButton>
+  );
+
+  const panelItems = integrationLinks.map(({ id, label, href }) => (
+    <EuiContextMenuItem
+      key={id}
+      href={href}
+      target="_self"
+      onClick={closePopover}
+      disabled={!href}
+      data-test-subj={`integrationOption-${id}`}
+    >
+      {label}
+    </EuiContextMenuItem>
+  ));
 
   return (
     <EuiFlexGroup>
@@ -95,9 +156,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <FormattedMessage
                 id="xpack.csp.vulnerabilties.intergationNoInstalledEmptyPrompt.promptTitle"
                 defaultMessage="Elastic’s Cloud Native {lineBreak} Vulnerability Management"
-                values={{
-                  lineBreak: <br />,
-                }}
+                values={{ lineBreak: <br /> }}
               />
             </h2>
           }
@@ -143,6 +202,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
           }
         />
       </EuiFlexItem>
+
       {is3PSupportedPage && (
         <EuiFlexItem>
           <EuiEmptyPrompt
@@ -181,20 +241,15 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
             actions={
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>
-                  <EuiButton
-                    color="primary"
-                    fill
-                    href={wizAddIntegrationLink}
-                    isDisabled={!wizAddIntegrationLink}
-                    data-test-subj={
-                      THIRD_PARTY_NO_VULNERABILITIES_FINDINGS_PROMPT_WIZ_INTEGRATION_BUTTON
-                    }
+                  <EuiPopover
+                    id="thirdPartyIntegrationPopover"
+                    button={popoverButton}
+                    isOpen={isPopoverOpen}
+                    closePopover={closePopover}
+                    anchorPosition="downCenter"
                   >
-                    <FormattedMessage
-                      id="xpack.csp.cloudPosturePage.3pIntegrationsNoVulnFindingsPrompt.addWizIntegrationButtonTitle"
-                      defaultMessage="Add Wiz Integration"
-                    />
-                  </EuiButton>
+                    <EuiContextMenuPanel items={panelItems} />
+                  </EuiPopover>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
