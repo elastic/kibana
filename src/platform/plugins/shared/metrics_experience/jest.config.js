@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type LayoutFeatureFlag = 'legacy-fixed' | 'grid';
-export const LAYOUT_FEATURE_FLAG_KEY = 'core.chrome.layoutType';
-export const LAYOUT_DEBUG_FEATURE_FLAG_KEY = 'core.chrome.layoutDebug';
-export type LayoutProjectSideNavVersion = 'v1' | 'v2';
-export const LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY = 'core.chrome.projectSideNav';
+const path = require('path');
+
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: path.resolve(__dirname, '../../../../..'),
+  roots: ['<rootDir>/src/platform/plugins/shared/metrics_experience'],
+};
