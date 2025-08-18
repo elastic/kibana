@@ -371,7 +371,7 @@ describe('Trusted devices form', () => {
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
-        tags: ['policy:some-policy-id']
+        tags: ['policy:some-policy-id'],
       });
       render();
 
@@ -383,7 +383,7 @@ describe('Trusted devices form', () => {
       formProps.mode = 'edit';
       formProps.item = createItem({
         name: 'existing device',
-        tags: ['policy:all']
+        tags: ['policy:all'],
       });
       render();
 
