@@ -200,7 +200,7 @@ export const Graph = memo<GraphProps>(
 
 Graph.displayName = 'Graph';
 
-export const processGraph = (
+const processGraph = (
   nodesModel: NodeViewModel[],
   edgesModel: EdgeViewModel[],
   interactive: boolean

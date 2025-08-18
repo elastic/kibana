@@ -7,6 +7,51 @@
 
 import type { NodeViewModel, EdgeViewModel } from '../types';
 
+export const basicSample = {
+  nodes: [
+    {
+      id: 'A',
+      label: 'A',
+      color: 'primary',
+      shape: 'hexagon',
+      icon: 'user',
+    },
+    {
+      id: 'B',
+      label: 'B',
+      color: 'primary',
+      shape: 'hexagon',
+      icon: 'user',
+    },
+    {
+      id: 'a(A)-b(B)label(IndividualLabel)',
+      label: 'IndividualLabel',
+      source: 'A',
+      target: 'B',
+      color: 'primary',
+      shape: 'label',
+    },
+  ] as NodeViewModel[],
+  edges: [
+    {
+      id: 'a(A)-b(a(A)-b(B)label(IndividualLabel))',
+      source: 'A',
+      sourceShape: 'hexagon',
+      target: 'a(A)-b(B)label(IndividualLabel)',
+      targetShape: 'label',
+      color: 'primary',
+    },
+    {
+      id: 'a(a(A)-b(B)label(IndividualLabel))-b(B)',
+      source: 'a(A)-b(B)label(IndividualLabel)',
+      sourceShape: 'label',
+      target: 'B',
+      targetShape: 'hexagon',
+      color: 'primary',
+    },
+  ] as EdgeViewModel[],
+};
+
 export const graphSample = {
   nodes: [
     {

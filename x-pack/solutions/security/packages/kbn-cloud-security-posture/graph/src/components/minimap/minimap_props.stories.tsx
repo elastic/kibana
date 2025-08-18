@@ -14,12 +14,14 @@ import {
   Background,
   useNodesState,
   useEdgesState,
+  type Node,
+  type Edge,
+  type ReactFlowInstance,
 } from '@xyflow/react';
 import { Minimap as MinimapComp, type MinimapProps as MinimapPropsType } from './minimap';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { SvgDefsMarker } from '../edge/markers';
 import { layoutGraph } from '../graph/layout_graph';
-import { processGraph } from '../graph/graph';
 import {
   DiamondNode,
   EdgeGroupNode,
@@ -30,7 +32,9 @@ import {
   RectangleNode,
 } from '../node';
 import { DefaultEdge } from '../edge';
-import { graphSample } from '../mock/graph_sample';
+import { basicSample } from '../mock/graph_sample';
+import { buildGraphFromViewModels } from '../utils';
+import type { NodeViewModel, EdgeViewModel } from '../types';
 
 const nodeTypes = {
   hexagon: HexagonNode,
@@ -47,12 +51,16 @@ const edgeTypes = {
 };
 
 const WrappedMinimap = (props: MinimapPropsType) => {
-  const { nodes, edges } = graphSample;
-  const { initialNodes, initialEdges } = processGraph(nodes, edges, true);
-  const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
+  const { nodes, edges } = buildGraphFromViewModels(basicSample.nodes, basicSample.edges);
+  const { nodes: layoutedNodes } = layoutGraph(nodes, edges);
+  const [nodesState, _setNodes, onNodesChange] = useNodesState<Node<NodeViewModel>>(layoutedNodes);
+  const [edgesState, _setEdges, onEdgesChange] = useEdgesState<Edge<EdgeViewModel>>(edges);
 
-  const [nodesState, _setNodes, onNodesChange] = useNodesState(layoutedNodes);
-  const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const onInit = (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {
+    setTimeout(() => {
+      xyflow.fitView();
+    }, 30);
+  };
 
   return (
     <>
@@ -62,6 +70,7 @@ const WrappedMinimap = (props: MinimapPropsType) => {
         edges={edgesState}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onInit={onInit}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         fitView
