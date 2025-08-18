@@ -12,7 +12,12 @@ import { css, euiStyled } from '@kbn/kibana-react-plugin/common';
 import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
 import { IndicatorFieldValue } from '../common/field_value';
 import { IndicatorFieldLabel } from '../common/field_label';
-import { IndicatorValueActions } from './indicator_value_actions';
+import {
+  CellActionsMode,
+  SecurityCellActions,
+  SecurityCellActionsTrigger,
+} from '../../../../../common/components/cell_actions';
+import { getIndicatorFieldAndValue } from '../../utils/field_value';
 
 /**
  * Show actions wrapper on hover. This is a helper component, limited only to Block
@@ -56,24 +61,25 @@ export const IndicatorBlock: FC<IndicatorBlockProps> = ({
   indicator,
   'data-test-subj': dataTestSubj,
 }) => {
+  const { key, value } = getIndicatorFieldAndValue(indicator, field);
+
   return (
-    <EuiPanel {...panelProps}>
-      <VisibleOnHover data-test-subj={`${dataTestSubj}Item`}>
-        <EuiText>
-          <IndicatorFieldLabel field={field} />
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiText size="s">
-          <IndicatorFieldValue indicator={indicator} field={field} />
-          <span className="actionsWrapper">
-            <IndicatorValueActions
-              indicator={indicator}
-              field={field}
-              data-test-subj={dataTestSubj}
-            />
-          </span>
-        </EuiText>
-      </VisibleOnHover>
-    </EuiPanel>
+    <SecurityCellActions
+      data={{ field: key, value }}
+      mode={CellActionsMode.HOVER_DOWN}
+      triggerId={SecurityCellActionsTrigger.DEFAULT}
+    >
+      <EuiPanel {...panelProps}>
+        <VisibleOnHover data-test-subj={`${dataTestSubj}Item`}>
+          <EuiText>
+            <IndicatorFieldLabel field={field} />
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiText size="s">
+            <IndicatorFieldValue indicator={indicator} field={field} />
+          </EuiText>
+        </VisibleOnHover>
+      </EuiPanel>
+    </SecurityCellActions>
   );
 };
