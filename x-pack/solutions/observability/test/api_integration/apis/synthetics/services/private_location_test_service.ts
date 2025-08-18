@@ -5,16 +5,16 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
-import { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
+import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { KibanaSupertestProvider } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,
 } from '@kbn/synthetics-plugin/common/saved_objects/private_locations';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export const INSTALLED_VERSION = '1.4.2';
 

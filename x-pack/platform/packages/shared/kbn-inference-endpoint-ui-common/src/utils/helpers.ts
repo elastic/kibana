@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
-import { Config, ConfigEntryView, FieldType, InferenceProvider } from '../types/types';
-import type { FieldsConfiguration } from '../types/types';
+import { FieldType } from '../types/types';
+import type {
+  FieldsConfiguration,
+  Config,
+  ConfigEntryView,
+  InferenceProvider,
+} from '../types/types';
 import * as LABELS from '../translations';
 
 export interface TaskTypeOption {

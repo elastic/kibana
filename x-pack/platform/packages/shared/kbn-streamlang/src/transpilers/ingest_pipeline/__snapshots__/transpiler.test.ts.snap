@@ -168,6 +168,7 @@ Object {
     },
     Object {
       "grok": Object {
+        "ecs_compatibility": "v1",
         "field": "body.message",
         "patterns": Array [
           "%{IP:attributes.client_ip} - %{WORD:attributes.method}",

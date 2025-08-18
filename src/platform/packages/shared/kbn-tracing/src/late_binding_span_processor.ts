@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Context } from '@opentelemetry/api';
+import type { Context } from '@opentelemetry/api';
 import { pull } from 'lodash';
-import { tracing } from '@elastic/opentelemetry-node/sdk';
+import type { tracing } from '@elastic/opentelemetry-node/sdk';
 
 const noop = async () => {};
 

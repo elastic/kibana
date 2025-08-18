@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import {
+import type {
   BufferFlushEvent,
-  ChatCompletionErrorCode,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  ChatCompletionErrorCode,
   StreamingChatResponseEventType,
   isChatCompletionError,
 } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
-  Observable,
-  OperatorFunction,
   catchError,
   concatMap,
   defer,
@@ -32,16 +33,16 @@ import {
   toArray,
 } from 'rxjs';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { isAxiosError } from 'axios';
 import { inspect } from 'util';
-import {
+import type {
   Message,
-  MessageRole,
   ObservabilityAIAssistantScreenContext,
 } from '@kbn/observability-ai-assistant-plugin/common/types';
-import { AssistantScope } from '@kbn/ai-assistant-common';
-import { HttpHandler } from '@kbn/core/public';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
+import type { HttpHandler } from '@kbn/core/public';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 

@@ -6,8 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { LicenseType } from '@kbn/licensing-types';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import type { GetColumnsByTypeFn, ISuggestionItem, Location } from '../../commands_registry/types';
 import { listCompleteItem } from '../../commands_registry/complete_items';
@@ -29,7 +29,7 @@ import {
   getFunctionDefinition,
 } from './functions';
 import { removeFinalUnknownIdentiferArg, getOverlapRange } from './shared';
-import { ESQLAstItem, ESQLFunction } from '../../types';
+import type { ESQLAstItem, ESQLFunction } from '../../types';
 import { getTestFunctions } from './test_functions';
 
 export function getOperatorSuggestion(fn: FunctionDefinition): ISuggestionItem {
