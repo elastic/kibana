@@ -27,7 +27,7 @@ import type {
   SyntheticsMonitorStatusRuleParams as StatusRuleParams,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
-import { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';

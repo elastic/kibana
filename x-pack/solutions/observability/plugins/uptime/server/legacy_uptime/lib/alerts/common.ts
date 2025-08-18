@@ -19,7 +19,7 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import type { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { ALERT_GROUPING } from '@kbn/rule-data-utils';
-import { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
 import type { UptimeCommonState } from '../../../../common/runtime_types';
