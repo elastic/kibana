@@ -6,10 +6,10 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { IndexDataEnricher } from '../services';
-import { Index } from '..';
-import { RouteDependencies } from '../types';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { IndexDataEnricher } from '../services';
+import type { Index } from '..';
+import type { RouteDependencies } from '../types';
 import type { MeteringStats } from './types';
 
 interface MeteringStatsResponse {

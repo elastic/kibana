@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface TemplateManagementOptions {

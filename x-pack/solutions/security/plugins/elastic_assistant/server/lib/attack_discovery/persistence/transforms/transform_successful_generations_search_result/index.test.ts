@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsAggregate } from '@elastic/elasticsearch/lib/api/types';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { transformSuccessfulGenerationsSearchResult } from '.';

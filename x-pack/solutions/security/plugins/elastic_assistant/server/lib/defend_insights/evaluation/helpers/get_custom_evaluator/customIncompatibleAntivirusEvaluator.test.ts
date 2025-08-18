@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { ExampleOutput } from './customIncompatibleAntivirusEvaluator';
 import {
   customIncompatibleAntivirusEvaluator,
-  ExampleOutput,
   isValidExampleOutput,
 } from './customIncompatibleAntivirusEvaluator';
 import { EVALUATOR_ERRORS } from './constants';
-import { Example, Run } from 'langsmith';
+import type { Example, Run } from 'langsmith';
 
 describe('customIncompatibleAntivirusEvaluator', () => {
   describe('isValidExampleOutput', () => {

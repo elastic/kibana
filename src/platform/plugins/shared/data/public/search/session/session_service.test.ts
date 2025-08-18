@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ISessionService, SessionService } from './session_service';
+import type { ISessionService } from './session_service';
+import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';
 import { getSessionsClientMock } from './mocks';
 import { BehaviorSubject } from 'rxjs';
 import { SearchSessionState } from './search_session_state';
 import { createNowProviderMock } from '../../now_provider/mocks';
-import { NowProviderInternalContract } from '../../now_provider';
+import type { NowProviderInternalContract } from '../../now_provider';
 import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import type { ISessionsClient, SearchSessionSavedObject } from './sessions_client';
-import { CoreStart } from '@kbn/core/public';
-import { SearchUsageCollector } from '../..';
+import type { CoreStart } from '@kbn/core/public';
+import type { SearchUsageCollector } from '../..';
 import { createSearchUsageCollectorMock } from '../collectors/mocks';
 
 const mockSavedObject: SearchSessionSavedObject = {

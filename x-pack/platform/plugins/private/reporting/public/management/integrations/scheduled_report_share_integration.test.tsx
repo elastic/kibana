@@ -14,7 +14,7 @@ import {
   createScheduledReportShareIntegration,
 } from './scheduled_report_share_integration';
 import { queryClient } from '../../query_client';
-import { ExportShareConfig } from '@kbn/share-plugin/public/types';
+import type { ExportShareConfig } from '@kbn/share-plugin/public/types';
 
 jest.mock('../hooks/use_get_reporting_health_query', () => ({
   getKey: jest.fn(() => 'reportingHealthKey'),

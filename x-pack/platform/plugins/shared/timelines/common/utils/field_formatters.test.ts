@@ -6,7 +6,7 @@
  */
 
 import { eventDetailsFormattedFields, eventHit } from '@kbn/securitysolution-t-grid';
-import { EventHit } from '../search_strategy';
+import type { EventHit } from '../search_strategy';
 import { getDataFromFieldsHits } from './field_formatters';
 
 describe('Events Details Helpers', () => {

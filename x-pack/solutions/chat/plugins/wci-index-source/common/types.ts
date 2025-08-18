@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationConfiguration } from '@kbn/wci-common';
+import type { IntegrationConfiguration } from '@kbn/wci-common';
 
 export interface WCIIndexSourceConfiguration extends IntegrationConfiguration {
   index: string;
