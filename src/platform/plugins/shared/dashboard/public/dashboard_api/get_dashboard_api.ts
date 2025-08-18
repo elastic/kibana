@@ -36,8 +36,9 @@ import {
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
+import { initializeFiltersManager } from './filters_manager';
 
-export function getDashboardApi({
+export async function getDashboardApi({
   creationOptions,
   incomingEmbeddable,
   initialState,
@@ -80,6 +81,7 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
+  const filterManager = await initializeFiltersManager(unifiedSearchManager, layoutManager);
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewModeManager,
     creationOptions,
@@ -114,6 +116,7 @@ export function getDashboardApi({
     ...dataViewsManager.api,
     ...layoutManager.api,
     ...settingsManager.api,
+    ...filterManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,

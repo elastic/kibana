@@ -67,6 +67,18 @@ export function initializeLayoutManager(
   // Set up panel state manager
   // --------------------------------------------------------------------------------------
   const children$ = new BehaviorSubject<DashboardChildren>({});
+  const untilAllChildrenAreAvailable = () =>
+    new Promise<void>((resolve) => {
+      const expectedChildCount = initialPanels.length;
+
+      const subscription = children$.subscribe((children) => {
+        if (Object.keys(children).length === expectedChildCount) {
+          subscription.unsubscribe();
+          resolve();
+        }
+      });
+    });
+
   const { layout: initialLayout, childState: initialChildState } = deserializeLayout(
     initialPanels,
     getReferences
@@ -333,6 +345,7 @@ export function initializeLayoutManager(
       layout$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
+      untilAllChildrenAreAvailable,
       startComparing$: (
         lastSavedState$: BehaviorSubject<DashboardState>
       ): Observable<{ panels?: DashboardState['panels'] }> => {

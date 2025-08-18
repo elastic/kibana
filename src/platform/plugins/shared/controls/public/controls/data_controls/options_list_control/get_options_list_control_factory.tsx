@@ -16,6 +16,7 @@ import {
   PublishingSubject,
   titleComparators,
 } from '@kbn/presentation-publishing';
+import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
@@ -72,18 +73,38 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
       const titlesManager = initializeTitleManager(state);
+      const selectionsManager = initializeSelectionsManager(state);
 
-      const dataControlManager = initializeDataControlManager<EditorState>(
+      const dataControlManager = await initializeDataControlManager<EditorState>(
         uuid,
         OPTIONS_LIST_CONTROL,
         OptionsListStrings.control.getDisplayName(),
         state,
         editorStateManager.getLatestState,
         editorStateManager.reinitializeState,
-        parentApi
+        parentApi,
+        selectionsManager.api.hasInitialSelections,
+        (dataView: DataView) => {
+          // TODO clean up this logic.
+          let newFilter: Filter | undefined;
+          const field = dataView.getFieldByName(state.fieldName);
+          if (dataView && field) {
+            if (state.existsSelected) {
+              newFilter = buildExistsFilter(field, dataView);
+            } else if (state.selectedOptions && state.selectedOptions.length > 0) {
+              newFilter =
+                state.selectedOptions.length === 1
+                  ? buildPhraseFilter(field, state.selectedOptions[0], dataView)
+                  : buildPhrasesFilter(field, state.selectedOptions, dataView);
+            }
+          }
+          if (newFilter) {
+            newFilter.meta.key = field?.name;
+            if (state.exclude) newFilter.meta.negate = true;
+          }
+          return newFilter;
+        }
       );
-
-      const selectionsManager = initializeSelectionsManager(state);
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
@@ -432,10 +453,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           selectionsManager.api.setSelectedOptions(remainingSelections);
         },
       };
-
-      if (selectionsManager.api.hasInitialSelections) {
-        await dataControlManager.api.untilFiltersReady();
-      }
 
       return {
         api,

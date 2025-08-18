@@ -14,11 +14,11 @@ import {
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesFilters,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
-import { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -32,7 +32,7 @@ export type DataControlApi = HasEditCapabilities &
   PublishesBlockingError &
   PublishesField &
   PublishesDataLoading &
-  PublishesAsyncFilters & {
+  PublishesFilters & {
     setDataLoading: (loading: boolean) => void;
     setBlockingError: (error: Error | undefined) => void;
   };

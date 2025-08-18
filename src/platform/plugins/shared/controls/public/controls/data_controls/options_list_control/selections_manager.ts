@@ -53,7 +53,9 @@ export function initializeSelectionsManager(initialState: SelectionsState) {
     ...selectionsManager,
     api: {
       ...selectionsManager.api,
-      hasInitialSelections: initialState.selectedOptions?.length || initialState.existsSelected,
+      hasInitialSelections: Boolean(
+        initialState.selectedOptions?.length || initialState.existsSelected
+      ),
     },
   };
 }
