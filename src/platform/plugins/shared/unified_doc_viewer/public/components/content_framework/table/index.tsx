@@ -99,7 +99,7 @@ export function ContentFrameworkTable({
     );
   };
 
-  if (!hit.flattened) {
+  if (Object.keys(hit.flattened).length === 0) {
     return null;
   }
 
