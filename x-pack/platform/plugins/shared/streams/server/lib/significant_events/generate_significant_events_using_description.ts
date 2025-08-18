@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import type { Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
-import {
-  getIndexPatternsForStream,
-  type GeneratedSignificantEventQuery,
-  type Streams,
-} from '@kbn/streams-schema';
+import { type GeneratedSignificantEventQuery, type Streams } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { isKqlQueryValid } from '../../routes/internal/esql/query_helpers';
+import { analyzeDataset } from './helpers/analyze_dataset';
 import KQL_GUIDE from './prompts/kql_guide.text';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
@@ -34,7 +30,7 @@ interface Dependencies {
   logger: Logger;
 }
 
-export async function generateUsingZeroShot(
+export async function generateSignificantEventQueriesUsingDescription(
   params: Params,
   dependencies: Dependencies
 ): Promise<GeneratedSignificantEventQuery[]> {
@@ -44,7 +40,7 @@ export async function generateUsingZeroShot(
     currentDate = new Date(),
     shortLookback = DEFAULT_SHORT_LOOKBACK,
   } = params;
-  const { inferenceClient, esClient, logger } = dependencies;
+  const { inferenceClient, esClient } = dependencies;
 
   const identifiedSystem = definition.description;
   if (isEmpty(identifiedSystem)) {
@@ -57,24 +53,14 @@ export async function generateUsingZeroShot(
   const start = mstart.valueOf();
   const end = mend.valueOf();
 
-  const analysis = await describeDataset({
-    esClient: esClient.client,
-    start,
-    end,
-    index: getIndexPatternsForStream(definition),
-  });
+  const { categorizationField, short } = await analyzeDataset(
+    { start, end, definition },
+    { esClient }
+  );
 
-  const short = sortAndTruncateAnalyzedFields(analysis);
-
-  const messageField = analysis.fields.find((f) => f.name === 'message' || f.name === 'body.text');
-
-  if (!messageField) {
+  if (!categorizationField) {
     return [];
   }
-
-  logger.debug(() => {
-    return `${JSON.stringify(short)}`;
-  });
 
   const { output: zeroShotQueries } = await inferenceClient.output({
     id: 'generate_queries_from_system',
@@ -86,7 +72,7 @@ ${identifiedSystem}
 
 ## Context
 - Index Name: ${definition.name}
-- Sample logs field: ${messageField.name}
+- Sample logs field: ${categorizationField}
 
 ## Dataset analysis
 Following is the list of fields found in the dataset with their types, count and values:
@@ -96,9 +82,9 @@ ${KQL_GUIDE}
 
 ## Task: Generate Significant Event Queries
 
-Based on your deep expertise of the identified system, generate Elasticsearch KQL queries
-to detect the most significant events for this type of system using exclusively the following field in the KQL query:
-${messageField.name}
+Based on your deep expertise of the {identified_system}, generate Elasticsearch KQL queries using the {kql_guide}
+to detect the most significant events for this type of system using the following field in the KQL query:
+${categorizationField}.
 
 Generate KQL queries that identify **operationally significant patterns** - events that indicate:
 1. **Critical Errors**: System failures, crashes, or critical errors specific to {identified_system}
@@ -108,7 +94,7 @@ Generate KQL queries that identify **operationally significant patterns** - even
 5. **Data Integrity**: Corruption, failed transactions, data loss indicators
 6. **Anomalous Behavior**: Unusual patterns specific to {identified_system}
 
-Remember to focus exclusively on queries that are specific to the identified system.
+Remember to focus exclusively on queries that are specific to the {identified_system} and follow the {kql_guide}.
 `,
     schema: {
       type: 'object',

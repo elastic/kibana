@@ -20,10 +20,10 @@ import {
   STREAMS_API_PRIVILEGES,
   STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE,
 } from '../../../common/constants';
-import { generateSignificantEventDefinitions } from '../../lib/significant_events/generate_significant_events';
+import { generateSignificantEventQueriesUsingLogPatterns } from '../../lib/significant_events/generate_significant_events_using_log_patterns';
 import { previewSignificantEvents } from '../../lib/significant_events/preview_significant_events';
 import { readSignificantEventsFromAlertsIndices } from '../../lib/significant_events/read_significant_events_from_alerts_indices';
-import { generateUsingZeroShot } from '../../lib/significant_events/zero_shot';
+import { generateSignificantEventQueriesUsingDescription } from '../../lib/significant_events/generate_significant_events_using_description';
 import { SecurityError } from '../../lib/streams/errors/security_error';
 import type { StreamsServer } from '../../types';
 import { createServerRoute } from '../create_server_route';
@@ -227,8 +227,8 @@ const generateSignificantEventsRoute = createServerRoute({
 
     const selectedAlgorithmFn =
       params.query.method === 'log_patterns'
-        ? generateSignificantEventDefinitions
-        : generateUsingZeroShot;
+        ? generateSignificantEventQueriesUsingLogPatterns
+        : generateSignificantEventQueriesUsingDescription;
 
     return fromRxjs(
       selectedAlgorithmFn(
