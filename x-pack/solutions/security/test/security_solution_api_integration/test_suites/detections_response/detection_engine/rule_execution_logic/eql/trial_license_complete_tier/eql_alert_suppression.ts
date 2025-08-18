@@ -73,9 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
   ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.group.index'] == null);
 
   // NOTE: Add to second quality gate after feature is GA
-  // Failing: See https://github.com/elastic/kibana/issues/202940
-  // Failing: See https://github.com/elastic/kibana/issues/202940
-  describe.skip('@ess @serverless Alert Suppression for EQL rules', () => {
+  describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -3181,7 +3179,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/202940
+      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();
