@@ -6,9 +6,9 @@
  */
 
 import { createContext, useContext } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { UiActionsEnhancedDynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
-import { StartDependencies } from '../plugin';
+import type { CoreStart } from '@kbn/core/public';
+import type { UiActionsEnhancedDynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { StartDependencies } from '../plugin';
 
 export interface UiActionsExampleAppContextValue {
   appBasePath: string;

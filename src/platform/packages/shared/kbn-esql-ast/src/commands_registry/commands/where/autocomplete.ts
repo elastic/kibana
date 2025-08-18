@@ -10,12 +10,8 @@ import type { ESQLCommand, ESQLSingleAstItem } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
 import { suggestForExpression } from '../../../definitions/utils/autocomplete/helpers';
 import { isExpressionComplete, getExpressionType } from '../../../definitions/utils/expressions';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ICommandCallbacks,
-} from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext, Location } from '../../types';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export async function autocomplete(
