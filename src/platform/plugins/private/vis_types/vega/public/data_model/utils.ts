@@ -8,7 +8,7 @@
  */
 
 import compactStringify from 'json-stringify-pretty-compact';
-import { CoreTheme } from '@kbn/core/public';
+import type { CoreTheme } from '@kbn/core/public';
 import { getEuiThemeVars } from '@kbn/ui-theme';
 
 export class Utils {

@@ -17,12 +17,12 @@ import {
 } from '@elastic/eui';
 import React, { useReducer, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import useToggle from 'react-use/lib/useToggle';
 import { SamplePreviewTable } from './sample_preview_table';
 import { FieldSummary } from './field_summary';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 import { AdvancedFieldMappingOptions } from './advanced_field_mapping_options';
 
 export interface SchemaEditorFlyoutProps {
