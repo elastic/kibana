@@ -11,7 +11,6 @@ import {
   EuiAccordion,
   EuiDataGrid,
   EuiDataGridProps,
-  EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
