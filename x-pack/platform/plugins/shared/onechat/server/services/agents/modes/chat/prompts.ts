@@ -31,7 +31,7 @@ export const getActPrompt = ({
       }
       return `\n\n### Tool-call guidance\n- Tool calls remaining: ${remainingCalls}. Current tool call count: ${currentToolCallCount}. If current_tool_call_count > 5 and you have not found a relevant document or relevant index, stop calling tools and ask the user for more information (be explicit about what's missing).`;
     }
-  return `\n\n### Tool-call guidance\n- No tool calls remain. If you already have a grounded answer, provide it now (concise, with brief citations). If you have partial findings, summarize them. Otherwise, ask 1–2 targeted questions to obtain the specific details needed to answer.`;
+    return `\n\n### Tool-call guidance\n- No tool calls remain. If you already have a grounded answer, provide it now (concise, with brief citations). If you have partial findings, summarize them. Otherwise, ask 1–2 targeted questions to obtain the specific details needed to answer.`;
   })();
   return [
     [

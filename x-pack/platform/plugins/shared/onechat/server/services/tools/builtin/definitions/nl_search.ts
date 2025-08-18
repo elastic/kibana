@@ -28,8 +28,7 @@ const searchDslSchema = z.object({
 export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof searchDslSchema> => {
   return {
     id: builtinToolIds.naturalLanguageSearch,
-    description:
-      `
+    description: `
       Analyzes natural language questions to automatically find relevant indices, generate appropriate ES|QL queries, and execute them to answer analytical questions. This tool handles the complete workflow from question to answer, including index discovery, query generation, and execution. 
       Ideal for:
       - Statistical analysis and aggregations (counts, sums, averages, percentiles)

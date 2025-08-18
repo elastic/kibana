@@ -22,7 +22,8 @@ const StateAnnotation = Annotation.Root({
   }),
   // track how many tool calls have been executed so far
   toolCallCount: Annotation<number>({
-    reducer: (a?: number, b?: number) => (typeof a === 'number' ? a : 0) + (typeof b === 'number' ? b : 0),
+    reducer: (a?: number, b?: number) =>
+      (typeof a === 'number' ? a : 0) + (typeof b === 'number' ? b : 0),
     default: () => 0,
   }),
   // outputs
@@ -83,11 +84,13 @@ export const createAgentGraph = ({
   const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
     // Increment by the number of tool calls issued in the last AI message
-    const lastMessage = state.addedMessages[state.addedMessages.length - 1] as AIMessage | undefined;
+    const lastMessage = state.addedMessages[state.addedMessages.length - 1] as
+      | AIMessage
+      | undefined;
     const increment = lastMessage?.tool_calls?.length ?? 1;
 
     return {
-  addedMessages: [...toolNodeResult],
+      addedMessages: [...toolNodeResult],
       // increment tool call counter by the number of tool calls just executed
       toolCallCount: increment,
     };
