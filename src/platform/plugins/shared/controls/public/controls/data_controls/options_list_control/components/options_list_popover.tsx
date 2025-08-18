@@ -26,7 +26,6 @@ const optionsListPopoverStyles = {
 
 export const OptionsListPopover = () => {
   const { componentApi, displaySettings } = useOptionsListContext();
-
   const [field, availableOptions, invalidSelections, loading] = useBatchedPublishingSubjects(
     componentApi.field$,
     componentApi.availableOptions$,
