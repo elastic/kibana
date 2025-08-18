@@ -63,7 +63,7 @@ export const OptionsListPopoverSuggestions = ({
     componentApi.totalCardinality$,
     componentApi.dataLoading$,
     componentApi.fieldFormatter,
-    componentApi.parentApi.allowExpensiveQueries$
+    componentApi.allowExpensiveQueries$
   );
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -162,7 +162,8 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
-      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+      // if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
+      if (searchTechnique === 'exact') return option.label;
 
       return (
         <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
@@ -170,7 +171,8 @@ export const OptionsListPopoverSuggestions = ({
         </EuiHighlight>
       );
     },
-    [searchTechnique, allowExpensiveQueries]
+    // [searchTechnique, allowExpensiveQueries]
+    [searchTechnique]
   );
 
   useEffect(() => {

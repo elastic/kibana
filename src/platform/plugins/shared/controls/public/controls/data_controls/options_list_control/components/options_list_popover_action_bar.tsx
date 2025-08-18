@@ -96,7 +96,7 @@ export const OptionsListPopoverActionBar = ({
     componentApi.totalCardinality$,
     componentApi.field$,
     componentApi.fieldName$,
-    componentApi.parentApi.allowExpensiveQueries$,
+    componentApi.allowExpensiveQueries$,
     componentApi.availableOptions$,
     componentApi.dataLoading$,
     componentApi.singleSelect$

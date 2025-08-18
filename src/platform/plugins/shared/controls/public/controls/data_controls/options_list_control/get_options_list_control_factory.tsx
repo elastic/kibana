@@ -34,6 +34,7 @@ import type {
   OptionsListSuccessResponse,
 } from '../../../../common/options_list';
 import { getSelectionAsFieldType, isValidSearch } from '../../../../common/options_list';
+import { coreServices } from '../../../services/kibana_services';
 import {
   defaultDataControlComparators,
   initializeDataControlManager,
@@ -64,7 +65,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
     type: OPTIONS_LIST_CONTROL,
     buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
       const state = initialState.rawState;
-
       const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
         state.sort ?? OPTIONS_LIST_DEFAULT_SORT
       );
@@ -84,7 +84,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       );
 
       const selectionsManager = initializeSelectionsManager(state);
-
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
       );
@@ -327,6 +326,21 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
         setSelectedOptions: selectionsManager.api.setSelectedOptions,
       });
 
+      // we do not want to delay the embeddable creation waiting for this, so do not await promise
+      const allowExpensiveQueries$ = new BehaviorSubject<boolean>(true);
+      coreServices.http
+        .get<{
+          allowExpensiveQueries: boolean;
+        }>('/internal/controls/getExpensiveQueriesSetting', {
+          version: '1',
+        })
+        .catch(() => {
+          return { allowExpensiveQueries: true }; // default to true on error
+        })
+        .then(({ allowExpensiveQueries }) => {
+          if (!allowExpensiveQueries) allowExpensiveQueries$.next(false);
+        });
+
       const componentApi: OptionsListComponentApi = {
         ...api,
         ...dataControlManager.api,
@@ -431,6 +445,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           );
           selectionsManager.api.setSelectedOptions(remainingSelections);
         },
+        allowExpensiveQueries$,
       };
 
       if (selectionsManager.api.hasInitialSelections) {
