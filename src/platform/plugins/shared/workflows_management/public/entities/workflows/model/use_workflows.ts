@@ -10,7 +10,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { WorkflowListDto } from '@kbn/workflows';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowsSearchParams } from '../../../types';
+import type { WorkflowsSearchParams } from '../../../types';
 
 export function useWorkflows(params: WorkflowsSearchParams) {
   const { http } = useKibana().services;
