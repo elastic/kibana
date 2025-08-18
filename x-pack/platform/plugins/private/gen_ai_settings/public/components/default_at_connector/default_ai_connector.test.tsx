@@ -10,7 +10,7 @@ function SettingsProbe({ onValue }: { onValue: (v: any) => void }) {
     const value = useSettingsContext();
     React.useEffect(() => {
         onValue(value);
-    }, [value]);
+    }, [value, onValue]);
     return null;
 }
 
@@ -100,8 +100,11 @@ describe("DefaultAIConnector", () => {
             expect(screen.getByText("Pre configured Connector")).toBeVisible();
             expect(screen.getByText("Custom Connector 1")).toBeVisible();
             
+            // eslint-disable-next-line no-bitwise
             expect(screen.getByText("Pre-configured").compareDocumentPosition(screen.getByText("Pre configured Connector")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            // eslint-disable-next-line no-bitwise
             expect(screen.getByText("Custom connectors").compareDocumentPosition(screen.getByText("Custom Connector 1")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+            // eslint-disable-next-line no-bitwise
             expect(screen.getByText("Pre configured Connector").compareDocumentPosition(screen.getByText("Custom connectors")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
         });
         

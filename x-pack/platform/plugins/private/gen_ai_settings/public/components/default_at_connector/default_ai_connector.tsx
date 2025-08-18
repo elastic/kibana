@@ -63,22 +63,19 @@ const getOptions = (connectors: UseGenAiConnectorsResult): EuiComboBoxOptionOpti
 
 const getOptionsByValues = (value: string, options: EuiComboBoxOptionOption<string>[]): EuiComboBoxOptionOption<string>[] => {
 
-    const getOptions = (option: EuiComboBoxOptionOption<string>): EuiComboBoxOptionOption<string>[] => {
+    const getOptionsByValuesHelper = (option: EuiComboBoxOptionOption<string>): EuiComboBoxOptionOption<string>[] => {
         if (option.options === undefined && option.value === value) {
             // If the option has no sub-options and its value is in the selected values, include it
             return [option];
         }
         if (option.options) {
             // If the option has sub-options, recursively get their options
-            return option.options.flatMap(getOptions);
+            return option.options.flatMap(getOptionsByValuesHelper);
         }
         return [];
     }
 
-    return options.flatMap(option => {
-        const options = getOptions(option)
-        return options;
-    });
+    return options.flatMap(getOptionsByValuesHelper);
 };
 
 
