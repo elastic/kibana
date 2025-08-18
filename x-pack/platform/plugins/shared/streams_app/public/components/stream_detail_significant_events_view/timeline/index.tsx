@@ -21,8 +21,8 @@ import { i18n } from '@kbn/i18n';
 import { range } from 'lodash';
 import moment from 'moment';
 import React, { useMemo } from 'react';
-import { useKibana } from '../../hooks/use_kibana';
-import { StreamsChartTooltip } from '../streams_chart_tooltip';
+import { useKibana } from '../../../hooks/use_kibana';
+import { StreamsChartTooltip } from '../../streams_chart_tooltip';
 
 export interface TimelineEvent {
   id: string;
