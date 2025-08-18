@@ -29,7 +29,7 @@ describe('Priority', () => {
   it('calls onChange when P1 is selected', async () => {
     render(<Priority {...options} />);
 
-    await userEvent.selectOptions(screen.getByTestId('jiraServiceManagement-prioritySelect'), 'P1');
+    await userEvent.selectOptions(screen.getByTestId('jsm-prioritySelect'), 'P1');
 
     await waitFor(() =>
       expect(onChange.mock.calls[0]).toMatchInlineSnapshot(`

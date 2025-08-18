@@ -42,13 +42,13 @@ describe('JiraServiceManagementConnector', () => {
 
   const defaultCreateAlertExpect = {
     method: 'post',
-    url: 'https://example.com/v2/alerts',
+    url: 'https://api.atlassian.com/jsm/ops/integration/v2/alerts',
     headers: { Authorization: 'GenieKey 123', 'Content-Type': 'application/json' },
   };
 
   const createCloseAlertExpect = (alias: string) => ({
     method: 'post',
-    url: `https://example.com/v2/alerts/${alias}/close?identifierType=alias`,
+    url: `https://api.atlassian.com/jsm/ops/integration/v2/alerts/${alias}/close?identifierType=alias`,
     headers: { Authorization: 'GenieKey 123', 'Content-Type': 'application/json' },
   });
 
@@ -151,12 +151,12 @@ describe('JiraServiceManagementConnector', () => {
   });
 
   it('calls request with the correct arguments for closing an alert', async () => {
-    await connector.closeAlert({ user: 'sam', alias: '111' }, connectorUsageCollector);
+    await connector.closeAlert({ alias: '111' }, connectorUsageCollector);
 
     expect(requestMock.mock.calls[0][0]).toEqual({
       ...ignoredRequestFields,
       ...createCloseAlertExpect('111'),
-      data: { user: 'sam' },
+      data: {},
       connectorUsageCollector,
     });
   });

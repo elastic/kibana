@@ -35,7 +35,7 @@ describe('DisplayMoreOptions', () => {
   it('calls toggleShowingMoreOptions when clicked', async () => {
     render(<DisplayMoreOptions {...options} />);
 
-    await userEvent.click(screen.getByTestId('jiraServiceManagement-display-more-options'));
+    await userEvent.click(screen.getByTestId('jsm-display-more-options'));
 
     expect(toggleShowingMoreOptions).toHaveBeenCalledTimes(1);
   });

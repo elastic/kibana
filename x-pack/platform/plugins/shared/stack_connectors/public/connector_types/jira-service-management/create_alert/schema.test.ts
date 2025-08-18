@@ -37,29 +37,11 @@ describe('schema', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
     });
 
-    it('throws an error when additional fields are present in responders with name field than in the schema', () => {
-      expect(() =>
-        decodeCreateAlert({
-          message: 'hi',
-          responders: [{ name: 'sam', type: 'team', invalidField: 'scott' }],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
-    });
-
     it('throws an error when additional fields are present in responders with id field than in the schema', () => {
       expect(() =>
         decodeCreateAlert({
           message: 'hi',
           responders: [{ id: 'id', type: 'team', invalidField: 'scott' }],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
-    });
-
-    it('throws an error when additional fields are present in visibleTo with name and type=team', () => {
-      expect(() =>
-        decodeCreateAlert({
-          message: 'hi',
-          visibleTo: [{ name: 'sam', type: 'team', invalidField: 'scott' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
     });
@@ -78,15 +60,6 @@ describe('schema', () => {
         decodeCreateAlert({
           message: 'hi',
           visibleTo: [{ id: 'id', type: 'user', invalidField: 'scott' }],
-        })
-      ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
-    });
-
-    it('throws an error when additional fields are present in visibleTo with username and type=user', () => {
-      expect(() =>
-        decodeCreateAlert({
-          message: 'hi',
-          visibleTo: [{ username: 'sam', type: 'user', invalidField: 'scott' }],
         })
       ).toThrowErrorMatchingInlineSnapshot(`"invalid keys \\"invalidField\\""`);
     });

@@ -16,9 +16,7 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 const actionConnector = {
   actionTypeId: '.jira-service-management',
   name: 'jira-service-management',
-  config: {
-    apiUrl: 'https://test.com',
-  },
+  config: {},
   secrets: {
     apiKey: 'secret',
   },
@@ -43,42 +41,13 @@ describe('JiraServiceManagementConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    expect(screen.getByTestId('config.apiUrl-input')).toBeInTheDocument();
     expect(screen.getByTestId('secrets.apiKey-input')).toBeInTheDocument();
-  });
-
-  it('populates the url field with the default Jira Service Management url if none is set', async () => {
-    const connector = {
-      actionTypeId: '.jira-service-management',
-      name: 'jira-service-management',
-      config: {},
-      secrets: {},
-      isDeprecated: false,
-    };
-
-    render(
-      <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
-        <JiraServiceManagementConnectorFields
-          readOnly={false}
-          isEdit={false}
-          registerPreSubmitValidator={() => {}}
-        />
-      </ConnectorFormTestProvider>
-    );
-
-    expect(screen.getByTestId('config.apiUrl-input')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('https://api.atlassian.com/jsm')).toBeInTheDocument();
   });
 
   describe('Validation', () => {
     beforeEach(() => {
       jest.clearAllMocks();
     });
-
-    const tests: Array<[string, string]> = [
-      ['config.apiUrl-input', 'not-valid'],
-      ['secrets.apiKey-input', ''],
-    ];
 
     it('connector validation succeeds when connector config is valid', async () => {
       const { getByTestId } = render(
@@ -100,9 +69,7 @@ describe('JiraServiceManagementConnectorFields renders', () => {
           data: {
             actionTypeId: '.jira-service-management',
             name: 'jira-service-management',
-            config: {
-              apiUrl: 'https://test.com',
-            },
+            config: {},
             secrets: {
               apiKey: 'secret',
             },
@@ -113,7 +80,8 @@ describe('JiraServiceManagementConnectorFields renders', () => {
       });
     });
 
-    it.each(tests)('validates correctly %p', async (field, value) => {
+    it('validates correctly secrets.apiKey-input', async () => {
+      const field = 'secrets.apiKey-input';
       const res = render(
         <ConnectorFormTestProvider connector={actionConnector} onSubmit={onSubmit}>
           <JiraServiceManagementConnectorFields
@@ -125,12 +93,6 @@ describe('JiraServiceManagementConnectorFields renders', () => {
       );
 
       await userEvent.clear(res.getByTestId(field));
-      if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
-          delay: 10,
-        });
-      }
-
       await userEvent.click(res.getByTestId('form-test-provide-submit'));
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
