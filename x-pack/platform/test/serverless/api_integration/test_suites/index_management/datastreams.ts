@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { DataStream } from '@kbn/index-management-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
+import type { DataStream } from '@kbn/index-management-plugin/common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { InternalRequestHeader, RoleCredentials } from '../../../shared/services';
 
 const API_BASE_PATH = '/api/index_management';
 

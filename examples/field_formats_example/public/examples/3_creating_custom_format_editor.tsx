@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import {
+import type {
   FieldFormatEditor,
   FieldFormatEditorFactory,
   IndexPatternFieldEditorSetup,

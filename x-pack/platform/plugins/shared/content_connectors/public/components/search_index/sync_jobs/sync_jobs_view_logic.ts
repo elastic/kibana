@@ -5,27 +5,28 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { isEqual } from 'lodash';
 import moment from 'moment';
 
-import { Pagination } from '@elastic/eui';
-import { ConnectorSyncJob, pageToPagination, Paginate } from '@kbn/search-connectors';
+import type { Pagination } from '@elastic/eui';
+import type { ConnectorSyncJob, Paginate } from '@kbn/search-connectors';
+import { pageToPagination } from '@kbn/search-connectors';
 
-import { HttpSetup } from '@kbn/core/public';
-import {
-  CancelSyncApiActions,
-  CancelSyncApiLogic,
-} from '../../../api/connector/cancel_sync_api_logic';
-import {
-  FetchSyncJobsApiLogic,
+import type { HttpSetup } from '@kbn/core/public';
+import type { CancelSyncApiActions } from '../../../api/connector/cancel_sync_api_logic';
+import { CancelSyncApiLogic } from '../../../api/connector/cancel_sync_api_logic';
+import type {
   FetchSyncJobsArgs,
   FetchSyncJobsResponse,
 } from '../../../api/connector/fetch_sync_jobs_api_logic';
+import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
-import { SyncsLogic, SyncsLogicActions } from '../../shared/header_actions/syncs_logic';
-import { Actions } from '../../../api/api_logic/create_api_logic';
+import type { SyncsLogicActions } from '../../shared/header_actions/syncs_logic';
+import { SyncsLogic } from '../../shared/header_actions/syncs_logic';
+import type { Actions } from '../../../api/api_logic/create_api_logic';
 import { Status } from '../../../../common/types/api';
 
 const UI_REFRESH_INTERVAL = 2000;

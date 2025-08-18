@@ -16,6 +16,7 @@
     "@kbn/i18n",
     "@kbn/test-jest-helpers",
     "@kbn/shared-ux-markdown",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

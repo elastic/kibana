@@ -8,9 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { CreateWorkflowCommandSchema } from '@kbn/workflows';
-import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_management_api';
+import type { WorkflowsManagementApi } from './workflows_management_api';
+import { type GetWorkflowsParams } from './workflows_management_api';
 
 export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logger: Logger) {
   router.get(

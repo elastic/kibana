@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryRulesQueryRuleCriteria } from '@elastic/elasticsearch/lib/api/types';
 import { EuiText, EuiBadge, EuiTextColor, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 

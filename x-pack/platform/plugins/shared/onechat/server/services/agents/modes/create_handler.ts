@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { AgentMode, AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
+import { AgentMode } from '@kbn/onechat-common';
 import type { AgentHandlerFn } from '@kbn/onechat-server';
 import { runAgent } from './run_agent';
 
