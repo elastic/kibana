@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 export enum SUB_FEATURE {
   endpointSecurity,

@@ -10,10 +10,10 @@ import type { Map as MbMap } from '@kbn/mapbox-gl';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_LABEL_SIZE } from '../vector_style_defaults';
 import { LABEL_BORDER_SIZES } from '../../../../../common/constants';
-import { LabelBorderSizeOptions } from '../../../../../common/descriptor_types';
-import { VECTOR_STYLES } from '../../../../../common/constants';
-import { StaticSizeProperty } from './static_size_property';
-import { DynamicSizeProperty } from './dynamic_size_property';
+import type { LabelBorderSizeOptions } from '../../../../../common/descriptor_types';
+import type { VECTOR_STYLES } from '../../../../../common/constants';
+import type { StaticSizeProperty } from './static_size_property';
+import type { DynamicSizeProperty } from './dynamic_size_property';
 
 const SMALL_SIZE = 1 / 16;
 const MEDIUM_SIZE = 1 / 8;

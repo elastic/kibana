@@ -112,7 +112,7 @@
     "@kbn/restorable-state",
     "@kbn/esql-editor",
     "@kbn/core-application-browser",
-    "@kbn/file-upload-plugin"
+    "@kbn/file-upload-plugin",
   ],
   "exclude": ["target/**/*"]
 }

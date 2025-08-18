@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   FieldDefinitionConfig,
   FieldDefinitionConfigAdvancedParameters,
   Streams,
 } from '@kbn/streams-schema';
-import { TableColumnName } from './constants';
+import type { TableColumnName } from './constants';
 
 export type SchemaFieldStatus = 'inherited' | 'mapped' | 'unmapped';
 export type SchemaFieldType = FieldDefinitionConfig['type'];

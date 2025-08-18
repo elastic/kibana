@@ -11,7 +11,7 @@ import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { MonitorTypeBadge } from '../../../../common/components/monitor_type_badge';
 import * as labels from '../../../management/monitor_list_table/labels';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
 export const MetricItemBody = ({ monitor }: { monitor: OverviewStatusMetaData }) => {
   const tags = monitor.tags;

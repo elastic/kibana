@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { InstallResponse, StatusResponse } from '../../../common';
+import type { InstallResponse, StatusResponse } from '../../../common';
 
 export interface InstallationAPI {
   getStatus(): Promise<StatusResponse>;

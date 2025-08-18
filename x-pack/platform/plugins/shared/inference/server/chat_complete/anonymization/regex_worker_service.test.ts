@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnonymizationRule } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/inference-common';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { RegexWorkerService } from './regex_worker_service';
-import { AnonymizationWorkerConfig } from '../../config';
+import type { AnonymizationWorkerConfig } from '../../config';
 
 const regexEmailRule: AnonymizationRule = {
   type: 'RegExp',

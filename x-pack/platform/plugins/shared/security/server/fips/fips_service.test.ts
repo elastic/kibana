@@ -19,7 +19,7 @@ import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { SecurityLicenseFeatures } from '@kbn/security-plugin-types-common';
 
 import type { FipsServiceSetupInternal, FipsServiceSetupParams } from './fips_service';

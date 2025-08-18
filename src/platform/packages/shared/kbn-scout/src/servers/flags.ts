@@ -9,10 +9,10 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { resolve } from 'path';
-import { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
+import type { FlagsReader, FlagOptions } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { CliSupportedServerModes } from '../types';
+import type { CliSupportedServerModes } from '../types';
 
 export type StartServerOptions = ReturnType<typeof parseServerFlags>;
 

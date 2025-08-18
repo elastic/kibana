@@ -10,7 +10,7 @@ import type { EuiSuperSelectOption } from '@elastic/eui';
 import React from 'react';
 import styled from '@emotion/styled';
 import { isEmpty } from 'lodash/fp';
-import { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import { EMPTY_PROMPT } from './translations';
 
