@@ -104,7 +104,14 @@ export const HEADERS_SWITCH = i18n.translate(
 export const HEADERS_TITLE = i18n.translate(
   'xpack.stackConnectors.components.auth.httpHeadersTitle',
   {
-    defaultMessage: 'Headers in use',
+    defaultMessage: 'HTTP headers',
+  }
+);
+
+export const HEADERS_SUBTITLE = i18n.translate(
+  'xpack.stackConnectors.components.auth.httpHeadersSubtitle',
+  {
+    defaultMessage: 'Add custom HTTP headers to be sent with API requests',
   }
 );
 
@@ -119,8 +126,29 @@ export const VALUE_LABEL = i18n.translate(
   }
 );
 
+export const CONFIG_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.configHeaderLabel',
+  {
+    defaultMessage: 'Config',
+  }
+);
+
+export const HEADER_TYPE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.headerTypeLabel',
+  {
+    defaultMessage: 'Type',
+  }
+);
+
+export const SECRET_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.auth.secretHeaderLabel',
+  {
+    defaultMessage: 'Secret',
+  }
+);
+
 export const ADD_BUTTON = i18n.translate('xpack.stackConnectors.components.auth.addHeaderButton', {
-  defaultMessage: 'Add',
+  defaultMessage: 'Add header',
 });
 
 export const DELETE_BUTTON = i18n.translate(

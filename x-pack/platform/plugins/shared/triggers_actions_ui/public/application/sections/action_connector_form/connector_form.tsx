@@ -70,6 +70,7 @@ interface InferenceConnectorProviderConfig {
 
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
+  console.log('form deserializer, data: ', data);
   if (
     data.actionTypeId === '.inference' &&
     // explicit check to see if this field exists as it only exists in serverless
@@ -101,16 +102,40 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
   }
 
   const webhookData = data as { config: { headers?: Record<string, string> } };
-  const headers = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
+  /**
+   * access to the form data
+   * be -> ui
+   * merge the headers using a new api to get the keys from the secrets.secretheaders
+   */
+  // const headers = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
+  //   key,
+  //   value,
+  // }));
+
+  const configHeaders = Object.entries(webhookData?.config?.headers ?? {}).map(([key, value]) => ({
     key,
     value,
+    type: 'config' as const,
   }));
 
+  const secretHeaders = [
+    {
+      key: 'secretKey',
+      value: '',
+      type: 'secret',
+    },
+  ];
+
+  const headers = [...configHeaders, ...secretHeaders];
+
+  console.log('deserializer, configHeaders: ', configHeaders);
+  console.log('deserializer, secretHeaders: ', secretHeaders);
+
   return {
-    ...data,
-    config: {
-      ...data.config,
-      headers: isEmpty(headers) ? undefined : headers,
+    ...(data as any),
+    __internal__: {
+      ...((data as any).__internal__ ?? {}),
+      headers,
     },
   };
 };
@@ -118,6 +143,7 @@ const formDeserializer = (data: ConnectorFormSchema): ConnectorFormSchema => {
 // TODO: Remove when https://github.com/elastic/kibana/issues/133107 is resolved
 const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
   // Temp solution for inference - connector framework will be updated with ability for connector to add its own serializer/deserializer
+  console.log('form serializer, formData: ', formData);
   if (
     formData.actionTypeId === '.inference' &&
     // explicit check to see if this field exists as it only exists in serverless
@@ -154,26 +180,65 @@ const formSerializer = (formData: ConnectorFormSchema): ConnectorFormSchema => {
     return formData;
   }
 
+  // const testData = formData as {
+  //   headers?: Array<{
+  //     key: 'string';
+  //     value: 'string';
+  //     type: 'config' | 'secret';
+  //   }>;
+  // };
+
   const webhookFormData = formData as {
     config: { headers?: Array<{ key: string; value: string }> };
+    __internal__?: {
+      headers?: Array<{
+        key: string;
+        value: string;
+        type: 'config' | 'secret';
+      }>;
+    };
   };
-  const headers = (webhookFormData?.config?.headers ?? []).reduce(
-    (acc, header) => ({
-      ...acc,
-      [header.key]: header.value,
-    }),
-    {}
-  );
+
+  const headers = webhookFormData?.__internal__?.headers ?? [];
+
+  const configHeaders = headers
+    .filter((header) => header.type === 'config' && header.key)
+    .reduce((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {} as Record<string, string>);
+
+  const secretHeaders = headers
+    .filter((header) => header.type === 'secret' && header.key)
+    .reduce((acc, { key, value }) => {
+      acc[key] = value;
+      return acc;
+    }, {} as Record<string, string>);
+
+  /**
+   * ui -> be
+   * split the secrets to get the headers
+   * check if i have access to __internal
+   * console.log
+   * not internal, rename to headers and convert
+   * only for webhook, cases webhook
+   * array -> records
+   * split the headers
+   */
 
   return {
     ...formData,
     config: {
       ...formData.config,
-      headers: isEmpty(headers)
+      headers: isEmpty(configHeaders)
         ? formData.actionTypeId !== '.gen-ai'
           ? null
           : undefined
-        : headers,
+        : configHeaders,
+    },
+    secrets: {
+      ...formData.secrets,
+      secretHeaders: isEmpty(secretHeaders) ? undefined : secretHeaders,
     },
   };
 };
