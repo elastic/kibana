@@ -41,6 +41,7 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
+  AlertAttachmentUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -449,6 +450,52 @@ export const patchAlertComment = async ({
   });
 
   return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
+export const deleteAlertComment = async ({
+  caseId,
+  alertId: alertIdToRemove,
+  alertAttachment,
+  signal,
+}: {
+  caseId: string;
+  alertId: string;
+  alertAttachment: AlertAttachmentUI;
+  signal?: AbortSignal;
+}): Promise<void | CaseUI> => {
+  const { alertId, index, rule, version, id, owner } = alertAttachment;
+  if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
+    const alertIdx = alertId.indexOf(alertIdToRemove);
+    alertId.splice(alertIdx, 1);
+    index.splice(alertIdx, 1);
+    if (alertId.length === 0) {
+      return deleteComment({
+        caseId,
+        commentId: alertAttachment.id,
+        signal,
+      });
+    } else {
+      return patchAlertComment({
+        caseId,
+        commentUpdate: {
+          type: AttachmentType.alert,
+          alertId,
+          index,
+          rule,
+          owner,
+          id,
+          version,
+        },
+        signal,
+      });
+    }
+  } else {
+    return deleteComment({
+      caseId,
+      commentId: alertAttachment.id,
+      signal,
+    });
+  }
 };
 
 export const deleteComment = async ({
