@@ -22,14 +22,12 @@ export const openDataControlEditor = <
   controlType,
   controlId,
   initialDefaultPanelTitle,
-  onSave,
   parentApi,
 }: {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
-  onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
   parentApi: unknown;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
@@ -70,7 +68,7 @@ export const openDataControlEditor = <
       return (
         <DataControlEditor<State>
           ariaLabelledBy="control-editor-title-input"
-          controlGroupApi={controlGroupApi}
+          parentApi={parentApi}
           initialState={initialState}
           controlType={controlType}
           controlId={controlId}
@@ -78,9 +76,8 @@ export const openDataControlEditor = <
           onCancel={(state) => {
             onCancel(state, closeFlyout);
           }}
-          onSave={(state, selectedControlType) => {
+          onSave={() => {
             closeFlyout();
-            onSave({ type: selectedControlType, state });
           }}
         />
       );

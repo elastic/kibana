@@ -9,14 +9,14 @@
 
 import { TIME_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { untilPluginStartServicesReady } from '../../services/kibana_services';
-import { registerControlFactory } from '../../control_factory_registry';
+import { registerControlPanelType } from '../../actions/control_panel_actions';
 
 export function registerTimeSliderControl() {
-  registerControlFactory(TIME_SLIDER_CONTROL, async () => {
-    const [{ getTimesliderControlFactory }] = await Promise.all([
-      import('../../controls_module'),
-      untilPluginStartServicesReady(),
-    ]);
-    return getTimesliderControlFactory();
-  });
+  // registerControlPanelType(TIME_SLIDER_CONTROL, async () => {
+  //   const [{ getTimesliderControlFactory }] = await Promise.all([
+  //     import('../../controls_module'),
+  //     untilPluginStartServicesReady(),
+  //   ]);
+  //   return getTimesliderControlFactory();
+  // });
 }

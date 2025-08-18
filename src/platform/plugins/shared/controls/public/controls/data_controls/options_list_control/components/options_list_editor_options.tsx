@@ -72,11 +72,10 @@ export const OptionsListEditorOptions = ({
   initialState,
   field,
   updateState,
-  controlGroupApi,
 }: CustomOptionsComponentProps<OptionsListControlState>) => {
-  const allowExpensiveQueries = useStateFromPublishingSubject(
-    controlGroupApi.allowExpensiveQueries$
-  );
+  // const allowExpensiveQueries = useStateFromPublishingSubject(
+  //   controlGroupApi.allowExpensiveQueries$
+  // );
 
   const [singleSelect, setSingleSelect] = useState<boolean>(initialState.singleSelect ?? false);
   const [runPastTimeout, setRunPastTimeout] = useState<boolean>(
@@ -142,7 +141,8 @@ export const OptionsListEditorOptions = ({
           name="selectionType"
         />
       </EuiFormRow>
-      {allowExpensiveQueries && compatibleSearchTechniques.length > 1 && (
+      {/* // allowExpensiveQueries &&  */}
+      {compatibleSearchTechniques.length > 1 && (
         <EuiFormRow
           label={OptionsListStrings.editor.getSearchOptionsTitle()}
           data-test-subj="optionsListControl__searchOptionsRadioGroup"

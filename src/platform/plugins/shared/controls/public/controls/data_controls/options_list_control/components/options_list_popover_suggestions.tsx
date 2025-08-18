@@ -162,8 +162,7 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
-      // if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
-      if (searchTechnique === 'exact') return option.label;
+      if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
 
       return (
         <EuiHighlight search={option.key === 'exists-option' ? '' : searchStringValue}>
@@ -171,8 +170,7 @@ export const OptionsListPopoverSuggestions = ({
         </EuiHighlight>
       );
     },
-    // [searchTechnique, allowExpensiveQueries]
-    [searchTechnique]
+    [searchTechnique, allowExpensiveQueries]
   );
 
   useEffect(() => {

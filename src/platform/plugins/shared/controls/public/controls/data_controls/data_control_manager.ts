@@ -39,7 +39,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
   typeDisplayName: string,
   state: DefaultDataControlState,
   getEditorState: () => EditorState,
-  setEditorState: (state: Partial<EditorState>) => void,
+  setEditorState: (state: Partial<EditorState>) => void, // TODO: Remove this
   parentApi: unknown,
   willHaveInitialFilter?: boolean,
   getInitialFilter?: (dataView: DataView) => Filter | undefined
@@ -152,20 +152,6 @@ export const initializeDataControlManager = async <EditorState extends object = 
 
     // open the editor to get the new state
     openDataControlEditor<DefaultDataControlState & EditorState>({
-      onSave: ({ type: newType, state: newState }) => {
-        if (newType === controlType) {
-          dataControlStateManager.reinitializeState(newState);
-          setEditorState(newState);
-        } else {
-          // replace the control with a new one of the updated type
-          if (apiIsPresentationContainer(parentApi)) {
-            parentApi.replacePanel(controlId, {
-              panelType: newType,
-              serializedState: { rawState: newState },
-            });
-          }
-        }
-      },
       initialState: {
         ...initialState,
       },

@@ -9,15 +9,14 @@
 
 import { RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import { untilPluginStartServicesReady } from '../../../services/kibana_services';
-import { registerControlFactory } from '../../../control_factory_registry';
+import { registerControlPanelType } from '../../../actions/control_panel_actions';
 
 export function registerRangeSliderControl() {
-  registerControlFactory(RANGE_SLIDER_CONTROL, async () => {
-    const [{ getRangesliderControlFactory }] = await Promise.all([
-      import('../../../controls_module'),
-      untilPluginStartServicesReady(),
-    ]);
-
-    return getRangesliderControlFactory();
-  });
+  // registerControlPanelType(RANGE_SLIDER_CONTROL, async () => {
+  //   const [{ getRangesliderControlFactory }] = await Promise.all([
+  //     import('../../../controls_module'),
+  //     untilPluginStartServicesReady(),
+  //   ]);
+  //   return getRangesliderControlFactory();
+  // });
 }

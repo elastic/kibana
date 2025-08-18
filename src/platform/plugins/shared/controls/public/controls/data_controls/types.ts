@@ -18,7 +18,6 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { DefaultDataControlState } from '../../../common';
-import { ControlGroupApi } from '../../control_group/types';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 
@@ -44,7 +43,6 @@ export interface CustomOptionsComponentProps<
   field: DataViewField;
   updateState: (newState: Partial<State>) => void;
   setControlEditorValid: (valid: boolean) => void;
-  controlGroupApi: ControlGroupApi;
 }
 
 interface DataControlField {

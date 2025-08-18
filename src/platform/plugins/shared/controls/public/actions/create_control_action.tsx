@@ -7,43 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { type EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, type EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { OptionsListControlState } from '../../common/options_list';
-import { ADD_OPTIONS_LIST_ACTION_ID } from './constants';
-import { OptionsListControlApi } from '../controls/data_controls/options_list_control/types';
+import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
+import { ACTION_CREATE_CONTROL } from './constants';
 
-export const createOptionsListAction = (): ActionDefinition<EmbeddableApiContext> => ({
-  id: ADD_OPTIONS_LIST_ACTION_ID,
+export const createControlAction = (): ActionDefinition<EmbeddableApiContext> => ({
+  id: ACTION_CREATE_CONTROL,
   order: 0,
-  getIconType: () => 'editorChecklist',
+  getIconType: () => 'controlsHorizontal',
   isCompatible: async ({ embeddable }) => apiCanAddNewPanel(embeddable),
   execute: async ({ embeddable }) => {
     if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
-    embeddable.addNewPanel<OptionsListControlState, OptionsListControlApi>(
-      {
-        panelType: OPTIONS_LIST_CONTROL,
-        serializedState: {
-          rawState: {
-            dataViewId: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
-            fieldName: 'Carrier',
-          },
-        },
+    const parentDataViewId = apiPublishesDataViews(embeddable)
+      ? embeddable.dataViews$.value?.[0]?.id
+      : undefined;
+
+    openDataControlEditor({
+      initialState: {
+        /** 
+          TODO: We probably don't want to hardcode these - in the old version of controls,
+          the last used values were persisted. Maybe we could use browser storage? :shrug:
+        */
+        grow: true,
+        width: 'medium',
+        dataViewId: parentDataViewId,
       },
-      true
-    );
+      parentApi: embeddable,
+    });
   },
   getDisplayName: () =>
     i18n.translate('optionsListcontrol.displayNameAriaLabel', {
-      defaultMessage: 'Options list control',
+      defaultMessage: 'Control',
     }),
 
   getDisplayNameTooltip: () =>
     i18n.translate('optionsListcontrol.tooltip', {
-      defaultMessage: 'Add an options list control.',
+      defaultMessage: 'Add a control to your dashboard.',
     }),
 });

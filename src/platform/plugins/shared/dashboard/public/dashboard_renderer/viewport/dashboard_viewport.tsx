@@ -18,7 +18,7 @@ import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
+// import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
@@ -113,7 +113,7 @@ export const DashboardViewport = ({
       })}
       css={styles.wrapper}
     >
-      {viewMode !== 'print' ? (
+      {/* {viewMode !== 'print' ? (
         <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
           <EmbeddableRenderer<object, ControlGroupApi>
             key={dashboardApi.uuid}
@@ -130,7 +130,7 @@ export const DashboardViewport = ({
             onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
           />
         </div>
-      ) : null}
+      ) : null} */}
       {fullScreenMode && (
         <EuiPortal>
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />

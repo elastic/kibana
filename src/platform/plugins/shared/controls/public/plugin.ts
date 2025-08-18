@@ -17,6 +17,7 @@ import { setKibanaServices } from './services/kibana_services';
 
 import type { ControlsPluginSetupDeps, ControlsPluginStartDeps } from './types';
 import { registerActions } from './actions/register_actions';
+import { addControlMenuTrigger } from './actions/control_panel_actions';
 
 export class ControlsPlugin
   implements Plugin<void, void, ControlsPluginSetupDeps, ControlsPluginStartDeps>
@@ -26,6 +27,8 @@ export class ControlsPlugin
     _setupPlugins: ControlsPluginSetupDeps
   ) {
     const { embeddable } = _setupPlugins;
+
+    _setupPlugins.uiActions.registerTrigger(addControlMenuTrigger);
 
     registerOptionsListControl(embeddable);
     registerRangeSliderControl();

@@ -19,7 +19,7 @@ import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-const
 
 import { type DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
-import { getAllControlTypes, getControlFactory } from '../../control_factory_registry';
+import { getAllControlTypes, getControlPanelType } from '../../actions/control_panel_actions';
 import type { ControlGroupApi } from '../../control_group/types';
 import type { ControlFactory } from '../types';
 import { DataControlEditor } from './data_control_editor';
@@ -125,7 +125,7 @@ describe('Data control editor', () => {
 
   beforeAll(() => {
     (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
-    (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]());
+    (getControlPanelType as jest.Mock).mockImplementation((key) => mockRegistry[key]());
   });
 
   describe('creating a new control', () => {
@@ -174,7 +174,7 @@ describe('Data control editor', () => {
           } as DataControlFactory),
       };
       (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(tempRegistry));
-      (getControlFactory as jest.Mock).mockImplementation((key) => tempRegistry[key]());
+      (getControlPanelType as jest.Mock).mockImplementation((key) => tempRegistry[key]());
 
       const controlEditor = await mountComponent({});
       const menu = controlEditor.getByTestId('controlTypeMenu');
@@ -187,7 +187,7 @@ describe('Data control editor', () => {
       expect(menu.children[4].textContent).toEqual('Search');
 
       (getAllControlTypes as jest.Mock).mockReturnValue(Object.keys(mockRegistry));
-      (getControlFactory as jest.Mock).mockImplementation((key) => mockRegistry[key]());
+      (getControlPanelType as jest.Mock).mockImplementation((key) => mockRegistry[key]());
     });
 
     test('selecting a keyword field - can only create an options list control', async () => {

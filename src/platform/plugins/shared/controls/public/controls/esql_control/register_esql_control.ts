@@ -9,14 +9,14 @@
 
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import { untilPluginStartServicesReady } from '../../services/kibana_services';
-import { registerControlFactory } from '../../control_factory_registry';
+import { registerControlPanelType } from '../../actions/control_panel_actions';
 
 export function registerESQLControl() {
-  registerControlFactory(ESQL_CONTROL, async () => {
-    const [{ getESQLControlFactory }] = await Promise.all([
-      import('../../controls_module'),
-      untilPluginStartServicesReady(),
-    ]);
-    return getESQLControlFactory();
-  });
+  // registerControlPanelType(ESQL_CONTROL, async () => {
+  //   const [{ getESQLControlFactory }] = await Promise.all([
+  //     import('../../controls_module'),
+  //     untilPluginStartServicesReady(),
+  //   ]);
+  //   return getESQLControlFactory();
+  // });
 }
