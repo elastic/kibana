@@ -11,11 +11,17 @@ import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { EndpointIntegrationFleetError } from './errors';
 import { getControlledArtifactCutoffDate } from '../../../common/endpoint/utils/controlled_artifact_rollout';
 
-export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) => {
+export const validateEndpointPackagePolicy = (
+  inputs: NewPackagePolicyInput[],
+  operation: 'update' | 'create' = 'create'
+) => {
   const input = inputs.find((i) => i.type === 'endpoint');
 
   // An elastic defend policy MUST have an input with expected policy and manifest data
-  if (!input?.config?.policy?.value || !input?.config?.artifact_manifest?.value) {
+  if (
+    operation === 'update' &&
+    (!input?.config?.policy?.value || !input?.config?.artifact_manifest?.value)
+  ) {
     throw new EndpointIntegrationFleetError(
       `Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required.`
     );
