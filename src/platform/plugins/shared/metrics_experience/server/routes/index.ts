@@ -7,5 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*\}\}/g;
-export const UNFINISHED_MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*$/g;
+import { dimensionsRoutes } from './dimensions/route';
+import { metricDataApi as metricDataRoutes } from './api/data';
+import { fieldsRoutes } from './fields/route';
+
+export const routeRepository = {
+  ...dimensionsRoutes,
+  ...fieldsRoutes,
+  ...metricDataRoutes, // TODO: Remove once we integrate with Lens for the charts
+};
+
+export type MetricsExperienceRouteRepository = typeof routeRepository;

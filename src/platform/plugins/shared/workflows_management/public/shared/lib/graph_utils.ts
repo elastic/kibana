@@ -19,3 +19,16 @@ export function getAllPredecessors(graph: graphlib.Graph, nodeId: string): strin
     ...getAllPredecessors(graph, predecessor),
   ]);
 }
+
+export function getTriggerLabel(triggerType: string) {
+  switch (triggerType) {
+    case 'manual':
+      return 'Manual';
+    case 'alert':
+      return 'Alert';
+    case 'scheduled':
+      return 'Scheduled';
+    default:
+      return triggerType;
+  }
+}
