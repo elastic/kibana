@@ -10,7 +10,6 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPanel,
-  EuiSelect,
   EuiSpacer,
   EuiSuperSelect,
 } from '@elastic/eui';

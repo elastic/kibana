@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiSelect, EuiSuperSelect } from '@elastic/eui';
+import { EuiPanel, EuiSuperSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HeaderSection } from '../../../../../common/components/header_section';
 import { getLensAttributes } from './get_lens_attributes';
