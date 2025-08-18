@@ -719,17 +719,16 @@ export class CaseUserActionService {
       page: 1,
       perPage: 1,
       sortField: defaultSortField,
-      search: Object.keys(UserActionActions)
-        .filter((action) => action !== 'delete')
-        .join('|'),
-      searchFields: ['action'],
       aggs: CaseUserActionService.buildUserActionStatsAgg(),
     });
 
     const result = {
       total: response.total ?? 0,
+      total_deletions: response.aggregations?.deletions?.doc_count ?? 0,
       total_comments: 0,
+      total_comment_deletions: 0,
       total_other_actions: 0,
+      total_other_action_deletions: 0,
     };
 
     response.aggregations?.totals.buckets.forEach(({ key, doc_count: docCount }) => {
@@ -738,7 +737,14 @@ export class CaseUserActionService {
       }
     });
 
+    response.aggregations?.deletions.deletions.buckets.forEach(({ key, doc_count: docCount }) => {
+      if (key === 'user') {
+        result.total_comment_deletions = docCount;
+      }
+    });
+
     result.total_other_actions = result.total - result.total_comments;
+    result.total_other_action_deletions = result.total_deletions - result.total_comment_deletions;
 
     return result;
   }
@@ -752,6 +758,21 @@ export class CaseUserActionService {
         terms: {
           field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
           size: 100,
+        },
+      },
+      deletions: {
+        filter: {
+          term: {
+            [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.action`]: UserActionActions.delete,
+          },
+        },
+        aggs: {
+          deletions: {
+            terms: {
+              field: `${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.comment.type`,
+              size: 100,
+            },
+          },
         },
       },
     };
