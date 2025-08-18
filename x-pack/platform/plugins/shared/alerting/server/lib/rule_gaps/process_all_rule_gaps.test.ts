@@ -36,6 +36,22 @@ const createGap = (ruleId: string, unfilledIntervals: Array<ReturnType<typeof ra
   } as unknown as Gap;
 };
 
+const getProcessGapsBatchImplementation =
+  (processedGapsCount: Record<string, number>) => async (gaps, limits: Record<string, number>) => {
+    const groupedGaps = groupBy(gaps, 'ruleId');
+    const processedGapsCountCurrentIteration: Record<string, number> = {};
+
+    Object.keys(groupedGaps).forEach((ruleId) => {
+      processedGapsCountCurrentIteration[ruleId] = limits[ruleId]
+        ? Math.min(limits[ruleId], groupedGaps[ruleId].length)
+        : groupedGaps[ruleId].length;
+
+      processedGapsCount[ruleId] += processedGapsCountCurrentIteration[ruleId];
+    });
+
+    return processedGapsCountCurrentIteration;
+  };
+
 const generateTestCaseData = (iterations: number, ruleIds: string[]) => {
   const pageSize = 500;
   const oneMinuteMs = 60 * 1000;
@@ -241,20 +257,9 @@ describe('processAllRuleGaps', () => {
       return acc;
     }, {} as Record<string, number>);
     beforeEach(async () => {
-      processGapsBatchMock.mockImplementation(async (gaps, limits: Record<string, number>) => {
-        const groupedGaps = groupBy(gaps, 'ruleId');
-        const processedGapsCountCurrentIteration: Record<string, number> = {};
-
-        Object.keys(groupedGaps).forEach((ruleId) => {
-          processedGapsCountCurrentIteration[ruleId] = limits[ruleId]
-            ? Math.min(limits[ruleId], groupedGaps[ruleId].length)
-            : groupedGaps[ruleId].length;
-
-          processedGapsCount[ruleId] += processedGapsCountCurrentIteration[ruleId];
-        });
-
-        return processedGapsCountCurrentIteration;
-      });
+      processGapsBatchMock.mockImplementation(
+        getProcessGapsBatchImplementation(processedGapsCount)
+      );
       findGapsSearchReturnValues.forEach((returnValue) =>
         findGapsSearchAfterMock.mockResolvedValueOnce(returnValue)
       );
@@ -298,11 +303,14 @@ describe('processAllRuleGaps', () => {
     // Make it stop after the first result
     findGapsSearchReturnValues[0].searchAfter = null;
     const { start, end } = searchRange;
-    let processedGapsCount = 0;
+    const processedGapsCount = ruleIds.reduce((acc, ruleId) => {
+      acc[ruleId] = 0;
+      return acc;
+    }, {} as Record<string, number>);
     beforeEach(async () => {
-      processGapsBatchMock.mockImplementation(async (gaps) => {
-        processedGapsCount += gaps.length;
-      });
+      processGapsBatchMock.mockImplementation(
+        getProcessGapsBatchImplementation(processedGapsCount)
+      );
       findGapsSearchAfterMock.mockImplementation(() => {
         return {
           data: [],
