@@ -60,8 +60,9 @@ describe('WorkflowsService', () => {
   describe('deleteWorkflows', () => {
     it('should soft delete workflows by setting deleted to true', async () => {
       const workflowIds = ['workflow-1', 'workflow-2'];
+      const mockRequest = {} as any;
 
-      await service.deleteWorkflows(workflowIds);
+      await service.deleteWorkflows(workflowIds, mockRequest);
 
       expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('workflow-1');
       expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('workflow-2');
@@ -158,10 +159,12 @@ definition:
         updated_at: '2023-01-01T00:00:00Z',
       };
 
+      const mockRequest = {} as any;
+
       mockSavedObjectsClient.create.mockResolvedValue(mockResponse);
 
       try {
-        await service.createWorkflow(mockWorkflow);
+        await service.createWorkflow(mockWorkflow, mockRequest);
       } catch (error) {
         // Ignore errors from yaml parsing - we just want to verify the saved object structure
       }

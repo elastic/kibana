@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+  SecurityServiceStart,
+} from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -21,6 +27,7 @@ import type {
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
+import { getAuthenticatedUser } from '../lib/get_user';
 import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
 import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
@@ -44,6 +51,7 @@ export class WorkflowsService {
   private stepsExecutionIndex: string;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private workflowExecutionLogsIndex: string;
+  private security?: SecurityServiceStart;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -64,6 +72,10 @@ export class WorkflowsService {
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
     this.taskScheduler = taskScheduler;
+  }
+
+  public setSecurityService(security: SecurityServiceStart) {
+    this.security = security;
   }
 
   private async initialize(
@@ -223,7 +235,10 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
@@ -232,6 +247,7 @@ export class WorkflowsService {
     // @ts-expect-error - TODO: fix this
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
       name: workflowToCreate.name,
       description: workflowToCreate.description,
@@ -239,8 +255,8 @@ export class WorkflowsService {
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
       definition: workflowToCreate.definition,
-      createdBy: 'system', // TODO: get from context
-      lastUpdatedBy: 'system', // TODO: get from context
+      createdBy: authenticatedUser,
+      lastUpdatedBy: authenticatedUser,
       deleted: false,
     };
 
@@ -274,7 +290,8 @@ export class WorkflowsService {
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
+    workflow: Partial<EsWorkflow>,
+    request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const { yaml, definition, ...rest } = workflow;
@@ -295,7 +312,7 @@ export class WorkflowsService {
         tags: updatedWorkflow.tags || [],
         yaml,
         definition: updatedWorkflow.definition,
-        lastUpdatedBy: 'system', // TODO: get from context
+        lastUpdatedBy: getAuthenticatedUser(request, this.security),
       };
 
       // Update scheduled tasks if triggers changed
@@ -313,7 +330,7 @@ export class WorkflowsService {
     } else {
       updateData = {
         ...rest,
-        lastUpdatedBy: 'system', // TODO: get from context
+        lastUpdatedBy: getAuthenticatedUser(request, this.security),
       };
     }
 
@@ -330,7 +347,7 @@ export class WorkflowsService {
     };
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
+  public async deleteWorkflows(workflowIds: string[], request: KibanaRequest): Promise<void> {
     const savedObjectsClient = await this.getSavedObjectsClient();
 
     // Remove scheduled tasks for deleted workflows
@@ -341,11 +358,12 @@ export class WorkflowsService {
     }
 
     // Soft delete workflows by marking them as deleted instead of removing them
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
     await Promise.all(
       workflowIds.map((id) =>
         savedObjectsClient.update<WorkflowSavedObjectAttributes>(WORKFLOW_SAVED_OBJECT_TYPE, id, {
           deleted: true,
-          lastUpdatedBy: 'system', // TODO: get from context
+          lastUpdatedBy: authenticatedUser,
         })
       )
     );
