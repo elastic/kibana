@@ -9,7 +9,6 @@
 
 import { TypeOf } from '@kbn/config-schema';
 import {
-  chainingSchema,
   controlsGroupSchema,
   labelPositionSchema,
   ignoreParentSettingsSchema,
@@ -19,7 +18,6 @@ import { controlSchema, controlWidthSchema } from './control_schema';
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 
 export type ControlsLabelPosition = TypeOf<typeof labelPositionSchema>;
-export type ControlsChainingSystem = TypeOf<typeof chainingSchema>;
 export type ControlsIgnoreParentSettings = TypeOf<typeof ignoreParentSettingsSchema>;
 
 export type ControlWidth = TypeOf<typeof controlWidthSchema>;

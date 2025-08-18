@@ -13,17 +13,14 @@ import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
 import { Observable, combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
-import { ControlFetchContext } from '../../../control_group/control_fetch';
 import { ControlGroupApi } from '../../../control_group/types';
 
 export function minMax$({
-  controlFetch$,
   controlGroupApi,
   dataViews$,
   fieldName$,
   setIsLoading,
 }: {
-  controlFetch$: Observable<ControlFetchContext>;
   controlGroupApi: ControlGroupApi;
   dataViews$: PublishesDataViews['dataViews$'];
   fieldName$: PublishingSubject<string>;

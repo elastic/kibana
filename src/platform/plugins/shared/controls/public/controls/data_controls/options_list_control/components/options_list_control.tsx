@@ -93,11 +93,7 @@ const optionListControlStyles = {
   `,
 };
 
-export const OptionsListControl = ({
-  controlPanelClassName,
-}: {
-  controlPanelClassName: string;
-}) => {
+export const OptionsListControl = () => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
   const { componentApi, displaySettings } = useOptionsListContext();
 
@@ -235,7 +231,6 @@ export const OptionsListControl = ({
     <EuiFilterGroup
       fullWidth
       compressed={isCompressed(componentApi)}
-      className={controlPanelClassName}
       css={optionListControlStyles.filterGroup}
     >
       <EuiInputPopover

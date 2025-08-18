@@ -25,5 +25,4 @@ export interface SerializedControlState<ControlStateType extends object = object
 export interface DefaultDataControlState extends DefaultControlState {
   dataViewId: string;
   fieldName: string;
-  title?: string; // custom control label
 }

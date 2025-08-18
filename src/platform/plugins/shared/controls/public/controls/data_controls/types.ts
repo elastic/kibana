@@ -11,14 +11,13 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
 import {
   HasEditCapabilities,
+  PublishesBlockingError,
+  PublishesDataLoading,
   PublishesDataViews,
-  PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-
 import { DefaultDataControlState } from '../../../common';
 import { ControlGroupApi } from '../../control_group/types';
-import { ControlFactory, DefaultControlApi } from '../types';
 import { PublishesAsyncFilters } from './publishes_async_filters';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
@@ -28,12 +27,15 @@ export interface PublishesField {
   fieldFormatter: PublishingSubject<DataControlFieldFormatter>;
 }
 
-export type DataControlApi = DefaultControlApi &
-  Omit<PublishesTitle, 'hideTitle$'> & // control titles cannot be hidden
-  HasEditCapabilities &
+export type DataControlApi = HasEditCapabilities &
   PublishesDataViews &
+  PublishesBlockingError &
   PublishesField &
-  PublishesAsyncFilters;
+  PublishesDataLoading &
+  PublishesAsyncFilters & {
+    setDataLoading: (loading: boolean) => void;
+    setBlockingError: (error: Error | undefined) => void;
+  };
 
 export interface CustomOptionsComponentProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -44,20 +46,6 @@ export interface CustomOptionsComponentProps<
   setControlEditorValid: (valid: boolean) => void;
   controlGroupApi: ControlGroupApi;
 }
-
-export interface DataControlFactory<
-  State extends DefaultDataControlState = DefaultDataControlState,
-  Api extends DataControlApi = DataControlApi
-> extends ControlFactory<State, Api> {
-  isFieldCompatible: (field: DataViewField) => boolean;
-  CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
-}
-
-export const isDataControlFactory = (
-  factory: ControlFactory<object, any>
-): factory is DataControlFactory<any, any> => {
-  return typeof (factory as DataControlFactory).isFieldCompatible === 'function';
-};
 
 interface DataControlField {
   field: DataViewField;

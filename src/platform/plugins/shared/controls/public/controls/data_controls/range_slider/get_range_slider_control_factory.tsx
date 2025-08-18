@@ -64,7 +64,6 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       );
     },
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
-      const controlFetch$ = controlGroupApi.controlFetch$(uuid);
       const loadingMinMax$ = new BehaviorSubject<boolean>(false);
       const loadingHasNoResults$ = new BehaviorSubject<boolean>(false);
       const dataLoading$ = new BehaviorSubject<boolean | undefined>(undefined);
@@ -159,7 +158,7 @@ export const getRangesliderControlFactory = (): DataControlFactory<
       const max$ = new BehaviorSubject<number | undefined>(undefined);
       const min$ = new BehaviorSubject<number | undefined>(undefined);
       const minMaxSubscription = minMax$({
-        controlFetch$,
+        // controlFetch$,
         dataViews$: dataControlManager.api.dataViews$,
         fieldName$: dataControlManager.api.fieldName$,
         setIsLoading: (isLoading: boolean) => {

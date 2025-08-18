@@ -9,18 +9,12 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-const controlGroupReferencePrefix = 'controlGroup_';
-
 export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
   const prefix = `${id}:`;
   const filteredReferences = references
     .filter((reference) => reference.name.indexOf(prefix) === 0)
     .map((reference) => ({ ...reference, name: reference.name.replace(prefix, '') }));
   return filteredReferences;
-};
-
-export const getReferencesForControls = (references: Reference[]): Reference[] => {
-  return references.filter((reference) => reference.name.startsWith(controlGroupReferencePrefix));
 };
 
 export const prefixReferencesFromPanel = (id: string, references: Reference[]): Reference[] => {

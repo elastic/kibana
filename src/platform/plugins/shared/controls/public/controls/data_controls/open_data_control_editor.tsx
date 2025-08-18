@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 
 import type { DefaultDataControlState } from '../../../common';
 import { coreServices } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
 
 export const openDataControlEditor = <
   State extends DefaultDataControlState = DefaultDataControlState
@@ -24,14 +23,14 @@ export const openDataControlEditor = <
   controlId,
   initialDefaultPanelTitle,
   onSave,
-  controlGroupApi,
+  parentApi,
 }: {
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
   onSave: ({ type, state }: { type: string; state: Partial<State> }) => void;
-  controlGroupApi: ControlGroupApi;
+  parentApi: unknown;
 }) => {
   const onCancel = (newState: Partial<State>, closeFlyout: () => void) => {
     if (deepEqual(initialState, newState)) {
@@ -65,7 +64,7 @@ export const openDataControlEditor = <
 
   openLazyFlyout({
     core: coreServices,
-    parentApi: controlGroupApi.parentApi,
+    parentApi,
     loadContent: async ({ closeFlyout }) => {
       const { DataControlEditor } = await import('./data_control_editor');
       return (

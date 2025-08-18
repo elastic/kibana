@@ -8,7 +8,6 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { registerControlGroupEmbeddable } from './control_group/register_control_group_embeddable';
 import { registerOptionsListControl } from './controls/data_controls/options_list_control/register_options_list_control';
 import { registerRangeSliderControl } from './controls/data_controls/range_slider/register_range_slider_control';
 import { registerTimeSliderControl } from './controls/timeslider_control/register_timeslider_control';
@@ -28,8 +27,7 @@ export class ControlsPlugin
   ) {
     const { embeddable } = _setupPlugins;
 
-    registerControlGroupEmbeddable(embeddable);
-    registerOptionsListControl();
+    registerOptionsListControl(embeddable);
     registerRangeSliderControl();
     registerTimeSliderControl();
     registerESQLControl();

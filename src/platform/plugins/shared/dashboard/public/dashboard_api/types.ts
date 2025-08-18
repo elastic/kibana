@@ -116,7 +116,6 @@ export type DashboardApi = CanExpandPanels &
   TrackContentfulRender &
   TracksOverlays & {
     asyncResetToLastSavedState: () => Promise<void>;
-    controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
     setFocusedPanelId: (id: string | undefined) => void;
@@ -153,15 +152,12 @@ export type DashboardApi = CanExpandPanels &
     setSettings: (settings: DashboardSettings) => void;
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
-    unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
   };
 
 export interface DashboardInternalApi {
-  controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   layout$: BehaviorSubject<DashboardLayout>;
   registerChildApi: (api: DefaultEmbeddableApi) => void;
-  setControlGroupApi: (controlGroupApi: ControlGroupApi) => void;
   serializeLayout: () => Pick<DashboardState, 'panels' | 'references'>;
   isSectionCollapsed: (sectionId?: string) => boolean;
 }

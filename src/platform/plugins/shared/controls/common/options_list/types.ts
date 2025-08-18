@@ -9,11 +9,11 @@
 
 import { DataView, FieldSpec, RuntimeFieldSpec } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, BoolQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-
-import { OptionsListSelection } from './options_list_selections';
-import { OptionsListSortingType } from './suggestions_sorting';
+import type { SerializedTitles } from '@kbn/presentation-publishing';
 import { DefaultDataControlState } from '../types';
+import { OptionsListSelection } from './options_list_selections';
 import { OptionsListSearchTechnique } from './suggestions_searching';
+import { OptionsListSortingType } from './suggestions_sorting';
 
 /**
  * ----------------------------------------------------------------
@@ -31,6 +31,7 @@ export interface OptionsListDisplaySettings {
 
 export interface OptionsListControlState
   extends DefaultDataControlState,
+    SerializedTitles,
     OptionsListDisplaySettings {
   searchTechnique?: OptionsListSearchTechnique;
   sort?: OptionsListSortingType;

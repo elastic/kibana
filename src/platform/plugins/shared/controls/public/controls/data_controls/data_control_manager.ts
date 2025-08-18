@@ -7,6 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
+import {
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  DataView,
+  DataViewField,
+} from '@kbn/data-views-plugin/common';
+import { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { StateComparators } from '@kbn/presentation-publishing';
+import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
+import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import {
   BehaviorSubject,
   Observable,
@@ -17,31 +29,15 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataView,
-  DataViewField,
-} from '@kbn/data-views-plugin/common';
-import type { Reference } from '@kbn/content-management-utils';
-import { Filter } from '@kbn/es-query';
-import { StateComparators } from '@kbn/presentation-publishing';
-
-import { i18n } from '@kbn/i18n';
-import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
-import type { ControlGroupApi } from '../../control_group/types';
 import { defaultControlComparators, defaultControlDefaultValues } from '../default_control_manager';
-import type { ControlApiInitialization } from '../types';
 import { openDataControlEditor } from './open_data_control_editor';
 import { getReferenceName } from './reference_name_utils';
 import type { DataControlApi, DataControlFieldFormatter } from './types';
 
 export const defaultDataControlComparators: StateComparators<DefaultDataControlState> = {
   ...defaultControlComparators,
-  title: 'referenceEquality',
   dataViewId: 'referenceEquality',
   fieldName: 'referenceEquality',
 };
@@ -49,13 +45,13 @@ export const defaultDataControlComparators: StateComparators<DefaultDataControlS
 export const initializeDataControlManager = <EditorState extends object = {}>(
   controlId: string,
   controlType: string,
+  typeDisplayName: string,
   state: DefaultDataControlState,
   getEditorState: () => EditorState,
   setEditorState: (state: Partial<EditorState>) => void,
-  controlGroupApi: ControlGroupApi
+  parentApi: unknown
 ): {
-  api: StateManager<DefaultDataControlState>['api'] &
-    Omit<ControlApiInitialization<DataControlApi>, 'hasUnsavedChanges$' | 'resetUnsavedChanges'>;
+  api: StateManager<DefaultDataControlState>['api'] & DataControlApi;
   cleanup: () => void;
   internalApi: {
     extractReferences: (referenceNameSuffix: string) => Reference[];
@@ -66,13 +62,12 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
   getLatestState: () => DefaultDataControlState;
   reinitializeState: (lastState?: DefaultDataControlState) => void;
 } => {
-  const dataControlManager = initializeStateManager<DefaultDataControlState>(
+  const dataControlStateManager = initializeStateManager<DefaultDataControlState>(
     state,
     {
       ...defaultControlDefaultValues,
       dataViewId: '',
       fieldName: '',
-      title: undefined,
     },
     defaultDataControlComparators
   );
@@ -95,7 +90,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     String(toFormat)
   );
 
-  const dataViewIdSubscription = dataControlManager.api.dataViewId$
+  const dataViewIdSubscription = dataControlStateManager.api.dataViewId$
     .pipe(
       tap(() => {
         filtersReady$.next(false);
@@ -120,7 +115,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       dataViews$.next(dataView ? [dataView] : undefined);
     });
 
-  const fieldNameSubscription = combineLatest([dataViews$, dataControlManager.api.fieldName$])
+  const fieldNameSubscription = combineLatest([dataViews$, dataControlStateManager.api.fieldName$])
     .pipe(
       tap(() => {
         filtersReady$.next(false);
@@ -128,7 +123,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     )
     .subscribe(([nextDataViews, nextFieldName]) => {
       const dataView = nextDataViews
-        ? nextDataViews.find(({ id }) => dataControlManager.api.dataViewId$.value === id)
+        ? nextDataViews.find(({ id }) => dataControlStateManager.api.dataViewId$.value === id)
         : undefined;
       if (!dataView) {
         return;
@@ -158,7 +153,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
 
   const onEdit = async () => {
     const initialState: DefaultDataControlState & EditorState = {
-      ...dataControlManager.getLatestState(),
+      ...dataControlStateManager.getLatestState(),
       ...getEditorState(),
     };
 
@@ -166,14 +161,16 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
     openDataControlEditor<DefaultDataControlState & EditorState>({
       onSave: ({ type: newType, state: newState }) => {
         if (newType === controlType) {
-          dataControlManager.reinitializeState(newState);
+          dataControlStateManager.reinitializeState(newState);
           setEditorState(newState);
         } else {
           // replace the control with a new one of the updated type
-          controlGroupApi.replacePanel(controlId, {
-            panelType: newType,
-            serializedState: { rawState: newState },
-          });
+          if (apiIsPresentationContainer(parentApi)) {
+            parentApi.replacePanel(controlId, {
+              panelType: newType,
+              serializedState: { rawState: newState },
+            });
+          }
         }
       },
       initialState: {
@@ -182,7 +179,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
       controlType,
       controlId,
       initialDefaultPanelTitle: defaultTitle$.getValue(),
-      controlGroupApi,
+      parentApi,
     });
   };
 
@@ -195,17 +192,17 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
 
   return {
     api: {
-      ...dataControlManager.api,
+      ...dataControlStateManager.api,
       dataLoading$,
       blockingError$,
       setBlockingError,
       setDataLoading,
-      defaultTitle$,
       dataViews$,
       field$,
       fieldFormatter,
       onEdit,
       filters$,
+      getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
       untilFiltersReady: async () => {
         return new Promise((resolve) => {
@@ -230,7 +227,7 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
           {
             name: getReferenceName(controlId, referenceNameSuffix),
             type: DATA_VIEW_SAVED_OBJECT_TYPE,
-            id: dataControlManager.api.dataViewId$.getValue(),
+            id: dataControlStateManager.api.dataViewId$.getValue(),
           },
         ];
       },
@@ -241,8 +238,8 @@ export const initializeDataControlManager = <EditorState extends object = {}>(
         filters$.next(newFilter ? [newFilter] : undefined);
       },
     },
-    anyStateChange$: dataControlManager.anyStateChange$,
-    getLatestState: dataControlManager.getLatestState,
-    reinitializeState: dataControlManager.reinitializeState,
+    anyStateChange$: dataControlStateManager.anyStateChange$,
+    getLatestState: dataControlStateManager.getLatestState,
+    reinitializeState: dataControlStateManager.reinitializeState,
   };
 };

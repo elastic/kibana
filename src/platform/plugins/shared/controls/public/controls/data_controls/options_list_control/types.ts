@@ -9,8 +9,10 @@
 
 import { Subject } from 'rxjs';
 
+import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
-import { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
+import { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+import { DefaultDataControlState } from '../../../../common';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -19,14 +21,16 @@ import type {
   OptionsListSuggestions,
 } from '../../../../common/options_list';
 import type { DataControlApi, PublishesField } from '../types';
-import { SelectionsState } from './selections_manager';
-import { DefaultDataControlState } from '../../../../common';
-import { TemporaryState } from './temporay_state_manager';
 import { EditorState } from './editor_state_manager';
+import { SelectionsState } from './selections_manager';
+import { TemporaryState } from './temporay_state_manager';
 
-export type OptionsListControlApi = DataControlApi & {
-  setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
-};
+export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
+  DataControlApi & {
+    setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
+    clearSelections: () => void;
+    hasSelections$: PublishingSubject<boolean | undefined>;
+  };
 
 export interface OptionsListComponentState
   extends Omit<OptionsListControlState, keyof OptionsListDisplaySettings> {
@@ -61,7 +65,4 @@ export type OptionsListComponentApi = PublishesField &
     deselectAll: (keys: string[]) => void;
     defaultTitle$?: PublishingSubject<string | undefined>;
     uuid: string;
-    parentApi: {
-      allowExpensiveQueries$: PublishingSubject<boolean>;
-    };
   };

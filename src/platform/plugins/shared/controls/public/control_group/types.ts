@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable } from 'rxjs';
-
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { PublishesESQLVariables } from '@kbn/esql-types';
 import { Filter } from '@kbn/es-query';
@@ -21,7 +19,6 @@ import {
   HasEditCapabilities,
   HasParentApi,
   PublishesDisabledActionIds,
-  PublishesFilters,
   PublishesTimeslice,
   PublishesUnifiedSearch,
   PublishesUnsavedChanges,
@@ -31,7 +28,6 @@ import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/p
 import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
 import type {
-  ControlsChainingSystem,
   ControlsGroupState,
   ControlsIgnoreParentSettings,
   ControlsLabelPosition,
@@ -42,7 +38,6 @@ import {
   ControlPanelState,
   DefaultControlState,
 } from '../../common';
-import { ControlFetchContext } from './control_fetch/control_fetch';
 
 /**
  * ----------------------------------------------------------------
@@ -52,7 +47,7 @@ import { ControlFetchContext } from './control_fetch/control_fetch';
 
 export type ControlGroupApi = PresentationContainer &
   DefaultEmbeddableApi<ControlsGroupState> &
-  PublishesFilters &
+  PublishesUnifiedSearch &
   PublishesDataViews &
   PublishesESQLVariables &
   HasSerializedChildState<ControlPanelState> &
@@ -66,7 +61,6 @@ export type ControlGroupApi = PresentationContainer &
     autoApplySelections$: PublishingSubject<boolean>;
     ignoreParentSettings$: PublishingSubject<ControlsIgnoreParentSettings | undefined>;
     labelPosition: PublishingSubject<ControlsLabelPosition>;
-    controlFetch$: (controlUuid: string, onReload?: () => void) => Observable<ControlFetchContext>;
     openAddDataControlFlyout: (options?: {
       controlStateTransform?: ControlStateTransform;
       onSave?: () => void;
@@ -75,9 +69,6 @@ export type ControlGroupApi = PresentationContainer &
 
     /** Public getters */
     getEditorConfig: () => ControlGroupEditorConfig | undefined;
-
-    /** Public setters */
-    setChainingSystem: (chainingSystem: ControlsChainingSystem) => void;
   };
 
 /**
@@ -95,7 +86,7 @@ export type ControlGroupUnsavedChanges = Omit<
 
 export type ControlGroupEditorState = Pick<
   ControlGroupRuntimeState,
-  'chainingSystem' | 'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
+  'labelPosition' | 'autoApplySelections' | 'ignoreParentSettings'
 >;
 
 export type ControlStateTransform<State extends DefaultControlState = DefaultControlState> = (

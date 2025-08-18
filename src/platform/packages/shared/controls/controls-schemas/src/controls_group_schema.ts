@@ -9,12 +9,9 @@
 
 import { schema } from '@kbn/config-schema';
 import {
-  CONTROLS_CHAINING_HIERARCHICAL,
-  CONTROLS_CHAINING_NONE,
   CONTROLS_LABEL_POSITION_ONE_LINE,
   CONTROLS_LABEL_POSITION_TWO_LINE,
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
@@ -29,17 +26,6 @@ export const labelPositionSchema = schema.oneOf(
     defaultValue: DEFAULT_CONTROLS_LABEL_POSITION,
     meta: {
       description: 'Position of the labels for controls. For example, "oneLine", "twoLine".',
-    },
-  }
-);
-
-export const chainingSchema = schema.oneOf(
-  [schema.literal(CONTROLS_CHAINING_HIERARCHICAL), schema.literal(CONTROLS_CHAINING_NONE)],
-  {
-    defaultValue: DEFAULT_CONTROLS_CHAINING,
-    meta: {
-      description:
-        'The chaining strategy for multiple controls. For example, "HIERARCHICAL" or "NONE".',
     },
   }
 );
@@ -77,7 +63,6 @@ export const controlsGroupSchema = schema.object({
     meta: { description: 'An array of control panels and their state in the control group.' },
   }),
   labelPosition: labelPositionSchema,
-  chainingSystem: chainingSchema,
   enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
   autoApplySelections: schema.boolean({

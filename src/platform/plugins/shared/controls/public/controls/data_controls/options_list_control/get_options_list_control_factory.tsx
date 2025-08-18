@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
+import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
+import { initializeUnsavedChanges } from '@kbn/presentation-containers';
+import {
+  initializeTitleManager,
+  PublishingSubject,
+  titleComparators,
+} from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
@@ -19,12 +28,6 @@ import {
   skip,
   Subject,
 } from 'rxjs';
-
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-
-import { initializeUnsavedChanges } from '@kbn/presentation-containers';
-import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type {
   OptionsListControlState,
   OptionsListSortingType,
@@ -35,69 +38,52 @@ import {
   defaultDataControlComparators,
   initializeDataControlManager,
 } from '../data_control_manager';
-import type { DataControlFactory } from '../types';
 import { OptionsListControl } from './components/options_list_control';
-import { OptionsListEditorOptions } from './components/options_list_editor_options';
 import {
   DEFAULT_SEARCH_TECHNIQUE,
   MIN_OPTIONS_LIST_REQUEST_SIZE,
   OPTIONS_LIST_DEFAULT_SORT,
 } from './constants';
-import { fetchAndValidate$ } from './fetch_and_validate';
-import { OptionsListControlContext } from './options_list_context_provider';
-import { initializeSelectionsManager, selectionComparators } from './selections_manager';
-import { OptionsListStrings } from './options_list_strings';
-import type { OptionsListComponentApi, OptionsListControlApi } from './types';
-import { initializeTemporayStateManager } from './temporay_state_manager';
 import {
   editorComparators,
   EditorState,
   initializeEditorStateManager,
 } from './editor_state_manager';
+import { fetchAndValidate$ } from './fetch_and_validate';
+import { OptionsListControlContext } from './options_list_context_provider';
+import { OptionsListStrings } from './options_list_strings';
+import { initializeSelectionsManager, selectionComparators } from './selections_manager';
+import { initializeTemporayStateManager } from './temporay_state_manager';
+import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 
-export const getOptionsListControlFactory = (): DataControlFactory<
+export const getOptionsListControlFactory = (): EmbeddableFactory<
   OptionsListControlState,
   OptionsListControlApi
 > => {
   return {
     type: OPTIONS_LIST_CONTROL,
-    order: 3, // should always be first, since this is the most popular control
-    getIconType: () => 'editorChecklist',
-    getDisplayName: OptionsListStrings.control.getDisplayName,
-    isFieldCompatible: (field) => {
-      return (
-        !field.spec.scripted &&
-        field.aggregatable &&
-        ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
-      );
-    },
-    CustomOptionsComponent: OptionsListEditorOptions,
-    buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
-      /** Serializable state - i.e. the state that is saved with the control */
-      const editorStateManager = initializeEditorStateManager(initialState);
+    buildEmbeddable: async ({ initialState, finalizeApi, uuid, parentApi }) => {
+      const state = initialState.rawState;
 
       const sort$ = new BehaviorSubject<OptionsListSortingType | undefined>(
-        initialState.sort ?? OPTIONS_LIST_DEFAULT_SORT
+        state.sort ?? OPTIONS_LIST_DEFAULT_SORT
       );
 
-      const placeholder = initialState.placeholder;
-      const hideActionBar = initialState.hideActionBar;
-      const hideExclude = initialState.hideExclude;
-      const hideExists = initialState.hideExists;
-      const hideSort = initialState.hideSort;
-
+      const editorStateManager = initializeEditorStateManager(state);
       const temporaryStateManager = initializeTemporayStateManager();
+      const titlesManager = initializeTitleManager(state);
 
       const dataControlManager = initializeDataControlManager<EditorState>(
         uuid,
         OPTIONS_LIST_CONTROL,
-        initialState,
+        OptionsListStrings.control.getDisplayName(),
+        state,
         editorStateManager.getLatestState,
         editorStateManager.reinitializeState,
-        controlGroupApi
+        parentApi
       );
 
-      const selectionsManager = initializeSelectionsManager(initialState);
+      const selectionsManager = initializeSelectionsManager(state);
 
       const selectionsSubscription = selectionsManager.anyStateChange$.subscribe(
         dataControlManager.internalApi.onSelectionChange
@@ -161,14 +147,13 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           loadMoreSubject,
           loadingSuggestions$,
           debouncedSearchString,
-          parentApi: controlGroupApi,
+          parentApi,
         },
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
         selectedOptions$: selectionsManager.api.selectedOptions$,
         searchTechnique$: editorStateManager.api.searchTechnique$,
         sort$,
-        controlFetch$: (onReload: () => void) => controlGroupApi.controlFetch$(uuid, onReload),
       }).subscribe((result) => {
         // if there was an error during fetch, set suggestion load error and return early
         if (Object.hasOwn(result, 'error')) {
@@ -203,7 +188,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       const hasSelections$ = new BehaviorSubject<boolean>(
-        Boolean(initialState.selectedOptions?.length || initialState.existsSelected)
+        Boolean(state.selectedOptions?.length || state.existsSelected)
       );
       const hasSelectionsSubscription = combineLatest([
         selectionsManager.api.selectedOptions$,
@@ -218,6 +203,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         .subscribe((hasSelections) => {
           hasSelections$.next(hasSelections);
         });
+
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
         dataControlManager.api.dataViews$,
@@ -249,6 +235,8 @@ export const getOptionsListControlFactory = (): DataControlFactory<
           dataControlManager.internalApi.setOutputFilter(newFilter);
         });
 
+      const { placeholder, hideActionBar, hideExclude, hideExists, hideSort } = state;
+
       function serializeState() {
         return {
           rawState: {
@@ -270,7 +258,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       const unsavedChangesApi = initializeUnsavedChanges<OptionsListControlState>({
         uuid,
-        parentApi: controlGroupApi,
+        parentApi,
         serializeState,
         anyStateChange$: merge(
           dataControlManager.anyStateChange$,
@@ -280,6 +268,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         ).pipe(map(() => undefined)),
         getComparators: () => {
           return {
+            ...titleComparators,
             ...defaultDataControlComparators,
             ...selectionComparators,
             ...editorComparators,
@@ -321,6 +310,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const api = finalizeApi({
         ...unsavedChangesApi,
         ...dataControlManager.api,
+        ...titlesManager.api,
         blockingError$,
         dataLoading$: temporaryStateManager.api.dataLoading$,
         getTypeDisplayName: OptionsListStrings.control.getDisplayName,
@@ -343,6 +333,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         ...editorStateManager.api,
         ...selectionsManager.api,
         ...temporaryStateManager.api,
+        ...titlesManager.api,
         loadMoreSubject,
         deselectOption: (key: string | undefined) => {
           const field = api.field$.getValue();
@@ -448,7 +439,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
 
       return {
         api,
-        Component: ({ className: controlPanelClassName }) => {
+        Component: () => {
           useEffect(() => {
             return () => {
               // on unmount, clean up all subscriptions
@@ -471,7 +462,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
                 displaySettings: { placeholder, hideActionBar, hideExclude, hideExists, hideSort },
               }}
             >
-              <OptionsListControl controlPanelClassName={controlPanelClassName} />
+              <OptionsListControl />
             </OptionsListControlContext.Provider>
           );
         },

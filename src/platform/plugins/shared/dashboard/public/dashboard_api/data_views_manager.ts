@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
@@ -17,34 +16,23 @@ import {
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { uniqBy } from 'lodash';
-import { BehaviorSubject, combineLatest, Observable, of, switchMap } from 'rxjs';
+import { BehaviorSubject, switchMap } from 'rxjs';
 import { dataService } from '../services/kibana_services';
 
 export function initializeDataViewsManager(
-  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>,
   children$: PublishingSubject<{ [key: string]: DefaultEmbeddableApi }>
 ) {
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>([]);
 
-  const controlGroupDataViewsPipe: Observable<DataView[] | undefined> = controlGroupApi$.pipe(
-    switchMap((controlGroupApi) => {
-      return controlGroupApi ? controlGroupApi.dataViews$ : of([]);
-    })
-  );
-
-  const childDataViewsPipe = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
+  const dataViewsSubscription = combineCompatibleChildrenApis<PublishesDataViews, DataView[]>(
     { children$ },
     'dataViews$',
     apiPublishesDataViews,
     []
-  );
-
-  const dataViewsSubscription = combineLatest([controlGroupDataViewsPipe, childDataViewsPipe])
+  )
     .pipe(
-      switchMap(async ([controlGroupDataViews, childDataViews]) => {
-        const allDataViews = [...(controlGroupDataViews ?? []), ...childDataViews].filter(
-          (dataView) => dataView.isPersisted()
-        );
+      switchMap(async (childDataViews) => {
+        const allDataViews = childDataViews.filter((dataView) => dataView.isPersisted());
 
         if (allDataViews.length === 0) {
           try {
@@ -59,6 +47,7 @@ export function initializeDataViewsManager(
         return uniqBy(allDataViews, 'id');
       })
     )
+    .pipe()
     .subscribe((nextDataViews) => {
       dataViews$.next(nextDataViews);
     });

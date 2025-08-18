@@ -17,6 +17,9 @@ import {
   PublishesDataViews,
   apiPublishesDataViews,
   useBatchedPublishingSubjects,
+  PublishesFilters,
+  PublishesTimeRange,
+  PublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import React, { useEffect } from 'react';
@@ -26,7 +29,6 @@ import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
 import { openDataControlEditor } from '../controls/data_controls/open_data_control_editor';
 import { coreServices, dataViewsService } from '../services/kibana_services';
 import { ControlGroup } from './components/control_group';
-import { chaining$, controlFetch$, controlGroupFetch$ } from './control_fetch';
 import { initializeControlGroupUnsavedChanges } from './control_group_unsaved_changes_api';
 import { initControlsManager } from './init_controls_manager';
 import { openEditControlGroupFlyout } from './open_edit_control_group_flyout';
@@ -84,20 +86,12 @@ export const getControlGroupEmbeddableFactory = () => {
         disabledActionIds$,
         ...unsavedChanges.api,
         ...selectionsManager.api,
-        controlFetch$: (controlUuid: string, onReload?: () => void) =>
-          controlFetch$(
-            chaining$(
-              controlUuid,
-              editorStateManager.api.chainingSystem$,
-              controlsManager.controlsInOrder$,
-              controlsManager.api.children$
-            ),
-            controlGroupFetch$(
-              editorStateManager.api.ignoreParentSettings$,
-              parentApi ? parentApi : {},
-              onReload
-            )
-          ),
+
+        // Temporarily forward unified search context from Dashboard...
+        filters$: (parentApi as PublishesFilters).filters$,
+        timeRange$: (parentApi as PublishesTimeRange).timeRange$,
+        query$: (parentApi as PublishesUnifiedSearch).query$,
+
         ignoreParentSettings$: editorStateManager.api.ignoreParentSettings$,
         autoApplySelections$: editorStateManager.api.autoApplySelections$,
         allowExpensiveQueries$,
@@ -145,7 +139,6 @@ export const getControlGroupEmbeddableFactory = () => {
 
         /** Public setters */
         setDisabledActionIds: (ids) => disabledActionIds$.next(ids),
-        setChainingSystem: editorStateManager.api.setChainingSystem,
       });
 
       /** Subscribe to all children's output data views, combine them, and output them */

@@ -64,7 +64,7 @@ export interface ControlEditorProps<
   controlType?: string;
   controlId?: string;
   initialDefaultPanelTitle?: string;
-  controlGroupApi: ControlGroupApi; // controls must always have a parent API
+  parentApi: unknown;
   onCancel: (newState: Partial<State>) => void;
   onSave: (newState: Partial<State>, type: string) => void;
   ariaLabelledBy: string;
@@ -177,7 +177,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   initialDefaultPanelTitle,
   onSave,
   onCancel,
-  controlGroupApi,
+  parentApi,
   ariaLabelledBy,
 }: ControlEditorProps<State>) => {
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
@@ -187,7 +187,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
   const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
-  const editorConfig = useMemo(() => controlGroupApi.getEditorConfig(), [controlGroupApi]);
+
+  // TODO get editor config from parent?
+  const editorConfig = useMemo(() => ({}), []);
 
   const {
     loading: dataViewListLoading,
@@ -256,11 +258,10 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           field={fieldRegistry[editorState.fieldName].field}
           updateState={(newState) => setEditorState({ ...editorState, ...newState })}
           setControlEditorValid={setControlOptionsValid}
-          controlGroupApi={controlGroupApi}
         />
       </div>
     );
-  }, [fieldRegistry, controlFactory, initialState, editorState, controlGroupApi]);
+  }, [fieldRegistry, controlFactory, initialState, editorState]);
 
   return (
     <>
