@@ -2434,7 +2434,7 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 /x-pack/test/common/utils/security_solution/spaces.ts @elastic/security-detection-rule-management
 /x-pack/solutions/security/test/plugin_functional/ @elastic/security-solution
 /x-pack/solutions/security/test/api_integration/services @elastic/security-solution
-/x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
+/x-pack/solutions/security/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/solutions/security/test/accessibility/ @elastic/security-solution
 /x-pack/solutions/security/test/fixtures/es_archives/endpoint/ @elastic/security-solution
 /x-pack/platform/test/plugin_functional/test_suites/resolver/ @elastic/security-solution

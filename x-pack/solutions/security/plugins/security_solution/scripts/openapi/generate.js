@@ -29,7 +29,10 @@ const SECURITY_SOLUTION_ROOT = resolve(__dirname, '../..');
     templateName: 'api_client_supertest',
     skipLinting: true,
     bundle: {
-      outFile: join(REPO_ROOT, 'x-pack/test/api_integration/services/security_solution_api.gen.ts'),
+      outFile: join(
+        REPO_ROOT,
+        'x-pack/solutions/security/test/api_integration/services/security_solution_api.gen.ts'
+      ),
     },
   });
 
