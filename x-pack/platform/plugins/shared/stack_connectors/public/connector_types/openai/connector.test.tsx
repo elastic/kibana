@@ -129,7 +129,74 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
     expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
     expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+    expect(queryByTestId('config.useNativeFunctionCallingSwitch')).toBeInTheDocument();
   });
+
+  test('useNativeFunctionCalling toggle only renders for Other provider', async () => {
+    const { queryByTestId: queryByTestIdOpenAi } = render(
+      <ConnectorFormTestProvider connector={openAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOpenAi('config.useNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdAzure } = render(
+      <ConnectorFormTestProvider connector={azureConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdAzure('config.useNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+
+    const { queryByTestId: queryByTestIdOther } = render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+    expect(queryByTestIdOther('config.useNativeFunctionCallingSwitch')).toBeInTheDocument();
+  });
+
+  test('enabling useNativeFunctionCalling saves to config for Other provider', async () => {
+    const onSubmit = jest.fn();
+    render(
+      <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
+        <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
+      </ConnectorFormTestProvider>
+    );
+
+    const toggle = await screen.findByTestId('config.useNativeFunctionCallingSwitch');
+    expect(toggle).toBeInTheDocument();
+
+    await userEvent.click(toggle);
+
+    await userEvent.click(await screen.findByTestId('form-test-provide-submit'));
+
+    await waitFor(() => {
+      expect(onSubmit).toHaveBeenCalled();
+    });
+
+    expect(onSubmit).toHaveBeenCalledWith({
+      data: {
+        actionTypeId: '.gen-ai',
+        name: 'OpenAI',
+        id: '123',
+        isDeprecated: false,
+        config: {
+          apiUrl: 'https://localhost/oss-llm',
+          apiProvider: OpenAiProviderType.Other,
+          defaultModel: 'local-model',
+          useNativeFunctionCalling: true,
+        },
+        secrets: {
+          apiKey: 'thats-a-nice-looking-key',
+        },
+        __internal__: {
+          hasHeaders: false,
+        },
+      },
+      isValid: true,
+    });
+  });
+
   describe('Headers', () => {
     it('toggles headers as expected', async () => {
       const testFormData = {
