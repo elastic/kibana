@@ -53,14 +53,13 @@ export const HeaderPageAnnouncer: FC<{
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (shouldHandlingTab && e.key === keys.TAB) {
-        console.log(4, shouldHandlingTab, e.key);
         skipLinkRef.current?.focus();
         e?.preventDefault();
       }
       setShouldHandlingTab(false);
     };
 
-    window.addEventListener('keydown', handleKeyDown);
+    window.addEventListener('keydown', handleKeyDown, { once: true });
 
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
