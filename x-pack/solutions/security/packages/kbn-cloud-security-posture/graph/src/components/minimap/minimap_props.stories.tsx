@@ -8,9 +8,16 @@
 import React from 'react';
 import type { Meta, StoryObj } from '@storybook/react';
 import { ThemeProvider } from '@emotion/react';
-import { ReactFlowProvider, ReactFlow } from '@xyflow/react';
+import {
+  ReactFlowProvider,
+  ReactFlow,
+  Background,
+  useNodesState,
+  useEdgesState,
+} from '@xyflow/react';
 import { Minimap as MinimapComp, type MinimapProps as MinimapPropsType } from './minimap';
 import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
+import { SvgDefsMarker } from '../edge/markers';
 import { layoutGraph } from '../graph/layout_graph';
 import { processGraph } from '../graph/graph';
 import {
@@ -42,18 +49,27 @@ const edgeTypes = {
 const WrappedMinimap = (props: MinimapPropsType) => {
   const { nodes, edges } = graphSample;
   const { initialNodes, initialEdges } = processGraph(nodes, edges, true);
-  const { nodes: nodesState } = layoutGraph(initialNodes, initialEdges);
+  const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
+
+  const [nodesState, _setNodes, onNodesChange] = useNodesState(layoutedNodes);
+  const [edgesState, _setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   return (
-    <ReactFlow
-      nodes={nodesState}
-      edges={initialEdges}
-      nodeTypes={nodeTypes}
-      edgeTypes={edgeTypes}
-      fitView
-    >
-      <MinimapComp {...props} nodesState={nodesState} />
-    </ReactFlow>
+    <>
+      <SvgDefsMarker />
+      <ReactFlow
+        nodes={nodesState}
+        edges={edgesState}
+        nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        fitView
+      >
+        <Background />
+        <MinimapComp {...props} nodesState={nodesState} />
+      </ReactFlow>
+    </>
   );
 };
 
