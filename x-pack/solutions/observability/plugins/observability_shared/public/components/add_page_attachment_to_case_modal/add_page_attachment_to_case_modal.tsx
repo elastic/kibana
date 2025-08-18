@@ -6,13 +6,16 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { EuiConfirmModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
+import { AttachmentType } from '@kbn/cases-plugin/common';
+import {
+  type PageAttachmentPersistedState,
+  PAGE_ATTACHMENT_TYPE,
+} from '@kbn/page-attachment-schema';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { AddToCaseComment } from '../add_to_case_comment';
 
 export interface AddPageAttachmentToCaseModalProps {
@@ -94,7 +97,9 @@ function AddToCaseButtonContent({
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
   const [comment, setComment] = useState<string>('');
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
-  const casesModal = useCasesAddToExistingCaseModal();
+  const casesModal = useCasesAddToExistingCaseModal({
+    onClose: onCloseModal,
+  });
 
   const handleCloseModal = useCallback(() => {
     setIsCommentModalOpen(true);
@@ -104,17 +109,16 @@ function AddToCaseButtonContent({
   const onCommentAdded = useCallback(() => {
     setIsCommentModalOpen(false);
     casesModal.open({
-      getAttachments: () =>
-        [
-          {
-            persistableStateAttachmentState: {
-              ...pageAttachmentState,
-              summary: comment,
-            },
-            persistableStateAttachmentTypeId: '.page',
-            type: 'persistableState',
+      getAttachments: () => [
+        {
+          persistableStateAttachmentState: {
+            ...pageAttachmentState,
+            summary: comment,
           },
-        ] as CaseAttachmentsWithoutOwner,
+          persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
+          type: AttachmentType.persistableState,
+        },
+      ],
     });
   }, [casesModal, comment, pageAttachmentState]);
 
