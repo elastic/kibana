@@ -28,7 +28,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
     lifecycle: {
       inherit: {},
     },
-    processing: [],
+    processing: { steps: [] },
   },
 };
 
