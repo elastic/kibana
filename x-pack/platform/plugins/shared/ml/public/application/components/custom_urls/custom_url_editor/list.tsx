@@ -297,7 +297,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           <EuiSpacer size="s" />
-          <EuiFlexGroup wrap gutterSize="s">
+          <EuiFlexGroup responsive={false} wrap gutterSize="s">
             <EuiFlexItem css={styles.narrowField} grow={2}>
               <EuiFormRow
                 fullWidth={true}
@@ -382,7 +382,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     key={`url-field-${index}`}
                     fullWidth={true}
                     value={customUrl.url_value}
-                    onChange={() => {}} // No-op to satisfy React's controlled component requirement
+                    onChange={() => {}} // satisfy React's requirement
                     onFocus={() => setExpandedUrlIndex(index)}
                     aria-required="true"
                     aria-label={`URL value for ${

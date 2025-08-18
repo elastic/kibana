@@ -90,7 +90,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
@@ -200,7 +200,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout euiFormControlLayout-readOnly emotion-euiFormControlLayout-fullWidth"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
               <div
                 class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
@@ -211,7 +211,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   class="euiFieldText emotion-euiFieldText-fullWidth"
                   data-test-subj="mlJobEditCustomUrlInput_0"
                   id="generated-id"
-                  readonly=""
                   type="text"
                   value="discover#/?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(index:e532ba80-b76f-11e8-a9dc-37914a458883,query:(language:lucene,query:'airline:\\"$airline$\\"'))"
                 />
@@ -309,7 +308,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
@@ -419,7 +418,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout euiFormControlLayout-readOnly emotion-euiFormControlLayout-fullWidth"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
               <div
                 class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
@@ -430,7 +429,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   class="euiFieldText emotion-euiFieldText-fullWidth"
                   data-test-subj="mlJobEditCustomUrlInput_1"
                   id="generated-id"
-                  readonly=""
                   type="text"
                   value="dashboards#/view/52ea8840-bbef-11e8-a04d-b1701b2b977e?_g=(time:(from:'$earliest$',mode:absolute,to:'$latest$'))&_a=(filters:!(),query:(language:lucene,query:'airline:\\"$airline$\\"'))"
                 />
@@ -528,7 +526,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
       class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
     />
     <div
-      class="euiFlexGroup emotion-euiFlexGroup-responsive-wrap-s-flexStart-stretch-row"
+      class="euiFlexGroup emotion-euiFlexGroup-wrap-s-flexStart-stretch-row"
     >
       <div
         class="euiFlexItem emotion-euiFlexItem-grow-2-narrowField"
@@ -638,7 +636,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
             class="euiFormRow__fieldWrapper"
           >
             <div
-              class="euiFormControlLayout euiFormControlLayout-readOnly emotion-euiFormControlLayout-fullWidth"
+              class="euiFormControlLayout emotion-euiFormControlLayout-fullWidth"
             >
               <div
                 class="euiFormControlLayout__childrenWrapper emotion-euiFormControlLayout__childrenWrapper"
@@ -649,7 +647,6 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
                   class="euiFieldText emotion-euiFieldText-fullWidth"
                   data-test-subj="mlJobEditCustomUrlInput_2"
                   id="generated-id"
-                  readonly=""
                   type="text"
                   value="http://airlinecodes.info/airline-code-$airline$"
                 />
