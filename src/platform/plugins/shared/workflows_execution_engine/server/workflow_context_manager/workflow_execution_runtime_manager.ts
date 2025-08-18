@@ -202,7 +202,6 @@ export class WorkflowExecutionRuntimeManager {
 
         this.workflowExecutionState.upsertStep(stepExecution);
         this.logStepStart(stepId);
-        // TODO: To think what to do here
         await this.workflowExecutionState.flush();
       }
     );

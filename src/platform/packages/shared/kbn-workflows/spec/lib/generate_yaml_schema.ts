@@ -15,6 +15,7 @@ import {
   getIfStepSchema,
   getMergeStepSchema,
   getParallelStepSchema,
+  WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
 
@@ -72,6 +73,7 @@ function createRecursiveStepSchema(
       ifSchema,
       parallelSchema,
       mergeSchema,
+      WaitStepSchema,
       ...connectorSchemas,
     ]);
   });
