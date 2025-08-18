@@ -28,6 +28,10 @@ export function LinkedDashboardsView({ definition }: { definition: Streams.all.G
     return <EuiLoadingSpinner />;
   }
 
+  if (selectedDashboard === null && dashboardsFetch.value?.dashboards.length) {
+    setSelectedDashboard(dashboardsFetch.value.dashboards[0].id);
+  }
+
   return dashboardsFetch.value && dashboardsFetch.value.dashboards.length ? (
     <>
       <DashboardSelector
@@ -62,6 +66,7 @@ function DashboardSelector({
     <EuiListGroup bordered={true}>
       {dashboards.map((dashboard) => (
         <EuiListGroupItem
+          key={dashboard.id}
           label={dashboard.title}
           onClick={() => onSelect(dashboard.id)}
           isActive={dashboard.id === selectedDashboard}
