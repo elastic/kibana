@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WaitGraphNode } from '@kbn/workflows';
+import type { WaitGraphNode } from '@kbn/workflows';
 import { WaitStepImpl } from './wait_step';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 
 describe('WaitStepImpl', () => {
   let underTest: WaitStepImpl;
@@ -51,6 +51,7 @@ describe('WaitStepImpl', () => {
 
     workflowLogger = {
       logInfo: jest.fn(),
+      logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
     workflowTaskManager = {
@@ -195,6 +196,21 @@ describe('WaitStepImpl', () => {
         await underTest.handleLongDuration();
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Waiting for 1d in step ${node.id}`);
       });
+
+      it('should log debug message about scheduled resume task', async () => {
+        node.configuration.with.duration = '6s';
+        await underTest.handleLongDuration();
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `Scheduled resume execution task for wait step "${node.id}" with ID resume-task-1`
+          )
+        );
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          expect.stringContaining(
+            `Execution will resume at ${new Date(Date.now() + 6000).toISOString()}`
+          )
+        );
+      });
     });
 
     describe('exiting long wait', () => {
@@ -224,6 +240,14 @@ describe('WaitStepImpl', () => {
         await underTest.handleLongDuration();
         expect(workflowLogger.logInfo).toHaveBeenCalledWith(
           `Finished waiting for 30m in step wait-step`
+        );
+      });
+
+      it('should log debug message about scheduled resume task', async () => {
+        node.configuration.with.duration = '6s';
+        await underTest.handleLongDuration();
+        expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+          expect.stringContaining(`Resuming execution of wait step "wait-step" after long wait.`)
         );
       });
 
