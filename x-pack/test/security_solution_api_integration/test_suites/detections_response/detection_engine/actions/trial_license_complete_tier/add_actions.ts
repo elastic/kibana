@@ -48,15 +48,18 @@ export default ({ getService }: FtrProviderContext) => {
     describe('adding actions', () => {
       before(async () => {
         await esArchiver.load(auditbeatPath);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
-          useCreate: true,
-          docsOnly: true,
-        });
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.8.0',
+          {
+            useCreate: true,
+            docsOnly: true,
+          }
+        );
       });
       after(async () => {
         await esArchiver.unload(auditbeatPath);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/signals/severity_risk_overrides'
+          'x-pack/solutions/security/test/fixtures/es_archives/signals/severity_risk_overrides'
         );
       });
       beforeEach(async () => {

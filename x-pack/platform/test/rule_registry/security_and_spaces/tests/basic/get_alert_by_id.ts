@@ -89,11 +89,15 @@ export default ({ getService }: FtrProviderContext) => {
       await getSecuritySolutionIndexName(superUser);
       await getAPMIndexName(superUser);
 
-      await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_registry/alerts'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/rule_registry/alerts'
+      );
     });
 
     it('superuser should be able to access an alert in a given space', async () => {

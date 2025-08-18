@@ -2086,7 +2086,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 #CC# /x-pack/platform/plugins/shared/security/ @elastic/kibana-security
 
 # Response Ops team
-/x-pack/test/functional/es_archives/rule_registry @elastic/response-ops
+/x-pack/solutions/security/test/fixtures/es_archives/rule_registry @elastic/response-ops
 /x-pack/test/functional/es_archives/event_log_multiple_indicies @elastic/response-ops
 /x-pack/test/functional/es_archives/task_manager* @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
 /x-pack/platform/test/plugin_api_perf @elastic/response-ops # Assigned per https://github.com/elastic/kibana/blob/assign-response-ops/x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance/kibana.jsonc#L4
@@ -2154,7 +2154,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/functional/es_archives/alerts_legacy @elastic/response-ops
 /x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts @elastic/response-ops
 /x-pack/test/functional/es_archives/actions @elastic/response-ops
-/x-pack/test/functional/es_archives/rules_scheduled_task_id @elastic/response-ops
+/x-pack/solutions/security/test/fixtures/es_archives/rules_scheduled_task_id @elastic/response-ops
 /x-pack/test/functional/es_archives/alerting/8_2_0 @elastic/response-ops
 /x-pack/test/functional/es_archives/cases/signals/default @elastic/kibana-cases
 /x-pack/test/functional/es_archives/cases/signals/hosts_users @elastic/kibana-cases
@@ -2288,10 +2288,10 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 # Security Solution
 /x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space @elastic/security-solution # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/security_solution_api_integration/test_suites/investigation/timeline/tests/timeline_migrations.ts#L58
-/x-pack/test/functional/es_archives/packetbeat @elastic/security-solution
+/x-pack/solutions/security/test/fixtures/es_archives/packetbeat @elastic/security-solution
 /x-pack/test/security_solution_ftr @elastic/security-solution
-/x-pack/test/functional/es_archives/security_solution @elastic/security-solution
-/x-pack/test/functional/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
+/x-pack/solutions/security/test/fixtures/es_archives/security_solution @elastic/security-solution
+/x-pack/solutions/security/test/fixtures/es_archives/rule_exceptions @elastic/security-solution # Assigned per https://github.com/elastic/kibana/pull/199795/files/ae80bb252bc71f787c122849fcb9b01e386fc5e9#r1840233040
 /x-pack/solutions/security/test/functional/ @elastic/security-solution
 /x-pack/solutions/security/test/functional_solution_sidenav/ @elastic/security-solution
 /x-pack/test/common/utils/security_solution/index.ts @elastic/security-solution
@@ -2299,12 +2299,12 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/solutions/security/test/accessibility/ @elastic/security-solution
-/x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
+/x-pack/solutions/security/test/fixtures/es_archives/endpoint/ @elastic/security-solution
 /x-pack/platform/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
-/x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
-/x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
+/x-pack/solutions/security/test/fixtures/es_archives/auditbeat/default @elastic/security-solution
+/x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/security/constants.ts @elastic/security-solution
 /x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
 /x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
@@ -2374,8 +2374,8 @@ x-pack/test/security_solution_api_integration/test_suites/investigations @elasti
 x-pack/test/security_solution_api_integration/test_suites/siem_migrations @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/sources @elastic/security-detections-response
 /x-pack/test/common/utils/security_solution/detections_response @elastic/security-detections-response
-/x-pack/test/functional/es_archives/signals @elastic/security-detections-response
-/x-pack/test/functional/es_archives/rule_keyword_family @elastic/security-detections-response
+/x-pack/solutions/security/test/fixtures/es_archives/signals @elastic/security-detections-response
+/x-pack/solutions/security/test/fixtures/es_archives/rule_keyword_family @elastic/security-detections-response
 
 # Security Solution sub teams
 
@@ -2506,10 +2506,10 @@ x-pack/solutions/security/test/security_solution_cypress/cypress/tasks/expandabl
 /x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/network @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/server/search_strategy/security_solution/factory/users @elastic/security-entity-analytics
 
-/x-pack/test/functional/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
-/x-pack/test/functional/es_archives/auditbeat/users @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/fixtures/es_archives/auditbeat/overview @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/fixtures/es_archives/auditbeat/users @elastic/security-threat-hunting-investigations
 
-/x-pack/test/functional/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-investigations
+/x-pack/solutions/security/test/fixtures/es_archives/auditbeat/uncommon_processes @elastic/security-threat-hunting-investigations
 
 ## The Hive Connector
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
@@ -2608,8 +2608,8 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/solutions/security/plugins/security_solution/common/api/detection_engine/signals_migration @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/common/cti @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/common/field_maps @elastic/security-detection-engine
-/x-pack/test/functional/es_archives/entity/risks @elastic/security-detection-engine
-/x-pack/test/functional/es_archives/entity/host_risk @elastic/security-detection-engine
+/x-pack/solutions/security/test/fixtures/es_archives/entity/risks @elastic/security-detection-engine
+/x-pack/solutions/security/test/fixtures/es_archives/entity/host_risk @elastic/security-detection-engine
 /x-pack/test/api_integration/apis/lists @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/value_list @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/public/detections/components/value_lists_management_flyout @elastic/security-detection-engine
@@ -2635,7 +2635,7 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/detection_engine @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/rule_gaps.ts @elastic/security-detection-engine
 /x-pack/test/security_solution_api_integration/test_suites/lists_and_exception_lists @elastic/security-detection-engine
-/x-pack/test/functional/es_archives/asset_criticality @elastic/security-detection-engine
+/x-pack/solutions/security/test/fixtures/es_archives/asset_criticality @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/exceptions @elastic/security-detection-engine
 /x-pack/solutions/security/plugins/security_solution/server/usage/value_lists @elastic/security-detection-engine
 
@@ -2722,10 +2722,10 @@ x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_po
 x-pack/platform/plugins/shared/fleet/public/applications/fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology.* @elastic/fleet @elastic/kibana-cloud-security-posture
 x-pack/platform/plugins/shared/fleet/public/applications/integrations/sections/epm/screens/detail/components/cloud_posture_third_party_support_callout.* @elastic/fleet @elastic/kibana-cloud-security-posture
 ## Kubernetes Security tests
-x-pack/test/functional/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/fixtures/es_archives/kubernetes_security @elastic/kibana-cloud-security-posture
 x-pack/test/kubernetes_security @elastic/kibana-cloud-security-posture
 ## SessionView tests
-x-pack/test/functional/es_archives/session_view @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/test/fixtures/es_archives/session_view @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/test/session_view @elastic/kibana-cloud-security-posture # Assigned per https://github.com/elastic/kibana/blob/main/api_docs/session_view.mdx#L18
 ## CSP tests
 x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/kibana-cloud-security-posture

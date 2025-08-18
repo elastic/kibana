@@ -126,7 +126,9 @@ export default ({ getService }: FtrProviderContext) => {
         await esArchiver.load(
           'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
         );
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.1.0'
+        );
       });
 
       after(async () => {
@@ -134,7 +136,7 @@ export default ({ getService }: FtrProviderContext) => {
           'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/alerts/8.1.0'
         );
       });
 

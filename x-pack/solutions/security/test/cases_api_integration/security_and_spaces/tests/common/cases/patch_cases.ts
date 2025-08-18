@@ -1950,14 +1950,18 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('detections rule', () => {
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
           await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
         });
 
         it('updates alert status when the status is updated and syncAlerts=true', async () => {
