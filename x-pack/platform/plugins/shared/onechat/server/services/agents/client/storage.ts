@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IndexStorageSettings, StorageIndexAdapter, types } from '@kbn/storage-adapter';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { StorageIndexAdapter, types } from '@kbn/storage-adapter';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { AgentType, ToolSelection } from '@kbn/onechat-common';
 

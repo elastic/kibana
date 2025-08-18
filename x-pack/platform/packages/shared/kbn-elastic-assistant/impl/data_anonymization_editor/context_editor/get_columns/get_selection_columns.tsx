@@ -5,11 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiBasicTableColumn } from '@elastic/eui';
-import { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
-import { ContextEditorRow } from '../types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
+import type { ContextEditorRow } from '../types';
 import { InputCheckbox, PageSelectionCheckbox } from '../selection/table_selection_checkbox';
-import {
+import type {
   HandlePageChecked,
   HandlePageUnchecked,
   HandleRowChecked,

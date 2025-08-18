@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { CoreStart, Logger } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import {
+import type { CoreStart, Logger } from '@kbn/core/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { EntityManagerConfig } from '../common/config';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { EntityManagerConfig } from '../common/config';
 
 export interface EntityManagerServerSetup {
   core: CoreStart;

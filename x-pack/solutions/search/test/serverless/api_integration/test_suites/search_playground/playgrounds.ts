@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/search_playground/playgrounds';
 const INITIAL_REST_VERSION = '1' as const;

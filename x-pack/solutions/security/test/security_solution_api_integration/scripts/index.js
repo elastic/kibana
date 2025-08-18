@@ -28,8 +28,8 @@ const configPath = `./test_suites/${area}/${domain}/${licenseFolder}/configs/${p
 
 const command =
   type === 'server'
-    ? '../../scripts/functional_tests_server.js'
-    : '../../scripts/functional_test_runner';
+    ? '../../../../scripts/functional_tests_server.js'
+    : '../../../../scripts/functional_test_runner';
 
 let grepArgs = [];
 
