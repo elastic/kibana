@@ -6,14 +6,14 @@
  */
 
 import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
 import {
   getIndexPatternsForStream,
   type GeneratedSignificantEventQuery,
   type Streams,
 } from '@kbn/streams-schema';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { isEmpty } from 'lodash';
 import moment from 'moment';
 import { Observable } from 'rxjs';

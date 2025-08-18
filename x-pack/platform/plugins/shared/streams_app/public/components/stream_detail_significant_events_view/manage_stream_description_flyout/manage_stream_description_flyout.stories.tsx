@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Streams } from '@kbn/streams-schema';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { ManageStreamDescriptionFlyout } from './manage_stream_description_flyout';
 
