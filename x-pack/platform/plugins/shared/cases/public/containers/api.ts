@@ -492,19 +492,27 @@ export const deleteAlertComment = async ({
     const alertIdx = alertId.indexOf(alertIdToRemove);
     alertId.splice(alertIdx, 1);
     index.splice(alertIdx, 1);
-    return patchAlertComment({
-      caseId,
-      commentUpdate: {
-        type: AttachmentType.alert,
-        alertId,
-        index,
-        rule,
-        owner,
-        id: attachment.comment_id as string,
-        version: attachment.version,
-      },
-      signal,
-    });
+    if (alertId.length === 0) {
+      return deleteComment({
+        caseId,
+        commentId: attachment.id,
+        signal,
+      });
+    } else {
+      return patchAlertComment({
+        caseId,
+        commentUpdate: {
+          type: AttachmentType.alert,
+          alertId,
+          index,
+          rule,
+          owner,
+          id: attachment.comment_id as string,
+          version: attachment.version,
+        },
+        signal,
+      });
+    }
   } else {
     return deleteComment({
       caseId,
