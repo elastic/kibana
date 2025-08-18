@@ -54,11 +54,11 @@ export class WorkflowExecutionState {
     });
   }
 
-  public getStepExecution(id: string): EsWorkflowStepExecution | undefined {
+  public getStepExecutionById(id: string): EsWorkflowStepExecution | undefined {
     return this.stepExecutions.get(id);
   }
 
-  public getStepExecutionByStepId(stepId: string): EsWorkflowStepExecution[] | undefined {
+  public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] | undefined {
     return Array.from(this.stepExecutions.values()).filter(
       (stepExecution) => stepExecution.stepId === stepId
     );

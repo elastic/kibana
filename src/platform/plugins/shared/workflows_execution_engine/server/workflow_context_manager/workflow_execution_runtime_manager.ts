@@ -23,11 +23,6 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowLogger: IWorkflowEventLogger;
 }
 
-interface ExecutionScope {
-  stepId: string;
-  scopeId: string;
-}
-
 /**
  * Manages the runtime execution state of a workflow, including step execution, results, and transitions.
  *
@@ -49,7 +44,7 @@ interface ExecutionScope {
  */
 export class WorkflowExecutionRuntimeManager {
   private currentStepIndex: number = -1;
-  private stack: ExecutionScope[] = [];
+  private stack: string[] = [];
   private topologicalOrder: string[];
   private workflowLogger: IWorkflowEventLogger | null = null;
 
@@ -132,10 +127,7 @@ export class WorkflowExecutionRuntimeManager {
 
     const resolvedScopeId = scopeId || currentStep.id;
 
-    this.stack.push({
-      stepId: currentStep.id,
-      scopeId: resolvedScopeId,
-    });
+    this.stack.push(resolvedScopeId);
   }
 
   public exitScope(): void {
@@ -143,7 +135,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public getStepResult(stepId: string): RunStepResult | undefined {
-    const stepExecution = this.workflowExecutionState.getStepExecution(stepId);
+    const stepExecution = this.workflowExecutionState.getStepExecutionById(stepId);
 
     if (!stepExecution) {
       return undefined;
@@ -158,25 +150,27 @@ export class WorkflowExecutionRuntimeManager {
   public async setStepResult(result: RunStepResult): Promise<void> {
     this.workflowExecutionState.upsertStep({
       id: this.getStepExecutionId(),
+      stepId: this.getCurrentStep().id,
       output: result.output,
       error: result.error,
     });
   }
 
   public getStepState(stepId: string): Record<string, any> | undefined {
-    const stepExecutions = this.workflowExecutionState.getStepExecutionByStepId(stepId);
+    const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(stepId);
 
-    return stepExecutions?.[0].state;
+    return stepExecutions?.[0]?.state;
   }
 
   public async setStepState(stepId: string, state: Record<string, any> | undefined): Promise<void> {
-    const stepExecutions = this.workflowExecutionState.getStepExecutionByStepId(stepId);
+    const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(stepId);
     const stepExecution = stepExecutions?.[0];
     if (!stepExecution) {
       throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
     }
     this.workflowExecutionState.upsertStep({
       id: stepExecution.id,
+      stepId,
       state,
     });
   }
@@ -202,6 +196,7 @@ export class WorkflowExecutionRuntimeManager {
         const stepStartedAt = new Date();
 
         const stepExecution = {
+          id: this.getStepExecutionId(),
           stepId: nodeId,
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
           status: ExecutionStatus.RUNNING,
@@ -232,9 +227,8 @@ export class WorkflowExecutionRuntimeManager {
         },
       },
       async () => {
-        const startedStepExecution = this.workflowExecutionState.getStepExecution(
-          this.getStepExecutionId()
-        );
+        const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(stepId);
+        const startedStepExecution = stepExecutions?.[stepExecutions.length - 1];
 
         if (!startedStepExecution) {
           throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
@@ -291,6 +285,7 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         this.workflowExecutionState.upsertStep({
+          id: this.getStepExecutionId(),
           stepId,
           status: ExecutionStatus.WAITING_FOR_INPUT,
         });
@@ -522,6 +517,14 @@ export class WorkflowExecutionRuntimeManager {
     await this.workflowExecutionState.flush();
   }
 
+  /**
+   * Generates a unique ID for the current step execution.
+   *
+   * The ID is created by joining the scope IDs of all scopes in the execution stack
+   * with double underscores (`__`).
+   *
+   * @returns {string} A string representing the unique step execution ID
+   */
   private getStepExecutionId(): string {
     return this.stack.join('__');
   }

@@ -84,7 +84,7 @@ describe('WorkflowExecutionState', () => {
     } as EsWorkflowStepExecution;
 
     underTest.upsertStep(stepExecution);
-    expect(underTest.getStepExecution('test-step-execution-id')).toEqual({
+    expect(underTest.getStepExecutionById('test-step-execution-id')).toEqual({
       id: 'test-workflow-execution-id-test-step-execution-id',
       workflowRunId: 'test-workflow-execution-id',
       workflowId: 'test-workflow-id',
@@ -111,7 +111,7 @@ describe('WorkflowExecutionState', () => {
       executionTimeMs: 60000,
     } as EsWorkflowStepExecution);
 
-    expect(underTest.getStepExecution('test-step-execution-id')).toEqual(
+    expect(underTest.getStepExecutionById('test-step-execution-id')).toEqual(
       expect.objectContaining({
         status: ExecutionStatus.COMPLETED,
         completedAt: '2025-08-05T20:01:00.000Z',
