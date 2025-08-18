@@ -724,6 +724,10 @@
                 "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
+                "plugin": "indicesMetadata",
+                "path": "x-pack/platform/plugins/private/indices_metadata/server/lib/services/sender.ts"
+              },
+              {
                 "plugin": "intercepts",
                 "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
