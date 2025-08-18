@@ -404,21 +404,18 @@ export const EXPERIMENTAL_DESC = i18n.translate('xpack.cases.badge.experimentalD
     'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
 });
 
-export const SUGGESTION = i18n.translate('xpack.cases.caseSuggestions.label', {
+export const SUGGESTION = i18n.translate('xpack.cases.suggestions.label', {
   defaultMessage: 'Suggestion',
 });
 
-export const DISMISS = i18n.translate('xpack.cases.caseSuggestions.dismiss', {
+export const DISMISS = i18n.translate('xpack.cases.suggestions.button.dismiss', {
   defaultMessage: 'Dismiss',
 });
 
-export const ADD_TO_CASE = i18n.translate('xpack.cases.caseSuggestions.addToCase', {
+export const ADD_TO_CASE = i18n.translate('xpack.cases.suggestions.button.addToCase', {
   defaultMessage: 'Add to Case',
 });
 
-export const SUGGESTION_ADDED_TO_CASE = i18n.translate(
-  'xpack.cases.caseSuggestions.suggestionAddedToCase',
-  {
-    defaultMessage: 'Suggestion added to case',
-  }
-);
+export const SUGGESTION_ADDED_TO_CASE = i18n.translate('xpack.cases.suggestions.addedToCase', {
+  defaultMessage: 'Suggestion added to case',
+});

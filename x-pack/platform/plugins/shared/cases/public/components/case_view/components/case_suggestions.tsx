@@ -12,7 +12,7 @@ import { CaseSuggestionItem } from './case_suggestion_item';
 import { useCaseSuggestions } from '../use_case_suggestions';
 
 export const CaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
-  const { visibleSuggestions, isLoadingSuggestions, onDismissSuggestion } = useCaseSuggestions({
+  const { visibleSuggestions, isLoadingSuggestions, setDismissedIds } = useCaseSuggestions({
     caseData,
   });
 
@@ -29,7 +29,7 @@ export const CaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
               key={suggestion.id}
               suggestion={suggestion}
               caseData={caseData}
-              onDismissSuggestion={onDismissSuggestion}
+              setDismissedIds={setDismissedIds}
             />
           );
         })}
