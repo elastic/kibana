@@ -7,5 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*\}\}/g;
-export const UNFINISHED_MUSTACHE_REGEX_GLOBAL = /\{\{\s*(?<key>\S*?)\s*$/g;
+import { WORKFLOWS_UI_SETTING_ID } from './constants';
+
+describe('Workflow Feature Flag Constants', () => {
+  it('should export the correct UI setting ID', () => {
+    expect(WORKFLOWS_UI_SETTING_ID).toBe('workflows:ui:enabled');
+  });
+
+  it('should have consistent naming pattern', () => {
+    expect(WORKFLOWS_UI_SETTING_ID).toMatch(/^workflows:/);
+    expect(WORKFLOWS_UI_SETTING_ID).toMatch(/:enabled$/);
+  });
+});
