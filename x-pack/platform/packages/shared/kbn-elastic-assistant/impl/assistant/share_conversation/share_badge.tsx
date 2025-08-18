@@ -17,11 +17,12 @@ import {
   useGeneratedHtmlId,
   EuiIcon,
 } from '@elastic/eui';
-import { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
-import { DataStreamApis } from '../use_data_stream_apis';
+import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import { useConversation } from '../use_conversation';
 import { ShareModal } from './share_modal';
-import { Conversation, useAssistantContext } from '../../..';
+import type { Conversation } from '../../..';
+import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 
 interface Props {
@@ -51,11 +52,6 @@ const ShareBadgeComponent: React.FC<Props> = ({
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const showGlobalModalOnOpen = useMemo(
-    // if the conversation is private opening sharing modal for the first time, default it to global view
-    () => !isShared || isSharedGlobal,
-    [isShared, isSharedGlobal]
-  );
   const items = useMemo<Array<EuiSelectableOption<ShareBadgeOptionData>>>(
     () => [
       {
@@ -73,7 +69,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         checked: isShared ? 'on' : undefined,
         key: 'shared',
         data: {
-          description: showGlobalModalOnOpen ? i18n.VISIBLE_GLOBAL : i18n.VISIBLE_SELECTED,
+          description: isSharedGlobal ? i18n.VISIBLE_GLOBAL : i18n.VISIBLE_SELECTED,
         },
         'data-test-subj': 'shared',
         disabled: !isConversationOwner,
@@ -81,7 +77,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         isGroupLabel: false,
       },
     ],
-    [isConversationOwner, isShared, showGlobalModalOnOpen]
+    [isConversationOwner, isShared, isSharedGlobal]
   );
 
   const unshareConversation = useCallback(async () => {
@@ -220,7 +216,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
       </EuiPopover>
       {isModalOpen && (
         <ShareModal
-          isSharedGlobal={showGlobalModalOnOpen}
+          isSharedGlobal={isSharedGlobal}
           selectedConversation={selectedConversation}
           isModalOpen={isModalOpen}
           setIsModalOpen={setIsModalOpen}

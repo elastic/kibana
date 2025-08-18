@@ -8,22 +8,25 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
+  EuiIcon,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiButtonGroup,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
+  EuiPanel,
 } from '@elastic/eui';
-import { UserProfile } from '@kbn/core-user-profile-common';
-import { DataStreamApis } from '../use_data_stream_apis';
+import type { UserProfile } from '@kbn/core-user-profile-common';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import { COPY_URL } from '../use_conversation/translations';
 import { UserProfilesList } from './user_profiles_list';
 import { useConversation } from '../use_conversation';
 import * as i18n from './translations';
-import { Conversation, useAssistantContext } from '../../..';
+import type { Conversation } from '../../..';
+import { useAssistantContext } from '../../..';
 import { UserProfilesSearch } from './user_profiles_search';
 
 interface Props {
@@ -36,14 +39,14 @@ interface Props {
 }
 const shareOptions = [
   {
-    id: 'global',
-    label: i18n.WITH_EVERYONE,
-    iconType: 'globe',
+    value: 'global',
+    inputDisplay: i18n.WITH_EVERYONE,
+    'data-test-subj': 'everyone',
   },
   {
-    id: 'selected',
-    label: i18n.WITH_SELECTED,
-    iconType: 'user',
+    value: 'selected',
+    inputDisplay: i18n.WITH_SELECTED,
+    'data-test-subj': 'selected',
   },
 ];
 const ShareModalComponent: React.FC<Props> = ({
@@ -133,6 +136,10 @@ const ShareModalComponent: React.FC<Props> = ({
     sharingOption,
     updateConversationUsers,
   ]);
+  const selectIcon = useMemo(
+    () => (sharingOption === 'global' ? 'globe' : 'users'),
+    [sharingOption]
+  );
 
   return isModalOpen ? (
     <EuiModal onClose={onCancelShare} maxWidth={600} data-test-subj="shareConversationModal">
@@ -143,15 +150,20 @@ const ShareModalComponent: React.FC<Props> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiButtonGroup
-          options={shareOptions}
-          isFullWidth
-          idSelected={sharingOption}
-          onChange={(id) => setSharingOption(id as 'global' | 'selected')}
-          legend="shareOptions"
-          buttonSize="compressed"
-        />
-
+        <EuiPanel hasShadow={false} hasBorder={true}>
+          <EuiText size="s">
+            <strong>{i18n.WHO_HAS_ACCESS}</strong>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiSuperSelect
+            hasDividers
+            fullWidth
+            prepend={<EuiIcon type={selectIcon} />}
+            options={shareOptions}
+            valueOfSelected={sharingOption}
+            onChange={(id) => setSharingOption(id as 'global' | 'selected')}
+          />
+        </EuiPanel>
         <EuiSpacer />
 
         {sharingOption === 'selected' && (

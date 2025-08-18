@@ -163,6 +163,7 @@ export const useChatSend = ({
       assistantTelemetry,
       createConversation,
       currentConversation,
+      currentUser,
       getConversation,
       http,
       isSetupComplete,

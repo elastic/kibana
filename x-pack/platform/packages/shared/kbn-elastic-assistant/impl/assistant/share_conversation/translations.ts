@@ -69,13 +69,13 @@ export const WHO_HAS_ACCESS = i18n.translate(
 export const WITH_EVERYONE = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.withEveryone',
   {
-    defaultMessage: 'With everyone',
+    defaultMessage: 'Everyone',
   }
 );
 export const WITH_SELECTED = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.withSelected',
   {
-    defaultMessage: 'Only with selected users',
+    defaultMessage: 'Only selected users',
   }
 );
 export const ERROR_SUGGEST = i18n.translate(
