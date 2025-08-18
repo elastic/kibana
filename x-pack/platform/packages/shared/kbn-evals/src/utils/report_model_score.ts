@@ -8,19 +8,11 @@
 import { SomeDevLog } from '@kbn/some-dev-log';
 import { Model } from '@kbn/inference-common';
 import { RanExperiment } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { sumBy, mean, keyBy, uniq } from 'lodash';
+import { sumBy, keyBy, uniq } from 'lodash';
 import { table } from 'table';
 import chalk from 'chalk';
+import { mean, median, deviation } from 'd3';
 import { KibanaPhoenixClient } from '../kibana_phoenix_client/client';
-
-// Helper function to calculate standard deviation
-function standardDeviation(values: number[]): number {
-  if (values.length <= 1) return 0;
-  const avg = mean(values);
-  const squareDiffs = values.map((value) => Math.pow(value - avg, 2));
-  const avgSquareDiff = mean(squareDiffs);
-  return Math.sqrt(avgSquareDiff);
-}
 
 interface DatasetScore {
   id: string;
@@ -50,12 +42,6 @@ export async function reportModelScore({
 
   for (const experiment of experiments) {
     const { datasetId, evaluationRuns, runs } = experiment;
-
-    log.info(
-      `Processing experiment for dataset: ${datasetId} with evaluation runs: ${JSON.stringify(
-        evaluationRuns
-      )}`
-    );
 
     const numExamplesForExperiment = runs ? Object.keys(runs).length : 0;
 
@@ -88,12 +74,6 @@ export async function reportModelScore({
     }
   }
 
-  log.info(
-    `Dataset scores map with keys and values: ${JSON.stringify(
-      Array.from(datasetScoresMap.entries())
-    )}`
-  );
-
   // Also log detailed evaluatorScores for each dataset (evaluator -> scores[])
   for (const [datasetId, dataset] of datasetScoresMap.entries()) {
     const evaluatorEntries = Array.from(dataset.evaluatorScores.entries());
@@ -122,8 +102,6 @@ export async function reportModelScore({
   });
   const evaluatorNames = Array.from(allEvaluatorNames).sort();
 
-  log.info(`Evaluator names found: ${JSON.stringify(evaluatorNames)}`);
-
   const datasetScores = Array.from(datasetScoresMap.values()).map((dataset) => ({
     ...dataset,
     evaluatorPercents: new Map(
@@ -146,6 +124,7 @@ export async function reportModelScore({
   const evaluatorAverages = new Map<string, number>();
   const evaluatorWeighted = new Map<string, number>();
   const evaluatorMeans = new Map<string, number>();
+  const evaluatorMedians = new Map<string, number>();
   const evaluatorStdDevs = new Map<string, number>();
   const totalExamples = sumBy(datasetScores, (d) => d.numExamples);
 
@@ -163,15 +142,18 @@ export async function reportModelScore({
     const weighted = totalExamples > 0 ? totalScore / totalExamples : 0;
     evaluatorWeighted.set(evaluatorName, weighted);
 
-    // Calculate mean and standard deviation of raw scores
+    // Calculate mean, median, and standard deviation of raw scores
     const allScores = datasetScores.flatMap((d) => d.evaluatorScores.get(evaluatorName) || []);
     if (allScores.length > 0) {
       const scoreMean = mean(allScores);
-      const scoreStdDev = standardDeviation(allScores);
+      const scoreMedian = median(allScores) ?? 0;
+      const scoreStdDev = deviation(allScores) ?? 0;
       evaluatorMeans.set(evaluatorName, scoreMean);
+      evaluatorMedians.set(evaluatorName, scoreMedian);
       evaluatorStdDevs.set(evaluatorName, scoreStdDev);
     } else {
       evaluatorMeans.set(evaluatorName, 0);
+      evaluatorMedians.set(evaluatorName, 0);
       evaluatorStdDevs.set(evaluatorName, 0);
     }
   });
@@ -224,6 +206,14 @@ export async function reportModelScore({
       return chalk.bold.cyan(meanScore.toFixed(3));
     }),
   ];
+  const medianRow = [
+    'Median Score',
+    '',
+    ...evaluatorNames.map((name) => {
+      const medianScore = evaluatorMedians.get(name) || 0;
+      return chalk.bold.cyan(medianScore.toFixed(3));
+    }),
+  ];
   const stdDevRow = [
     'Std Dev',
     '',
@@ -233,7 +223,7 @@ export async function reportModelScore({
     }),
   ];
 
-  const summaryRows = [emptyRow, averageRow, weightedRow, meanRow, stdDevRow];
+  const summaryRows = [emptyRow, averageRow, weightedRow, meanRow, medianRow, stdDevRow];
 
   // Build column alignment configuration dynamically
   const columnConfig: Record<number, { alignment: 'right' }> = {};
