@@ -16,8 +16,7 @@ type Stubs =
   | 'deprecations'
   | 'fatalErrors'
   | 'navigation'
-  | 'overlays'
-  | 'savedObjects';
+  | 'overlays';
 
 type StubbedStartServices = Pick<FleetStartServices, Stubs>;
 
@@ -31,5 +30,4 @@ export const stubbedStartServices: StubbedStartServices = {
   fatalErrors: {} as FleetStartServices['fatalErrors'],
   navigation: {} as FleetStartServices['navigation'],
   overlays: {} as FleetStartServices['overlays'],
-  savedObjects: {} as FleetStartServices['savedObjects'],
 };
