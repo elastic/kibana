@@ -57,11 +57,19 @@ export const useCaseActions = ({
           const alertIdx = alertId.indexOf(alert._id);
           alertId.splice(alertIdx, 1);
           index.splice(alertIdx, 1);
-          updateComment({
-            caseId: caseData.id,
-            commentUpdate: alertAttachment,
-            successToasterTitle: removalSuccessToast,
-          });
+          if (alertId.length === 0) {
+            deleteComment({
+              caseId: caseData.id,
+              commentId: alertAttachment.id,
+              successToasterTitle: removalSuccessToast,
+            });
+          } else {
+            updateComment({
+              caseId: caseData.id,
+              commentUpdate: alertAttachment,
+              successToasterTitle: removalSuccessToast,
+            });
+          }
         } else {
           deleteComment({
             caseId: caseData.id,
