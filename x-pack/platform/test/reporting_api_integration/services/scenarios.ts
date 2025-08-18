@@ -88,8 +88,12 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   /**
-   * Creates a role for a data analyst user with read access to the ecommerce index and minimal Kibana
-   * privileges to Kibana applications like Discover, Dashboard, Canvas, and Visualize in the default space.
+   * Creates a role for a data analyst user with read access to the ecommerce
+   * index and minimal Kibana privileges to Kibana applications like Discover,
+   * Dashboard, Canvas, and Visualize in the default space.
+
+   *
+   * Does not have permissions to generate reports.
    */
   const createDataAnalystRole = async () => {
     await security.role.create(DATA_ANALYST_ROLE, {
@@ -121,15 +125,22 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
   };
 
   /**
-   * Creates a role for a reporting user with minimal Kibana privileges to Kibana applications
-   * in the default space.
+   * Creates a role for a reporting user with read access to the ecommerce
+   * index and permissions to generate reports in Kibana applications like
+   * Discover, Dashboard, Canvas, and Visualize in the default space.
    */
   const createTestReportingUserRole = async () => {
     await security.role.create(REPORTING_ROLE, {
       metadata: {},
       elasticsearch: {
         cluster: [],
-        indices: [],
+        indices: [
+          {
+            names: ['ecommerce'],
+            privileges: ['read', 'view_index_metadata'],
+            allow_restricted_indices: false,
+          },
+        ],
         run_as: [],
       },
       kibana: [
