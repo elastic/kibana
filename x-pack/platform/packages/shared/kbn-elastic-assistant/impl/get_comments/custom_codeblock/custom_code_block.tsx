@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import React from 'react';
 
 export const CustomCodeBlock = ({ value, lang }: { value: string; lang: string }) => {

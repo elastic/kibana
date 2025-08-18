@@ -7,7 +7,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { PromptItemArray } from '@kbn/elastic-assistant-common/impl/schemas/security_ai_prompts/common_attributes.gen';
 import { useAssistantContext, useFindPrompts } from '../../..';
 

@@ -8,7 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { ApiConfig, AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import type { AIConnector } from '../connector_selector';
 import { ConnectorSelector } from '../connector_selector';
