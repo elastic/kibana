@@ -83,6 +83,7 @@ const renderProcessesTable = ({
         error={error}
         clearSearchBar={() => {}}
         setSortBy={(s: SortBy) => {}}
+        schema="ecs"
       />
     </IntlProvider>
   );

@@ -7,11 +7,11 @@
 
 import { Transform } from 'stream';
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 import { has } from 'lodash/fp';
 import { pipe } from 'fp-ts/pipeable';
 import { fold } from 'fp-ts/Either';
-import {
+import type {
   CreateCommentsArray,
   ExportExceptionDetails,
   ImportCommentsArray,
@@ -19,6 +19,8 @@ import {
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
   ImportExceptionsListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   importExceptionListItemSchema,
   importExceptionsListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
@@ -32,7 +34,7 @@ import {
 import { BadRequestError } from '@kbn/securitysolution-es-utils';
 import { exactCheck, formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
-import { ExceptionsImport } from '../../import_exception_list_and_items';
+import type { ExceptionsImport } from '../../import_exception_list_and_items';
 
 /**
  * Parses strings from ndjson stream

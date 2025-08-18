@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/timelines-plugin/common';
 
 export type AlertWorkflowStatus = 'open' | 'closed' | 'acknowledged';
 

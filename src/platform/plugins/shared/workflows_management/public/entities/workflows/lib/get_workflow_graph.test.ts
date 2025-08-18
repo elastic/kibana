@@ -17,7 +17,7 @@ describe('getWorkflowGraph', () => {
       enabled: true,
       triggers: [
         {
-          type: 'triggers.elastic.manual' as const,
+          type: 'manual' as const,
           enabled: true,
         },
       ],
@@ -36,10 +36,10 @@ describe('getWorkflowGraph', () => {
     expect(workflowGraph.nodes().length).toBe(2);
     expect(workflowGraph.edges().length).toBe(1);
 
-    expect(workflowGraph.node('triggers.elastic.manual').type).toBe('trigger');
+    expect(workflowGraph.node('manual').type).toBe('trigger');
     expect(workflowGraph.node('first-step').type).toBe('action');
 
-    expect(workflowGraph.hasEdge('triggers.elastic.manual', 'first-step')).toBe(true);
+    expect(workflowGraph.hasEdge('manual', 'first-step')).toBe(true);
   });
 
   it('should return the correct graph with a nested step', () => {
@@ -49,7 +49,7 @@ describe('getWorkflowGraph', () => {
       enabled: true,
       triggers: [
         {
-          type: 'triggers.elastic.manual' as const,
+          type: 'manual' as const,
           enabled: true,
         },
       ],
@@ -91,13 +91,13 @@ describe('getWorkflowGraph', () => {
     expect(workflowGraph.nodes().length).toBe(5);
     expect(workflowGraph.edges().length).toBe(4);
 
-    expect(workflowGraph.node('triggers.elastic.manual').type).toBe('trigger');
+    expect(workflowGraph.node('manual').type).toBe('trigger');
     expect(workflowGraph.node('first-step').type).toBe('action');
     expect(workflowGraph.node('if-split').type).toBe('if');
     expect(workflowGraph.node('if-true').type).toBe('action');
     expect(workflowGraph.node('if-false').type).toBe('action');
 
-    expect(workflowGraph.hasEdge('triggers.elastic.manual', 'first-step')).toBe(true);
+    expect(workflowGraph.hasEdge('manual', 'first-step')).toBe(true);
     expect(workflowGraph.hasEdge('first-step', 'if-split')).toBe(true);
     expect(workflowGraph.hasEdge('if-split', 'if-true')).toBe(true);
     expect(workflowGraph.hasEdge('if-split', 'if-false')).toBe(true);

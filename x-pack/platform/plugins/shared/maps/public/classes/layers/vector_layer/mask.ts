@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { MapGeoJSONFeature } from '@kbn/mapbox-gl';
+import type { MapGeoJSONFeature } from '@kbn/mapbox-gl';
 import type { IESAggSource } from '../../sources/es_agg_source';
 import type { IESAggField } from '../../fields/agg';
 import { FIELD_ORIGIN, MASK_OPERATOR, MB_LOOKUP_FUNCTION } from '../../../../common/constants';

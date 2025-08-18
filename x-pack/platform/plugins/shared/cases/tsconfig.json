@@ -97,6 +97,7 @@
     "@kbn/page-attachment-schema",
     "@kbn/zod",
     "@kbn/inference-common"
+    "@kbn/licensing-types"
   ],
   "exclude": ["target/**/*"]
 }
