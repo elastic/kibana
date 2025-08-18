@@ -11,10 +11,10 @@ import { useMemo, useState } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { pick } from 'lodash';
 import { Subject } from 'rxjs';
-import { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
+import type { UnifiedHistogramApi, UseUnifiedHistogramProps } from './use_unified_histogram';
 import { createStateService } from '../services/state_service';
 import { useStateProps } from './use_state_props';
-import { UnifiedHistogramInputMessage } from '../types';
+import type { UnifiedHistogramInputMessage } from '../types';
 import { useRequestParams } from './use_request_params';
 import { getBreakdownField } from '../utils/local_storage_utils';
 
