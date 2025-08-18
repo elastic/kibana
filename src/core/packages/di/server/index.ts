@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+export { CapabilitiesProvider } from './src/services/capabilities';
 export {
   Request,
   Response,

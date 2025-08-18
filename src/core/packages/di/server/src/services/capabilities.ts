@@ -7,5 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { http } from './src/modules/http';
-export { capabilities } from './src/modules/capabilities';
+import type { ServiceIdentifier } from 'inversify';
+import type { CapabilitiesProvider as ICapabilitiesProvider } from '@kbn/core-capabilities-server';
+
+export const CapabilitiesProvider = Symbol(
+  'CapabilitiesProvider'
+) as ServiceIdentifier<ICapabilitiesProvider>;
