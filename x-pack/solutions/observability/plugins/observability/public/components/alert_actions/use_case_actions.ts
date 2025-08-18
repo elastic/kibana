@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { CaseAttachmentsWithoutOwner, useRemoveAlertFromCase } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { useRemoveAlertFromCase } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import type { CaseUI } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
