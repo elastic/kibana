@@ -8,3 +8,4 @@
  */
 
 export { http } from './src/modules/http';
+export { capabilities } from './src/modules/capabilities';
