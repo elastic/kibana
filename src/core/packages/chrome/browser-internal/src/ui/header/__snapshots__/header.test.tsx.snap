@@ -29,6 +29,7 @@ exports[`Header renders 1`] = `
           />
           <a
             class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
+            data-test-subj="skipToMainButton"
             href="#"
             rel="noreferrer"
             role="button"
