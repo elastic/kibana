@@ -12,7 +12,6 @@ import {
   createDataTypeRegistry,
   type DataTypeRegistry,
   type DataTypeDefinition,
-  registerDataTypes,
 } from './data_type_registry';
 
 export interface DataServiceSetupDeps {
@@ -41,7 +40,6 @@ export class DataService {
 
   setup(deps: DataServiceSetupDeps): DataServiceSetup {
     this.setupDeps = deps;
-    registerDataTypes({ registry: this.dataTypeRegistry });
 
     return {
       register: (dataType) => this.dataTypeRegistry.register(dataType),

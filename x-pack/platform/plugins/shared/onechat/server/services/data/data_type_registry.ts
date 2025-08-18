@@ -43,11 +43,3 @@ class DataTypeRegistryImpl implements DataTypeRegistry {
 export const createDataTypeRegistry = (): DataTypeRegistry => {
   return new DataTypeRegistryImpl();
 };
-
-export const registerDataTypes = ({ registry }: { registry: DataTypeRegistry }) => {
-  const dataTypes: DataTypeDefinition[] = []; // TODO: get all datatypes registered from all Kibana plugins
-
-  dataTypes.forEach((dataType) => {
-    registry.register(dataType);
-  });
-};
