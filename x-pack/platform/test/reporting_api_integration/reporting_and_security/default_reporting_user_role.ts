@@ -299,35 +299,28 @@ export default function (context: FtrProviderContext) {
     });
 
     it('unprivileged user should not be able to generate report in default space', async () => {
-      const { postJobDefaultSpace, UNPRIVILEGED_USER, UNPRIVILEGED_USER_PASSWORD } = api;
-
       // Try to invoke a reporting job in the default space, which should FAIL with an authorization error
-      const jobDefaultSpace = await postJobDefaultSpace(
-        UNPRIVILEGED_USER,
-        UNPRIVILEGED_USER_PASSWORD
+      const jobDefaultSpace = await api.postJobDefaultSpace(
+        api.UNPRIVILEGED_USER,
+        api.UNPRIVILEGED_USER_PASSWORD
+      );
+      expect(jobDefaultSpace?.statusCode).to.be(403);
+    });
+
+    it('privileged user is not able to generate a report in the default space', async () => {
+      // Try to invoke a reporting job in the default space, which should FAIL with an authorization error
+      const jobDefaultSpace = await api.postJobDefaultSpace(
+        api.PRIVILEGED_REPORTING_USER,
+        api.PRIVILEGED_REPORTING_USER_PASSWORD
       );
       expect(jobDefaultSpace?.statusCode).to.be(403);
     });
 
     it('privileged user is able to generate a report in a custom space only', async () => {
-      const {
-        postJobDefaultSpace,
-        postJobCustomSpace,
-        PRIVILEGED_REPORTING_USER,
-        PRIVILEGED_REPORTING_USER_PASSWORD,
-      } = api;
-
-      // Try to invoke a reporting job in the default space, which should FAIL with an authorization error
-      const jobDefaultSpace = await postJobDefaultSpace(
-        PRIVILEGED_REPORTING_USER,
-        PRIVILEGED_REPORTING_USER_PASSWORD
-      );
-      expect(jobDefaultSpace?.statusCode).to.be(403);
-
       // Try to invoke a reporting job in the custom space, which should SUCCEED
-      const jobCustomSpace = await postJobCustomSpace(
-        PRIVILEGED_REPORTING_USER,
-        PRIVILEGED_REPORTING_USER_PASSWORD
+      const jobCustomSpace = await api.postJobCustomSpace(
+        api.PRIVILEGED_REPORTING_USER,
+        api.PRIVILEGED_REPORTING_USER_PASSWORD
       );
       expect(jobCustomSpace?.statusCode).to.be(200);
     });
