@@ -6,21 +6,27 @@
  */
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { Subscription } from 'rxjs';
 import { catchError, exhaustMap, finalize, map, takeWhile, throwError, timer } from 'rxjs';
 
 const POLL_INTERVAL = 1; // seconds
 
 export class DocCountService {
   private indexName: string | null = null;
+  private subscription: Subscription | null = null;
 
   constructor(
     private data: DataPublicPluginStart,
     private onIndexSearchable: (indexName: string) => void
   ) {}
 
+  public destroy() {
+    this.subscription?.unsubscribe();
+  }
+
   public start(indexName: string): void {
     this.indexName = indexName;
-    this.pollIsSearchable()
+    this.subscription = this.pollIsSearchable()
       .pipe(finalize(() => this.onIndexSearchable(indexName)))
       .subscribe({
         error: (err) => {
@@ -32,7 +38,7 @@ export class DocCountService {
   private pollIsSearchable() {
     return timer(0, POLL_INTERVAL * 1000).pipe(
       exhaustMap(() => this.isSearchable$()),
-      takeWhile((isSearchable) => this.indexName !== null && !isSearchable, true) // takeUntil we get `true`, including the final one
+      takeWhile((isSearchable) => !isSearchable, true) // takeUntil we get `true`, including the final one
     );
   }
   private isSearchable$() {
@@ -48,9 +54,5 @@ export class DocCountService {
         map((response) => response.rawResponse.hits.hits.length > 0),
         catchError((err) => throwError(() => err))
       );
-  }
-
-  public forceStop() {
-    this.indexName = null;
   }
 }

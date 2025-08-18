@@ -226,7 +226,7 @@ export class FileUploadManager {
     this.existingIndexMappings$.complete();
     this._uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
-    this.docCountService.forceStop();
+    this.docCountService.destroy();
   }
   private setStatus(status: Partial<UploadStatus>) {
     this._uploadStatus$.next({
