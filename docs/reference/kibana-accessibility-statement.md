@@ -29,7 +29,7 @@ Elastic takes the following measures to ensure accessibility across Kibana:
 - Maintains and incorporates an accessible component library.
 - Provides continual accessibility training to staff
 - Conducts continuous accessibility audits and ensures that any found issues get fixed in a reasonable timeframe.
-- We value and prioritize accessibility feedback from our users and customers. Their input plays a critical role in shaping our accessibility roadmap and helps us address real-world barriers more effectively.
+We value and prioritize accessibility feedback from our users and customers. Their input plays a critical role in shaping our accessibility roadmap and helps us address real-world barriers more effectively.
 
 ## Conformance status
 Elastic and its suite of products aim to meet [WCAG 2.2 Level AA compliance](https://www.w3.org/WAI/WCAG22/quickref/?versions=2.1). Currently, we partially conform, meaning some success criteria have not yet been fully met. However, Elastic goes beyond regulatory minimums to deliver inclusive design and user experiences.
