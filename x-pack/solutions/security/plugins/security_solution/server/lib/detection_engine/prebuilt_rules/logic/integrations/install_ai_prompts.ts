@@ -29,8 +29,11 @@ export async function installSecurityAiPromptsPackage(
       pkgVersion,
       logger
     );
-  } catch (e) {
-    // fail silently
+  } catch (error) {
+    logger.error(
+      'installSecurityAiPromptsPackage: Security AI prompts package failed to install',
+      error
+    );
     return null;
   }
 }

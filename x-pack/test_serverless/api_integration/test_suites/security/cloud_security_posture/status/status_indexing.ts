@@ -11,12 +11,9 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
-import {
-  findingsMockData,
-  vulnerabilityMockData,
-} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/mock_data';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
+import { createPackagePolicy } from '../helper';
+import { findingsMockData, vulnerabilityMockData } from '../mock_data';
+import { EsIndexDataProvider } from '../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 

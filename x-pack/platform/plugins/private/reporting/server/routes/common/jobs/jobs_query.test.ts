@@ -65,6 +65,7 @@ describe('jobsQuery', () => {
                   bool: {
                     should: [
                       { term: { space_id: 'default' } },
+                      { term: { 'space_id.keyword': 'default' } },
                       // also show all reports created before space_id was added
                       { bool: { must_not: { exists: { field: 'space_id' } } } },
                     ],

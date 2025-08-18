@@ -17,6 +17,7 @@ import {
   EuiIcon,
   EuiLink,
   EuiPopover,
+  EuiScreenReaderOnly,
   EuiToolTipProps,
 } from '@elastic/eui';
 import { MountPoint } from '@kbn/core/public';
@@ -324,12 +325,12 @@ export function InternalDashboardTopNav({
 
   return (
     <div className="dashboardTopNav">
-      <h1
-        id="dashboardTitle"
-        className="euiScreenReaderOnly"
-        ref={dashboardTitleRef}
-        tabIndex={-1}
-      >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      <EuiScreenReaderOnly>
+        <h1
+          id="dashboardTitle"
+          ref={dashboardTitleRef}
+        >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
+      </EuiScreenReaderOnly>
       <navigationService.ui.TopNavMenu
         {...visibilityProps}
         query={query as Query | undefined}
