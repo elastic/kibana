@@ -20,12 +20,12 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import {
-  ControlGroupRenderer,
+import type {
   ControlGroupRendererApi,
   DefaultControlApi,
   OptionsListControlApi,
 } from '@kbn/controls-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';

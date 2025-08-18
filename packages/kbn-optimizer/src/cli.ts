@@ -11,7 +11,8 @@ import Path from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { lastValueFrom } from 'rxjs';
-import { run, Flags } from '@kbn/dev-cli-runner';
+import type { Flags } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
 import { logOptimizerState } from './log_optimizer_state';

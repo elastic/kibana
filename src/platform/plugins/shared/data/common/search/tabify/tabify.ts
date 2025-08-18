@@ -12,8 +12,9 @@ import type { Datatable } from '@kbn/expressions-plugin/common';
 import { TabbedAggResponseWriter } from './response_writer';
 import { TabifyBuckets } from './buckets';
 import type { TabbedResponseWriterOptions } from './types';
-import { AggResponseBucket } from './types';
-import { AggGroupNames, IAggConfigs } from '../aggs';
+import type { AggResponseBucket } from './types';
+import type { IAggConfigs } from '../aggs';
+import { AggGroupNames } from '../aggs';
 
 /**
  * read an aggregation from a bucket, which *might* be found at key (if

@@ -6,7 +6,8 @@
  */
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
-import { createBadRequestError, EsqlToolConfig } from '@kbn/onechat-common';
+import type { EsqlToolConfig } from '@kbn/onechat-common';
+import { createBadRequestError } from '@kbn/onechat-common';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
 
 export const validateConfig = async (configuration: EsqlToolConfig) => {

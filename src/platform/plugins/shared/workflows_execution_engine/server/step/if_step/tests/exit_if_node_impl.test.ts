@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitIfNode } from '@kbn/workflows';
+import type { ExitIfNode } from '@kbn/workflows';
 import { ExitIfNodeImpl } from '../exit_if_node_impl';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('ExitIfNodeImpl', () => {
   let step: ExitIfNode;

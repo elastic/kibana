@@ -10,12 +10,9 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import {
-  ConcreteTaskInstance,
-  BulkUpdateTaskResult,
-  Frequency,
-} from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import { Frequency } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
 
@@ -1151,6 +1148,31 @@ export default function ({ getService }: FtrProviderContext) {
         expect(scheduledTask.status).to.be('idle');
         expect(scheduledTask.startedAt).to.be(null);
         expect(scheduledTask.retryAt).to.be(null);
+      });
+    });
+
+    it('should disable a task that returns shouldDisableTask: true', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskDisablesItself',
+        schedule: { interval: '1d' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('running');
+        expect(scheduledTask.startedAt).not.to.be(null);
+        expect(scheduledTask.retryAt).not.to.be(null);
+      });
+
+      await retry.try(async () => {
+        const currTasks = await currentTasks();
+
+        const [scheduledTask] = currTasks.docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('idle');
+        expect(scheduledTask.enabled).to.be(false);
       });
     });
   });
