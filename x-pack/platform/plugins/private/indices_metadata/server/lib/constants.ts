@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesMetadataConfiguration } from './services/indices_metadata.types';
+import type { IndicesMetadataConfiguration } from './services/indices_metadata.types';
 import type { CdnConfig } from './services/artifact.types';
 
 export const DEFAULT_CDN_CONFIG: CdnConfig = {

@@ -16,7 +16,8 @@ import {
   isProperNode,
 } from '../ast/is';
 import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
-import { ESQLAstExpressionNode, Visitor } from '../visitor';
+import type { ESQLAstExpressionNode } from '../visitor';
+import { Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { LeafPrinter } from './leaf_printer';

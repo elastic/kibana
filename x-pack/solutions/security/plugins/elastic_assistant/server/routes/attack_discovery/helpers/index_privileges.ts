@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
-import { AwaitedProperties } from '@kbn/utility-types';
+import type { IKibanaResponse, KibanaResponseFactory } from '@kbn/core/server';
+import type { AwaitedProperties } from '@kbn/utility-types';
 
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 
 const DEFAULT_ATTACK_DISCOVER_ALERTS_INDEX = '.alerts-security.attack.discovery.alerts' as const;
 const DEFAULT_ATTACK_DISCOVER_ADHOC_ALERTS_INDEX =

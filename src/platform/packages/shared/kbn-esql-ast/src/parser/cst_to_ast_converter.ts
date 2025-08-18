@@ -9,7 +9,7 @@
 
 import * as antlr from 'antlr4';
 import * as cst from '../antlr/esql_parser';
-import * as ast from '../types';
+import type * as ast from '../types';
 import { isCommand } from '../ast/is';
 import { LeafPrinter } from '../pretty_print';
 import { getPosition, nonNullable } from './helpers';
@@ -593,17 +593,7 @@ export class CstToAstConverter {
     const command = this.createCommand('stats', ctx);
 
     if (ctx._stats) {
-      const fields = ctx.aggFields();
-
-      for (const fieldCtx of fields.aggField_list()) {
-        if (fieldCtx.getText() === '') continue;
-
-        const field = this.fromAggField(fieldCtx);
-
-        if (field) {
-          command.args.push(field);
-        }
-      }
+      command.args.push(...this.fromAggFields(ctx.aggFields()));
     }
 
     if (ctx._grouping) {
@@ -2072,7 +2062,9 @@ export class CstToAstConverter {
 
     try {
       for (const aggField of ctx.aggField_list()) {
-        const field = this.fromField(aggField.field());
+        if (aggField.getText() === '') continue;
+
+        const field = this.fromAggField(aggField);
 
         if (field) {
           fields.push(field);

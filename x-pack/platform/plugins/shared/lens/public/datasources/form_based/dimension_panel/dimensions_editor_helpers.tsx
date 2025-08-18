@@ -30,7 +30,7 @@ import {
   type TermsIndexPatternColumn,
 } from '../operations';
 import { isColumnOfType } from '../operations/definitions/helpers';
-import { FormBasedLayer } from '../types';
+import type { FormBasedLayer } from '../types';
 import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';

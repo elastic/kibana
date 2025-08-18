@@ -6,8 +6,8 @@
  */
 
 import { isEmpty } from 'lodash';
-import { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { ConfigDrivenProcessorFormState, FieldConfiguration, FieldOptions } from './types';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { ConfigDrivenProcessorFormState, FieldConfiguration, FieldOptions } from './types';
 
 export const getConvertFormStateToConfig = <
   FormState extends ConfigDrivenProcessorFormState,

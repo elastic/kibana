@@ -7,19 +7,15 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { FlattenRecord, isSchema } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
-import {
-  ALWAYS_CONDITION,
-  GrokProcessor,
-  ProcessorType,
-  StreamlangProcessorDefinition,
-  streamlangProcessorSchema,
-} from '@kbn/streamlang';
-import { EnrichmentDataSource } from '../../../../common/url_schema';
-import {
+import type { GrokProcessor, ProcessorType, StreamlangProcessorDefinition } from '@kbn/streamlang';
+import { ALWAYS_CONDITION, streamlangProcessorSchema } from '@kbn/streamlang';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type {
   DissectFormState,
   GrokFormState,
   ProcessorFormState,
@@ -29,12 +25,12 @@ import {
   SetFormState,
 } from './types';
 import { configDrivenProcessors } from './processors/config_driven';
-import {
+import type {
   ConfigDrivenProcessorType,
   ConfigDrivenProcessors,
 } from './processors/config_driven/types';
 import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import { ProcessorResources } from './state_management/processor_state_machine';
+import type { ProcessorResources } from './state_management/processor_state_machine';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.

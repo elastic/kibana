@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import {
+import type {
   DataStreamDocsStat,
   FailedDocsDetails,
   FailedDocsErrorsResponse,
