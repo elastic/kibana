@@ -14,8 +14,9 @@ import { PNG } from 'pngjs';
 import cheerio from 'cheerio';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import type { CustomCheerio, CustomCheerioStatic } from './custom_cheerio_api';
-// @ts-ignore not supported yet
+
 import { scrollIntoViewIfNecessary } from './scroll_into_view_if_necessary';
 import { Browsers } from '../remote/browsers';
 

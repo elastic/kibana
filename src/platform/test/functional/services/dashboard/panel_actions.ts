@@ -8,6 +8,7 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { asyncMap } from '@kbn/std';
 import { FtrService } from '../../ftr_provider_context';
 
 const ACTION_SHOW_CONFIG_PANEL_SUBJ = 'embeddablePanelAction-ACTION_SHOW_CONFIG_PANEL';
@@ -58,12 +59,10 @@ export class DashboardPanelActionsService extends FtrService {
     ).flat();
 
     let fixedHeaderHeight = 0;
-    await Promise.all(
-      fixedHeaders.map(async (header) => {
-        const headerHeight = (await header.getSize()).height;
-        fixedHeaderHeight += headerHeight;
-      })
-    );
+    await asyncMap(fixedHeaders, async (header) => {
+      const headerHeight = (await header.getSize()).height;
+      fixedHeaderHeight += headerHeight;
+    });
 
     const additionalOffsetForFloatingHoverActions = 32;
 
