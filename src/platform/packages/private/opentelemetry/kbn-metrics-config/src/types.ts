@@ -10,12 +10,22 @@
 import type { Duration } from 'moment';
 
 /**
+ * Common configuration for OTLP metrics exporters
+ */
+export interface MetricsExporterCommonConfig {
+  /** Frequency in which the exporter should collect the metrics */
+  exportIntervalMillis?: number | Duration;
+  /** The preferred temporality of the metrics. Defaults to `delta`, as it plays better with the ES backend. */
+  temporalityPreference: 'delta' | 'cumulative';
+}
+
+/**
  * Allowed configurations for OTLP metrics exporters
  */
 export type MetricsExporterConfig =
   | {
       /** GRPC OTLP Exporter */
-      grpc: {
+      grpc: MetricsExporterCommonConfig & {
         /** The URL of the OTLP gRPC endpoint */
         url: string;
         /** HTTP headers to send to the OTLP gRPC endpoint. Typically, the `Authorization` header is one of them */
@@ -24,7 +34,7 @@ export type MetricsExporterConfig =
     }
   | {
       /** HTTP OTLP Exporter */
-      http: {
+      http: MetricsExporterCommonConfig & {
         /** The URL of the OTLP HTTP endpoint */
         url: string;
         /** HTTP headers to send to the OTLP HTTP endpoint. Typically, the `Authorization` header is one of them */

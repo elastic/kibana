@@ -7,7 +7,8 @@
 
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
-import { Type, type } from '.';
+import type { Type } from '.';
+import { type } from '.';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 describe('type', () => {

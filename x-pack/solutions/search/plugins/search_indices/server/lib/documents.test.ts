@@ -6,7 +6,7 @@
  */
 
 import { deleteDocument } from './documents';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 describe('deleteDocument', () => {

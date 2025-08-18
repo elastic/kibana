@@ -8,7 +8,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
@@ -18,7 +18,7 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { cryptoFactory } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { PdfExportType } from '.';
-import { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
 
 let content: string;
 let mockPdfExportType: PdfExportType;

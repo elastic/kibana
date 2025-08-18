@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Point } from 'geojson';
+import type { Point } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { FIELD_FORMAT_IDS, TextContextTypeConvert } from '../types';
+import type { TextContextTypeConvert } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 import { asPrettyString, geoUtils } from '../utils';
 const { ddToMGRS, ddToDMS } = geoUtils;
 const TRANSFORM_OPTIONS = [

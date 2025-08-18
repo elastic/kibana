@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
   CreateWorkflowCommand,
   EsWorkflow,
-  transformWorkflowYamlJsontoEsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -19,12 +18,11 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import {
-  WORKFLOW_SAVED_OBJECT_TYPE,
-  WorkflowSavedObjectAttributes,
-} from '../saved_objects/workflow';
+import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
+import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { createIndexWithMappings } from './lib/create_index';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
@@ -33,8 +31,9 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './lib/index_mappings';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import { IWorkflowEventLogger, LogSearchResult, SimpleWorkflowLogger } from './lib/workflow_logger';
-import { GetWorkflowsParams } from './workflows_management_api';
+import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
+import { SimpleWorkflowLogger } from './lib/workflow_logger';
+import type { GetWorkflowsParams } from './workflows_management_api';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -211,7 +210,7 @@ export class WorkflowsService {
         createdBy: response.attributes.createdBy,
         lastUpdatedAt: new Date(response.updated_at!),
         lastUpdatedBy: response.attributes.lastUpdatedBy,
-        definition: response.attributes.definition as any,
+        definition: response.attributes.definition,
         yaml: response.attributes.yaml,
       };
     } catch (error: any) {
@@ -248,9 +247,9 @@ export class WorkflowsService {
     );
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition.workflow.triggers) {
-      for (const trigger of workflowToCreate.definition.workflow.triggers) {
-        if (trigger.type === 'triggers.elastic.scheduled' && trigger.enabled) {
+    if (this.taskScheduler && workflowToCreate.definition.triggers) {
+      for (const trigger of workflowToCreate.definition.triggers) {
+        if (trigger.type === 'scheduled' && trigger.enabled) {
           await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }
       }
@@ -303,7 +302,7 @@ export class WorkflowsService {
 
         // Add new scheduled tasks
         for (const trigger of updatedWorkflow.definition.workflow.triggers) {
-          if (trigger.type === 'triggers.elastic.scheduled') {
+          if (trigger.type === 'scheduled') {
             await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
           }
         }
@@ -429,7 +428,7 @@ export class WorkflowsService {
       bool: {
         must: [
           {
-            term: {
+            match: {
               'workflow.execution_id': executionId,
             },
           },
@@ -445,12 +444,12 @@ export class WorkflowsService {
       bool: {
         must: [
           {
-            term: {
+            match: {
               'workflow.execution_id': executionId,
             },
           },
           {
-            term: {
+            match: {
               'workflow.step_id': stepId,
             },
           },

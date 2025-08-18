@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
-import { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { WorkflowsService } from '../workflows_management/workflows_management_service';
-import { extractConnectorIds } from './lib/extract_connector_ids';
 import {
-  convertToWorkflowGraph,
   convertToSerializableGraph,
+  convertToWorkflowGraph,
 } from '../../common/lib/build_execution_graph/build_execution_graph';
+import type { WorkflowsService } from '../workflows_management/workflows_management_service';
+import { extractConnectorIds } from './lib/extract_connector_ids';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
   return [];
@@ -60,7 +60,7 @@ export class SchedulerService {
     workflow: WorkflowExecutionEngineModel,
     inputs: Record<string, any>
   ): Promise<string> {
-    const executionGraph = convertToWorkflowGraph(workflow);
+    const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
     const connectorCredentials = await extractConnectorIds(this.actionsClient);
 

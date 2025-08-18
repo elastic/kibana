@@ -10,6 +10,7 @@
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -55,6 +56,8 @@ export interface CoreStart {
   featureFlags: FeatureFlagsStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
   /**
    * {@link SavedObjectsStart}
    * @deprecated See https://github.com/elastic/kibana/issues/149098
