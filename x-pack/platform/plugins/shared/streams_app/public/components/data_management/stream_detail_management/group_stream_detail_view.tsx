@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { EuiButton, EuiDescriptionList, EuiLink, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { OverlayRef } from '@kbn/core/public';
+import type { OverlayRef } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';

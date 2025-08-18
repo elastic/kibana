@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 import { DashboardRenderer } from '@kbn/dashboard-plugin/public';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import {
   EuiListGroup,
   EuiListGroupItem,

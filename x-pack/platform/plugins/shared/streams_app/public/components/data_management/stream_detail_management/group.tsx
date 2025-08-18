@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';

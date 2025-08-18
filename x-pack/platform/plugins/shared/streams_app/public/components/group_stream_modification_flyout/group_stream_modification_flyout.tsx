@@ -16,11 +16,11 @@ import {
   EuiSpacer,
   EuiButton,
 } from '@elastic/eui';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { Streams } from '@kbn/streams-schema';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 
 export function GroupStreamModificationFlyout({

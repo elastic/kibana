@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { StreamsGraph } from '.';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';

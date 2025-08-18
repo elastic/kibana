@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import React, {
-  CSSProperties,
-  createContext,
-  memo,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { CSSProperties } from 'react';
+import React, { createContext, memo, useCallback, useEffect, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import cytoscape from 'cytoscape';
 import dagre from 'cytoscape-dagre';
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 

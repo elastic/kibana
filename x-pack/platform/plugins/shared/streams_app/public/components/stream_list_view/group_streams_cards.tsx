@@ -17,7 +17,8 @@ import {
 import { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { StatefulStreamsAppRouter, useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import type { StatefulStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 export function GroupStreamsCards({
   streams: allStreams,
