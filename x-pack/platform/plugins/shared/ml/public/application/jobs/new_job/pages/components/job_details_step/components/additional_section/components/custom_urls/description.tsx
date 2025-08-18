@@ -29,15 +29,15 @@ export const Description: FC<PropsWithChildren<unknown>> = memo(({ children }) =
     /* Apply column layout only on screens wider than 768px */
     @media (min-width: 769px) {
       &.euiDescribedFormGroup {
-        flex-direction: column !important;
+        flex-direction: column;
       }
     }
 
     /* Widen the Custom URL fields */
     .euiDescribedFormGroup__fieldWrapper,
     .euiDescribedFormGroup__fields {
-      max-width: none !important;
-      width: 100% !important;
+      max-width: none;
+      width: 100%;
     }
 
     > .euiFlexGroup {

@@ -8,7 +8,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
 >
   <div
     aria-labelledby="custom-url-heading-0"
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow-panel"
     data-test-subj="mlJobEditCustomUrlItem_0"
     role="listitem"
   >
@@ -226,7 +226,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
   />
   <div
     aria-labelledby="custom-url-heading-1"
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow-panel"
     data-test-subj="mlJobEditCustomUrlItem_1"
     role="listitem"
   >
@@ -444,7 +444,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
   />
   <div
     aria-labelledby="custom-url-heading-2"
-    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
+    class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow-panel"
     data-test-subj="mlJobEditCustomUrlItem_2"
     role="listitem"
   >
