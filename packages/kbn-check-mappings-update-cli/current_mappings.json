@@ -4273,6 +4273,9 @@
         "enabled": false,
         "type": "object"
       },
+      "deleted": {
+        "type": "boolean"
+      },
       "description": {
         "fields": {
           "keyword": {
