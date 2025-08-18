@@ -5708,15 +5708,22 @@
             }
           },
           {
+            "description": "The fields to return in the `attributes` key of the response.",
             "in": "query",
             "name": "fields",
             "required": false,
             "schema": {
-              "items": {
-                "description": "The fields to return in the `attributes` key of the response.",
-                "type": "string"
-              },
-              "type": "array"
+              "anyOf": [
+                {
+                  "items": {
+                    "type": "string"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "string"
+                }
+              ]
             }
           },
           {
