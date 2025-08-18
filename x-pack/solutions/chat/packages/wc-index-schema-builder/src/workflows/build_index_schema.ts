@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod';
 import { StateGraph, Annotation, Send } from '@langchain/langgraph';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { getFieldTypeByPath, getFieldsTopValues } from '@kbn/wc-integration-utils';
 import type {
   IndexSourceDefinition,

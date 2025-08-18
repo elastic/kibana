@@ -8,7 +8,7 @@
  */
 
 import { parse } from '..';
-import { ESQLCommand, ESQLSource } from '../../types';
+import type { ESQLCommand, ESQLSource } from '../../types';
 import { Walker } from '../../walker';
 
 describe('ENRICH', () => {

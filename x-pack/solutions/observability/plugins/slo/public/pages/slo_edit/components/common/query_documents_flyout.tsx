@@ -14,11 +14,11 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { FieldPath } from 'react-hook-form';
-import { CreateSLOForm } from '../../types';
+import type { FieldPath } from 'react-hook-form';
+import type { CreateSLOForm } from '../../types';
 import { DocumentsTable } from './documents_table';
 import type { SearchBarProps } from './query_builder';
 

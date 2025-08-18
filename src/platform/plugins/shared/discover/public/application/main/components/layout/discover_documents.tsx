@@ -333,20 +333,38 @@ function DiscoverDocumentsComponent({
     ]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) => {
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
+    },
+    [dispatch, setDataGridUiState]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+  const cellRendererDensity = useMemo(
+    () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
+    [density, dataGridUiState, services.storage]
+  );
+  const cellRendererRowHeight = useMemo(
+    () =>
+      getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight ?? dataGridUiState?.rowHeight,
+        configRowHeight,
+      }),
+    [rowHeight, dataGridUiState, services.storage, configRowHeight]
+  );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
       dataView,
-      density: density ?? getDataGridDensity(services.storage, 'discover'),
-      rowHeight: getRowHeight({
-        storage: services.storage,
-        consumer: 'discover',
-        rowHeightState: rowHeight,
-        configRowHeight,
-      }),
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
@@ -400,14 +418,6 @@ function DiscoverDocumentsComponent({
         ),
       }),
     [viewModeToggle, callouts, loadingIndicator]
-  );
-
-  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
-  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
-  const onInitialStateChange = useCallback(
-    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
-      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
-    [dispatch, setDataGridUiState]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

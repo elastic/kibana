@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
@@ -19,17 +19,15 @@ import {
 } from '../../../types';
 import { isAssignment, isInlineCast } from '../../../ast/is';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
-import {
+import type {
   FunctionParameter,
-  FunctionDefinitionTypes,
   FunctionDefinition,
   FunctionParameterType,
   ReasonTypes,
 } from '../../types';
-import {
-  ICommandCallbacks,
-  getLocationFromCommandOrOptionName,
-} from '../../../commands_registry/types';
+import { FunctionDefinitionTypes } from '../../types';
+import type { ICommandCallbacks } from '../../../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
@@ -48,7 +46,7 @@ import {
   isParamLiteral,
   isParametrized,
 } from '../../../ast/is';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandContext } from '../../../commands_registry/types';
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];
@@ -830,7 +828,7 @@ export function isSupportedFunction(
 
 function validateFunctionLicense(
   fn: ESQLFunction,
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined
 ): ESQLMessage[] {
   const fnDefinition = getFunctionDefinition(fn.name);
 
@@ -841,7 +839,7 @@ function validateFunctionLicense(
   const { license } = fnDefinition;
 
   if (!!hasMinimumLicenseRequired && license) {
-    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as LicenseType)) {
       return [
         getMessageFromId({
           messageId: 'licenseRequired',
@@ -877,7 +875,7 @@ function validateFunctionLicense(
 function validateSignatureLicense(
   fn: ESQLFunction,
   matchingSignatures: FunctionDefinition['signatures'],
-  hasMinimumLicenseRequired: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired: (minimumLicenseRequired: LicenseType) => boolean,
   context: ICommandContext,
   parentCommand: string
 ): ESQLMessage[] {
@@ -903,7 +901,7 @@ function validateSignatureLicense(
   const hasValidLicense = relevantSignatures.some(
     (signature) =>
       signature.license &&
-      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
+      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType)
   );
 
   if (hasValidLicense) {
