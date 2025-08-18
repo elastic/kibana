@@ -8,6 +8,7 @@
 export interface DataTypeDefinition {
   id: number;
   name: string;
+  description?: string;
 }
 
 export interface DataTypeRegistry {
