@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 /**
  * Return the logo(s) that should be displayed for the given solution.

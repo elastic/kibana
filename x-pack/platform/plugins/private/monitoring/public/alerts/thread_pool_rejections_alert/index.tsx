@@ -12,10 +12,8 @@ import type { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULE_REQUIRES_APP_CONTEXT } from '../../../common/constants';
 import type { CommonAlertParamDetails } from '../../../common/types/alerts';
 import type { MonitoringConfig } from '../../types';
-import {
-  LazyExpression,
-  LazyExpressionProps,
-} from '../components/param_details_form/lazy_expression';
+import type { LazyExpressionProps } from '../components/param_details_form/lazy_expression';
+import { LazyExpression } from '../components/param_details_form/lazy_expression';
 
 interface ThreadPoolTypes {
   [key: string]: unknown;

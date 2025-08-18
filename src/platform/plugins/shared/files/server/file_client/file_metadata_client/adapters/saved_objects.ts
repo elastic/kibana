@@ -14,9 +14,9 @@ import type {
   ISavedObjectsRepository,
   SavedObjectsOpenPointInTimeResponse,
 } from '@kbn/core-saved-objects-api-server';
-import { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
+import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 
-import { FindFileArgs } from '../../../file_service/file_action_types';
+import type { FindFileArgs } from '../../../file_service/file_action_types';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../../../common/constants';
 import type { FileMetadata, FilesMetrics, FileStatus } from '../../../../common/types';
 import type {

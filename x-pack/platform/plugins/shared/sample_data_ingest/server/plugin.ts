@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SampleDataIngestConfig } from './config';
-import {
+import type {
   InternalServices,
   SampleDataStartDependencies,
   SampleDataSetupDependencies,

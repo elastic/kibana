@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RouteDependencies } from '../types';
+import type { RouteDependencies } from '../types';
 
 import { registerAppRoutes } from './app';
 import { registerCloudBackupStatusRoutes } from './cloud_backup_status';

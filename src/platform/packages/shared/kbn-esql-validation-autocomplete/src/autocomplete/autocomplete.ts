@@ -24,7 +24,7 @@ import {
   buildFieldsDefinitionsWithMetadata,
 } from '@kbn/esql-ast/src/definitions/utils';
 import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
-import {
+import type {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   GetColumnsByTypeFn,
