@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
-  metricsSourceConfigurationResponseRT,
 } from '@kbn/infra-plugin/common/metrics_sources';
+import { metricsSourceConfigurationResponseRT } from '@kbn/infra-plugin/common/metrics_sources';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
@@ -41,11 +41,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         withInternalHeaders: true,
         useCookieHeader: true,
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await kibanaServer.savedObjects.cleanStandardList();
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await supertestWithAdminScope.destroy();
     });
 

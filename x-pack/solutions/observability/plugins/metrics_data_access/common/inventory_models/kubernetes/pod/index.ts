@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import { nginx as nginxRequiredMetrics } from '../../shared/metrics/required_metrics';
 import { createInventoryModel } from '../../shared/create_inventory_model';
 export const pod = createInventoryModel('pod', {
   displayName: i18n.translate('xpack.metricsData.inventoryModel.pod.displayName', {
@@ -16,7 +15,7 @@ export const pod = createInventoryModel('pod', {
   singularDisplayName: i18n.translate('xpack.metricsData.inventoryModels.pod.singularDisplayName', {
     defaultMessage: 'Kubernetes Pod',
   }),
-  requiredModule: 'kubernetes',
+  requiredIntegration: 'kubernetes',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -29,12 +28,4 @@ export const pod = createInventoryModel('pod', {
     ip: 'kubernetes.pod.ip',
   },
   metrics,
-  requiredMetrics: [
-    'podOverview',
-    'podCpuUsage',
-    'podMemoryUsage',
-    'podNetworkTraffic',
-    ...nginxRequiredMetrics,
-  ],
-  tooltipMetrics: ['cpu', 'memory', 'rx', 'tx'],
 });

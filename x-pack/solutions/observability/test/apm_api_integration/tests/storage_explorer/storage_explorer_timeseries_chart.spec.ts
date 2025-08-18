@@ -6,10 +6,10 @@
  */
 import expect from '@kbn/expect';
 import { sumBy } from 'lodash';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import { IndexLifecyclePhaseSelectOption } from '@kbn/apm-plugin/common/storage_explorer_types';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type StorageTimeSeries = APIReturnType<'GET /internal/apm/storage_chart'>;
 
@@ -38,7 +38,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when(
-    'Storage Explorer timeseries chart when data is not loaded',
+    'Storage explorer timeseries chart when data is not loaded',
     { config: 'basic', archives: [] },
     () => {
       it('handles empty state', async () => {
@@ -51,7 +51,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 
   // FLAKY: https://github.com/elastic/kibana/issues/177539
-  registry.when('Storage Explorer timeseries chart', { config: 'basic', archives: [] }, () => {
+  registry.when('Storage explorer timeseries chart', { config: 'basic', archives: [] }, () => {
     describe('when data is loaded', () => {
       let body: StorageTimeSeries;
       let status: number;

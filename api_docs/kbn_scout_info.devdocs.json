@@ -139,6 +139,30 @@
       },
       {
         "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TARGET_MODE",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TARGET_MODE",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/runtime.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
+        "id": "def-common.SCOUT_TARGET_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "SCOUT_TARGET_TYPE",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-scout-info/src/runtime.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-info",
         "id": "def-common.SCOUT_TEST_CONFIG_STATS_PATH",
         "type": "string",
         "tags": [],

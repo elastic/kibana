@@ -14,7 +14,8 @@ import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
 import { first, take, toArray } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { environmentServiceMock } from '@kbn/core-environment-server-mocks';
-import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
+import type { RouterMock } from '@kbn/core-http-router-server-mocks';
+import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { metricsServiceMock } from '@kbn/core-metrics-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
@@ -77,6 +78,9 @@ describe('StatusService', () => {
       pluginDependencies: new Map(),
       environment: environmentServiceMock.createSetupContract(),
       http: httpServiceMock.createInternalSetupContract(),
+      httpRateLimiter: {
+        status$: of(undefined),
+      },
       metrics: metricsServiceMock.createInternalSetupContract(),
       coreUsageData: coreUsageDataServiceMock.createSetupContract(),
       ...overrides,
@@ -130,6 +134,9 @@ describe('StatusService', () => {
             elasticsearch: {
               status$: of(available),
             },
+            httpRateLimiter: {
+              status$: of(available),
+            },
             savedObjects: {
               status$: of(degraded),
             },
@@ -137,6 +144,7 @@ describe('StatusService', () => {
         );
         expect(await setup.core$.pipe(first()).toPromise()).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
       });
@@ -145,6 +153,9 @@ describe('StatusService', () => {
         const setup = await service.setup(
           setupDeps({
             elasticsearch: {
+              status$: of(available),
+            },
+            httpRateLimiter: {
               status$: of(available),
             },
             savedObjects: {
@@ -157,14 +168,17 @@ describe('StatusService', () => {
         const subResult3 = await setup.core$.pipe(first()).toPromise();
         expect(subResult1).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
         expect(subResult2).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
         expect(subResult3).toEqual({
           elasticsearch: available,
+          http: available,
           savedObjects: degraded,
         });
       });

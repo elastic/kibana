@@ -14,7 +14,9 @@ export const transformSnapshotMetricsToMetricsAPIMetrics = async (
   snapshotRequest: SnapshotRequest
 ): Promise<MetricsAPIMetric[]> => {
   const inventoryModel = findInventoryModel(snapshotRequest.nodeType);
-  const aggregations = await inventoryModel.metrics.getAggregations();
+  const aggregations = await inventoryModel.metrics.getAggregations({
+    schema: snapshotRequest.schema,
+  });
 
   return snapshotRequest.metrics
     .map((metric, index) => {

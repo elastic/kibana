@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, header, timePicker, navigationalSearch } = getPageObjects([
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should remember time range and pinned filters from discover', async () => {
       await lens.goToTimeRange('Sep 7, 2015 @ 06:31:44.000', 'Sep 19, 2025 @ 06:31:44.000');
       await filterBar.toggleFilterEnabled('ip');
-      await appsMenu.clickLink('Visualize Library', { category: 'kibana' });
+      await appsMenu.clickLink('Visualize library', { category: 'kibana' });
       await visualize.clickNewVisualization();
       await visualize.waitForGroupsSelectPage();
       await visualize.clickVisType('lens');

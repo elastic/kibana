@@ -6,14 +6,14 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  ILM_LOCATOR_ID,
+import type {
   IlmLocatorParams,
   Phases,
   PolicyFromES,
 } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
 import {
-  IngestStreamLifecycle,
   getAncestors,
   isIlmLifecycle,
   findInheritedLifecycle,
@@ -21,6 +21,7 @@ import {
   isDslLifecycle,
   Streams,
 } from '@kbn/streams-schema';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,7 +42,6 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSelectable,
-  EuiSelectableOption,
   EuiSpacer,
   EuiSwitch,
   EuiText,
@@ -379,8 +379,8 @@ function IlmModal({
 function InheritModal({ definition, ...options }: ModalOptions) {
   if (Streams.WiredStream.GetResponse.is(definition)) {
     return <InheritModalWired definition={definition} {...options} />;
-  } else if (Streams.UnwiredStream.GetResponse.is(definition)) {
-    return <InheritModalUnwired definition={definition} {...options} />;
+  } else if (Streams.ClassicStream.GetResponse.is(definition)) {
+    return <InheritModalClassic definition={definition} {...options} />;
   }
 }
 
@@ -454,12 +454,12 @@ function InheritModalWired({
   );
 }
 
-function InheritModalUnwired({
+function InheritModalClassic({
   definition,
   closeModal,
   updateInProgress,
   updateLifecycle,
-}: ModalOptions & { definition: Streams.UnwiredStream.GetResponse }) {
+}: ModalOptions & { definition: Streams.ClassicStream.GetResponse }) {
   const modalTitleId = useGeneratedHtmlId();
 
   return (
@@ -473,7 +473,7 @@ function InheritModalUnwired({
       </EuiModalHeader>
 
       <EuiModalBody>
-        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleUnwiredDesc', {
+        {i18n.translate('xpack.streams.streamDetailLifecycle.defaultLifecycleClassicDesc', {
           defaultMessage:
             'All custom retention settings for this stream will be removed, resetting it to use the configuration of the template.',
         })}

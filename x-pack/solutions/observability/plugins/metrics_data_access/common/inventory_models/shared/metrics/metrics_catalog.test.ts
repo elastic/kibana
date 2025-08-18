@@ -6,7 +6,7 @@
  */
 
 import { MetricsCatalog } from './metrics_catalog';
-import type { MetricConfigMap } from './types';
+import { type MetricConfigMap } from './types';
 
 describe('MetricsCatalog', () => {
   const aggregationsPerSchema = {

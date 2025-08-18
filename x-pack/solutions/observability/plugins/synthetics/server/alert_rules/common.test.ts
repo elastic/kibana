@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IBasePath } from '@kbn/core/server';
+import type { IBasePath } from '@kbn/core/server';
 import { updateState, setRecoveredAlertsContext } from './common';
-import {
+import type {
   AlertOverviewStatus,
   StaleDownConfig,
   SyntheticsCommonState,
@@ -204,7 +204,7 @@ describe('setRecoveredAlertsContext', () => {
       monitorQueryId: 'stale-config',
       status: 'up',
       locationId: '',
-      ping: {
+      latestPing: {
         '@timestamp': new Date().toISOString(),
         state: {
           ends: {
@@ -219,7 +219,7 @@ describe('setRecoveredAlertsContext', () => {
             name: location,
           },
         },
-      } as StaleDownConfig['ping'],
+      } as StaleDownConfig['latestPing'],
       timestamp: new Date().toISOString(),
       checks: {
         downWithinXChecks: 1,
@@ -260,7 +260,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: 'location',
-        ping: {
+        latestPing: {
           '@timestamp': new Date().toISOString(),
           state: {
             id: '123456',
@@ -273,7 +273,7 @@ describe('setRecoveredAlertsContext', () => {
               name: location,
             },
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isDeleted: true,
         checks: {
@@ -350,7 +350,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: 'location',
-        ping: {
+        latestPing: {
           '@timestamp': new Date().toISOString(),
           state: {
             id: '123456',
@@ -363,7 +363,7 @@ describe('setRecoveredAlertsContext', () => {
               name: 'us_west',
             },
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {
@@ -440,7 +440,7 @@ describe('setRecoveredAlertsContext', () => {
         monitorQueryId: 'stale-config',
         status: 'down',
         locationId: location,
-        ping: {
+        latestPing: {
           state: {
             id: '123456',
           },
@@ -448,7 +448,7 @@ describe('setRecoveredAlertsContext', () => {
           monitor: {
             name: 'test-monitor',
           },
-        } as StaleDownConfig['ping'],
+        } as StaleDownConfig['latestPing'],
         timestamp: new Date().toISOString(),
         isLocationRemoved: true,
         checks: {

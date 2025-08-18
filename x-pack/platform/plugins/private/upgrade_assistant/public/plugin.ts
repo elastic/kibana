@@ -7,12 +7,17 @@
 
 import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
 import { apiService } from './application/lib/api';
 import { breadcrumbService } from './application/lib/breadcrumbs';
 import { uiMetricService } from './application/lib/ui_metric';
-import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
+import type {
+  SetupDependencies,
+  StartDependencies,
+  AppDependencies,
+  ClientConfigType,
+} from './types';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
@@ -53,7 +58,7 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const [coreStart, { data }] = await coreSetup.getStartServices();
+          const [coreStart, { data, reindexService }] = await coreSetup.getStartServices();
 
           const {
             chrome: { docTitle },
@@ -67,6 +72,7 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
+              reindexService,
             },
             services: {
               core: coreStart,

@@ -7,7 +7,7 @@
 import expect from '@kbn/expect';
 import type { GetBenchmarkResponse } from '@kbn/cloud-security-posture-plugin/common/types/latest';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -111,7 +111,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     it(`Should return all benchmarks if user has CSP integrations`, async () => {

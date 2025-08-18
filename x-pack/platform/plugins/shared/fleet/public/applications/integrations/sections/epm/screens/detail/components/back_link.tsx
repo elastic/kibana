@@ -32,7 +32,11 @@ export function BackLink({ queryParams, integrationsPath }: Props) {
   const appId = returnAppId && returnPath ? returnAppId : 'integrations';
   const path = returnAppId && returnPath ? returnPath : integrationsPath;
 
-  const message = returnPath ? BACK_TO_SELECTION : BACK_TO_INTEGRATIONS;
+  // Maintain 'Back to integrations' for the AI4SOC integrations page
+  const message =
+    !returnPath || returnPath.includes('/configurations/integrations')
+      ? BACK_TO_INTEGRATIONS
+      : BACK_TO_SELECTION;
 
   return (
     <>

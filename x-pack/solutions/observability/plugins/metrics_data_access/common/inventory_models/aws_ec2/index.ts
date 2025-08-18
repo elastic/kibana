@@ -19,7 +19,7 @@ export const awsEC2 = createInventoryModel('awsEC2', {
       defaultMessage: 'EC2 Instance',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -32,7 +32,5 @@ export const awsEC2 = createInventoryModel('awsEC2', {
     name: 'cloud.instance.name',
     ip: 'aws.ec2.instance.public.ip',
   },
-  requiredMetrics: ['awsEC2CpuUtilization', 'awsEC2NetworkTraffic', 'awsEC2DiskIOBytes'],
-  tooltipMetrics: ['cpu', 'rx', 'tx'],
-  nodeFilter: [{ term: { 'event.dataset': 'aws.ec2' } }],
+  nodeFilter: () => [{ term: { 'event.dataset': 'aws.ec2' } }],
 });

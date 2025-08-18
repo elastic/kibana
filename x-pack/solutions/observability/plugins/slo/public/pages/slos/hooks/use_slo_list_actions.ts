@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useCallback } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { SLO_OVERVIEW_EMBEDDABLE_ID } from '../../../embeddable/slo/overview/constants';

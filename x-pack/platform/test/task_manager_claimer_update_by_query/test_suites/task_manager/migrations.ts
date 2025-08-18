@@ -8,15 +8,15 @@
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransportResult } from '@elastic/elasticsearch';
-import {
+import type {
   ConcreteTaskInstance,
   SerializedConcreteTaskInstance,
   TaskInstanceWithDeprecatedFields,
-  TaskStatus,
 } from '@kbn/task-manager-plugin/server/task';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
 export default function createGetTests({ getService }: FtrProviderContext) {
   const es = getService('es');
@@ -26,11 +26,11 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
   describe('migrations', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/task_manager_tasks');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
     });
 
     it('8.0.0 migrates actions tasks with legacy id to saved object ids', async () => {

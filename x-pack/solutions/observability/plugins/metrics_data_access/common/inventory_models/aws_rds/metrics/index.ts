@@ -22,11 +22,25 @@ export const metrics: InventoryMetricsConfig<RDSAggregations> = {
     awsRDSQueriesExecuted,
     awsRDSActiveTransactions,
   },
+  requiredTsvb: [
+    'awsRDSCpuTotal',
+    'awsRDSConnections',
+    'awsRDSQueriesExecuted',
+    'awsRDSActiveTransactions',
+    'awsRDSLatency',
+  ],
   getAggregations: async (args) => {
     const { snapshot } = await import('./snapshot');
     const catalog = new MetricsCatalog(snapshot, args?.schema);
     return catalog;
   },
+  getWaffleMapTooltipMetrics: () => [
+    'cpu',
+    'rdsLatency',
+    'rdsConnections',
+    'rdsQueriesExecuted',
+    'rdsActiveTransactions',
+  ],
   defaultSnapshot: 'cpu',
   defaultTimeRangeInSeconds: 14400, // 4 hours
 };

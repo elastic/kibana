@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CSSProperties, Dispatch } from 'react';
+import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import { ConsoleParsedRequestsProvider, getParsedRequestsProvider, monaco } from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
+import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
+import type { ErrorAnnotation } from '@kbn/monaco/src/languages/console/types';
 import { checkForTripleQuotesAndQueries } from '@kbn/monaco/src/languages/console/utils';
 import { isQuotaExceededError } from '../../../services/history';
 import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { sendRequest } from '../../hooks';
-import { Actions } from '../../stores/request';
+import type { Actions } from '../../stores/request';
 
 import {
   AutocompleteType,
@@ -44,7 +45,7 @@ import {
 import type { AdjustedParsedRequest } from './types';
 import { type RequestToRestore, RestoreMethod } from '../../../types';
 import { StorageQuotaError } from '../../components/storage_quota_error';
-import { ContextValue } from '../../contexts';
+import type { ContextValue } from '../../contexts';
 import { containsComments, indentData } from './utils/requests_utils';
 
 const AUTO_INDENTATION_ACTION_LABEL = 'Apply indentations';
@@ -52,8 +53,6 @@ const TRIGGER_SUGGESTIONS_ACTION_LABEL = 'Trigger suggestions';
 const TRIGGER_SUGGESTIONS_HANDLER_ID = 'editor.action.triggerSuggest';
 const DEBOUNCE_HIGHLIGHT_WAIT_MS = 200;
 const DEBOUNCE_AUTOCOMPLETE_WAIT_MS = 500;
-const INSPECT_TOKENS_LABEL = 'Inspect tokens';
-const INSPECT_TOKENS_HANDLER_ID = 'editor.action.inspectTokens';
 const { collapseLiteralStrings } = XJson;
 
 export class MonacoEditorActionsProvider {
@@ -61,8 +60,7 @@ export class MonacoEditorActionsProvider {
   private highlightedLines: monaco.editor.IEditorDecorationsCollection;
   constructor(
     private editor: monaco.editor.IStandaloneCodeEditor,
-    private setEditorActionsCss: (css: CSSProperties) => void,
-    private isDevMode: boolean
+    private setEditorActionsCss: (css: CSSProperties) => void
   ) {
     this.parsedRequestsProvider = getParsedRequestsProvider(this.editor.getModel());
     this.highlightedLines = this.editor.createDecorationsCollection();
@@ -110,9 +108,6 @@ export class MonacoEditorActionsProvider {
       // trigger autocomplete on backspace
       if (event.keyCode === monaco.KeyCode.Backspace) {
         debouncedTriggerSuggestions();
-      }
-      if (this.isDevMode && event.keyCode === monaco.KeyCode.F1) {
-        this.editor.trigger(INSPECT_TOKENS_LABEL, INSPECT_TOKENS_HANDLER_ID, {});
       }
     });
   }
@@ -354,7 +349,8 @@ export class MonacoEditorActionsProvider {
       // track the requests
       setTimeout(() => trackSentRequests(requests, trackUiMetric), 0);
 
-      const results = await sendRequest({ http, requests });
+      const selectedHost = settings.getSelectedHost();
+      const results = await sendRequest({ http, requests, host: selectedHost || undefined });
 
       let saveToHistoryError: undefined | Error;
       const isHistoryEnabled = settings.getIsHistoryEnabled();

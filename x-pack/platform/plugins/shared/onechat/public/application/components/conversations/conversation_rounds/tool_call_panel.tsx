@@ -14,7 +14,7 @@ import {
   EuiAccordion,
   EuiCodeBlock,
 } from '@elastic/eui';
-import { ToolCallStep } from '@kbn/onechat-common';
+import type { ToolCallStep } from '@kbn/onechat-common';
 import React from 'react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -24,7 +24,7 @@ interface ToolCallPanelProps {
 }
 
 export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
-  step: { result, tool_call_id: callId, tool_id: toolId, params },
+  step: { results, tool_call_id: callId, tool_id: toolId, params },
 }) => {
   const { euiTheme } = useEuiTheme();
   const toolCallPanelClass = css`
@@ -88,7 +88,7 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
           </div>
         </EuiAccordion>
         <EuiSpacer size="s" />
-        {result ? (
+        {results.length > 0 ? (
           <EuiAccordion
             id={`result-${callId}`}
             buttonContent={
@@ -105,7 +105,9 @@ export const ToolCallPanel: React.FC<ToolCallPanelProps> = ({
                 isCopyable={false}
                 transparentBackground
               >
-                {result}
+                {
+                  JSON.stringify(results, null, 2) // stringify the results for display
+                }
               </EuiCodeBlock>
             </div>
           </EuiAccordion>

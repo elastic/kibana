@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   readLog,
   clearLog,
