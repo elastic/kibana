@@ -10,7 +10,7 @@ import { kqlQuery } from '@kbn/es-query';
 import { getIndexPatternsForStream, type Streams } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import pLimit from 'p-limit';
-import { rangeQuery } from '../../../routes/internal/esql/query_helpers';
+import { isKqlQueryValid, rangeQuery } from '../../../routes/internal/esql/query_helpers';
 
 interface Query {
   title: string;
@@ -29,14 +29,11 @@ interface Dependencies {
   logger: Logger;
 }
 
-interface VerifiedQueries {
+export type VerifiedQuery = Query & { count: number };
+
+export interface VerifiedQueries {
   totalCount: number;
-  queries: Array<
-    Query & {
-      count: number;
-      ratio: number;
-    }
-  >;
+  queries: Array<VerifiedQuery>;
 }
 
 export async function verifyQueries(
@@ -46,10 +43,18 @@ export async function verifyQueries(
   const { queries, definition, start, end } = params;
   const { esClient, logger } = dependencies;
 
+  const validQueries = queries.filter((query) => isKqlQueryValid(query.kql));
+  if (!queries.length) {
+    return {
+      totalCount: 0,
+      queries: [],
+    };
+  }
+
   const limiter = pLimit(10);
-  const [queriesWithCounts, totalCount] = await Promise.all([
+  const [validQueriesWithCounts, totalCount] = await Promise.all([
     Promise.all(
-      queries.map((query) =>
+      validQueries.map((query) =>
         limiter(async () => {
           return esClient
             .search('verify_query', {
@@ -57,11 +62,7 @@ export async function verifyQueries(
               index: getIndexPatternsForStream(definition),
               size: 0,
               timeout: '5s',
-              query: {
-                bool: {
-                  filter: [...kqlQuery(query.kql), ...rangeQuery(start, end)],
-                },
-              },
+              query: { bool: { filter: [...kqlQuery(query.kql), ...rangeQuery(start, end)] } },
             })
             .then((response) => ({ ...query, count: response.hits.total.value }))
             .catch(() => {
@@ -77,12 +78,15 @@ export async function verifyQueries(
         size: 0,
         timeout: '5s',
       })
-      .then((response) => response.hits.total.value),
+      .then((response) => response.hits.total.value)
+      .catch(() => {
+        return 0;
+      }),
   ]);
 
-  if (queries.length) {
+  if (validQueriesWithCounts.length) {
     logger.debug(() => {
-      return `Ran queries: ${queriesWithCounts
+      return `Ran queries: ${validQueriesWithCounts
         .map((query) => `- ${query.kql}: ${query.count}`)
         .join('\n')}`;
     });
@@ -90,9 +94,6 @@ export async function verifyQueries(
 
   return {
     totalCount,
-    queries: queriesWithCounts.map((query) => ({
-      ...query,
-      ratio: query.count > 0 ? totalCount / query.count : 0,
-    })),
+    queries: validQueriesWithCounts,
   };
 }

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { $Values } from 'utility-types';
-import { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
+import type { $Values } from 'utility-types';
+import type { SignificantEventItem } from '../../../hooks/use_fetch_significant_events';
 import { pValueToLabel } from './p_value_to_label';
 
 type EuiThemeColor = $Values<{

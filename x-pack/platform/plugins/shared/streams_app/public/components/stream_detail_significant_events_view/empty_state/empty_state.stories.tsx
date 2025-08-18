@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -29,14 +29,7 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <SignificantEventsViewEmptyState
-        onAddClick={function (): void {
-          throw new Error('Function not implemented.');
-        }}
-        onIdentifySystemClick={function (): void {
-          throw new Error('Function not implemented.');
-        }}
-      />
+      <SignificantEventsViewEmptyState onAddClick={() => {}} onIdentifySystemClick={() => {}} />
     </EuiPanel>
   );
 };

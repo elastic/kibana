@@ -6,8 +6,8 @@
  */
 
 import type { Observable } from 'rxjs';
-import { ServerSentEventBase } from '@kbn/sse-utils';
-import { StreamQueryKql } from '../../queries';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { StreamQueryKql } from '../../queries';
 
 /**
  * SignificantEvents Get Response

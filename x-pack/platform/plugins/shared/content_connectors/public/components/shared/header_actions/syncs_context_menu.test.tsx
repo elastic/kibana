@@ -23,7 +23,7 @@ import { Status } from '../../../../common/types/api';
 import { SyncsContextMenu } from './syncs_context_menu';
 import { AppContextProvider } from '../../../app_context';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import { AppDependencies, SearchConnectorsPluginStartDependencies } from '../../../types';
+import type { AppDependencies, SearchConnectorsPluginStartDependencies } from '../../../types';
 
 const appContext: AppDependencies = {
   isAgentlessEnabled: true,

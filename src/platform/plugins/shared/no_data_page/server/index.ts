@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginConfigDescriptor } from '@kbn/core-plugins-server';
+import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-import { configSchema, NoDataPageConfig } from './config';
+import type { NoDataPageConfig } from './config';
+import { configSchema } from './config';
 
 export const config: PluginConfigDescriptor<NoDataPageConfig> = {
   exposeToBrowser: {

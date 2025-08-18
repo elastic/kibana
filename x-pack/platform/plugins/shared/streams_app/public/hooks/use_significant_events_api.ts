@@ -6,7 +6,8 @@
  */
 
 import { useAbortController } from '@kbn/react-hooks';
-import { StreamQueryKql, type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
+import type { StreamQueryKql } from '@kbn/streams-schema';
+import { type SignificantEventsGenerateResponse } from '@kbn/streams-schema';
 import { useKibana } from './use_kibana';
 
 interface SignificantEventsApiBulkOperationCreate {

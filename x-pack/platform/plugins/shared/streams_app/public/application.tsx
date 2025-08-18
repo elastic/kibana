@@ -7,7 +7,7 @@
 import { type AppMountParameters, type CoreStart } from '@kbn/core/public';
 import React from 'react';
 import { AppRoot } from './components/app_root';
-import { StreamsAppServices } from './services/types';
+import type { StreamsAppServices } from './services/types';
 import type { StreamsAppStartDependencies } from './types';
 
 export const StreamsApplication = ({

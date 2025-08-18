@@ -15,7 +15,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql, Streams, streamQuerySchema } from '@kbn/streams-schema';
+import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
+import { streamQuerySchema } from '@kbn/streams-schema';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { FlowSelector } from './flow_selector';
 import { GeneratedFlowForm } from './generated_flow_form/generated_flow_form';

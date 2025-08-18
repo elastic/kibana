@@ -8,7 +8,7 @@
 import { niceTimeFormatter } from '@elastic/charts';
 import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 import React from 'react';
 import { Timeline } from '.';
 import { ChangePointSummary } from '../change_point_summary';

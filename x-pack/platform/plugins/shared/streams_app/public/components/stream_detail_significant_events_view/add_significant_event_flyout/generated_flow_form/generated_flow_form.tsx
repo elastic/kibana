@@ -9,24 +9,21 @@ import {
   EuiButton,
   EuiContextMenu,
   EuiFlexGroup,
-  EuiLink,
-  EuiLoadingSpinner,
   EuiPopover,
-  EuiText,
   EuiTitle,
-  EuiToolTip,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import React, { useEffect, useState } from 'react';
+import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
-import { useAIFeatures } from '../../common/use_ai_features';
-import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { validateQuery } from '../common/validate_query';
+import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
+import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
+import { useAIFeatures } from './use_ai_features';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -37,7 +34,7 @@ interface Props {
 
 export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmitting }: Props) {
   const {
-    core: { notifications, http },
+    core: { notifications },
   } = useKibana();
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
@@ -57,7 +54,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
     setSelectedQueries([]);
     setIsPopoverOpen(false);
 
-    const generation$ = generate(aiFeatures?.selectedConnector!, method);
+    const generation$ = generate(aiFeatures?.genAiConnectors.selectedConnector!, method);
 
     generation$.subscribe({
       next: (result) => {
@@ -74,6 +71,10 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
         }
       },
       error: (error) => {
+        setIsGenerating(false);
+        if (error.name === 'AbortError') {
+          return;
+        }
         notifications.showErrorDialog({
           title: i18n.translate(
             'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
@@ -81,7 +82,6 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
           ),
           error,
         });
-        setIsGenerating(false);
       },
       complete: () => {
         notifications.toasts.addSuccess({
@@ -140,44 +140,10 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
         </h3>
       </EuiTitle>
 
-      {aiFeatures.loading && <EuiLoadingSpinner size="m" />}
-
-      {!aiFeatures.loading && !aiFeatures.enabled && (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledTooltip',
-            {
-              defaultMessage:
-                'AI Assistant features are not enabled. To enable features, add an AI connector on the management page.',
-            }
-          )}
-        >
-          {aiFeatures.couldBeEnabled ? (
-            <EuiLink
-              target="_blank"
-              href={http.basePath.prepend(
-                `/app/management/insightsAndAlerting/triggersActionsConnectors/connectors`
-              )}
-            >
-              {i18n.translate(
-                'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabled',
-                { defaultMessage: 'Enable AI Assistant features' }
-              )}
-            </EuiLink>
-          ) : (
-            <EuiText>
-              <h3>
-                {i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.aiFlow.aiAssistantNotEnabledAskAdmin',
-                  { defaultMessage: 'Ask your administrator to enable AI Assistant features' }
-                )}
-              </h3>
-            </EuiText>
-          )}
-        </EuiToolTip>
+      {aiFeatures && !aiFeatures.enabled && !aiFeatures.genAiConnectors.loading && (
+        <AIFeaturesDisabledCallout couldBeEnabled={aiFeatures?.couldBeEnabled ?? false} />
       )}
-
-      {!aiFeatures.loading && aiFeatures.enabled && (
+      {aiFeatures && aiFeatures.enabled && (
         <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
           <EuiPopover
             id={contextMenuPopoverId}
@@ -196,6 +162,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
                     )
                   : i18n.translate(
                       'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
+
                       { defaultMessage: 'Generate' }
                     )}
               </EuiButton>

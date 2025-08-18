@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import { TimeState } from '@kbn/es-query';
-import {
-  StreamQuery,
-  Streams,
-  buildEsqlQuery,
-  getIndexPatternsForStream,
-} from '@kbn/streams-schema';
+import type { TimeState } from '@kbn/es-query';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
+import { buildEsqlQuery, getIndexPatternsForStream } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
 export function buildDiscoverParams(

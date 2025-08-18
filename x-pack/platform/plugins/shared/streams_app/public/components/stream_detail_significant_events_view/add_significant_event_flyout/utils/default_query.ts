@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StreamQueryKql } from '@kbn/streams-schema';
+import type { StreamQueryKql } from '@kbn/streams-schema';
 import { v4 } from 'uuid';
 
 export function defaultQuery(): StreamQueryKql {
