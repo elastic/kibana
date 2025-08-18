@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardStart, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
 
 const getPanelPlacementSetting = () => {

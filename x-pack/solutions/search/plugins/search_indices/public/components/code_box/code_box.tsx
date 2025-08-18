@@ -23,14 +23,14 @@ import {
 import { TryInConsoleButton } from '@kbn/try-in-console';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
 import * as Styles from './styles';
-import { CodeLanguage } from '../../types';
+import type { CodeLanguage } from '../../types';
 
 export interface CodeSampleOption {
   language: CodeLanguage;

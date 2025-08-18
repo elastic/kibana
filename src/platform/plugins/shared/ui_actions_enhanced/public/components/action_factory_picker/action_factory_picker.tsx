@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
-import { PresentablePicker, Item } from '../presentable_picker';
+import type { ActionFactory, BaseActionFactoryContext } from '../../dynamic_actions';
+import type { Item } from '../presentable_picker';
+import { PresentablePicker } from '../presentable_picker';
 
 export interface ActionFactoryPickerProps {
   actionFactories: ActionFactory[];

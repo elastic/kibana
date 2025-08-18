@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Example, Run } from 'langsmith';
-import { EvaluatorT } from 'langsmith/evaluation';
-import { DefendInsights } from '@kbn/elastic-assistant-common';
+import type { Example, Run } from 'langsmith';
+import type { EvaluatorT } from 'langsmith/evaluation';
+import type { DefendInsights } from '@kbn/elastic-assistant-common';
 import { EVALUATOR_ERRORS } from './constants';
 
 export interface ExampleOutput {

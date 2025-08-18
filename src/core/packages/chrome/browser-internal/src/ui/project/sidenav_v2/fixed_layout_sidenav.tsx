@@ -8,14 +8,15 @@
  */
 
 import { EuiFlyout } from '@elastic/eui';
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject } from 'rxjs';
 import { css, Global } from '@emotion/react';
 
 import { Navigation } from './navigation';
 import { SideNavV2CollapseButton } from './collapse_button';
-import { NavigationProps } from './types';
+import type { NavigationProps } from './types';
 
 interface CollapsibleNavigationProps {
   toggle: (isVisible: boolean) => void;

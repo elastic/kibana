@@ -8,7 +8,7 @@
  */
 
 import Boom from '@hapi/boom';
-import { CustomHttpResponseOptions } from '@kbn/core/server';
+import type { CustomHttpResponseOptions } from '@kbn/core/server';
 import { get } from 'lodash';
 
 const ERR_ES_INDEX_NOT_FOUND = 'index_not_found_exception';

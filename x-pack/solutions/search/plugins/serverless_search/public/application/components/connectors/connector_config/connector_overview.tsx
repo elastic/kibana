@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { EuiButton, EuiSpacer, Pagination } from '@elastic/eui';
+import type { Pagination } from '@elastic/eui';
+import { EuiButton, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  Connector,
-  ConnectorStatus,
-  pageToPagination,
-  SyncJobsTable,
-} from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { ConnectorStatus, pageToPagination, SyncJobsTable } from '@kbn/search-connectors';
 import { useQueryClient, useMutation } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { useConnector } from '../../../hooks/api/use_connector';

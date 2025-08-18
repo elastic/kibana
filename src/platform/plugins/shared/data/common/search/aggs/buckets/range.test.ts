@@ -10,7 +10,8 @@
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry } from '../test_helpers';
 import { BUCKET_TYPES } from './bucket_agg_types';
-import { FieldFormatsGetConfigFn, NumberFormat } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { NumberFormat } from '@kbn/field-formats-plugin/common';
 import { RangeKey } from './range_key';
 
 describe('Range Agg', () => {
