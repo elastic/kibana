@@ -11,7 +11,7 @@ import { render, waitFor, screen } from '@testing-library/react';
 import type { ToastsApi } from '@kbn/core/public';
 import { RuleRoute, getRuleSummary } from './rule_route';
 import type { Rule, RuleSummary, RuleType } from '../../../../types';
-        
+
 jest.mock('../../../../common/lib/kibana');
 
 const fakeNow = new Date('2020-02-09T23:15:41.941Z');
