@@ -1968,7 +1968,7 @@
     "sass-embedded": "^1.79.6",
     "sass-loader": "^10.5.2",
     "selenium-webdriver": "^4.34.0",
-    "sharp": "^0.34.3",
+    "sharp": "0.32.6",
     "simple-git": "^3.27.0",
     "sinon": "^19.0.2",
     "sort-package-json": "^3.2.1",
