@@ -60,8 +60,8 @@ export const ChartSectionTemplate = ({
           {leftSide.length > 0 && (
             <EuiFlexItem grow={false}>
               <IconButtonGroup
-                legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
-                  defaultMessage: 'Chart visibility',
+                legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                  defaultMessage: 'Chart actions',
                 })}
                 buttonSize="s"
                 buttons={leftSide}
