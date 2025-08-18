@@ -467,6 +467,7 @@ const AssistantComponent: React.FC<Props> = ({
               conversations={conversations}
               onConversationDeleted={handleOnConversationDeleted}
               onConversationCreate={handleCreateConversation}
+              isAssistantSharingEnabled={isAssistantSharingEnabled}
               isFetchingCurrentUserConversations={isFetchingCurrentUserConversations}
               refetchCurrentUserConversations={refetchCurrentUserConversations}
               setPaginationObserver={setPaginationObserver}

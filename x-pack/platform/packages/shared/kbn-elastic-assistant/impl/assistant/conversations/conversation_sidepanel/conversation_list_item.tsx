@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiListGroupItemExtraActionProps, EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
-import { ConversationWithOwner } from '../../api';
-import { Conversation } from '../../../..';
+import type { EuiListGroupItemExtraActionProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
+import type { ConversationWithOwner } from '../../api';
+import type { Conversation } from '../../../..';
 import { ConversationSidePanelContextMenu } from './context_menu';
 import { COPY_URL, DUPLICATE } from '../../use_conversation/translations';
 import * as i18n from './translations';
@@ -26,7 +27,7 @@ interface Props {
   setPaginationObserver: (ref: HTMLDivElement) => void;
 }
 
-export const ConversationListItem: FunctionComponent<Props> = ({
+export const ConversationListItem: React.FC<Props> = ({
   conversation,
   handleCopyUrl,
   handleDuplicateConversation,
@@ -37,6 +38,7 @@ export const ConversationListItem: FunctionComponent<Props> = ({
   setDeleteConversationItem,
   setPaginationObserver,
 }) => {
+  console.log('isAssistantSharingEnabled', isAssistantSharingEnabled);
   const internalSetObserver = useCallback(
     (ref: HTMLDivElement | null) => {
       if (conversation.id === lastConversationId && ref) {
