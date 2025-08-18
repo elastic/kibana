@@ -10,7 +10,7 @@ import React, { useState } from 'react';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
 import { capitalize } from 'lodash';
-import { QualityIndicators } from '../../../../common/types';
+import type { QualityIndicators } from '../../../../common/types';
 import { QualityIndicator } from '../../quality_indicator';
 
 const qualitiesSelectorLabel = i18n.translate('xpack.datasetQuality.qualitiesSelectorLabel', {

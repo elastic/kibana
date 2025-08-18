@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import type { Client } from '@elastic/elasticsearch';
-import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
 
 interface MoveIndexToFrozenDataTierResult {
   snapshotRepositoryName: string;

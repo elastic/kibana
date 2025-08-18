@@ -9,8 +9,9 @@ import { useInterpret, useSelector } from '@xstate/react';
 import createContainer from 'constate';
 import { useCallback, useState } from 'react';
 import { waitFor } from 'xstate/lib/waitFor';
-import { DEFAULT_LOG_VIEW, LogViewAttributes, LogViewReference } from '../../common/log_views';
-import {
+import type { LogViewAttributes, LogViewReference } from '../../common/log_views';
+import { DEFAULT_LOG_VIEW } from '../../common/log_views';
+import type {
   InitializeFromUrl,
   UpdateContextInUrl,
   ListenForUrlChanges,

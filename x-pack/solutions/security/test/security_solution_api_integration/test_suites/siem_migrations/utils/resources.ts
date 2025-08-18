@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import SuperTest from 'supertest';
+import type SuperTest from 'supertest';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -13,7 +13,7 @@ import {
 import { replaceParams } from '@kbn/openapi-common/shared';
 
 import { SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH } from '@kbn/security-solution-plugin/common/siem_migrations/constants';
-import { GetRuleMigrationResourcesMissingResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { GetRuleMigrationResourcesMissingResponse } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { API_VERSIONS } from '@kbn/security-solution-plugin/common/constants';
 import { assertStatusCode } from './asserts';
 

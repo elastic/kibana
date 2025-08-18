@@ -6,17 +6,21 @@
  */
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { merge } from 'lodash';
-import {
+import type {
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
   PackagePolicy,
 } from '@kbn/fleet-plugin/common';
 import { CSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common/constants';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { assert } from '../../../common/utils/helpers';
 import { useKibana } from '../../common/hooks/use_kibana';
-import { CloudSecurityPolicyTemplate, PostureInput, UpdatePolicy } from '../../../common/types_old';
+import type {
+  CloudSecurityPolicyTemplate,
+  PostureInput,
+  UpdatePolicy,
+} from '../../../common/types_old';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,

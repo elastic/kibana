@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useIsNavControlVisible } from './is_nav_control_visible';
-import { CoreStart } from '@kbn/core/public';
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 import { of } from 'rxjs';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
 

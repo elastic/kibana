@@ -10,7 +10,8 @@ import React from 'react';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSampleLayout } from './test_utils/sample_layout';
-import { GridLayout, GridLayoutProps } from './grid_layout';
+import type { GridLayoutProps } from './grid_layout';
+import { GridLayout } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { EuiThemeProvider } from '@elastic/eui';
 

@@ -8,8 +8,8 @@
 import { getColorAssignments } from './color_assignment';
 import type { FormatFactory } from '../../../common/types';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import { XYDataLayerConfig } from './types';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { XYDataLayerConfig } from './types';
+import type { Datatable } from '@kbn/expressions-plugin/common';
 
 describe('color_assignment', () => {
   const layers: XYDataLayerConfig[] = [

@@ -8,11 +8,12 @@ import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiCallOut, EuiFieldText, EuiForm, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import { type NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { CspRadioOption, RadioGroup } from '../../csp_boxed_radio_group';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
 import {
   fieldIsInvalid,
   getCloudShellDefaultValue,
@@ -27,7 +28,7 @@ import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ,
 } from './gcp_test_subjects';
-import { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
+import type { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';

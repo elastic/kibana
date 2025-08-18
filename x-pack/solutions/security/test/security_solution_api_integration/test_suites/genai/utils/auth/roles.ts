@@ -6,7 +6,7 @@
  */
 
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
-import { Role } from './types';
+import type { Role } from './types';
 
 export const noKibanaPrivileges: Role = {
   name: 'no_kibana_privileges',
