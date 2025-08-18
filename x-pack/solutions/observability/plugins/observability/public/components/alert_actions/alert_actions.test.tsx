@@ -31,7 +31,7 @@ import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { CaseUI } from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { basicCase, caseComment } from './alert_actions_mock_data';
 
 const refresh = jest.fn();

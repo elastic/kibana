@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AttachmentType, CaseSeverity, CaseUI, ConnectorTypes } from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
+import { AttachmentType, CaseSeverity, ConnectorTypes } from '@kbn/cases-plugin/common';
 import { CaseStatuses } from '@kbn/cases-components';
-import { AttachmentUI } from '@kbn/cases-plugin/common/ui/types';
+import type { AttachmentUI } from '@kbn/cases-plugin/common/ui/types';
 
 export const caseComment: AttachmentUI = {
   alertId: ['6d4c6d74-d51a-495c-897d-88ced3b95e30'],

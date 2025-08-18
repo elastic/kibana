@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import {
-  CaseAttachmentsWithoutOwner,
-  useDeleteComment,
-  useUpdateAlertComment,
-} from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import { useDeleteComment, useUpdateAlertComment } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
-import { AttachmentType, CaseUI } from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
-import { CasesService } from '@kbn/response-ops-alerts-table/types';
-import { AttachmentUI } from '@kbn/cases-plugin/common/ui';
+import type { CasesService } from '@kbn/response-ops-alerts-table/types';
+import type { AttachmentUI } from '@kbn/cases-plugin/common/ui';
 import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({
