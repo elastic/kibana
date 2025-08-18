@@ -41,7 +41,7 @@ export function useMonitorDetailLocator({
     const url = locator?.getRedirectUrl({
       configId,
       locationId,
-      timeRange: useAbsoluteDate && timeRange ? convertToAbsoluteTimeRange(timeRange) : timeRange,
+      timeRange: useAbsoluteDate ? convertToAbsoluteTimeRange(timeRange) : timeRange,
       tabId,
       ...getMonitorSpaceToAppend(space, spaces),
     });
