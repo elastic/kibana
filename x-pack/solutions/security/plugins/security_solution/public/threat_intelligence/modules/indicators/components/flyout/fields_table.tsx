@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import { EuiInMemoryTable, useEuiFontSize } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
@@ -19,6 +19,13 @@ import {
   SecurityCellActions,
   SecurityCellActionsTrigger,
 } from '../../../../../common/components/cell_actions';
+
+const euiTableSearchOptions: EuiSearchBarProps = {
+  box: {
+    schema: true,
+    incremental: true,
+  },
+};
 
 interface TableItem {
   key: string;
@@ -69,16 +76,6 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
     [indicator]
   );
 
-  const search = useMemo(
-    () => ({
-      box: {
-        schema: true,
-        incremental: true,
-      },
-    }),
-    []
-  );
-
   const items = useMemo(() => {
     return fields.toSorted().reduce<TableItem[]>((acc, field) => {
       return [
@@ -102,7 +99,7 @@ export const IndicatorFieldsTable: FC<IndicatorFieldsTableProps> = ({
           font-size: ${smallFontSize};
         }
       `}
-      search={search}
+      search={euiTableSearchOptions}
     />
   );
 };
