@@ -69,34 +69,180 @@ export interface InlineSuggestionItem {
   completeBracketPairs?: boolean;
 }
 
+/**
+ * Normalizes query text by removing comments, newlines and standardizing pipe operators
+ */
 function processQuery(query: string): string {
-  // Regex to remove C-style comments /* ... */
-  const noComments = query.replace(/\/\*[\s\S]*?\*\//g, '');
-
-  const noNewLines = noComments.replace(/[\n\r]/g, '');
-  // Regex to normalize spacing around the '|' character to be exactly " | "
-  return noNewLines.replace(/\s*\|\s*/g, ' | ').trim();
+  return query
+    .replace(/\/\*[\s\S]*?\*\//g, '') // Remove C-style comments
+    .replace(/[\n\r]/g, '') // Remove newlines
+    .replace(/\s*\|\s*/g, ' | ') // Normalize pipe spacing
+    .trim();
 }
 
+/**
+ * Extracts the insert text content from an InlineSuggestionItem
+ */
+function getInsertTextContent(item: InlineSuggestionItem): string {
+  return typeof item.insertText === 'string' ? item.insertText : item.insertText.snippet;
+}
+
+/**
+ * Creates a normalized key for deduplication based on the insert text
+ */
+function createDeduplicationKey(item: InlineSuggestionItem): string {
+  return processQuery(getInsertTextContent(item)).toLowerCase();
+}
+
+/**
+ * Removes duplicate suggestions using a Set for O(n) performance
+ */
+function removeDuplicates(suggestions: InlineSuggestionItem[]): InlineSuggestionItem[] {
+  const seenKeys = new Set<string>();
+  return suggestions.filter((item) => {
+    const key = createDeduplicationKey(item);
+    if (seenKeys.has(key)) {
+      return false;
+    }
+    seenKeys.add(key);
+    return true;
+  });
+}
+
+/**
+ * Filters suggestions by prefix and ensures they're different from the current text
+ */
 function filterByPrefix(
-  arr: InlineSuggestionItem[],
+  suggestions: InlineSuggestionItem[],
   prefix: string,
   fullText: string
 ): InlineSuggestionItem[] {
-  return arr.filter((item) => {
-    if (typeof item.insertText === 'string') {
-      const trimmedText = processQuery(item.insertText).toLowerCase();
-      return (
-        trimmedText.startsWith(prefix) &&
-        trimmedText !== prefix &&
-        processQuery(fullText).toLowerCase() !== trimmedText
-      );
-    } else if (typeof item.insertText === 'object' && 'snippet' in item.insertText) {
-      const trimmedSnippet = processQuery(item.insertText.snippet).toLowerCase();
-      return trimmedSnippet.startsWith(prefix) && trimmedSnippet !== prefix;
-    }
-    return false;
+  const normalizedFullText = processQuery(fullText).toLowerCase();
+
+  return suggestions.filter((item) => {
+    const normalizedText = createDeduplicationKey(item);
+    return (
+      normalizedText.startsWith(prefix) &&
+      normalizedText !== prefix &&
+      normalizedText !== normalizedFullText
+    );
   });
+}
+
+/**
+ * Trims the prefix from the insert text to show only the completion part
+ */
+function trimSuggestionPrefix(
+  item: InlineSuggestionItem,
+  prefixLength: number
+): InlineSuggestionItem {
+  if (typeof item.insertText === 'string') {
+    return {
+      ...item,
+      insertText: processQuery(item.insertText).substring(prefixLength),
+    };
+  }
+
+  return {
+    ...item,
+    insertText: {
+      snippet: processQuery(item.insertText.snippet).substring(prefixLength),
+    },
+  };
+}
+
+/**
+ * Fetches data sources and determines the FROM command
+ */
+async function getFromCommand(
+  textBeforeCursor: string,
+  callbacks?: ESQLCallbacks
+): Promise<string> {
+  const dataSource = getIndexPatternFromESQLQuery(textBeforeCursor);
+
+  if (dataSource) {
+    return `FROM ${dataSource}`;
+  }
+
+  const sources = (await callbacks?.getSources?.()) || [];
+  const visibleSources = sources.filter((source) => !source.hidden);
+
+  if (visibleSources.find((source) => source.name.startsWith('logs'))) {
+    return 'FROM logs*';
+  }
+
+  if (visibleSources.length > 0) {
+    return `FROM ${visibleSources[0].name}`;
+  }
+
+  return 'FROM *';
+}
+
+/**
+ * Fetches field information and determines time and categorization fields
+ */
+async function getFieldInfo(
+  fromCommand: string,
+  callbacks?: ESQLCallbacks
+): Promise<{ timeField: string; categorizationField: string | undefined }> {
+  const { getFieldsByType } = getFieldsByTypeHelper(fromCommand, callbacks);
+
+  const [dateFields, textFields] = await Promise.all([
+    getFieldsByType(['date'], []),
+    getFieldsByType(['text'], []),
+  ]);
+
+  const timeField =
+    dateFields.length > 0
+      ? dateFields.find((field) => field.name === '@timestamp')?.name || dateFields[0].name
+      : '';
+
+  const categorizationField =
+    textFields.length > 0
+      ? getCategorizationField(textFields.map((field) => field.name))
+      : undefined;
+
+  return { timeField, categorizationField };
+}
+
+/**
+ * Fetches all suggestion sources in parallel
+ */
+async function fetchAllSuggestions(
+  fromCommand: string,
+  timeField: string,
+  categorizationField: string | undefined,
+  range: InlineSuggestionItem['range'],
+  callbacks?: ESQLCallbacks
+): Promise<InlineSuggestionItem[]> {
+  const [editorExtensions, historyStarredItems] = await Promise.all([
+    callbacks
+      ?.getEditorExtensions?.(fromCommand)
+      .then((result) => result ?? { recommendedQueries: [] }),
+    callbacks?.getHistoryStarredItems?.().then((result) => result ?? []),
+  ]);
+
+  // Convert each source to InlineSuggestionItem format
+  const extensionSuggestions = (editorExtensions?.recommendedQueries || []).map((query) => ({
+    insertText: query.query,
+    range,
+  }));
+
+  const historySuggestions = (historyStarredItems || []).map((item) => ({
+    insertText: item,
+    range,
+  }));
+
+  const templateSuggestions = getRecommendedQueriesTemplates({
+    fromCommand,
+    timeField,
+    categorizationField,
+  }).map((query) => ({
+    insertText: query.queryString,
+    range,
+  }));
+
+  return [...extensionSuggestions, ...templateSuggestions, ...historySuggestions];
 }
 
 export async function inlineSuggest(
@@ -105,111 +251,32 @@ export async function inlineSuggest(
   range: InlineSuggestionItem['range'],
   callbacks?: ESQLCallbacks
 ): Promise<{ items: InlineSuggestionItem[] }> {
-  const trimmedText = processQuery(textBeforeCursor).toLowerCase();
+  try {
+    const trimmedText = processQuery(textBeforeCursor).toLowerCase();
 
-  let fromCommand = '';
-  const dataSource = getIndexPatternFromESQLQuery(trimmedText);
+    // Fetch data sources and field information
+    const fromCommand = await getFromCommand(trimmedText, callbacks);
+    const { timeField, categorizationField } = await getFieldInfo(fromCommand, callbacks);
 
-  if (dataSource) {
-    fromCommand = `FROM ${dataSource}`;
-  } else {
-    const sources = (await callbacks?.getSources?.()) || [];
-    const visibleSources = sources.filter((source) => !source.hidden);
-    if (visibleSources.find((source) => source.name.startsWith('logs'))) {
-      fromCommand = 'FROM logs*';
-    } else if (visibleSources.length) {
-      fromCommand = `FROM ${visibleSources[0].name}`;
-    }
-  }
-
-  const { getFieldsByType } = getFieldsByTypeHelper(fromCommand, callbacks);
-
-  const [dateFields, textFields] = await Promise.all([
-    getFieldsByType(['date'], []),
-    // get text fields separately to avoid mixing them with date fields
-    getFieldsByType(['text'], []),
-  ]);
-
-  let timeField = '';
-  let categorizationField: string | undefined = '';
-
-  if (dateFields.length) {
-    timeField =
-      dateFields?.find((field) => field.name === '@timestamp')?.name || dateFields[0].name;
-  }
-
-  if (textFields.length) {
-    categorizationField = getCategorizationField(textFields.map((field) => field.name));
-  }
-
-  const editorExtensions = (await callbacks?.getEditorExtensions?.(fromCommand)) ?? {
-    recommendedQueries: [],
-  };
-
-  const historyStarredItemsResult = await callbacks?.getHistoryStarredItems?.();
-  const historyStarredItems = historyStarredItemsResult
-    ? historyStarredItemsResult.map((item) => {
-        return {
-          insertText: item,
-          range,
-        };
-      })
-    : [];
-
-  const queryItemsFromExtensions = editorExtensions.recommendedQueries.map((query) => {
-    return {
-      insertText: query.query,
+    // Fetch all suggestions in parallel
+    const allSuggestions = await fetchAllSuggestions(
+      fromCommand,
+      timeField,
+      categorizationField,
       range,
-    };
-  });
-
-  const recommendedQueries = getRecommendedQueriesTemplates({
-    fromCommand,
-    timeField,
-    categorizationField,
-  }).map((query) => {
-    return {
-      insertText: query.queryString,
-      range,
-    };
-  });
-
-  const allSuggestions = [
-    ...queryItemsFromExtensions,
-    ...recommendedQueries,
-    ...historyStarredItems,
-  ];
-
-  // Remove duplicates based on insertText
-  const inlineSuggestions = allSuggestions.filter((item, index, self) => {
-    const currentText =
-      typeof item.insertText === 'string'
-        ? item.insertText
-        : (item.insertText as { snippet: string }).snippet;
-
-    return (
-      index ===
-      self.findIndex((otherItem) => {
-        const otherText =
-          typeof otherItem.insertText === 'string'
-            ? otherItem.insertText
-            : (otherItem.insertText as { snippet: string }).snippet;
-        return processQuery(currentText).toLowerCase() === processQuery(otherText).toLowerCase();
-      })
+      callbacks
     );
-  });
 
-  return {
-    items: filterByPrefix(inlineSuggestions, trimmedText, fullText).map((item) => {
-      return {
-        ...item,
-        insertText:
-          typeof item.insertText === 'string'
-            ? processQuery(item.insertText).substring(trimmedText.length)
-            : {
-                snippet: processQuery(item.insertText.snippet).substring(trimmedText.length),
-              },
-      };
-    }),
-  };
+    // Process suggestions: remove duplicates, filter by prefix, and trim prefix
+    const uniqueSuggestions = removeDuplicates(allSuggestions);
+    const filteredSuggestions = filterByPrefix(uniqueSuggestions, trimmedText, fullText);
+    const finalSuggestions = filteredSuggestions.map((item) =>
+      trimSuggestionPrefix(item, trimmedText.length)
+    );
+
+    return { items: finalSuggestions };
+  } catch (error) {
+    // Return empty array on error to maintain user experience
+    return { items: [] };
+  }
 }
