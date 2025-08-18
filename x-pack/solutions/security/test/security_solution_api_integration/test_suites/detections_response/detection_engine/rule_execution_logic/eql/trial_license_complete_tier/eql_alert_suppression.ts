@@ -3184,14 +3184,14 @@ export default ({ getService }: FtrProviderContext) => {
 
         const SECOND = 1000;
         const dateNow = Date.now();
-        const timestamp1 = new Date(dateNow - 50 * SECOND).toISOString();
-        const timestamp2 = new Date(dateNow - 49 * SECOND).toISOString();
-        const timestamp3 = new Date(dateNow - 48 * SECOND).toISOString();
-        const timestamp4 = new Date(dateNow - 5 * SECOND).toISOString();
-        const timestamp5 = new Date(dateNow - 4 * SECOND).toISOString();
-        const timestamp6 = new Date(dateNow - 3 * SECOND).toISOString();
+        const timestamp1 = new Date(dateNow - 50 * SECOND);
+        const timestamp2 = new Date(dateNow - 49 * SECOND);
+        const timestamp3 = new Date(dateNow - 48 * SECOND);
+        const timestamp4 = new Date(dateNow - 5 * SECOND);
+        const timestamp5 = new Date(dateNow - 4 * SECOND);
+        const timestamp6 = new Date(dateNow - 3 * SECOND);
 
-        const seqDoc = (ts: string) => ({ id, '@timestamp': ts, host: { name: 'host-a' } });
+        const buildSequenceDoc = (ts: Date) => ({ id, '@timestamp': ts.toISOString(), host: { name: 'host-a' } });
         await indexListOfSourceDocuments([
           seqDoc(timestamp1),
           seqDoc(timestamp2),
