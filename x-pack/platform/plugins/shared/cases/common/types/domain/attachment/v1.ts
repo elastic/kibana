@@ -105,6 +105,10 @@ export const AlertAttachmentRt = rt.intersection([
   }),
 ]);
 
+export type AlertAttachmentResponse = AlertAttachmentPayload & {
+  id: string;
+  version: string;
+};
 export type AlertAttachmentPayload = rt.TypeOf<typeof AlertAttachmentPayloadRt>;
 export type AlertAttachmentAttributes = rt.TypeOf<typeof AlertAttachmentAttributesRt>;
 export type AlertAttachment = rt.TypeOf<typeof AlertAttachmentRt>;

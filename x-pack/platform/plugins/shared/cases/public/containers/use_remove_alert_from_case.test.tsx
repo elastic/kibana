@@ -12,13 +12,13 @@ import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { casesQueriesKeys } from './constants';
 import { TestProviders, createTestQueryClient } from '../common/mock';
-import { useUpdateAlertComment } from './use_update_alert_comment';
-import type { AlertAttachmentPayload } from '../../common/types/domain';
+import { useRemoveAlertFromCase } from './use_remove_alert_from_case';
+import type { AlertAttachmentUI } from './types';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
-describe('useUpdateAlertComment', () => {
+describe('useRemoveAlertFromCase', () => {
   const addSuccess = jest.fn();
   const addError = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
@@ -29,14 +29,13 @@ describe('useUpdateAlertComment', () => {
 
   const sampleUpdate: {
     caseId: string;
-    commentUpdate: AlertAttachmentPayload & {
-      id: string;
-      version: string;
-    };
+    alertId: string;
+    alertAttachment: AlertAttachmentUI;
     successToasterTitle: string;
   } = {
     caseId: 'test-id',
-    commentUpdate: alertCommentPatch,
+    alertId: 'test-alert-id',
+    alertAttachment: alertCommentPatch as AlertAttachmentUI,
     successToasterTitle: 'Done!',
   };
 
@@ -44,7 +43,7 @@ describe('useUpdateAlertComment', () => {
     const queryClient = createTestQueryClient();
     const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
 
-    const { result } = renderHook(() => useUpdateAlertComment(), {
+    const { result } = renderHook(() => useRemoveAlertFromCase(), {
       wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
     });
 
@@ -60,8 +59,8 @@ describe('useUpdateAlertComment', () => {
   });
 
   it('calls the api when invoked with the correct parameters', async () => {
-    const patchAlertCommentSpy = jest.spyOn(api, 'patchAlertComment');
-    const { result } = renderHook(() => useUpdateAlertComment(), {
+    const deleteAlertCommentSpy = jest.spyOn(api, 'deleteAlertComment');
+    const { result } = renderHook(() => useRemoveAlertFromCase(), {
       wrapper: TestProviders,
     });
 
@@ -70,15 +69,16 @@ describe('useUpdateAlertComment', () => {
     });
 
     await waitFor(() =>
-      expect(patchAlertCommentSpy).toHaveBeenCalledWith({
+      expect(deleteAlertCommentSpy).toHaveBeenCalledWith({
         caseId: 'test-id',
-        commentUpdate: alertCommentPatch,
+        alertId: 'test-alert-id',
+        alertAttachment: alertCommentPatch,
       })
     );
   });
 
   it('shows a success toaster', async () => {
-    const { result } = renderHook(() => useUpdateAlertComment(), {
+    const { result } = renderHook(() => useRemoveAlertFromCase(), {
       wrapper: TestProviders,
     });
 
@@ -95,9 +95,9 @@ describe('useUpdateAlertComment', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'patchAlertComment').mockRejectedValue(new Error('useUpdateCase: Test error'));
+    jest.spyOn(api, 'deleteAlertComment').mockRejectedValue(new Error('useUpdateCase: Test error'));
 
-    const { result } = renderHook(() => useUpdateAlertComment(), {
+    const { result } = renderHook(() => useRemoveAlertFromCase(), {
       wrapper: TestProviders,
     });
 

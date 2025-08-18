@@ -68,24 +68,13 @@ const config: ConfigSchema = {
 
 const getFormatterMock = jest.fn();
 
-export const mockDeleteComment = jest.fn();
-export const mockUpdateComment = jest.fn();
+export const mockDeleteAlertComment = jest.fn();
 
 jest.mock('@kbn/cases-plugin/public', () => ({
   ...jest.requireActual('@kbn/cases-plugin/public'),
-  useDeleteComment: jest.fn(() => ({
+  useRemoveAlertFromCase: jest.fn(() => ({
     mutate: jest.fn(),
-    mutateAsync: () => mockDeleteComment(),
-    isLoading: false,
-    isError: false,
-    isSuccess: false,
-    error: null,
-    data: null,
-    reset: jest.fn(),
-  })),
-  useUpdateAlertComment: jest.fn(() => ({
-    mutate: jest.fn(),
-    mutateAsync: () => mockUpdateComment(),
+    mutateAsync: () => mockDeleteAlertComment(),
     isLoading: false,
     isError: false,
     isSuccess: false,
@@ -287,20 +276,6 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('should delete attachment when removing an alert from an existing case', async () => {
-    const wrapper = await setup({ pageId: 'nothing' });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().length).toBe(1);
-    });
-    wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').hostNodes().simulate('click');
-    });
-
-    expect(mockDeleteComment).toHaveBeenCalled();
-  });
-
   it('should update attachment when removing one of several alerts from an existing case', async () => {
     const multiAlertCaseComment = {
       ...caseComment,
@@ -318,7 +293,7 @@ describe('ObservabilityActions component', () => {
       wrapper.find('[data-test-subj="confirmModalConfirmButton"]').hostNodes().simulate('click');
     });
 
-    expect(mockUpdateComment).toHaveBeenCalled();
+    expect(mockDeleteAlertComment).toHaveBeenCalled();
   });
 
   it('should refresh when when calling onSuccess of useCasesAddToExistingCaseModal', async () => {

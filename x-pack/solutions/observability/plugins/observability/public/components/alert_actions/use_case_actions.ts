@@ -8,7 +8,6 @@
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { useRemoveAlertFromCase } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
-import type { CaseUI } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
@@ -20,7 +19,7 @@ export const useCaseActions = ({
   alerts,
   onAddToCase,
   services,
-  caseData,
+  caseId,
   alertAttachment,
 }: {
   alerts: Alert[];
@@ -31,7 +30,7 @@ export const useCaseActions = ({
      */
     cases?: CasesService;
   };
-  caseData?: CaseUI;
+  caseId?: string;
   alertAttachment?: AlertAttachmentUI;
 }) => {
   const { cases } = services;
@@ -50,9 +49,9 @@ export const useCaseActions = ({
 
   const handleRemoveAlertsFromCase = () => {
     alerts.forEach((alert) => {
-      if (alertAttachment && caseData?.id && alert._id) {
+      if (alertAttachment && caseId && alert._id) {
         removeAlertsFromCase({
-          caseId: caseData?.id,
+          caseId,
           alertAttachment,
           alertId: alert._id,
           successToasterTitle: removalSuccessToast,

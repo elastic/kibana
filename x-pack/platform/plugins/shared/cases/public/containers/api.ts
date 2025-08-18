@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { AlertAttachmentPayload, CaseCustomField, User } from '../../common/types/domain';
+import type { AlertAttachmentResponse, CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -41,7 +41,6 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
-  AlertAttachmentUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -435,21 +434,21 @@ export const patchAlertComment = async ({
   signal,
 }: {
   caseId: string;
-  commentUpdate: AlertAttachmentPayload & {
-    id: string;
-    version: string;
-  };
+  commentUpdate: AlertAttachmentResponse;
   signal?: AbortSignal;
-}): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
-    method: 'PATCH',
-    body: JSON.stringify({
-      ...commentUpdate,
-    }),
-    signal,
-  });
+}): Promise<AlertAttachmentResponse> => {
+  const response = await KibanaServices.get().http.fetch<AlertAttachmentResponse>(
+    getCaseCommentsUrl(caseId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify({
+        ...commentUpdate,
+      }),
+      signal,
+    }
+  );
 
-  return convertCaseToCamelCase(decodeCaseResponse(response));
+  return response;
 };
 
 export const deleteAlertComment = async ({
@@ -460,9 +459,9 @@ export const deleteAlertComment = async ({
 }: {
   caseId: string;
   alertId: string;
-  alertAttachment: AlertAttachmentUI;
+  alertAttachment: AlertAttachmentResponse;
   signal?: AbortSignal;
-}): Promise<void | CaseUI> => {
+}): Promise<void | AlertAttachmentResponse> => {
   const { alertId, index, rule, version, id, owner } = alertAttachment;
   if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
     const alertIdx = alertId.indexOf(alertIdToRemove);

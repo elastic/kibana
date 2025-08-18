@@ -43,6 +43,7 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
+  deleteAlertComment,
 } from './api';
 
 import {
@@ -69,6 +70,7 @@ import {
   mockCase,
   similarCases,
   similarCasesSnake,
+  alertCommentPatch,
 } from './mock';
 
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from './constants';
@@ -1003,6 +1005,61 @@ describe('Cases API', () => {
         signal: abortCtrl.signal,
       });
       expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('deleteAlertComment', () => {
+    beforeEach(() => {
+      fetchMock.mockClear();
+    });
+
+    it('patch comment should be called with correct check url, method, signal', async () => {
+      const updatedComment = {
+        ...alertCommentPatch,
+        alertId: alertCommentPatch.alertId.slice(1),
+        index: alertCommentPatch.index.slice(1),
+      };
+      fetchMock.mockResolvedValue(updatedComment);
+      const resp = await deleteAlertComment({
+        caseId: basicCaseId,
+        alertId: alertCommentPatch.alertId[0],
+        alertAttachment: alertCommentPatch,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
+        body: JSON.stringify({
+          ...updatedComment,
+        }),
+        method: 'PATCH',
+        signal: abortCtrl.signal,
+      });
+
+      expect(resp).toEqual(updatedComment);
+    });
+
+    it('delete alert should be called with correct check url, method, signal', async () => {
+      const updatedComment = {
+        ...alertCommentPatch,
+        alertId: alertCommentPatch.alertId.slice(3),
+        index: alertCommentPatch.index.slice(3),
+      };
+      fetchMock.mockResolvedValue(null);
+      const resp = await deleteAlertComment({
+        caseId: basicCaseId,
+        alertId: alertCommentPatch.alertId[3],
+        alertAttachment: updatedComment,
+        signal: abortCtrl.signal,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_URL}/${basicCase.id}/comments/${alertCommentPatch.id}`,
+        {
+          method: 'DELETE',
+          signal: abortCtrl.signal,
+        }
+      );
+      expect(resp).toEqual(undefined);
     });
   });
 

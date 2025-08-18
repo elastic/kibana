@@ -124,7 +124,7 @@ export function AlertActions({
     services: {
       cases,
     },
-    caseData,
+    caseId: caseData?.id,
     alertAttachment: alertAttachment as AlertAttachmentUI,
   });
 
