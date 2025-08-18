@@ -296,6 +296,11 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "sampling_rate",
+    "type": "float",
+    "validationName": "floatFourDecimalPlacesRt",
+  },
+  Object {
     "key": "sanitize_field_names",
     "type": "text",
     "validationName": "string",
