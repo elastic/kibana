@@ -247,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(200);
           });
 
-          it(`should allow Windows and Mac combination on [${trustedDeviceApiCall.method}] (CRITICAL DIFFERENCE from trusted apps)`, async () => {
+          it(`should allow Windows and Mac combination on [${trustedDeviceApiCall.method}]`, async () => {
             const body = trustedDeviceApiCall.getBody();
 
             // Match request version with artifact version

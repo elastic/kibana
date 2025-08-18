@@ -89,6 +89,12 @@ export class TrustedDeviceValidator extends BaseValidator {
     return super.validateHasPrivilege('canReadTrustedDevices');
   }
 
+  private async validateTrustedDevicesFeatureEnabled(): Promise<void> {
+    if (!this.endpointAppContext.experimentalFeatures.trustedDevices) {
+      throw new EndpointArtifactExceptionValidationError('Trusted devices feature is not enabled');
+    }
+  }
+
   /**
    * Override base validation to allow both Windows and Mac OS types for trusted devices
    * CRITICAL: This is the key difference from trusted apps which only allow single OS
@@ -133,6 +139,7 @@ export class TrustedDeviceValidator extends BaseValidator {
   async validatePreCreateItem(
     item: CreateExceptionListItemOptions
   ): Promise<CreateExceptionListItemOptions> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasWritePrivilege();
     await this.validateTrustedDeviceData(item);
     await this.validateCanCreateByPolicyArtifacts(item);
@@ -149,6 +156,7 @@ export class TrustedDeviceValidator extends BaseValidator {
   ): Promise<UpdateExceptionListItemOptions> {
     const updatedItem = _updatedItem as ExceptionItemLikeOptions;
 
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasWritePrivilege();
     await this.validateTrustedDeviceData(updatedItem);
 
@@ -171,28 +179,34 @@ export class TrustedDeviceValidator extends BaseValidator {
   }
 
   async validatePreDeleteItem(currentItem: ExceptionListItemSchema): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasWritePrivilege();
     await this.validateCanDeleteItemInActiveSpace(currentItem);
   }
 
   async validatePreGetOneItem(currentItem: ExceptionListItemSchema): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasReadPrivilege();
     await this.validateCanReadItemInActiveSpace(currentItem);
   }
 
   async validatePreMultiListFind(): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasReadPrivilege();
   }
 
   async validatePreExport(): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasReadPrivilege();
   }
 
   async validatePreSingleListFind(): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasReadPrivilege();
   }
 
   async validatePreGetListSummary(): Promise<void> {
+    await this.validateTrustedDevicesFeatureEnabled();
     await this.validateHasReadPrivilege();
   }
 
