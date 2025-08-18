@@ -8,6 +8,7 @@
  */
 
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -48,6 +49,9 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [workflows, setWorkflows] = useState<WorkflowOption[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [selectedWorkflowDisabledError, setSelectedWorkflowDisabledError] = useState<string | null>(
+    null
+  );
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
@@ -81,10 +85,14 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         editSubActionParams('workflowId', changedOption.id);
         setInputValue(changedOption.name);
         setIsSearching(false);
+        // Clear the disabled workflow error when a new workflow is selected
+        setSelectedWorkflowDisabledError(null);
       } else {
         editSubActionParams('workflowId', '');
         setInputValue('');
         setIsSearching(true);
+        // Clear the disabled workflow error when selection is cleared
+        setSelectedWorkflowDisabledError(null);
       }
     },
     [editSubActionParams]
@@ -125,11 +133,31 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
         const response = await http.post('/api/workflows/search');
         const workflowsMap = response as WorkflowListDto;
 
+        // Check if the currently selected workflow is disabled
+        let hasSelectedWorkflowDisabled = false;
+
         const workflowOptions: WorkflowOption[] = workflowsMap.results.map((workflow) => {
           // TODO: remove this once we have a way to disable workflows
           const isDisabled = false;
           const isSelected = workflow.id === workflowId;
           const wasSelectedButNowDisabled = isSelected && isDisabled;
+
+          // Track if selected workflow is disabled
+          if (wasSelectedButNowDisabled) {
+            hasSelectedWorkflowDisabled = true;
+          }
+
+          // Determine what to show in prepend
+          let prependElement;
+          if (wasSelectedButNowDisabled) {
+            // Show warning icon for previously selected but now disabled workflows
+            prependElement = (
+              <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
+            );
+          } else if (isDisabled) {
+            // Show disabled badge for disabled workflows
+            prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
+          }
 
           return {
             id: workflow.id,
@@ -140,11 +168,16 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             disabled: isDisabled,
             checked: isSelected ? 'on' : undefined,
             toolTipContent: workflow.description,
-            prepend: wasSelectedButNowDisabled ? (
-              <EuiIcon type="alert" color="warning" aria-label={i18n.WORKFLOW_DISABLED_WARNING} />
-            ) : undefined,
+            prepend: prependElement,
           };
         });
+
+        // Set error state if selected workflow is disabled
+        if (hasSelectedWorkflowDisabled) {
+          setSelectedWorkflowDisabledError(i18n.SELECTED_WORKFLOW_DISABLED_ERROR);
+        } else {
+          setSelectedWorkflowDisabledError(null);
+        }
 
         setWorkflows(workflowOptions);
       } catch (error) {
@@ -187,7 +220,10 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
   const errorMessages = errors['subActionParams.workflowId'];
   const errorMessage = Array.isArray(errorMessages) ? errorMessages[0] : errorMessages;
-  const displayError = typeof errorMessage === 'string' ? errorMessage : undefined;
+  const validationError = typeof errorMessage === 'string' ? errorMessage : undefined;
+
+  // Prioritize selected workflow disabled error over validation errors
+  const displayError = selectedWorkflowDisabledError || validationError;
   const helpText = loadError || (isLoading ? i18n.LOADING_WORKFLOWS : undefined);
 
   return (
