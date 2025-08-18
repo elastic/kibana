@@ -17,13 +17,13 @@ import {
   getUseField,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { Field } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormLabel,
   EuiHorizontalRule,
-  EuiSelectOption,
   EuiSpacer,
   EuiSplitPanel,
 } from '@elastic/eui';
@@ -39,7 +39,7 @@ import { recurringSummary } from '../utils/recurring_summary';
 import { parseSchedule } from '../utils/parse_schedule';
 import { getPresets } from '../utils/get_presets';
 import { getWeekdayInfo } from '../utils/get_weekday_info';
-import { RecurringSchedule } from '../types';
+import type { RecurringSchedule } from '../types';
 import * as i18n from '../translations';
 import { convertStringToMomentOptional, convertMomentToStringOptional } from '../converters/moment';
 

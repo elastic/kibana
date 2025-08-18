@@ -9,7 +9,7 @@
 
 import { waitFor, renderHook, act } from '@testing-library/react';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
-import { TableVisUiState } from '../../types';
+import type { TableVisUiState } from '../../types';
 import { useUiState } from './use_ui_state';
 
 describe('useUiState', () => {

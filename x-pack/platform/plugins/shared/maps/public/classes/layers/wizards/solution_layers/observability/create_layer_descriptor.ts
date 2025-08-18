@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
-import {
+import type {
   AggDescriptor,
   ColorDynamicOptions,
   LayerDescriptor,

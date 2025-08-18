@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore, Filter } from '@kbn/es-query';
-import { moveFiltersToQuery, Pre600FilterQuery } from './move_filters_to_query';
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+import type { Pre600FilterQuery } from './move_filters_to_query';
+import { moveFiltersToQuery } from './move_filters_to_query';
 
 const filter: Filter = {
   meta: { disabled: false, negate: false, alias: '' },

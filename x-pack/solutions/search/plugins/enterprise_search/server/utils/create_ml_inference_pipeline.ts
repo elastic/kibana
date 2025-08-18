@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { AttachMlInferencePipelineResponse } from '../../common/types/pipelines';
 
