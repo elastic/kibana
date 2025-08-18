@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { SearchConnectorsPluginSetupDependencies } from '../types';
+import type { SearchConnectorsPluginSetupDependencies } from '../types';
 
 export function registerApiKeysRoutes({ router }: SearchConnectorsPluginSetupDependencies) {
   router.get(

@@ -12,14 +12,14 @@ import Fs from 'fs';
 import { createHash } from 'crypto';
 
 import globby from 'globby';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { escape } from 'he';
 import { FtrScreenshotFilename } from '@kbn/ftr-screenshot-filename';
 import { JourneyScreenshots } from '@kbn/journeys';
 
-import { BuildkiteMetadata } from './buildkite_metadata';
-import { TestFailure } from './get_failures';
+import type { BuildkiteMetadata } from './buildkite_metadata';
+import type { TestFailure } from './get_failures';
 
 interface JourneyMeta {
   journeyName: string;

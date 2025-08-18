@@ -14,7 +14,8 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ActionConnector, EditConnectorTabs, GenericValidationResult } from '../../../../types';
+import type { ActionConnector, GenericValidationResult } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
 import { times } from 'lodash';
 import { useHistory, useParams } from 'react-router-dom';
 

@@ -7,7 +7,8 @@
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { withActionOperations, ComponentOpts } from './with_actions_api_operations';
+import type { ComponentOpts } from './with_actions_api_operations';
+import { withActionOperations } from './with_actions_api_operations';
 import * as actionApis from '../../../lib/action_connector_api';
 import { useKibana } from '../../../../common/lib/kibana';
 

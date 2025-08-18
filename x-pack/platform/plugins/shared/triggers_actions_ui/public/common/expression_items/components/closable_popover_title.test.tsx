@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 describe('closable popover title', () => {
   it('renders with defined options', async () => {
     const onClose = jest.fn();
-    const children = <div  data-test-subj="data_test_subj"/>;
+    const children = <div data-test-subj="data_test_subj" />;
     render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
 
     expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
@@ -24,7 +24,7 @@ describe('closable popover title', () => {
     const user = userEvent.setup();
 
     const onClose = jest.fn();
-    const children = <div/>;
+    const children = <div />;
     render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
 
     const closeButton = screen.getByRole('button', { name: /close/i });

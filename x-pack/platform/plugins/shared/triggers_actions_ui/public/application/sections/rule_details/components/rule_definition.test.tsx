@@ -9,7 +9,7 @@ import { screen, render } from '@testing-library/react';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { RuleDefinition } from './rule_definition';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
-import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
+import type { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import * as capabilities from '../../../lib/capabilities';

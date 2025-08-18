@@ -8,14 +8,9 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
-  DataViewBase,
-  KueryParseOptions,
-  KueryQueryOptions,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '../../..';
-import { KqlContext } from '../../kuery/types';
+import type { DataViewBase, KueryParseOptions, KueryQueryOptions } from '../../..';
+import { fromKueryExpression, toElasticsearchQuery } from '../../..';
+import type { KqlContext } from '../../kuery/types';
 
 interface ElasticsearchQueryOptions {
   indexPattern?: DataViewBase;

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApiKey } from '@kbn/security-plugin-types-common';
+import type { ApiKey } from '@kbn/security-plugin-types-common';
 
 export interface IndicesStatusResponse {
   indexNames: string[];

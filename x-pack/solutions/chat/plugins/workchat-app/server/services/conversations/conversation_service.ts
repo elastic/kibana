@@ -12,7 +12,8 @@ import type {
   SecurityServiceStart,
 } from '@kbn/core/server';
 import { conversationTypeName } from '../../saved_objects/conversations';
-import { ConversationClientImpl, ConversationClient } from './conversation_client';
+import type { ConversationClient } from './conversation_client';
+import { ConversationClientImpl } from './conversation_client';
 
 interface ConversationServiceOptions {
   logger: Logger;

@@ -8,9 +8,9 @@ import React from 'react';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import { RadioGroup } from '@kbn/cloud-security-posture';
 import { VULN_MGMT_POLICY_TEMPLATE, CNVM_POLICY_TEMPLATE } from '../../../common/constants';
 import type { CloudSecurityPolicyTemplate } from '../../../common/types_old';
-import { RadioGroup } from './csp_boxed_radio_group';
 interface PolicyTemplateSelectorProps {
   selectedTemplate: CloudSecurityPolicyTemplate;
   policy: NewPackagePolicy;
@@ -53,6 +53,7 @@ export const PolicyTemplateSelector = ({
         idSelected={selectedTemplate}
         onChange={(id: CloudSecurityPolicyTemplate) => setPolicyTemplate(id)}
         disabled={disabled}
+        name="policyTemplate"
       />
     </div>
   );
