@@ -3191,7 +3191,11 @@ export default ({ getService }: FtrProviderContext) => {
         const timestamp5 = new Date(dateNow - 4 * SECOND);
         const timestamp6 = new Date(dateNow - 3 * SECOND);
 
-        const buildSequenceDoc = (ts: Date) => ({ id, '@timestamp': ts.toISOString(), host: { name: 'host-a' } });
+        const buildSequenceDoc = (ts: Date) => ({
+          id,
+          '@timestamp': ts.toISOString(),
+          host: { name: 'host-a' },
+        });
         await indexListOfSourceDocuments([
           seqDoc(timestamp1),
           seqDoc(timestamp2),
@@ -3216,6 +3220,11 @@ export default ({ getService }: FtrProviderContext) => {
           interval: '40s',
         };
 
+        // it will execute 2 times
+        // first execution from dateNow - 80s to dateNow - 40s, should fetch timestamp 1, 2, 3
+        // the exucution should generate 1 alert
+        // second execution from dateNow - 40s to dateNow, should fetch timestamp 4, 5, 6
+        // the execution should generate 1 more alert, and not supress it as timestamp 1, 2, 3 outside of suppression duration
         const { previewId } = await previewRule({
           supertest,
           rule,
