@@ -64,7 +64,7 @@ Accessibility testing is integrated into:
 - Quarterly post-release audits
 
 ## Accessibility Audit Schedule (FY26)
-This document outlines our accessibility schedule for the 2026 fiscal year. We initiated audits for WCAG 2.2 Level A compliance, addressing baseline accessibility requirements such as text alternatives, keyboard navigation, and basic ARIA support. In the latter part of the year, we will conduct audits for WCAG 2.2 Level AA compliance, which includes additional requirements such as color contrast ratios, focus visibility, and error identification. Please note completed audit cycles have been marked off with a check.
+This section outlines our accessibility schedule for the 2026 fiscal year. We initiated audits for WCAG 2.2 Level A compliance, addressing baseline accessibility requirements such as text alternatives, keyboard navigation, and basic ARIA support. In the latter part of the year, we will conduct audits for WCAG 2.2 Level AA compliance, which includes additional requirements such as color contrast ratios, focus visibility, and error identification. In the following table, completed audit cycles are marked with a check.
 
 | Quarter   | Timeline         | Audit Items |
 |-----------|------------------|-------------|
