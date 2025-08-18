@@ -118,11 +118,14 @@ export class AIAssistantManagementPlugin
 
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
 
+    const isAiAssistantManagementSelectionEnabled =
+      coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
+
     // Toggle visibility based on license at runtime
     if (licensing) {
       this.licensingSubscription = licensing.license$.subscribe((license) => {
         const isEnterprise = license?.hasAtLeast('enterprise');
-        if (isEnterprise) {
+        if (isEnterprise && isAiAssistantManagementSelectionEnabled) {
           this.registeredAiAssistantManagementSelectionApp?.enable();
         } else {
           this.registeredAiAssistantManagementSelectionApp?.disable();
