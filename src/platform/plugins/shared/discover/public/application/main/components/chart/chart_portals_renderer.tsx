@@ -198,7 +198,6 @@ const CustomChartSectionWrapper = ({
     ...restProps,
     initialState: {
       ...unifiedHistogramProps.initialState,
-      topPanelHeight: chartSectionConfig.containerInitialHeight,
     },
     localStorageKeyPrefix:
       chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix,

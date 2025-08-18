@@ -243,7 +243,6 @@ export type ChartSectionConfiguration =
       Component: React.ComponentType<ChartSectionProps>;
       replaceDefaultHistogram: true;
       localStorageKeyPrefix: string;
-      containerInitialHeight: number;
     }
   | {
       replaceDefaultHistogram: false;
