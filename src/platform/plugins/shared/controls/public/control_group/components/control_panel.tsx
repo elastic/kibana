@@ -12,13 +12,13 @@ import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexItem,
   EuiFormControlLayout,
   EuiFormLabel,
   EuiFormRow,
   EuiToolTip,
-  UseEuiTheme,
 } from '@elastic/eui';
 import {
   apiHasParentApi,
@@ -27,10 +27,10 @@ import {
 } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classNames from 'classnames';
+import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
 import { FloatingActions } from './floating_actions';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
-import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
+import type { ControlPanelProps, DefaultControlApi } from '../../controls/types';
 import { ControlError } from './control_error';
 import { isCompressed } from '../utils/is_compressed';
 import { controlWidthStyles } from './control_panel.styles';

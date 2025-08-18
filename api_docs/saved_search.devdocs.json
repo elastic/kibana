@@ -714,12 +714,196 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-server.DiscoverSessionTab",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverSessionTab",
+        "description": [],
+        "signature": [
+          "{ readonly id: string; readonly label: string; readonly attributes: Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-server.DiscoverSessionTabAttributes",
+        "type": "Type",
+        "tags": [],
+        "label": "DiscoverSessionTabAttributes",
+        "description": [],
+        "signature": [
+          "{ readonly version?: number | undefined; readonly usesAdHocDataView?: boolean | undefined; readonly viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; readonly hideAggregatedPreview?: boolean | undefined; readonly rowHeight?: number | undefined; readonly headerRowHeight?: number | undefined; readonly timeRestore?: boolean | undefined; readonly timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly rowsPerPage?: number | undefined; readonly sampleSize?: number | undefined; readonly breakdownField?: string | undefined; readonly density?: \"compact\" | \"normal\" | \"expanded\" | undefined; readonly visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; readonly hits?: number | undefined; readonly sort: string[] | string[][]; readonly columns: string[]; readonly grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; readonly hideChart: boolean; readonly isTextBasedQuery: boolean; readonly kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/server/saved_objects/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   },
   "common": {
     "classes": [],
     "functions": [
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.extractTabs",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTabs",
+        "description": [
+          "\nExtract tab attributes into a separate array since multiple tabs are supported"
+        ],
+        "signature": [
+          "(attributes: Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; title: string; columns: string[]; description: string; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>) => Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; tabs?: Readonly<{} & { id: string; label: string; attributes: Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }>[] | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; title: string; columns: string[]; description: string; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.extractTabs.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "attributes",
+            "description": [
+              "The previous attributes to be transformed (version 5)"
+            ],
+            "signature": [
+              "Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.VIEW_MODE",
+                "text": "VIEW_MODE"
+              },
+              " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; title: string; columns: string[]; description: string; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>"
+            ],
+            "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedSearch",
+        "id": "def-common.extractTabsBackfillFn",
+        "type": "Function",
+        "tags": [],
+        "label": "extractTabsBackfillFn",
+        "description": [],
+        "signature": [
+          "(prevDoc: ",
+          "SavedObjectModelTransformationDoc",
+          "<Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; title: string; columns: string[]; description: string; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>>) => { attributes: Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; tabs?: Readonly<{} & { id: string; label: string; attributes: Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+          {
+            "pluginId": "savedSearch",
+            "scope": "common",
+            "docId": "kibSavedSearchPluginApi",
+            "section": "def-common.VIEW_MODE",
+            "text": "VIEW_MODE"
+          },
+          " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; columns: string[]; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }>[] | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; title: string; columns: string[]; description: string; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>; }"
+        ],
+        "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedSearch",
+            "id": "def-common.extractTabsBackfillFn.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "prevDoc",
+            "description": [],
+            "signature": [
+              "SavedObjectModelTransformationDoc",
+              "<Readonly<{ version?: number | undefined; usesAdHocDataView?: boolean | undefined; viewMode?: ",
+              {
+                "pluginId": "savedSearch",
+                "scope": "common",
+                "docId": "kibSavedSearchPluginApi",
+                "section": "def-common.VIEW_MODE",
+                "text": "VIEW_MODE"
+              },
+              " | undefined; hideAggregatedPreview?: boolean | undefined; rowHeight?: number | undefined; headerRowHeight?: number | undefined; timeRestore?: boolean | undefined; timeRange?: Readonly<{} & { from: string; to: string; }> | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; rowsPerPage?: number | undefined; sampleSize?: number | undefined; breakdownField?: string | undefined; density?: \"compact\" | \"normal\" | \"expanded\" | undefined; visContext?: Readonly<{} & { attributes: Record<string, any>; requestData: Readonly<{ breakdownField?: string | undefined; timeField?: string | undefined; dataViewId?: string | undefined; timeInterval?: string | undefined; } & {}>; suggestionType: string; }> | Readonly<{} & {}> | undefined; hits?: number | undefined; } & { sort: string[] | string[][]; title: string; columns: string[]; description: string; grid: Readonly<{ columns?: Record<string, Readonly<{ width?: number | undefined; } & {}>> | undefined; } & {}>; hideChart: boolean; isTextBasedQuery: boolean; kibanaSavedObjectMeta: Readonly<{} & { searchSourceJSON: string; }>; }>>"
+            ],
+            "path": "src/platform/plugins/shared/saved_search/common/service/extract_tabs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "savedSearch",
         "id": "def-common.fromSavedSearchAttributes",
@@ -738,7 +922,7 @@
             "section": "def-common.SavedSearch",
             "text": "SavedSearch"
           },
-          ">(id: string | undefined, attributes: ",
+          ">(id: string | undefined, { title, description, tabs }: ",
           "SavedSearchAttributes",
           ", tags: string[] | undefined, searchSource: ",
           {
@@ -782,7 +966,7 @@
             "id": "def-common.fromSavedSearchAttributes.$2",
             "type": "Object",
             "tags": [],
-            "label": "attributes",
+            "label": "{ title, description, tabs }",
             "description": [],
             "signature": [
               "SavedSearchAttributes"

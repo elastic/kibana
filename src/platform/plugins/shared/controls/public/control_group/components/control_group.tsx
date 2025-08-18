@@ -8,11 +8,11 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 
+import type { DragEndEvent } from '@dnd-kit/core';
 import {
   DndContext,
-  DragEndEvent,
   DragOverlay,
   KeyboardSensor,
   MeasuringStrategy,
@@ -28,12 +28,12 @@ import {
 } from '@dnd-kit/sortable';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ControlsLabelPosition } from '@kbn/controls-schemas';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import type { ControlLabelPosition } from '../../../common';
 import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlsInOrder } from '../init_controls_manager';
+import type { ControlsInOrder } from '../init_controls_manager';
 import type { ControlGroupApi } from '../types';
 import { ControlClone } from './control_clone';
 import { ControlRenderer } from './control_renderer';
@@ -47,7 +47,7 @@ interface Props {
     setControlApi: (uuid: string, controlApi: DefaultControlApi) => void;
   };
   hasUnappliedSelections: boolean;
-  labelPosition: ControlLabelPosition;
+  labelPosition: ControlsLabelPosition;
 }
 
 export function ControlGroup({

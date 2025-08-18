@@ -17,7 +17,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { hasReadAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 export const findAttackDiscoveriesRoute = (
@@ -96,6 +96,7 @@ export const findAttackDiscoveriesRoute = (
             esClient,
             findAttackDiscoveryAlertsParams: {
               alertIds: query.alert_ids,
+              includeUniqueAlertIds: query.include_unique_alert_ids ?? false,
               ids: query.ids,
               search: query.search,
               shared: query.shared,

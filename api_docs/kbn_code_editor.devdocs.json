@@ -497,6 +497,22 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.ariadescribedby",
+            "type": "string",
+            "tags": [],
+            "label": "'aria-describedby'",
+            "description": [
+              "\nID of the element that describes the editor."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.isCopyable",
             "type": "CompoundType",
             "tags": [],

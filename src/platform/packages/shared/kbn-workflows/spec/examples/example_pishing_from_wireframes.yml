@@ -4,7 +4,7 @@ workflow:
   description: "Workflow to detect if an alert is a real pishing attempt or not"
   enabled: true
   triggers:
-    - type: triggers.elastic.detectionRule
+    - type: alert
       with:
         rule_name: "Email Reported by User as ..."
   steps:
@@ -50,7 +50,7 @@ workflow:
               with:
                 description: "Add alert details to the case"
             - name: Send message
-              type: slack.sendMessage
+              type: slack
               connectorId: "slack-uuid"
               with:
                 channel: "#alerts_to_investigate"
@@ -65,7 +65,7 @@ workflow:
               with:
                 description: "Alert closed as not malicious."
     - name: Workflow completion notification
-      type: slack.sendMessage
+      type: slack
       connectorId: "slack-uuid"
       if: always()
       with:

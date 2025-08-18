@@ -9,16 +9,17 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest, debounceTime, filter, map, merge, switchMap } from 'rxjs';
 import { ESQLVariableType } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { ESQLControlVariable, ESQLControlState, EsqlControlType } from '@kbn/esql-types';
-import {
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { ESQLControlVariable, ESQLControlState } from '@kbn/esql-types';
+import { EsqlControlType } from '@kbn/esql-types';
+import type {
   OptionsListSearchTechnique,
   OptionsListSelection,
   OptionsListSuggestions,
 } from '../../../common/options_list';
 import { dataService } from '../../services/kibana_services';
-import { ControlGroupApi } from '../../control_group/types';
+import type { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {

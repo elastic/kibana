@@ -7,8 +7,9 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrService, FtrProviderContext } from '../ftr_provider_context';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
+import { FtrService } from '../ftr_provider_context';
 
 interface FillTagFormFields {
   name?: string;
@@ -469,12 +470,11 @@ export class TagManagementPageObject extends FtrService {
       await this.openActionMenu();
     }
 
-    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
-
     if (!menuWasOpened) {
       await this.toggleActionMenu();
     }
 
+    const actionExists = await this.testSubjects.exists(`actionBar-button-${actionId}`);
     return actionExists;
   }
 

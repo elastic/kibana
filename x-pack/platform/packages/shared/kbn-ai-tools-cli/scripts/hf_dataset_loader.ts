@@ -7,9 +7,14 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { createKibanaClient, toolingLogToLogger } from '@kbn/kibana-api-cli';
-import { castArray, keyBy } from 'lodash';
+import { castArray } from 'lodash';
 import { loadHuggingFaceDatasets } from '../src/hf_dataset_loader/load_hugging_face_datasets';
-import { ALL_HUGGING_FACE_DATASETS } from '../src/hf_dataset_loader/config';
+import {
+  PREDEFINED_HUGGING_FACE_DATASETS,
+  getDatasetSpecs,
+} from '../src/hf_dataset_loader/datasets/config';
+import { listAllOneChatDatasets } from '../src/hf_dataset_loader/datasets/onechat';
+import type { HuggingFaceDatasetSpec } from '../src/hf_dataset_loader/types';
 
 interface Flags {
   // the number of rows per dataset to load into ES
@@ -18,11 +23,39 @@ interface Flags {
   datasets?: string | string[];
   // whether all specified dataset's indices should be cleared before loading
   clear?: boolean;
+  // the kibana URL to connect to
+  'kibana-url'?: string;
+}
+
+async function showAvailableDatasets(accessToken: string, logger: any) {
+  let output = 'No datasets specified. Here are the available datasets:\n\n';
+
+  output += 'Pre-defined HuggingFace datasets:\n';
+  output += PREDEFINED_HUGGING_FACE_DATASETS.map((d, index) => `  ${index + 1}. ${d.name}`).join(
+    '\n'
+  );
+  output += '\n\n';
+
+  const oneChatDatasets = await listAllOneChatDatasets(accessToken, logger);
+  output += 'OneChat datasets:\n';
+  if (oneChatDatasets.length > 0) {
+    output += oneChatDatasets.map((dataset, index) => `  ${index + 1}. ${dataset}`).join('\n');
+  } else {
+    output +=
+      '  (none available - you may need to join Elastic oranization on HuggingFace to access OneChat datasets)';
+  }
+
+  output += '\n\n';
+  output += 'Usage: Use --datasets to specify which datasets to load\n';
+  output += 'Example: --datasets onechat/knowledge-base/wix_knowledge_base';
+
+  logger.info(output);
 }
 
 run(
   async ({ log, flags }) => {
     const signal = new AbortController().signal;
+    const logger = toolingLogToLogger({ flags, log });
 
     const accessToken = process.env.HUGGING_FACE_ACCESS_TOKEN;
 
@@ -32,13 +65,15 @@ run(
       );
     }
 
+    // destructure and normalize CLI flags
+    const { limit, datasets, clear } = flags as Flags;
+    const kibanaUrl = typeof flags['kibana-url'] === 'string' ? flags['kibana-url'] : undefined;
+
     const kibanaClient = await createKibanaClient({
       log,
       signal,
+      baseUrl: kibanaUrl,
     });
-
-    // destructure and normalize CLI flags
-    const { limit, datasets, clear } = flags as Flags;
 
     const datasetNames = !!datasets
       ? castArray(datasets)
@@ -47,15 +82,15 @@ run(
           .filter(Boolean)
       : undefined;
 
-    const specsByName = keyBy(ALL_HUGGING_FACE_DATASETS, (val) => val.name);
+    let specs: HuggingFaceDatasetSpec[];
 
-    const specs =
-      datasetNames?.map((name) => {
-        if (!specsByName[name]) {
-          throw new Error(`Dataset spec for ${name} not found`);
-        }
-        return specsByName[name];
-      }) ?? ALL_HUGGING_FACE_DATASETS;
+    if (datasetNames) {
+      specs = await getDatasetSpecs(accessToken, logger, datasetNames);
+    } else {
+      // Show available datasets and exit
+      await showAvailableDatasets(accessToken, logger);
+      return;
+    }
 
     if (!specs.length) {
       throw new Error(`No datasets to load`);
@@ -63,7 +98,7 @@ run(
 
     await loadHuggingFaceDatasets({
       esClient: kibanaClient.es,
-      logger: toolingLogToLogger({ flags, log }),
+      logger,
       clear: Boolean(clear),
       limit: !!limit ? Number(limit) : undefined,
       datasets: specs,
@@ -73,14 +108,17 @@ run(
   {
     description: `Loads HuggingFace datasets into an Elasticsearch cluster`,
     flags: {
-      string: ['limit', 'datasets'],
+      string: ['limit', 'datasets', 'kibana-url'],
       boolean: ['clear'],
       help: `
         Usage: node --require ./src/setup_node_env/index.js x-pack/platform/packages/shared/kbn-ai-tools-cli/scripts/hf_dataset_loader.ts [options]
 
-        --datasets          Comma-separated list of HuggingFace dataset names to load
+        --datasets          Comma-separated list of HuggingFace dataset names to load.
+                           For OneChat datasets, use format: onechat/<directory>/<dataset_name>
+                           Example: --datasets onechat/knowledge-base/wix_knowledge_base
         --limit             Number of rows per dataset to load into Elasticsearch
         --clear             Clear the existing indices for the specified datasets before loading
+        --kibana-url        Kibana URL to connect to (bypasses auto-discovery when provided)
       `,
       default: {
         clear: false,

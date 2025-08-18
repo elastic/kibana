@@ -7,8 +7,9 @@
 
 import type { ReactElement } from 'react';
 import React from 'react';
-import { EuiButton } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
 const KIBANA_DEPLOYMENT_TYPE_PARAM = 'entry.573002982';
@@ -68,7 +69,7 @@ export const FeatureFeedbackButton = ({
   surveyButtonText = (
     <FormattedMessage
       id="xpack.ml.featureFeedbackButton.tellUsWhatYouThinkLink"
-      defaultMessage="Tell us what you think!"
+      defaultMessage="Give feedback"
     />
   ),
 }: FeatureFeedbackButtonProps) => {
@@ -78,15 +79,19 @@ export const FeatureFeedbackButton = ({
       : undefined;
 
   return (
-    <EuiButton
+    <EuiButtonEmpty
+      aria-label={i18n.translate('xpack.ml.featureFeedbackButton.button.ariaLabel', {
+        defaultMessage: 'Give feedback',
+      })}
       href={getSurveyFeedbackURL(formUrl, kibanaVersion, deploymentType, sanitizedPath)}
+      size="s"
+      iconType={defaultButton ? undefined : 'popout'}
+      iconSide="right"
       target="_blank"
-      color={defaultButton ? undefined : 'warning'}
-      iconType={defaultButton ? undefined : 'editorComment'}
-      data-test-subj={dts}
       onClickCapture={onClickCapture}
+      data-test-subj={dts}
     >
       {surveyButtonText}
-    </EuiButton>
+    </EuiButtonEmpty>
   );
 };

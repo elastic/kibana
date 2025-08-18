@@ -50,13 +50,13 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
     <>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events */}
       <div
+        data-test-subj="traceItemRowWrapper"
         css={css`
           border-bottom: ${euiTheme.border.thin};
           ${onClick || hasToggle ? 'cursor: pointer;' : 'cursor: default'}
         `}
-        onClick={(e: React.MouseEvent) => {
+        onClick={() => {
           if (!hasToggle && onClick) {
-            e.stopPropagation();
             onClick(item.id);
           }
         }}
@@ -82,6 +82,7 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           {hasToggle ? (
             <EuiFlexItem grow={false}>
               <ToggleAccordionButton
+                data-test-subj="traceItemRowToggleAccordionButton"
                 isOpen={state === 'open'}
                 childrenCount={childrenCount}
                 onClick={() => onToggle(item.id)}
@@ -90,13 +91,12 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
           ) : null}
           <EuiFlexItem>
             <div
-              data-test-subj="trace-bar-row"
+              data-test-subj="traceItemRowContent"
               css={css`
                 margin-left: ${calculateMarginLeft()}px;
               `}
-              onClick={(e: React.MouseEvent) => {
+              onClick={() => {
                 if (hasToggle && onClick) {
-                  e.stopPropagation();
                   onClick(item.id);
                 }
               }}
@@ -142,11 +142,6 @@ export function TraceItemRow({ item, childrenCount, state, onToggle }: Props) {
         paddingSize="none"
         forceState={state}
         arrowDisplay="none"
-        onToggle={() => {
-          if (hasToggle) {
-            onToggle(item.id);
-          }
-        }}
         buttonContentClassName="accordion__buttonContent"
         css={css`
           .accordion__buttonContent {

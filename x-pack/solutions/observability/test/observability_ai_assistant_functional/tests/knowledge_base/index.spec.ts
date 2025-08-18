@@ -6,12 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  LlmProxy,
-  createLlmProxy,
-} from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common';
+import type { LlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import { createLlmProxy } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/create_llm_proxy';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   deployTinyElserAndSetupKb,
   stopTinyElserModel,
@@ -77,7 +75,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           endpoint: 'GET /internal/observability_ai_assistant/kb/status',
         });
 
-        expect(response.body?.kbState).to.eql(KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT);
+        expect(response.body?.inferenceModelState).to.eql(
+          InferenceModelState.MODEL_PENDING_DEPLOYMENT
+        );
       });
     });
 

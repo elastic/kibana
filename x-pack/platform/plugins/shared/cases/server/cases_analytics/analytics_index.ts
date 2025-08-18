@@ -139,6 +139,11 @@ export class AnalyticsIndex {
         return;
       }
 
+      if (error.body?.error?.type === 'multi_project_pending_exception') {
+        this.logDebug('Multi-project setup. Skipping creation.');
+        return;
+      }
+
       this.handleError('Failed to create the index.', error);
     }
   }

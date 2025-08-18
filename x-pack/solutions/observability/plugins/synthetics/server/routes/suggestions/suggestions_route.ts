@@ -10,14 +10,14 @@ import {
   legacySyntheticsMonitorTypeSingle,
   legacyMonitorAttributes,
 } from '../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../types';
-import {
-  ConfigKey,
+import type { SyntheticsRestApiRouteFactory } from '../types';
+import type {
   MonitorFiltersResult,
   EncryptedSyntheticsMonitorAttributes,
 } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
-import { QuerySchema, getMonitorFilters, SEARCH_FIELDS } from '../common';
+import { QuerySchema, getMonitorFilters, MONITOR_SEARCH_FIELDS } from '../common';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';
 
 type Buckets = Array<{
@@ -178,7 +178,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       filter: filtersStr ? filtersStr : undefined,
       aggs: getAggs(false),
       search: query ? `${query}*` : undefined,
-      searchFields: SEARCH_FIELDS,
+      searchFields: MONITOR_SEARCH_FIELDS,
     });
 
     const { filtersStr: legacyFilterStr } = await getMonitorFilters(route, legacyMonitorAttributes);
@@ -190,7 +190,7 @@ export const getSyntheticsSuggestionsRoute: SyntheticsRestApiRouteFactory<
       filter: legacyFilterStr ? legacyFilterStr : undefined,
       aggs: getAggs(true),
       search: query ? `${query}*` : undefined,
-      searchFields: SEARCH_FIELDS,
+      searchFields: MONITOR_SEARCH_FIELDS,
     });
 
     // Extract aggs

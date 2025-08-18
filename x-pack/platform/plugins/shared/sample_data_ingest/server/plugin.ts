@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { getDataPath } from '@kbn/utils';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { SampleDataIngestConfig } from './config';
-import {
+import type {
   InternalServices,
   SampleDataStartDependencies,
   SampleDataSetupDependencies,
@@ -55,7 +55,6 @@ export class SampleDataIngestPlugin
       artifactRepositoryUrl: this.context.config.get().artifactRepositoryUrl,
       elserInferenceId: this.context.config.get().elserInferenceId,
       logger: this.logger,
-      indexPrefixName: 'sample-data',
       isServerlessPlatform: this.isServerlessPlatform,
     });
 

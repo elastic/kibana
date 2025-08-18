@@ -7,13 +7,13 @@
 import expect from '@kbn/expect';
 
 import { getKbnPalettes, KbnPalette } from '@kbn/palettes';
-import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { DebugState } from '@elastic/charts';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import chroma from 'chroma-js';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const oldColorMappingsDashboardFixture =
-  'x-pack/test/functional/fixtures/kbn_archiver/lens/old_color_mapping_dashboard.json';
+  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/old_color_mapping_dashboard.json';
 
 const palettes = getKbnPalettes({ name: 'borealis', darkMode: false });
 const defaultPaletteColors = palettes

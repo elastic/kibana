@@ -8,18 +8,20 @@
  */
 
 import { resolve } from 'path';
-import { ToolingLog, pickLevelFromFlags } from '@kbn/tooling-log';
-import { ProcRunner, withProcRunner } from '@kbn/dev-proc-runner';
+import type { ToolingLog } from '@kbn/tooling-log';
+import { pickLevelFromFlags } from '@kbn/tooling-log';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
+import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getFlags } from '@kbn/dev-cli-runner';
 import { runElasticsearch, runKibanaServer } from '../../servers';
 import { loadServersConfig } from '../../config';
 import { silence } from '../../common';
-import { RunTestsOptions } from './flags';
+import type { RunTestsOptions } from './flags';
 import { getExtraKbnOpts } from '../../servers/run_kibana_server';
 import { getPlaywrightGrepTag, execPromise } from '../utils';
-import { ScoutPlaywrightProjects } from '../types';
+import type { ScoutPlaywrightProjects } from '../types';
 
 export const getPlaywrightProject = (
   testTarget: RunTestsOptions['testTarget'],
@@ -159,19 +161,20 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
 
   await withProcRunner(log, async (procs) => {
     const exitCode = await hasTestsInPlaywrightConfig(log, pwBinPath, pwCmdArgs, pwConfigPath);
+    const pwEnv = {
+      SCOUT_LOG_LEVEL: logsLevel,
+      SCOUT_TARGET_TYPE: options.testTarget,
+      SCOUT_TARGET_MODE: options.mode,
+    };
 
     if (exitCode !== 0) {
       process.exit(exitCode);
     }
 
     if (pwProject === 'local') {
-      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, {
-        SCOUT_LOG_LEVEL: logsLevel,
-      });
+      await runLocalServersAndTests(procs, log, options, pwBinPath, pwCmdArgs, pwEnv);
     } else {
-      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, {
-        SCOUT_LOG_LEVEL: logsLevel,
-      });
+      await runPlaywrightTest(procs, pwBinPath, pwCmdArgs, pwEnv);
     }
 
     reportTime(runStartTime, 'ready', {

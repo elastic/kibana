@@ -7,14 +7,10 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import {
-  ReindexStatusResponse,
-  ReindexStatus,
-  ReindexStep,
-  IndexWarning,
-} from '../../../../../../common/types';
+import type { ReindexStatusResponse, IndexWarning } from '../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
-import { ApiService } from '../../../../lib/api';
+import type { ApiService } from '../../../../lib/api';
 
 const POLL_INTERVAL = 3000;
 
@@ -259,7 +255,10 @@ export const useReindex = ({
     }
 
     setReindexState((prevValue: ReindexState) => {
-      return getReindexState(prevValue, { reindexOp, meta: prevValue.meta });
+      return getReindexState(prevValue, {
+        reindexOp: reindexOp || undefined,
+        meta: prevValue.meta,
+      });
     });
     updateStatus();
   }, [api, indexName, updateStatus]);

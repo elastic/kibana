@@ -10,11 +10,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
-import {
-  convertWorkflowScheduleToTaskSchedule,
-  getScheduledTriggers,
-  WorkflowTrigger,
-} from '../lib/schedule_utils';
+import type { WorkflowTrigger } from '../lib/schedule_utils';
+import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -32,7 +29,7 @@ export class WorkflowTaskScheduler {
    * Schedules tasks for all enabled scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(workflow: EsWorkflow, spaceId: string): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.workflow.triggers);
+    const scheduledTriggers = getScheduledTriggers(workflow.definition.triggers);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
@@ -40,11 +37,11 @@ export class WorkflowTaskScheduler {
         const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger);
         scheduledTaskIds.push(taskId);
         this.logger.info(
-          `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.id}, task ID: ${taskId}`
+          `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
         );
       } catch (error) {
         this.logger.error(
-          `Failed to schedule workflow task for workflow ${workflow.id}, trigger ${trigger.id}: ${error}`
+          `Failed to schedule workflow task for workflow ${workflow.id}, trigger ${trigger.type}: ${error}`
         );
         throw error;
       }
@@ -70,7 +67,7 @@ export class WorkflowTaskScheduler {
       params: {
         workflowId,
         spaceId,
-        triggerId: trigger.id,
+        triggerType: trigger.type,
       },
       state: {
         lastRunAt: null,
@@ -97,7 +94,7 @@ export class WorkflowTaskScheduler {
           bool: {
             must: [
               { term: { 'task.taskType': 'workflow:scheduled' } },
-              { term: { _id: `task:workflow:${workflowId}:triggers.elastic.scheduled` } },
+              { term: { _id: `task:workflow:${workflowId}:scheduled` } },
             ],
           },
         },

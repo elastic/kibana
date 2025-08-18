@@ -13,32 +13,62 @@
  * on the generated definitions provided by Elasticsearch.
  */
 import { uniq } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ESQLUserDefinedColumn,
   ESQLFieldWithMetadata,
   ICommandCallbacks,
   ISuggestionItem,
-  getLocationFromCommandOrOptionName,
   Location,
 } from '../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../commands_registry/types';
 import { aggFunctionDefinitions } from '../definitions/generated/aggregation_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLCommand } from '../types';
-import {
+import type {
   FieldType,
-  FunctionDefinitionTypes,
   FunctionParameterType,
   FunctionReturnType,
   SupportedDataType,
 } from '../definitions/types';
+import { FunctionDefinitionTypes } from '../definitions/types';
 import { mockContext, getMockCallbacks } from './context_fixtures';
 import { getSafeInsertText } from '../definitions/utils';
 import { timeUnitsToSuggest } from '../definitions/constants';
 import { correctQuerySyntax, findAstPosition } from '../definitions/utils/ast';
+
+export const suggest = (
+  query: string,
+  context = mockContext,
+  commandName: string,
+  mockCallbacks = getMockCallbacks(),
+  autocomplete: (
+    arg0: string,
+    arg1: ESQLCommand,
+    arg2: ICommandCallbacks,
+    arg3: {
+      userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
+      fields: Map<string, ESQLFieldWithMetadata>;
+    },
+    arg4?: number
+  ) => Promise<ISuggestionItem[]>,
+  offset?: number
+): Promise<ISuggestionItem[]> => {
+  const innerText = query.substring(0, offset ?? query.length);
+  const correctedQuery = correctQuerySyntax(innerText);
+  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const cursorPosition = offset ?? query.length;
+  const { command } = findAstPosition(ast, cursorPosition);
+  if (!command) {
+    throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
+  }
+
+  return autocomplete(query, command, mockCallbacks, context, cursorPosition);
+};
+
 export const expectSuggestions = async (
   query: string,
   expectedSuggestions: string[],
@@ -57,14 +87,7 @@ export const expectSuggestions = async (
   ) => Promise<ISuggestionItem[]>,
   offset?: number
 ) => {
-  const correctedQuery = correctQuerySyntax(query);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
-  const cursorPosition = offset ?? query.length;
-  const { command } = findAstPosition(ast, cursorPosition);
-  if (!command) {
-    throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
-  }
-  const result = await autocomplete(query, command, mockCallbacks, context, cursorPosition);
+  const result = await suggest(query, context, commandName, mockCallbacks, autocomplete, offset);
 
   const suggestions: string[] = [];
   result.forEach((suggestion) => {
@@ -131,8 +154,9 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
-    license === 'platinum'
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
+    license === 'platinum',
+  activeProduct = { type: 'observability', tier: 'complete' }
 ) {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -158,53 +182,64 @@ export function getFunctionSignaturesByReturnType(
   const locations = Array.isArray(location) ? location : [location];
 
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
-      const hasRestrictedSignature = signatures.some((signature) => signature.license);
-      if (hasRestrictedSignature) {
-        const availableSignatures = signatures.filter((signature) => {
-          if (!signature.license) return true;
-          return hasMinimumLicenseRequired(
-            signature.license.toLocaleLowerCase() as ESQLLicenseType
-          );
-        });
+    .filter(
+      ({ signatures, ignoreAsSuggestion, locationsAvailable, license, observabilityTier }) => {
+        const hasRestrictedSignature = signatures.some((signature) => signature.license);
+        if (hasRestrictedSignature) {
+          const availableSignatures = signatures.filter((signature) => {
+            if (!signature.license) return true;
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
+          });
 
-        if (availableSignatures.length === 0) {
+          if (availableSignatures.length === 0) {
+            return false;
+          }
+        }
+
+        if (
+          license &&
+          observabilityTier &&
+          !(
+            activeProduct?.type === 'observability' &&
+            activeProduct.tier === observabilityTier.toLowerCase()
+          )
+        ) {
           return false;
         }
-      }
 
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (
-        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-          (loc) => locationsAvailable.includes(loc)
-        )
-      ) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
-      );
-      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
+        if (ignoreAsSuggestion) {
+          return false;
+        }
+        if (
+          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+            (loc) => locationsAvailable.includes(loc)
+          )
+        ) {
+          return false;
+        }
+        const filteredByReturnType = signatures.filter(
+          ({ returnType }) =>
+            expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
         );
+        if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
+          return false;
+        }
+        if (paramsTypes?.length) {
+          return filteredByReturnType.some(
+            ({ params }) =>
+              !params.length ||
+              (paramsTypes.length <= params.length &&
+                paramsTypes.every(
+                  (expectedType, i) =>
+                    expectedType === 'any' ||
+                    params[i].type === 'any' ||
+                    expectedType === params[i].type
+                ))
+          );
+        }
+        return true;
       }
-      return true;
-    })
+    )
     .filter(({ name }) => {
       if (ignored?.length) {
         return !ignored?.includes(name);

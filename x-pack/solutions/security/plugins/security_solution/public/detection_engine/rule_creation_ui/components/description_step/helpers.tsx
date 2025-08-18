@@ -21,16 +21,16 @@ import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { isEmpty } from 'lodash/fp';
 import React from 'react';
 import styled from 'styled-components';
-
-import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
+import { constructThreatMappingDescription } from '../../../rule_management/components/rule_details/rule_definition_section';
 import { IntervalAbbrScreenReader } from '../../../../common/components/accessibility';
 import type {
   AlertSuppressionMissingFieldsStrategy,
   RequiredFieldArray,
+  ThreatMapping,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { AND, MATCHES, OR } from '../../../../common/components/threat_match/translations';
 import type { EqlOptions } from '../../../../../common/search_strategy';
 import { assertUnreachable } from '../../../../../common/utility_types';
 import * as i18nSeverity from '../severity_mapping/translations';
@@ -516,31 +516,8 @@ export const buildThreatMappingDescription = (
   title: string,
   threatMapping: ThreatMapping
 ): ListItems[] => {
-  const description = threatMapping.reduce<string>(
-    (accumThreatMaps, threatMap, threatMapIndex, { length: threatMappingLength }) => {
-      const matches = threatMap.entries.reduce<string>(
-        (accumItems, item, itemsIndex, { length: threatMapLength }) => {
-          if (threatMapLength === 1) {
-            return `${item.field} ${MATCHES} ${item.value}`;
-          } else if (itemsIndex === 0) {
-            return `(${item.field} ${MATCHES} ${item.value})`;
-          } else {
-            return `${accumItems} ${AND} (${item.field} ${MATCHES} ${item.value})`;
-          }
-        },
-        ''
-      );
+  const description = constructThreatMappingDescription(threatMapping);
 
-      if (threatMappingLength === 1) {
-        return `${matches}`;
-      } else if (threatMapIndex === 0) {
-        return `(${matches})`;
-      } else {
-        return `${accumThreatMaps} ${OR} (${matches})`;
-      }
-    },
-    ''
-  );
   return [
     {
       title,

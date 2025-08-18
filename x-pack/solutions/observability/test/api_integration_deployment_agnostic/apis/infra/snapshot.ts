@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import {
+import type {
   SnapshotNodeResponse,
   SnapshotMetricInput,
   SnapshotRequest,
@@ -46,8 +46,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('6.6.0', () => {
       const { min, max } = DATES['6.6.0'].docker;
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/6.6.0/docker'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/6.6.0/docker'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/6.6.0/docker'
+        )
+      );
 
       it('should basically work', async () => {
         const snapshot = await fetchSnapshot({
@@ -122,10 +130,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     describe('8.0.0', () => {
       const { min, max } = DATES['8.0.0'].logs_and_metrics;
       before(() =>
-        esArchiver.load('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+        )
       );
       after(() =>
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/8.0.0/logs_and_metrics')
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/8.0.0/logs_and_metrics'
+        )
       );
 
       it("should use the id for the label when the name doesn't exist", async () => {
@@ -303,8 +315,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     describe('7.0.0', () => {
       const { min, max } = DATES['7.0.0'].hosts;
-      before(() => esArchiver.load('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
-      after(() => esArchiver.unload('x-pack/test/functional/es_archives/infra/7.0.0/hosts'));
+      before(() =>
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/7.0.0/hosts'
+        )
+      );
+      after(() =>
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/7.0.0/hosts'
+        )
+      );
 
       it('should basically work', async () => {
         const snapshot = await fetchSnapshot({

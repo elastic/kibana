@@ -14,13 +14,15 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
   describe('disable Elastic Maps Service', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load('x-pack/platform/test/disable_ems/kbn_archive.json');
       await browser.setWindowSize(1600, 1000);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/maps/data');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.importExport.unload('x-pack/platform/test/disable_ems/kbn_archive.json');
     });
 

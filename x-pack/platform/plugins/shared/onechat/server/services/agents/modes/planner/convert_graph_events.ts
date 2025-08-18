@@ -6,18 +6,19 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
+import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
 import type { AIMessageChunk } from '@langchain/core/messages';
-import { EMPTY, mergeMap, of, OperatorFunction, merge, shareReplay, filter } from 'rxjs';
-import {
+import type { OperatorFunction } from 'rxjs';
+import { EMPTY, mergeMap, of, merge, shareReplay, filter } from 'rxjs';
+import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
   ToolCallEvent,
   ToolResultEvent,
-  isToolCallEvent,
-  isToolResultEvent,
 } from '@kbn/onechat-common';
+import { isToolCallEvent, isToolResultEvent } from '@kbn/onechat-common';
+import type { ToolIdMapping } from '@kbn/onechat-genai-utils/langchain';
 import {
   matchGraphName,
   matchEvent,
@@ -27,11 +28,12 @@ import {
   createTextChunkEvent,
   createMessageEvent,
   createReasoningEvent,
-  ToolIdMapping,
 } from '@kbn/onechat-genai-utils/langchain';
+import type { Logger } from '@kbn/logging';
 import { convertGraphEvents as convertExecutorEvents } from '../chat/convert_graph_events';
 import type { StateType } from './graph';
-import { lastPlanningResult, PlanningResult } from './backlog';
+import type { PlanningResult } from './backlog';
+import { lastPlanningResult } from './backlog';
 
 export type ResearcherAgentEvents =
   | MessageChunkEvent
@@ -53,9 +55,11 @@ const formatPlanningResult = (planning: PlanningResult): string => {
 export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
+  logger,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
+  logger: Logger;
 }): OperatorFunction<LangchainStreamEvent, ResearcherAgentEvents> => {
   return (streamEvents$) => {
     const messageId = uuidv4();
@@ -67,6 +71,7 @@ export const convertGraphEvents = ({
         convertExecutorEvents({
           graphName: 'executor_agent',
           toolIdMapping,
+          logger,
         }),
         filter((event) => {
           return isToolCallEvent(event) || isToolResultEvent(event);

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function canvasFiltersTest({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -15,7 +15,8 @@ export default function canvasFiltersTest({ getService, getPageObjects }: FtrPro
   const find = getService('find');
   const kibanaServer = getService('kibanaServer');
   const spacesService = getService('spaces');
-  const archive = 'x-pack/test/functional/fixtures/kbn_archiver/canvas/saved_object_resolve';
+  const archive =
+    'x-pack/platform/test/functional/fixtures/kbn_archives/canvas/saved_object_resolve';
   const browser = getService('browser');
 
   describe('filters', function () {

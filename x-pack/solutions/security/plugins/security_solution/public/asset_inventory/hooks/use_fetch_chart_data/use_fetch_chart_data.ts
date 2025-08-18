@@ -12,7 +12,7 @@ import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { IKibanaSearchRequest, IKibanaSearchResponse } from '@kbn/search-types';
 import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
-import { QUERY_KEY_CHART_DATA } from '../../constants';
+import { QUERY_KEY_ASSET_INVENTORY, QUERY_KEY_CHART_DATA } from '../../constants';
 import { getTopAssetsQuery } from './get_top_assets_query';
 import type { AssetAggs } from './transform_asset_aggregation_to_chart_data';
 import { transformAssetAggregationToChartData } from './transform_asset_aggregation_to_chart_data';
@@ -37,7 +37,7 @@ export function useFetchChartData(options: UseTopAssetsOptions) {
   }, [dataView]);
 
   return useQuery(
-    [QUERY_KEY_CHART_DATA, { params: options }],
+    [QUERY_KEY_ASSET_INVENTORY, QUERY_KEY_CHART_DATA, { params: options }],
     async () => {
       const {
         rawResponse: { aggregations },

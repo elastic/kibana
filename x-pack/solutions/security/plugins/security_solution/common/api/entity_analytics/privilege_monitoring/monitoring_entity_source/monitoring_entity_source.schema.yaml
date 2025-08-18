@@ -2,7 +2,7 @@ openapi: 3.0.0
 info:
   title: Monitoring Entity Source Schema
   description: Schema for managing entity source configurations in the monitoring system.
-  version: "1"
+  version: "2023-10-31"
 
 paths:
   /api/entity_analytics/monitoring/entity_source:
@@ -22,7 +22,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdatedMonitoringEntitySource"
+                $ref: "#/components/schemas/MonitoringEntitySource"
 
   /api/entity_analytics/monitoring/entity_source/{id}:
     get:
@@ -65,7 +65,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/UpdatedMonitoringEntitySource"          
+                $ref: "#/components/schemas/MonitoringEntitySource"
 
     delete:
       operationId: DeleteEntitySource

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
-import { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
+import type { ControlsIgnoreParentSettings } from '@kbn/controls-schemas';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { PublishesUnifiedSearch, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { BehaviorSubject, debounceTime, map, merge, Observable, switchMap, tap } from 'rxjs';
-import { ParentIgnoreSettings } from '../../../common';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, debounceTime, map, merge, switchMap, tap } from 'rxjs';
 
 export interface ControlGroupFetchContext {
   unifiedSearchFilters?: Filter[] | undefined;
@@ -20,7 +21,7 @@ export interface ControlGroupFetchContext {
 }
 
 export function controlGroupFetch$(
-  ignoreParentSettings$: PublishingSubject<ParentIgnoreSettings | undefined>,
+  ignoreParentSettings$: PublishingSubject<ControlsIgnoreParentSettings | undefined>,
   parentApi: Partial<PublishesUnifiedSearch> & {
     unifiedSearchFilters$?: PublishingSubject<Filter[] | undefined>;
   },

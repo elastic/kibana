@@ -727,6 +727,23 @@ describe('utils', () => {
         expect(decoded).toEqual(query);
       });
 
+      it('can decode an encoded query with negate=true', () => {
+        const query: ThreatMatchNamedQuery = {
+          id: 'my_id',
+          index: 'index',
+          field: 'threat.indicator.domain',
+          value: 'host.name',
+          queryType: 'mq',
+          negate: true,
+        };
+
+        const encoded = encodeThreatMatchNamedQuery(query);
+        const decoded = decodeThreatMatchNamedQuery(encoded);
+        // Check that `query` and `encoded` contain the same data but are different objects by reference
+        expect(decoded).not.toBe(query);
+        expect(decoded).toEqual(query);
+      });
+
       it('can decode if some parameters not passed', () => {
         const query: ThreatTermNamedQuery = {
           field: 'threat.indicator.domain',
