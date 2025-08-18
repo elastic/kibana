@@ -129,33 +129,33 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
     expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
     expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
-    expect(queryByTestId('config.useNativeFunctionCallingSwitch')).toBeInTheDocument();
+    expect(queryByTestId('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
   });
 
-  test('useNativeFunctionCalling toggle only renders for Other provider', async () => {
+  test('enableNativeFunctionCalling toggle only renders for Other provider', async () => {
     const { queryByTestId: queryByTestIdOpenAi } = render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(queryByTestIdOpenAi('config.useNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+    expect(queryByTestIdOpenAi('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
 
     const { queryByTestId: queryByTestIdAzure } = render(
       <ConnectorFormTestProvider connector={azureConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(queryByTestIdAzure('config.useNativeFunctionCallingSwitch')).not.toBeInTheDocument();
+    expect(queryByTestIdAzure('config.enableNativeFunctionCallingSwitch')).not.toBeInTheDocument();
 
     const { queryByTestId: queryByTestIdOther } = render(
       <ConnectorFormTestProvider connector={otherOpenAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(queryByTestIdOther('config.useNativeFunctionCallingSwitch')).toBeInTheDocument();
+    expect(queryByTestIdOther('config.enableNativeFunctionCallingSwitch')).toBeInTheDocument();
   });
 
-  test('enabling useNativeFunctionCalling saves to config for Other provider', async () => {
+  test('enabling enableNativeFunctionCalling saves to config for Other provider', async () => {
     const onSubmit = jest.fn();
     render(
       <ConnectorFormTestProvider connector={otherOpenAiConnector} onSubmit={onSubmit}>
@@ -163,7 +163,7 @@ describe('ConnectorFields renders', () => {
       </ConnectorFormTestProvider>
     );
 
-    const toggle = await screen.findByTestId('config.useNativeFunctionCallingSwitch');
+    const toggle = await screen.findByTestId('config.enableNativeFunctionCallingSwitch');
     expect(toggle).toBeInTheDocument();
 
     await userEvent.click(toggle);
@@ -184,7 +184,7 @@ describe('ConnectorFields renders', () => {
           apiUrl: 'https://localhost/oss-llm',
           apiProvider: OpenAiProviderType.Other,
           defaultModel: 'local-model',
-          useNativeFunctionCalling: true,
+          enableNativeFunctionCalling: true,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',

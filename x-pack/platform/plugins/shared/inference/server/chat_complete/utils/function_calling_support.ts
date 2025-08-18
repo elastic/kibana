@@ -19,7 +19,7 @@ export const isNativeFunctionCallingSupported = (connector: InferenceConnector):
 
       if (apiProvider === OpenAiProviderType.Other) {
         // Allow opting into native function calling for OpenAI-compatible providers via connector config
-        return connector.config.useNativeFunctionCalling === true;
+        return connector.config.enableNativeFunctionCalling === true;
       }
 
       return true;

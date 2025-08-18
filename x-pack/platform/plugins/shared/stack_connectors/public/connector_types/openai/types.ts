@@ -26,7 +26,7 @@ export interface Config {
   verificationMode?: 'full' | 'certificate' | 'none';
   caData?: string;
   // This property is only used when apiProvider is OpenAiProviderType.Other
-  useNativeFunctionCalling?: boolean;
+  enableNativeFunctionCalling?: boolean;
 }
 
 export interface InternalConfig {

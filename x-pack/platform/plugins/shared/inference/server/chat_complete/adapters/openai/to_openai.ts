@@ -57,7 +57,7 @@ export function toolChoiceToOpenAI(
       : undefined;
 
   // For OpenAI-compatible ("Other") providers:
-  // - When native tool calling is enabled (useNativeFunctionCalling), and
+  // - When native tool calling is enabled (enableNativeFunctionCalling), and
   // - There is exactly one tool defined, and
   // - The caller explicitly selected that same tool by name (named toolChoice),
   // some providers expect `tool_choice: 'required'` instead of the named-function variant.
@@ -66,9 +66,10 @@ export function toolChoiceToOpenAI(
     const isOtherProvider =
       (context.connector.config?.apiProvider as OpenAiProviderType) === OpenAiProviderType.Other;
 
-    const nativeToolCallingEnabled = context.connector.config?.useNativeFunctionCalling === true;
+    const isNativeToolCallingEnabled =
+      context.connector.config?.enableNativeFunctionCalling === true;
 
-    if (isOtherProvider && nativeToolCallingEnabled) {
+    if (isOtherProvider && isNativeToolCallingEnabled) {
       const toolNames = Object.keys(context.tools);
       if (toolNames.length === 1 && typeof toolChoice !== 'string' && toolChoice) {
         const selectedTool = toolChoice.function;

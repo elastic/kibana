@@ -127,7 +127,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
           />
           <EuiSpacer size="s" />
           <UseField
-            path="config.useNativeFunctionCalling"
+            path="config.enableNativeFunctionCalling"
             component={ToggleField}
             config={{
               label: i18n.USE_NATIVE_FUNCTION_CALLING_LABEL,
@@ -137,7 +137,7 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             componentProps={{
               euiFieldProps: {
                 disabled: readOnly,
-                'data-test-subj': 'config.useNativeFunctionCallingSwitch',
+                'data-test-subj': 'config.enableNativeFunctionCallingSwitch',
               },
             }}
           />
