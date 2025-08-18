@@ -17,7 +17,7 @@ import {
   Walker,
 } from '@kbn/esql-ast';
 import { mutate, synth } from '@kbn/esql-ast';
-import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
+import type { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
 
 export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
   const firstCommand = ast[0];

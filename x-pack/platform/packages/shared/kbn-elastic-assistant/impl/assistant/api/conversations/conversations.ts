@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
-  ApiConfig,
-  Replacements,
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
-import { Conversation, ClientMessage } from '../../../assistant_context/types';
-import { FetchConversationsResponse } from './use_fetch_current_user_conversations';
+import type { Conversation, ClientMessage } from '../../../assistant_context/types';
+import type { FetchConversationsResponse } from './use_fetch_current_user_conversations';
 
 export interface GetConversationByIdParams {
   http: HttpSetup;

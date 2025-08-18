@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { MonitorSummariesResult } from '@kbn/synthetics-plugin/common/runtime_types';
+import type { MonitorSummariesResult } from '@kbn/synthetics-plugin/common/runtime_types';
 import { API_URLS } from '@kbn/uptime-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 interface ExpectedMonitorStatesPage {
   response: any;
