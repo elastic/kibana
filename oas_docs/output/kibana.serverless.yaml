@@ -60501,6 +60501,9 @@ components:
           description: The time conversation was created.
           example: '2025-04-30T14:00:00Z'
           type: string
+        createdBy:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who created the conversation.
         excludeFromLastConversationStorage:
           description: Exclude from last conversation storage.
           type: boolean
@@ -60537,6 +60540,7 @@ components:
         - id
         - title
         - createdAt
+        - createdBy
         - users
         - namespace
         - category
@@ -60587,6 +60591,10 @@ components:
           description: The conversation title.
           example: Updated Security AI Assistant Setup
           type: string
+        users:
+          items:
+            $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          type: array
       required:
         - id
     Security_AI_Assistant_API_DeleteResponseFields:
@@ -61204,6 +61212,9 @@ components:
         traceData:
           $ref: '#/components/schemas/Security_AI_Assistant_API_TraceData'
           description: Trace data
+        user:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_User'
+          description: The user who sent the message.
       required:
         - timestamp
         - content
