@@ -241,5 +241,6 @@
     "@kbn/security-ai-prompts",
     "@kbn/scout-security",
     "@kbn/inference-endpoint-ui-common",
+    "@kbn/core-metrics-server",
   ]
 }

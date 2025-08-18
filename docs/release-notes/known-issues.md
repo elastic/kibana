@@ -28,7 +28,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`. PDF and PNG reports will fail when this setting is used in this release.
 
 **Action**
 
