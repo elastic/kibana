@@ -20,7 +20,7 @@ import {
   useRedirectLink,
 } from '../../../../hooks';
 import { NavigationSource } from '../../../../services/telemetry';
-import { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
+import type { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { getQualityIssuesColumns } from './columns';
 
 export const QualityIssuesTable = () => {

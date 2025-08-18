@@ -8,7 +8,7 @@
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import { Item } from '../components/dataset_quality/filters/selector';
+import type { Item } from '../components/dataset_quality/filters/selector';
 import { documentIndexFailed, degradedField } from '../../common/translations';
 
 const ISSUE_TYPE_OPTIONS = [
