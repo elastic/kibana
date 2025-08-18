@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM } from '@kbn/security-solution-plugin/common/constants';
+import type { SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM } from '@kbn/security-solution-plugin/common/constants';
 import {
   SAVED_OBJECTS_SETTINGS,
   SAVED_OBJECTS_TAGS_FILTER,
