@@ -15,7 +15,7 @@ import {
   SuggestUsersRequestBody,
   SuggestUsersResponse,
 } from '@kbn/elastic-assistant-common';
-import { ElasticAssistantPluginRouter } from '../../types';
+import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import { performChecks } from '../helpers';
 

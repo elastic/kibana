@@ -6,9 +6,9 @@
  */
 
 import { bulkUpdateConversations } from './bulk_update_actions_conversations';
+import type { ConversationCategory } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  ConversationCategory,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
 } from '@kbn/elastic-assistant-common';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';

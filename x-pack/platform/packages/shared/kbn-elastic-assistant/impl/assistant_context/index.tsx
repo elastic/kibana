@@ -7,14 +7,13 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { omit } from 'lodash/fp';
-import type { User } from '@kbn/elastic-assistant-common';
+import type { User, AssistantFeatures } from '@kbn/elastic-assistant-common';
 import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import type {
   ChromeStart,

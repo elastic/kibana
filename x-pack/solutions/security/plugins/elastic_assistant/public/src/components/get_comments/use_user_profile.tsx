@@ -8,7 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
 import type { User } from '@kbn/elastic-assistant-common';
-import { UserProfile } from '@kbn/core-user-profile-common';
+import type { UserProfile } from '@kbn/core-user-profile-common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 export interface UserProfileWithAvatar extends UserProfile {
   avatar: UserProfileAvatarData;

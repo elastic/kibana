@@ -11,8 +11,8 @@ import { css } from '@emotion/react';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DUPLICATE } from '../use_conversation/translations';
-import { DataStreamApis } from '../use_data_stream_apis';
-import { Conversation } from '../../..';
+import type { DataStreamApis } from '../use_data_stream_apis';
+import type { Conversation } from '../../..';
 import {
   DEFAULT_ASSISTANT_NAMESPACE,
   SHARED_CONVERSATION_CALLOUT,

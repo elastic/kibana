@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -20,16 +21,16 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiToolTip,
-  EuiSwitchEvent,
   EuiIcon,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { COPY_URL, DUPLICATE } from '../../use_conversation/translations';
-import { DataStreamApis } from '../../use_data_stream_apis';
+import type { DataStreamApis } from '../../use_data_stream_apis';
 import { useConversation } from '../../use_conversation';
-import { Conversation, useAssistantContext } from '../../../..';
+import type { Conversation } from '../../../..';
+import { useAssistantContext } from '../../../..';
 import * as i18n from './translations';
 import {
   conversationContainsAnonymizedValues,

@@ -7,12 +7,11 @@
 
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Replacements, User } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  User,
 } from '@kbn/elastic-assistant-common';
 import type { Conversation, ClientMessage } from '../../../assistant_context/types';
 import type { FetchConversationsResponse } from './use_fetch_current_user_conversations';

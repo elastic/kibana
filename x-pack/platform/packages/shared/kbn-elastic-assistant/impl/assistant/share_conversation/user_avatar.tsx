@@ -10,7 +10,7 @@ import { EuiAvatar } from '@elastic/eui';
 import type { User } from '@kbn/elastic-assistant-common';
 import { useQuery } from '@tanstack/react-query';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';
-import { EuiAvatarSize } from '@elastic/eui/src/components/avatar/avatar';
+import type { EuiAvatarSize } from '@elastic/eui/src/components/avatar/avatar';
 import { useAssistantContext } from '../../..';
 
 interface Props {

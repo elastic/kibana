@@ -13,10 +13,10 @@ import type {
   RefetchQueryFilters,
 } from '@tanstack/react-query';
 import { useInfiniteQuery } from '@tanstack/react-query';
+import type { User } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  User,
 } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import type { Conversation } from '../../../assistant_context/types';
