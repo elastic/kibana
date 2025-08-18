@@ -36,7 +36,7 @@ describe("settings_context", () => {
                     }
                 }}>
                     <QueryClientProvider client={queryClient}>
-                        <SettingsContextProvider settingsKeys={["genAiSettings:defaultAIConnector", "genAiSettings:defaultAIConnectorOnly"]}>
+                        <SettingsContextProvider>
                             {children}
                         </SettingsContextProvider>
                     </QueryClientProvider>

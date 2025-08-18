@@ -55,7 +55,7 @@ function setupTest() {
             wrapper: ({ children }) => (
                 <I18nProvider>
                     <QueryClientProvider client={queryClient}>
-                        <SettingsContextProvider settingsKeys={["genAiSettings:defaultAIConnector"]}>
+                        <SettingsContextProvider>
                             {children}
                         </SettingsContextProvider>
                     </QueryClientProvider>

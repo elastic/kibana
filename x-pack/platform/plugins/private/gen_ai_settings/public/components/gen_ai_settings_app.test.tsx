@@ -47,7 +47,7 @@ describe('GenAiSettingsApp', () => {
     return renderWithI18n(
           <QueryClientProvider client={new QueryClient()}>
             <KibanaContextProvider services={coreStart}>
-              <SettingsContextProvider settingsKeys={[]}>
+              <SettingsContextProvider>
                 <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} {...props} />
               </SettingsContextProvider>
             </KibanaContextProvider>

@@ -12,6 +12,7 @@ import { IUiSettingsClient, UiSettingsType } from '@kbn/core/public';
 import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
 
 type SettingsContext = ReturnType<typeof Settings>;
 
@@ -27,14 +28,17 @@ const useSettingsContext = () => {
     return context;
 };
 
+const SETTING_KEYS = [
+        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
+        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
+    ]
+
 export const SettingsContextProvider = ({
     children,
-    settingsKeys
 }: {
     children: React.ReactNode;
-    settingsKeys: string[];
 }) => {
-    const value = Settings({ settingsKeys });
+    const value = Settings({ settingsKeys: SETTING_KEYS });
     return (
         <SettingsContext.Provider value={value}>
             {children}

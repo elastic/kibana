@@ -49,10 +49,7 @@ export const mountManagementSection = async ({
       <I18nProvider>
         <KibanaContextProvider services={{ ...coreStart, ...startDeps, genAiSettingsApi }}>
           <EnabledFeaturesContextProvider config={config}>
-            <SettingsContextProvider settingsKeys={[
-              GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
-              GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY
-            ]}>
+            <SettingsContextProvider>
               <Router history={history}>
                 <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} />
               </Router>
