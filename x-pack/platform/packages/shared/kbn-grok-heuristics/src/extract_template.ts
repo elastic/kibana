@@ -11,7 +11,7 @@ import { maskQuotes } from './mask_quotes';
 import { FIRST_PASS_PATTERNS, PATTERN_PRECEDENCE, TOKEN_SPLIT_CHARS } from './constants';
 import { GROK_REGEX_MAP, ALL_CAPTURE_CHARS } from './constants';
 import { normalizeTokensForColumn } from './normalize_tokens';
-import { ExtractTemplateResult } from './types';
+import type { ExtractTemplateResult } from './types';
 import { findMatchingPatterns } from './find_matching_patterns';
 import { tokenize } from './tokenize';
 
@@ -254,10 +254,32 @@ function findConsistentSplitChars(
   });
 }
 
-/* -----------------------------------------------------------
- *  MAIN IMPLEMENTATION
- * --------------------------------------------------------- */
-
+/**
+ * Extracts structured fields from log messages.
+ *
+ * ## Algorithm
+ *
+ * 1. **Columnization:**
+ *     1. Iterate through log messages
+ *     2. Mask highly specific patterns like UUIDS, IPs, quoted strings etc
+ *     3. Detect a column delimiter from a small list of known delimiter (e.g. `\s, |, ;` etc)
+ *     4. Split each log message by this delimiter into columns
+ * 2. **Tokenization:**
+ *     1. Trim leading/trailing whitespace, keep track of this for 4
+ *     2. Tokenize based on split characters (e.g. `@, ;, -, .`)
+ *     3. Detect which split characters have consistent token counts per column
+ *     4. Run 2.2 again but only with the split characters that are consistent
+ *     5. Unmask the patterns from 1.2
+ *     6. Run each token through a pattern recognition process (e.g. this token matches MONTHNUM, INT, NOTSPACE, DATA)
+ *     7. Return tokens + matching patterns (in order of preference) per token
+ * 3. **Normalization:**
+ *     1. Per column, normalize into common sequence of tokens
+ *     2. Process from both edges inwards (so 0, -1, 1, -2, etc)
+ *     3. Stop processing when tokens are no longer shared across rows OR overlapping into other edge's shared sequence
+ *     4. Token is shared when more specific than NOTSPACE + DATA
+ *     5. Collapse tokens in the middle not part of either edge's sequence into single set of values
+ *     6. Match concatenated values against patterns again, find most specific common pattern
+ */
 export function syncExtractTemplate(messages: string[]): ExtractTemplateResult {
   if (!messages.length) {
     return {

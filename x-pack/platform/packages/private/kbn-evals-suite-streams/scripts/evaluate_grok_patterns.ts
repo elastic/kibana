@@ -30,7 +30,7 @@ import chalk from 'chalk';
 import yargs from 'yargs/yargs';
 import { flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
-import { getLogGroups } from '../server/routes/internal/streams/processing/get_log_groups';
+import { getLogGroups } from '@kbn/streams-plugin/server/routes/internal/streams/processing/get_log_groups';
 
 const ES_URL = 'http://localhost:9200';
 const ES_USER = 'elastic';

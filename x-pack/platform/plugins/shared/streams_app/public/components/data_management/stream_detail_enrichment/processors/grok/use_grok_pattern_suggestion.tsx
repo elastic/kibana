@@ -19,6 +19,7 @@ import {
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { get } from 'lodash';
+import AggregateError from 'aggregate-error';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';
 import {
@@ -116,49 +117,46 @@ export function useGrokPatternSuggestion() {
                 path: { name: params.streamName },
                 body: {
                   connector_id: params.connectorId,
-                  sample_messages: messages.slice(0, 10),
+                  sample_messages: group.messages.slice(0, 10),
                   review_fields: reviewFields,
                 },
               },
             })
-            .then(
-              (response) => {
-                const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, response);
-                const inlinedGrokPatterns = inlineGrokPatterns(combinedGrokProcessor);
+            .then((response) => {
+              const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, response);
+              const inlinedPatterns = inlineGrokPatterns(grokProcessor);
 
-                finishTrackingAndReport(1, [1]);
-
-                return {
-                  ...grokProcessor,
-                  patterns: inlinedGrokPatterns,
-                  pattern_definitions: {},
-                };
-              },
-              (error: Error) => {
-                showErrorToast(notifications, error);
-                throw error;
-              }
-            );
+              return {
+                ...grokProcessor,
+                patterns: inlinedPatterns,
+                pattern_definitions: {},
+              };
+            });
         })
       );
 
-      // If all promises failed, throw the first error
-      if (
-        result.every(
-          (settledState): settledState is PromiseRejectedResult =>
-            settledState.status === 'rejected'
-        )
-      ) {
-        throw result[0].reason;
-      }
+      const aggregateError = new AggregateError(
+        result.reduce<Error[]>((acc, settledState) => {
+          if (settledState.status === 'rejected') {
+            acc.push(settledState.reason);
+          }
+          return acc;
+        }, [])
+      );
 
-      // Otherwise, ignore errors and continue with fulfilled results
       const grokProcessors = result.reduce<GrokProcessorResult[]>((acc, settledState) => {
         if (settledState.status === 'fulfilled') {
           acc.push(settledState.value);
         }
         return acc;
       }, []);
+
+      // If all promises failed, throw an aggregate error, otherwise ignore errors and continue with fulfilled results
+      if (grokProcessors.length === 0) {
+        finishTrackingAndReport(0, [0]);
+        showErrorToast(notifications, aggregateError);
+        throw aggregateError;
+      }
 
       // Combine all grok processors into a single one with fallback patterns
       const combinedGrokProcessor = mergeGrokProcessors(grokProcessors);
@@ -186,6 +184,10 @@ export function useGrokPatternSuggestion() {
           },
         }
       );
+
+      finishTrackingAndReport(1, [
+        simulationResult.processors_metrics[SUGGESTED_GROK_PROCESSOR_ID].parsed_rate,
+      ]);
 
       return { grokProcessor: combinedGrokProcessor, simulationResult };
     },
