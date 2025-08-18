@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
@@ -28,7 +28,7 @@ import type {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { createExtentFilter } from '../../../../common/elasticsearch_util';
-import { DataRequest } from '../../util/data_request';
+import type { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import type { SourceEditorArgs } from '../source';
 import { AbstractVectorSource, getLayerFeaturesRequestName } from '../vector_source';

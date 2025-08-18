@@ -9,8 +9,12 @@ import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 import { XyToolbar } from '.';
 import { AxisSettingsPopover } from './axis_settings_popover';
-import { FramePublicAPI, DatasourcePublicAPI, VisualizationToolbarProps } from '../../../types';
-import { State, XYState, XYDataLayerConfig } from '../types';
+import type {
+  FramePublicAPI,
+  DatasourcePublicAPI,
+  VisualizationToolbarProps,
+} from '../../../types';
+import type { State, XYState, XYDataLayerConfig } from '../types';
 import { Position } from '@elastic/charts';
 import { createMockFramePublicAPI, createMockDatasource } from '../../../mocks';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';

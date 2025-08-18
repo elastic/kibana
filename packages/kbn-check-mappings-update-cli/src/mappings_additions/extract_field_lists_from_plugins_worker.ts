@@ -10,11 +10,11 @@
 import { createRootWithCorePlugins } from '@kbn/core-test-helpers-kbn-server';
 import { set } from '@kbn/safer-lodash-set';
 import { PLUGIN_SYSTEM_ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
-import {
+import type {
   FieldListMap,
-  getFieldListMapFromMappingDefinitions,
   SavedObjectsTypeMappingDefinitions,
 } from '@kbn/core-saved-objects-base-server-internal';
+import { getFieldListMapFromMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
 import { getFieldListMapFromModelVersions } from './get_field_list_from_model_version';
 
 export interface Result {

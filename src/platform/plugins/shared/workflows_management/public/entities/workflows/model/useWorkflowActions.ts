@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CreateWorkflowCommand, EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
+import type { CreateWorkflowCommand, EsWorkflow, WorkflowDetailDto } from '@kbn/workflows';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 

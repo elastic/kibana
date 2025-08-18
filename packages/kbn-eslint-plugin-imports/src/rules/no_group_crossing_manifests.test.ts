@@ -11,7 +11,7 @@ import { RuleTester } from 'eslint';
 import dedent from 'dedent';
 import { NoGroupCrossingManifestsRule } from './no_group_crossing_manifests';
 import { formatSuggestions } from '../helpers/report';
-import { ModuleId } from '@kbn/repo-source-classifier/src/module_id';
+import type { ModuleId } from '@kbn/repo-source-classifier/src/module_id';
 import type { ModuleGroup, ModuleVisibility } from '@kbn/projects-solutions-groups';
 
 const makePlugin = (filename: string) => ({

@@ -12,10 +12,10 @@ import type { ApplicationStart, NotificationsStart } from '@kbn/core/public';
 import moment from 'moment';
 import { from, race, timer } from 'rxjs';
 import { mapTo, tap } from 'rxjs';
-import { SearchSessionStatusResponse } from '../../../../../common';
-import { SearchSessionSavedObject } from '../types';
-import { ISessionsClient } from '../../sessions_client';
-import { SearchUsageCollector } from '../../../collectors';
+import type { SearchSessionStatusResponse } from '../../../../../common';
+import type { SearchSessionSavedObject } from '../types';
+import type { ISessionsClient } from '../../sessions_client';
+import type { SearchUsageCollector } from '../../../collectors';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 
 interface SearchSessionManagementDeps {

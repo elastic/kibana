@@ -13,7 +13,7 @@ import {
 import type { Agent } from 'supertest';
 import type { GraphRequest } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import { result } from './utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');

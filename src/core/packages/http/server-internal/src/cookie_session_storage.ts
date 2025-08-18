@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request, Server } from '@hapi/hapi';
+import type { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';

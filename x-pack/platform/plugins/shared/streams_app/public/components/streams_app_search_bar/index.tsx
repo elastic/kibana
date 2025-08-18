@@ -6,12 +6,10 @@
  */
 import React from 'react';
 import { isEqual } from 'lodash';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { getAbsoluteTimeRange } from '@kbn/data-plugin/common';
-import {
-  UncontrolledStreamsAppSearchBar,
-  UncontrolledStreamsAppSearchBarProps,
-} from './uncontrolled_streams_app_bar';
+import type { UncontrolledStreamsAppSearchBarProps } from './uncontrolled_streams_app_bar';
+import { UncontrolledStreamsAppSearchBar } from './uncontrolled_streams_app_bar';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
 export type StreamsAppSearchBarProps = UncontrolledStreamsAppSearchBarProps;
