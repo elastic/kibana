@@ -29,7 +29,17 @@ export const naturalLanguageSearchTool = (): BuiltinToolDefinition<typeof search
   return {
     id: builtinToolIds.naturalLanguageSearch,
     description:
-      'Given a natural language query, run a DSL search query on one index and return matching documents.',
+      `
+      Analyzes natural language questions to automatically find relevant indices, generate appropriate ES|QL queries, and execute them to answer analytical questions. This tool handles the complete workflow from question to answer, including index discovery, query generation, and execution. 
+      Ideal for:
+      - Statistical analysis and aggregations (counts, sums, averages, percentiles)
+      - Time-based analysis and trending (changes over time, comparisons between periods)
+      - Filtering and grouping data by specific criteria
+      - Calculating metrics and KPIs from structured data
+      - Finding patterns, anomalies, or outliers in datasets
+      - Comparing values across different dimensions or categories
+      The tool automatically determines the most appropriate index to query based on the question context, constructs optimized ES|QL queries for the analytical task, and returns processed results ready for interpretation.
+      `,
     schema: searchDslSchema,
     handler: async ({ query: nlQuery, index, context }, { esClient, modelProvider }) => {
       const model = await modelProvider.getDefaultModel();
