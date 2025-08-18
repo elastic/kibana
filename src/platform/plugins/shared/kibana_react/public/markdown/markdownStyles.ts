@@ -8,7 +8,8 @@
  */
 
 import { css } from '@emotion/react';
-import { UseEuiTheme, transparentize } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 
 // Default styles for Markdown element
 //

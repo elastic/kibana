@@ -6,8 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
-import { EsAttackDiscoverySchema } from '../types';
+import type { AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import type { EsAttackDiscoverySchema } from '../types';
 
 export const transformESSearchToAttackDiscovery = (
   response: estypes.SearchResponse<EsAttackDiscoverySchema>

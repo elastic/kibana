@@ -9,7 +9,8 @@
 
 import React, { useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { RouteComponentProps, useLocation, withRouter } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { useLocation, withRouter } from 'react-router-dom';
 import { DataViewType } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexPatternManagmentContext } from '../../types';
