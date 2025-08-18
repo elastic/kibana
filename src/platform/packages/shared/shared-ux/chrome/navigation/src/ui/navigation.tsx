@@ -74,7 +74,7 @@ const NavigationComp: FC<Props> = ({ navigationTree$, dataTestSubj$ }) => {
           return <RecentlyAccessed {...navNode} key={`recentlyAccessed-${i}`} />;
         }
 
-        if (navNode.sideNavStatus === 'hidden') {
+        if (navNode.sideNavStatus === 'hidden' || navNode.sideNavVersion === 'v2') {
           return null;
         }
 
