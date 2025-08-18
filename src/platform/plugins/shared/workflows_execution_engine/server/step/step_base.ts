@@ -65,10 +65,10 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
 
     try {
       const result = await this._run();
-      await this.workflowExecutionRuntime.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } catch (error) {
       const result = await this.handleFailure(error);
-      await this.workflowExecutionRuntime.setStepResult(stepId, result);
+      await this.workflowExecutionRuntime.setStepResult(result);
     } finally {
       await this.workflowExecutionRuntime.finishStep(stepId);
     }

@@ -251,7 +251,7 @@ async function workflowExecutionLoop(
       workflowLogger.logError(
         `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
       );
-      await workflowRuntime.setStepResult(currentNode.id, {
+      await workflowRuntime.setStepResult({
         output: null,
         error: String(error),
       });

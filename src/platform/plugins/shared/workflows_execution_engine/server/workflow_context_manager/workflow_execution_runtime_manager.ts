@@ -23,6 +23,11 @@ interface WorkflowExecutionRuntimeManagerInit {
   workflowLogger: IWorkflowEventLogger;
 }
 
+interface ExecutionScope {
+  stepId: string;
+  scopeId: string;
+}
+
 /**
  * Manages the runtime execution state of a workflow, including step execution, results, and transitions.
  *
@@ -44,6 +49,7 @@ interface WorkflowExecutionRuntimeManagerInit {
  */
 export class WorkflowExecutionRuntimeManager {
   private currentStepIndex: number = -1;
+  private stack: ExecutionScope[] = [];
   private topologicalOrder: string[];
   private workflowLogger: IWorkflowEventLogger | null = null;
 
@@ -111,20 +117,29 @@ export class WorkflowExecutionRuntimeManager {
   // TODO: To rename to goToNextNode
   public goToNextStep(): void {
     if (this.currentStepIndex < this.topologicalOrder.length - 1) {
-      for (let i = this.currentStepIndex + 1; i < this.topologicalOrder.length; i++) {
-        const nextStepId = this.topologicalOrder[i];
-        if (
-          this.workflowExecutionState.getStepExecution(nextStepId)?.status !==
-          ExecutionStatus.SKIPPED
-        ) {
-          this.currentStepIndex = i;
-          return;
-        }
-      }
+      this.currentStepIndex++;
       return;
     }
 
     this.currentStepIndex = -1;
+  }
+
+  public enterScope(scopeId?: string): void {
+    const currentStep = this.getCurrentStep();
+    if (!currentStep) {
+      throw new Error('WorkflowRuntime: Cannot enter scope without a current step');
+    }
+
+    const resolvedScopeId = scopeId || currentStep.id;
+
+    this.stack.push({
+      stepId: currentStep.id,
+      scopeId: resolvedScopeId,
+    });
+  }
+
+  public exitScope(): void {
+    this.stack.pop();
   }
 
   public getStepResult(stepId: string): RunStepResult | undefined {
@@ -140,43 +155,35 @@ export class WorkflowExecutionRuntimeManager {
     };
   }
 
-  public async setStepResult(stepId: string, result: RunStepResult): Promise<void> {
+  public async setStepResult(result: RunStepResult): Promise<void> {
     this.workflowExecutionState.upsertStep({
-      stepId,
+      id: this.getStepExecutionId(),
       output: result.output,
       error: result.error,
     });
   }
 
   public getStepState(stepId: string): Record<string, any> | undefined {
-    const stepExecution = this.workflowExecutionState.getStepExecution(stepId);
+    const stepExecutions = this.workflowExecutionState.getStepExecutionByStepId(stepId);
 
-    if (!stepExecution) {
-      return undefined;
-    }
-
-    return stepExecution.state;
+    return stepExecutions?.[0].state;
   }
 
   public async setStepState(stepId: string, state: Record<string, any> | undefined): Promise<void> {
+    const stepExecutions = this.workflowExecutionState.getStepExecutionByStepId(stepId);
+    const stepExecution = stepExecutions?.[0];
+    if (!stepExecution) {
+      throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
+    }
     this.workflowExecutionState.upsertStep({
-      stepId,
+      id: stepExecution.id,
       state,
     });
   }
 
-  public getStepStatus(stepId: string): ExecutionStatus {
-    const stepExecution = this.workflowExecutionState.getStepExecution(stepId);
-
-    if (!stepExecution) {
-      throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
-    }
-
-    return stepExecution.status;
-  }
-
   public async startStep(stepId: string): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
+    this.enterScope();
     return withSpan(
       {
         name: `workflow.step.${stepId}`,
@@ -210,7 +217,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public async finishStep(stepId: string): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-
+    this.exitScope();
     return withSpan(
       {
         name: `workflow.step.${stepId}.complete`,
@@ -225,7 +232,9 @@ export class WorkflowExecutionRuntimeManager {
         },
       },
       async () => {
-        const startedStepExecution = this.workflowExecutionState.getStepExecution(stepId);
+        const startedStepExecution = this.workflowExecutionState.getStepExecution(
+          this.getStepExecutionId()
+        );
 
         if (!startedStepExecution) {
           throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
@@ -511,6 +520,10 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
     await this.workflowExecutionState.flush();
+  }
+
+  private getStepExecutionId(): string {
+    return this.stack.join('__');
   }
 
   private getCurrentStepError(): any | undefined {

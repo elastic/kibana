@@ -123,7 +123,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should update the step execution with the result and be able to retrieve it', async () => {
       const fakeResult = { success: true, data: {} };
-      await underTest.setStepResult('node1', {
+      await underTest.setStepResult({
         output: fakeResult,
         error: null,
       });

@@ -35,7 +35,7 @@ export class WorkflowExecutionState {
       this.workflowExecution.id
     );
     foundSteps.forEach((stepExecution) => {
-      this.stepExecutions.set(stepExecution.stepId, stepExecution);
+      this.stepExecutions.set(stepExecution.id, stepExecution);
     });
   }
 
@@ -54,39 +54,45 @@ export class WorkflowExecutionState {
     });
   }
 
-  public getStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
-    return this.stepExecutions.get(stepId);
+  public getStepExecution(id: string): EsWorkflowStepExecution | undefined {
+    return this.stepExecutions.get(id);
+  }
+
+  public getStepExecutionByStepId(stepId: string): EsWorkflowStepExecution[] | undefined {
+    return Array.from(this.stepExecutions.values()).filter(
+      (stepExecution) => stepExecution.stepId === stepId
+    );
   }
 
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
-    if (!step.stepId) {
+    if (!step.id) {
       throw new Error('Step execution ID is required for update');
     }
 
-    if (!this.stepExecutions.has(step.stepId)) {
+    if (!this.stepExecutions.has(step.id)) {
       this.stepExecutions.set(
-        step.stepId as string,
+        step.id as string,
         {
           ...step,
-          id: `${this.workflowExecution.id}-${step.stepId}`,
+          id: step.id,
           workflowRunId: this.workflowExecution.id,
           workflowId: this.workflowExecution.workflowId,
         } as EsWorkflowStepExecution
       );
-      this.stepChanges.set(step.stepId, {
-        objectId: step.stepId,
+      this.stepChanges.set(step.id, {
+        objectId: step.id,
         changeType: 'create',
       });
     } else {
-      this.stepExecutions.set(step.stepId, {
-        ...this.stepExecutions.get(step.stepId),
+      this.stepExecutions.set(step.id, {
+        ...this.stepExecutions.get(step.id),
         ...step,
       } as EsWorkflowStepExecution);
 
       // only update if the step is not in changes
-      if (!this.stepChanges.has(step.stepId)) {
-        this.stepChanges.set(step.stepId, {
-          objectId: step.stepId,
+      if (!this.stepChanges.has(step.id)) {
+        this.stepChanges.set(step.id, {
+          objectId: step.id,
           changeType: 'update',
         });
       }
