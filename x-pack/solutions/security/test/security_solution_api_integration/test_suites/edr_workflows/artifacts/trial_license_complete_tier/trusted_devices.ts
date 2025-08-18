@@ -6,7 +6,7 @@
  */
 
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
-import { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import expect from '@kbn/expect';
 import {
   BY_POLICY_ARTIFACT_TAG_PREFIX,
@@ -14,10 +14,10 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
 import { ExceptionsListItemGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/exceptions_list_item_generator';
 import { TrustedDeviceConditionEntryField } from '@kbn/securitysolution-utils';
-import TestAgent from 'supertest/lib/agent';
-import { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
-import { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type TestAgent from 'supertest/lib/agent';
+import type { PolicyTestResourceInfo } from '../../../../../security_solution_endpoint/services/endpoint_policy';
+import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { ROLE } from '../../../../config/services/security_solution_edr_workflows_roles_users';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -47,6 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     const anEndpointArtifactError = (res: { body: { message: string } }) => {
       expect(res.body.message).to.match(/EndpointArtifactError/);
+    };
+    const aValidationError = (res: { body: { message: string } }) => {
+      // Match either EndpointArtifactError or OpenAPI validation errors
+      expect(res.body.message).to.match(/(EndpointArtifactError|\[request body\])/);
     };
     const anErrorMessageWith = (
       value: string | RegExp
@@ -207,8 +211,12 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/Field value cannot be empty/));
+              .expect(aValidationError)
+              .expect(
+                anErrorMessageWith(
+                  /String must contain at least 1 character|No empty strings allowed/
+                )
+              );
           });
 
           it(`should allow single Windows OS on [${trustedDeviceApiCall.method}]`, async () => {
@@ -276,8 +284,12 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/Unsupported OS type: linux/));
+              .expect(aValidationError)
+              .expect(
+                anErrorMessageWith(
+                  /expected value to equal \[windows\]|expected value to equal \[macos\]/
+                )
+              );
           });
 
           it(`should error on [${trustedDeviceApiCall.method}] if too many OS types are used`, async () => {
@@ -291,8 +303,12 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(anEndpointArtifactError)
-              .expect(anErrorMessageWith(/array size is \[3\]/));
+              .expect(aValidationError)
+              .expect(
+                anErrorMessageWith(
+                  /expected value to equal \[windows\]|expected value to equal \[macos\]/
+                )
+              );
           });
 
           // Test all supported trusted device fields
@@ -417,7 +433,8 @@ export default function ({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'true')
               .send(body)
               .expect(400)
-              .expect(anEndpointArtifactError);
+              .expect(aValidationError)
+              .expect(anErrorMessageWith(/Invalid discriminator value|Expected.*match.*wildcard/));
           });
 
           it(`should error on [${trustedDeviceApiCall.method}] if policy id is invalid`, async () => {
