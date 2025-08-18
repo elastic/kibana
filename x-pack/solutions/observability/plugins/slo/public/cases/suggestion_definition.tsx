@@ -7,7 +7,7 @@
 
 import type { SuggestionType } from '@kbn/cases-plugin/public';
 import React from 'react';
-import { AttachmentFramework } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { AttachmentFramework } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { SLOSuggestion } from '../../common/cases/suggestions';
 
 const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
