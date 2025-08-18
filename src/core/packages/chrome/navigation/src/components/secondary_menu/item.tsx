@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonEmpty, IconType, useEuiTheme } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
-import { SecondaryMenuItem } from '../../../types';
+import type { SecondaryMenuItem } from '../../../types';
 import { BetaBadge } from '../beta_badge';
 
 export interface SecondaryMenuItemProps extends SecondaryMenuItem {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Series } from '../../../../common/types';
+import type { Series } from '../../../../common/types';
 
 export function formatKey(key: string, series: Series) {
   if (series.label && /{{\s*key\s*}}/.test(series.label)) {

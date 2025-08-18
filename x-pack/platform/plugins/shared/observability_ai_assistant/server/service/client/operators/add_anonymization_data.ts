@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Dictionary, cloneDeep, keyBy } from 'lodash';
-import { OperatorFunction, defaultIfEmpty, filter, map, toArray } from 'rxjs';
+import type { Dictionary } from 'lodash';
+import { cloneDeep, keyBy } from 'lodash';
+import type { OperatorFunction } from 'rxjs';
+import { defaultIfEmpty, filter, map, toArray } from 'rxjs';
 import {
   StreamingChatResponseEventType,
   type MessageAddEvent,

@@ -55,7 +55,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
@@ -73,7 +73,7 @@ import { ProjectSideNavV1 } from './ui/project/sidenav_v1/sidenav';
 import { GridLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/grid_layout_sidenav';
 import { FixedLayoutProjectSideNavV2 } from './ui/project/sidenav_v2/fixed_layout_sidenav';
 import { SideNavV2CollapseButton } from './ui/project/sidenav_v2/collapse_button';
-import { NavigationProps as SideNavV2NavigationProps } from './ui/project/sidenav_v2/types';
+import type { NavigationProps as SideNavV2NavigationProps } from './ui/project/sidenav_v2/types';
 
 const IS_SIDENAV_COLLAPSED_KEY = 'core.chrome.isSideNavCollapsed';
 const SNAPSHOT_REGEX = /-snapshot/i;

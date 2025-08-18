@@ -9,7 +9,8 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 
 import { SideNavFooter } from './footer';
 import { SideNavFooterItem } from './footer_item';

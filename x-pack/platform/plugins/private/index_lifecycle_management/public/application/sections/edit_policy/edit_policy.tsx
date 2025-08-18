@@ -55,7 +55,7 @@ import {
   getSchema,
 } from './form';
 import { useEditPolicyContext } from './edit_policy_context';
-import { FormInternal } from './types';
+import type { FormInternal } from './types';
 
 const policyNamePath = 'name';
 

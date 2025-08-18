@@ -23,9 +23,9 @@ import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
-import { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import { LayoutService } from '@kbn/core-chrome-layout';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
+import type { LayoutService } from '@kbn/core-chrome-layout';
 import {
   getSideNavVersion,
   getLayoutVersion,

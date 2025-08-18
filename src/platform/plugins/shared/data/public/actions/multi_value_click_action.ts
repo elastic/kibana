@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datatable } from '@kbn/expressions-plugin/public';
-import { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { BooleanRelation, extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
-import { QueryStart } from '../query';
+import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import type { BooleanRelation } from '@kbn/es-query';
+import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
+import type { QueryStart } from '../query';
 
 export type MultiValueClickActionContext = MultiValueClickContext;
 export const ACTION_MULTI_VALUE_CLICK = 'ACTION_MULTI_VALUE_CLICK';

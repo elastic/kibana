@@ -5,12 +5,12 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiComboBoxOptionOption,
   EuiText,
   EuiTextArea,
   EuiIcon,
@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
 import React, { useCallback, useMemo } from 'react';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { IndexEntry } from '@kbn/elastic-assistant-common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';

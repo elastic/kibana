@@ -6,8 +6,9 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import { CoreStart, SavedObjectsClient } from '@kbn/core/server';
-import { SearchConnectorsPluginStartDependencies } from '../types';
+import type { CoreStart } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
+import type { SearchConnectorsPluginStartDependencies } from '../types';
 import { AgentlessConnectorsInfraService } from '.';
 
 export interface AgentlessConnectorsInfraServiceContext {

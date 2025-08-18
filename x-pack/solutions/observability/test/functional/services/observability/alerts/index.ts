@@ -10,7 +10,7 @@ import { ObservabilityAlertsCommonProvider } from './common';
 import { ObservabilityAlertsAddToCaseProvider } from './add_to_case';
 import { ObservabilityAlertsRulesProvider } from './rules_page';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export function ObservabilityAlertsProvider(context: FtrProviderContext) {
   const common = ObservabilityAlertsCommonProvider(context);

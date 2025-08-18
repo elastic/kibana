@@ -8,27 +8,30 @@
 import { isEqual, noop } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { AggregateQuery, isOfAggregateQueryType, Query } from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { useStore } from 'react-redux';
-import { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { TopNavMenuData, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
+import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import moment from 'moment';
-import { EuiCallOut, UseEuiTheme, euiBreakpoint } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiCallOut, euiBreakpoint } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SerializedStyles, css } from '@emotion/react';
+import type { SerializedStyles } from '@emotion/react';
+import { css } from '@emotion/react';
 import { LENS_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { LENS_APP_NAME } from '../../common/constants';
-import { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
+import type { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
+import type { LensAppState } from '../state_management';
 import {
   setState,
   useLensSelector,
   useLensDispatch,
-  LensAppState,
   switchAndCleanDatasource,
   selectIsManaged,
 } from '../state_management';
@@ -40,12 +43,8 @@ import {
 } from '../utils';
 import { combineQueryAndFilters, getLayerMetaInfo } from './show_underlying_data';
 import { changeIndexPattern } from '../state_management/lens_slice';
-import {
-  DEFAULT_LENS_LAYOUT_DIMENSIONS,
-  ShareableConfiguration,
-  getLocatorParams,
-  getShareURL,
-} from './share_action';
+import type { ShareableConfiguration } from './share_action';
+import { DEFAULT_LENS_LAYOUT_DIMENSIONS, getLocatorParams, getShareURL } from './share_action';
 import { getDatasourceLayers } from '../state_management/utils';
 
 function getSaveButtonMeta({

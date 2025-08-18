@@ -121,7 +121,9 @@ describe('<CspPolicyTemplateForm />', () => {
   const WrappedComponent = ({
     newPolicy,
     edit = false,
-    packageInfo = {} as PackageInfo,
+    packageInfo = {
+      version: '3.0.0',
+    } as PackageInfo,
     isAgentlessEnabled,
     integrationToEnable,
     defaultSetupTechnology = SetupTechnology.AGENT_BASED,
@@ -405,7 +407,7 @@ describe('<CspPolicyTemplateForm />', () => {
     render(
       <WrappedComponent
         newPolicy={policy}
-        packageInfo={{ name: 'kspm' } as PackageInfo}
+        packageInfo={{ name: 'kspm', version: '3.0.0' } as PackageInfo}
         onChange={onChange}
       />
     );
