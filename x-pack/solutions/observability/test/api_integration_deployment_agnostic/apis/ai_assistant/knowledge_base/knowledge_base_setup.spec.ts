@@ -35,6 +35,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const loggerMock = getLoggerMock(log);
 
   describe('Knowledge base: POST /internal/observability_ai_assistant/kb/setup', function () {
+    this.tags(['skipServerless']);
+
     before(async () => {
       await restoreIndexAssets(getService);
     });
