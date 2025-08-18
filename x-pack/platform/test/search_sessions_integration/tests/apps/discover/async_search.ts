@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -100,7 +100,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
 
       await retry.try(async () => {
-        const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+        const rowActions = await dataGrid.getRowActions();
         if (!rowActions.length) {
           throw new Error('row actions empty, trying again');
         }

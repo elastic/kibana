@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, fireEvent, screen } from '@testing-library/react';
-import { NeedLicenseUpgrade, NeedLicenseUpgradeProps } from './need_license_upgrade';
+import type { NeedLicenseUpgradeProps } from './need_license_upgrade';
+import { NeedLicenseUpgrade } from './need_license_upgrade';
 import { translations } from './need_license_upgrade.translations';
 import { translations as defaultTranslations } from '../call_to_action.translations';
 import { EuiThemeProvider } from '@elastic/eui';

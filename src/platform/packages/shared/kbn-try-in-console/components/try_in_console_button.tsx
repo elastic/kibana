@@ -9,13 +9,8 @@
 
 import React from 'react';
 
-import {
-  EuiLink,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiButtonColor,
-} from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
