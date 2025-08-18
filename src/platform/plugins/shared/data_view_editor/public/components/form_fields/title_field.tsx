@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeEvent } from 'react';
+import type { ChangeEvent, ReactNode } from 'react';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
@@ -30,6 +30,7 @@ interface TitleFieldProps {
     matchedIndices: MatchedIndicesSet;
     rollupIndex: string | null | undefined;
   }>;
+  titleHelpText?: ReactNode | string;
 }
 
 const rollupIndexPatternNoMatchError = {
@@ -114,11 +115,13 @@ interface GetTitleConfigArgs {
   isRollup: boolean;
   matchedIndices: MatchedItem[];
   rollupIndicesCapabilities: RollupIndicesCapsResponse;
+  titleHelpText?: ReactNode | string;
 }
 
 const getTitleConfig = ({
   isRollup,
   rollupIndicesCapabilities,
+  titleHelpText,
 }: GetTitleConfigArgs): FieldConfig<string> => {
   const titleFieldConfig = schema.title;
 
@@ -134,6 +137,7 @@ const getTitleConfig = ({
   return {
     ...titleFieldConfig!,
     validations,
+    helpText: titleHelpText,
   };
 };
 
@@ -142,6 +146,7 @@ export const TitleField = ({
   matchedIndices$,
   rollupIndicesCapabilities,
   indexPatternValidationProvider,
+  titleHelpText,
 }: TitleFieldProps) => {
   const [appendedWildcard, setAppendedWildcard] = useState<boolean>(false);
   const matchedIndices = useObservable(matchedIndices$, matchedIndiciesDefault).exactMatchedIndices;
@@ -152,8 +157,9 @@ export const TitleField = ({
         isRollup,
         matchedIndices,
         rollupIndicesCapabilities,
+        titleHelpText,
       }),
-    [isRollup, matchedIndices, rollupIndicesCapabilities]
+    [isRollup, matchedIndices, rollupIndicesCapabilities, titleHelpText]
   );
 
   return (
