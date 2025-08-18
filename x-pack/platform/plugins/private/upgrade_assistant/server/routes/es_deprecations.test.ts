@@ -8,7 +8,8 @@
 import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { handleEsError } from '../shared_imports';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
+import type { MockRouter } from './__mocks__/routes.mock';
+import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mock';
 import { createRequestMock } from './__mocks__/request.mock';
 
 jest.mock('@kbn/upgrade-assistant-pkg-server', () => ({

@@ -20,11 +20,10 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ModelOptionsData,
-  getModelOptionsForInferenceEndpoints,
-} from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
-import { useInferenceEndpoints, UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import type { ModelOptionsData } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
+import { getModelOptionsForInferenceEndpoints } from '@kbn/ai-assistant/src/utils/get_model_options_for_inference_endpoints';
+import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
+import { useInferenceEndpoints } from '@kbn/ai-assistant/src/hooks';
 import {
   ELSER_ON_ML_NODE_INFERENCE_ID,
   InferenceModelState,
