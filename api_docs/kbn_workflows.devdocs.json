@@ -411,13 +411,41 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.ConnectorContract.params",
-            "type": "Array",
+            "id": "def-common.ConnectorContract.paramsSchema",
+            "type": "Object",
             "tags": [],
-            "label": "params",
+            "label": "paramsSchema",
             "description": [],
             "signature": [
-              "{ name: string; type: \"string\" | \"number\" | \"boolean\" | \"object\"; }[]"
+              "Zod.ZodType<any, Zod.ZodTypeDef, any>"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.ConnectorContract.connectorIdRequired",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "connectorIdRequired",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.ConnectorContract.outputSchema",
+            "type": "Object",
+            "tags": [],
+            "label": "outputSchema",
+            "description": [],
+            "signature": [
+              "Zod.ZodType<any, Zod.ZodTypeDef, any>"
             ],
             "path": "src/platform/packages/shared/kbn-workflows/spec/lib/generate_yaml_schema.ts",
             "deprecated": false,
@@ -2061,6 +2089,21 @@
       },
       {
         "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowContext",
+        "type": "Type",
+        "tags": [],
+        "label": "WorkflowContext",
+        "description": [],
+        "signature": [
+          "{ steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
         "id": "def-common.WorkflowExecutionListItemDto",
         "type": "Type",
         "tags": [],
@@ -2333,6 +2376,21 @@
         "description": [],
         "signature": [
           "Zod.ZodRecord<Zod.ZodString, Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean, Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>, Zod.ZodObject<{}, \"strip\", Zod.ZodTypeAny, {}, {}>, Zod.ZodArray<Zod.ZodAny, \"many\">]>>"
+        ],
+        "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/workflows",
+        "id": "def-common.WorkflowContextSchema",
+        "type": "Object",
+        "tags": [],
+        "label": "WorkflowContextSchema",
+        "description": [],
+        "signature": [
+          "Zod.ZodObject<{ workflowRunId: Zod.ZodString; event: Zod.ZodOptional<Zod.ZodAny>; consts: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodAny>>; steps: Zod.ZodRecord<Zod.ZodString, Zod.ZodObject<{ output: Zod.ZodOptional<Zod.ZodAny>; error: Zod.ZodOptional<Zod.ZodAny>; }, \"strip\", Zod.ZodTypeAny, { error?: any; output?: any; }, { error?: any; output?: any; }>>; foreach: Zod.ZodOptional<Zod.ZodObject<{ item: Zod.ZodAny; }, \"strip\", Zod.ZodTypeAny, { item?: any; }, { item?: any; }>>; now: Zod.ZodOptional<Zod.ZodDate>; }, \"strip\", Zod.ZodTypeAny, { steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }, { steps: Record<string, { error?: any; output?: any; }>; workflowRunId: string; event?: any; now?: Date | undefined; consts?: Record<string, any> | undefined; foreach?: { item?: any; } | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
         "deprecated": false,
