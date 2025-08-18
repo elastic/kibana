@@ -151,7 +151,7 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       try {
-        const { limit, page, status, createdBy, query } =
+        const { limit, page, enabled, createdBy, query } =
           request.body as unknown as GetWorkflowsParams;
 
         const spaceId = spaces.getSpaceId(request);
@@ -160,7 +160,7 @@ export function defineRoutes(
             {
               limit,
               page,
-            status,
+            enabled,
             createdBy,
             query,
             },

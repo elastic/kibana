@@ -144,7 +144,7 @@ export const SearchWorkflowCommandSchema = z.object({
   limit: z.number().default(100),
   page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
-  enabled: z.boolean().optional(),
+  enabled: z.array(z.boolean()).optional(),
   query: z.string().optional(),
   _full: z.boolean().default(false),
 });
