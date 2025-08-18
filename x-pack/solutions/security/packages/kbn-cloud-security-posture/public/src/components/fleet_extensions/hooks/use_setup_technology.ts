@@ -6,10 +6,10 @@
  */
 import { useState, useEffect } from 'react';
 
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { AWS_PROVIDER, AZURE_PROVIDER, GCP_PROVIDER } from '../constants';
-import { CloudProviders } from '../types';
+import type { CloudProviders } from '../types';
 
 export const useSetupTechnology = ({
   input,

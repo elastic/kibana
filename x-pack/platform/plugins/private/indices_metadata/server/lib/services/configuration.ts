@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { Observable } from 'rxjs';
 import {
-  Observable,
   ReplaySubject,
   timer,
   exhaustMap,
@@ -16,12 +16,10 @@ import {
   shareReplay,
 } from 'rxjs';
 import type { Logger, LogMeta } from '@kbn/core/server';
-import { ArtifactService } from './artifact';
+import type { ArtifactService } from './artifact';
 import { ArtifactNotFoundError, ManifestNotFoundError } from './artifact.errors';
-import {
-  IndicesMetadataConfiguration,
-  IndicesMetadataConfigurationSchema,
-} from './indices_metadata.types';
+import type { IndicesMetadataConfiguration } from './indices_metadata.types';
+import { IndicesMetadataConfigurationSchema } from './indices_metadata.types';
 export const REFRESH_CONFIG_INTERVAL_MS = 60 * 60 * 1000;
 const CONFIGURATION_ARTIFACT_NAME = 'indices-metadata-configuration-v1';
 

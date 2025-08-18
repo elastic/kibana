@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   FeatureTypeUsage,
   RulesTypeUsage,
 } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';

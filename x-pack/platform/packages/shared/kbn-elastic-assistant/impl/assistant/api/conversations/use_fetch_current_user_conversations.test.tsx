@@ -10,10 +10,8 @@ import { waitFor, renderHook } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import {
-  UseFetchCurrentUserConversationsParams,
-  useFetchCurrentUserConversations,
-} from './use_fetch_current_user_conversations';
+import type { UseFetchCurrentUserConversationsParams } from './use_fetch_current_user_conversations';
+import { useFetchCurrentUserConversations } from './use_fetch_current_user_conversations';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 const http = {

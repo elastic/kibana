@@ -7,19 +7,18 @@
 
 import { BehaviorSubject, type Subscription } from 'rxjs';
 
-import {
+import type {
   AppMountParameters,
-  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { PLUGIN_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
-import {
+import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchInferenceEndpointsConfigType,

@@ -7,10 +7,10 @@
 
 import type SuperTest from 'supertest';
 
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
-import { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
-import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { RuleParamsWithDefaultValue } from '@kbn/response-ops-rule-params';
+import type { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 
 /**
  * Creates a rule using the alerting APIs directly.
