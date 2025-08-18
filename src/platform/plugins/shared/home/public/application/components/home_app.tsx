@@ -30,6 +30,7 @@ export interface HomeAppProps {
 
 export function HomeApp({ directories, solutions }: HomeAppProps) {
   const {
+    chrome,
     application,
     getBasePath,
     addBasePath,
