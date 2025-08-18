@@ -72,7 +72,7 @@ export const GRANTED_RIGHTS_DATA: UserRowData[] = [
   },
 ];
 
-export const GRANTED_RIGHTS_STACK_BY_OPTIONS: EuiSuperSelectOption<string>[] = [
+export const GRANTED_RIGHTS_STACK_BY_OPTIONS: EuiSuperSelectOption<VisualizationStackByOption>[] = [
   {
     inputDisplay: 'Privileged User',
     value: 'privileged_user',
