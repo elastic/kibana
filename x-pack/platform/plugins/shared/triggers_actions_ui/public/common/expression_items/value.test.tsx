@@ -88,7 +88,12 @@ describe('value expression', () => {
     const user = userEvent.setup();
     const onChangeSelectedValue = jest.fn();
     renderWithIntl(
-      <ValueExpression description="test" value={1000} errors={[]} onChangeSelectedValue={onChangeSelectedValue} />
+      <ValueExpression
+        description="test"
+        value={1000}
+        errors={[]}
+        onChangeSelectedValue={onChangeSelectedValue}
+      />
     );
 
     await user.click(screen.getByTestId('valueExpression'));
