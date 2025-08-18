@@ -4573,6 +4573,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/core-chrome-layout-feature-flags@link:src/core/packages/chrome/layout/core-chrome-layout-feature-flags":
+  version "0.0.0"
+  uid ""
+
 "@kbn/core-chrome-layout@link:src/core/packages/chrome/layout/core-chrome-layout":
   version "0.0.0"
   uid ""
@@ -6626,6 +6630,10 @@
   uid ""
 
 "@kbn/metrics-data-access-plugin@link:x-pack/solutions/observability/plugins/metrics_data_access":
+  version "0.0.0"
+  uid ""
+
+"@kbn/metrics-experience-plugin@link:src/platform/plugins/shared/metrics_experience":
   version "0.0.0"
   uid ""
 
