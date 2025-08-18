@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentName } from '../es_schemas_ui';
+import type { AgentName } from '../es_schemas_ui';
 
 export interface SpanLinkDetails {
   traceId: string;
