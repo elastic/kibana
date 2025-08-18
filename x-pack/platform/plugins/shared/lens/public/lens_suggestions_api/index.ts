@@ -175,11 +175,9 @@ export const suggestionsApi = ({
 
     if (!shouldSkipSearch) {
       const compatibleSuggestion = findCompatibleSuggestion(suggestionsList, targetChartType);
-      if (compatibleSuggestion) {
-        return [
-          createSuggestionWithAttributes(compatibleSuggestion, preferredVisAttributes, context),
-        ];
-      }
+      const selectedSuggestion = compatibleSuggestion ?? suggestionsList[0];
+
+      return [createSuggestionWithAttributes(selectedSuggestion, preferredVisAttributes, context)];
     }
   }
 

@@ -39,7 +39,7 @@ const context = {
 
 describe('lens suggestions api helpers', () => {
   describe('mergeSuggestionWithVisContext', () => {
-    it('should return the suggestion as it is if the visualization types do not match', async () => {
+    it('should merge even if the visualization types do not match', async () => {
       const suggestion = mockAllSuggestions[0];
       const visAttributes = {
         visualizationType: 'lnsXY',
@@ -50,9 +50,18 @@ describe('lens suggestions api helpers', () => {
           datasourceStates: { textBased: { layers: {} } },
         },
       } as unknown as TypedLensByValueInput['attributes'];
-      expect(mergeSuggestionWithVisContext({ suggestion, visAttributes, context })).toStrictEqual(
-        suggestion
-      );
+      expect(mergeSuggestionWithVisContext({ suggestion, visAttributes, context })).toStrictEqual({
+        title: visAttributes.title,
+        visualizationId: visAttributes.visualizationType,
+        visualizationState: visAttributes.state.visualization,
+        keptLayerIds: [],
+        datasourceState: visAttributes.state.datasourceStates.textBased,
+        datasourceId: 'textBased',
+        columns: suggestion.columns,
+        changeType: suggestion.changeType,
+        score: suggestion.score,
+        previewIcon: suggestion.previewIcon,
+      });
     });
 
     it('should return the suggestion as it is if the context is not from ES|QL', async () => {

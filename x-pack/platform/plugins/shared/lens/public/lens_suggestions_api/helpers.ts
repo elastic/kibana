@@ -97,10 +97,7 @@ export function mergeSuggestionWithVisContext({
   visAttributes: TypedLensByValueInput['attributes'];
   context: VisualizeFieldContext | VisualizeEditorContext;
 }): Suggestion {
-  if (
-    visAttributes.visualizationType !== suggestion.visualizationId ||
-    !('textBasedColumns' in context)
-  ) {
+  if (!('textBasedColumns' in context)) {
     return suggestion;
   }
 
