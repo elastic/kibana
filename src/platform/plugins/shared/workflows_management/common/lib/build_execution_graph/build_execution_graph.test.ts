@@ -729,13 +729,13 @@ describe('convertToWorkflowGraph', () => {
       const topsort = graphlib.alg.topsort(executionGraph);
       expect(topsort).toHaveLength(7);
       expect(topsort).toEqual([
-        'foreach_testForeachConnectorStep',
         'if_testForeachConnectorStep',
         'enterThen(if_testForeachConnectorStep)',
+        'foreach_testForeachConnectorStep',
         'testForeachConnectorStep',
+        'exitForeach(foreach_testForeachConnectorStep)',
         'exitThen(if_testForeachConnectorStep)',
         'exitCondition(if_testForeachConnectorStep)',
-        'exitForeach(foreach_testForeachConnectorStep)',
       ]);
     });
   });

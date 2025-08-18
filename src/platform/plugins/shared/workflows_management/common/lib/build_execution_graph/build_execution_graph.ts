@@ -198,34 +198,55 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   return exitForeachNode;
 }
 
+/**
+ * Processes step-level operations for a given workflow step.
+ *
+ * This function handles conditional step-level operations (if, foreach, etc)
+ * that are defined at the step level by wrapping the original step in appropriate
+ * control flow steps.
+ *
+ * @param currentStep - The workflow step to process
+ * @returns A potentially wrapped version of the input step that incorporates
+ *          any step-level control flow operations (if/foreach)
+ */
+function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
+  let toVisit = currentStep;
+
+  /** !IMPORTANT!
+   * The order of operations is important here.
+   * The order affects what context will be available in the step if/foreach/etc operation.
+   */
+
+  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
+  // when the step is already a foreach step
+  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
+    toVisit = {
+      name: `foreach_${getNodeId(currentStep)}`,
+      type: 'foreach',
+      foreach: currentStep.foreach,
+      steps: [toVisit],
+    } as ForEachStep;
+  }
+
+  if (currentStep.if) {
+    toVisit = {
+      name: `if_${getNodeId(currentStep)}`,
+      type: 'if',
+      condition: currentStep.if,
+      steps: [toVisit],
+    } as IfStep;
+  }
+
+  return toVisit;
+}
+
 export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   let previousNode: any | null = null;
 
   workflowSchema.steps.forEach((currentStep, index) => {
-    let toVisit = currentStep;
-
-    if (currentStep.if) {
-      toVisit = {
-        name: `if_${getNodeId(currentStep)}`,
-        type: 'if',
-        condition: currentStep.if,
-        steps: [toVisit],
-      } as IfStep;
-    }
-
-    // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
-    // when the step is already a foreach step
-    if (currentStep.foreach && currentStep.type !== 'foreach') {
-      toVisit = {
-        name: `foreach_${getNodeId(currentStep)}`,
-        type: 'foreach',
-        foreach: currentStep.foreach,
-        steps: [toVisit],
-      } as ForEachStep;
-    }
-
-    const currentNode = visitAbstractStep(graph, previousNode, toVisit);
+    const transformedStep = handleStepLevelOperations(currentStep);
+    const currentNode = visitAbstractStep(graph, previousNode, transformedStep);
     previousNode = currentNode;
   });
 
