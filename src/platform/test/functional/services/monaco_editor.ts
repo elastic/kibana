@@ -80,4 +80,16 @@ export class MonacoEditorService extends FtrService {
       `[data-test-subj="${testSubjId}"] .cdr.squiggly-error`
     );
   }
+
+  public async selectSuggestionByIndex(index: number) {
+    const suggestions = await this.findService.allByCssSelector(
+      '.monaco-editor .suggest-widget .monaco-list-row'
+    );
+
+    if (index < 0 || index >= suggestions.length) {
+      throw new Error(`Index ${index} is out of bounds for suggestions list.`);
+    }
+
+    await suggestions[index].click();
+  }
 }

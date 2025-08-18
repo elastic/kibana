@@ -43,6 +43,7 @@ import { SolutionNavigationProvider } from './solution_navigation';
 import { EmbeddedConsoleProvider } from './embedded_console';
 import { SpaceSettingsPageObject } from './space_settings';
 import { MarkdownVisPageObject } from './markdown_vis';
+import { IndexEditorObject } from './index_editor';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -81,6 +82,7 @@ export const pageObjects = {
   filesManagement: FilesManagementPageObject,
   spaceSettings: SpaceSettingsPageObject,
   markdownVis: MarkdownVisPageObject,
+  indexEditor: IndexEditorObject,
 };
 
 export { SolutionNavigationProvider } from './solution_navigation';

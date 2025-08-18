@@ -79,7 +79,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
           <EuiFlexGroup gutterSize="s" alignItems="center">
             {isSaveButtonVisible ? (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onSave}>
+                <EuiButton data-test-subj="indexEditorSaveChangesButton" onClick={onSave}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.primaryButtonLabel.saveIndex"
                     defaultMessage="Save changes"

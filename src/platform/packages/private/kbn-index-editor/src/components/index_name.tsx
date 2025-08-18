@@ -139,6 +139,10 @@ export const IndexName: FC = () => {
             setError([]);
             validateOnType(e.target.value);
           },
+          'data-test-subj': 'indexNameInput',
+        },
+        saveButtonProps: {
+          'data-test-subj': 'indexNameSaveButton',
         },
       }}
       readModeProps={{
