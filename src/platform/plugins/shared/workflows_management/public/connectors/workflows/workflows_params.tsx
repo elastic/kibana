@@ -12,6 +12,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHighlight,
   EuiIcon,
   EuiInputPopover,
   EuiLink,
@@ -32,12 +33,15 @@ interface WorkflowOption {
   name: string;
   description: string;
   status: string;
+  tags: string[];
   label: string;
   disabled?: boolean;
   checked?: 'on' | 'off';
-  toolTipContent?: string;
   prepend?: React.ReactNode;
   append?: React.ReactNode;
+  data?: {
+    secondaryContent?: string;
+  };
   [key: string]: any;
 }
 
@@ -58,6 +62,22 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
   const [inputValue, setInputValue] = useState('');
   const [isSearching, setIsSearching] = useState(true);
   const { http, application } = useKibana().services;
+
+  // Custom render function for workflow options
+  const renderWorkflowOption = useCallback((option: WorkflowOption, searchValue: string) => {
+    return (
+      <>
+        <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+        {option.secondaryContent && (
+          <EuiText size="xs" color="subdued" className="eui-displayBlock">
+            <small>
+              <EuiHighlight search={searchValue}>{option.secondaryContent}</EuiHighlight>
+            </small>
+          </EuiText>
+        )}
+      </>
+    );
+  }, []);
 
   // Ensure proper initialization of action parameters
   useEffect(() => {
@@ -179,27 +199,45 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
             prependElement = <EuiBadge color="default">{i18n.DISABLED_BADGE_LABEL}</EuiBadge>;
           }
 
-          // Create the append element with the workflow link
+          // Create tags badges if workflow has tags
+          const workflowTags = workflow.definition?.tags || [];
+          const tagsElement =
+            workflowTags.length > 0 ? (
+              <EuiFlexGroup gutterSize="xs" wrap>
+                {workflowTags.map((tag: string, tagIndex: number) => (
+                  <EuiFlexItem grow={false} key={tagIndex}>
+                    <EuiBadge color="hollow">{tag}</EuiBadge>
+                  </EuiFlexItem>
+                ))}
+              </EuiFlexGroup>
+            ) : undefined;
+
+          // Create the append element with tags and workflow link
           const appendElement = (
-            <EuiButtonIcon
-              iconType="popout"
-              aria-label={i18n.OPEN_WORKFLOW_LINK}
-              title={i18n.OPEN_WORKFLOW_LINK}
-              size="s"
-              color="text"
-              style={{ flexShrink: 0 }}
-              onMouseDown={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                event.preventDefault();
-                event.nativeEvent.stopImmediatePropagation();
-              }}
-              onClick={(event: React.MouseEvent) => {
-                event.stopPropagation();
-                event.preventDefault();
-                event.nativeEvent.stopImmediatePropagation();
-                handleOpenWorkflow(workflow.id, event);
-              }}
-            />
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+              {tagsElement && <EuiFlexItem grow={false}>{tagsElement}</EuiFlexItem>}
+              <EuiFlexItem grow={false}>
+                <EuiButtonIcon
+                  iconType="popout"
+                  aria-label={i18n.OPEN_WORKFLOW_LINK}
+                  title={i18n.OPEN_WORKFLOW_LINK}
+                  size="s"
+                  color="text"
+                  style={{ flexShrink: 0 }}
+                  onMouseDown={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    event.nativeEvent.stopImmediatePropagation();
+                  }}
+                  onClick={(event: React.MouseEvent) => {
+                    event.stopPropagation();
+                    event.preventDefault();
+                    event.nativeEvent.stopImmediatePropagation();
+                    handleOpenWorkflow(workflow.id, event);
+                  }}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
 
           return {
@@ -208,12 +246,15 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               name: workflow.name,
               description: workflow.description,
               status: workflow.status,
+              tags: workflowTags,
               label: workflow.name,
               disabled: isDisabled,
               checked: isSelected ? 'on' : undefined,
-              toolTipContent: workflow.description,
               prepend: prependElement,
               append: appendElement,
+              data: {
+                secondaryContent: workflow.description,
+              },
             } as WorkflowOption,
             hasAlertTriggerType,
           };
@@ -324,8 +365,17 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
           isPreFiltered={isSearching ? false : { highlightSearch: false }}
           data-test-subj="workflowIdSelect"
           listProps={{
-            rowHeight: 40,
+            rowHeight: 60, // Increased height to accommodate secondary content and tags
+            showIcons: false,
+            css: {
+              // Hide the badge when the option is focused
+              // This should be configurable in EUI, but it's not :(
+              '.euiSelectableListItem__onFocusBadge': {
+                display: 'none',
+              },
+            },
           }}
+          renderOption={renderWorkflowOption}
         >
           {(list, search) => (
             <EuiInputPopover

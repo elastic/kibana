@@ -49,12 +49,22 @@ describe('WorkflowsParamsFields', () => {
           name: 'Test Workflow 1',
           description: 'Description for workflow 1',
           status: 'active',
+          definition: {
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            tags: ['test-tag'],
+          },
         },
         {
           id: 'workflow-2',
           name: 'Test Workflow 2',
           description: 'Description for workflow 2',
           status: 'active',
+          definition: {
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            tags: [],
+          },
         },
       ],
     });
@@ -63,6 +73,9 @@ describe('WorkflowsParamsFields', () => {
       services: {
         http: {
           post: mockHttpPost,
+        },
+        application: {
+          getUrlForApp: jest.fn().mockReturnValue('/app/workflows'),
         },
       },
     } as any);
@@ -238,12 +251,22 @@ describe('WorkflowsParamsFields', () => {
           name: 'Active Workflow',
           description: 'Active workflow description',
           status: 'active',
+          definition: {
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            tags: [],
+          },
         },
         {
           id: 'workflow-2',
           name: 'Inactive Workflow',
           description: 'Inactive workflow description',
           status: 'inactive',
+          definition: {
+            enabled: false,
+            triggers: [{ type: 'manual' }],
+            tags: [],
+          },
         },
       ],
     });
@@ -504,7 +527,9 @@ describe('WorkflowsParamsFields', () => {
           description: 'A regular workflow without alert triggers',
           status: 'active',
           definition: {
+            enabled: true,
             triggers: [{ type: 'manual' }, { type: 'schedule' }],
+            tags: [],
           },
         },
         {
@@ -513,7 +538,9 @@ describe('WorkflowsParamsFields', () => {
           description: 'A workflow with alert trigger',
           status: 'active',
           definition: {
+            enabled: true,
             triggers: [{ type: 'alert' }, { type: 'manual' }],
+            tags: [],
           },
         },
         {
@@ -522,7 +549,9 @@ describe('WorkflowsParamsFields', () => {
           description: 'Another workflow without alert triggers',
           status: 'active',
           definition: {
+            enabled: true,
             triggers: [{ type: 'manual' }],
+            tags: [],
           },
         },
         {
@@ -531,7 +560,9 @@ describe('WorkflowsParamsFields', () => {
           description: 'Another workflow with alert trigger',
           status: 'active',
           definition: {
+            enabled: true,
             triggers: [{ type: 'schedule' }, { type: 'alert' }],
+            tags: [],
           },
         },
       ],
@@ -582,7 +613,11 @@ describe('WorkflowsParamsFields', () => {
           name: 'Workflow Without Definition',
           description: 'A workflow without definition',
           status: 'active',
-          // No definition property
+          definition: {
+            enabled: true,
+            triggers: [{ type: 'manual' }],
+            tags: [],
+          },
         },
         {
           id: 'workflow-2',
@@ -590,7 +625,9 @@ describe('WorkflowsParamsFields', () => {
           description: 'A workflow with empty triggers',
           status: 'active',
           definition: {
+            enabled: true,
             triggers: [],
+            tags: [],
           },
         },
         {
@@ -599,7 +636,9 @@ describe('WorkflowsParamsFields', () => {
           description: 'A workflow with alert trigger',
           status: 'active',
           definition: {
+            enabled: true,
             triggers: [{ type: 'alert' }],
+            tags: [],
           },
         },
       ],
