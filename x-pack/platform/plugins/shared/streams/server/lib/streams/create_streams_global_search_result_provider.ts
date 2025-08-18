@@ -13,7 +13,8 @@ import type {
 } from '@kbn/global-search-plugin/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import { Streams } from '@kbn/streams-schema';
-import { StreamsStorageClient, StreamsStorageSettings, streamsStorageSettings } from './service';
+import type { StreamsStorageClient, StreamsStorageSettings } from './service';
+import { streamsStorageSettings } from './service';
 import { migrateOnRead } from './helpers/migrate_on_read';
 
 export function createStreamsGlobalSearchResultProvider(

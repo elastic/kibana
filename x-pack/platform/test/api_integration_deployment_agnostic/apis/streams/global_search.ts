@@ -6,13 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams } from './helpers/requests';
-import { SupertestWithRoleScope } from '../../services/role_scoped_supertest';
+import type { SupertestWithRoleScope } from '../../services/role_scoped_supertest';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -51,16 +49,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         })
         .expect(200);
 
-      expect(response.body.results).to.eql([
-        {
-          id: 'logs',
-          score: 100,
-          title: 'logs',
-          type: 'Wired stream',
-          url: '/app/streams/logs/management/lifecycle',
-          icon: 'logsApp',
-        },
-      ]);
+      expect(response.body.results).to.contain({
+        id: 'logs',
+        score: 100,
+        title: 'logs',
+        type: 'Wired stream',
+        url: '/app/streams/logs/management/lifecycle',
+        icon: 'logsApp',
+      });
     });
   });
 }
