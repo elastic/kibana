@@ -82,11 +82,14 @@ export function AddToCaseContextItem() {
   }, [setIsAddToCaseModalOpen]);
 
   const pageState = useMemo(() => {
+    if (!redirectUrl || !monitor?.name) {
+      return null;
+    }
     return {
       type: 'synthetics_monitor',
       url: {
-        pathAndQuery: redirectUrl || '',
-        label: monitor?.name || '',
+        pathAndQuery: redirectUrl,
+        label: monitor.name,
         actionLabel: i18n.translate(
           'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryLinkLabel',
           {
@@ -98,7 +101,7 @@ export function AddToCaseContextItem() {
     };
   }, [monitor, redirectUrl]);
 
-  if (!monitor || !redirectUrl || !cases || !hasCasesPermissions) {
+  if (!monitor || !redirectUrl || !cases || !hasCasesPermissions || !pageState) {
     return null; // Ensure monitor and redirectUrl are available before rendering
   }
 
