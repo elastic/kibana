@@ -28,6 +28,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';
