@@ -344,6 +344,13 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
     .monaco-hover {
       display: block !important;
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain} !important;
+      line-height: 1.5rem;
+      border-radius: ${theme.euiTheme.border.radius.medium} !important;
+      ${euiShadow(theme, 'l')}
+      .slider {
+        display: none;
+      }
     }
     .hover-row.status-bar {
       display: none;

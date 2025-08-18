@@ -31,6 +31,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
 import { ESQLLang, ESQL_LANG_ID, monaco, type ESQLCallbacks } from '@kbn/monaco';
@@ -71,6 +72,8 @@ import type {
   ControlsContext,
 } from './types';
 import { useRestorableState, withRestorableState } from './restorable_state';
+import { getHistoryItems } from './history_local_storage';
+import type { StarredQueryMetadata } from './editor_footer/esql_starred_queries_service';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -130,8 +133,27 @@ const ESQLEditorInternal = function ESQLEditor({
   const datePickerOpenStatusRef = useRef<boolean>(false);
   const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
-  const { dataViews, expressions, application, core, fieldsMetadata, uiSettings, uiActions, data } =
-    kibana.services;
+  const {
+    dataViews,
+    expressions,
+    application,
+    core,
+    fieldsMetadata,
+    uiSettings,
+    uiActions,
+    data,
+    usageCollection,
+  } = kibana.services;
+
+  const favoritesClient = useMemo(
+    () =>
+      new FavoritesClient<StarredQueryMetadata>('esql_editor', 'esql_query', {
+        http: core.http,
+        userProfile: core.userProfile,
+        usageCollection,
+      }),
+    [core.http, core.userProfile, usageCollection]
+  );
 
   const activeSolutionId = useObservable(core.chrome.getActiveSolutionNavId$());
 
@@ -557,9 +579,23 @@ const ESQLEditorInternal = function ESQLEditor({
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
+      getHistoryStarredItems: async () => {
+        const historyItems = getHistoryItems('desc');
+        const { favoriteMetadata } = (await favoritesClient?.getFavorites()) || {};
+
+        const items = historyItems.map((item) => item.queryString);
+
+        Object.keys(favoriteMetadata).forEach((id) => {
+          const item = favoriteMetadata[id];
+          const { queryString } = item;
+          items.push(queryString);
+        });
+        return items;
+      },
     };
     return callbacks;
   }, [
+    favoritesClient,
     fieldsMetadata,
     kibana.services?.esql,
     dataSourcesCache,
@@ -694,6 +730,10 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
 
+  const inlineCompletionsProvider = useMemo(() => {
+    return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
+  }, [esqlCallbacks]);
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -759,6 +799,12 @@ const ESQLEditorInternal = function ESQLEditor({
         bottom: 8,
       },
       quickSuggestions: true,
+      inlineSuggest: {
+        enabled: true,
+        showToolbar: 'onHover',
+        suppressSuggestions: false,
+        keepOnBlur: false,
+      },
       readOnly: isDisabled,
       renderLineHighlight: 'line',
       renderLineHighlightOnlyWhenFocus: true,
@@ -877,6 +923,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
+                  inlineCompletionsProvider={inlineCompletionsProvider}
                   onChange={onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
@@ -914,6 +961,7 @@ const ESQLEditorInternal = function ESQLEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
+
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
                       const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);

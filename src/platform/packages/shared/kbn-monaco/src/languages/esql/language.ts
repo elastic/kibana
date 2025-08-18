@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateQuery, type ESQLCallbacks, suggest } from '@kbn/esql-validation-autocomplete';
+import {
+  validateQuery,
+  type ESQLCallbacks,
+  suggest,
+  inlineSuggest,
+} from '@kbn/esql-validation-autocomplete';
 import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
@@ -72,6 +77,32 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
       ) {
         return getHoverItem(model, position, callbacks);
       },
+    };
+  },
+  getInlineCompletionsProvider: (
+    callbacks?: ESQLCallbacks
+  ): monaco.languages.InlineCompletionsProvider => {
+    return {
+      async provideInlineCompletions(model, position, context, token) {
+        const fullText = model.getValue();
+        // Get the text before the cursor
+        const textBeforeCursor = model.getValueInRange({
+          startLineNumber: position.lineNumber,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        const range = new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
+
+        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
+      },
+      freeInlineCompletions: () => {},
     };
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
