@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlApi } from './api';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlApi } from './api';
 
 export function MachineLearningJobManagementProvider(
   { getService }: FtrProviderContext,

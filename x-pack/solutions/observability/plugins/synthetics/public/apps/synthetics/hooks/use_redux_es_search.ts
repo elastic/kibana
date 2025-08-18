@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { IInspectorInfo } from '@kbn/data-plugin/common';
+import type { IInspectorInfo } from '@kbn/data-plugin/common';
 import { useDispatch, useSelector } from 'react-redux';
 import { useEffect, useMemo } from 'react';
 import {

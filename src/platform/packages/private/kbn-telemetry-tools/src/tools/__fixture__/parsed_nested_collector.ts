@@ -8,7 +8,7 @@
  */
 
 import { SyntaxKind } from 'typescript';
-import { ParsedUsageCollection } from '../ts_parser';
+import type { ParsedUsageCollection } from '../ts_parser';
 
 export const parsedNestedCollector: ParsedUsageCollection = [
   'src/platform/packages/private/kbn-telemetry-tools/src/tools/__fixture__/telemetry_collectors/nested_collector.ts',

@@ -9,7 +9,7 @@ import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
 import { PipelineItem } from './pipeline_item';
-import { InferenceUsageInfo } from '../../../../types';
+import type { InferenceUsageInfo } from '../../../../types';
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
 jest.mock('../../../../../../hooks/use_kibana');

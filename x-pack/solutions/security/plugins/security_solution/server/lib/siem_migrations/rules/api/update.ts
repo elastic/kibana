@@ -48,13 +48,18 @@ export const registerSiemRuleMigrationsUpdateRoute = (
           try {
             const ctx = await context.resolve(['securitySolution']);
             const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
-            await siemMigrationAuditLogger.logUpdateMigration({ migrationId });
+            await siemMigrationAuditLogger.logUpdateMigration({
+              migrationId,
+            });
             await ruleMigrationsClient.data.migrations.update(migrationId, req.body);
 
             return res.ok();
           } catch (error) {
             logger.error(error);
-            await siemMigrationAuditLogger.logUpdateMigration({ migrationId, error });
+            await siemMigrationAuditLogger.logUpdateMigration({
+              migrationId,
+              error,
+            });
             return res.badRequest({ body: error.message });
           }
         })

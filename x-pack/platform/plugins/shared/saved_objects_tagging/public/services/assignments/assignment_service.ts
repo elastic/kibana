@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
-import {
+import type { HttpSetup } from '@kbn/core/public';
+import type {
   UpdateTagAssignmentsOptions,
   FindAssignableObjectsOptions,
   AssignableObject,
 } from '../../../common/assignments';
-import {
+import type {
   FindAssignableObjectResponse,
   GetAssignableTypesResponse,
 } from '../../../common/http_api_types';
