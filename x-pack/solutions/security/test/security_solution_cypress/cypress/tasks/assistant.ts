@@ -103,7 +103,7 @@ export const selectConnector = (connectorName: string) => {
   assertConnectorSelected(connectorName);
 };
 export const resetConversation = () => {
-  cy.get(CHAT_CONTEXT_MENU).click();
+  cy.get(CONVERSATION_SETTINGS_MENU).click();
   cy.get(CLEAR_CHAT).click();
   cy.get(CONFIRM_CLEAR_CHAT).click();
   cy.get(EMPTY_CONVO).should('be.visible');
