@@ -10,7 +10,8 @@ import { ESQLVariableType } from '@kbn/esql-types';
 import { Walker } from '../../../walker';
 import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { isAssignment, isColumn } from '../../../ast/is';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 import type {
   ESQLCommand,
   ESQLCommandOption,

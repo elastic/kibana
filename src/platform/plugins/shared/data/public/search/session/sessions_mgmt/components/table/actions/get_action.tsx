@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { IClickActionDescriptor } from './types';
-import { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { ACTION, UISession } from '../../../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { IClickActionDescriptor } from './types';
+import type { SearchSessionsMgmtAPI } from '../../../lib/api';
+import type { UISession } from '../../../types';
+import { ACTION } from '../../../types';
 import { createDeleteActionDescriptor } from './delete_button';
 import { createExtendActionDescriptor } from './extend_button';
 import { createInspectActionDescriptor } from './inspect_button';

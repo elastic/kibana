@@ -9,14 +9,14 @@
 
 import React, { useLayoutEffect } from 'react';
 import classNames from 'classnames';
-import { CoreStart } from '@kbn/core/public';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { CoreStart } from '@kbn/core/public';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { TableVisConfig, TableVisData } from '../types';
+import type { TableVisConfig, TableVisData } from '../types';
 import { TableVisBasic } from './table_vis_basic';
 import { TableVisSplit } from './table_vis_split';
 import { useUiState } from '../utils';

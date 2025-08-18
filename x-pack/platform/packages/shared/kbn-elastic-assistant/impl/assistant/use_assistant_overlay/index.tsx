@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Replacements } from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useCallback, useEffect, useMemo } from 'react';
 
-import { Conversation } from '../../assistant_context/types';
+import type { Conversation } from '../../assistant_context/types';
 import { useAssistantContext } from '../../assistant_context';
 import { getUniquePromptContextId } from '../../assistant_context/helpers';
 import type { PromptContext } from '../prompt_context/types';

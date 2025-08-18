@@ -6,7 +6,7 @@
  */
 
 import { createAction } from 'redux-actions';
-import { DynamicSettings } from '../../../../common/runtime_types';
+import type { DynamicSettings } from '../../../../common/runtime_types';
 
 export const getDynamicSettings = createAction('GET_DYNAMIC_SETTINGS');
 export const getDynamicSettingsSuccess = createAction<DynamicSettings>(

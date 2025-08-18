@@ -26,8 +26,9 @@ import {
   getCategorizeField,
   findClosestColumn,
 } from './query_parsing_helpers';
-import { monaco } from '@kbn/monaco';
-import { ESQLColumn, parse, walk } from '@kbn/esql-ast';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLColumn } from '@kbn/esql-ast';
+import { parse, walk } from '@kbn/esql-ast';
 describe('esql query helpers', () => {
   describe('getIndexPatternFromESQLQuery', () => {
     it('should return the index pattern string from esql queries', () => {

@@ -7,7 +7,7 @@
 
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { ToolType } from '@kbn/onechat-common';
-import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
+import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
 import { useQuery } from '@tanstack/react-query';
 import { useEffect, useMemo } from 'react';
 import { queryKeys } from '../../query_keys';
