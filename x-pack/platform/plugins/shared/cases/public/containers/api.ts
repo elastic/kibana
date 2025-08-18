@@ -25,7 +25,6 @@ import type {
   AddObservableRequest,
   UpdateObservableRequest,
   UserActionInternalFindResponse,
-  UserActionFindResponse,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -42,6 +41,7 @@ import type {
   SimilarCasesProps,
   CasesSimilarResponseUI,
   InternalFindCaseUserActions,
+  AlertAttachmentUI,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -455,39 +455,15 @@ export const patchAlertComment = async ({
 export const deleteAlertComment = async ({
   caseId,
   alertId: alertIdToRemove,
+  alertAttachment,
   signal,
 }: {
   caseId: string;
   alertId: string;
+  alertAttachment: AlertAttachmentUI;
   signal?: AbortSignal;
 }): Promise<void | CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<UserActionFindResponse>(
-    `${getCaseFindUserActionsUrl(caseId)}`,
-    {
-      method: 'GET',
-      signal,
-      query: {
-        types: 'alert',
-        perPage: 100,
-      },
-    }
-  );
-
-  const attachment = response.userActions.find((action) => {
-    return (
-      action.payload as { comment: { alertId?: string | string[] } }
-    )?.comment.alertId?.includes(alertIdToRemove);
-  });
-
-  if (
-    !attachment ||
-    !('comment' in attachment.payload) ||
-    !('alertId' in attachment.payload?.comment)
-  ) {
-    throw new Error(`Comment with alertId ${alertIdToRemove} not found`);
-  }
-
-  const { alertId, index, rule, owner } = attachment.payload.comment;
+  const { alertId, index, rule, version, id, owner } = alertAttachment;
   if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
     const alertIdx = alertId.indexOf(alertIdToRemove);
     alertId.splice(alertIdx, 1);
@@ -495,7 +471,7 @@ export const deleteAlertComment = async ({
     if (alertId.length === 0) {
       return deleteComment({
         caseId,
-        commentId: attachment.id,
+        commentId: alertAttachment.id,
         signal,
       });
     } else {
@@ -507,8 +483,8 @@ export const deleteAlertComment = async ({
           index,
           rule,
           owner,
-          id: attachment.comment_id as string,
-          version: attachment.version,
+          id,
+          version,
         },
         signal,
       });
@@ -516,7 +492,7 @@ export const deleteAlertComment = async ({
   } else {
     return deleteComment({
       caseId,
-      commentId: attachment.id,
+      commentId: alertAttachment.id,
       signal,
     });
   }

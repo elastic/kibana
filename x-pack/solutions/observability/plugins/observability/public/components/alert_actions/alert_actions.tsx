@@ -27,6 +27,7 @@ import {
   useDeletePropertyAction,
   DeleteAttachmentConfirmationModal,
 } from '@kbn/cases-plugin/public';
+import type { AlertAttachmentUI } from '@kbn/cases-plugin/common/ui';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -124,7 +125,7 @@ export function AlertActions({
       cases,
     },
     caseData,
-    alertAttachment,
+    alertAttachment: alertAttachment as AlertAttachmentUI,
   });
 
   const closeActionsPopover = useCallback(() => {

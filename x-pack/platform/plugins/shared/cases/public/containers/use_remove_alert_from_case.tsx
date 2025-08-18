@@ -12,11 +12,13 @@ import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_c
 import { useCasesToast } from '../common/use_cases_toast';
 import { deleteAlertComment } from './api';
 import * as i18n from './translations';
+import type { AlertAttachmentUI } from './types';
 
 interface MutationArgs {
   caseId: string;
   alertId: string;
   successToasterTitle: string;
+  alertAttachment: AlertAttachmentUI;
 }
 
 export const useRemoveAlertFromCase = () => {
@@ -24,7 +26,8 @@ export const useRemoveAlertFromCase = () => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ caseId, alertId }: MutationArgs) => deleteAlertComment({ caseId, alertId }),
+    ({ caseId, alertId, alertAttachment }: MutationArgs) =>
+      deleteAlertComment({ caseId, alertId, alertAttachment }),
     {
       mutationKey: casesMutationsKeys.deleteComment,
       onSuccess: (_, { successToasterTitle }) => {

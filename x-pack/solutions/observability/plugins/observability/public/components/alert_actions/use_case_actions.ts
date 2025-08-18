@@ -13,7 +13,7 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import type { CasesService } from '@kbn/response-ops-alerts-table/types';
-import type { AttachmentUI } from '@kbn/cases-plugin/common/ui';
+import type { AlertAttachmentUI } from '@kbn/cases-plugin/common/ui';
 import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({
@@ -32,7 +32,7 @@ export const useCaseActions = ({
     cases?: CasesService;
   };
   caseData?: CaseUI;
-  alertAttachment?: AttachmentUI;
+  alertAttachment?: AlertAttachmentUI;
 }) => {
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -50,12 +50,14 @@ export const useCaseActions = ({
 
   const handleRemoveAlertsFromCase = () => {
     alerts.forEach((alert) => {
-      if (caseData?.id && alert._id) {
+      if (alertAttachment && caseData?.id && alert._id) {
         removeAlertsFromCase({
           caseId: caseData?.id,
+          alertAttachment,
           alertId: alert._id,
           successToasterTitle: removalSuccessToast,
         });
+        closeActionsPopover();
       }
     });
   };
