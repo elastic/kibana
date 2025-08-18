@@ -28,7 +28,7 @@ export async function saveKnowledgeBaseContentToIndex({
   }
 
   // Delete existing documents for this package version, but only if they exist
-  deletePackageKnowledgeBase(esClient, pkgName, pkgVersion);
+  await deletePackageKnowledgeBase(esClient, pkgName, pkgVersion);
 
   // Index each knowledge base file as a separate document
   const operations = [];
