@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ListNodesRouteResponse, DataTierRole } from '../../../../common/types';
+import type { ListNodesRouteResponse, DataTierRole } from '../../../../common/types';
 
-import { RouteDependencies } from '../../../types';
+import type { RouteDependencies } from '../../../types';
 import { addBasePath } from '../../../services';
 
 interface Settings {

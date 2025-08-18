@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
+import type { FieldListMap } from '@kbn/core-saved-objects-base-server-internal';
 import { compareFieldLists, type CompareResult } from './compare_type_field_lists';
 import { readCurrentFields, writeCurrentFields } from './current_fields';
 import { extractFieldListsFromPlugins } from './extract_field_lists_from_plugins';

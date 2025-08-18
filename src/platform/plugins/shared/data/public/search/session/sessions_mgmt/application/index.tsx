@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type {
   AppDependencies,
@@ -49,7 +49,6 @@ export class SearchSessionsMgmtApp {
 
     const api = new SearchSessionsMgmtAPI(setupDeps.sessionsClient, this.config, {
       notifications,
-      locators: pluginsStart.share.url.locators,
       application,
       usageCollector: setupDeps.searchUsageCollector,
     });

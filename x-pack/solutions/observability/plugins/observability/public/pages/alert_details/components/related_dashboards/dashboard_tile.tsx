@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
-import { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
 

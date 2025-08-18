@@ -8,7 +8,8 @@
  */
 import type { ESQLCommand } from '../../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 
 export async function autocomplete(
   query: string,

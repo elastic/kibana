@@ -11,7 +11,7 @@ import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {

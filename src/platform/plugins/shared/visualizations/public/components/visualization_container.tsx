@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, Suspense, lazy } from 'react';
+import type { ReactNode } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { EuiLoadingChart, euiScrollBarStyles, type UseEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { visContainerStyle } from '../vis.styles';

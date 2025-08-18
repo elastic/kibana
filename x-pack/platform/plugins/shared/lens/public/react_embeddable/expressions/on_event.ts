@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
+import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { type AggregateQuery, type Query, isOfAggregateQueryType } from '@kbn/es-query';
 import {
