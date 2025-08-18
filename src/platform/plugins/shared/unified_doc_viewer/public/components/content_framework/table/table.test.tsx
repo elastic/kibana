@@ -85,7 +85,7 @@ describe('ContentFrameworkTable', () => {
     expect(screen.getByLabelText('Test Table')).toBeInTheDocument();
   });
 
-  it('returns null if hit.flattened is falsy', () => {
+  it('returns null if hit.flattened is empty', () => {
     const props = {
       ...defaultProps,
       hit: { id: 'test-id', flattened: {}, raw: {} },
