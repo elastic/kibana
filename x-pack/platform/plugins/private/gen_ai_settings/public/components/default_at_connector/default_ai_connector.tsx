@@ -15,8 +15,6 @@ type Props = {
     connectors: UseGenAiConnectorsResult
 }
 
-export const NO_DEFAULT_CONNECTOR = "NO_DEFAULT_CONNECTOR";
-
 const NoDefaultOption: EuiComboBoxOptionOption<string> = {
     label: i18n.translate(
         'xpack.gen_ai_settings.settings.defaultLLm.select.option.noDefaultConnector',
