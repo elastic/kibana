@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   type CoreSetup,
   type CoreStart,
@@ -22,8 +22,8 @@ import type {
   IndicesMetadataPluginStartDeps,
 } from './plugin.types';
 import { DEFAULT_CDN_CONFIG, DEFAULT_INDICES_METADATA_CONFIGURATION } from './lib/constants';
-import { PluginConfig } from './config';
-import { CdnConfig } from './lib/services/artifact.types';
+import type { PluginConfig } from './config';
+import type { CdnConfig } from './lib/services/artifact.types';
 import { ArtifactService } from './lib/services/artifact';
 import { ConfigurationService } from './lib/services/configuration';
 

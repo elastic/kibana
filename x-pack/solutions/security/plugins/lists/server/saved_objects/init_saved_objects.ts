@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreSetup } from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 
 import { exceptionListAgnosticType, exceptionListType } from './exception_list';
 

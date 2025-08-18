@@ -14,7 +14,7 @@ import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { QueryInput } from '@kbn/visualization-ui-components';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 
 jest.mock('.', () => ({}));
 

@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment';
-import { timerange, log, LogDocument } from '@kbn/apm-synthtrace-client';
-import { SynthtraceFixture } from '@kbn/scout-oblt';
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
+import { timerange, log } from '@kbn/apm-synthtrace-client';
+import type { SynthtraceFixture } from '@kbn/scout-oblt';
 import { randomInt } from 'crypto';
 
 export async function generateFrequentErrorLogs({

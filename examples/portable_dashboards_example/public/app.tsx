@@ -12,14 +12,14 @@ import React, { useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EuiButton, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { DashboardListingTable } from '@kbn/dashboard-plugin/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { DualDashboardsExample } from './dual_dashboards_example';
-import { StartDeps } from './plugin';
+import type { StartDeps } from './plugin';
 import { StaticByValueExample } from './static_by_value_example';
 import { StaticByReferenceExample } from './static_by_reference_example';
 import { DashboardWithControlsExample } from './dashboard_with_controls_example';

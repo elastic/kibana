@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip, UseEuiTheme } from '@elastic/eui';
-import { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexItem, EuiIcon, EuiKeyPadMenuItem, EuiToolTip } from '@elastic/eui';
+import type { UiActionsPresentable as Presentable } from '@kbn/ui-actions-plugin/public';
 import {
   txtBetaActionFactoryLabel,
   txtBetaActionFactoryTooltip,

@@ -16,8 +16,8 @@ import {
 } from '@kbn/reporting-server';
 import rison from '@kbn/rison';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { RruleSchedule } from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { RruleSchedule } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 function removeWhitespace(str: string) {
   return str.replace(/\s/g, '');

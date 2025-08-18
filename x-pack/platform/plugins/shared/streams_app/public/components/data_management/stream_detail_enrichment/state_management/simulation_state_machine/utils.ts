@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { FieldDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition } from '@kbn/streams-schema';
 import { uniq } from 'lodash';
-import { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
-import { DetectedField, Simulation } from './types';
-import { MappedSchemaField, SchemaField, isSchemaFieldTyped } from '../../../schema_editor/types';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { DetectedField, Simulation } from './types';
+import type { MappedSchemaField, SchemaField } from '../../../schema_editor/types';
+import { isSchemaFieldTyped } from '../../../schema_editor/types';
 import { convertToFieldDefinitionConfig } from '../../../schema_editor/utils';
 
 export function getSourceField(processor: StreamlangProcessorDefinition): string | undefined {

@@ -6,13 +6,14 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { updatePolicyWithInputs } from '../utils';
-import { CspRadioGroupProps, RadioGroup } from '../../csp_boxed_radio_group';
-import { AzureAccountType, UpdatePolicy } from '../types';
+import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
+import type { AzureAccountType, UpdatePolicy } from '../types';
 import {
   AZURE_CREDENTIALS_TYPE,
   AZURE_ORGANIZATION_ACCOUNT,

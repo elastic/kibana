@@ -11,10 +11,11 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import type { IAggConfigs, IAggConfig } from '@kbn/data-plugin/public';
-import { ISchemas } from '@kbn/visualizations-plugin/public';
+import type { ISchemas } from '@kbn/visualizations-plugin/public';
 import { createMockedVisEditorSchemas } from '@kbn/visualizations-plugin/public/mocks';
 
-import { DefaultEditorAggGroup, DefaultEditorAggGroupProps } from './agg_group';
+import type { DefaultEditorAggGroupProps } from './agg_group';
+import { DefaultEditorAggGroup } from './agg_group';
 import { DefaultEditorAgg } from './agg';
 import { DefaultEditorAggAdd } from './agg_add';
 import type { EditorVisState } from './sidebar/state/reducers';
