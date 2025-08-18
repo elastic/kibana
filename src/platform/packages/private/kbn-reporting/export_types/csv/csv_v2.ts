@@ -99,7 +99,7 @@ export class CsvV2ExportType extends ExportType<
 
   public runTask = async ({
     jobId,
-    payload: job,
+    payload,
     request,
     taskInstanceFields,
     cancellationToken,
@@ -115,7 +115,7 @@ export class CsvV2ExportType extends ExportType<
     const { data: dataPluginStart, discover: discoverPluginStart } = this.startDeps;
     const data = dataPluginStart.search.asScoped(request);
 
-    const { locatorParams } = job;
+    const { locatorParams, ...job } = payload;
     const { params } = locatorParams[0];
 
     // use Discover contract to convert the job params into inputs for CsvGenerator
@@ -124,25 +124,16 @@ export class CsvV2ExportType extends ExportType<
     const query = await locatorClient.queryFromLocator(params);
 
     if (query && 'esql' in query) {
-      // TODO: use columnsFromLocator
-      // currently locatorClient.columnsFromLocator can only extract columns from the saved search,
-      // but for the es|ql we simply want to get currently visible columns from params.columns.
-      // we didn't want to add this change inside locatorClient.columnsFromLocator, as it would change the behaviour of csv_v2 for non-ES|QL export,
-      // this should be addressed here https://github.com/elastic/kibana/issues/151190
-      // const columns = await locatorClient.columnsFromLocator(params);
-      const columns = params.columns as string[] | undefined;
+      const columns = await locatorClient.columnsFromEsqlLocator(params);
       const filters = await locatorClient.filtersFromLocator(params);
       const es = this.startDeps.esClient.asScoped(request);
 
       const clients = { uiSettings, data, es };
 
+      const jobCsvEsql = { ...job, columns, query, filters };
+
       const csv = new CsvESQLGenerator(
-        {
-          columns,
-          query,
-          filters,
-          ...job,
-        },
+        jobCsvEsql,
         csvConfig,
         taskInstanceFields,
         clients,
@@ -163,12 +154,10 @@ export class CsvV2ExportType extends ExportType<
     const clients = { uiSettings, data, es };
     const dependencies = { searchSourceStart, fieldFormatsRegistry };
 
+    const jobCsvV2 = { ...job, searchSource: searchSource.getSerializedFields(true), columns };
+
     const csv = new CsvGenerator(
-      {
-        columns,
-        searchSource: searchSource.getSerializedFields(true),
-        ...job,
-      },
+      jobCsvV2,
       csvConfig,
       taskInstanceFields,
       clients,

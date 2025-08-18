@@ -11,7 +11,6 @@ import React from 'react';
 import { firstValueFrom } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ShareContext, ExportShare } from '@kbn/share-plugin/public';
@@ -26,30 +25,21 @@ export const getCsvReportParams: ReportParamsGetter<
   ReportParamsGetterOptions & { forShareUrl?: boolean },
   CsvSearchModeParams
 > = ({ sharingData, forShareUrl = false }) => {
-  const getSearchSource = sharingData.getSearchSource as ({
-    addGlobalTimeFilter,
-    absoluteTime,
-  }: {
-    addGlobalTimeFilter?: boolean;
-    absoluteTime?: boolean;
-  }) => SerializedSearchSourceFields;
-
-  if (sharingData.isTextBased) {
-    // csv v2 uses locator params
-    return {
-      isEsqlMode: true,
-      locatorParams: sharingData.locatorParams as LocatorParams[],
-    };
+  if (forShareUrl) {
+    /**
+     * FIXME: the timerange used in the locator params should be RELATIVE if
+     * `forShareUrl == true`.
+     *
+     * Automated reports created using the POST URL (non-ad-hoc) should use a
+     * relative time range so each report instance is generated relative to the
+     * time of its generation.
+     *
+     * Ad-hoc (non-automated) reports must be generated using the same absolute
+     * range of time as the search results being viewed.
+     */
   }
-
-  // csv v1 uses search source and columns
   return {
-    isEsqlMode: false,
-    columns: sharingData.columns as string[] | undefined,
-    searchSource: getSearchSource({
-      addGlobalTimeFilter: true,
-      absoluteTime: !forShareUrl,
-    }),
+    locatorParams: sharingData.locatorParams as LocatorParams[],
   };
 };
 

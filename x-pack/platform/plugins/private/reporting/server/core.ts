@@ -243,7 +243,7 @@ export class ReportingCore {
     const exportTypes: ExportType[] = [];
 
     if (csv.enabled) {
-      // NOTE: CsvSearchSourceExportType should be deprecated and replaced with V2 in the UI: https://github.com/elastic/kibana/issues/151190
+      // NOTE: CsvSearchSourceExportType is deprecated and tagged for removal once usage of CSV v2 is widespread
       exportTypes.push(
         new CsvSearchSourceExportType(this.core, this.config, this.logger, this.context)
       );

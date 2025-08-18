@@ -19,18 +19,11 @@ import type {
 
 export * from './constants';
 
-interface BaseParamsCSV {
-  searchSource: SerializedSearchSourceFields;
-  columns?: string[];
-}
-
 interface BaseParamsCsvV2 {
   locatorParams: LocatorParams[];
 }
 
-export type JobParamsCSV = BaseParamsCSV & BaseParams;
 export type JobParamsCsvV2 = BaseParamsCsvV2 & BaseParams;
-export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
 
 /**
  * Public-facing interface
@@ -38,7 +31,7 @@ export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
  * fields become automatically provided by Reporting
  * @public
  */
-export type JobAppParamsCSV = Omit<JobParamsCSV, 'browserTimezone' | 'version'>;
+
 export type JobAppParamsCsvV2 = Omit<JobParamsCsvV2, 'browserTimezone' | 'version'>;
 
 interface CsvFromSavedObjectBase {
@@ -58,10 +51,22 @@ export interface TaskPayloadCsvFromSavedObject extends CsvFromSavedObjectBase, B
 
 export const CSV_REPORTING_ACTION = 'generateCsvReport';
 
-/**
- * @deprecated
- * Supported in case older reports exist in storage
- */
+/** @deprecated */
+interface BaseParamsCSV {
+  searchSource: SerializedSearchSourceFields;
+  columns?: string[];
+}
+
+/** @deprecated */
+export type JobParamsCSV = BaseParamsCSV & BaseParams;
+
+/** @deprecated */
+export type TaskPayloadCSV = BaseParamsCSV & BasePayload;
+
+/** @deprecated */
+export type JobAppParamsCSV = Omit<JobParamsCSV, 'browserTimezone' | 'version'>;
+
+/** @deprecated */
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
 
 export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';

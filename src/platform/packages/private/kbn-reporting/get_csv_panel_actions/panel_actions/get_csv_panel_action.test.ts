@@ -64,7 +64,7 @@ describe('GetCsvReportPanelAction', () => {
       maxRows: 10000,
     };
 
-    apiClient = new ReportingAPIClient(core.http, core.uiSettings, '7.15.0');
+    apiClient = new ReportingAPIClient(core.http, core.uiSettings, '9.2.0');
     jest.spyOn(apiClient, 'createReportingJob');
 
     mockLicenseState = 'valid';
@@ -128,13 +128,21 @@ describe('GetCsvReportPanelAction', () => {
 
     await panel.execute(context);
 
-    expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_v2', {
       browserTimezone: undefined,
-      columns: [],
+      locatorParams: [
+        {
+          id: 'DISCOVER_APP_LOCATOR',
+          params: {
+            columns: [],
+            filters: undefined,
+            query: undefined,
+          },
+        },
+      ],
       objectType: 'search',
-      searchSource: {},
       title: 'embeddable title',
-      version: '7.15.0',
+      version: '9.2.0',
     });
   });
 
@@ -162,13 +170,21 @@ describe('GetCsvReportPanelAction', () => {
 
     await panel.execute(context);
 
-    expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_searchsource', {
+    expect(apiClient.createReportingJob).toHaveBeenCalledWith('csv_v2', {
       browserTimezone: undefined,
-      columns: ['column_a', 'column_b'],
+      locatorParams: [
+        {
+          id: 'DISCOVER_APP_LOCATOR',
+          params: {
+            columns: ['column_a', 'column_b'],
+            filters: undefined,
+            query: undefined,
+          },
+        },
+      ],
       objectType: 'search',
-      searchSource: { testData: 'testDataValue' },
       title: 'embeddable title',
-      version: '7.15.0',
+      version: '9.2.0',
     });
   });
 
@@ -184,8 +200,8 @@ describe('GetCsvReportPanelAction', () => {
 
     await panel.execute(context);
 
-    expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_searchsource', {
-      body: '{"jobParams":"(columns:!(),objectType:search,searchSource:(),title:\'embeddable title\',version:\'7.15.0\')"}',
+    expect(core.http.post).toHaveBeenCalledWith('/internal/reporting/generate/csv_v2', {
+      body: '{"jobParams":"(locatorParams:!((id:DISCOVER_APP_LOCATOR,params:(columns:!()))),objectType:search,title:\'embeddable title\',version:\'9.2.0\')"}',
       method: 'POST',
     });
   });

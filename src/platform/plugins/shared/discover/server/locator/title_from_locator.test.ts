@@ -42,6 +42,7 @@ let soClient: SavedObjectsClientContract;
 let searchSourceStart: ISearchStartSearchSource;
 let mockServices: Services;
 let mockSavedSearch: SavedObject<SavedSearchAttributes>;
+let mockDataView: DataView;
 
 // mock params containing the discover app locator
 let mockPayload: Array<{ params: DiscoverAppLocatorParams }>;
@@ -53,10 +54,14 @@ beforeAll(async () => {
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
   searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
 
+  const mockDataViewsService = dataStartMock.indexPatterns.dataViewsServiceFactory();
+  mockDataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
+
   mockServices = {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: mockDataViewsService,
   };
 
   const soClientGet = soClient.get;

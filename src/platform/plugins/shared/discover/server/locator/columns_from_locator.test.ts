@@ -76,10 +76,14 @@ beforeAll(async () => {
   uiSettingsClient = coreMock.createStart().uiSettings.asScopedToClient(soClient);
   searchSourceStart = await dataStartMock.search.searchSource.asScoped(request);
 
+  const mockDataViewsService = dataStartMock.indexPatterns.dataViewsServiceFactory();
+  mockDataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
+
   mockServices = {
     searchSourceStart,
     savedObjects: soClient,
     uiSettings: uiSettingsClient,
+    dataViewsService: mockDataViewsService,
   };
 
   const soClientGet = soClient.get;
@@ -115,8 +119,8 @@ beforeEach(() => {
 });
 
 test('with search source using columns with default time field', async () => {
-  const provider = columnsFromLocatorFactory(mockServices);
-  const columns = await provider(mockPayload[0].params);
+  const { columnsFromLocator } = columnsFromLocatorFactory(mockServices);
+  const columns = await columnsFromLocator(mockPayload[0].params);
   expect(columns).toEqual(['timestamp', 'response', 'url', 'clientip', 'machine.os', 'tags']);
 });
 
@@ -130,8 +134,8 @@ test('with search source using columns without time field in the DataView', asyn
   });
   mockSearchSource.setField('index', mockDataView);
 
-  const provider = columnsFromLocatorFactory(mockServices);
-  const columns = await provider(mockPayload[0].params);
+  const { columnsFromLocator } = columnsFromLocatorFactory(mockServices);
+  const columns = await columnsFromLocator(mockPayload[0].params);
   expect(columns).toEqual(['response', 'url', 'clientip', 'machine.os', 'tags']);
 });
 
@@ -144,8 +148,8 @@ test('with search source using columns when DOC_HIDE_TIME_COLUMN_SETTING is true
     return uiSettingsGet(key);
   });
 
-  const provider = columnsFromLocatorFactory(mockServices);
-  const columns = await provider(mockPayload[0].params);
+  const { columnsFromLocator } = columnsFromLocatorFactory(mockServices);
+  const columns = await columnsFromLocator(mockPayload[0].params);
   expect(columns).toEqual(['response', 'url', 'clientip', 'machine.os', 'tags']);
 });
 
@@ -171,7 +175,7 @@ test('with saved search containing ["_source"]', async () => {
     },
   };
 
-  const provider = columnsFromLocatorFactory(mockServices);
-  const columns = await provider(mockPayload[0].params);
+  const { columnsFromLocator } = columnsFromLocatorFactory(mockServices);
+  const columns = await columnsFromLocator(mockPayload[0].params);
   expect(columns).not.toBeDefined(); // must erase the field since it can not be used for search query
 });
