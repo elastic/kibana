@@ -207,6 +207,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const customUrlRows = customUrls.map((customUrl, index) => {
     // Validate the label.
     const label = customUrl.url_name;
+    const effectiveLabel = label || `Custom URL ${index + 1}`;
     const otherUrls = [...customUrls];
     otherUrls.splice(index, 1); // Don't compare label with itself.
     const isInvalidLabel = !isValidLabel(label, otherUrls);
@@ -319,7 +320,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                   onChange={(e) => onLabelChange(e, index)}
                   data-test-subj={`mlJobEditCustomUrlLabelInput_${index}`}
                   aria-required="true"
-                  aria-label={`Label for custom URL ${index + 1}`}
+                  aria-label={i18n.translate('xpack.ml.customUrlEditorList.labelAriaLabel', {
+                    defaultMessage: 'Label for custom URL {indexCount}',
+                    values: { indexCount: index + 1 },
+                  })}
                   aria-invalid={isInvalidLabel}
                 />
               </EuiFormRow>
@@ -343,7 +347,10 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     isInvalid={isInvalidTimeRange}
                     placeholder={TIME_RANGE_TYPE.AUTO}
                     onChange={(e) => onTimeRangeChange(e, index)}
-                    aria-label={`Time range for custom URL ${index + 1}`}
+                    aria-label={i18n.translate('xpack.ml.customUrlEditorList.timeRangeAriaLabel', {
+                      defaultMessage: 'Time range for custom URL {indexCount}',
+                      values: { indexCount: index + 1 },
+                    })}
                     aria-invalid={isInvalidTimeRange}
                   />
                 </EuiFormRow>
@@ -374,7 +381,12 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                       setExpandedUrlIndex(null);
                     }}
                     aria-required="true"
-                    aria-label={`URL value for ${label || `custom URL ${index + 1}`}`}
+                    aria-label={i18n.translate('xpack.ml.customUrlEditorList.urlValueAriaLabel', {
+                      defaultMessage: 'URL value for {label}',
+                      values: {
+                        label: effectiveLabel,
+                      },
+                    })}
                     data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
                   />
                 ) : (
@@ -385,9 +397,15 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     onChange={() => {}} // satisfy React's requirement
                     onFocus={() => setExpandedUrlIndex(index)}
                     aria-required="true"
-                    aria-label={`URL value for ${
-                      label || `custom URL ${index + 1}`
-                    }. Click to expand for editing.`}
+                    aria-label={i18n.translate(
+                      'xpack.ml.customUrlEditorList.urlFieldExpandAriaLabel',
+                      {
+                        defaultMessage: 'URL value for {label}. Click to expand for editing.',
+                        values: {
+                          label: effectiveLabel,
+                        },
+                      }
+                    )}
                     data-test-subj={`mlJobEditCustomUrlInput_${index}`}
                   />
                 )}
@@ -404,7 +422,9 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
     <div
       role="list"
       data-test-subj="mlJobEditCustomUrlsList"
-      aria-label="Custom URL configurations"
+      aria-label={i18n.translate('xpack.ml.customUrlEditorList.configurationsListAriaLabel', {
+        defaultMessage: 'Custom URL configurations',
+      })}
     >
       {customUrlRows}
     </div>

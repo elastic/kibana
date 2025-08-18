@@ -319,7 +319,12 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
         initialFocus="[name=label]"
         style={{ width: 500 }}
         data-test-subj="mlJobNewCustomUrlFormModal"
-        aria-label="Add custom URL to job"
+        aria-label={i18n.translate(
+          'xpack.ml.jobsList.editJobFlyout.customUrls.addCustomUrlAriaLabel',
+          {
+            defaultMessage: 'Add custom URL to the job',
+          }
+        )}
       >
         <EuiModalHeader>
           <EuiModalHeaderTitle>
@@ -348,10 +353,24 @@ export class CustomUrls extends Component<CustomUrlsProps, CustomUrlsState> {
       <>
         <EuiScreenReaderOnly>
           <div aria-live="polite" aria-atomic="true">
-            <h2>Custom URL Configuration</h2>
-            {customUrls.length === 0
-              ? 'No custom URLs configured'
-              : `${customUrls.length} custom URL${customUrls.length === 1 ? '' : 's'} configured`}
+            <h2>
+              <FormattedMessage
+                id="xpack.ml.customUrls.screenReader.configurationTitle"
+                defaultMessage="Custom URL Configuration"
+              />
+            </h2>
+            {customUrls.length === 0 ? (
+              <FormattedMessage
+                id="xpack.ml.customUrls.screenReader.noConfiguredUrls"
+                defaultMessage="No custom URLs configured"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.ml.customUrls.screenReader.configuredUrlsCount"
+                defaultMessage="{count, plural, one {# custom URL} other {# custom URLs}} configured"
+                values={{ count: customUrls.length }}
+              />
+            )}
           </div>
         </EuiScreenReaderOnly>
         <EuiSpacer size="m" />
