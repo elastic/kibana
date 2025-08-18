@@ -31,6 +31,18 @@ describe('AI Assistant Management Selection Plugin', () => {
           }
         }),
       },
+      application: {
+        capabilities: {
+          management: {
+            ai: {
+              aiAssistantManagementSelection: true,
+              // Ensure at least one other AI app is visible for Option A gating
+              securityAiAssistantManagement: true,
+              observabilityAiAssistantManagement: false,
+            },
+          },
+        },
+      },
     } as unknown as CoreStart;
 
     const result = plugin.start(coreStart, {} as any);
@@ -66,6 +78,7 @@ describe('AI Assistant Management Selection Plugin', () => {
         },
         getApps: () => apps,
       };
+
       return {
         sections: { section: { ai: aiSection } },
       } as unknown as ManagementSetup;
@@ -84,10 +97,23 @@ describe('AI Assistant Management Selection Plugin', () => {
       enterprise: 50,
       trial: 60,
     };
+
     const makeLicense = (type: keyof typeof rank) => ({
       type,
       hasAtLeast: (minimum: keyof typeof rank) => rank[type] >= rank[minimum],
     });
+
+    const applicationCapabilities = {
+      capabilities: {
+        management: {
+          ai: {
+            aiAssistantManagementSelection: true,
+            securityAiAssistantManagement: true,
+            observabilityAiAssistantManagement: false,
+          },
+        },
+      },
+    };
 
     it('is disabled by default and only enabled for enterprise license', async () => {
       const plugin = new AIAssistantManagementPlugin({
@@ -107,9 +133,15 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       // Start with non-enterprise license (e.g., gold)
       const license$ = new BehaviorSubject<any>(makeLicense('gold'));
-      plugin.start({ uiSettings: { get: jest.fn(() => AIAssistantType.Default) } } as any, {
-        licensing: { license$ } as any,
-      });
+      plugin.start(
+        {
+          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          application: applicationCapabilities,
+        } as any,
+        {
+          licensing: { license$ } as any,
+        }
+      );
       expect(app.enabled).toBe(false);
 
       // Switch to enterprise license
@@ -138,10 +170,59 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       // Start with a platinum license
       const license$ = new BehaviorSubject<any>(makeLicense('platinum'));
-      plugin.start({ uiSettings: { get: jest.fn(() => AIAssistantType.Default) } } as any, {
-        licensing: { license$ } as any,
-      });
+      plugin.start(
+        {
+          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          application: applicationCapabilities,
+        } as any,
+        {
+          licensing: { license$ } as any,
+        }
+      );
 
+      expect(app.enabled).toBe(false);
+    });
+
+    it('remains disabled for enterprise license when aiAssistantManagementSelection capability is false', async () => {
+      const plugin = new AIAssistantManagementPlugin({
+        config: { get: jest.fn() },
+        env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
+      } as unknown as PluginInitializerContext);
+
+      const management = createManagementMock();
+      const coreSetup = createCoreSetupMock();
+
+      plugin.setup(coreSetup, { management });
+
+      const app = (management.sections.section.ai as any).getApps()[0];
+      expect(app).toBeDefined();
+      expect(app.enabled).toBe(false);
+
+      // Start with non-enterprise, then move to enterprise; capability stays false
+      const license$ = new BehaviorSubject<any>(makeLicense('gold'));
+      plugin.start(
+        {
+          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          application: {
+            capabilities: {
+              management: {
+                ai: {
+                  aiAssistantManagementSelection: false,
+                  securityAiAssistantManagement: true,
+                  observabilityAiAssistantManagement: true,
+                },
+              },
+            },
+          },
+        } as any,
+        {
+          licensing: { license$ } as any,
+        }
+      );
+      expect(app.enabled).toBe(false);
+
+      // Upgrade to enterprise; still should remain disabled because capability is false
+      license$.next(makeLicense('enterprise'));
       expect(app.enabled).toBe(false);
     });
   });
