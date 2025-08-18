@@ -6,13 +6,13 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { EuiConfirmModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
-import { NotificationsStart } from '@kbn/core/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { AddToCaseComment } from '../add_to_case_comment';
 
 export interface AddPageAttachmentToCaseModalProps {
