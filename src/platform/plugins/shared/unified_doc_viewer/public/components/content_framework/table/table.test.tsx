@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { ContentFrameworkTable, ContentFrameworkTableProps } from '.';
+import type { ContentFrameworkTableProps } from '.';
+import { ContentFrameworkTable } from '.';
 import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { buildHitMock } from '../../../__mocks__';
 

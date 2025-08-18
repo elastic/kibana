@@ -8,13 +8,14 @@
  */
 
 import React, { useMemo } from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { getUnifiedDocViewerServices } from '../../../plugin';
-import { DataGrid, DataGridField } from './components/data_grid';
+import type { DataGridField } from './components/data_grid';
+import { DataGrid } from './components/data_grid';
 
 export interface ContentFrameworkTableProps
   extends Pick<
