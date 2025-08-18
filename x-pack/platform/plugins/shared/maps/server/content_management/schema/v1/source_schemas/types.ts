@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   countAggSchema,
   fieldedAggSchema,
   percentileAggSchema,
@@ -15,14 +15,18 @@ import {
   ESGeoLineSourceSchema,
   ESPewPewSourceSchema,
 } from './es_agg_source_schemas';
-import {
+import type {
   ESDistanceSourceSchema,
   ESJoinSourceSchema,
   ESTermSourceSchema,
   joinSourceSchema,
 } from './es_join_source_schemas';
-import { BaseESSourceSchema, ESQLSourceSchema, ESSearchSourceSchema } from './es_source_schemas';
-import {
+import type {
+  BaseESSourceSchema,
+  ESQLSourceSchema,
+  ESSearchSourceSchema,
+} from './es_source_schemas';
+import type {
   EMSFileSourceSchema,
   EMSTMSSourceSchema,
   kibanaTilemapSourceSchema,

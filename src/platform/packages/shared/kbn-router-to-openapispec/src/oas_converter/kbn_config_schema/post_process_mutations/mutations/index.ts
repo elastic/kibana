@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Joi from 'joi';
+import type Joi from 'joi';
 import { metaFields } from '@kbn/config-schema';
 import type { OpenAPIV3 } from 'openapi-types';
 import { parse } from '../../parse';
 import { deleteField, stripBadDefault, processDeprecated, processDiscontinued } from './utils';
-import { IContext } from '../context';
+import type { IContext } from '../context';
 
 const {
   META_FIELD_X_OAS_MAX_LENGTH,

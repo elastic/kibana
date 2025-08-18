@@ -18,7 +18,7 @@ import type { Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 
 /**
  * The fetch status of a Unified Histogram request

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 
 export const plugin = async (ctx: PluginInitializerContext) => {
   const { SearchProfilerServerPlugin } = await import('./plugin');

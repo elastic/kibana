@@ -18,6 +18,7 @@
     "@kbn/config-schema",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

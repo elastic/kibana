@@ -17,14 +17,12 @@ import {
   type GetAttackDiscoveryGenerationsResponse,
   type PostAttackDiscoveryGenerationsDismissResponse,
 } from '@kbn/elastic-assistant-common';
-import { AuthenticatedUser } from '@kbn/core-security-common';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
-import {
-  AIAssistantDataClient,
-  AIAssistantDataClientParams,
-} from '../../../ai_assistant_data_clients';
+import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_clients';
+import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 import { findDocuments } from '../../../ai_assistant_data_clients/find';
 import { findAllAttackDiscoveries } from './find_all_attack_discoveries/find_all_attack_discoveries';
 import { combineFindAttackDiscoveryFilters } from './combine_find_attack_discovery_filters';
@@ -38,7 +36,7 @@ import { getAttackDiscoveryGenerationByIdQuery } from './get_attack_discovery_ge
 import { getAttackDiscoveryGenerationsQuery } from './get_attack_discovery_generations_query';
 import { getCombinedFilter } from './get_combined_filter';
 import { getFindAttackDiscoveryAlertsAggregation } from './get_find_attack_discovery_alerts_aggregation';
-import { AttackDiscoveryAlertDocument } from '../schedules/types';
+import type { AttackDiscoveryAlertDocument } from '../schedules/types';
 import { transformSearchResponseToAlerts } from './transforms/transform_search_response_to_alerts';
 import { getScheduledIndexPattern } from './get_scheduled_index_pattern';
 import { getUpdateAttackDiscoveryAlertsQuery } from '../get_update_attack_discovery_alerts_query';

@@ -53,6 +53,7 @@ export interface UsageStats {
   'onechat:a2a:enabled': boolean;
   'onechat:ui:enabled': boolean;
   'onechat:api:enabled': boolean;
+  'workflows:ui:enabled': boolean;
   'visualization:heatmap:maxBuckets': number;
   'visualization:regionmap:showWarnings': boolean;
   'visualization:tileMap:maxPrecision': number;

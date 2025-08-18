@@ -11,7 +11,8 @@
 import { join } from 'path';
 import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
-import { Flags, run } from '@kbn/dev-cli-runner';
+import type { Flags } from '@kbn/dev-cli-runner';
+import { run } from '@kbn/dev-cli-runner';
 import * as constants from './constants';
 
 type StorybookCliOptions = CLIOptions & BuilderOptions & LoadOptions & { mode: 'dev' | 'static' };

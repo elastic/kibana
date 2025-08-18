@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiBasicTableColumn, EuiIcon, EuiToolTip } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { capitalize } from 'lodash';
-import { UISession } from '../../../types';
+import type { UISession } from '../../../types';
 
 // Helper function: translate an app string to EuiIcon-friendly string
 const appToIcon = (app: string) => {

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
 import { Annotation } from '@langchain/langgraph';
 
 import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
-import { AttackDiscoveryPrompts } from '../prompts';
+import type { AttackDiscoveryPrompts } from '../prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
