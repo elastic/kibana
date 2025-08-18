@@ -10,14 +10,14 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useValues } from 'kea';
 
 import { EuiFlexItem } from '@elastic/eui';
-import { BrushTriggerEvent } from '@kbn/charts-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { BrushTriggerEvent } from '@kbn/charts-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/common';
 
-import { TimeRange } from '@kbn/es-query';
-import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { FormulaPublicApi, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
-import { AnalyticsCollection } from '../../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../../common/types/analytics';
 
 import { KibanaLogic } from '../../shared/kibana';
 import { findOrCreateDataView } from '../utils/find_or_create_data_view';

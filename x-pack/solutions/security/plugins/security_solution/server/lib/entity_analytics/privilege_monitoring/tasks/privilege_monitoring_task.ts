@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { type Logger, type AnalyticsServiceSetup, type AuditLogger } from '@kbn/core/server';
+import {
+  type CoreStart,
+  type Logger,
+  type AnalyticsServiceSetup,
+  SECURITY_EXTENSION_ID,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -25,14 +30,16 @@ import {
   type LatestTaskStateSchema as PrivilegeMonitoringTaskState,
 } from './state';
 import { getApiKeyManager } from '../auth/api_key';
-import { PrivilegeMonitoringDataClient } from '../privilege_monitoring_data_client';
-import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
+import { PrivilegeMonitoringDataClient } from '../engine/data_client';
+import { createDataSourcesService } from '../data_sources/data_sources_service';
+import { buildFakeScopedRequest } from '../../risk_score/tasks/helpers';
+import { PrivilegeMonitoringApiKeyType } from '../auth/saved_object';
+import { monitoringEntitySourceType } from '../saved_objects';
 
 interface RegisterParams {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
-  auditLogger?: AuditLogger;
   taskManager: TaskManagerSetupContract | undefined;
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
@@ -44,6 +51,7 @@ interface RunParams {
   telemetry: AnalyticsServiceSetup;
   experimentalFeatures: ExperimentalFeatures;
   taskInstance: ConcreteTaskInstance;
+  core: CoreStart;
   getPrivilegedUserMonitoringDataClient: (
     namespace: string
   ) => Promise<undefined | PrivilegeMonitoringDataClient>;
@@ -62,12 +70,11 @@ const getTaskId = (namespace: string): string => `${TYPE}:${namespace}:${VERSION
 export const registerPrivilegeMonitoringTask = ({
   getStartServices,
   logger,
-  auditLogger,
   telemetry,
   taskManager,
   kibanaVersion,
   experimentalFeatures,
-}: RegisterParams): void => {
+}: RegisterParams) => {
   if (!taskManager) {
     logger.info(
       '[Privilege Monitoring]  Task Manager is unavailable; skipping privilege monitoring task registration.'
@@ -77,7 +84,6 @@ export const registerPrivilegeMonitoringTask = ({
   const getPrivilegedUserMonitoringDataClient = async (namespace: string) => {
     const [core, { taskManager: taskManagerStart, security, encryptedSavedObjects }] =
       await getStartServices();
-
     const apiKeyManager = getApiKeyManager({
       core,
       logger,
@@ -93,15 +99,13 @@ export const registerPrivilegeMonitoringTask = ({
       return undefined;
     }
 
-    const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart: core, namespace });
-
     return new PrivilegeMonitoringDataClient({
       logger,
       clusterClient: client.clusterClient,
       namespace,
-      soClient,
       taskManager: taskManagerStart,
-      auditLogger,
+      savedObjects: core.savedObjects,
+      auditLogger: core.security.audit.withoutRequest,
       kibanaVersion,
       telemetry,
       apiKeyManager,
@@ -117,6 +121,7 @@ export const registerPrivilegeMonitoringTask = ({
         logger,
         telemetry,
         experimentalFeatures,
+        getStartServices,
         getPrivilegedUserMonitoringDataClient,
       }),
     },
@@ -128,6 +133,7 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     experimentalFeatures: ExperimentalFeatures;
+    getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
     getPrivilegedUserMonitoringDataClient: (
       namespace: string
     ) => Promise<undefined | PrivilegeMonitoringDataClient>;
@@ -136,57 +142,23 @@ const createPrivilegeMonitoringTaskRunnerFactory =
     let cancelled = false;
     const isCancelled = () => cancelled;
     return {
-      run: async () =>
-        runPrivilegeMonitoringTask({
+      run: async () => {
+        const [core] = await deps.getStartServices();
+        return runPrivilegeMonitoringTask({
           isCancelled,
           logger: deps.logger,
           telemetry: deps.telemetry,
           taskInstance,
           experimentalFeatures: deps.experimentalFeatures,
+          core,
           getPrivilegedUserMonitoringDataClient: deps.getPrivilegedUserMonitoringDataClient,
-        }),
+        });
+      },
       cancel: async () => {
         cancelled = true;
       },
     };
   };
-
-const runPrivilegeMonitoringTask = async ({
-  isCancelled,
-  logger,
-  telemetry,
-  taskInstance,
-  experimentalFeatures,
-  getPrivilegedUserMonitoringDataClient,
-}: RunParams): Promise<{
-  state: PrivilegeMonitoringTaskState;
-}> => {
-  const state = taskInstance.state as PrivilegeMonitoringTaskState;
-  const taskStartTime = moment().utc().toISOString();
-  const updatedState = {
-    lastExecutionTimestamp: taskStartTime,
-    namespace: state.namespace,
-    runs: state.runs + 1,
-  };
-  if (isCancelled()) {
-    logger.info('[Privilege Monitoring] Task was cancelled.');
-    return { state: updatedState };
-  }
-
-  try {
-    logger.info('[Privilege Monitoring] Running privilege monitoring task');
-    const dataClient = await getPrivilegedUserMonitoringDataClient(state.namespace);
-    if (!dataClient) {
-      logger.error('[Privilege Monitoring] error creating data client.');
-      throw Error('No data client was found');
-    }
-    await dataClient.plainIndexSync();
-  } catch (e) {
-    logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
-  }
-  logger.info('[Privilege Monitoring] Finished running privilege monitoring task');
-  return { state: updatedState };
-};
 
 export const startPrivilegeMonitoringTask = async ({
   logger,
@@ -213,6 +185,51 @@ export const startPrivilegeMonitoringTask = async ({
     );
     throw e;
   }
+};
+
+const runPrivilegeMonitoringTask = async ({
+  isCancelled,
+  logger,
+  taskInstance,
+  getPrivilegedUserMonitoringDataClient,
+  core,
+}: RunParams): Promise<{
+  state: PrivilegeMonitoringTaskState;
+}> => {
+  const state = taskInstance.state as PrivilegeMonitoringTaskState;
+  const taskStartTime = moment().utc().toISOString();
+  const updatedState = {
+    lastExecutionTimestamp: taskStartTime,
+    namespace: state.namespace,
+    runs: state.runs + 1,
+  };
+  if (isCancelled()) {
+    logger.info('[Privilege Monitoring] Task was cancelled.');
+    return { state: updatedState };
+  }
+
+  try {
+    logger.info('[Privilege Monitoring] Running privilege monitoring task');
+    const dataClient = await getPrivilegedUserMonitoringDataClient(state.namespace);
+    if (!dataClient) {
+      logger.error('[Privilege Monitoring] error creating data client.');
+      throw Error('No data client was found');
+    }
+    const dataSourcesService = createDataSourcesService(dataClient);
+    const request = buildFakeScopedRequest({
+      namespace: state.namespace,
+      coreStart: core,
+    });
+    const soClient = core.savedObjects.getScopedClient(request, {
+      includedHiddenTypes: [PrivilegeMonitoringApiKeyType.name, monitoringEntitySourceType.name],
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+    });
+    await dataSourcesService.plainIndexSync(soClient);
+  } catch (e) {
+    logger.error(`[Privilege Monitoring] Error running privilege monitoring task: ${e.message}`);
+  }
+  logger.info('[Privilege Monitoring] Finished running privilege monitoring task');
+  return { state: updatedState };
 };
 
 export const removePrivilegeMonitoringTask = async ({

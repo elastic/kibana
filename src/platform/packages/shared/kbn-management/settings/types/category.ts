@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldDefinition } from './field_definition';
+import type { FieldDefinition } from './field_definition';
 
 export interface CategorizedFields {
   [category: string]: {
