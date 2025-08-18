@@ -10,4 +10,4 @@
 export { CoreInjectionService } from './src/service';
 export { Global } from './src/modules/plugin';
 export type { InternalCoreDiServiceSetup, InternalCoreDiServiceStart } from './src/contracts';
-export { toContainerModule, toServiceIdentifier } from './src/utils';
+export { cacheInScope, toContainerModule, toServiceIdentifier } from './src/utils';

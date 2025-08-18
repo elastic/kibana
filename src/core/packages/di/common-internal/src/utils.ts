@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule, type ServiceIdentifier } from 'inversify';
+import {
+  type BindingActivation,
+  Container,
+  ContainerModule,
+  type ServiceIdentifier,
+} from 'inversify';
+
+/** @internal */
+export function cacheInScope<T>(serviceIdentifier: ServiceIdentifier<T>): BindingActivation<T> {
+  return ({ get }, injectable) => {
+    get(Container).rebindSync(serviceIdentifier).toConstantValue(injectable);
+
+    return injectable;
+  };
+}
 
 /** @internal */
 export function toContainerModule<T extends object>(

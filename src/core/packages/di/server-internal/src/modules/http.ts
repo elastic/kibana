@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Container, ContainerModule } from 'inversify';
+import { ContainerModule } from 'inversify';
 import type { RouteRegistrar } from '@kbn/core-http-server';
 import { CoreSetup, CoreStart, Request, Response, Route, Router } from '@kbn/core-di-server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { Global } from '@kbn/core-di-internal';
+import { cacheInScope, Global } from '@kbn/core-di-internal';
 import { OnSetup } from '@kbn/core-di';
 
 /** @internal */
@@ -44,14 +44,7 @@ export const http = new ContainerModule(({ bind, onActivation }) => {
   bind(Router)
     .toResolvedValue((httpSetup) => httpSetup.createRouter(), [CoreSetup('http')])
     .inRequestScope()
-    .onActivation(({ get }, router) => {
-      const container = get(Container);
-      if (!container.isCurrentBound(Router)) {
-        container.bind(Router).toConstantValue(router);
-      }
-
-      return router;
-    });
+    .onActivation(cacheInScope(Router));
 
   bind(OnSetup).toConstantValue((container) => {
     container.getAll(Route);

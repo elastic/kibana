@@ -8,7 +8,41 @@
  */
 
 import { Container } from 'inversify';
-import { toContainerModule, toServiceIdentifier } from './utils';
+import { cacheInScope, toContainerModule, toServiceIdentifier } from './utils';
+
+describe('cacheInScope', () => {
+  let parent: Container;
+  let child: Container;
+  let serviceIdentifier: symbol;
+  let factory: jest.Mock;
+
+  beforeEach(() => {
+    parent = new Container();
+    child = new Container({ parent });
+    serviceIdentifier = Symbol('Service');
+    factory = jest.fn(() => 'something');
+
+    parent
+      .bind(serviceIdentifier)
+      .toDynamicValue(factory)
+      .inRequestScope()
+      .onActivation(cacheInScope(serviceIdentifier));
+    parent.bind(Container).toConstantValue(parent);
+    child.bind(Container).toConstantValue(child);
+  });
+
+  it('should cache resolved binding in a request scope', () => {
+    expect(child.get(serviceIdentifier)).toBe('something');
+    expect(child.get(serviceIdentifier)).toBe('something');
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
+
+  it('should rebind resolved binding in the container', () => {
+    expect(parent.get(serviceIdentifier)).toBe('something');
+    expect(parent.get(serviceIdentifier)).toBe('something');
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
+});
 
 describe('toContainerModule', () => {
   it('should create a container module with bindings for each key-value pair in the object', () => {
