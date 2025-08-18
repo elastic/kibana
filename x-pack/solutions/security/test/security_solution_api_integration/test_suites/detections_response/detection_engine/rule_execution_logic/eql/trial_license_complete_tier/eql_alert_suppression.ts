@@ -3196,13 +3196,14 @@ export default ({ getService }: FtrProviderContext) => {
           '@timestamp': ts.toISOString(),
           host: { name: 'host-a' },
         });
+
         await indexListOfSourceDocuments([
-          seqDoc(timestamp1),
-          seqDoc(timestamp2),
-          seqDoc(timestamp3),
-          seqDoc(timestamp4),
-          seqDoc(timestamp5),
-          seqDoc(timestamp6),
+          buildSequenceDoc(timestamp1),
+          buildSequenceDoc(timestamp2),
+          buildSequenceDoc(timestamp3),
+          buildSequenceDoc(timestamp4),
+          buildSequenceDoc(timestamp5),
+          buildSequenceDoc(timestamp6),
         ]);
 
         const rule: EqlRuleCreateProps = {
