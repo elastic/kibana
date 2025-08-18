@@ -6,7 +6,7 @@
  */
 
 import { pipe } from 'fp-ts/function';
-import { StreamlangDSL } from '../../../types/streamlang';
+import type { StreamlangDSL } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
 import { convertStreamlangDSLActionsToIngestPipelineProcessors } from './conversions';
 import { applyPostProcessing } from './post_processing';

@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,

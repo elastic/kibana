@@ -7,8 +7,8 @@
 import { css } from '@emotion/react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
+import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
+import type { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 
 export const createObservabilityStreamsAppPageTemplate =
   ({

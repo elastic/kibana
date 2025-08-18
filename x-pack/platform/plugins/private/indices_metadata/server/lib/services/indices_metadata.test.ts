@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type {
   ConcreteTaskInstance,
@@ -24,7 +24,7 @@ import type {
 import { IndicesMetadataService } from './indices_metadata';
 import { MetadataReceiver } from './receiver';
 import { MetadataSender } from './sender';
-import { ConfigurationService } from './configuration';
+import type { ConfigurationService } from './configuration';
 import {
   DATA_STREAM_EVENT,
   ILM_POLICY_EVENT,

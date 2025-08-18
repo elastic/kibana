@@ -8,15 +8,16 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { initializeControlGroupManager } from './control_group_manager';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { initializeControlGroupManager } from './control_group_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { initializeLayoutManager } from './layout_manager';
-import { DashboardChildren } from './layout_manager/types';
-import { DashboardSettings, DashboardState, isDashboardSection } from '../../common';
-import { initializeSettingsManager } from './settings_manager';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
+import type { initializeLayoutManager } from './layout_manager';
+import type { DashboardChildren } from './layout_manager/types';
+import type { DashboardSettings, DashboardState } from '../../common';
+import { isDashboardSection } from '../../common';
+import type { initializeSettingsManager } from './settings_manager';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { DashboardPanel } from '../../server';
 
 jest.mock('../services/dashboard_backup_service', () => ({}));

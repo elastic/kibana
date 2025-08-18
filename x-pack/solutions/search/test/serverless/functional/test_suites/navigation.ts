@@ -7,7 +7,7 @@
 
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const archiveEmptyIndex =
   'x-pack/solutions/search/test/functional_search/fixtures/search-empty-index';

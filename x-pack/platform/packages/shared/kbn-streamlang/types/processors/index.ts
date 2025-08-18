@@ -8,11 +8,10 @@
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { createIsNarrowSchema } from '@kbn/zod-helpers';
-import {
-  ElasticsearchProcessorType,
-  elasticsearchProcessorTypes,
-} from './manual_ingest_pipeline_processors';
-import { Condition, conditionSchema } from '../conditions';
+import type { ElasticsearchProcessorType } from './manual_ingest_pipeline_processors';
+import { elasticsearchProcessorTypes } from './manual_ingest_pipeline_processors';
+import type { Condition } from '../conditions';
+import { conditionSchema } from '../conditions';
 
 /**
  * Base processor
