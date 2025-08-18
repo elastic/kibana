@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Feature } from 'geojson';
-import { RENDER_AS } from '../../../../common/constants';
+import type { Feature } from 'geojson';
+import type { RENDER_AS } from '../../../../common/constants';
 
 export function convertCompositeRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[];
 export function convertRegularRespToGeoJson(esResponse: any, renderAs: RENDER_AS): Feature[];

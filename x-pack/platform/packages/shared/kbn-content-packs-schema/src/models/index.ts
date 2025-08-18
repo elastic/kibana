@@ -7,8 +7,9 @@
 
 import path from 'path';
 import { z } from '@kbn/zod';
-import { ContentPackSavedObject, SUPPORTED_SAVED_OBJECT_TYPE } from './saved_object';
-import { ContentPackStream } from './stream';
+import type { ContentPackSavedObject } from './saved_object';
+import { SUPPORTED_SAVED_OBJECT_TYPE } from './saved_object';
+import type { ContentPackStream } from './stream';
 
 export * from './api';
 export * from './saved_object';

@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import { DataViewAttributes } from '@kbn/data-views-plugin/common';
+import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import { CDR_MISCONFIGURATIONS_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-common';
 import { CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_SPACE = 'space-1';
 

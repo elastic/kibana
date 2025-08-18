@@ -12,8 +12,8 @@
  */
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ComponentType } from 'react';
-import { DataStreamFlyoutWithContextProps } from './data_stream_flyout_with_context_types';
+import type { ComponentType } from 'react';
+import type { DataStreamFlyoutWithContextProps } from './data_stream_flyout_with_context_types';
 
 export const DataStreamFlyout = dynamic<ComponentType<DataStreamFlyoutWithContextProps>>(() =>
   import('./data_stream_flyout_with_context').then((mod) => ({
