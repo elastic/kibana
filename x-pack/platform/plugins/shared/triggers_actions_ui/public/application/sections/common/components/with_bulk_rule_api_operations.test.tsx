@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/no-shadow */
-
 import * as React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -117,7 +115,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('muteRule calls the muteRule api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('muteRule', (p) => p.rule);
+    const ComponentToExtend = invoker('muteRule', (p) => p.rule);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule();
@@ -131,7 +129,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('unmuteRule calls the unmuteRule api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('unmuteRule', (p) => p.rule);
+    const ComponentToExtend = invoker('unmuteRule', (p) => p.rule);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule({ muteAll: true });
@@ -145,7 +143,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('enableRule calls the bulkEnableRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('bulkEnableRules', (p) => ({ ids: [p.rule.id] }));
+    const ComponentToExtend = invoker('bulkEnableRules', (p) => ({ ids: [p.rule.id] }));
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule({ enabled: false });
@@ -158,7 +156,10 @@ describe('with_bulk_rule_api_operations', () => {
 
   it('disableRule calls the bulkDisableRules api', async () => {
     const { http } = useKibanaMock().services;
-  const ComponentToExtend = invoker('bulkDisableRules', (p) => ({ ids: [p.rule.id], untrack: true }));
+    const ComponentToExtend = invoker('bulkDisableRules', (p) => ({
+      ids: [p.rule.id],
+      untrack: true,
+    }));
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rule = mockRule();
@@ -174,7 +175,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('muteRules calls the muteRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('muteRules', (p) => p.rules);
+    const ComponentToExtend = invoker('muteRules', (p) => p.rules);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule(), mockRule()];
@@ -188,7 +189,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('unmuteRules calls the unmuteRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('unmuteRules', (p) => p.rules);
+    const ComponentToExtend = invoker('unmuteRules', (p) => p.rules);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule({ muteAll: true }), mockRule({ muteAll: true })];
@@ -202,7 +203,9 @@ describe('with_bulk_rule_api_operations', () => {
   it('enableRules calls the bulkEnableRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('bulkEnableRules', (p) => ({ ids: p.rules.map((r: Rule) => r.id) }));
+    const ComponentToExtend = invoker('bulkEnableRules', (p) => ({
+      ids: p.rules.map((r: Rule) => r.id),
+    }));
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [
@@ -223,7 +226,10 @@ describe('with_bulk_rule_api_operations', () => {
   it('disableRules calls the bulkDisableRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('bulkDisableRules', (p) => ({ ids: p.rules.map((r: Rule) => r.id), untrack: true }));
+    const ComponentToExtend = invoker('bulkDisableRules', (p) => ({
+      ids: p.rules.map((r: Rule) => r.id),
+      untrack: true,
+    }));
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule(), mockRule()];
@@ -241,7 +247,9 @@ describe('with_bulk_rule_api_operations', () => {
   it('bulkDeleteRules calls the bulkDeleteRules api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('bulkDeleteRules', (p) => ({ ids: [p.rules[0].id, p.rules[1].id] }));
+    const ComponentToExtend = invoker('bulkDeleteRules', (p) => ({
+      ids: [p.rules[0].id, p.rules[1].id],
+    }));
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const rules = [mockRule(), mockRule()];
@@ -255,7 +263,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('loadRule calls the loadRule api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('loadRule', (p) => p.ruleId);
+    const ComponentToExtend = invoker('loadRule', (p) => p.ruleId);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const ruleId = uuidv4();
@@ -269,7 +277,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('resolveRule calls the resolveRule api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('resolveRule', (p) => p.ruleId);
+    const ComponentToExtend = invoker('resolveRule', (p) => p.ruleId);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     const ruleId = uuidv4();
@@ -283,7 +291,7 @@ describe('with_bulk_rule_api_operations', () => {
   it('loadRuleTypes calls the loadRuleTypes api', async () => {
     const { http } = useKibanaMock().services;
     const user = userEvent.setup();
-  const ComponentToExtend = invoker('loadRuleTypes');
+    const ComponentToExtend = invoker('loadRuleTypes');
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     render(<ExtendedComponent />);
@@ -313,7 +321,7 @@ describe('with_bulk_rule_api_operations', () => {
       sort: [sortTimestamp],
     };
 
-  const ComponentToExtend = invoker('loadExecutionLogAggregations', () => callProps);
+    const ComponentToExtend = invoker('loadExecutionLogAggregations', () => callProps);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     render(<ExtendedComponent />);
@@ -346,7 +354,7 @@ describe('with_bulk_rule_api_operations', () => {
       ],
     };
 
-  const ComponentToExtend = invoker('loadActionErrorLog', () => callProps);
+    const ComponentToExtend = invoker('loadActionErrorLog', () => callProps);
 
     const ExtendedComponent = withBulkRuleOperations(ComponentToExtend);
     render(<ExtendedComponent />);

@@ -314,9 +314,9 @@ describe('actions_connectors_list', () => {
 
       const nextPageButton = await screen.findByTestId('pagination-button-1');
       await user.click(nextPageButton);
-      
+
       expect(await screen.findByTestId('actionsTable')).toBeInTheDocument();
-      
+
       // Expect an item from the second page to be visible
       expect(await screen.findByText('My test 10')).toBeInTheDocument();
       // And an item that was only on the first page to be gone (ensures page actually changed)
