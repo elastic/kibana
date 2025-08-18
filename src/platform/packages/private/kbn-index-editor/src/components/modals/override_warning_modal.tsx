@@ -27,9 +27,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { firstValueFrom } from 'rxjs';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextExtra } from '../../types';
-import { isPlaceholderColumn } from '../../utils';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KibanaContextExtra } from '../../types';
 
 const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';
 
@@ -120,15 +119,7 @@ export const getOverrideConfirmation = async ({
   storage,
   indexUpdateService,
 }: KibanaContextExtra): Promise<boolean> => {
-  const columnsPendingToBeSaved = (
-    await firstValueFrom(indexUpdateService.pendingColumnsToBeSaved$, { defaultValue: [] })
-  ).filter((col) => !isPlaceholderColumn(col.name));
-
-  const docsPendingToBeSaved = await firstValueFrom(indexUpdateService.savingDocs$, {
-    defaultValue: new Map(),
-  });
-
-  const hasPendingChanges = docsPendingToBeSaved.size > 0 || columnsPendingToBeSaved.length > 0;
+  const hasPendingChanges = await firstValueFrom(indexUpdateService.hasUnsavedChanges$);
   const dontAskMeAgainCheck = Boolean(storage.get(OVERRIDE_WARNING_MODAL_DISMISSED));
 
   return new Promise((resolve) => {
