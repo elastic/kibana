@@ -7,7 +7,7 @@
 
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
 import {
   legacySyntheticsMonitorTypeSingle,
