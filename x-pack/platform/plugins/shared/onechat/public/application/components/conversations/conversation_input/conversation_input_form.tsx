@@ -8,8 +8,8 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useMessages } from '../../../context/messages_context';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../context/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
 import { ConversationContent } from '../conversation_grid';
 import { ConversationInputActions } from './conversation_input_actions';
@@ -25,12 +25,13 @@ const fullHeightStyles = css`
 
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
-  const { input, setInput, sendMessage } = useMessages();
+  const [input, setInput] = useState('');
+  const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
-  const disabled = !input.trim() || isSendingMessage;
+  const isSubmitDisabled = !input.trim() || isSendingMessage;
 
   const handleSubmit = () => {
-    if (disabled) {
+    if (isSubmitDisabled) {
       return;
     }
     sendMessage({ message: input });
@@ -67,12 +68,16 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
           defaultMessage: 'Message input form',
         })}
       >
-        <ConversationInputTextArea
-          message={input}
-          setMessage={setInput}
-          handleSubmit={handleSubmit}
+        <ConversationInputTextArea input={input} setInput={setInput} onSubmit={handleSubmit} />
+        <ConversationInputActions
+          onSubmit={handleSubmit}
+          isSubmitDisabled={isSubmitDisabled}
+          resetToPendingMessage={() => {
+            if (pendingMessage) {
+              setInput(pendingMessage);
+            }
+          }}
         />
-        <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />
       </EuiFlexGroup>
     </ConversationContent>
   );

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { injectMetaAttributes } from './inject_meta_attributes';
-import { ISavedObjectsManagement } from '../services';
-import { v1 } from '../../common';
-import { SavedObjectInvalidRelation, SavedObjectWithMetadata } from '../types';
+import type { ISavedObjectsManagement } from '../services';
+import type { v1 } from '../../common';
+import type { SavedObjectInvalidRelation, SavedObjectWithMetadata } from '../types';
 
 export async function findRelationships({
   type,

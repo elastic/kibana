@@ -9,6 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -17,7 +18,6 @@ import {
   EuiImage,
   EuiPageTemplate,
   EuiText,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';

@@ -9,11 +9,11 @@
 
 import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
-import { Version } from '@kbn/object-versioning';
+import type { Version } from '@kbn/object-versioning';
 
 import type { MSearchIn, MSearchOut } from '../../common';
 import type { ContentRegistry, StorageContext } from '../core';
-import { MSearchService } from '../core/msearch';
+import type { MSearchService } from '../core/msearch';
 import { getServiceObjectTransformFactory, getStorageContext } from '../utils';
 import { ContentClient } from './content_client';
 

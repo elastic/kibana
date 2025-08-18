@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FeaturesPluginStart } from './plugin';
+import type { FeaturesPluginStart } from './plugin';
 
 const createStart = (): jest.Mocked<FeaturesPluginStart> => {
   return {

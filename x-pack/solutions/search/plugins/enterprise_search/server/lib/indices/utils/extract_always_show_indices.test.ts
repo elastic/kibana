@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchIndex } from '@kbn/search-connectors';
+import type { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { expandAliases, getAlwaysShowAliases } from './extract_always_show_indices';
 

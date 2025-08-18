@@ -12,7 +12,7 @@ import type {
   CoreUserProfileDelegateContract,
   GetUserProfileResponse,
 } from '@kbn/core-user-profile-browser';
-import { UserProfileData } from '@kbn/core-user-profile-common';
+import type { UserProfileData } from '@kbn/core-user-profile-common';
 
 export const getDefaultUserProfileImplementation = (): CoreUserProfileDelegateContract => {
   return {
