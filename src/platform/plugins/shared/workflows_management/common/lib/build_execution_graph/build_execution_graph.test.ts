@@ -8,7 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import {
+import type {
   AtomicGraphNode,
   ConnectorStep,
   EnterConditionBranchNode,

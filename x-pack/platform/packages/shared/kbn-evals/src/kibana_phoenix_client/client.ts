@@ -5,15 +5,16 @@
  * 2.0.
  */
 import pLimit from 'p-limit';
-import { PhoenixClient, createClient } from '@arizeai/phoenix-client';
-import { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { Model } from '@kbn/inference-common';
+import type { PhoenixClient } from '@arizeai/phoenix-client';
+import { createClient } from '@arizeai/phoenix-client';
+import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Model } from '@kbn/inference-common';
 import { withActiveInferenceSpan } from '@kbn/inference-tracing';
-import { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
+import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
 import { upsertDataset } from './upsert_dataset';
-import { PhoenixConfig } from '../utils/get_phoenix_config';
+import type { PhoenixConfig } from '../utils/get_phoenix_config';
 
 export class KibanaPhoenixClient {
   private readonly phoenixClient: PhoenixClient;

@@ -6,7 +6,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
   ConversationCreateProps,
@@ -14,7 +14,7 @@ import {
   ConversationUpdateProps,
   DeleteAllConversationsRequestBody,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   CreateMessageSchema,
   EsConversationSchema,
 } from '../ai_assistant_data_clients/conversations/types';

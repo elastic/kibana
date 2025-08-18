@@ -12,7 +12,7 @@ import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-sett
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
 import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
-import { QueryAsset } from '../../../../common/assets';
+import type { QueryAsset } from '../../../../common/assets';
 
 export interface GroupObjectGetResponse {
   group: Streams.GroupStream.Definition['group'];

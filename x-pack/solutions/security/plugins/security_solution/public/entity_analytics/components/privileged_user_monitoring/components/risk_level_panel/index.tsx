@@ -115,7 +115,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                 <EuiBasicTable
                   responsiveBreakpoint={false}
                   data-test-subj="severity-level-table"
-                  compressed
                   columns={columns}
                   items={severityTableData}
                   loading={isLoading}

@@ -18,12 +18,10 @@ import {
   EuiLoadingLogo,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-  ObservabilityOnboardingLocatorParams,
-} from '@kbn/deeplinks-observability';
-import { OverlayRef } from '@kbn/core/public';
-import { Streams } from '@kbn/streams-schema';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
+import type { OverlayRef } from '@kbn/core/public';
+import type { Streams } from '@kbn/streams-schema';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';

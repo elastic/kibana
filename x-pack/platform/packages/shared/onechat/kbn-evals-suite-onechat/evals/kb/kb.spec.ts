@@ -6,7 +6,8 @@
  */
 
 import { evaluate as base } from '../../src/evaluate';
-import { EvaluateDataset, createEvaluateDataset } from '../../src/evaluate_dataset';
+import type { EvaluateDataset } from '../../src/evaluate_dataset';
+import { createEvaluateDataset } from '../../src/evaluate_dataset';
 
 const evaluate = base.extend<
   {
