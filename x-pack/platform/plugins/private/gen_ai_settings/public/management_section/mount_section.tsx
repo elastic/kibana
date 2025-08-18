@@ -14,14 +14,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/enabled_features_context';
 import type { GenAiSettingsConfigType } from '../../common/config';
 import { createCallGenAiSettingsAPI } from '../api/client';
 import { SettingsContextProvider } from '../contexts/settings_context';
-import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/management-settings-ids';
-import { wrapWithTheme } from '@kbn/react-kibana-context-theme';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface MountSectionParams {
   core: CoreSetup;
