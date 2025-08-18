@@ -12,7 +12,6 @@ import type {
   ConversationUpdateProps,
   Provider,
   MessageRole,
-  ConversationSummary,
   UUID,
   ContentReferences,
 } from '@kbn/elastic-assistant-common';
@@ -45,7 +44,11 @@ export interface UpdateConversationSchema {
     provider?: Provider;
     model?: string;
   };
-  summary?: ConversationSummary;
+  summary?: {
+    '@timestamp': string;
+    semantic_content?: string;
+    summarized_message_ids?: UUID[];
+  };
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
   updated_at?: string;
@@ -85,7 +88,7 @@ export const updateConversation = async ({
           },
         },
         refresh: true,
-        script: getUpdateScript({ conversation: params, isPatch }).script,
+        script: getUpdateScript({ conversation: params, isBulkUpdate: false, isPatch }).script,
       });
       if (
         (response?.updated && response?.updated > 0) ||
@@ -142,6 +145,7 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
     id,
+    summary,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
@@ -198,6 +202,15 @@ export const transformToUpdateScheme = (
                 }
               : {}),
           })),
+        }
+      : {}),
+    ...(summary
+      ? {
+          summary: {
+            '@timestamp': updatedAt,
+            semantic_content: summary.semanticContent,
+            summarized_message_ids: summary.summarizedMessageIds,
+          },
         }
       : {}),
   };

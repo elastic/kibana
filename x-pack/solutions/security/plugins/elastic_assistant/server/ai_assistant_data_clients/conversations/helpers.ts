@@ -9,11 +9,21 @@ import type { UpdateConversationSchema } from './update_conversation';
 
 export const getUpdateScript = ({
   conversation,
+  isBulkUpdate,
   isPatch,
 }: {
   conversation: UpdateConversationSchema;
+  isBulkUpdate: boolean;
   isPatch?: boolean;
 }) => {
+  if (isBulkUpdate) {
+    // https://www.elastic.co/docs/reference/elasticsearch/mapping-reference/semantic-text#update-script
+    // Cannot use script for bulk update of the documents with semantic_text fields
+    return {
+      doc: conversation,
+    };
+  }
+
   return {
     script: {
       source: `
@@ -74,6 +84,21 @@ export const getUpdateScript = ({
         messages.add(newMessage);
       }
       ctx._source.messages = messages;
+    }
+    if (params.assignEmpty == true || params.containsKey('summary')) {
+      if (ctx._source.summary != null) {
+        if (params.assignEmpty == true || params.summary.containsKey('@timestamp')) {
+          ctx._source.summary['@timestamp'] = params.summary['@timestamp'];
+        }
+        if (params.assignEmpty == true || params.summary.containsKey('semantic_content')) {
+          ctx._source.summary.semantic_content = params.summary.semantic_content;
+        }
+        if (params.assignEmpty == true || params.summary.containsKey('summarized_message_ids')) {
+          ctx._source.summary.summarized_message_ids = params.summary.summarized_message_ids;
+        }
+      } else {
+        ctx._source.summary = params.summary;
+      }
     }
     ctx._source.updated_at = params.updated_at;
   `,
