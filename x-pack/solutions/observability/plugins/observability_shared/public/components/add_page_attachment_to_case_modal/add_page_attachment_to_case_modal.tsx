@@ -71,7 +71,11 @@ export function AddPageAttachmentToCaseModal({
   }, [hasCasesPermissions, notifications.toasts]);
 
   return hasCasesPermissions ? (
-    <CasesContext permissions={casesPermissions} owner={['observability']}>
+    <CasesContext
+      permissions={casesPermissions}
+      owner={['observability']}
+      features={{ alerts: { sync: false } }}
+    >
       <AddToCaseButtonContent
         pageAttachmentState={pageAttachmentState}
         notifications={notifications}
