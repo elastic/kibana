@@ -13,7 +13,7 @@ export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
 // New version for 9.1.
 export const SECURITY_FEATURE_ID_V3 = 'siemV3' as const;
-
+export const SECURITY_FEATURE_ID_V4 = 'siemV4' as const;
 /**
  * @deprecated deprecated in 8.17. Use CASE_FEATURE_ID_V2 instead
  */
@@ -32,6 +32,8 @@ export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as 
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as const;
+
+export const RULES_FEATURE_ID = 'securitySolutionRulesV1' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

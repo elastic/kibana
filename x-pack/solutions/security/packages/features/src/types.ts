@@ -100,4 +100,5 @@ export interface ProductFeaturesConfigurator {
   timeline: () => ProductFeaturesConfig;
   notes: () => ProductFeaturesConfig;
   siemMigrations: () => ProductFeaturesConfig;
+  rules: () => ProductFeaturesConfig;
 }
