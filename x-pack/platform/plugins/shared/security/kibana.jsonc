@@ -27,7 +27,8 @@
       "management",
       "usageCollection",
       "spaces",
-      "share"
+      "share",
+      "developerToolbar"
     ],
     "requiredBundles": [
       "kibanaReact",

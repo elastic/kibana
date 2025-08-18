@@ -11,11 +11,11 @@ import { css } from '@emotion/react';
 import type { LayoutState } from './layout.types';
 
 const cssProp = css`
-  align-items: baseline;
   height: 100vh;
   width: 100vw;
   min-height: 100%;
   min-width: 100%;
+  overflow: hidden;
 
   display: grid;
 

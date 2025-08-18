@@ -64,7 +64,14 @@ export class FeatureFlagsService {
       this.overrides = featureFlagsInjectedMetadata.overrides;
     }
     return {
-      getInitialFeatureFlags: () => featureFlagsInjectedMetadata?.initialFeatureFlags ?? {},
+      getInitialFeatureFlags: (withOverrides) => {
+        if (withOverrides) {
+          return deepMerge(featureFlagsInjectedMetadata?.initialFeatureFlags ?? {}, this.overrides);
+        }
+        // If no overrides are requested, return the initial feature flags as is.
+        return featureFlagsInjectedMetadata?.initialFeatureFlags ?? {};
+      },
+
       setProvider: (provider) => {
         if (this.isProviderReadyPromise) {
           throw new Error('A provider has already been set. This API cannot be called twice.');

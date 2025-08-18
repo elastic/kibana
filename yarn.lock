@@ -5645,6 +5645,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/developer-toolbar@link:src/platform/packages/private/kbn-developer-toolbar":
+  version "0.0.0"
+  uid ""
+
 "@kbn/discover-contextual-components@link:src/platform/packages/shared/kbn-discover-contextual-components":
   version "0.0.0"
   uid ""

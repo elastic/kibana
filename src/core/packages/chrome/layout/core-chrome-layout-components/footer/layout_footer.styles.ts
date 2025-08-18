@@ -15,6 +15,7 @@ const root = css`
   width: var(--kbn-layout--footer-width);
   height: var(--kbn-layout--footer-height);
   z-index: var(--kbn-layout--aboveFlyoutLevel);
+  overflow: hidden;
 `;
 
 export const styles = {

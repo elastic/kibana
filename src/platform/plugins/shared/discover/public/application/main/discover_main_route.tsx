@@ -37,6 +37,8 @@ import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../constants';
 import { ChartPortalsRenderer } from './components/chart';
 import { useStateManagers } from './state_management/hooks/use_state_managers';
 import { getUserAndSpaceIds } from './utils/get_user_and_space_ids';
+import { DeveloperToolbarAction, DeveloperToolbarProvider } from '@kbn/developer-toolbar';
+import { EuiBadge, EuiSwitch } from '@elastic/eui';
 
 export interface MainRouteProps {
   customizationContext: DiscoverCustomizationContext;
@@ -58,10 +60,13 @@ export const DiscoverMainRoute = ({
   onAppLeave,
 }: MainRouteProps) => {
   const services = useDiscoverServices();
-  const tabsEnabled = services.core.featureFlags.getBooleanValue(
+  const _tabsEnabled = services.core.featureFlags.getBooleanValue(
     TABS_ENABLED_FEATURE_FLAG_KEY,
     false
   );
+  const [tabsOverride, setTabsOverride] = useState<boolean | undefined>(undefined);
+  const tabsEnabled = tabsOverride ?? _tabsEnabled;
+
   const rootProfileState = useRootProfile();
   const history = useHistory();
   const [urlStateStorage] = useState(
@@ -184,16 +189,30 @@ export const DiscoverMainRoute = ({
   };
 
   return (
-    <InternalStateProvider store={internalState}>
-      <rootProfileState.AppWrapper>
-        <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
-          {tabsEnabled ? (
-            <TabsView {...sessionViewProps} />
-          ) : (
-            <DiscoverSessionView {...sessionViewProps} />
-          )}
-        </ChartPortalsRenderer>
-      </rootProfileState.AppWrapper>
-    </InternalStateProvider>
+    <DeveloperToolbarProvider>
+      <InternalStateProvider store={internalState}>
+        <rootProfileState.AppWrapper>
+          <ChartPortalsRenderer runtimeStateManager={sessionViewProps.runtimeStateManager}>
+            {tabsEnabled ? (
+              <TabsView {...sessionViewProps} />
+            ) : (
+              <DiscoverSessionView {...sessionViewProps} />
+            )}
+          </ChartPortalsRenderer>
+        </rootProfileState.AppWrapper>
+
+        <DeveloperToolbarAction id={'discoverTabs'} priority={100} tooltip={'Discover Tabs'}>
+          <EuiSwitch
+            showLabel={true}
+            label={'Tabs'}
+            checked={tabsEnabled}
+            onChange={async () => {
+              setTabsOverride(!tabsEnabled);
+            }}
+            compressed
+          />
+        </DeveloperToolbarAction>
+      </InternalStateProvider>
+    </DeveloperToolbarProvider>
   );
 };

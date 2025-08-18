@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultConfig } from '@kbn/storybook';
+import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+import { DeveloperToolbarPlugin } from './plugin';
 
-module.exports = {
-  ...defaultConfig,
-  stories: [
-    '../../**/*.stories.+(tsx|mdx)',
-    '../../../../shared/shared-ux/**/*.stories.+(tsx|mdx)',
-    '../../../../../../core/packages/chrome/**/*.stories.+(tsx|mdx)',
-    '../../../../private/kbn-developer-toolbar/**/*.stories.+(tsx|mdx)',
-  ],
-};
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DeveloperToolbarPlugin(initializerContext);
+}
+
+export type { DeveloperToolbarAction, DeveloperToolbarStart } from './plugin';
