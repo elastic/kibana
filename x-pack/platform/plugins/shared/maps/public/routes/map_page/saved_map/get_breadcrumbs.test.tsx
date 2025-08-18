@@ -6,7 +6,7 @@
  */
 
 import { getBreadcrumbs } from './get_breadcrumbs';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 
 jest.mock('../../../kibana_services', () => {});
 jest.mock('../../../render_app', () => {});

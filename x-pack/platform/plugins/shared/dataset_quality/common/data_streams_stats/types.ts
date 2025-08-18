@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APIClientRequestParamsOf, APIReturnType } from '../rest';
+import type { APIClientRequestParamsOf, APIReturnType } from '../rest';
 
 export type GetDataStreamsTypesPrivilegesParams =
   APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/types_privileges`>['params'];

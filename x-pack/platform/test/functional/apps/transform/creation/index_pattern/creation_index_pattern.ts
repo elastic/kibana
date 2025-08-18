@@ -8,13 +8,8 @@
 import { TRANSFORM_STATE } from '@kbn/transform-plugin/common/constants';
 
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import {
-  GroupByEntry,
-  isLatestTransformTestData,
-  isPivotTransformTestData,
-  LatestTransformTestData,
-  PivotTransformTestData,
-} from '../../helpers';
+import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } from '../../helpers';
+import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const canvasElement = getService('canvasElement');

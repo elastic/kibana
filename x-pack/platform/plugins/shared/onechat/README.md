@@ -252,7 +252,7 @@ try {
 
 ## MCP Server
 
-The MCP server provides a standardized interface for external MCP clients to access onechat tools.
+The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/chat/mcp` endpoint.
 
 
 ### Running with Claude Desktop
@@ -271,7 +271,7 @@ Configure Claude Desktop by adding this to its configuration:
       "command": "npx",
       "args": [
         "mcp-remote",
-        "http://localhost:5601/api/mcp",
+        "http://localhost:5601/api/chat/mcp",
         "--header",
         "Authorization:${AUTH_HEADER}"
       ],

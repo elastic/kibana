@@ -9,7 +9,7 @@ import { act, waitFor, renderHook } from '@testing-library/react';
 import { kibanaStartMock } from '../utils/kibana_react.mock';
 import * as pluginContext from './use_plugin_context';
 import { createObservabilityRuleTypeRegistryMock } from '..';
-import { PluginContextValue } from '../context/plugin_context/plugin_context';
+import type { PluginContextValue } from '../context/plugin_context/plugin_context';
 import { useFetchAlertDetail } from './use_fetch_alert_detail';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();

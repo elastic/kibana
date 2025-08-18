@@ -18,13 +18,9 @@ import {
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
-import {
-  ESQL_STRING_TYPES,
-  ESQL_NUMBER_TYPES,
-  FunctionReturnType,
-  FieldType,
-} from '../../../definitions/types';
+import type { ICommandCallbacks } from '../../types';
+import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 

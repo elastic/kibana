@@ -7,16 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import {
-  TRIGGER_SUGGESTION_COMMAND,
-  fieldTypes,
-  FieldType,
-  FunctionParameterType,
-  FunctionReturnType,
-  FunctionDefinitionTypes,
-} from '@kbn/esql-ast';
+import type { FieldType, FunctionParameterType, FunctionReturnType } from '@kbn/esql-ast';
+import { TRIGGER_SUGGESTION_COMMAND, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import {
+import type {
   Location,
   ESQLFieldWithMetadata,
   ISuggestionItem,
@@ -26,8 +20,8 @@ import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -139,7 +133,7 @@ export function getFunctionSignaturesByReturnType(
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
     license === 'platinum',
   activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
@@ -176,9 +170,7 @@ export function getFunctionSignaturesByReturnType(
         if (hasRestrictedSignature) {
           const availableSignatures = signatures.filter((signature) => {
             if (!signature.license) return true;
-            return hasMinimumLicenseRequired(
-              signature.license.toLocaleLowerCase() as ESQLLicenseType
-            );
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
           });
 
           if (availableSignatures.length === 0) {

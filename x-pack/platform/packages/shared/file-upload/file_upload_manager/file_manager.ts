@@ -25,7 +25,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
-import { FileUploadResults } from '@kbn/file-upload-common';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import { isEqual } from 'lodash';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';

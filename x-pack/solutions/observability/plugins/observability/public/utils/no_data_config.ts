@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 
 export function getNoDataConfig({
