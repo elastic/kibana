@@ -57,7 +57,6 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
       application,
     },
     docLinkVersion,
-    config: { isDevMode },
   } = context;
   const { toasts } = notifications;
   const {
@@ -102,13 +101,13 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
 
   const editorDidMountCallback = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
-      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss, isDevMode);
+      const provider = new MonacoEditorActionsProvider(editor, setEditorActionsCss);
       setInputEditor(provider);
       actionsProvider.current = provider;
       setupResizeChecker(divRef.current!, editor);
       setEditorInstace(editor);
     },
-    [setupResizeChecker, setInputEditor, setEditorInstace, isDevMode]
+    [setupResizeChecker, setInputEditor, setEditorInstace]
   );
 
   useEffect(() => {
