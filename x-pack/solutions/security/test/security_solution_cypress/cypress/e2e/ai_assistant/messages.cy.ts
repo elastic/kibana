@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MessageRole } from '@kbn/elastic-assistant-common';
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import { TIMELINE_QUERY } from '../../screens/timeline';
 import { CASES_URL } from '../../urls/navigation';

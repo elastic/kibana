@@ -13,19 +13,16 @@ import { Subject, Observable } from 'rxjs';
 import { EventEmitter, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
-import { MessageRole, type Message } from '../../../common';
-import {
+import { MessageRole, type Message, CONTEXT_FUNCTION_NAME } from '../../../common';
+import type {
   ChatCompletionChunkEvent,
   MessageAddEvent,
-  StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
-import {
-  ChatCompletionEventType as InferenceChatCompletionEventType,
-  ChatCompleteResponse,
-} from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-common';
+import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
+import type { ChatCompleteResponse } from '@kbn/inference-common';
+import { ChatCompletionEventType as InferenceChatCompletionEventType } from '@kbn/inference-common';
+import type { InferenceClient } from '@kbn/inference-common';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
-import { CONTEXT_FUNCTION_NAME } from '../../functions/context/context';
 import { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
 import { observableIntoStream } from '../util/observable_into_stream';

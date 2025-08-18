@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { monaco } from '@kbn/monaco';
-import {
+import type { monaco } from '@kbn/monaco';
+import type {
   WorkflowYAMLEditorDiffProps,
   WorkflowYAMLEditorProps,
   YamlValidationErrorSeverity,

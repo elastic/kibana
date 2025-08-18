@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { INSTALLED_VERSION } from '../../../services/synthetics_private_location';
 import { getDataStream } from './test_policy';
 

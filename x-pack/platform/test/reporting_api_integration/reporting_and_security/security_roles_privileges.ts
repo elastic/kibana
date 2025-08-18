@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { SerializedConcreteTaskInstance } from '@kbn/task-manager-plugin/server/task';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const reportingAPI = getService('reportingAPI');

@@ -9,7 +9,8 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { getPackages } from '@kbn/repo-packages';
-import { CliArgs, Env, RawConfigAdapter } from '@kbn/config';
+import type { CliArgs, RawConfigAdapter } from '@kbn/config';
+import { Env } from '@kbn/config';
 import { CliDevMode } from './cli_dev_mode';
 import { CliLog } from './log';
 import { convertToLogger } from './log_adapter';

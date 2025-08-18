@@ -7,7 +7,7 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useSyntheticsSettingsContext } from '../../../contexts';
 
 export function useManagementLocator(extraPath?: string) {
