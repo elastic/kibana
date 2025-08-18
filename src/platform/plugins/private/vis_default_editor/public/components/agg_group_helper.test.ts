@@ -16,7 +16,7 @@ import {
   isInvalidAggsTouched,
   getEnabledMetricAggsCount,
 } from './agg_group_helper';
-import { AggsState } from './agg_group_state';
+import type { AggsState } from './agg_group_state';
 
 describe('DefaultEditorGroup helpers', () => {
   let group: IAggConfig[];

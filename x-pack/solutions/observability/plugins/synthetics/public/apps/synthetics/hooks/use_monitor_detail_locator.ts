@@ -9,9 +9,10 @@ import { useEffect, useState, useMemo } from 'react';
 import { syntheticsMonitorDetailLocatorID } from '@kbn/observability-plugin/common';
 import { type TimeRange, getAbsoluteTimeRange } from '@kbn/data-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 import { getMonitorSpaceToAppend } from './use_edit_monitor_locator';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export interface MonitorDetailLocatorParams {
   configId: string;

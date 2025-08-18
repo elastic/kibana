@@ -8,12 +8,12 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
+import type {
   ShareRegistry,
   ShareMenuRegistrySetup,
   ShareMenuRegistryStart,
 } from './share_menu_registry';
-import { ShareContext, ShareConfigs, ShareActionIntents } from '../types';
+import type { ShareContext, ShareConfigs, ShareActionIntents } from '../types';
 
 const createSetupMock = (): jest.Mocked<ShareMenuRegistrySetup> => {
   const setup = {

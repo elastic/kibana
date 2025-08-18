@@ -12,7 +12,7 @@ import { type TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AddPageAttachmentToCaseModal } from '@kbn/observability-shared-plugin/public';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useGetUrlParams, useMonitorDetailLocator } from '../../hooks';
 

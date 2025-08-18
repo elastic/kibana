@@ -34,7 +34,7 @@ export const SearchBar = () => {
 
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
-    [timeRangeMetadata]
+    [timeRangeMetadata?.schemas]
   );
 
   // Set preferredSchema in URL if not set and hostOtelEnabled
@@ -100,6 +100,7 @@ export const SearchBar = () => {
                 query={searchCriteria.query}
                 filters={searchCriteria.filters}
                 onFiltersChange={onPanelFiltersChange}
+                schema={searchCriteria.preferredSchema}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>

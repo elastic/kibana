@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowSchema, WorkflowYaml } from '../spec/schema';
+import type { WorkflowYaml } from '../spec/schema';
+import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -27,7 +28,11 @@ export interface EsWorkflowExecution {
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+  context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
+  currentNodeId?: string; // The node currently being executed
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -35,6 +40,8 @@ export interface EsWorkflowExecution {
   finishedAt: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export interface ProviderInput {
@@ -59,8 +66,9 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
-  error?: string;
-  output?: Record<string, any>;
+  error?: string | null;
+  output?: Record<string, any> | null;
+  state?: Record<string, any>;
 }
 
 export enum WorkflowStatus {

@@ -22,6 +22,10 @@ After creating a report in a non-default {{kib}} space, the document exists in t
 
 Applies to: {{stack}} 9.0.3, 9.0.4, 9.1.0
 
+**Resolved**
+
+This issue is resolved in {{stack}} 9.1.0 and 9.1.2.
+
 **Details**
 
 If you've set `xpack.alerting.rules.run.alerts.max` to a value greater than `5000`, you will encounter `Result window is too large` error messages when a maintenance window is active.
@@ -38,7 +42,7 @@ Applies to: {{stack}} 9.0.0
 
 **Details**
 
-If you've changed the [`server.protocol`](/reference/configuration-reference/general-settings.md) value to `http2`, PDF and PNG reports will fail when you export them from the dashboard, visualization, or Canvas workpad that you're generating a report for.
+Starting in  9.0.0, the default value of `server.protocol` is `http2`. PDF and PNG reports will fail when this setting is used in this release.
 
 **Action**
 

@@ -7,10 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps, useEffect, useState } from 'react';
-import { Meta, StoryFn, StoryObj } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';

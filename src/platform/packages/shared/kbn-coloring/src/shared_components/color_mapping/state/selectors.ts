@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KbnPalettes } from '@kbn/palettes';
-import { RootState } from './color_mapping';
+import type { KbnPalettes } from '@kbn/palettes';
+import type { RootState } from './color_mapping';
 
 export function selectPalette(palettes: KbnPalettes) {
   return (state: RootState) => palettes.get(state.colorMapping.paletteId);

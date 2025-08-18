@@ -9,7 +9,7 @@
 
 import { ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM } from '@kbn/core-http-common';
 import type { HttpFetchQuery } from '@kbn/core/public';
-import { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   INTERNAL_ROUTES,
@@ -18,7 +18,7 @@ import {
   buildKibanaPath,
   REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
-import {
+import type {
   BaseParams,
   JobId,
   ManagementLinkFn,
@@ -28,7 +28,7 @@ import {
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import { Job } from '.';
 import { jobCompletionNotifications } from './job_completion_notifications';
 

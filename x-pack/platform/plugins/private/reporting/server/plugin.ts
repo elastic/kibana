@@ -24,7 +24,7 @@ import type {
   ReportingStart,
   ReportingStartDeps,
 } from './types';
-import { ReportingRequestHandlerContext } from './types';
+import type { ReportingRequestHandlerContext } from './types';
 import { registerReportingEventTypes, registerReportingUsageCollector } from './usage';
 import { registerFeatures } from './features';
 import { setupSavedObjects } from './saved_objects';

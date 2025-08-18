@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { AppPluginDependenciesStart, AppPluginDependenciesSetup } from './types';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { AppPluginDependenciesStart, AppPluginDependenciesSetup } from './types';
 
 export class SessionNotificationsPlugin implements Plugin {
   private sessionIds: Array<string | undefined> = [];
