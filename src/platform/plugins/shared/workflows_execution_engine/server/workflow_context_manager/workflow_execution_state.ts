@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
-import { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
-import { StepExecutionRepository } from '../repositories/step_execution_repository';
+import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
+import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
+import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 
 interface Change {
   objectId: string;

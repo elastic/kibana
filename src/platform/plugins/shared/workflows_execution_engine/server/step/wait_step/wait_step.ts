@@ -6,11 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { WaitGraphNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
-import { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
+import type { WaitGraphNode } from '@kbn/workflows';
+import type { StepImplementation } from '../step_base';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { WorkflowTaskManager } from '../../workflow_task_manager/workflow_task_manager';
 
 export class WaitStepImpl implements StepImplementation {
   private static readonly SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
@@ -64,11 +64,16 @@ export class WaitStepImpl implements StepImplementation {
     const durationInMs = this.getDurationInMs();
     await this.workflowRuntime.startStep(this.node.id);
     const workflowExecution = this.workflowRuntime.getWorkflowExecution();
+    const runAt = new Date(new Date().getTime() + durationInMs);
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
-      runAt: new Date(new Date().getTime() + durationInMs),
+      runAt,
       workflowRunId: workflowExecution.id,
     });
-
+    this.workflowLogger.logDebug(
+      `Scheduled resume execution task for wait step "${this.node.id}" with ID ${
+        resumeExecutionTask.taskId
+      }.\nExecution will resume at ${runAt.toISOString()}`
+    );
     await this.workflowRuntime.setStepState(this.node.id, {
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });
@@ -78,6 +83,9 @@ export class WaitStepImpl implements StepImplementation {
 
   private async exitLongWait(): Promise<void> {
     await this.workflowRuntime.setStepState(this.node.id, undefined);
+    this.workflowLogger.logDebug(
+      `Resuming execution of wait step "${this.node.id}" after long wait.`
+    );
     this.logFinishWait();
     await this.workflowRuntime.finishStep(this.node.id);
     this.workflowRuntime.goToNextStep();
