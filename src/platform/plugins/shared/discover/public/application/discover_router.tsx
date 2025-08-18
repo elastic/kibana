@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
 import React from 'react';
 import { EuiErrorBoundary } from '@elastic/eui';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -20,6 +20,7 @@ import type { DiscoverServices } from '../build_services';
 import { ViewAlertRoute } from './view_alert';
 import type { DiscoverCustomizationContext } from '../customizations';
 import { DiscoverMainRoute } from './main';
+import { DiscoverListing } from '../discover_listing';
 
 export interface DiscoverRouterProps {
   services: DiscoverServices;
@@ -63,8 +64,14 @@ export const DiscoverRoutes = ({
       <Route path="/view/:id">
         <DiscoverMainRoute {...routeProps} />
       </Route>
-      <Route path="/" exact>
+      <Route path="/list">
+        <DiscoverListing />
+      </Route>
+      <Route path="/create">
         <DiscoverMainRoute {...routeProps} />
+      </Route>
+      <Route path="/" exact>
+        <Redirect to="/list" />
       </Route>
       <NotFoundRoute />
     </Routes>

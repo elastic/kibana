@@ -1,148 +1,113 @@
 # Favorites POC Plugin
 
-A proof-of-concept plugin that provides a reusable favorites service and UI components for Kibana applications. This plugin demonstrates how to create a cross-app favorites system that can be used consistently across different Kibana plugins.
+A proof of concept for a reusable Favorites service across Kibana applications, demonstrating how to build a unified favorites system that can be extended across different object types and applications.
 
 ## Overview
 
-The Favorites POC plugin provides:
+This POC implements a lightweight favorites service that can be used across Kibana applications to provide consistent favoriting functionality. The service is designed to be extensible and can adapt to existing features while providing a unified user experience.
 
-1. **FavoritesService** - A service for managing favorites across different object types
-2. **FavoriteStarButton** - A reusable UI component for favoriting/unfavoriting items
-3. **Integration with SavedObjectFinder** - Star buttons in saved object lists across Kibana
+## Features
+
+### Core Service
+- **FavoritesService**: Lightweight service with saved object backing
+- **FavoriteStarButton**: Reusable star button component with animations
+- **Session Persistence**: In-memory cache for graceful error handling
+- **Type Safety**: Full TypeScript support with proper interfaces
+
+### Enhanced Components
+- **SavedObjectFinder**: Enhanced with tabbed UI (All/Starred tabs)
+- **Real-time Updates**: Items disappear immediately when unfavorited
+- **Smooth Animations**: Star burst effects only on user interactions
+- **Consistent UX**: Matches existing Kibana patterns
+
+### Integration Examples
+- **Discover**: Integrated into "Open Discover session" flyout
+- **Dashboard**: Extended existing listing with new service
+- **Cross-app Consistency**: Same behavior across applications
 
 ## Architecture
 
-### FavoritesService
+### Plugin Structure
+```
+src/plugins/favorites_poc/
+├── public/
+│   ├── components/
+│   │   └── favorite_star_button.tsx
+│   ├── services/
+│   │   └── favorites_service.ts
+│   └── plugin.tsx
+├── server/
+│   └── plugin.ts
+└── kibana.jsonc
+```
 
-The `FavoritesService` is a drop-in replacement for the existing `FavoritesClient` that provides:
+### Service API
+```typescript
+interface FavoritesService {
+  isFavorite(type: string, id: string): Promise<boolean>;
+  toggleFavorite(type: string, id: string): Promise<boolean>;
+  getFavorites(): Promise<{ favoriteIds: string[] }>;
+  configureForApp(appName: string, contentType: string): FavoritesService;
+}
+```
 
-- **Backward compatibility** - Implements the same interface as `FavoritesClient`
-- **Enhanced functionality** - Cross-app favorites queries
-- **Error handling** - Graceful fallback when API calls fail
-- **Local caching** - Session persistence during development
-
-### FavoriteStarButton
-
-A reusable React component that provides:
-
-- **Consistent UI** - Matches Kibana's existing star button design
-- **Hover behavior** - Shows/hides based on favorite status
-- **Starburst animation** - Visual feedback when toggling favorites
-- **Error handling** - Graceful degradation when services are unavailable
+### Component API
+```typescript
+interface FavoriteStarButtonProps {
+  type: string;
+  id: string;
+  favoritesService: FavoritesService;
+  onFavoriteChange?: (isFavorite: boolean) => void;
+  alwaysShow?: boolean;
+  className?: string;
+}
+```
 
 ## Usage
 
-### 1. Plugin Setup
-
-Add the plugin to your `kibana.jsonc`:
-
-```jsonc
-{
-  "type": "plugin",
-  "id": "@kbn/favorites-poc-plugin",
-  "plugin": {
-    "id": "favoritesPoc",
-    "requiredPlugins": ["contentManagement"],
-    "optionalPlugins": []
-  }
-}
-```
-
-### 2. Server-Side Registration
-
-Register favorite types in your server plugin:
-
-```typescript
-// In your server plugin setup
-public setup(core: CoreSetup, { contentManagement }: Dependencies) {
-  // Register your content type as a favorite type
-  contentManagement.favorites.registerFavoriteType('your_content_type');
-}
-```
-
-### 3. Client-Side Integration
-
-#### Basic Usage
-
+### Basic Star Button
 ```typescript
 import { FavoriteStarButton } from '@kbn/favorites-poc-plugin/public';
 
-// In your component
 <FavoriteStarButton
   type="dashboard"
   id="dashboard-123"
   favoritesService={favoritesService}
   onFavoriteChange={(isFavorite) => {
-    console.log(`Dashboard is now ${isFavorite ? 'favorited' : 'unfavorited'}`);
+    console.log('Favorite status changed:', isFavorite);
   }}
 />
 ```
 
-#### With FavoritesService
-
-```typescript
-import { FavoritesService } from '@kbn/favorites-poc-plugin/public';
-
-// Configure the service for your app
-const favoritesService = new FavoritesService({
-  http: coreServices.http,
-  userProfile: coreServices.userProfile,
-  usageCollection: coreServices.usageCollection,
-}).configureForApp('your-app-id', 'your-content-type');
-
-// Use in components
-<FavoriteStarButton
-  type="your-content-type"
-  id="item-id"
-  favoritesService={favoritesService}
-/>
-```
-
-#### Integration with SavedObjectFinder
-
-The plugin automatically adds star buttons to `SavedObjectFinder` components when a `favoritesService` is provided:
-
+### Enhanced SavedObjectFinder
 ```typescript
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 
 <SavedObjectFinder
-  // ... other props
   favoritesService={configuredFavoritesService}
-  savedObjectMetaData={[
-    {
-      type: 'your-content-type',
-      getIconForSavedObject: () => 'yourIcon',
-      name: 'Your Content Type',
-    },
-  ]}
+  showTabbedUI={true} // Enable All/Starred tabs
+  // ... other props
 />
 ```
 
-## API Reference
+### Service Configuration
+```typescript
+const configuredService = favoritesService.configureForApp('discover', 'search');
+```
 
-### FavoritesService
+## CSS Utilities
 
-#### Methods
+The plugin provides CSS utilities for hover behavior:
 
-- `configureForApp(appName: string, contentType: string)` - Configure for specific app context
-- `addFavorite(params: { id: string; metadata?: object })` - Add item to favorites
-- `removeFavorite(params: { id: string })` - Remove item from favorites
-- `getFavorites()` - Get all favorites for current content type
-- `isFavorite(type: string, id: string)` - Check if item is favorited
-- `toggleFavorite(type: string, id: string)` - Toggle favorite status
-- `getAllFavorites()` - Get favorites across all types
-- `getFavoritesForTypes(types: string[])` - Get favorites for specific types
+```typescript
+import { cssFavoriteHoverWithinTable, cssFavoriteHoverWithinListItem } from '@kbn/favorites-poc-plugin/public';
 
-### FavoriteStarButton
+// For tables
+<EuiTable css={cssFavoriteHoverWithinTable(euiTheme)}>
 
-#### Props
-
-- `type: string` - The type of object being favorited
-- `id: string` - The ID of the object being favorited
-- `favoritesService: FavoritesService` - The favorites service to use
-- `onFavoriteChange?: (isFavorite: boolean) => void` - Callback when status changes
-- `alwaysShow?: boolean` - Whether to show button always (default: false)
-- `className?: string` - Optional CSS class name
+// For list items
+<EuiListGroup css={cssFavoriteHoverWithinListItem(euiTheme)}>
+```
 
 ## Examples
 
@@ -205,50 +170,69 @@ const discoverFavoritesService = favoritesService.configureForApp('discover', 's
 </EuiTable>
 ```
 
-## CSS Utilities
-
-The plugin provides CSS utilities for hover behavior:
-
-```typescript
-import { cssFavoriteHoverWithinTable, cssFavoriteHoverWithinListItem } from '@kbn/favorites-poc-plugin/public';
-
-// For tables
-<EuiTable css={cssFavoriteHoverWithinTable(euiTheme)}>
-
-// For list items
-<EuiListGroup css={cssFavoriteHoverWithinListItem(euiTheme)}>
-```
-
 ## Development
 
 ### Running Tests
-
 ```bash
-# Run Jest tests
-yarn test:jest src/plugins/favorites_poc
+yarn test:jest --plugin favorites_poc
+```
 
-# Run type checks
+### Type Checking
+```bash
 yarn type-check --project src/plugins/favorites_poc/tsconfig.json
 ```
 
-### Building
-
-The plugin is automatically built as part of the Kibana build process.
-
 ## Future Enhancements
 
-- **Phase 2**: Discover Home Page with favorited saved searches
-- **Phase 3**: Personalized Kibana Home Page with cross-app favorites
-- **Enhanced persistence**: Better error handling and offline support
-- **Performance optimizations**: Caching and batch operations
-- **Additional UI components**: Favorite lists, bulk operations
+### TableListView Integration
+**Potential Future Enhancement**: Consider integrating `TableListView` into `SavedObjectFinder` for a more unified table experience across Kibana.
+
+#### Benefits:
+- **Consistent UX**: Same table patterns across all Kibana applications
+- **Enhanced Features**: Better pagination, advanced filtering, sorting, bulk operations
+- **Built-in Favorites**: Leverage existing favorites support in TableListView
+- **Developer Experience**: Type-safe, consistent API patterns
+
+#### Implementation Options:
+1. **Gradual Migration**: Add `useTableListView` prop to SavedObjectFinder
+2. **New Component**: Create `SavedObjectFinderWithTableListView`
+3. **Enhanced Version**: Build enhanced SavedObjectFinder with TableListView features
+
+#### Migration Path:
+1. Add TableListView as an option in SavedObjectFinder
+2. Make it default for new implementations
+3. Gradually migrate existing usage
+4. Deprecate old implementation
+
+This enhancement would provide a more powerful and consistent table experience while maintaining backward compatibility.
+
+### Content Insights for Saved Searches
+**Future Enhancement**: Add content insights functionality to the Discover "View details" flyout to show usage analytics.
+
+#### Current Status:
+- ✅ **"Created by" information** - Available and implemented
+- ✅ **"Updated by" information** - Available and implemented  
+- ✅ **Creation/update dates** - Available and implemented
+- ❌ **Usage analytics chart** - Not yet available for saved searches
+
+#### Implementation Plan:
+1. **Content Insights Client**: Extend `ContentInsightsClient` to support `domainId: 'search'` or `domainId: 'discover'`
+2. **Activity Section**: Add 90-day usage chart to "View details" flyout
+3. **Analytics Tracking**: Implement view tracking for saved searches
+4. **Performance Metrics**: Add usage statistics and trends
+
+#### Benefits:
+- **Usage Analytics**: Understand which saved searches are most popular
+- **User Insights**: Track engagement patterns
+- **Content Optimization**: Identify unused or underutilized searches
+- **Consistent UX**: Match Dashboard's activity section functionality
+
+#### Technical Requirements:
+- Content insights service support for saved searches
+- Analytics tracking for saved search views
+- Performance considerations for chart rendering
+- Proper error handling for missing analytics data
 
 ## Contributing
 
-This is a proof-of-concept plugin. For production use, consider:
-
-1. **Error handling** - Implement proper error boundaries and user feedback
-2. **Performance** - Add caching and optimize API calls
-3. **Accessibility** - Ensure proper ARIA labels and keyboard navigation
-4. **Testing** - Add comprehensive unit and integration tests
-5. **Documentation** - Expand API documentation and examples
+This is a proof of concept and not intended for production use. The code demonstrates architectural patterns and integration approaches for building reusable favorites functionality across Kibana applications.

@@ -37,6 +37,8 @@ const savedSearchSearchOptionsSchema = schema.maybe(
   schema.object({
     searchFields: schema.maybe(schema.arrayOf(schema.string())),
     fields: schema.maybe(schema.arrayOf(schema.string())),
+    includeReferences: schema.maybe(schema.arrayOf(schema.oneOf([schema.literal('tag')]))),
+    limit: schema.maybe(schema.number()),
   })
 );
 
