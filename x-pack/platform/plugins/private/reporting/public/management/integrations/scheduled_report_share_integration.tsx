@@ -11,7 +11,7 @@ import type { ExportShareDerivatives } from '@kbn/share-plugin/public/types';
 import type { ReportingSharingData } from '@kbn/reporting-public/share/share_context_menu';
 import { EuiButton } from '@elastic/eui';
 import type { ReportingAPIClient } from '@kbn/reporting-public';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
 import type { ReportTypeId } from '../../types';
 import { getKey as getReportingHealthQueryKey } from '../hooks/use_get_reporting_health_query';

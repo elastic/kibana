@@ -11,10 +11,10 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { OBSERVABILITY_AI_ASSISTANT_CONNECTOR_ID } from '../../common/rule_connector';
-import { ObsAIAssistantActionParams } from './types';
+import type { ObsAIAssistantActionParams } from './types';
 import {
   CONNECTOR_DESC,
   CONNECTOR_REQUIRED,

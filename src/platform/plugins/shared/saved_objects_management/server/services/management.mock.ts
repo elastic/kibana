@@ -8,7 +8,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { SavedObjectsManagement } from './management';
+import type { SavedObjectsManagement } from './management';
 
 type Management = PublicMethodsOf<SavedObjectsManagement>;
 const createManagementMock = () => {

@@ -6,7 +6,7 @@
  */
 
 import { format } from 'url';
-import request from 'superagent';
+import type request from 'superagent';
 import type {
   APIReturnType,
   ObservabilityAIAssistantAPIClientRequestParamsOf as APIClientRequestParamsOf,

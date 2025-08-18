@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCheckbox,
-  EuiCheckboxProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiModalBody,

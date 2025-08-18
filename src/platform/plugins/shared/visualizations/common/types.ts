@@ -8,7 +8,7 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import {
+import type {
   AggParamsMapping,
   AggConfigSerialized,
   SerializedSearchSourceFields,

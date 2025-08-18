@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { CONTEXT_MENU_TRIGGER, EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_MARKDOWN_ACTION_ID,
   CONVERT_LEGACY_MARKDOWN_ACTION_ID,
