@@ -88,6 +88,21 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     includeAgents: ['opentelemetry/java/elastic'],
   },
   {
+    key: 'sampling_rate',
+    type: 'float',
+    defaultValue: '1.0',
+    label: i18n.translate('xpack.apm.agentConfig.samplingRate.label', {
+      defaultMessage: 'Sampling rate',
+    }),
+    description: i18n.translate('xpack.apm.agentConfig.samplingRate.description', {
+      defaultMessage:
+        'By default, the agent will sample every span in every trace (e.g. request to your service). ' +
+        'To reduce overhead and storage requirements, you can set the sampling rate to a value between 0.0 and 1.0. ' +
+        'Further details can be found in the [OpenTelemetry Sampling Concepts](https://opentelemetry.io/docs/concepts/sampling/) page.',
+    }),
+    excludeAgents: ['android/java', 'iOS/swift', ...EDOT_AGENT_NAMES],
+  },
+  {
     key: 'send_traces',
     type: 'boolean',
     defaultValue: 'true',
