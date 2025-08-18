@@ -208,16 +208,6 @@ function validateFileContent(fileBytes, path) {
     }
   }
 
-  // Check if the content is a PNG and sanitize it
-  // if (possibleMimeTypes.includes('image/png')) {
-  //   try {
-  //     // Return the sanitized content as Buffer
-  //     return await sanitizePng(fileBytes);
-  //   } catch (error) {
-  //     throw new Error(`Failed to sanitize PNG content: ${error.message}`);
-  //   }
-  // }
-
   return fileBytes;
 }
 
