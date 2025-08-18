@@ -103,9 +103,12 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('dns processor', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/pipeline/dns', {
-          useCreate: true,
-        });
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/pipeline/dns',
+          {
+            useCreate: true,
+          }
+        );
       });
 
       after(async () => {
