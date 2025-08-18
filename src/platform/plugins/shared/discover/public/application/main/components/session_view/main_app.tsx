@@ -9,6 +9,7 @@
 
 import React, { useEffect } from 'react';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
+import { i18n } from '@kbn/i18n';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { DiscoverLayout } from '../layout';
 import { setBreadcrumbs } from '../../../../utils/breadcrumbs';
@@ -45,7 +46,12 @@ export function DiscoverMainApp({ stateContainer }: DiscoverMainProps) {
     if (stateContainer.customizationContext.displayMode === 'standalone') {
       const pageTitleSuffix = savedSearch.id && savedSearch.title ? `: ${savedSearch.title}` : '';
       chrome.docTitle.change(`Discover${pageTitleSuffix}`);
-      setBreadcrumbs({ titleBreadcrumbText: savedSearch.title, services });
+      setBreadcrumbs({ 
+        titleBreadcrumbText: savedSearch.title || i18n.translate('discover.newSessionBreadcrumb', {
+          defaultMessage: 'New session',
+        }), 
+        services 
+      });
     }
   }, [
     chrome.docTitle,

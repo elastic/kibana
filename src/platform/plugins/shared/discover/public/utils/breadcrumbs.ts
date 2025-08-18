@@ -48,10 +48,6 @@ export function setBreadcrumbs({
   if (titleBreadcrumbText) {
     services.chrome.setBreadcrumbs([...rootBreadcrumbs, { text: titleBreadcrumbText }]);
   } else {
-    services.chrome.setBreadcrumbs([
-      {
-        text: discoverBreadcrumbsTitle,
-      },
-    ]);
+    services.chrome.setBreadcrumbs(rootBreadcrumbs);
   }
 }

@@ -12,6 +12,7 @@ import React, { useMemo } from 'react';
 import { FavoritesClient } from '@kbn/content-management-favorites-public';
 import { TableListView } from '@kbn/content-management-table-list-view';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedRelative, I18nProvider } from '@kbn/i18n-react';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { QueryClientProvider } from '@tanstack/react-query';
@@ -47,6 +48,8 @@ export const DashboardListing = ({
     refreshUnsavedDashboards,
     tableListViewTableProps,
     contentInsightsClient,
+    hasInitialFetchReturned,
+    pageDataTestSubject,
   } = useDashboardListingTable({
     goToDashboard,
     getDashboardUrl,
@@ -72,30 +75,41 @@ export const DashboardListing = ({
     }
   }, []);
 
+  // Extract title for the page header
+  const { title } = tableListViewTableProps;
+
   return (
     <I18nProvider>
       <QueryClientProvider client={dashboardQueryClient}>
-        <TableListViewKibanaProvider
-          {...{
-            core: coreServices,
-            savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
-            FormattedRelative,
-            favorites: dashboardFavoritesClient,
-            contentInsightsClient,
-            isKibanaVersioningEnabled: !serverlessService,
-          }}
-        >
-          <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
-            <>
-              {children}
-              <DashboardUnsavedListing
-                goToDashboard={goToDashboard}
-                unsavedDashboardIds={unsavedDashboardIds}
-                refreshUnsavedDashboards={refreshUnsavedDashboards}
-              />
-            </>
-          </TableListView>
-        </TableListViewKibanaProvider>
+        <KibanaPageTemplate panelled data-test-subj={pageDataTestSubject}>
+          <KibanaPageTemplate.Header
+            pageTitle={<span id={tableListViewTableProps.headingId}>{title}</span>}
+            data-test-subj="top-nav"
+          />
+          <KibanaPageTemplate.Section aria-labelledby={hasInitialFetchReturned ? tableListViewTableProps.headingId : undefined}>
+            <TableListViewKibanaProvider
+              {...{
+                core: coreServices,
+                savedObjectsTagging: savedObjectsTaggingService?.getTaggingApi(),
+                FormattedRelative,
+                favorites: dashboardFavoritesClient,
+                contentInsightsClient,
+                isKibanaVersioningEnabled: !serverlessService,
+              }}
+            >
+              <TableListView<DashboardSavedObjectUserContent> {...tableListViewTableProps}>
+                <>
+                  {children}
+                  <DashboardUnsavedListing
+                    goToDashboard={goToDashboard}
+                    unsavedDashboardIds={unsavedDashboardIds}
+                    refreshUnsavedDashboards={refreshUnsavedDashboards}
+                  />
+                </>
+              </TableListView>
+            </TableListViewKibanaProvider>
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
       </QueryClientProvider>
     </I18nProvider>
   );

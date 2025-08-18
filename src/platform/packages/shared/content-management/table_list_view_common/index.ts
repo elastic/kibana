@@ -23,3 +23,8 @@ export interface UserContentCommonSchema {
     description?: string;
   };
 }
+
+// Export recently accessed items components
+export { RecentlyAccessedItemsPanel } from './components/recently_accessed_items_panel';
+export { useRecentlyAccessedItems } from './hooks/use_recently_accessed_items';
+export type { RecentlyAccessedItem, RecentlyAccessedFilter } from './hooks/use_recently_accessed_items';

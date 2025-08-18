@@ -21,9 +21,17 @@ This POC implements a lightweight favorites service that can be used across Kiba
 - **Consistent UX**: Matches existing Kibana patterns
 
 ### Integration Examples
-- **Discover**: Integrated into "Open Discover session" flyout
+- **Discover**: Integrated into "Open Discover session" flyout and new home page
 - **Dashboard**: Extended existing listing with new service
 - **Cross-app Consistency**: Same behavior across applications
+
+### Discover Home Page
+- **New Home Route**: `/list` route with modern `TableListView` integration
+- **Tabbed Interface**: "All sessions" and "Starred sessions" tabs
+- **Recently Accessed Items**: Side panel showing last 10 recently accessed Discover sessions
+- **Smart Navigation**: Proper routing to `/create` for new sessions
+- **Breadcrumb Navigation**: Clickable "Discover" → "New session" structure
+- **App Menu Integration**: "New session" button routes to new home page structure
 
 ## Architecture
 
@@ -87,6 +95,32 @@ import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
   favoritesService={configuredFavoritesService}
   showTabbedUI={true} // Enable All/Starred tabs
   // ... other props
+/>
+```
+
+### Discover Home Page
+```typescript
+import { DiscoverListing } from '@kbn/discover-plugin/public/discover_listing';
+
+// Route configuration
+<Route path="/list">
+  <DiscoverListing />
+</Route>
+```
+
+### Recently Accessed Items Panel
+```typescript
+import { RecentlyAccessedItemsPanel } from '@kbn/content-management-table-list-view-common';
+
+<RecentlyAccessedItemsPanel
+  items={recentlyAccessedItems}
+  isLoading={isLoadingRecentlyAccessed}
+  error={recentlyAccessedError}
+  onItemSelect={handleRecentlyAccessedItemSelect}
+  title="Recently accessed"
+  filter="discover"
+  width={320}
+  maxWidth={400}
 />
 ```
 
@@ -182,6 +216,40 @@ yarn test:jest --plugin favorites_poc
 yarn type-check --project src/plugins/favorites_poc/tsconfig.json
 ```
 
+## Implementation Details
+
+### Discover Home Page Architecture
+The new Discover home page (`/list`) implements a modern, consistent user experience:
+
+#### Key Components:
+- **TableListView**: Shared Kibana component providing advanced table functionality
+- **KibanaPageTemplate**: Consistent page layout with header and sections
+- **RecentlyAccessedItemsPanel**: Side panel showing recently accessed items
+- **Favorites Integration**: Star buttons with real-time updates
+
+#### Navigation Flow:
+1. **Home Page** (`/list`): Shows all saved searches with favorites
+2. **Create New** (`/create`): Creates new Discover session
+3. **View Saved** (`/view/:id`): Opens existing saved search
+4. **Breadcrumbs**: "Discover" (clickable) → "New session" or saved search title
+
+#### Smart Routing:
+- **New Session**: Routes to `/create` with proper breadcrumb context
+- **Saved Search**: Routes to `/view/:id` with full state preservation
+- **Recently Accessed**: Uses `services.locator.getRedirectUrl` for proper URL generation
+
+### Recently Accessed Items
+The recently accessed items functionality provides quick access to recently used Discover sessions:
+
+#### Features:
+- **localStorage Integration**: Uses `services.chrome.recentlyAccessed.get()`
+- **Filtering**: Support for `'discover'`, `'dashboard'`, `'all'` filters
+- **App Icons**: Shows `discoverApp` or `dashboardApp` icons based on item type
+- **Proper Navigation**: Generates correct URLs with all necessary parameters
+
+#### Shared Component:
+Located in `@kbn/content-management-table-list-view-common` for reuse across Kibana applications.
+
 ## Future Enhancements
 
 ### TableListView Integration
@@ -232,6 +300,44 @@ This enhancement would provide a more powerful and consistent table experience w
 - Analytics tracking for saved search views
 - Performance considerations for chart rendering
 - Proper error handling for missing analytics data
+
+### Optional UI Telemetry (usageCollection)
+An orthogonal enhancement is to wire Kibana's `usageCollection` to report lightweight UI counters (e.g., button clicks, creates, deletes, favorites toggled). This is separate from Content Insights (which aggregates content usage over time) and can be added later without affecting functionality.
+
+Notes:
+- Discover does not currently emit UI counters on its listing page.
+- If desired, expose `usageCollection` through the app services and invoke `reportUiCounter` on key interactions.
+- This can coexist with, but is independent from, Content Insights.
+
+## Completed Features
+
+### Phase 1: Favorites Service (Foundation) ✅
+- ✅ **FavoritesService**: Lightweight service with saved object backing
+- ✅ **FavoriteStarButton**: Reusable star button component with animations
+- ✅ **SavedObjectFinder Enhancement**: Added tabbed UI (All/Starred tabs)
+- ✅ **Dashboard Integration**: Star button in Dashboard listing page
+- ✅ **Discover Integration**: Star button in "Open session" flyout
+- ✅ **Cross-app Functionality**: Works across Dashboard and Discover
+- ✅ **Comprehensive Documentation**: Complete README with usage examples
+
+### Phase 2: Discover Home Page ✅
+- ✅ **New Discover Home Route**: `/list` route with `TableListView`
+- ✅ **TableListView Integration**: Using shared component with "All" and "Starred" tabs
+- ✅ **Create/Delete Actions**: Working identically to Dashboard
+- ✅ **View Details Action**: Content editor with metadata editing
+- ✅ **Smart Navigation**: Proper routing to `/create` for new sessions
+- ✅ **KibanaPageTemplate**: Refactored to use consistent page layout
+- ✅ **Recently Accessed Items Panel**: Side panel showing recent Discover sessions
+- ✅ **Breadcrumb Navigation**: Clickable "Discover" → "New session" structure
+
+### Phase 3: Extend Discover Home Page ✅
+- ✅ **Recently Accessed Items**: Panel showing last 10 recently accessed items
+- ✅ **Shared Component**: `RecentlyAccessedItemsPanel` in `@kbn/content-management-table-list-view-common`
+- ✅ **Filtering**: Support for `'discover'`, `'dashboard'`, `'all'` filters
+- ✅ **Proper Navigation**: Uses `services.locator.getRedirectUrl` for Discover items
+- ✅ **UI Refinements**: `EuiListGroup` display with app icons
+- ✅ **Breadcrumb Fixes**: Always clickable "Discover" breadcrumb
+- ✅ **App Menu Integration**: "New session" button routes to `/create`
 
 ## Contributing
 

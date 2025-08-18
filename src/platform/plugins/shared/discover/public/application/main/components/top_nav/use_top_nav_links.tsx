@@ -135,12 +135,11 @@ export const useTopNavLinks = ({
         const newSearchMenuItem = getNewSearchAppMenuItem({
           newSearchUrl: services.locator.getRedirectUrl(locatorParams),
           onNewSearch: () => {
-            const defaultState: DiscoverAppState = defaultEsqlState ?? {
-              dataSource: currentDataView.id
-                ? createDataViewDataSource({ dataViewId: currentDataView.id })
-                : undefined,
-            };
-            services.application.navigateToApp(DISCOVER_APP_ID, { state: { defaultState } });
+            // Navigate to Discover create page to create a new search
+            // Use the same pattern as the listing page create functionality
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.split('/app/discover')[0];
+            window.location.href = `${baseUrl}/app/discover#/create`;
           },
         });
         items.push(newSearchMenuItem);

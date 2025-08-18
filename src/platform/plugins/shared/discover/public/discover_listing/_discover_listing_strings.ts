@@ -39,4 +39,3 @@ export const discoverListingErrorStrings = {
       values: { title },
     }),
 };
-
