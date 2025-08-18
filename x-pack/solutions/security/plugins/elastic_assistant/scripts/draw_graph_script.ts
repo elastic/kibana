@@ -72,6 +72,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     savedObjectsClient: savedObjectsClientMock.create(),
     contentReferencesStore: newContentReferencesStoreMock(),
     telemetry: coreMock.createSetup().analytics,
+    esClient: coreMock.createStart().elasticsearch.client.asInternalUser,
   });
   return graph.getGraph();
 }

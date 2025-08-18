@@ -11,6 +11,7 @@ import type {
   Plugin,
   Logger,
   FeatureFlagsStart,
+  ElasticsearchClient,
 } from '@kbn/core/server';
 
 import {
@@ -45,6 +46,7 @@ import { getAttackDiscoveryScheduleType } from './lib/attack_discovery/schedules
 import type { ConfigSchema } from './config_schema';
 import { attackDiscoveryAlertFieldMap } from './lib/attack_discovery/schedules/fields';
 import { ATTACK_DISCOVERY_ALERTS_CONTEXT } from './lib/attack_discovery/schedules/constants';
+import { ElasticSearchSaver } from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
 
 interface FeatureFlagDefinition {
   featureFlagName: string;
@@ -59,12 +61,12 @@ interface FeatureFlagDefinition {
 
 export class ElasticAssistantPlugin
   implements
-    Plugin<
-      ElasticAssistantPluginSetup,
-      ElasticAssistantPluginStart,
-      ElasticAssistantPluginSetupDependencies,
-      ElasticAssistantPluginStartDependencies
-    >
+  Plugin<
+    ElasticAssistantPluginSetup,
+    ElasticAssistantPluginStart,
+    ElasticAssistantPluginSetupDependencies,
+    ElasticAssistantPluginStartDependencies
+  >
 {
   private readonly logger: Logger;
   private assistantService: AIAssistantService | undefined;
@@ -206,13 +208,14 @@ export class ElasticAssistantPlugin
   ): ElasticAssistantPluginStart {
     this.logger.debug('elasticAssistant: Started');
     appContextService.start({ logger: this.logger });
-
     removeLegacyQuickPrompt(core.elasticsearch.client.asInternalUser)
       .then((res) => {
         if (res?.total)
           this.logger.info(`Removed ${res.total} legacy quick prompts from AI Assistant`);
       })
-      .catch(() => {});
+      .catch(() => { });
+
+    //this.setupIndices(core.elasticsearch.client.asInternalUser);
 
     return {
       actions: plugins.actions,
@@ -233,6 +236,32 @@ export class ElasticAssistantPlugin
         return appContextService.registerCallback(callbackId, callback);
       },
     };
+  }
+
+  private async setupIndices(client: ElasticsearchClient): Promise<void> {
+    const exists = await client.indices.exists({
+      index: ElasticSearchSaver.defaultCheckpointIndex,
+    });
+    if (!exists) {
+      await client.indices.create({
+        index: ElasticSearchSaver.defaultCheckpointIndex,
+        mappings: {
+          properties: ElasticSearchSaver.checkpointIndexMapping,
+        },
+      });
+    }
+
+    const existsWrites = await client.indices.exists({
+      index: ElasticSearchSaver.defaultCheckpointWritesIndex,
+    });
+    if (!existsWrites) {
+      await client.indices.create({
+        index: ElasticSearchSaver.defaultCheckpointWritesIndex,
+        mappings: {
+          properties: ElasticSearchSaver.checkpointWritesIndexMapping,
+        },
+      });
+    }
   }
 
   public stop() {

@@ -21,6 +21,7 @@ import { AGENT_NODE_TAG } from './nodes/run_agent';
 import { DEFAULT_ASSISTANT_GRAPH_ID, DefaultAssistantGraph } from './graph';
 import { GraphInputs } from './types';
 import type { OnLlmResponse, TraceOptions } from '../../executors/types';
+import { v4 as uuidv4 } from 'uuid';
 
 interface StreamGraphParams {
   apmTracer: APMTracer;
@@ -126,6 +127,9 @@ export const streamGraph = async ({
         version: 'v2',
         streamMode: 'values',
         recursionLimit: inputs?.isOssModel ? 50 : 25,
+        configurable:{
+          thread_id: uuidv4(),
+        }
       },
       inputs?.llmType === 'bedrock' ? { includeNames: ['Summarizer'] } : undefined
     );
@@ -268,6 +272,9 @@ export const invokeGraph = async ({
       runName: DEFAULT_ASSISTANT_GRAPH_ID,
       tags: traceOptions?.tags ?? [],
       recursionLimit: inputs?.isOssModel ? 50 : 25,
+      configurable:{
+        thread_id: uuidv4(),
+      }
     });
     const output = (result.agentOutcome as AgentFinish).returnValues.output;
     const conversationId = result.conversation?.id;

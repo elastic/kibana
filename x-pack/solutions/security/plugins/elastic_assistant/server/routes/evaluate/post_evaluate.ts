@@ -490,6 +490,7 @@ export const postEvaluateRoute = (
                   contentReferencesStore,
                   agentRunnable,
                   dataClients,
+                  esClient,
                   createLlmInstance,
                   logger,
                   actionsClient,

@@ -269,6 +269,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     telemetry,
     telemetryParams,
     contentReferencesStore,
+    esClient
   });
   const inputs: GraphInputs = {
     responseLanguage,

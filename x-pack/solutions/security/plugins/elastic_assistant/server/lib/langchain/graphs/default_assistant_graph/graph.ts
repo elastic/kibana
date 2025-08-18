@@ -29,6 +29,8 @@ import { persistConversationChanges } from './nodes/persist_conversation_changes
 import { respond } from './nodes/respond';
 import { NodeType } from './constants';
 import { getStateAnnotation } from './state';
+import { ElasticsearchClient } from '@kbn/core/server';
+import {ElasticSearchSaver} from '@kbn/langgraph-checkpoint-saver/server/elastic-search-checkpoint-saver';
 
 export const DEFAULT_ASSISTANT_GRAPH_ID = 'Default Security Assistant Graph';
 
@@ -46,6 +48,7 @@ export interface GetDefaultAssistantGraphParams {
   contentReferencesStore: ContentReferencesStore;
   telemetryParams?: TelemetryParams;
   telemetry: AnalyticsServiceSetup;
+  esClient: ElasticsearchClient;
 }
 
 export type DefaultAssistantGraph = ReturnType<typeof getDefaultAssistantGraph>;
@@ -65,6 +68,7 @@ export const getDefaultAssistantGraph = ({
   tools,
   replacements,
   getFormattedTime,
+  esClient,
 }: GetDefaultAssistantGraphParams) => {
   try {
     // Default node parameters
@@ -132,7 +136,12 @@ export const getDefaultAssistantGraph = ({
         [NodeType.TOOLS]: NodeType.TOOLS,
         [NodeType.END]: END,
       });
-    return graph.compile();
+
+    const checkpointer = new ElasticSearchSaver({ client: esClient, logger });
+
+    return graph.compile({
+      checkpointer
+    });
   } catch (e) {
     throw new Error(`Unable to compile DefaultAssistantGraph\n${e}`);
   }

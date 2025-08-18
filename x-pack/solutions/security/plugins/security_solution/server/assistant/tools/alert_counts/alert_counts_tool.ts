@@ -13,6 +13,7 @@ import { contentReferenceString, securityAlertsPageReference } from '@kbn/elasti
 import type { Require } from '@kbn/elastic-assistant-plugin/server/types';
 import { getAlertsCountQuery } from './get_alert_counts_query';
 import { APP_UI_ID } from '../../../../common';
+import { interrupt } from '@langchain/langgraph';
 
 export type AlertCountsToolParams = Require<AssistantToolParams, 'alertsIndexPattern'>;
 
@@ -37,6 +38,15 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       params as AlertCountsToolParams;
     return tool(
       async () => {
+        const response = interrupt(
+          `Trying to call \`ALERT_COUNTS_TOOL\`` +
+          `Please approve.`
+        )
+        if (response.type) {
+          // proceed to execute the tool logic
+        } else {
+          throw new Error(`Unknown response type: ${response.type}`)
+        }
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
         const alertsCountReference = contentReferencesStore.add((p) =>
