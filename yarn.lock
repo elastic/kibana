@@ -5993,6 +5993,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/favorites-poc-plugin@link:src/plugins/favorites_poc":
+  version "0.0.0"
+  uid ""
+
 "@kbn/feature-controls-examples-plugin@link:examples/feature_control_examples":
   version "0.0.0"
   uid ""

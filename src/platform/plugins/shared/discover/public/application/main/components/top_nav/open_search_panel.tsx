@@ -32,10 +32,24 @@ interface OpenSearchPanelProps {
 
 export function OpenSearchPanel(props: OpenSearchPanelProps) {
   const modalTitleId = useGeneratedHtmlId();
-  const { addBasePath, capabilities, savedObjectsTagging, contentClient, uiSettings } =
-    useDiscoverServices();
+  const {
+    addBasePath,
+    capabilities,
+    savedObjectsTagging,
+    contentClient,
+    uiSettings,
+    favoritesPoc,
+  } = useDiscoverServices();
   const hasSavedObjectPermission =
     capabilities.savedObjectsManagement?.edit || capabilities.savedObjectsManagement?.delete;
+
+  // Configure the favorites service with Discover app context
+  const configuredFavoritesService = React.useMemo(() => {
+    if (favoritesPoc?.favoritesService) {
+      return favoritesPoc.favoritesService.configureForApp('discover', 'search');
+    }
+    return undefined;
+  }, [favoritesPoc]);
 
   return (
     <EuiFlyout
@@ -62,10 +76,12 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
             contentClient,
             uiSettings,
           }}
+          favoritesService={configuredFavoritesService}
+          showTabbedUI={true}
           noItemsMessage={
             <FormattedMessage
               id="discover.topNav.openSearchPanel.noSearchesFoundDescription"
-              defaultMessage="No matching Discover sessions found."
+              defaultMessage="No starred Discover sessions found."
             />
           }
           savedObjectMetaData={[

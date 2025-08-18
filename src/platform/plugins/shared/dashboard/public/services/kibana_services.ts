@@ -29,6 +29,9 @@ import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin'
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
+// Import our plugin types
+import type { FavoritesPocPluginStart } from '../../../../../plugins/favorites_poc/public/types';
+
 import type { DashboardStartDependencies } from '../plugin';
 
 export let coreServices: CoreStart;
@@ -50,6 +53,7 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
+export let favoritesPocService: FavoritesPocPluginStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -73,6 +77,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   uiActionsService = deps.uiActions;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
+  favoritesPocService = deps.favoritesPoc;
 
   servicesReady$.next(true);
 };

@@ -562,6 +562,7 @@
     "@kbn/expressions-explorer-plugin": "link:examples/expressions_explorer",
     "@kbn/expressions-plugin": "link:src/platform/plugins/shared/expressions",
     "@kbn/failure-store-modal": "link:x-pack/platform/packages/shared/kbn-failure-store-modal",
+    "@kbn/favorites-poc-plugin": "link:src/plugins/favorites_poc",
     "@kbn/feature-controls-examples-plugin": "link:examples/feature_control_examples",
     "@kbn/feature-flags-example-plugin": "link:examples/feature_flags_example",
     "@kbn/feature-usage-test-plugin": "link:x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test",

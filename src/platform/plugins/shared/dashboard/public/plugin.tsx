@@ -62,6 +62,9 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 
+// Import our plugin types
+import type { FavoritesPocPluginStart } from '../../../../../plugins/favorites_poc/public/types';
+
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import type { DashboardMountContextProps } from './dashboard_app/types';
@@ -112,6 +115,7 @@ export interface DashboardStartDependencies {
   noDataPage?: NoDataPagePluginStart;
   lens?: LensPublicStart;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  favoritesPoc?: FavoritesPocPluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

@@ -71,6 +71,8 @@ import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
 import type { DiscoverEBTManager } from './ebt_manager';
+import type { FavoritesPocPluginStart } from '../../../../../plugins/favorites_poc/public/types';
+import type { DiscoverContainerProps } from './components/discover_container';
 
 /**
  * Location state of internal Discover history instance
@@ -146,6 +148,7 @@ export interface DiscoverServices {
   logsDataAccess?: LogsDataAccessPluginStart;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  favoritesPoc?: FavoritesPocPluginStart;
 }
 
 export const buildServices = ({
@@ -241,5 +244,6 @@ export const buildServices = ({
     logsDataAccess: plugins.logsDataAccess,
     embeddableEnhanced: plugins.embeddableEnhanced,
     apmSourcesAccess: plugins.apmSourcesAccess,
+    favoritesPoc: plugins.favoritesPoc,
   };
 };

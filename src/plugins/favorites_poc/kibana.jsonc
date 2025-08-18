@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/favorites-poc-plugin",
+  "owner": ["@elastic/kibana-data-discovery"],
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Proof of concept for a reusable favorites service across Kibana apps.",
+  "plugin": {
+    "id": "favoritesPoc",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "contentManagement"
+    ],
+    "optionalPlugins": [
+      "usageCollection"
+    ]
+  }
+}

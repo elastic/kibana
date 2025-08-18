@@ -29,9 +29,14 @@ import {
   EuiText,
   EuiToolTip,
   EuiIconTip,
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
   Query,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import {
@@ -41,6 +46,9 @@ import {
 
 import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
+// Import our FavoriteStarButton component
+import { FavoriteStarButton, cssFavoriteHoverWithinTable } from '../../../../../../plugins/favorites_poc/public/components/favorite_star_button';
+import { css } from '@emotion/react';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];
 
@@ -65,6 +73,9 @@ interface SavedObjectFinderState {
   items: SavedObjectFinderItem[];
   query: Query;
   isFetchingItems: boolean;
+  selectedTabId: 'all' | 'starred';
+  starredIds: string[];
+  isLoadingStarred: boolean;
 }
 
 interface SavedObjectFinderServices {
@@ -89,6 +100,10 @@ interface BaseSavedObjectFinder {
   children?: ReactElement | ReactElement[];
   helpText?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
+  /** Optional favorites service to enable star buttons */
+  favoritesService?: any; // Using 'any' for now to avoid import issues
+  /** Show tabbed UI with All/Starred tabs. Defaults to true. */
+  showTabbedUI?: boolean;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -116,6 +131,15 @@ class SavedObjectFinderUiClass extends React.Component<
     showFilter: PropTypes.bool,
   };
   private isComponentMounted: boolean = false;
+
+  // Get the EUI theme for hover CSS
+  private getEuiTheme() {
+    // This is a workaround since we can't use hooks in class components
+    // We'll use a default theme object
+    return {
+      animation: { fast: '150ms', resistance: 'cubic-bezier(0.694, 0, 0.335, 1)' }
+    };
+  }
 
   private debouncedFetch = debounce(async (query: Query) => {
     const metaDataMap = this.getSavedObjectMetaDataMap();
@@ -191,6 +215,9 @@ class SavedObjectFinderUiClass extends React.Component<
       items: [],
       isFetchingItems: false,
       query: Query.parse(''),
+      selectedTabId: 'all',
+      starredIds: [],
+      isLoadingStarred: false,
     };
   }
 
@@ -220,10 +247,44 @@ class SavedObjectFinderUiClass extends React.Component<
     );
   };
 
+  private handleTabChange = (tabId: 'all' | 'starred') => {
+    if (tabId === 'all') {
+      this.setState({ 
+        selectedTabId: tabId,
+        starredIds: []
+      });
+    } else {
+      this.setState({ 
+        selectedTabId: tabId
+      });
+    }
+  };
+
+  private refreshStarredItems = () => {
+    if (this.props.favoritesService) {
+      this.setState({ isLoadingStarred: true });
+      this.props.favoritesService.getFavorites()
+        .then((response: any) => {
+          this.setState({ 
+            starredIds: response.favoriteIds || [],
+            isLoadingStarred: false 
+          });
+        })
+        .catch((error: any) => {
+          // Silently handle refresh errors - user can retry by switching tabs
+          this.setState({ 
+            starredIds: [],
+            isLoadingStarred: false 
+          });
+        });
+    }
+  };
+
   public render() {
     const {
       onChoose,
       savedObjectMetaData,
+      showTabbedUI = true, // Default to true
       euiTablePersist: { pageSize, sorting, onTableChange },
     } = this.props;
     const taggingApi = this.props.services.savedObjectsTagging;
@@ -304,40 +365,70 @@ class SavedObjectFinderUiClass extends React.Component<
             ? currentSavedObjectMetaData.getTooltipForSavedObject(item.simple)
             : `${item.name} (${currentSavedObjectMetaData!.name})`;
 
-          const link = (
-            <EuiLink
-              onClick={
-                onChoose
-                  ? () => {
-                      onChoose(item.id, item.type, fullName, item.simple);
-                    }
-                  : undefined
-              }
-              title={fullName}
-              data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
-            >
-              {item.name}
-            </EuiLink>
-          );
-
           const tooltipText = this.props.getTooltipText?.(item);
           const description = !!item.simple.attributes.description && (
             <EuiText size="xs" color="subdued">
               {item.simple.attributes.description}
             </EuiText>
           );
-          return tooltipText ? (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip position="left" content={tooltipText}>
-                {link}
-              </EuiToolTip>
+
+          // Render title with star button inline (matching Dashboard ItemDetails pattern)
+          const renderTitle = () => {
+            const link = (
+              <EuiLink
+                onClick={
+                  onChoose
+                    ? () => {
+                        onChoose(item.id, item.type, fullName, item.simple);
+                      }
+                    : undefined
+                }
+                title={fullName}
+                data-test-subj={`savedObjectTitle${(item.title || '').split(' ').join('-')}`}
+              >
+                {item.name}
+              </EuiLink>
+            );
+
+            // Add star button if favorites service is provided
+            const starButton = this.props.favoritesService ? (
+              <FavoriteStarButton
+                type={item.type}
+                id={item.id}
+                favoritesService={this.props.favoritesService}
+                onFavoriteChange={(isFavorite) => {
+                  // If we're on the starred tab and an item was unfavorited, refresh the starred list
+                  if (this.state.selectedTabId === 'starred' && !isFavorite) {
+                    this.refreshStarredItems();
+                  }
+                }}
+                alwaysShow={false} // Let component handle visibility based on favorite status
+                className="favorite-star-button--empty"
+              />
+            ) : null;
+
+            return tooltipText ? (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip position="left" content={tooltipText}>
+                    {link}
+                  </EuiToolTip>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{starButton}</EuiFlexItem>
+              </EuiFlexGroup>
+            ) : (
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>{link}</EuiFlexItem>
+                <EuiFlexItem grow={false}>{starButton}</EuiFlexItem>
+              </EuiFlexGroup>
+            );
+          };
+
+          return (
+            <div>
+              <EuiText size="s">{renderTitle()}</EuiText>
               {description}
-            </EuiFlexItem>
-          ) : (
-            <EuiFlexItem grow={false}>
-              {link}
-              {description}
-            </EuiFlexItem>
+            </div>
           );
         },
       },
@@ -390,6 +481,54 @@ class SavedObjectFinderUiClass extends React.Component<
       toolsLeft: this.props.leftChildren ? <>{this.props.leftChildren}</> : undefined,
     };
 
+    // Fetch starred IDs when switching to starred tab
+    if (showTabbedUI && this.state.selectedTabId === 'starred' && this.props.favoritesService && !this.state.isLoadingStarred && this.state.starredIds.length === 0) {
+      this.refreshStarredItems();
+    }
+
+    // Filter items based on selected tab
+    const filteredItems = showTabbedUI && this.state.selectedTabId === 'starred'
+      ? this.state.items.filter((item) => this.state.starredIds.includes(item.id))
+      : this.state.items;
+
+    // Render tabs if showTabbedUI is true
+    const renderTabs = () => {
+      if (!this.props.showTabbedUI) return null;
+
+      return (
+        <>
+          <EuiTabs
+            data-test-subj="savedObjectFinderTabs"
+            style={{
+              marginTop: '-8px',
+            }}
+          >
+            <EuiTab
+              onClick={() => this.handleTabChange('all')}
+              isSelected={this.state.selectedTabId === 'all'}
+              data-test-subj="allTab"
+            >
+              <FormattedMessage
+                id="savedObjectsFinder.tabs.allTabLabel"
+                defaultMessage="All"
+              />
+            </EuiTab>
+            <EuiTab
+              onClick={() => this.handleTabChange('starred')}
+              isSelected={this.state.selectedTabId === 'starred'}
+              data-test-subj="starredTab"
+            >
+              <FormattedMessage
+                id="savedObjectsFinder.tabs.starredTabLabel"
+                defaultMessage="Starred"
+              />
+            </EuiTab>
+          </EuiTabs>
+          <EuiSpacer size="s" />
+        </>
+      );
+    };
+
     return (
       <EuiFlexGroup direction="column">
         {this.props.helpText ? (
@@ -399,11 +538,12 @@ class SavedObjectFinderUiClass extends React.Component<
             </EuiText>
           </EuiFlexItem>
         ) : undefined}
+        {renderTabs()}
         <EuiFlexItem>
           <EuiInMemoryTable
             loading={this.state.isFetchingItems}
             itemId="id"
-            items={this.state.items}
+            items={filteredItems}
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
             message={this.props.noItemsMessage}
@@ -411,6 +551,7 @@ class SavedObjectFinderUiClass extends React.Component<
             pagination={pagination}
             sorting={!!this.state.query?.text ? undefined : sorting}
             onTableChange={onTableChange}
+            css={cssFavoriteHoverWithinTable(this.getEuiTheme())}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

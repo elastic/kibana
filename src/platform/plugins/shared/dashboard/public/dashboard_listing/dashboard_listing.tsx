@@ -23,6 +23,7 @@ import {
   savedObjectsTaggingService,
   serverlessService,
   usageCollectionService,
+  favoritesPocService,
 } from '../services/kibana_services';
 import { dashboardQueryClient } from '../services/dashboard_query_client';
 import { DashboardUnsavedListing } from './dashboard_unsaved_listing';
@@ -53,12 +54,22 @@ export const DashboardListing = ({
     initialFilter,
   });
 
+  // Use our FavoritesService if available, otherwise fall back to FavoritesClient
   const dashboardFavoritesClient = useMemo(() => {
-    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
-      http: coreServices.http,
-      usageCollection: usageCollectionService,
-      userProfile: coreServices.userProfile,
-    });
+    if (favoritesPocService?.favoritesService) {
+      // Use our enhanced service
+      return favoritesPocService.favoritesService.configureForApp(
+        DASHBOARD_APP_ID,
+        DASHBOARD_CONTENT_ID
+      );
+    } else {
+      // Fall back to the original FavoritesClient
+      return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+        http: coreServices.http,
+        usageCollection: usageCollectionService,
+        userProfile: coreServices.userProfile,
+      });
+    }
   }, []);
 
   return (

@@ -46,6 +46,8 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { ApmSourceAccessPluginStart } from '@kbn/apm-sources-access-plugin/public';
 import type { Setup as InspectorPublicPluginSetup } from '@kbn/inspector-plugin/public/plugin';
+// Import our plugin types
+import type { FavoritesPocPluginStart } from '../../../../../plugins/favorites_poc/public/types';
 import type { DiscoverAppLocator } from '../common';
 import type { DiscoverContainerProps } from './components/discover_container';
 
@@ -179,4 +181,5 @@ export interface DiscoverStartPlugins {
   usageCollection?: UsageCollectionSetup;
   embeddableEnhanced?: EmbeddableEnhancedPluginStart;
   apmSourcesAccess?: ApmSourceAccessPluginStart;
+  favoritesPoc?: FavoritesPocPluginStart;
 }

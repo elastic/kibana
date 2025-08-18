@@ -1,0 +1,20 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true
+  },
+  "include": [
+    "public/**/*",
+    "server/**/*",
+    "../../../typings/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/content-management-favorites-public",
+    "@kbn/content-management-favorites-server"
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}
