@@ -5,8 +5,16 @@
  * 2.0.
  */
 
-import type { CoreSetup, Plugin, AppMountParameters, CoreStart } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type Plugin,
+  type AppMountParameters,
+  type CoreStart,
+  type AppUpdater,
+  AppStatus,
+} from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { BehaviorSubject, type Subscription } from 'rxjs';
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_TITLE } from '../common';
 import type {
   AppPluginSetupDependencies,
@@ -21,6 +29,8 @@ import { PLUGIN_ROUTE_ROOT } from '../common/api_routes';
 export class QueryRulesPlugin
   implements Plugin<SearchQueryRulesPluginSetup, SearchQueryRulesPluginStart>
 {
+  private appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private licenseSubscription: Subscription | undefined;
   constructor() {}
 
   public setup(
@@ -34,6 +44,8 @@ export class QueryRulesPlugin
       id: PLUGIN_ID,
       appRoute: PLUGIN_ROUTE_ROOT,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
+      status: AppStatus.inaccessible,
+      updater$: this.appUpdater$,
       title: PLUGIN_TITLE,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
@@ -57,10 +69,27 @@ export class QueryRulesPlugin
     return {};
   }
 
-  public start(core: CoreStart): SearchQueryRulesPluginStart {
+  public start(
+    core: CoreStart,
+    { licensing }: AppPluginStartDependencies
+  ): SearchQueryRulesPluginStart {
     docLinks.setDocLinks(core.docLinks.links);
+
+    this.licenseSubscription = licensing.license$.subscribe((license) => {
+      const status: AppStatus =
+        license && license.isAvailable && license.hasAtLeast('enterprise')
+          ? AppStatus.accessible
+          : AppStatus.inaccessible;
+
+      this.appUpdater$.next(() => ({ status }));
+    });
     return {};
   }
 
-  public stop() {}
+  public stop() {
+    if (this.licenseSubscription) {
+      this.licenseSubscription.unsubscribe();
+      this.licenseSubscription = undefined;
+    }
+  }
 }

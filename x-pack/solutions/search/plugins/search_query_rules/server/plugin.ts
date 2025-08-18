@@ -40,6 +40,7 @@ export class SearchQueryRulesPlugin
 
     plugins.features.registerKibanaFeature({
       id: PLUGIN_ID,
+      minimumLicense: 'enterprise',
       name: PLUGIN_TITLE,
       order: 0,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
