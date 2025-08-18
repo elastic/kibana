@@ -42,7 +42,6 @@ describe('DatePickerRangeField', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders the dates in the settings format', async () => {
@@ -68,7 +67,7 @@ describe('DatePickerRangeField', () => {
         path: 'endDate',
       } as FieldHook<string, string>,
     };
-
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <MockHookWrapperComponent>
         <DatePickerRangeField fields={fields} data-test-subj={'datePicker'} />

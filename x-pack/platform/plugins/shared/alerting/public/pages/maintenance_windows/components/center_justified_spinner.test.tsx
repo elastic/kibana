@@ -7,6 +7,7 @@
 
 import React from 'react';
 
+import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
@@ -16,12 +17,12 @@ describe('CenterJustifiedSpinner', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   test('it renders', () => {
-    const result = appMockRenderer.render(<CenterJustifiedSpinner />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CenterJustifiedSpinner />);
 
-    expect(result.getByTestId('center-justified-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('center-justified-spinner')).toBeInTheDocument();
   });
 });

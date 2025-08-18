@@ -131,8 +131,8 @@ describe('mustache lambdas', () => {
           {{/context}}
         `.trim();
 
-      const result = renderMustacheString(logger, template, vars, 'none');
-      expect(result).toEqual(`1\n2\n3\n`);
+      const view = renderMustacheString(logger, template, vars, 'none');
+      expect(view).toEqual(`1\n2\n3\n`);
     });
 
     it('invalid expression logs and returns error string', () => {
@@ -146,8 +146,8 @@ describe('mustache lambdas', () => {
           {{#EvalMath}} ) 1 ++++ 0 ( {{/EvalMath}}
         `.trim();
 
-      const result = renderMustacheString(logger, template, vars, 'none');
-      expect(result).toEqual(
+      const view = renderMustacheString(logger, template, vars, 'none');
+      expect(view).toEqual(
         'error evaluating tinymath expression ") 1 ++++ 0 (": Failed to parse expression. Expected "(", function, literal, or whitespace but ")" found.'
       );
       expect(logger.warn).toHaveBeenCalledWith(
@@ -186,8 +186,8 @@ describe('mustache lambdas', () => {
           {{#ParseHjson}} ${hjson} {{/ParseHjson}}
         `.trim();
 
-      const result = renderMustacheString(logger, template, vars, 'none');
-      expect(JSON.parse(result)).toMatchInlineSnapshot(`
+      const view = renderMustacheString(logger, template, vars, 'none');
+      expect(JSON.parse(view)).toMatchInlineSnapshot(`
         Object {
           "a": Object {
             "b": 1,
@@ -214,8 +214,8 @@ describe('mustache lambdas', () => {
           {{#ParseHjson}} [1,2,3,,] {{/ParseHjson}}
         `.trim();
 
-      const result = renderMustacheString(logger, template, {}, 'none');
-      expect(result).toEqual(
+      const view = renderMustacheString(logger, template, {}, 'none');
+      expect(view).toEqual(
         `error parsing Hjson \"[1,2,3,,]\": Found a punctuator character ',' when expecting a quoteless string (check your syntax) at line 1,7 >>>1,2,3,,] ...`
       );
       expect(logger.warn).toHaveBeenCalledWith(

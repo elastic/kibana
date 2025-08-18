@@ -22,10 +22,10 @@ describe('rule_actions_popover', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders the top 3 events', async () => {
+    appMockRenderer = createAppMockRenderer();
     appMockRenderer.render(
       <UpcomingEventsPopover
         maintenanceWindowFindResponse={{
