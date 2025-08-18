@@ -9,11 +9,8 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import useDebounce from 'react-use/lib/useDebounce';
 import { noop } from 'lodash';
-import {
-  API_VERSIONS,
-  ELASTIC_USERS_SUGGEST_URL,
-  SuggestUsersResponse,
-} from '@kbn/elastic-assistant-common';
+import type { SuggestUsersResponse } from '@kbn/elastic-assistant-common';
+import { API_VERSIONS, ELASTIC_USERS_SUGGEST_URL } from '@kbn/elastic-assistant-common';
 import type { HttpStart, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../..';

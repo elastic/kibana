@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import type React from 'react';
+import { useCallback } from 'react';
 import type { ApiConfig, User } from '@kbn/elastic-assistant-common';
-import { DataStreamApis } from '../use_data_stream_apis';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import type { Conversation, ClientMessage } from '../../assistant_context/types';

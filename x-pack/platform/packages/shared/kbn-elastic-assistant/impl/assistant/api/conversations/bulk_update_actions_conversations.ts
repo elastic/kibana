@@ -7,11 +7,13 @@
 
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup, IToasts } from '@kbn/core/public';
+import type {
+  ConversationCreateProps,
+  ConversationUpdateProps,
+} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   API_VERSIONS,
-  ConversationCreateProps,
-  ConversationUpdateProps,
 } from '@kbn/elastic-assistant-common';
 import type { Conversation } from '../../../assistant_context/types';
 

@@ -6,10 +6,10 @@
  */
 
 import React, { useState } from 'react';
+import type { EuiContextMenuItemProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
-  EuiContextMenuItemProps,
   EuiContextMenuPanel,
   EuiPopover,
   useGeneratedHtmlId,

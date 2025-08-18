@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import { orderBy } from 'lodash';
-import { ConversationWithOwner } from '../../api';
+import type { ConversationWithOwner } from '../../api';
 import { getAbsoluteTime, isValidDateMath } from './date_utils';
 
 export function useConversationsByDate(conversations: ConversationWithOwner[] = []) {
