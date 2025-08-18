@@ -24,10 +24,10 @@ export const HeaderPageAnnouncer: FC<{
   customBranding$: HeaderProps['customBranding$'];
 }> = ({ breadcrumbs$, customBranding$ }) => {
   const [routeTitle, setRouteTitle] = useState('');
-  const [shouldHandlingTab, setShouldHandlingTab] = useState(false);
   const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
   const breadcrumbs = useObservable(breadcrumbs$, []);
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
+  const shouldHandleTab = useRef<boolean>(false);
 
   useEffect(() => {
     if (!breadcrumbs.length) {
@@ -46,25 +46,27 @@ export const HeaderPageAnnouncer: FC<{
 
     if (routeTitle !== joinedBreadcrumbs) {
       setRouteTitle(joinedBreadcrumbs);
-      setShouldHandlingTab(true);
+      shouldHandleTab.current = true;
     }
-  }, [breadcrumbs, branding, routeTitle]);
+  }, [breadcrumbs, branding, routeTitle, shouldHandleTab]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (shouldHandlingTab && e.key === keys.TAB) {
+    const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
+
+    const handleFn = (e: Event) => {
+      if (shouldHandleTab.current && e.key === keys.TAB) {
         skipLinkRef.current?.focus();
-        e?.preventDefault();
+        e.preventDefault?.();
       }
-      setShouldHandlingTab(false);
+      shouldHandleTab.current = false;
     };
 
-    window.addEventListener('keydown', handleKeyDown, { once: true });
+    events.forEach((event) => window.addEventListener(event, handleFn));
 
     return () => {
-      window.removeEventListener('keydown', handleKeyDown);
+      events.forEach((event) => window.removeEventListener(event, handleFn));
     };
-  }, [shouldHandlingTab]);
+  }, []);
 
   return (
     <>
