@@ -9,7 +9,7 @@
 //   at https://www.elastic.co/docs/solutions/search/api-quickstarts
 
 import { basicsQuickstartCommands } from './basics_quickstart';
-import { QuickstartCodeExamples } from './types';
+import type { QuickstartCodeExamples } from './types';
 
 export const quickstartExamples: QuickstartCodeExamples = {
   basics: basicsQuickstartCommands,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { SEARCH_QUICKSTARTS_FEATURE_FLAG_ID } from '@kbn/search-shared-ui';
 
 export function isSearchQuickstartsEnabled(uiSettings: IUiSettingsClient): boolean {
