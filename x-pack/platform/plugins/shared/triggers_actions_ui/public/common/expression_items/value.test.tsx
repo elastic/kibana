@@ -6,12 +6,11 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueExpression } from './value';
 
-// Helper function to render with IntlProvider
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
@@ -21,10 +20,6 @@ const renderWithIntl = (ui: React.ReactElement) => {
 };
 
 describe('value expression', () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
   it('renders description and value', async () => {
     const user = userEvent.setup();
     renderWithIntl(
@@ -36,17 +31,13 @@ describe('value expression', () => {
       />
     );
 
-    // Initially, only the button should be visible
     expect(screen.getByTestId('valueExpression')).toBeInTheDocument();
     expect(screen.getByText('test')).toBeInTheDocument();
     expect(screen.getByText('1000')).toBeInTheDocument();
 
-    // Open the popover to see the form elements
     await user.click(screen.getByTestId('valueExpression'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('valueFieldTitle')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('valueFieldTitle')).toBeInTheDocument();
     expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
     expect(screen.getByTestId('valueFieldTitle')).toHaveTextContent('test');
     expect(screen.getByTestId('valueFieldNumber')).toHaveValue(1000);
@@ -63,14 +54,11 @@ describe('value expression', () => {
       />
     );
 
-    // Open the popover to see the form elements
     await user.click(screen.getByTestId('valueExpression'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
-    });
+    const numberInput = await screen.findByTestId('valueFieldNumber');
 
-    const numberInput = screen.getByTestId('valueFieldNumber');
+    expect(numberInput).toBeInTheDocument();
     expect(numberInput).toBeInvalid();
     expect(screen.getByText('value is not valid')).toBeInTheDocument();
   });
@@ -86,47 +74,29 @@ describe('value expression', () => {
       />
     );
 
-    // Initially, only the button should be visible
     expect(screen.getByTestId('valueExpression')).toBeInTheDocument();
     expect(screen.queryByTestId('valueFieldTitle')).not.toBeInTheDocument();
     expect(screen.queryByTestId('valueFieldNumber')).not.toBeInTheDocument();
 
-    // Click to open the popover
     await user.click(screen.getByTestId('valueExpression'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('valueFieldTitle')).toBeInTheDocument();
-    });
-    expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
+    expect(await screen.findByTestId('valueFieldTitle')).toBeInTheDocument();
+    expect(await screen.findByTestId('valueFieldNumber')).toBeInTheDocument();
   });
 
   it('emits onChangeSelectedValue action when value is updated', async () => {
     const user = userEvent.setup();
     const onChangeSelectedValue = jest.fn();
     renderWithIntl(
-      <ValueExpression
-        description="test"
-        value={1000}
-        errors={[]}
-        onChangeSelectedValue={onChangeSelectedValue}
-      />
+      <ValueExpression description="test" value={1000} errors={[]} onChangeSelectedValue={onChangeSelectedValue} />
     );
 
-    // Open the popover
     await user.click(screen.getByTestId('valueExpression'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('valueFieldNumber')).toBeInTheDocument();
-    });
-
-    // Clear the mock before changing the value
+    const numberInput = await screen.findByTestId('valueFieldNumber');
     onChangeSelectedValue.mockClear();
-
-    // Change the value
-    const numberInput = screen.getByTestId('valueFieldNumber');
     fireEvent.change(numberInput, { target: { value: '3000' } });
 
-    // Check that the function was called with the final value
-    expect(onChangeSelectedValue).toHaveBeenCalledWith(3000);
+    expect(onChangeSelectedValue).toHaveBeenLastCalledWith(3000);
   });
 });

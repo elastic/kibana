@@ -76,9 +76,6 @@ describe('EventLogListCellRenderer', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    // @ts-ignore
-    window.location.href =
-      'https://localhost/app/management/insightsAndAlerting/triggersActions/logs';
   });
 
   it('renders primitive values correctly', () => {

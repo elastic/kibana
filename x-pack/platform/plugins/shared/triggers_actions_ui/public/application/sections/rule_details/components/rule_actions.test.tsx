@@ -29,7 +29,7 @@ describe('Rule Actions', () => {
     actionTypeRegistry.get.mockReturnValue(actionType);
   });
 
-  async function setup() {
+  it("renders rule action connector icons for user's selected rule actions", async () => {
     const ruleActions = [
       {
         id: '1',
@@ -71,20 +71,13 @@ describe('Rule Actions', () => {
       { id: '.index', iconClass: 'indexOpen' },
     ] as ActionTypeModel[]);
 
-    return render(
-      <RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />
-    );
-  }
-
-  it("renders rule action connector icons for user's selected rule actions", async () => {
-    const { container } = await setup();
+    render(<RuleActions ruleActions={ruleActions} actionTypeRegistry={actionTypeRegistry} />);
     expect(mockedUseFetchRuleActionConnectorsHook).toHaveBeenCalledTimes(1);
 
-    // Check that the expected icons are present using data-euiicon-type attribute
-    const logsAppIcons = container.querySelectorAll('[data-euiicon-type="logsApp"]');
-    const slackIcons = container.querySelectorAll('[data-euiicon-type="logoSlack"]');
-    const indexIcons = container.querySelectorAll('[data-euiicon-type="index"]');
-    const emailIcons = container.querySelectorAll('[data-euiicon-type="email"]');
+    const logsAppIcons = screen.getAllByTestId('ruleActionIcon-logsApp');
+    const slackIcons = screen.getAllByTestId('ruleActionIcon-logoSlack');
+    const indexIcons = screen.queryAllByTestId('ruleActionIcon-indexOpen');
+    const emailIcons = screen.queryAllByTestId('ruleActionIcon-email');
 
     expect(logsAppIcons).toHaveLength(1);
     expect(slackIcons).toHaveLength(1);

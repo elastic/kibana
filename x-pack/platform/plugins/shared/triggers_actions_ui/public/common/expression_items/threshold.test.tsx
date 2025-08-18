@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ThresholdExpression } from './threshold';
 
-// Helper function to render with IntlProvider
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
@@ -35,14 +34,13 @@ describe('threshold expression', () => {
       />
     );
 
-    // Check that the button shows the correct value
-    expect(screen.getByTestId('thresholdPopover')).toHaveTextContent('Is between');
+    const button = screen.getByTestId('thresholdPopover');
 
-    // Open the popover to access the form elements
-    await user.click(screen.getByTestId('thresholdPopover'));
+    expect(button).toHaveTextContent('Is between');
 
-    // Now check for the comparator select
-    expect(screen.getByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+    await user.click(button);
+
+    expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
   });
 
   it('renders with threshold title', () => {
@@ -76,23 +74,23 @@ describe('threshold expression', () => {
       />
     );
 
-    // Open the popover
     await user.click(screen.getByTestId('thresholdPopover'));
 
-    expect(screen.getByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+    expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
 
-    // Change threshold value
     const thresholdInput = screen.getByTestId('alertThresholdInput0') as HTMLInputElement;
+
     await user.clear(thresholdInput);
     await user.type(thresholdInput, '1000');
 
-    expect(onChangeSelectedThreshold).toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onChangeSelectedThreshold).toHaveBeenCalledTimes(1);
+    });
     expect(onChangeSelectedThresholdComparator).not.toHaveBeenCalled();
 
     jest.clearAllMocks();
 
-    // Change comparator
     const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox') as HTMLSelectElement;
     await user.selectOptions(comparatorSelect, '<');
 
@@ -101,7 +99,6 @@ describe('threshold expression', () => {
 
     jest.clearAllMocks();
 
-    // Change to between comparator
     await user.selectOptions(comparatorSelect, 'between');
 
     expect(onChangeSelectedThreshold).toHaveBeenCalled();
@@ -135,33 +132,23 @@ describe('threshold expression', () => {
       />
     );
 
-    // Open the popover
     await user.click(screen.getByTestId('thresholdPopover'));
 
-    expect(screen.getByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
+    expect(await screen.findByTestId('comparatorOptionsComboBox')).toBeInTheDocument();
     expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
 
-    // Change to between comparator
     const comparatorSelect = screen.getByTestId('comparatorOptionsComboBox') as HTMLSelectElement;
     await user.selectOptions(comparatorSelect, 'between');
 
-    // Wait for the second input to appear
-    await waitFor(() => {
-      expect(screen.getByTestId('alertThresholdInput1')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('alertThresholdInput1')).toBeInTheDocument();
+    expect(await screen.findByTestId('alertThresholdInput0')).toBeInTheDocument();
 
-    // Both inputs should be present
-    expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
-
-    // Change back to single threshold comparator
     await user.selectOptions(comparatorSelect, '<');
 
-    // Wait for the second input to disappear
     await waitFor(() => {
       expect(screen.queryByTestId('alertThresholdInput1')).not.toBeInTheDocument();
     });
 
-    // First input should still be present
     expect(screen.getByTestId('alertThresholdInput0')).toBeInTheDocument();
   });
 
@@ -180,10 +167,10 @@ describe('threshold expression', () => {
       />
     );
 
-    // Open the popover to see the input
     await user.click(screen.getByTestId('thresholdPopover'));
 
     const thresholdInput = screen.getByTestId('alertThresholdInput0') as HTMLInputElement;
+
     expect(thresholdInput.value).toBe('0');
     expect(thresholdInput).not.toBeInvalid();
   });

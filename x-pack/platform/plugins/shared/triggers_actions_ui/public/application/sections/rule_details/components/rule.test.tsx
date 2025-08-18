@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { Suspense } from 'react';
-import { render, waitFor, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -48,7 +48,6 @@ jest.mock('../../../lib/rule_api/load_execution_log_aggregations', () => ({
   loadExecutionLogAggregations: jest.fn(),
 }));
 
-// Mock the useSpacesData hook
 jest.mock('../../../hooks/use_multiple_spaces', () => ({
   useMultipleSpaces: jest.fn(() => ({
     onShowAllSpacesChange: jest.fn(),
@@ -154,7 +153,6 @@ const queryClient = new QueryClient({
   },
 });
 
-// Helper function to render with all necessary providers
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(
     <IntlProvider locale="en" messages={{}}>
@@ -189,9 +187,7 @@ describe('rules', () => {
     });
 
     const expectedItems: AlertListItem[] = [
-      // active first
       alertToListItem(fakeNow.getTime(), 'second_rule', ruleSummary.alerts.second_rule),
-      // ok second
       alertToListItem(fakeNow.getTime(), 'first_rule', ruleSummary.alerts.first_rule),
     ];
 
@@ -205,12 +201,7 @@ describe('rules', () => {
       />
     );
 
-    // Wait for the component to render
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleStatusPanel')).toBeInTheDocument();
-    });
-
-    // Verify that RuleAlertList is called with the correct items
+    expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
     expect(mockRuleAlertList).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expectedItems,
@@ -226,7 +217,7 @@ describe('rules', () => {
     const ruleType = mockRuleType();
     const ruleSummary = mockRuleSummary();
 
-    const { container } = renderWithProviders(
+    renderWithProviders(
       <RuleComponent
         durationEpoch={fake2MinutesAgo.getTime()}
         {...mockAPIs}
@@ -237,8 +228,8 @@ describe('rules', () => {
       />
     );
 
-    const hiddenInput = container.querySelector('[name="alertsDurationEpoch"]') as HTMLInputElement;
-    expect(hiddenInput?.value).toEqual(fake2MinutesAgo.getTime().toString());
+    const hiddenInput = screen.getByTestId('alertsDurationEpoch') as HTMLInputElement;
+    expect(hiddenInput.value).toEqual(fake2MinutesAgo.getTime().toString());
   });
 
   it('render all active rules', async () => {
@@ -276,11 +267,7 @@ describe('rules', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleStatusPanel')).toBeInTheDocument();
-    });
-
-    // Verify that RuleAlertList is called with the correct items
+    expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
     expect(mockRuleAlertList).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expectedItems,
@@ -328,11 +315,7 @@ describe('rules', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('ruleStatusPanel')).toBeInTheDocument();
-    });
-
-    // Verify that RuleAlertList is called with the correct items
+    expect(await screen.findByTestId('ruleStatusPanel')).toBeInTheDocument();
     expect(mockRuleAlertList).toHaveBeenCalledWith(
       expect.objectContaining({
         items: expectedItems,
@@ -364,9 +347,7 @@ describe('rules', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByTestId('alertsTable')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('alertsTable')).toBeInTheDocument();
 
     jest.setSystemTime(fakeNow);
 
@@ -532,13 +513,10 @@ describe('execution duration overview', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getAllByTestId('ruleStatus-ok')).toHaveLength(2);
-    });
+    expect(await screen.findAllByTestId('ruleStatus-ok')).toHaveLength(2);
 
     const ruleExecutionStatusStats = screen.getAllByTestId('ruleStatus-ok');
     expect(ruleExecutionStatusStats[0]).toBeInTheDocument();
-    // Check for the text content instead of attribute
     expect(ruleExecutionStatusStats[0]).toHaveTextContent('Last response');
     expect(ruleExecutionStatusStats[1]).toHaveTextContent('Ok');
   });
@@ -560,7 +538,7 @@ describe('disable/enable functionality', () => {
       />
     );
 
-    const actionsElem = await waitFor(() => screen.getByTestId('statusDropdown'));
+    const actionsElem = await screen.findByTestId('statusDropdown');
 
     expect(actionsElem).toHaveTextContent('Enabled');
   });
@@ -582,7 +560,7 @@ describe('disable/enable functionality', () => {
       />
     );
 
-    const actionsElem = await waitFor(() => screen.getByTestId('statusDropdown'));
+    const actionsElem = await screen.findByTestId('statusDropdown');
 
     expect(actionsElem).toHaveTextContent('Disabled');
   });
@@ -590,7 +568,6 @@ describe('disable/enable functionality', () => {
 
 describe('tabbed content', () => {
   it('tabbed content renders when the event log experiment is on', async () => {
-    // Enable the event log experiment
     (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(
       (feature: string) => {
         if (feature === 'rulesDetailLogs') {
@@ -631,29 +608,20 @@ describe('tabbed content', () => {
       />
     );
 
-    await waitFor(() => {
-      expect(screen.getByRole('tablist')).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('tablist')).toBeInTheDocument();
 
-    // Should show both tabs
     expect(screen.getByRole('tab', { name: /alerts/i })).toBeInTheDocument();
     expect(screen.getByRole('tab', { name: /history/i })).toBeInTheDocument();
 
-    // Click on event log tab
-    const eventLogTab = screen.getByRole('tab', { name: /history/i });
+    const eventLogTab = await screen.findByRole('tab', { name: /history/i });
     await userEvent.click(eventLogTab);
 
-    await waitFor(() => {
-      expect(eventLogTab).toHaveAttribute('aria-selected', 'true');
-    });
+    expect(eventLogTab).toHaveAttribute('aria-selected', 'true');
 
-    // Click on alert list tab
-    const alertListTab = screen.getByRole('tab', { name: /alerts/i });
+    const alertListTab = await screen.findByRole('tab', { name: /alerts/i });
     await userEvent.click(alertListTab);
 
-    await waitFor(() => {
-      expect(alertListTab).toHaveAttribute('aria-selected', 'true');
-    });
+    expect(alertListTab).toHaveAttribute('aria-selected', 'true');
   });
 });
 

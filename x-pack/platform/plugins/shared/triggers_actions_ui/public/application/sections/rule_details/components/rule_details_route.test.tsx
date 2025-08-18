@@ -52,9 +52,7 @@ describe('rule_details_route', () => {
 
     renderWithIntl(<RuleDetailsRoute {...mockRouterProps(rule)} {...mockApis()} />);
 
-    await waitFor(() => {
-      expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    });
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('redirects to another page if fetched rule is an aliasMatch', async () => {

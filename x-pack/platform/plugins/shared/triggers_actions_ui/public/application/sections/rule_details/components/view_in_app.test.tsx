@@ -9,6 +9,7 @@ import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { render, screen, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
 
 import { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
@@ -17,10 +18,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 jest.mock('../../../../common/lib/kibana');
-
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
 }));
+
+const getNavigation = jest.fn();
+const navigateToUrl = jest.fn();
 
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(
@@ -37,7 +40,7 @@ describe('view in app', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: {
-          navigateToUrl: jest.fn(),
+          navigateToUrl,
           navigateToApp: jest.fn(),
         },
         http: {
@@ -46,7 +49,7 @@ describe('view in app', () => {
           },
         },
         alerting: {
-          getNavigation: jest.fn(),
+          getNavigation,
         },
       },
     } as unknown as ReturnType<typeof useKibana>);
@@ -55,29 +58,23 @@ describe('view in app', () => {
   describe('link to the app that created the rule', () => {
     it('is disabled when there is no navigation', async () => {
       const rule = mockRule();
-      const alerting = mockUseKibana().services.alerting;
-
-      // Mock getNavigation to return null (no navigation)
-      alerting!.getNavigation = jest.fn().mockResolvedValue(null);
+      getNavigation.mockResolvedValueOnce(null);
 
       renderWithIntl(<ViewInApp rule={rule} />);
-      const button = screen.getByRole('button', { name: /view in app/i });
+      const button = await screen.findByRole('button', { name: /view in app/i });
 
-      await waitFor(() => {
-        expect(button).toBeDisabled();
-      });
+      expect(button).toBeDisabled();
       expect(button).toHaveTextContent('View in app');
 
-      expect(alerting!.getNavigation).toBeCalledWith(rule.id);
+      expect(getNavigation).toBeCalledWith(rule.id);
     });
 
     it('enabled when there is navigation', async () => {
-      const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
-      const alerting = mockUseKibana().services.alerting;
-      const navigateToUrl = mockUseKibana().services.application.navigateToUrl;
+      const user = userEvent.setup();
 
-      // Mock getNavigation to return a navigation path
-      alerting!.getNavigation = jest.fn().mockResolvedValue('/rule');
+      const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
+      const navigateToUrl = mockUseKibana().services.application.navigateToUrl;
+      getNavigation.mockResolvedValueOnce('/rule');
 
       renderWithIntl(<ViewInApp rule={rule} />);
       const button = screen.getByRole('button', { name: /view in app/i });
@@ -85,7 +82,8 @@ describe('view in app', () => {
       await waitFor(() => {
         expect(button).not.toBeDisabled();
       });
-      button.click();
+
+      await user.click(button);
 
       expect(navigateToUrl).toBeCalledWith('/rule');
     });

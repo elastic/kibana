@@ -35,14 +35,13 @@ describe('of expression', () => {
       />
     );
 
-    // Check that the button shows the correct value
-    expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test');
+    const button = screen.getByTestId('ofExpressionPopover');
 
-    // Open the popover to access the form elements
+    expect(button).toHaveTextContent('of test');
+
     await user.click(screen.getByTestId('ofExpressionPopover'));
 
-    // Now check for the combo box
-    expect(screen.getByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
+    expect(await screen.findByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
   });
 
   it('renders with custom aggregation types', async () => {
@@ -73,18 +72,13 @@ describe('of expression', () => {
       />
     );
 
-    // Check that the button shows the correct value
-    waitFor(() => {
-      expect(screen.getByTestId('ofExpressionPopover')).toBeInTheDocument();
-    });
+    const button = screen.getByTestId('ofExpressionPopover');
 
-    expect(screen.getByTestId('ofExpressionPopover')).toHaveTextContent('of test2');
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveTextContent('of test2');
+    await user.click(button);
 
-    // Open the popover to access the form elements
-    await user.click(screen.getByTestId('ofExpressionPopover'));
-
-    // Now check for the combo box
-    expect(screen.getByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
+    expect(await screen.findByTestId('availableFieldsOptionsComboBox')).toBeInTheDocument();
   });
 
   it('renders with default aggregation type preselected if no aggType was set', async () => {
@@ -101,12 +95,11 @@ describe('of expression', () => {
       />
     );
 
-    // Click to open the popover
     const button = screen.getByTestId('ofExpressionPopover');
+
     await user.click(button);
 
-    // Check that the popover is open and contains the "of" text
-    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
     expect(screen.getAllByText('of')).toHaveLength(2); // One in button, one in popover title
   });
 
@@ -125,11 +118,9 @@ describe('of expression', () => {
       />
     );
 
-    // Open the popover to see the help text
     await user.click(screen.getByTestId('ofExpressionPopover'));
 
-    // The help text should be visible in the form row
-    expect(screen.getByText('Helptext test message')).toBeInTheDocument();
+    expect(await screen.findByText('Helptext test message')).toBeInTheDocument();
   });
 
   it('clears selected agg field if fields does not contain current selection', async () => {
@@ -153,7 +144,6 @@ describe('of expression', () => {
       />
     );
 
-    // Wait for the effect to run and clear the field
     await waitFor(() => {
       expect(onChangeSelectedAggField).toHaveBeenCalledWith(undefined);
     });

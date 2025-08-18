@@ -63,7 +63,6 @@ const ConnectorIconTipWithSpacing: React.FC = () => {
       color="warning"
       content={connectorDeprecatedMessage}
       position="right"
-      data-test-subj="deprecatedConnectorIcon"
       iconProps={{
         style: { verticalAlign: 'text-top' },
       }}

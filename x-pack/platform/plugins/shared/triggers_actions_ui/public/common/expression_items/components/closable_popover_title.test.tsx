@@ -6,26 +6,29 @@
  */
 
 import * as React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { ClosablePopoverTitle } from './closable_popover_title';
+import userEvent from '@testing-library/user-event';
 
 describe('closable popover title', () => {
-  it('renders with defined options', () => {
+  it('renders with defined options', async () => {
     const onClose = jest.fn();
-    const children = <div className="foo" />;
+    const children = <div  data-test-subj="data_test_subj"/>;
     render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
 
     expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
-    expect(document.querySelector('.foo')).toBeInTheDocument();
+    expect(await screen.findByTestId('data_test_subj')).toBeInTheDocument();
   });
 
-  it('onClose function gets called', () => {
+  it('onClose function gets called', async () => {
+    const user = userEvent.setup();
+
     const onClose = jest.fn();
-    const children = <div className="foo" />;
+    const children = <div/>;
     render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
 
     const closeButton = screen.getByRole('button', { name: /close/i });
-    fireEvent.click(closeButton);
+    await user.click(closeButton);
 
     expect(onClose).toHaveBeenCalled();
   });
