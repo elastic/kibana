@@ -7,7 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { MiniMap, type Node, type MiniMapNodeProps } from '@xyflow/react';
-import { useEuiTheme } from '@elastic/eui';
+import { useEuiTheme, transparentize } from '@elastic/eui';
 import {
   GRAPH_MINIMAP_ID,
   GRAPH_MINIMAP_ENTITY_NODE_ID,
@@ -173,7 +173,7 @@ export const Minimap = ({
   return (
     <div data-test-subj={GRAPH_MINIMAP_ID}>
       <MiniMap<Node<NodeViewModel>>
-        maskColor={euiTheme.colors.backgroundBaseFormsControlDisabled}
+        maskColor={transparentize(euiTheme.colors.backgroundBaseFormsControlDisabled, 0.75)}
         nodeComponent={NodeRenderer}
         style={{ ...defaultStyle, ...style }}
         zoomable={zoomable}
