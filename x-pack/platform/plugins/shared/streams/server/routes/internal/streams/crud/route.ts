@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
-import { estypes } from '@elastic/elasticsearch';
-import { Streams, ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { estypes } from '@elastic/elasticsearch';
+import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { processAsyncInChunks } from '../../../../utils/process_async_in_chunks';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';

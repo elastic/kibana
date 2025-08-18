@@ -7,8 +7,8 @@
 
 import React, { useState, useMemo, useEffect, Fragment } from 'react';
 
+import type { CriteriaWithPagination, EuiSearchBarOnChangeArgs } from '@elastic/eui';
 import {
-  CriteriaWithPagination,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -24,23 +24,22 @@ import {
   EuiContextMenuItem,
   EuiPageHeader,
   EuiPageTemplate,
-  EuiSearchBarOnChangeArgs,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { REFRESH_INTERVALS, PAGINATION, WATCH_TYPES } from '../../../../common/constants';
 import { listBreadcrumb } from '../../lib/breadcrumbs';
+import type { Error } from '../../components';
 import {
   getPageErrorCode,
   PageError,
   DeleteWatchesModal,
   WatchStateBadge,
   SectionLoading,
-  Error,
 } from '../../components';
 import { useLoadWatches } from '../../lib/api';
 import { goToCreateThresholdAlert, goToCreateAdvancedWatch } from '../../lib/navigation';

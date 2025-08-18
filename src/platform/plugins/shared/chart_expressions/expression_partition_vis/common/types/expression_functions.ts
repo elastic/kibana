@@ -9,7 +9,7 @@
 
 import type { PartitionProps } from '@elastic/charts';
 import type { MakeOverridesSerializable, Simplify } from '@kbn/chart-expressions-common/types';
-import {
+import type {
   ExpressionFunctionDefinition,
   Datatable,
   ExpressionValueRender,
@@ -17,7 +17,7 @@ import {
   DefaultInspectorAdapters,
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
-import {
+import type {
   PARTITION_LABELS_VALUE,
   PIE_VIS_EXPRESSION_NAME,
   TREEMAP_VIS_EXPRESSION_NAME,
@@ -25,11 +25,10 @@ import {
   WAFFLE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
 } from '../constants';
+import type { LabelPositions, ValueFormats } from './expression_renderers';
 import {
   type PartitionChartProps,
   type PieVisConfig,
-  LabelPositions,
-  ValueFormats,
   type TreemapVisConfig,
   type MosaicVisConfig,
   type WaffleVisConfig,
