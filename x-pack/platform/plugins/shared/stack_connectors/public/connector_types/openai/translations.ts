@@ -194,7 +194,7 @@ export const CA_DATA_DESC = i18n.translate(
 export const USE_NATIVE_FUNCTION_CALLING_LABEL = i18n.translate(
   'xpack.stackConnectors.components.genAi.enableNativeFunctionCallingLabel',
   {
-    defaultMessage: 'Use native function calling',
+    defaultMessage: 'Enable native function calling',
   }
 );
 
