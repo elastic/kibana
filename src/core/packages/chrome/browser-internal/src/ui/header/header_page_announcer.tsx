@@ -53,8 +53,8 @@ export const HeaderPageAnnouncer: FC<{
   useEffect(() => {
     const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
 
-    const handleFn = (e: Event) => {
-      if (shouldHandleTab.current && e.key === keys.TAB) {
+    const handleFn = (e: KeyboardEvent | MouseEvent) => {
+      if (shouldHandleTab.current && e instanceof KeyboardEvent && e.key === keys.TAB) {
         skipLinkRef.current?.focus();
         e.preventDefault?.();
       }
