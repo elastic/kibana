@@ -21,7 +21,7 @@ pageLoadAssetSize:
   contentConnectors: 33036
   contentManagement: 8350
   controls: 13000
-  core: 563664
+  core: 602071
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -86,9 +86,9 @@ pageLoadAssetSize:
   interactiveSetup: 42153
   intercepts: 19011
   kibanaOverview: 6339
-  kibanaReact: 24701
+  kibanaReact: 25470
   kibanaUsageCollection: 1736
-  kibanaUtils: 54423
+  kibanaUtils: 62813
   lens: 66734
   licenseManagement: 13558
   licensing: 10078
