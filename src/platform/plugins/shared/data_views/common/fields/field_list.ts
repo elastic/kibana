@@ -9,8 +9,8 @@
 
 import { findIndex } from 'lodash';
 import { DataViewField } from './data_view_field';
-import { FieldSpec, DataViewFieldMap } from '../types';
-import { DataView } from '../data_views';
+import type { FieldSpec, DataViewFieldMap } from '../types';
+import type { DataView } from '../data_views';
 
 type FieldMap = Map<DataViewField['name'], DataViewField>;
 

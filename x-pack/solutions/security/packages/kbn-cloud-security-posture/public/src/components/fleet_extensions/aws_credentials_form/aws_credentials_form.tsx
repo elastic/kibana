@@ -7,12 +7,13 @@
 import React from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
-import { CspRadioOption, RadioGroup } from '../../csp_boxed_radio_group';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
 import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
 import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
@@ -21,7 +22,7 @@ import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
-import { AwsSetupFormat, UpdatePolicy } from '../types';
+import type { AwsSetupFormat, UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [

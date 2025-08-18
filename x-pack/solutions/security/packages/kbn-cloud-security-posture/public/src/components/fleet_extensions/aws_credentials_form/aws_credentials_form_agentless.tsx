@@ -9,8 +9,12 @@ import { EuiAccordion, EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elasti
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
   ORGANIZATION_ACCOUNT,
@@ -42,7 +46,7 @@ import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ } from './aws_test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
-import { UpdatePolicy } from '../types';
+import type { UpdatePolicy } from '../types';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 interface AwsAgentlessFormProps {

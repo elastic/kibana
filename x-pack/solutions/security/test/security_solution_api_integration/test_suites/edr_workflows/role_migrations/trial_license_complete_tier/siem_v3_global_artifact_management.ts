@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
-import { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
+import type { FeaturesPrivileges, Role } from '@kbn/security-plugin-types-common';
+import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

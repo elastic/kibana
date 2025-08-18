@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { DataViewListItem, indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import type { DataViewListItem } from '@kbn/data-plugin/public';
+import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import {
+import type {
   SerializedNode,
   UrlTemplate,
   SerializedUrlTemplate,

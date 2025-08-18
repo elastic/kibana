@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { $Values } from '@kbn/utility-types';
+import type { $Values } from '@kbn/utility-types';
 
 export const AggGroupNames = Object.freeze({
   Buckets: 'buckets' as 'buckets',
