@@ -6,7 +6,6 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

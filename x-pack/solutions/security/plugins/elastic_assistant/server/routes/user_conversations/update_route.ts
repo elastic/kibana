@@ -67,22 +67,6 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
               statusCode: 404,
             });
           }
-          console.log('user check ==>', {
-            existingConversation: {
-              name: existingConversation.createdBy.name,
-              id: existingConversation.createdBy.id,
-            },
-            authenticatedUser: {
-              name: authenticatedUser?.username,
-              id: authenticatedUser?.profile_uid,
-              wholeThing: JSON.stringify(authenticatedUser, null, 2),
-            },
-            con0:
-              existingConversation.createdBy.name !== authenticatedUser?.username ||
-              existingConversation.createdBy.id !== authenticatedUser?.profile_uid,
-            con1: existingConversation.createdBy.name !== authenticatedUser?.username,
-            con2: existingConversation.createdBy.id !== authenticatedUser?.profile_uid,
-          });
           if (
             existingConversation.createdBy.name !== authenticatedUser?.username &&
             existingConversation.createdBy.id !== authenticatedUser?.profile_uid

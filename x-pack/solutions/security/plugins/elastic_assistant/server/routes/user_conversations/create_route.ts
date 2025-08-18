@@ -53,7 +53,6 @@ export const createConversationRoute = (router: ElasticAssistantPluginRouter): v
           if (!checkResponse.isSuccess) {
             return checkResponse.response;
           }
-          console.log('authenticatedUser ==>', checkResponse.currentUser);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
           const createdConversation = await dataClient?.createConversation({

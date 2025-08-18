@@ -6,6 +6,7 @@
  */
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import type { MessageRole } from '@kbn/elastic-assistant-common';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
   assertConversationTitle,
@@ -49,7 +50,8 @@ import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_
 import { deleteConnectors } from '../../tasks/api_calls/common';
 import { login } from '../../tasks/login';
 import { visit, visitGetStartedPage } from '../../tasks/navigation';
-
+const userRole: MessageRole = 'user';
+const assistantRole: MessageRole = 'assistant';
 describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => {
   const isServerless = Cypress.env(IS_SERVERLESS);
   const primaryUser = isServerless ? 'elastic_admin' : 'system_indices_superuser';
@@ -64,12 +66,12 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         user: {
           name: primaryUser,
         },
-        role: 'user',
+        role: userRole,
       },
       {
         timestamp: '2025-08-14T21:08:25.349Z',
         content: 'Hello spooky person',
-        role: 'assistant',
+        role: assistantRole,
       },
     ],
   };
@@ -83,12 +85,12 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
         user: {
           name: primaryUser,
         },
-        role: 'user',
+        role: userRole,
       },
       {
         timestamp: '2025-08-14T21:08:25.349Z',
         content: 'Hello silly person',
-        role: 'assistant',
+        role: assistantRole,
       },
     ],
   };
