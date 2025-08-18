@@ -13,6 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
+import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
   FeatureCatalogueEntry,
@@ -25,7 +26,6 @@ import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
 import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_table';
-import { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 

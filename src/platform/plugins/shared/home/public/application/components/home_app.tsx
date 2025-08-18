@@ -29,14 +29,8 @@ export interface HomeAppProps {
 }
 
 export function HomeApp({ directories, solutions }: HomeAppProps) {
-  const {
-    chrome,
-    application,
-    getBasePath,
-    addBasePath,
-    environmentService,
-    dataViewsService,
-  } = getServices();
+  const { chrome, application, getBasePath, addBasePath, environmentService, dataViewsService } =
+    getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useState } from 'react';
+import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   formatDate,
   EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiTableFieldDataColumnType,
   EuiLink,
   EuiPanel,
   EuiTitle,
@@ -19,7 +18,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
+import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
 interface RecentlyAccessedTableProps {
