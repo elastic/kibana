@@ -382,7 +382,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     key={`url-field-${index}`}
                     fullWidth={true}
                     value={customUrl.url_value}
-                    readOnly={true}
+                    onChange={() => {}} // No-op to satisfy React's controlled component requirement
                     onFocus={() => setExpandedUrlIndex(index)}
                     aria-required="true"
                     aria-label={`URL value for ${
