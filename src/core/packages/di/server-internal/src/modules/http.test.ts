@@ -20,13 +20,14 @@ import { http as httpModule } from './http';
 class TestRoute {
   static method = 'post' as const;
   static path = '/some-path';
-  static validate = {};
+  static handleLegacyErrors = false;
   static security = {
     authz: {
       enabled: false,
       reason: 'This route is opted out from authorization.',
     },
   } as const;
+  static validate = {};
 
   constructor(
     @inject(Request) public readonly request: unknown,
@@ -51,7 +52,7 @@ describe('http', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     injection = injectionServiceMock.createStartContract();
-    router = { post: jest.fn() } as unknown as typeof router;
+    router = { post: jest.fn(), handleLegacyErrors: jest.fn() } as unknown as typeof router;
     http = { createRouter: jest.fn().mockReturnValue(router) } as unknown as typeof http;
     container = injection.getContainer();
     container.loadSync(httpModule);
@@ -110,5 +111,16 @@ describe('http', () => {
     expect(route.request).toBe(request);
     expect(route.response).toBe(response);
     expect(unbindAllSpy).toHaveBeenCalled();
+  });
+
+  it('should wrap a route handler to handle legacy errors', () => {
+    const wrapper = jest.fn();
+    router.handleLegacyErrors.mockReturnValue(wrapper);
+    TestRoute.handleLegacyErrors = true;
+    container.bind(Route).toConstantValue(TestRoute);
+    setup();
+    TestRoute.handleLegacyErrors = false;
+
+    expect(router.post).toHaveBeenCalledWith(TestRoute, wrapper);
   });
 });

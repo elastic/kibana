@@ -32,6 +32,12 @@ export interface RouteDefinition<
    * The HTTP method of the route.
    */
   method: Method;
+
+  /**
+   * Catch and convert legacy boom errors to proper custom errors.
+   * @see {@link IRouter.handleLegacyErrors}
+   */
+  handleLegacyErrors?: boolean;
 }
 
 /**
