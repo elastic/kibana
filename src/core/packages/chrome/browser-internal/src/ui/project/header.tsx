@@ -43,7 +43,7 @@ import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
-import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/screen_reader_a11y';
+import { ScreenReaderRouteAnnouncements, SkipToMainContent } from '../header/header_page_announcer';
 import { AppMenuBar } from './app_menu';
 import { BreadcrumbsWithExtensionsWrapper } from '../header/breadcrumbs_with_extensions';
 
