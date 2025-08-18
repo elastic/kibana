@@ -133,7 +133,7 @@ describe('WorkflowsService', () => {
         perPage: 100,
         sortField: 'updated_at',
         sortOrder: 'desc',
-        filter: 'workflow.attributes.deleted: false',
+        filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted: true`,
       });
     });
   });

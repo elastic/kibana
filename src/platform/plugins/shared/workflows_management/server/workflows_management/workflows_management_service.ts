@@ -118,7 +118,7 @@ export class WorkflowsService {
       sortField: 'updated_at',
       sortOrder: 'desc',
       // Exclude deleted workflows by default
-      filter: 'workflow.attributes.deleted: false',
+      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted: true`,
     });
 
     // Get workflow IDs to fetch execution history

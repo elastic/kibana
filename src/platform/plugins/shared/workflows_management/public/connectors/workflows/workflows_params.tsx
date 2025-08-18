@@ -155,7 +155,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
         const workflowOptionsWithSortInfo = workflowsMap.results.map((workflow) => {
           // TODO: remove this once we have a way to disable workflows
-          const isDisabled = false;
+          const isDisabled = !workflow.definition.enabled;
           const isSelected = workflow.id === workflowId;
           const wasSelectedButNowDisabled = isSelected && isDisabled;
           const hasAlertTriggerType = workflow.definition?.triggers.some(
