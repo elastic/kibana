@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { AttachmentItem } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common';
@@ -41,7 +41,6 @@ export const useCaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
     return (data?.suggestions ?? []).flatMap((suggestion) => {
       const component = componentById.get(suggestion.id);
       if (!component) {
-        // TODO: if the suggestion component is not found, we should log an error
         return [];
       }
       return suggestion.data.map((d) => ({
@@ -59,15 +58,10 @@ export const useCaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
     [suggestionAttachmentsWithInjectedComponent, dismissedIds]
   );
 
-  const onDismissSuggestion = useCallback(
-    (id: string) => setDismissedIds((prev) => [...prev, id]),
-    [setDismissedIds]
-  );
-
   return {
     isLoadingSuggestions: isLoading,
     visibleSuggestions,
     refetchSuggestions: refetch,
-    onDismissSuggestion,
+    setDismissedIds,
   };
 };

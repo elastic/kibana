@@ -14,6 +14,7 @@ import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { AttachmentItem } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentFramework } from '@kbn/cases-plugin/server/attachment_framework/types';
 import { sloPaths } from '../../../common';
 import type { SLOSuggestion } from '../../../common/cases/suggestions';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
@@ -195,3 +196,15 @@ export function getSLOByServiceName(
     },
   };
 }
+
+export const registerSloSuggestion = ({
+  attachmentFramework,
+  coreStart,
+  logger,
+}: {
+  attachmentFramework: AttachmentFramework;
+  coreStart: CoreStart;
+  logger: Logger;
+}) => {
+  attachmentFramework.registerSuggestion(getSLOByServiceName(coreStart, logger));
+};

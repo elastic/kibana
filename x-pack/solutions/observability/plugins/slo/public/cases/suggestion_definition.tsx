@@ -7,9 +7,10 @@
 
 import type { SuggestionType } from '@kbn/cases-plugin/public';
 import React from 'react';
+import { AttachmentFramework } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { SLOSuggestion } from '../../common/cases/suggestions';
 
-export const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
+const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
   id: 'slo',
   owner: 'observability',
   children: React.lazy(() =>
@@ -17,4 +18,8 @@ export const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
       default: m.SLOSuggestionChildren,
     }))
   ),
+};
+
+export const registerSloSuggestion = (attachmentFramework: AttachmentFramework) => {
+  attachmentFramework.registerSuggestion(sloSuggestionDefinition);
 };

@@ -16,24 +16,24 @@ import * as i18n from '../../common/translations';
 export const useCaseSuggestionItem = ({
   caseData,
   suggestion,
-  onDismissSuggestion,
+  setDismissedIds,
 }: {
   caseData: CaseUI;
   suggestion: AttachmentItem;
-  onDismissSuggestion: (id: string) => void;
+  setDismissedIds: (callback: (prev: string[]) => string[]) => void;
 }) => {
   const { showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
-  const onDismissSuggestionNew = useCallback(() => {
-    onDismissSuggestion(suggestion.id);
-  }, [onDismissSuggestion, suggestion.id]);
+  const onDismissSuggestion = useCallback(() => {
+    setDismissedIds((prev) => [...prev, suggestion.id]);
+  }, [setDismissedIds, suggestion.id]);
 
   const onSuggestionAddedToCase = useCallback(() => {
     refreshCaseViewPage();
     showSuccessToast(i18n.SUGGESTION_ADDED_TO_CASE);
-    onDismissSuggestionNew();
-  }, [showSuccessToast, refreshCaseViewPage, onDismissSuggestionNew]);
+    onDismissSuggestion();
+  }, [showSuccessToast, refreshCaseViewPage, onDismissSuggestion]);
 
   const { mutateAsync: createAttachments, isLoading: isAddingSuggestionToCase } =
     useCreateAttachments({
@@ -48,5 +48,5 @@ export const useCaseSuggestionItem = ({
     });
   }, [createAttachments, caseData.id, caseData.owner, suggestion.attachment]);
 
-  return { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestionNew };
+  return { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestion };
 };

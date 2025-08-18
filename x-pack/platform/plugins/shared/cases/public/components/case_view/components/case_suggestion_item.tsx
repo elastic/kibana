@@ -27,19 +27,19 @@ const ITEM_HEIGHT = 350;
 export const CaseSuggestionItem = ({
   suggestion,
   caseData,
-  onDismissSuggestion,
+  setDismissedIds,
 }: {
   suggestion: AttachmentItem & {
     injectedComponent: SuggestionType['children'];
   };
   caseData: CaseUI;
-  onDismissSuggestion: (id: string) => void;
+  setDismissedIds: (callback: (prev: string[]) => string[]) => void;
 }) => {
-  const { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestionNew } =
+  const { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestion } =
     useCaseSuggestionItem({
       suggestion,
       caseData,
-      onDismissSuggestion,
+      setDismissedIds,
     });
 
   return (
@@ -63,17 +63,14 @@ export const CaseSuggestionItem = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon iconType="cross" color="text" onClick={onDismissSuggestionNew} />
+            <EuiButtonIcon iconType="cross" color="text" onClick={onDismissSuggestion} />
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        {suggestion.description && <EuiText size="s">{suggestion.description}</EuiText>}
-
+        <EuiText size="s">{suggestion.description}</EuiText>
         <suggestion.injectedComponent suggestion={{ data: [suggestion], id: suggestion.id }} />
-
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty size="s" color="primary" onClick={onDismissSuggestionNew}>
+            <EuiButtonEmpty size="s" color="primary" onClick={onDismissSuggestion}>
               {i18n.DISMISS}
             </EuiButtonEmpty>
           </EuiFlexItem>
