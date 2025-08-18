@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type CommonTokenStream, Token } from 'antlr4';
+import type { Token } from 'antlr4';
+import { type CommonTokenStream } from 'antlr4';
 import { Builder } from '../builder';
 import { Visitor } from '../visitor';
 import type {

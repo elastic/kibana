@@ -8,10 +8,10 @@
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { STEP_END_FILTER } from '../../../../../../common/constants/data_filters';
 import { asMutableArray } from '../../../../../../common/utils/as_mutable_array';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useSyntheticsRefreshContext } from '../../../contexts';
 

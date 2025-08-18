@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiNotificationBadge, EuiPanel } fr
 import { EditableResult } from '@kbn/search-index-documents';
 import { resultToFieldFromMappingResponse } from '@kbn/search-index-documents/components/result/result_metadata';
 import React from 'react';
-import { FieldError } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
 import { useFetchDocument } from '../../../../hooks/use_fetch_document';
 
 interface DocumentSelectorProps {
