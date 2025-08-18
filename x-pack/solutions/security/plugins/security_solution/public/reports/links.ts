@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
-import type { StartPlugins } from '../types';
+import { i18n } from '@kbn/i18n';
+import { SECURITY_UI_SHOW_PRIVILEGE } from '@kbn/security-solution-features/constants';
 import {
-  SecurityPageName,
-  SECURITY_FEATURE_ID,
-  ATTACK_DISCOVERY_FEATURE_ID,
   AI_VALUE_PATH,
+  ATTACK_DISCOVERY_FEATURE_ID,
+  SecurityPageName,
 } from '../../common/constants';
 import { AI_VALUE_DASHBOARD } from '../app/translations';
 import type { LinkItem } from '../common/links/types';
+import type { StartPlugins } from '../types';
 
 export const aiValueLinks: LinkItem = {
   id: SecurityPageName.aiValue,
@@ -24,9 +24,7 @@ export const aiValueLinks: LinkItem = {
     defaultMessage: 'See ROI for Security AI features',
   }),
   path: AI_VALUE_PATH,
-  capabilities: [
-    [`${SECURITY_FEATURE_ID}.show`, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
-  ],
+  capabilities: [[SECURITY_UI_SHOW_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.aiValue', {
       defaultMessage: 'AI Value',

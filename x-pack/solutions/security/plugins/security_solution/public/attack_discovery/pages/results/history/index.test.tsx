@@ -40,6 +40,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
         capabilities: {
           siemV2: { crud_alerts: true, read_alerts: true },
           siemV3: { configurations: true },
+          siemV4: { configurations: true },
         },
         navigateToUrl: jest.fn(),
       },

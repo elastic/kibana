@@ -7,6 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import {
+  RULES_UI_READ_PRIVILEGE,
+  SECURITY_UI_SHOW_PRIVILEGE,
+} from '@kbn/security-solution-features/constants';
+import {
   COVERAGE_OVERVIEW_PATH,
   EXCEPTIONS_PATH,
   RULES_ADD_PATH,
@@ -37,7 +41,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: `${SECURITY_FEATURE_ID}.show`,
+  capabilities: [RULES_UI_READ_PRIVILEGE, SECURITY_UI_SHOW_PRIVILEGE],
   links: [
     {
       id: SecurityPageName.rules,
@@ -52,7 +56,8 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
-      capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
+      // TODO Remove `${SECURITY_FEATURE_ID}.detections` ? Check if AI4SOC needs it
+      capabilities: [[RULES_UI_READ_PRIVILEGE, `${SECURITY_FEATURE_ID}.detections`]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -79,7 +84,7 @@ export const links: LinkItem = {
       }),
       landingIcon: IconConsoleCloud,
       path: EXCEPTIONS_PATH,
-      capabilities: [`${SECURITY_FEATURE_ID}.showEndpointExceptions`],
+      capabilities: [RULES_UI_READ_PRIVILEGE],
       skipUrlState: true,
       hideTimeline: true,
       globalSearchKeywords: [
@@ -100,7 +105,7 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: `${SECURITY_FEATURE_ID}.detections`,
+      capabilities: RULES_UI_READ_PRIVILEGE,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',

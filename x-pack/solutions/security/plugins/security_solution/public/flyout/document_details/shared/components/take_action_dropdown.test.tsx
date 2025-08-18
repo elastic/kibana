@@ -35,7 +35,7 @@ jest.mock('../../../../common/components/endpoint/responder');
 jest.mock('../../../../common/components/user_privileges');
 
 jest.mock('../../../../detections/components/user_info', () => ({
-  useUserData: jest.fn().mockReturnValue([{ canUserCRUD: true, hasIndexWrite: true }]),
+  useUserData: jest.fn().mockReturnValue([{ hasIndexWrite: true }]),
 }));
 
 jest.mock('../../../../common/lib/kibana');
@@ -43,7 +43,7 @@ jest.mock('../../../../common/lib/kibana');
 jest.mock(
   '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => ({
-    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasKibanaCRUD: true }),
+    useAlertsPrivileges: jest.fn().mockReturnValue({ hasIndexWrite: true, hasSiemCRUD: true }),
   })
 );
 jest.mock('../../../../cases/components/use_insert_timeline');
@@ -153,6 +153,7 @@ describe('take action dropdown', () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         ...getUserPrivilegesMockDefaultValue(),
         timelinePrivileges: { read: true },
+        rulesPrivileges: { read: true, edit: true },
       });
       wrapper = mount(
         <TestProviders>
