@@ -23,6 +23,7 @@ export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
   profileId: METRICS_DATA_SOURCE_PROFILE_ID,
+  isExperimental: true,
   profile: {
     getDefaultAppState: (prev) => (params) => ({
       ...(prev ? prev(params) : {}),
