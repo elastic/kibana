@@ -78,28 +78,29 @@ export class AIAssistantManagementPlugin
       });
     }
 
-    this.registeredAiAssistantManagementSelectionApp = management.sections.section.kibana.registerApp({
-      id: 'aiAssistantManagementSelection',
-      title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
-        defaultMessage: 'AI Assistants',
-      }),
-      order: 1,
-      keywords: ['ai'],
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section/mount_section');
-        const securityAIAssistantEnabled = !!management?.sections.section.kibana
-          .getAppsEnabled()
-          .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);
+    this.registeredAiAssistantManagementSelectionApp =
+      management.sections.section.kibana.registerApp({
+        id: 'aiAssistantManagementSelection',
+        title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
+          defaultMessage: 'AI Assistants',
+        }),
+        order: 1,
+        keywords: ['ai'],
+        mount: async (mountParams) => {
+          const { mountManagementSection } = await import('./management_section/mount_section');
+          const securityAIAssistantEnabled = !!management?.sections.section.kibana
+            .getAppsEnabled()
+            .find((app) => app.id === 'securityAiAssistantManagement' && app.enabled);
 
-        return mountManagementSection({
-          core,
-          mountParams,
-          kibanaBranch: this.kibanaBranch,
-          buildFlavor: this.buildFlavor,
-          securityAIAssistantEnabled,
-        });
-      },
-    });
+          return mountManagementSection({
+            core,
+            mountParams,
+            kibanaBranch: this.kibanaBranch,
+            buildFlavor: this.buildFlavor,
+            securityAIAssistantEnabled,
+          });
+        },
+      });
 
     // Default to disabled until license check runs in start()
     this.registeredAiAssistantManagementSelectionApp.disable();
