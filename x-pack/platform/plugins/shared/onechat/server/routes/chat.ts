@@ -183,10 +183,14 @@ export function registerChatRoutes({
 
         return response.ok({
           headers: {
-            'Content-Type': 'text/event-stream',
+            // cloud compress text/* types, loosing chunking capabilities which we need for SSE
+            'Content-Type': cloud?.isCloudEnabled
+              ? 'application/octet-stream'
+              : 'text/event-stream',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Transfer-Encoding': 'chunked',
+            'X-Content-Type-Options': 'nosniff',
             // This disables response buffering on proxy servers
             'X-Accel-Buffering': 'no',
           },

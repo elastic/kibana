@@ -47,6 +47,7 @@ import {
   OPERATOR_TITLES,
   INPUT_ERRORS,
   VALIDATION_WARNINGS,
+  OS_OPTIONS_PLACEHOLDER,
 } from '../translations';
 
 interface ValidationResult {
@@ -206,7 +207,7 @@ const ConditionsSection = memo<{
       >
         <EuiComboBox
           isInvalid={visitedFields.os && !!validationResult.errors.os}
-          placeholder="Select an operating system"
+          placeholder={OS_OPTIONS_PLACEHOLDER}
           singleSelection={{ asPlainText: true }}
           options={OS_OPTIONS}
           selectedOptions={OS_OPTIONS.filter(
