@@ -18,6 +18,7 @@ import type {
   ChatCompletionMessageParam,
 } from 'openai/resources/chat/completions';
 import type { Stream } from 'openai/streaming';
+import { trace } from '@opentelemetry/api';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 import { getCustomAgents } from '@kbn/actions-plugin/server/lib/get_custom_agents';
@@ -287,6 +288,9 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     { body, stream, signal, timeout }: StreamActionParams,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<RunActionResponse> {
+    const parentSpan = trace.getActiveSpan();
+    parentSpan?.setAttribute('openai.raw_request', body);
+
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
