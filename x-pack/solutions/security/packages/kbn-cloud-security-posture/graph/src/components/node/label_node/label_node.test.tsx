@@ -18,7 +18,7 @@ import {
   TEST_SUBJ_EXPAND_BTN,
   TEST_SUBJ_HANDLE,
   TEST_SUBJ_HOVER_OUTLINE,
-  TEST_SUBJ_TOOLTIP,
+  TEST_SUBJ_POPOVER,
 } from './label_node';
 
 jest.mock('./label_node_badges', () => {
@@ -155,9 +155,9 @@ describe('LabelNode', () => {
     });
   });
 
-  describe('Tooltip', () => {
+  describe('Popover', () => {
     // TODO This test is skipped for now until we find a proper solution to show truncated text
-    xtest('shows tooltip when text is truncated', async () => {
+    xtest('shows popover when text is truncated', async () => {
       const props = {
         ...baseProps,
         data: {
@@ -175,11 +175,11 @@ describe('LabelNode', () => {
       await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
+        expect(screen.queryByTestId(TEST_SUBJ_POPOVER)).toBeInTheDocument();
       });
     });
 
-    test('shows tooltip when number of events is over limit', async () => {
+    test('shows popover when number of events is over limit', async () => {
       const props = {
         ...baseProps,
         data: {
@@ -197,11 +197,11 @@ describe('LabelNode', () => {
       await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
+        expect(screen.queryByTestId(TEST_SUBJ_POPOVER)).toBeInTheDocument();
       });
     });
 
-    test('shows tooltip when number of alerts is over limit', async () => {
+    test('shows popover when number of alerts is over limit', async () => {
       const props = {
         ...baseProps,
         data: {
@@ -219,11 +219,11 @@ describe('LabelNode', () => {
       await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).toBeInTheDocument();
+        expect(screen.queryByTestId(TEST_SUBJ_POPOVER)).toBeInTheDocument();
       });
     });
 
-    test('does not show tooltip otherwise', async () => {
+    test('does not show popover otherwise', async () => {
       render(
         <ReactFlow>
           <LabelNode {...baseProps} />
@@ -233,7 +233,7 @@ describe('LabelNode', () => {
       await userEvent.hover(screen.getByTestId(TEST_SUBJ_CONTAINER));
 
       await waitFor(() => {
-        expect(screen.queryByTestId(TEST_SUBJ_TOOLTIP)).not.toBeInTheDocument();
+        expect(screen.queryByTestId(TEST_SUBJ_POPOVER)).not.toBeInTheDocument();
       });
     });
   });
