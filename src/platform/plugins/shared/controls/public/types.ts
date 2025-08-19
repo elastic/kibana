@@ -10,8 +10,8 @@
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PublishingSubject } from '@kbn/presentation-publishing';
+import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface CanClearSelections {
   clearSelections: () => void;
@@ -30,6 +30,7 @@ export const isClearableControl = (control: unknown): control is CanClearSelecti
  */
 export interface ControlsPluginSetupDeps {
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
 }
 export interface ControlsPluginStartDeps {
   uiActions: UiActionsStart;

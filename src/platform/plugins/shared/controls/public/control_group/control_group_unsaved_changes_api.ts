@@ -25,7 +25,7 @@ import {
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import type { ControlPanelsState } from '../../common';
-import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
+// import { apiPublishesAsyncFilters } from '../controls/data_controls/publishes_async_filters';
 import { getControlsInOrder, type ControlsInOrder } from './init_controls_manager';
 import { deserializeControlGroup } from './utils/serialization_utils';
 import { ControlGroupEditorState } from './types';

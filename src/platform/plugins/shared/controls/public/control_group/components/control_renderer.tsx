@@ -11,7 +11,7 @@ import React, { useEffect, useImperativeHandle, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
 
 import type { DefaultControlState } from '../../../common';
-import { getControlFactory } from '../../control_factory_registry';
+import { getControlPanelType } from '../../actions/control_panel_actions';
 import type { ControlApiRegistration, DefaultControlApi } from '../../controls/types';
 import type { ControlGroupApi } from '../types';
 import { ControlPanel } from './control_panel';
@@ -45,7 +45,7 @@ export const ControlRenderer = <
 
       async function buildControl() {
         const controlGroupApi = getParentApi();
-        const factory = await getControlFactory<StateType, ApiType>(type);
+        const factory = await getControlPanelType<StateType, ApiType>(type);
         const finalizeApi = (apiRegistration: ControlApiRegistration<ApiType>): ApiType => {
           return {
             ...apiRegistration,
