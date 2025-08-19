@@ -7,7 +7,11 @@
 
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../../../mocks';
-import { triggerConsoleCommandInputEvent, getConsoleTestSetup } from '../../../mocks';
+import {
+  getCommandListMock,
+  triggerConsoleCommandInputEvent,
+  getConsoleTestSetup,
+} from '../../../mocks';
 import type { ConsoleProps } from '../../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../../console_state/state_update_handlers/handle_input_area_state';
 import { waitFor, createEvent, fireEvent } from '@testing-library/react';
@@ -144,6 +148,29 @@ describe('When entering data into the Console input', () => {
     await enterCommand('cmd2 ', { inputOnly: true });
 
     expect(getFooterText()).toEqual('cmd2 --file [--ext --bad]');
+  });
+
+  it('should display hint provided by `exampleUsage` callback', async () => {
+    const commands = getCommandListMock();
+    const cmd1Command = commands[0];
+    const exampleUsageMessage = 'example usage provided by callback';
+    cmd1Command.exampleUsage = jest.fn(() => exampleUsageMessage);
+    render({ commands });
+    await enterCommand('cmd1 ', { inputOnly: true });
+
+    expect(getFooterText()).toEqual(exampleUsageMessage);
+    expect(cmd1Command.exampleUsage).toHaveBeenCalledWith({
+      argState: {},
+      args: {
+        args: {},
+        hasArgs: false,
+        input: 'cmd1 ',
+        name: 'cmd1',
+      },
+      commandDefinition: cmd1Command,
+      input: 'cmd1 ',
+      inputDisplay: 'cmd1 ',
+    });
   });
 
   it('should display hint when an unknown command is typed', async () => {
