@@ -117,8 +117,8 @@ export class WorkflowsService {
       perPage: 100,
       sortField: 'updated_at',
       sortOrder: 'desc',
-      // Exclude deleted workflows by default
-      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted: true`,
+      // Exclude deleted workflows by checking for null/undefined deleted_at
+      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
     });
 
     // Get workflow IDs to fetch execution history
@@ -257,7 +257,7 @@ export class WorkflowsService {
       definition: workflowToCreate.definition,
       createdBy: authenticatedUser,
       lastUpdatedBy: authenticatedUser,
-      deleted: false,
+      deleted_at: null,
     };
 
     const response = await savedObjectsClient.create<WorkflowSavedObjectAttributes>(
@@ -357,12 +357,13 @@ export class WorkflowsService {
       }
     }
 
-    // Soft delete workflows by marking them as deleted instead of removing them
+    // Soft delete workflows by setting deleted_at timestamp instead of removing them
     const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const deletedAt = new Date();
     await Promise.all(
       workflowIds.map((id) =>
         savedObjectsClient.update<WorkflowSavedObjectAttributes>(WORKFLOW_SAVED_OBJECT_TYPE, id, {
-          deleted: true,
+          deleted_at: deletedAt,
           lastUpdatedBy: authenticatedUser,
         })
       )

@@ -58,7 +58,7 @@ describe('WorkflowsService', () => {
   });
 
   describe('deleteWorkflows', () => {
-    it('should soft delete workflows by setting deleted to true', async () => {
+    it('should soft delete workflows by setting deleted_at timestamp', async () => {
       const workflowIds = ['workflow-1', 'workflow-2'];
       const mockRequest = {} as any;
 
@@ -70,19 +70,19 @@ describe('WorkflowsService', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         WORKFLOW_SAVED_OBJECT_TYPE,
         'workflow-1',
-        {
-          deleted: true,
+        expect.objectContaining({
+          deleted_at: expect.any(Date),
           lastUpdatedBy: 'system',
-        }
+        })
       );
 
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         WORKFLOW_SAVED_OBJECT_TYPE,
         'workflow-2',
-        {
-          deleted: true,
+        expect.objectContaining({
+          deleted_at: expect.any(Date),
           lastUpdatedBy: 'system',
-        }
+        })
       );
 
       expect(mockSavedObjectsClient.delete).not.toHaveBeenCalled();
@@ -133,13 +133,13 @@ describe('WorkflowsService', () => {
         perPage: 100,
         sortField: 'updated_at',
         sortOrder: 'desc',
-        filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted: true`,
+        filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
       });
     });
   });
 
   describe('createWorkflow', () => {
-    it('should initialize deleted to false for new workflows', async () => {
+    it('should initialize deleted_at to null for new workflows', async () => {
       const mockWorkflow = {
         yaml: `
 name: Test Workflow
@@ -172,7 +172,7 @@ definition:
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         WORKFLOW_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          deleted: false,
+          deleted_at: null,
         })
       );
     });
