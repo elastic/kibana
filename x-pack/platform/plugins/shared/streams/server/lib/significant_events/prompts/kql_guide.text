@@ -1,7 +1,4 @@
-## KQL Query Syntax Guide
-
-### Core Syntax Rule
-`field:value` - Search for `value` within the specified `field`
+## {{kql_guide}}
 
 ### Key Principles
 

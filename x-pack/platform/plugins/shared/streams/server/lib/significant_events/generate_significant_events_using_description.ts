@@ -65,9 +65,11 @@ export async function generateSignificantEventQueriesUsingDescription(
   const { output: zeroShotQueries } = await inferenceClient.output({
     id: 'generate_queries_from_system',
     connectorId,
-    input: `You are an expert log analysis system. You previously identified the system that generated the logs as {identified_system}.
+    input: `You are an expert log analyst tasked with generating KQL (Kibana Query Language) queries to identify significant events for the {{identified_system}}.
 
-## Identified System
+
+## {{identified_system}}
+You previously identified the system that generated the logs as:
 ${identifiedSystem}
 
 ## Context
@@ -82,19 +84,18 @@ ${KQL_GUIDE}
 
 ## Task: Generate Significant Event Queries
 
-Based on your deep expertise of the {identified_system}, generate Elasticsearch KQL queries using the {kql_guide}
-to detect the most significant events for this type of system using the following field in the KQL query:
-${categorizationField}.
+Based on your deep expertise of the {{identified_system}}, generate Elasticsearch KQL (Kibana Query Language) queries using the {{kql_guide}} 
+to detect the most significant events for this type of system using the following field in the KQL query: ${categorizationField}.
 
 Generate KQL queries that identify **operationally significant patterns** - events that indicate:
-1. **Critical Errors**: System failures, crashes, or critical errors specific to {identified_system}
+1. **Critical Errors**: System failures, crashes, or critical errors specific to {{identified_system}}
 2. **Security Events**: Authentication failures, unauthorized access, suspicious patterns
 3. **Performance Issues**: Slow responses, timeouts, resource exhaustion
 4. **Availability Issues**: Service disruptions, connectivity problems
 5. **Data Integrity**: Corruption, failed transactions, data loss indicators
-6. **Anomalous Behavior**: Unusual patterns specific to {identified_system}
+6. **Anomalous Behavior**: Unusual patterns specific to {{identified_system}}
 
-Remember to focus exclusively on queries that are specific to the {identified_system} and follow the {kql_guide}.
+Remember to focus exclusively on queries that are specific to the {{identified_system}} and follow the {{kql_guide}}.
 `,
     schema: {
       type: 'object',
