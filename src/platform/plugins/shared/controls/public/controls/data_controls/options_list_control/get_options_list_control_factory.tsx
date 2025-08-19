@@ -101,6 +101,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           if (newFilter) {
             newFilter.meta.key = field?.name;
             if (state.exclude) newFilter.meta.negate = true;
+            newFilter.meta.controlledBy = uuid;
           }
           return newFilter;
         }
@@ -169,6 +170,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           loadingSuggestions$,
           debouncedSearchString,
           parentApi,
+          uuid,
         },
         requestSize$: temporaryStateManager.api.requestSize$,
         runPastTimeout$: editorStateManager.api.runPastTimeout$,
@@ -252,6 +254,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           if (newFilter) {
             newFilter.meta.key = field?.name;
             if (exclude) newFilter.meta.negate = true;
+            newFilter.meta.controlledBy = uuid;
           }
           dataControlManager.internalApi.setOutputFilter(newFilter);
         });
