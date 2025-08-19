@@ -24,13 +24,15 @@ export const findSuggestionsRoute = createCasesRoute({
     try {
       const caseContext = await context.cases;
       const casesClient = await caseContext.getCasesClient();
-      const suggestions = await casesClient.suggestions.getAllForOwners({
+      const suggestionsResponse = await casesClient.suggestions.getAllForOwners({
         owners: request.body.owners,
         context: request.body.context,
         request,
       });
       return response.ok({
-        body: suggestions,
+        body: {
+          suggestions: suggestionsResponse.suggestions.slice(0, 2),
+        },
       });
     } catch (error) {
       throw createCaseError({
