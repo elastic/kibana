@@ -454,7 +454,7 @@ export interface SavedObjectsClientContract {
    * Changes the access mode of one or more SavedObjects.
    * @param objects - The objects to change access mode for
    * @param options {@link SavedObjectsChangeAccessModeOptions} - options for the change access mode operation
-   * @returns the {@link SavedObjectsChangeAccessModeResponse}
+   * @returns the {@link SavedObjectsChangeAccessControlResponse}
    */
   changeAccessMode(
     objects: SavedObjectsChangeAccessControlObject[],

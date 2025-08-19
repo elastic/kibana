@@ -335,14 +335,12 @@ export const changeObjectAccessControl = async (
         }
 
         const { type, id, esRequestIndex } = expectedResult.value;
-        if (esRequestIndex !== undefined) {
-          const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
+        const response = bulkOperationResponse?.items[esRequestIndex] ?? {};
 
-          const rawResponse = Object.values(response)[0] as any;
-          const error = getBulkOperationError(type, id, rawResponse);
-          if (error) {
-            return { id, type, error };
-          }
+        const rawResponse = Object.values(response)[0] as any;
+        const error = getBulkOperationError(type, id, rawResponse);
+        if (error) {
+          return { id, type, error };
         }
 
         return { id, type };
