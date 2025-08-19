@@ -8,7 +8,7 @@
  */
 
 import { appendIndexToJoinCommand } from './create_lookup_index';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 describe('appendIndexToJoinCommand', () => {
   it('replaces existing index argument', () => {

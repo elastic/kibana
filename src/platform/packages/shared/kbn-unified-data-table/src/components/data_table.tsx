@@ -100,7 +100,7 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
-import { useRowHeight, RowHeightType } from '../hooks/use_row_height';
+import { useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
