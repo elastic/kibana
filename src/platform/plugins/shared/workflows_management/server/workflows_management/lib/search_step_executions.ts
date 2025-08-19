@@ -31,6 +31,8 @@ export const searchStepExecutions = async ({
         match: { workflowRunId: workflowExecutionId },
       },
       sort: 'startedAt:dsc',
+      from: 0,
+      size: 100, // without it, it returns up to 10 results by default
     });
 
     logger.info(
