@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef, useEffect } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
@@ -52,6 +52,7 @@ import { confirmDeleteControl } from '../../common';
 import { dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
 import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState
@@ -69,17 +70,8 @@ export interface ControlEditorProps<
 const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
-const CompatibleControlTypesComponent = ({
-  dataViewId,
-  fieldName,
-  selectedAction,
-  setSelectedAction,
-}: Partial<DefaultDataControlState> & {
-  selectedAction?: ControlTypeAction;
-  setSelectedAction: (action: ControlTypeAction) => void;
-}) => {
+const useControlTypeActions = () => {
   const [controlTypes, setControlTypes] = useState<ControlTypeAction[] | undefined>(undefined);
-  const [isCompatible, setIsCompatible] = useState<{ [type: string]: boolean }>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -114,6 +106,22 @@ const CompatibleControlTypesComponent = ({
     };
   }, []);
 
+  return controlTypes;
+};
+
+const CompatibleControlTypesComponent = ({
+  dataViewId,
+  fieldName,
+  selectedAction,
+  setSelectedAction,
+}: Partial<DefaultDataControlState> & {
+  selectedAction?: string;
+  setSelectedAction: (type: string) => void;
+  setAvailableActions: (actions: ControlTypeAction[]) => void;
+}) => {
+  const controlTypes = useControlTypeActions();
+  const [isCompatible, setIsCompatible] = useState<{ [type: string]: boolean }>({});
+
   const controlTypeContext = useMemo(
     () => ({
       trigger: addControlMenuTrigger,
@@ -146,7 +154,7 @@ const CompatibleControlTypesComponent = ({
               id={`create__${action.type}`}
               aria-label={action.getDisplayName(controlTypeContext)}
               data-test-subj={`create__${action.type}`}
-              isSelected={action.id === selectedAction?.id}
+              isSelected={action.type === selectedAction}
               disabled={disabled}
               onClick={() => setSelectedAction(action)}
               label={action.getDisplayName(controlTypeContext)}
@@ -189,12 +197,15 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   parentApi,
   ariaLabelledBy,
 }: ControlEditorProps<State>) => {
+  const actions = useRef<ControlTypeAction[]>([]);
+  const controlTypes = useControlTypeActions();
+
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialDefaultPanelTitle ?? initialState.fieldName ?? ''
   );
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
-  const [selectedAction, setSelectedAction] = useState<ControlTypeAction | undefined>();
+  const [selectedAction, setSelectedAction] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   // TODO get editor config from parent?
@@ -230,7 +241,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   }, [editorState.dataViewId]);
 
   const CustomSettingsComponent = useMemo(() => {
-    const CustomSettings = selectedAction?.MenuItem;
+    const CustomSettings = actions.current?.[selectedAction]?.extension?.CustomOptionsComponent;
     if (!CustomSettings || !selectedDataView || !editorState.fieldName) return;
 
     const field = editorState.fieldName
@@ -305,10 +316,14 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               </EuiCallOut>
             ) : (
               <FieldPicker
-                // filterPredicate={(field: DataViewField) => {
-                //   const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
-                //   return Boolean(fieldRegistry?.[field.name]) && customPredicate;
-                // }}
+                filterPredicate={(field: DataViewField) => {
+                  const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
+                  return (
+                    (controlTypes ?? []).some((action) =>
+                      action.extension.isFieldCompatible(field)
+                    ) && customPredicate
+                  );
+                }}
                 selectedFieldName={editorState.fieldName}
                 dataView={selectedDataView}
                 onSelectField={(field) => {
@@ -318,14 +333,18 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                    * make sure that the new field is compatible with the selected control type and, if it's not,
                    * reset the selected control type to the **first** compatible control type
                    */
-                  // const newCompatibleControlTypes =
-                  //   fieldRegistry?.[field.name]?.compatibleControlTypes ?? [];
-                  // if (
-                  //   !selectedControlType ||
-                  //   !newCompatibleControlTypes.includes(selectedControlType!)
-                  // ) {
-                  //   setSelectedControlType(newCompatibleControlTypes[0]);
-                  // }
+                  if (
+                    !selectedAction ||
+                    !controlTypes[selectedAction]?.extension.isFieldCompatible(field)
+                  ) {
+                    const firstCompatible = (() => {
+                      for (const action of controlTypes ?? []) {
+                        if (action.extension.isFieldCompatible(field)) return action;
+                      }
+                      return undefined;
+                    })();
+                    setSelectedAction(firstCompatible.type);
+                  }
 
                   /**
                    * set the control title (i.e. the one set by the user) + default title (i.e. the field display name)
@@ -353,6 +372,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 fieldName={editorState.fieldName}
                 selectedAction={selectedAction}
                 setSelectedAction={setSelectedAction}
+                setAvailableActions={(availableActions) => {
+                  actions.current = availableActions;
+                }}
               />
             </div>
           </EuiFormRow>
@@ -443,10 +465,11 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 color="primary"
                 disabled={!(controlOptionsValid && Boolean(selectedAction))}
                 onClick={() => {
-                  selectedAction?.execute({
+                  actions.current?.[selectedAction]?.execute({
                     trigger: addControlMenuTrigger,
                     embeddable: parentApi,
                     state: editorState,
+                    controlId,
                   });
                   onSave();
                 }}

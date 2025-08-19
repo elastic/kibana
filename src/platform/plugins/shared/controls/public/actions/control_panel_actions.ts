@@ -13,14 +13,16 @@ import { Trigger } from '@kbn/ui-actions-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public/actions';
 import type { DefaultDataControlState } from '../../common';
 import type { CustomOptionsComponentProps } from '../controls/data_controls/types';
+import { DataViewField } from '@kbn/data-views-plugin/common';
 
-export interface ControlTypeAction<State extends DefaultDataControlState = DefaultDataControlState>
-  extends Omit<
-    Action<EmbeddableApiContext & { state: Partial<State>; controlId?: string }>,
-    'MenuItem'
-  > {
-  MenuItem?: React.FC<CustomOptionsComponentProps<State>>;
-}
+export type ControlTypeAction<State extends DefaultDataControlState = DefaultDataControlState> =
+  Action<
+    EmbeddableApiContext & { state: Partial<State>; controlId?: string },
+    {
+      CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
+      isFieldCompatible: (field: DataViewField) => boolean;
+    }
+  >;
 
 export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';
 
