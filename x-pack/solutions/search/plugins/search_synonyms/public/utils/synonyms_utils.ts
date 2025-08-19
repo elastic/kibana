@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
-import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 
 export const isExplicitSynonym = (synonym: string) => {
   return synonym.trim().includes('=>');

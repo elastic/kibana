@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { map, of } from 'rxjs';
 import { createNavigationTree } from './navigation_tree';
-import {
+import type {
   ServerlessObservabilityPublicSetup,
   ServerlessObservabilityPublicStart,
   ServerlessObservabilityPublicSetupDependencies,

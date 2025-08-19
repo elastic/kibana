@@ -6,10 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { NotificationsStart, OverlayStart } from '@kbn/core/public';
-import { TagWithRelations } from '../../../common/types';
-import { ITagInternalClient } from '../../services/tags';
-import { TagAction } from './types';
+import type { NotificationsStart, OverlayStart } from '@kbn/core/public';
+import type { TagWithRelations } from '../../../common/types';
+import type { ITagInternalClient } from '../../services/tags';
+import type { TagAction } from './types';
 
 interface GetDeleteActionOptions {
   overlays: OverlayStart;

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { PhaseWithTiming } from '../../../../../../../../common/types';
+import type { PhaseWithTiming } from '../../../../../../../../common/types';
 
 export function getUnitsAriaLabelForPhase(phase: PhaseWithTiming) {
   switch (phase) {
