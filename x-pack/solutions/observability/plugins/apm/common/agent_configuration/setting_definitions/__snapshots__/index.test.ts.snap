@@ -242,7 +242,7 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
-    "key": "polling_interval",
+    "key": "opamp_polling_interval",
     "min": "1s",
     "type": "duration",
     "units": Array [
