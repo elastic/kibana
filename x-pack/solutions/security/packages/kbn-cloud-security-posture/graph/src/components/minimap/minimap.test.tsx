@@ -47,7 +47,7 @@ describe('Minimap', () => {
     const minimap = screen.getByTestId(GRAPH_MINIMAP_ID);
     expect(minimap.firstChild).toHaveStyle({
       'background-color': '#FFFFFF',
-      '--xy-minimap-mask-background-color-props': '#CAD3E2',
+      '--xy-minimap-mask-background-color-props': 'rgba(202,211,226,0.75)',
     });
     expect(minimap.firstChild).toHaveClass('bottom left');
   });
