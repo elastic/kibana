@@ -51,6 +51,7 @@ export function registerFeatures({ isServerless, features }: FeatureRegistration
       category: DEFAULT_APP_CATEGORIES.management,
       management: { insightsAndAlerting: ['reporting'] },
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+      hidden: true,
       app: [],
       privileges: null,
       reserved: {
