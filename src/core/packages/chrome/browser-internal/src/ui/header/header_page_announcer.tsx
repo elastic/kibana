@@ -8,7 +8,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiSkipLink, EuiLiveAnnouncer, keys } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -27,15 +27,7 @@ export const HeaderPageAnnouncer: FC<{
   const branding = useObservable(customBranding$)?.pageTitle || DEFAULT_BRAND;
   const breadcrumbs = useObservable(breadcrumbs$, []);
   const skipLinkRef = useRef<HTMLAnchorElement | null>(null);
-  const shouldHandleTab = useRef<boolean>(false);
-
-  const handleTabFn: EventListener = useCallback((e) => {
-    if (shouldHandleTab.current && e instanceof KeyboardEvent && e.key === keys.TAB) {
-      skipLinkRef.current?.focus();
-      e.preventDefault?.();
-    }
-    shouldHandleTab.current = false;
-  }, []);
+  const [shouldHandleTab, setShouldHandleTab] = useState<boolean>(false);
 
   useEffect(() => {
     if (!breadcrumbs.length) {
@@ -54,18 +46,31 @@ export const HeaderPageAnnouncer: FC<{
 
     if (routeTitle !== joinedBreadcrumbs) {
       setRouteTitle(joinedBreadcrumbs);
-      shouldHandleTab.current = true;
+      setShouldHandleTab(true);
     }
-  }, [breadcrumbs, branding, routeTitle, shouldHandleTab]);
+  }, [breadcrumbs, branding, routeTitle]);
 
   useEffect(() => {
     const events: Array<keyof WindowEventMap> = ['keydown', 'mousedown'];
-    events.forEach((event) => window.addEventListener(event, handleTabFn));
 
-    return () => {
-      events.forEach((event) => window.removeEventListener(event, handleTabFn));
+    const handleTabFn: EventListener = (e) => {
+      if (shouldHandleTab && e instanceof KeyboardEvent && e.key === keys.TAB) {
+        skipLinkRef.current?.focus();
+        e.preventDefault?.();
+      }
+      setShouldHandleTab(false);
     };
-  }, [handleTabFn]);
+
+    const removeListeners = () =>
+      events.forEach((event) => window.removeEventListener(event, handleTabFn));
+
+    if (shouldHandleTab) {
+      events.forEach((event) => window.addEventListener(event, handleTabFn, { once: true }));
+    } else {
+      removeListeners();
+    }
+    return removeListeners;
+  }, [shouldHandleTab]);
 
   return (
     <>
