@@ -83,9 +83,9 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    */
   resetInitialState: () => void;
   /**
-   * Start syncing the state with the URL
+   * @deprecated Do not use, this only exists for tests to start syncing the state with the URL
    */
-  syncState: () => ISyncStateRef;
+  syncStateForTesting: () => ISyncStateRef;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -301,6 +301,14 @@ export const getDiscoverAppStateContainer = ({
     state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
   };
 
+  const startGlobalStateUrlSync = () => {
+    return syncState({
+      storageKey: GLOBAL_STATE_URL_KEY,
+      stateContainer: globalStateContainer,
+      stateStorage,
+    });
+  };
+
   const updateUrlWithCurrentState = async () => {
     await Promise.all([
       replaceUrlState({}),
@@ -376,11 +384,7 @@ export const getDiscoverAppStateContainer = ({
     );
 
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
-      syncState({
-        storageKey: GLOBAL_STATE_URL_KEY,
-        stateContainer: globalStateContainer,
-        stateStorage,
-      });
+      startGlobalStateUrlSync();
 
     // current state needs to be pushed to url
     updateUrlWithCurrentState().then(() => {
@@ -408,6 +412,26 @@ export const getDiscoverAppStateContainer = ({
 
   const getPrevious = () => previousState;
 
+  const syncStateForTesting: DiscoverAppStateContainer['syncStateForTesting'] = () => {
+    let stopSync = () => {};
+
+    return {
+      start: () => {
+        const appStateSync = startAppStateUrlSync();
+        const globalStateSync = startGlobalStateUrlSync();
+
+        stopSync = () => {
+          appStateSync.stop();
+          globalStateSync.stop();
+        };
+
+        appStateSync.start();
+        globalStateSync.start();
+      },
+      stop: () => stopSync(),
+    };
+  };
+
   return {
     ...enhancedAppContainer,
     getPrevious,
@@ -417,7 +441,7 @@ export const getDiscoverAppStateContainer = ({
     resetInitialState,
     updateUrlWithCurrentState,
     replaceUrlState,
-    syncState: startAppStateUrlSync,
+    syncStateForTesting,
     update,
     getAppStateFromSavedSearch,
   };

@@ -43,7 +43,7 @@ import { updateSavedSearch } from './utils/update_saved_search';
 import { getConnectedCustomizationService } from '../../../customizations';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
-  const { start, stop } = appState.syncState();
+  const { start, stop } = appState.syncStateForTesting();
   start();
   return stop;
 };
