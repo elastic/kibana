@@ -8,7 +8,7 @@
 import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { useKibana } from '../hooks/use_kibana';
 
-export const useAdd3PIntegrationRoute = (pkgkey: string) => {
+export const useAdd3PIntegrationRoute = (pkgkey: string, integrationExtensionName?: string) => {
   const { http } = useKibana().services;
 
   const path = pagePathGetters
@@ -17,5 +17,7 @@ export const useAdd3PIntegrationRoute = (pkgkey: string) => {
     })
     .join('');
 
-  return http.basePath.prepend(path);
+  const fullPath = integrationExtensionName ? `${path}/${integrationExtensionName}` : path;
+
+  return http.basePath.prepend(fullPath);
 };

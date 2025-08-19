@@ -206,7 +206,7 @@ const EmptySecurityFindingsPrompt = () => {
       label: 'Microsoft 365 Defender',
       href: microsoft365DefenderLink,
     },
-  ]; // filter out missing links
+  ];
 
   // Button that toggles the popover
   const popoverButton = (
