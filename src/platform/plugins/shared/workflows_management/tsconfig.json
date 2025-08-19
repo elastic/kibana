@@ -37,6 +37,7 @@
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerting-plugin",
     "@kbn/core-ui-settings-server",
+    "@kbn/logging-mocks",
     "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]

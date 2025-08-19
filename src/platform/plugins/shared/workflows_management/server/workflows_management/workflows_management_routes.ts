@@ -114,7 +114,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     },
     async (context, request, response) => {
       try {
-        const createdWorkflow = await api.createWorkflow(request.body);
+        const createdWorkflow = await api.createWorkflow(request.body, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({
@@ -152,7 +152,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
       try {
         const { id } = request.params as { id: string };
         return response.ok({
-          body: await api.updateWorkflow(id, request.body),
+          body: await api.updateWorkflow(id, request.body, request),
         });
       } catch (error) {
         return response.customError({
@@ -189,7 +189,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        await api.deleteWorkflows([id]);
+        await api.deleteWorkflows([id], request);
         return response.ok();
       } catch (error) {
         return response.customError({
@@ -225,7 +225,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { ids } = request.body as { ids: string[] };
-        await api.deleteWorkflows(ids);
+        await api.deleteWorkflows(ids, request);
         return response.ok();
       } catch (error) {
         return response.customError({

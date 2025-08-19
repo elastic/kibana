@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -78,19 +79,23 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.getWorkflow(id);
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
-    return await this.workflowsService.createWorkflow(workflow);
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    return await this.workflowsService.createWorkflow(workflow, request);
   }
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
+    workflow: Partial<EsWorkflow>,
+    request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
-    return await this.workflowsService.updateWorkflow(id, workflow);
+    return await this.workflowsService.updateWorkflow(id, workflow, request);
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds);
+  public async deleteWorkflows(workflowIds: string[], request: KibanaRequest): Promise<void> {
+    return await this.workflowsService.deleteWorkflows(workflowIds, request);
   }
 
   public async runWorkflow(

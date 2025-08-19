@@ -205,9 +205,12 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
 
-    // Set task scheduler in workflows service
+    // Set task scheduler and security service in workflows service
     if (this.workflowsService) {
       this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
+      if (plugins.security) {
+        this.workflowsService.setSecurityService(core.security);
+      }
     }
 
     const actionsTypes = plugins.actions.getAllTypes();
@@ -217,7 +220,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.schedulerService = new SchedulerService(
       this.logger,
       this.workflowsService!,
-      this.unsecureActionsClient!,
       plugins.taskManager
     );
     this.api!.setSchedulerService(this.schedulerService!);
