@@ -466,6 +466,14 @@ describe('convertToWorkflowGraph', () => {
         } as EnterConditionBranchNode);
       });
 
+      it('should not include if condition to the step inside if step', () => {
+        const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+        const innerStep = executionGraph.node(
+          'firstThenTestConnectorStep'
+        ) as unknown as AtomicGraphNode;
+        expect((innerStep.configuration as ConnectorStep).if).toBeUndefined();
+      });
+
       it('should configure exit-then branch node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
         const exitThenBranchNode = executionGraph.node('exitThen(if_firstThenTestConnectorStep)');
@@ -678,6 +686,14 @@ describe('convertToWorkflowGraph', () => {
         } as EnterForeachNode);
       });
 
+      it('should not include foreach to the step inside foreach step', () => {
+        const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+        const innerStep = executionGraph.node(
+          'testForeachConnectorStep'
+        ) as unknown as AtomicGraphNode;
+        expect((innerStep.configuration as ConnectorStep).foreach).toBeUndefined();
+      });
+
       it('should configure exit-foreach node correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
         const exitForeachNode = executionGraph.node(
@@ -795,6 +811,44 @@ describe('convertToWorkflowGraph', () => {
         'exitForeach(foreach_testForeachConnectorStep)',
         'exitThen(if_testForeachConnectorStep)',
         'exitCondition(if_testForeachConnectorStep)',
+      ]);
+    });
+  });
+
+  describe('step level foreach in if step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testIfStep',
+          type: 'if',
+          condition: 'true',
+          steps: [
+            {
+              name: 'testForeachConnectorStep',
+              type: 'slack',
+              connectorId: 'slack',
+              foreach: '["item1", "item2", "item3"]',
+              with: {
+                message: 'Hello from foreach nested step 1',
+              },
+            } as ConnectorStep,
+          ],
+        } as IfStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should have foreach step on top of if step in topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topsort = graphlib.alg.topsort(executionGraph);
+      expect(topsort).toHaveLength(7);
+      expect(topsort).toEqual([
+        'testIfStep',
+        'enterThen(testIfStep)',
+        'foreach_testForeachConnectorStep',
+        'testForeachConnectorStep',
+        'exitForeach(foreach_testForeachConnectorStep)',
+        'exitThen(testIfStep)',
+        'exitCondition(testIfStep)',
       ]);
     });
   });
