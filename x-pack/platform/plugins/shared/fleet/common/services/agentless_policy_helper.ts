@@ -14,8 +14,6 @@ import {
 import { PackagePolicyValidationError } from '../errors';
 import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
 
-import type { SimplifiedInputs } from './simplified_package_policy_helper';
-
 // Checks if a package has a policy template that supports agentless
 // Provide a specific integration policy template name to check if it alone supports agentless
 export const isAgentlessIntegration = (

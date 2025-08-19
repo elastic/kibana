@@ -388,10 +388,7 @@ describe('agentless_policy_helper', () => {
               enabled: true,
             },
           },
-          inputs: [
-            { type: 'logs' },
-            { type: 'metrics' },
-          ],
+          inputs: [{ type: 'logs' }, { type: 'metrics' }],
         },
         {
           name: 'template2',
@@ -402,10 +399,7 @@ describe('agentless_policy_helper', () => {
               enabled: true,
             },
           },
-          inputs: [
-            { type: 'logs' },
-            { type: 'tcp' },
-          ],
+          inputs: [{ type: 'logs' }, { type: 'tcp' }],
         },
       ] as RegistryPolicyTemplate[],
     } as any;
@@ -602,10 +596,7 @@ describe('agentless_policy_helper', () => {
               enabled: true,
             },
           },
-          inputs: [
-            { type: 'logs' },
-            { type: 'metrics' },
-          ],
+          inputs: [{ type: 'logs' }, { type: 'metrics' }],
         },
       ] as RegistryPolicyTemplate[],
     } as any;
