@@ -34,7 +34,7 @@ export interface ContentFrameworkSectionProps {
   title: string;
   description?: string;
   actions?: Action[];
-  children?: React.ReactNode;
+  children: React.ReactNode;
 }
 
 export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
