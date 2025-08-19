@@ -47,7 +47,11 @@ export function createEditLookupIndexContentAction(
         false,
         true,
         existingIndexName,
-        { index: { mode: 'lookup' } }
+        { index: { mode: 'lookup' } },
+        // On index searchable
+        (index) => {
+          indexUpdateService.onFileUploadFinished(index);
+        }
       );
 
       const storage = new Storage(localStorage);

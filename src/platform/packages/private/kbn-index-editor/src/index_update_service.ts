@@ -43,7 +43,7 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { IndexEditorErrors } from './types';
-import { parsePrimitive, isPlaceholderColumn } from './utils';
+import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
@@ -299,8 +299,6 @@ export class IndexUpdateService {
   // Accumulate actions in a buffer
   private bufferState$: Observable<BulkUpdateOperations> = this._actions$.pipe(
     scan((acc: BulkUpdateOperations, action: Action) => {
-      this._error$.next(null);
-
       switch (action.type) {
         case 'add-doc':
           return [...acc, action];
@@ -421,6 +419,7 @@ export class IndexUpdateService {
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
+    this._refreshSubject$,
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
       const unsavedFields = pendingColumnsToBeSaved
@@ -697,13 +696,16 @@ export class IndexUpdateService {
               (field) => field.spec.metadata_field !== true && !field.spec.subType
             ).length;
 
-            const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - columnsCount;
-            const initialPlaceholders =
-              missingPlaceholders > 0
+            const completeWithPlaceholders = (currentColumnsCount: number) => {
+              const missingPlaceholders = MAX_COLUMN_PLACEHOLDERS - currentColumnsCount;
+              return missingPlaceholders > 0
                 ? times(missingPlaceholders, () => ({
                     name: `${COLUMN_PLACEHOLDER_PREFIX}${placeholderIndex++}`,
                   }))
                 : [];
+            };
+
+            const initialPlaceholders = completeWithPlaceholders(columnsCount);
 
             return this._actions$.pipe(
               scan((acc: ColumnAddition[], action) => {
@@ -733,7 +735,7 @@ export class IndexUpdateService {
                   return acc.filter((column) => action.payload[column.name] === undefined);
                 }
                 if (action.type === 'discard-unsaved-changes') {
-                  return acc.filter((column) => isPlaceholderColumn(column.name));
+                  return completeWithPlaceholders(0);
                 }
                 return acc;
               }, initialPlaceholders),
@@ -765,6 +767,10 @@ export class IndexUpdateService {
 
   public setIsFetching(isFetching: boolean) {
     this._isFetching$.next(isFetching);
+  }
+
+  public setIsSaving(isSaving: boolean) {
+    this._isSaving$.next(isSaving);
   }
 
   public setIndexName(indexName: string) {
@@ -911,6 +917,8 @@ export class IndexUpdateService {
     this._exitAttemptWithUnsavedChanges$.complete();
     this.data.dataViews.clearCache();
     this._indexName$.complete();
+
+    this.data.dataViews.clearInstanceCache();
   }
 
   public async createIndex() {
@@ -927,6 +935,22 @@ export class IndexUpdateService {
     } catch (error) {
       throw error;
     } finally {
+      this._isSaving$.next(false);
+    }
+  }
+
+  public async onFileUploadFinished(indexName: string) {
+    if (this.isIndexCreated()) {
+      // This timeout can be cleaned when https://github.com/elastic/kibana/issues/232225 is resolved
+      setTimeout(async () => {
+        const dataView = await firstValueFrom(this.dataView$);
+        await this.data.dataViews.refreshFields(dataView, false, true);
+        this.refresh();
+        this._isSaving$.next(false);
+      }, 2000);
+    } else {
+      this.setIndexName(indexName);
+      this.setIndexCreated(true);
       this._isSaving$.next(false);
     }
   }
