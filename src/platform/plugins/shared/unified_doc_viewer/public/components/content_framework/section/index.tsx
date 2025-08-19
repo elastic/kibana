@@ -25,6 +25,7 @@ interface Action {
   icon: IconType;
   onClick: () => void;
   ariaLabel: string;
+  dataTestSubj?: string;
   label?: string;
 }
 
@@ -46,7 +47,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
       {actions?.map((action, idx) => {
-        const { icon, onClick, ariaLabel, label } = action;
+        const { icon, onClick, ariaLabel, label, dataTestSubj } = action;
         const size = 'xs';
         return (
           <EuiFlexItem grow={false} key={idx}>
@@ -56,7 +57,9 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
                 iconType={icon}
                 aria-label={ariaLabel}
                 onClick={onClick}
-                data-test-subj={`unifiedDocViewerSectionActionButton-${icon}`}
+                data-test-subj={
+                  dataTestSubj ? dataTestSubj : `unifiedDocViewerSectionActionButton-${icon}`
+                }
               >
                 {label}
               </EuiButtonEmpty>
@@ -66,7 +69,9 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
                 iconType={icon}
                 onClick={onClick}
                 aria-label={ariaLabel}
-                data-test-subj={`unifiedDocViewerSectionActionButton-${icon}`}
+                data-test-subj={
+                  dataTestSubj ? dataTestSubj : `unifiedDocViewerSectionActionButton-${icon}`
+                }
               />
             )}
           </EuiFlexItem>
