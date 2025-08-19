@@ -83,7 +83,11 @@ describe('with_bulk_rule_api_operations', () => {
         onClick={() => {
           const fn = props[methodName];
           const args = getArgs ? getArgs(props) : undefined;
-          args === undefined ? fn() : fn(args);
+          if (args === undefined) {
+            fn();
+          } else {
+            fn(args);
+          }
         }}
       >
         {label}
