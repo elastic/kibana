@@ -262,7 +262,6 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const { placeholder, hideActionBar, hideExclude, hideExists, hideSort } = state;
 
       function serializeState() {
-        console.log('titles', titlesManager.getLatestState());
         return {
           rawState: {
             ...dataControlManager.getLatestState(),

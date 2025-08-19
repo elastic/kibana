@@ -56,7 +56,7 @@ type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
 export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
   PublishesOptionsListState &
-  Pick<PublishesTitle, 'title$'> &
+  PublishesTitle &
   OptionsListStateSetters & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;

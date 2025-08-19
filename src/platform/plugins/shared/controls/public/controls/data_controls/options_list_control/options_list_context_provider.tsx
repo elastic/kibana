@@ -11,15 +11,14 @@ import React, { useContext } from 'react';
 import type { OptionsListDisplaySettings } from '../../../../common/options_list';
 import type { OptionsListComponentApi } from './types';
 
-export const OptionsListControlContext = React.createContext<
-  | {
-      componentApi: OptionsListComponentApi;
-      displaySettings: OptionsListDisplaySettings;
-    }
-  | undefined
->(undefined);
+interface Context {
+  componentApi: OptionsListComponentApi;
+  displaySettings: OptionsListDisplaySettings;
+}
 
-export const useOptionsListContext = () => {
+export const OptionsListControlContext = React.createContext<Context | undefined>(undefined);
+
+export const useOptionsListContext = (): Context => {
   const optionsListContext = useContext(OptionsListControlContext);
   if (!optionsListContext)
     throw new Error(
