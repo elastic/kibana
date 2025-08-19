@@ -52,7 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
   };
 
-  const getSimpleUserProfile = async () => {
+  const activateSimpleUserProfile = async () => {
     const response = await es.security.activateUserProfile({
       username: 'simple_user',
       password: 'changeme',
@@ -227,7 +227,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('transfer ownership of read only objects', () => {
       it('should transfer ownership of read only objects by owner', async () => {
-        const { profileUid: simpleUserProfileUid } = await getSimpleUserProfile();
+        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
 
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
@@ -260,7 +260,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should throw when transferring ownership of object owned by a different user and not admin', async () => {
-        const { profileUid: simpleUserProfileUid } = await getSimpleUserProfile();
+        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
         const { cookie: adminCookie, profileUid: adminProfileUid } = await login(
           adminTestUser.username,
           adminTestUser.password
@@ -293,7 +293,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow admins to transfer ownership of any object', async () => {
-        const { profileUid: simpleUserProfileUid } = await getSimpleUserProfile();
+        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
         const { cookie: testUserCookie, profileUid } = await loginAsTestUser();
         const createResponse = await supertestWithoutAuth
           .post('/read_only_objects/create')
@@ -325,7 +325,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should allow bulk transfer ownership of allowed objects', async () => {
-        const { profileUid: simpleUserProfileUid } = await getSimpleUserProfile();
+        const { profileUid: simpleUserProfileUid } = await activateSimpleUserProfile();
         const { cookie: testUserCookie } = await loginAsTestUser();
         const { cookie: adminCookie } = await login(adminTestUser.username, adminTestUser.password);
         const firstCreate = await supertestWithoutAuth
@@ -461,7 +461,7 @@ export default function ({ getService }: FtrProviderContext) {
           .expect(200);
         const objectId = createResponse.body.id;
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
-        await getSimpleUserProfile();
+        await activateSimpleUserProfile();
         const { cookie: simpleUserCookie } = await login('simple_user', 'changeme');
 
         const updateResponse = await supertestWithoutAuth
