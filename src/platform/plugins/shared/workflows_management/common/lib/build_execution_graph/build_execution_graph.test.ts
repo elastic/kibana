@@ -137,6 +137,66 @@ describe('convertToWorkflowGraph', () => {
     });
   });
 
+  describe('if step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testAtomicStep1',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 1',
+          },
+        } as ConnectorStep,
+        {
+          name: 'testWaitStep',
+          type: 'wait',
+          with: {
+            duration: '1s',
+          },
+        } as WaitStep,
+        {
+          name: 'testAtomicStep2',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 2',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for wait step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(3);
+      expect(topSort).toEqual(['testAtomicStep1', 'testWaitStep', 'testAtomicStep2']);
+    });
+
+    it('should return correct edges for wait step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'testAtomicStep1', w: 'testWaitStep' },
+        { v: 'testWaitStep', w: 'testAtomicStep2' },
+      ]);
+    });
+
+    it('should configure the wait step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testWaitStep');
+      expect(node).toEqual({
+        id: 'testWaitStep',
+        type: 'wait',
+        configuration: {
+          name: 'testWaitStep',
+          type: 'wait',
+          with: { duration: '1s' },
+        },
+      } as WaitGraphNode);
+    });
+  });
+
   describe('if condition', () => {
     describe('if step', () => {
       const workflowDefinition = {
