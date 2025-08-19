@@ -56,7 +56,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('regression creation', function () {
     let testDashboardId: string | null = null;
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/egs_regression');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/egs_regression');
       await ml.testResources.createDataViewIfNeeded('ft_egs_regression');
       await ml.testResources.setKibanaTimeZoneToUTC();
       testDashboardId = await ml.testResources.createMLTestDashboardIfNeeded();

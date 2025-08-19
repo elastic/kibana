@@ -24,14 +24,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('Alerts - GET - _alert_summary', () => {
     before(async () => {
-      await esArchiver.load(
-        'x-pack/solutions/security/test/fixtures/es_archives/rule_registry/o11y_alerts'
-      );
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/o11y_alerts');
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/solutions/security/test/fixtures/es_archives/rule_registry/o11y_alerts'
+        'x-pack/platform/test/fixtures/es_archives/rule_registry/o11y_alerts'
       );
     });
 

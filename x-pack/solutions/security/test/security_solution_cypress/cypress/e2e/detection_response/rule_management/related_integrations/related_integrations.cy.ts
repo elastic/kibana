@@ -47,8 +47,6 @@ import {
   waitForPageToBeLoaded,
 } from '../../../../tasks/rule_details';
 
-// https://github.com/elastic/kibana/issues/179943
-
 describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';
   const PREBUILT_RULE_NAME = 'Prebuilt rule with related integrations';
@@ -74,6 +72,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerl
     },
     { package: 'system', version: '1.17.0' },
   ];
+
   const PREBUILT_RULE = createRuleAssetSavedObject({
     name: PREBUILT_RULE_NAME,
     index: [DATA_STREAM_NAME],
@@ -81,6 +80,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerl
     rule_id: 'rule_1',
     related_integrations: RELATED_INTEGRATIONS,
   });
+
   const EXPECTED_RELATED_INTEGRATIONS: ExpectedRelatedIntegration[] = [
     {
       title: 'Auditd Logs',
@@ -102,6 +102,7 @@ describe('Related integrations', { tags: ['@ess', '@serverless', '@skipInServerl
       status: 'Enabled',
     },
   ];
+
   const EXPECTED_KNOWN_RELATED_INTEGRATIONS = EXPECTED_RELATED_INTEGRATIONS.filter((x) =>
     Boolean(x.status)
   );
