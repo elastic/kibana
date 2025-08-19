@@ -164,11 +164,7 @@ export const bulkCreateArtifacts = async (
       nonConflictErrors.push(
         ...res.items.reduce<Error[]>((acc, item) => {
           // 409's (conflict - record already exists) are ignored since the artifact already exists
-          if (
-            item.create &&
-            item.create.status !== 409 &&
-            String(item.create.status).charAt(0) !== '2'
-          ) {
+          if (item.create && item.create.status !== 409 && item.create.error) {
             acc.push(
               new Error(
                 `Create of artifact id [${item.create._id}] returned: result [${
