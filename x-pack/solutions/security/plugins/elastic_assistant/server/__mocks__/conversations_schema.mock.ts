@@ -138,27 +138,25 @@ export type ConversationMockParams = (ConversationCreateProps | ConversationUpda
   summary?: ConversationSummary;
 };
 
-export const getConversationMock = (params: ConversationMockParams): ConversationResponse => {
-  return {
-    id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
-    apiConfig: {
-      actionTypeId: '.gen-ai',
-      connectorId: '1',
-      defaultSystemPromptId: 'Default',
+export const getConversationMock = (params: ConversationMockParams): ConversationResponse => ({
+  id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
+  apiConfig: {
+    actionTypeId: '.gen-ai',
+    connectorId: '1',
+    defaultSystemPromptId: 'Default',
+  },
+  title: 'test',
+  ...params,
+  createdAt: '2019-12-13T16:40:33.400Z',
+  updatedAt: '2019-12-13T16:40:33.400Z',
+  namespace: 'default',
+  category: 'assistant',
+  users: [
+    {
+      name: 'elastic',
     },
-    title: 'test',
-    ...params,
-    createdAt: '2019-12-13T16:40:33.400Z',
-    updatedAt: '2019-12-13T16:40:33.400Z',
-    namespace: 'default',
-    category: 'assistant',
-    users: [
-      {
-        name: 'elastic',
-      },
-    ],
-  };
-};
+  ],
+});
 
 export const getQueryConversationParams = (isUpdate?: boolean): ConversationMockParams => {
   return isUpdate
