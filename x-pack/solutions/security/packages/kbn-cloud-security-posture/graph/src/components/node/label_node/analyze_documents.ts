@@ -11,7 +11,7 @@ interface DocumentAnalysisInput {
   eventsCount: number;
   alertsCount: number;
   // TODO Remove color when API returns `eventsCount` and `alertsCount`
-  color: LabelNodeViewModel['color'];
+  color?: LabelNodeViewModel['color'];
 }
 export interface DocumentAnalysisOutput {
   eventsCount: number;
