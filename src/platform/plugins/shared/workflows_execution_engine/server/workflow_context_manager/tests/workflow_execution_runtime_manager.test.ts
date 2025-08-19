@@ -57,7 +57,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
     workflowExecutionState = {
       getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
       updateWorkflowExecution: jest.fn(),
-      getStepExecution: jest.fn(),
+      getLatestStepExecution: jest.fn(),
+      getStepExecutionsByStepId: jest.fn(),
       upsertStep: jest.fn(),
       load: jest.fn(),
       flush: jest.fn(),
@@ -117,11 +118,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
   });
 
   describe('step result management', () => {
-    beforeEach(async () => {
-      await underTest.startStep('node1');
+    beforeEach(() => {
+      underTest.goToStep('node1');
     });
 
     it('should update the step execution with the result and be able to retrieve it', async () => {
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+        id: 'step-execution-id',
+        stepId: 'node1',
+      } as Partial<EsWorkflowStepExecution>);
       const fakeResult = { success: true, data: {} };
       await underTest.setStepResult({
         output: fakeResult,
@@ -129,6 +134,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
       });
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith({
+        id: 'step-execution-id',
         stepId: 'node1',
         output: fakeResult,
         error: null,
@@ -136,7 +142,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should be able to retrieve the step result', () => {
-      (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+        id: 'step-execution-id',
         stepId: 'node1',
         output: { success: true, data: {} },
         error: 'Fake error',
@@ -151,8 +158,11 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('step state management', () => {
     it('should update the step execution with the result and be able to retrieve it', async () => {
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
+        stepId: 'node1',
+        state: { success: true, data: {} },
+      } as Partial<EsWorkflowStepExecution>);
       const fakeState = { success: true, data: {} };
-      await underTest.startStep('node1');
       await underTest.setStepState('node1', fakeState);
 
       expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith({
@@ -162,7 +172,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should be able to retrieve the step state', () => {
-      (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node1',
         state: { success: true, data: {} },
       } as Partial<EsWorkflowStepExecution>);
@@ -237,6 +247,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
   describe('startStep', () => {
     beforeEach(() => {
+      (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: [],
+      } as Partial<EsWorkflowExecution>);
       mockDateNow = new Date('2023-01-01T00:00:00.000Z');
       underTest.goToStep('node3');
     });
@@ -244,12 +258,44 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should create a step execution with "RUNNING" status', async () => {
       await underTest.startStep('node3');
 
-      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith({
-        stepId: 'node3',
-        topologicalIndex: 2,
-        status: ExecutionStatus.RUNNING,
-        startedAt: mockDateNow.toISOString(),
-      });
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stepId: 'node3',
+          topologicalIndex: 2,
+          status: ExecutionStatus.RUNNING,
+          startedAt: mockDateNow.toISOString(),
+        })
+      );
+    });
+
+    it('should generate correct id according to current scope when no executions yet', async () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['node1', 'node2'],
+      } as Partial<EsWorkflowExecution>);
+      (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
+      await underTest.startStep('node3');
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'node1__node2__node3__0',
+          stack: ['node1', 'node2'],
+        })
+      );
+    });
+
+    it('should generate correct id according to current scope when there are executions', async () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['node1', 'node2'],
+      } as Partial<EsWorkflowExecution>);
+      (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([{}]);
+      await underTest.startStep('node3');
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'node1__node2__node3__1',
+          stack: ['node1', 'node2'],
+        })
+      );
     });
 
     it('should log the start of step execution', async () => {
@@ -264,14 +310,14 @@ describe('WorkflowExecutionRuntimeManager', () => {
   describe('finishStep', () => {
     beforeEach(async () => {
       mockDateNow = new Date('2025-08-06T00:00:00.000Z');
-      (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node2',
         startedAt: '2025-08-06T00:00:00.000Z',
       } as Partial<EsWorkflowStepExecution>);
     });
 
     it('should throw error upon attempt to finish a step that is not running', async () => {
-      (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue(undefined);
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue(undefined);
       await expect(underTest.finishStep('node2')).rejects.toThrowError(
         'Step execution not found for step ID: node2'
       );
@@ -292,7 +338,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     describe('step execution succeeds', () => {
       beforeEach(async () => {
-        (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
           stepId: 'node1',
           startedAt: '2025-08-06T00:00:00.000Z',
           output: { success: true, data: {} },
@@ -327,7 +373,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     describe('step execution fails', () => {
       beforeEach(async () => {
-        (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+        (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
           stepId: 'node1',
           startedAt: '2025-08-06T00:00:00.000Z',
           output: null,
@@ -428,7 +474,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should fail workflow execution if its current step failed', async () => {
       underTest.goToStep('node2');
-      (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node3',
         output: { success: true, data: {} },
         error: 'Second step failed',
@@ -457,7 +503,7 @@ describe('WorkflowExecutionRuntimeManager', () => {
 
     it('should log workflow failure', async () => {
       underTest.goToStep('node2');
-      (workflowExecutionState.getStepExecutionById as jest.Mock).mockReturnValue({
+      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
         stepId: 'node3',
         output: { success: true, data: {} },
         error: 'Second step failed',
@@ -472,6 +518,35 @@ describe('WorkflowExecutionRuntimeManager', () => {
         },
         tags: ['workflow', 'execution', 'complete'],
       });
+    });
+  });
+
+  describe('enterScope', () => {
+    it('should push current step to the stack', () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['node1', 'node2'],
+      } as Partial<EsWorkflowExecution>);
+      underTest.goToStep('node3');
+      underTest.enterScope();
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stack: ['node1', 'node2', 'node3'],
+        })
+      );
+    });
+  });
+
+  describe('exitScope', () => {
+    it('should pop the last step from the stack', () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        stack: ['node1', 'node2', 'node3'],
+      } as Partial<EsWorkflowExecution>);
+      underTest.exitScope();
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stack: ['node1', 'node2'],
+        })
+      );
     });
   });
 });
