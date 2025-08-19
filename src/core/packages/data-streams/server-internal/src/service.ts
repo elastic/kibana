@@ -35,7 +35,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
 
   setup() {
     return {
-      registerDataStream: async (dataStreamDefinition: DataStreamDefinition) => {
+      registerDataStream: (dataStreamDefinition: DataStreamDefinition) => {
         this.dataStreams.set(dataStreamDefinition, undefined);
       },
     };

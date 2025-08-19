@@ -33,7 +33,7 @@ export const plugin = (ctx: PluginInitializerContext) => {
     },
     start({ dataStreams }: CoreStart) {
       const client = dataStreams.getClient(dataStream);
-      client
+      void client
         .index({
           document: {
             '@timestamp': new Date().toISOString(),
