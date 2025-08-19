@@ -1,0 +1,104 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type api from '@elastic/elasticsearch/lib/api/types';
+import {
+  IDataStreamClient,
+  BaseSearchRuntimeMappings,
+  DataStreamDefinition,
+  IDataStreamClientIndexRequest,
+  SearchRequestImproved,
+  ClientHelpers,
+} from './types';
+import { setup } from './setup';
+
+type AnyDataStream = DataStreamDefinition<{}, {}>;
+
+export interface DataStreamClientArgs<S extends object, SRM extends BaseSearchRuntimeMappings> {
+  /**
+   * @remark For now just one
+   */
+  dataStreams: DataStreamDefinition<S, SRM>;
+  elasticsearchClient: ElasticsearchClient;
+  logger: Logger;
+
+  // TODO: support serialize/deserialize opts so that we can map from S => Deserialized values
+  //       For example: read a doc { date: '2023-10-01T00:00:00Z' } and deserialize it to { date: moment.Moment }
+  //                    write a doc { date: moment.Moment } and serialize it to { date: '2023-10-01T00:00:00Z' }
+}
+
+export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMappings>
+  implements IDataStreamClient<S, SRM>
+{
+  public helpers: ClientHelpers<SRM> = {
+    getFieldsFromHit: (hit) => {
+      const fields = (hit.fields ?? {}) as Record<keyof SRM, unknown[]>;
+      return fields;
+    },
+  };
+  private readonly runtimeFields: string[];
+  private constructor(
+    private readonly client: ElasticsearchClient,
+    private readonly logger: Logger,
+    private readonly dataStreams: AnyDataStream
+  ) {
+    this.logger = logger.get('data-streams-client');
+    this.runtimeFields = Object.keys(dataStreams.searchRuntimeMappings ?? {});
+  }
+
+  /**
+   * An idempotent setup method that should be called before any other methods.
+   */
+  public async setup() {
+    await setup({
+      dataStreams: this.dataStreams,
+      elasticsearchClient: this.client,
+      logger: this.logger,
+    });
+  }
+
+  public async index(args: IDataStreamClientIndexRequest<S>) {
+    return this.client.index({
+      index: this.dataStreams.name,
+      ...args,
+    });
+  }
+
+  public async search<Agg extends Record<string, api.AggregationsAggregate> = {}>(
+    args: SearchRequestImproved<SRM>,
+    transportOpts?: TransportRequestOptionsWithOutMeta
+  ) {
+    return this.client.search<S, Agg>(
+      {
+        index: this.dataStreams.name,
+        runtime_mappings: this.dataStreams.searchRuntimeMappings,
+        fields: this.runtimeFields,
+        ...args,
+      },
+      transportOpts
+    );
+  }
+
+  /**
+   * This function ensures setup has been run before returning an instance of the client.
+   *
+   * @remark This function should execute early in the application lifecycle and preferably once per
+   *         data stream. However, it should be idempotent.
+   */
+  public static async setup<S extends object, SRM extends BaseSearchRuntimeMappings>(
+    args: DataStreamClientArgs<S, SRM>
+  ): Promise<DataStreamClient<S, SRM>> {
+    await setup(args);
+    return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.logger, args.dataStreams);
+  }
+
+  // TODO public static async create... that skips setup
+}
