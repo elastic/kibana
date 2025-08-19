@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Subscription } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type { ManagementApp } from '@kbn/management-plugin/public';
-import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { ManagementSetup, ManagementApp } from '@kbn/management-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';
@@ -39,8 +38,6 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
-  spaces?: SpacesPluginStart;
-  cloud?: CloudStart;
   licensing: LicensingPluginStart;
 }
 
@@ -90,7 +87,7 @@ export class AiAssistantManagementObservabilityPlugin
     }
 
     if (observabilityAIAssistant) {
-      this.registeredApp = management.sections.section.ai.registerApp({
+      this.registeredApp = management.sections.section.kibana.registerApp({
         id: 'observabilityAiAssistantManagement',
         title,
         hideFromSidebar: true,

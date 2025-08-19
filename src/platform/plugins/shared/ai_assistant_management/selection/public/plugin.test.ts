@@ -33,13 +33,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       },
       application: {
         capabilities: {
-          management: {
-            ai: {
-              aiAssistantManagementSelection: true,
-              securityAiAssistantManagement: true,
-              observabilityAiAssistantManagement: false,
-            },
-          },
+          management: { kibana: { aiAssistantManagementSelection: true } },
         },
       },
     } as unknown as CoreStart;
@@ -60,7 +54,7 @@ describe('AI Assistant Management Selection Plugin', () => {
   describe('Licensing', () => {
     const createManagementMock = () => {
       const apps: any[] = [];
-      const aiSection = {
+      const kibanaSection = {
         registerApp: (args: any) => {
           const app = {
             id: args.id,
@@ -79,7 +73,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       };
 
       return {
-        sections: { section: { ai: aiSection } },
+        sections: { section: { kibana: kibanaSection } },
       } as unknown as ManagementSetup;
     };
 
@@ -103,15 +97,7 @@ describe('AI Assistant Management Selection Plugin', () => {
     });
 
     const applicationCapabilities = {
-      capabilities: {
-        management: {
-          ai: {
-            aiAssistantManagementSelection: true,
-            securityAiAssistantManagement: true,
-            observabilityAiAssistantManagement: false,
-          },
-        },
-      },
+      capabilities: { management: { kibana: { aiAssistantManagementSelection: true } } },
     };
 
     it('is disabled by default and only enabled for enterprise license', async () => {
@@ -126,7 +112,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       plugin.setup(coreSetup, { management });
 
       // After setup, app is registered and disabled by default
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -163,7 +149,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       plugin.setup(coreSetup, { management });
 
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -193,7 +179,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       plugin.setup(coreSetup, { management });
 
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -203,15 +189,7 @@ describe('AI Assistant Management Selection Plugin', () => {
         {
           uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
           application: {
-            capabilities: {
-              management: {
-                ai: {
-                  aiAssistantManagementSelection: false,
-                  securityAiAssistantManagement: true,
-                  observabilityAiAssistantManagement: true,
-                },
-              },
-            },
+            capabilities: { management: { kibana: { aiAssistantManagementSelection: false } } },
           },
         } as any,
         {
