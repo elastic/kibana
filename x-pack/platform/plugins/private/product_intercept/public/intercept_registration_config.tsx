@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Intercept } from '@kbn/intercepts-plugin/public';
+import type { Intercept } from '@kbn/intercepts-plugin/public';
 import type { PromptTelemetry } from './telemetry';
 import { NPSScoreInput } from './components';
 

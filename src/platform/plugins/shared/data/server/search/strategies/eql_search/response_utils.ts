@@ -9,8 +9,8 @@
 
 import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportResult } from '@elastic/elasticsearch';
-import { EqlSearchResponse } from './types';
-import { EqlSearchStrategyResponse } from '../../../../common';
+import type { EqlSearchResponse } from './types';
+import type { EqlSearchStrategyResponse } from '../../../../common';
 import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 /**

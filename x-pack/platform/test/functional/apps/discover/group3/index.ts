@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('discover - group 3', function () {
@@ -16,5 +16,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./value_suggestions_non_timebased'));
     loadTestFile(require.resolve('./saved_search_embeddable'));
     loadTestFile(require.resolve('./esql_starred'));
+    loadTestFile(require.resolve('./rule_creation'));
   });
 }

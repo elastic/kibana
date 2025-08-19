@@ -5,27 +5,23 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { firstValueFrom } from 'rxjs';
 
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   esIndicesStateCheck,
   getReindexWarnings,
   type Version,
 } from '@kbn/upgrade-assistant-pkg-server';
-import {
-  ReindexSavedObject,
-  ReindexStatus,
-  ReindexStep,
-  IndexWarning,
-} from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexSavedObject, IndexWarning } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
 
 import { generateNewIndexName, sourceNameForIndex } from './index_settings';
 
-import { ReindexActions } from './reindex_actions';
+import type { ReindexActions } from './reindex_actions';
 
 import { error } from './error';
 

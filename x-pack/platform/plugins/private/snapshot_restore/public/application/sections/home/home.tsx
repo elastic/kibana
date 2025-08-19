@@ -7,12 +7,13 @@
 
 import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
-import { BASE_PATH, Section } from '../../constants';
+import type { Section } from '../../constants';
+import { BASE_PATH } from '../../constants';
 import { useConfig, useCore } from '../../app_context';
 import { breadcrumbService, docTitleService } from '../../services/navigation';
 

@@ -10,8 +10,8 @@ import { EuiFlexItem, EuiFlexGroup, EuiSearchBar, EuiButton } from '@elastic/eui
 import { i18n } from '@kbn/i18n';
 import { FieldStatusFilterGroup } from './filters/status_filter_group';
 import { FieldTypeFilterGroup } from './filters/type_filter_group';
-import { TControls } from './hooks/use_controls';
-import { SchemaEditorProps } from './types';
+import type { TControls } from './hooks/use_controls';
+import type { SchemaEditorProps } from './types';
 
 interface ControlsProps {
   controls: TControls;
@@ -21,7 +21,7 @@ interface ControlsProps {
 
 export function Controls({ controls, onChange, onRefreshData }: ControlsProps) {
   return (
-    <EuiFlexItem grow={false}>
+    <EuiFlexItem grow={false} data-test-subj="streamsAppSchemaEditorControls">
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiSearchBar

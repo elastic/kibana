@@ -95,6 +95,54 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.MetricsExporterCommonConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "MetricsExporterCommonConfig",
+        "description": [
+          "\nCommon configuration for OTLP metrics exporters"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsExporterCommonConfig.exportIntervalMillis",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "exportIntervalMillis",
+            "description": [
+              "Frequency in which the exporter should collect the metrics"
+            ],
+            "signature": [
+              "number | moment.Duration | undefined"
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/metrics-config",
+            "id": "def-common.MetricsExporterCommonConfig.temporalityPreference",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "temporalityPreference",
+            "description": [
+              "The preferred temporality of the metrics. Defaults to `delta`, as it plays better with the ES backend."
+            ],
+            "signature": [
+              "\"delta\" | \"cumulative\""
+            ],
+            "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -109,9 +157,42 @@
           "\nAllowed configurations for OTLP metrics exporters"
         ],
         "signature": [
-          "{ grpc: { url: string; headers?: Record<string, string> | undefined; }; } | { http: { url: string; headers?: Record<string, string> | undefined; }; }"
+          "{ grpc: ",
+          {
+            "pluginId": "@kbn/metrics-config",
+            "scope": "common",
+            "docId": "kibKbnMetricsConfigPluginApi",
+            "section": "def-common.MetricsExporterCommonConfig",
+            "text": "MetricsExporterCommonConfig"
+          },
+          " & { url: string; headers?: Record<string, string> | undefined; }; } | { http: ",
+          {
+            "pluginId": "@kbn/metrics-config",
+            "scope": "common",
+            "docId": "kibKbnMetricsConfigPluginApi",
+            "section": "def-common.MetricsExporterCommonConfig",
+            "text": "MetricsExporterCommonConfig"
+          },
+          " & { url: string; headers?: Record<string, string> | undefined; }; }"
         ],
         "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.MonitoringCollectionConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "MonitoringCollectionConfig",
+        "description": [
+          "\nConfiguration of the plugin `monitoring_collection`"
+        ],
+        "signature": [
+          "{ readonly enabled: boolean; readonly opentelemetry: Readonly<{} & { metrics: Readonly<{} & { otlp: Readonly<{ url?: string | undefined; headers?: Record<string, string> | undefined; } & { exportIntervalMillis: number; logLevel: string; }>; prometheus: Readonly<{} & { enabled: boolean; }>; }>; }>; }"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -145,7 +226,113 @@
           },
           ">"
         ],
-        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/schema.ts",
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/metrics_schema.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/metrics-config",
+        "id": "def-common.monitoringCollectionSchema",
+        "type": "Object",
+        "tags": [
+          "privateRemarks"
+        ],
+        "label": "monitoringCollectionSchema",
+        "description": [
+          "\nConfig schema of the plugin `monitoring_collection`."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; opentelemetry: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ metrics: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ otlp: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ url: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string | undefined>; headers: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<Record<string, string> | undefined>; exportIntervalMillis: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<number>; logLevel: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<string>; }>; prometheus: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<{ enabled: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.Type",
+            "text": "Type"
+          },
+          "<boolean>; }>; }>; }>; }>"
+        ],
+        "path": "src/platform/packages/private/opentelemetry/kbn-metrics-config/src/monitoring_collection_schema.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
