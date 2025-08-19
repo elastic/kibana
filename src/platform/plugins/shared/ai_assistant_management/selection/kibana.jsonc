@@ -13,7 +13,8 @@
       "aiAssistantManagementSelection"
     ],
     "requiredPlugins": [
-      "management"
+      "management",
+      "licensing"
     ],
     "optionalPlugins": [
       "home",
