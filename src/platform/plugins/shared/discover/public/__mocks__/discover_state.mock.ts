@@ -41,7 +41,7 @@ export function getDiscoverStateMock({
   services: originalServices = discoverServiceMock,
 }: {
   isTimeBased?: boolean;
-  savedSearch?: SavedSearch | false;
+  savedSearch?: SavedSearch;
   runtimeStateManager?: RuntimeStateManager;
   stateStorageContainer?: IKbnUrlStateStorage;
   history?: History<HistoryLocationState>;
@@ -55,15 +55,13 @@ export function getDiscoverStateMock({
   const services = { ...originalServices, history };
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
-  stateStorageContainer =
-    stateStorageContainer ??
-    createKbnUrlStateStorage({
-      useHash: storeInSessionStorage,
-      history: services.history,
-      useHashQuery: customizationContext.displayMode !== 'embedded',
-      ...(toasts && withNotifyOnErrors(toasts)),
-    });
-  runtimeStateManager = runtimeStateManager ?? createRuntimeStateManager();
+  stateStorageContainer ??= createKbnUrlStateStorage({
+    useHash: storeInSessionStorage,
+    history: services.history,
+    useHashQuery: customizationContext.displayMode !== 'embedded',
+    ...(toasts && withNotifyOnErrors(toasts)),
+  });
+  runtimeStateManager ??= createRuntimeStateManager();
   const tabsStorageManager = createTabsStorageManager({
     urlStateStorage: stateStorageContainer,
     storage: services.storage,
@@ -75,32 +73,23 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
   });
-  const finalSavedSearch =
-    savedSearch === false
-      ? undefined
-      : savedSearch
-      ? savedSearch
-      : isTimeBased
-      ? savedSearchMockWithTimeField
-      : savedSearchMock;
-  const persistedDiscoverSession: DiscoverSession | undefined = finalSavedSearch
-    ? {
-        ...finalSavedSearch,
-        id: finalSavedSearch.id ?? '',
-        title: finalSavedSearch.title ?? '',
-        description: finalSavedSearch.description ?? '',
-        tabs: [
-          fromSavedSearchToSavedObjectTab({
-            tab: {
-              id: finalSavedSearch.id ?? '',
-              label: finalSavedSearch.title ?? '',
-            },
-            savedSearch: finalSavedSearch,
-            services,
-          }),
-        ],
-      }
-    : undefined;
+  savedSearch ??= isTimeBased ? savedSearchMockWithTimeField : savedSearchMock;
+  const persistedDiscoverSession: DiscoverSession = {
+    ...savedSearch,
+    id: savedSearch.id ?? '',
+    title: savedSearch.title ?? '',
+    description: savedSearch.description ?? '',
+    tabs: [
+      fromSavedSearchToSavedObjectTab({
+        tab: {
+          id: savedSearch.id ?? '',
+          label: savedSearch.title ?? '',
+        },
+        savedSearch,
+        services,
+      }),
+    ],
+  };
   const mockUserId = 'mockUserId';
   const mockSpaceId = 'mockSpaceId';
   const initialTabsState = tabsStorageManager.loadLocally({
@@ -118,7 +107,7 @@ export function getDiscoverStateMock({
         persistedDiscoverSession,
       },
       'requestId',
-      { discoverSessionId: finalSavedSearch?.id }
+      { discoverSessionId: savedSearch.id }
     )
   );
   const container = getDiscoverStateContainer({
@@ -138,9 +127,7 @@ export function getDiscoverStateMock({
     cleanup: async () => {},
   });
   tabRuntimeState.stateContainer$.next(container);
-  if (finalSavedSearch) {
-    container.savedSearchState.set(finalSavedSearch);
-  }
+  container.savedSearchState.set(savedSearch);
 
   return container;
 }
