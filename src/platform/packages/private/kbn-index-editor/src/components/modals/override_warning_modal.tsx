@@ -27,8 +27,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { firstValueFrom } from 'rxjs';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { KibanaContextExtra } from '../../types';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { KibanaContextExtra } from '../../types';
 import { isPlaceholderColumn } from '../../utils';
 
 const OVERRIDE_WARNING_MODAL_DISMISSED = 'indexEditor.OverrideWarningDismissed';

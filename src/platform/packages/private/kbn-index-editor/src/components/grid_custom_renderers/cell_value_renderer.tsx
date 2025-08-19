@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { type FunctionComponent, RefObject } from 'react';
+import type { RefObject } from 'react';
+import React, { type FunctionComponent } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';

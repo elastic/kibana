@@ -7,15 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '@kbn/discover-utils';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
-import React, { RefObject, useCallback, useMemo, useState } from 'react';
-import { EuiDataGridCellPopoverElementProps, EuiDataGridRefProps, EuiToolTip } from '@elastic/eui';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { RefObject } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import type { EuiDataGridCellPopoverElementProps, EuiDataGridRefProps } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import { EuiFocusTrap, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 import { getInputComponentForType } from '../value_inputs_factory';
-import { PendingSave } from '../../index_update_service';
+import type { PendingSave } from '../../index_update_service';
 import { isPlaceholderColumn } from '../../utils';
 
 export type OnCellValueChange = (docId: string, update: any) => void;

@@ -12,12 +12,11 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
 import {
-  CustomCellRenderer,
   DataLoadingState,
   UnifiedDataTable,
   type SortOrder,
-  CustomGridColumnsConfiguration,
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
@@ -28,7 +27,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 
