@@ -209,7 +209,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     if (this.workflowsService) {
       this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
       if (plugins.security) {
-        this.workflowsService.setSecurityService(plugins.security);
+        this.workflowsService.setSecurityService(core.security);
       }
     }
 
