@@ -23,7 +23,6 @@ import { wrapAsMonacoSuggestions } from './lib/converters/suggestions';
 import { wrapAsMonacoMessages } from './lib/converters/positions';
 import { getHoverItem } from './lib/hover/hover';
 import { monacoPositionToOffset } from './lib/shared/utils';
-import type { CustomLangModuleType } from '../../types';
 
 const removeKeywordSuffix = (name: string) => {
   return name.endsWith('.keyword') ? name.slice(0, -8) : name;
@@ -31,7 +30,12 @@ const removeKeywordSuffix = (name: string) => {
 
 export const ESQL_AUTOCOMPLETE_TRIGGER_CHARS = ['(', ' ', '[', '?'];
 
-export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
+// Global state for LLM trigger tracking (outside provider instances)
+const globalLLMTriggerState = {
+  isTriggered: false,
+};
+
+export const ESQLLang = {
   ID: ESQL_LANG_ID,
   async onLanguage() {
     const language = monarch.create({
@@ -81,9 +85,9 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   },
   getInlineCompletionsProvider: (
     callbacks?: ESQLCallbacks
-  ): monaco.languages.InlineCompletionsProvider => {
-    return {
-      async provideInlineCompletions(model, position, context, token) {
+  ): monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void } => {
+    const provider = {
+      async provideInlineCompletions(model: monaco.editor.ITextModel, position: monaco.Position) {
         const fullText = model.getValue();
         // Get the text before the cursor
         const textBeforeCursor = model.getValueInRange({
@@ -100,10 +104,24 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
           position.column
         );
 
-        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
+        const triggerKind = globalLLMTriggerState.isTriggered
+          ? ('manual' as const)
+          : ('automatic' as const);
+
+        // Reset flag after window expires naturally
+        if (globalLLMTriggerState.isTriggered) {
+          globalLLMTriggerState.isTriggered = false;
+        }
+
+        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks, triggerKind);
       },
       freeInlineCompletions: () => {},
+      triggerLLMSuggestions: () => {
+        globalLLMTriggerState.isTriggered = true;
+      },
     };
+
+    return provider;
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {

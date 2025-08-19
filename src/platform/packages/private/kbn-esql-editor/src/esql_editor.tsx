@@ -592,6 +592,16 @@ const ESQLEditorInternal = function ESQLEditor({
         });
         return items;
       },
+      getESQLCompletionFromLLM: async (queryString: string) => {
+        try {
+          const message: { content: string } = await core.http.get(
+            `/internal/esql/esql_completion/${queryString}`
+          );
+          return message.content;
+        } catch (error) {
+          return '';
+        }
+      },
     };
     return callbacks;
   }, [
@@ -734,6 +744,17 @@ const ESQLEditorInternal = function ESQLEditor({
     return ESQLLang.getInlineCompletionsProvider?.(esqlCallbacks);
   }, [esqlCallbacks]);
 
+  // Store reference to the provider for triggering LLM suggestions
+  const inlineCompletionsProviderRef = useRef<
+    (monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void }) | undefined
+  >();
+
+  useEffect(() => {
+    inlineCompletionsProviderRef.current = inlineCompletionsProvider as
+      | (monaco.languages.InlineCompletionsProvider & { triggerLLMSuggestions: () => void })
+      | undefined;
+  }, [inlineCompletionsProvider]);
+
   const onErrorClick = useCallback(({ startLineNumber, startColumn }: MonacoMessage) => {
     if (!editor1.current) {
       return;
@@ -779,6 +800,7 @@ const ESQLEditorInternal = function ESQLEditor({
       accessibilitySupport: 'auto',
       autoIndent: 'keep',
       automaticLayout: true,
+      contextmenu: true,
       fixedOverflowWidgets: true,
       folding: false,
       fontSize: 14,
@@ -798,7 +820,7 @@ const ESQLEditorInternal = function ESQLEditor({
         top: 8,
         bottom: 8,
       },
-      quickSuggestions: true,
+      quickSuggestions: false,
       inlineSuggest: {
         enabled: true,
         showToolbar: 'onHover',
@@ -938,7 +960,12 @@ const ESQLEditorInternal = function ESQLEditor({
                     // to fire, the timeout is needed because otherwise it refocuses on the popover icon
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
-                    editor.onMouseDown(() => {
+                    editor.onMouseDown((e) => {
+                      // Don't interfere with right-clicks (context menu)
+                      if (e.event.rightButton) {
+                        return;
+                      }
+
                       setTimeout(() => {
                         editor.focus();
                       }, 100);
@@ -961,6 +988,32 @@ const ESQLEditorInternal = function ESQLEditor({
                       monaco.KeyMod.CtrlCmd | monaco.KeyCode.Slash,
                       onCommentLine
                     );
+
+                    // Add keyboard shortcut for inline suggestions
+                    editor.addAction({
+                      id: 'esql.triggerInlineSuggestions',
+                      label: 'ES|QL: Get AI Suggestions',
+                      keybindings: [
+                        // eslint-disable-next-line no-bitwise
+                        monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
+                      ],
+                      contextMenuGroupId: 'navigation',
+                      contextMenuOrder: 1.5,
+                      run: (editorInstance) => {
+                        // Set the flag to indicate our custom action was triggered
+                        inlineCompletionsProviderRef.current?.triggerLLMSuggestions();
+
+                        try {
+                          editorInstance.trigger(
+                            'manual',
+                            'editor.action.inlineSuggest.trigger',
+                            {}
+                          );
+                        } catch (error) {
+                          // nothing to do here
+                        }
+                      },
+                    });
 
                     setMeasuredEditorWidth(editor.getLayoutInfo().width);
                     if (expandToFitQueryOnMount) {
