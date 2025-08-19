@@ -7,10 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DATA_PATH_ATTRIBUTE_KEY, decodeAttribute } from '@kbn/babel-data-path';
-import { INSPECT_OVERLAY_ID } from '../common';
+import type { FileInfo, GetElementFromPointOptions, GetInspectedElementOptions } from './types';
 import { getComponentData } from './get_component_data';
-import type { GetElementFromPointOptions, GetInspectedElementOptions } from './types';
+import { INSPECT_OVERLAY_ID } from '../common';
+
+const findDebugSourceUpwards = (fiberNode: any): any | null => {
+  if (!fiberNode) return null;
+
+  if (fiberNode._debugSource) return fiberNode._debugSource;
+
+  return findDebugSourceUpwards(fiberNode._debugOwner);
+};
 
 export const getElementFromPoint = ({
   event,
@@ -50,6 +57,8 @@ export const getInspectedElementData = async ({
   event.preventDefault();
   event.stopPropagation();
 
+  let fileInfo: FileInfo | null = null;
+
   const target = getElementFromPoint({ event });
 
   if (!target) {
@@ -57,40 +66,31 @@ export const getInspectedElementData = async ({
     return;
   }
 
-  /*
-    If the target doesn't have the data-path attribute, traverse up the DOM tree
-    to find the closest element that does.
-  */
-  let closestElementWithDataPath: HTMLElement | SVGElement | null = target;
-  while (
-    closestElementWithDataPath &&
-    !closestElementWithDataPath.hasAttribute(DATA_PATH_ATTRIBUTE_KEY)
-  ) {
-    closestElementWithDataPath = closestElementWithDataPath.parentElement;
+  const reactFiberKey = Object.keys(target).find((key) => key.startsWith('__reactFiber$'));
+  const targetReactFiber = reactFiberKey ? (target as any)[reactFiberKey] : null;
+
+  if (targetReactFiber) {
+    if (targetReactFiber._debugSource) {
+      fileInfo = targetReactFiber._debugSource;
+    } else {
+      const parentDebugSource = findDebugSourceUpwards(targetReactFiber._debugOwner);
+
+      if (parentDebugSource) {
+        fileInfo = parentDebugSource;
+      } else {
+        fileInfo = null;
+      }
+    }
   }
 
-  if (!closestElementWithDataPath) {
-    setIsInspecting(false);
-    return;
-  }
-
-  const dataAttribute = closestElementWithDataPath.getAttribute(DATA_PATH_ATTRIBUTE_KEY);
-
-  if (!dataAttribute) {
-    setIsInspecting(false);
-    return;
-  }
-
-  const path = decodeAttribute(dataAttribute);
-
-  if (!path) {
+  if (!fileInfo) {
     setIsInspecting(false);
     return;
   }
 
   await getComponentData({
     core,
-    path,
+    fileInfo,
     setFlyoutRef,
     setIsInspecting,
   });

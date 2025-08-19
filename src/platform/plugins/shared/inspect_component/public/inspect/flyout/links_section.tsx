@@ -17,15 +17,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { FileInfo } from '../../types';
 
 interface Props {
-  path: string;
-  fullPath?: string;
+  fileInfo: FileInfo;
 }
 
-export const LinksSection = ({ path, fullPath }: Props) => {
-  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${path}`;
-  const VSCODE_LINK = `vscode://file/${fullPath}`;
+export const LinksSection = ({ fileInfo }: Props) => {
+  if (!fileInfo) return null;
+
+  const formattedPath = fileInfo.fileName?.split('/kibana')[1];
+
+  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${formattedPath}#L${fileInfo.lineNumber}`;
+  const VSCODE_LINK = `vscode://file/${fileInfo.fileName}:${fileInfo.lineNumber}:${fileInfo.columnNumber}`;
 
   return (
     <EuiFlexItem grow={false}>
@@ -48,22 +52,20 @@ export const LinksSection = ({ path, fullPath }: Props) => {
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {fullPath && (
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                href={VSCODE_LINK}
-                target="_blank"
-                size="s"
-                iconType="code"
-                flush="left"
-              >
-                <FormattedMessage
-                  id="kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText"
-                  defaultMessage="Open in VSCode"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          )}
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              href={VSCODE_LINK}
+              target="_blank"
+              size="s"
+              iconType="code"
+              flush="left"
+            >
+              <FormattedMessage
+                id="kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText"
+                defaultMessage="Open in VSCode"
+              />
+            </EuiButtonEmpty>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
     </EuiFlexItem>
