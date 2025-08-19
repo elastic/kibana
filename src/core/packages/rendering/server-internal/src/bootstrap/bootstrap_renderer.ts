@@ -103,6 +103,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       'kbn-ui-shared-deps-src': `${bundlesHref}/kbn-ui-shared-deps-src/`,
       'kbn-ui-shared-deps-npm': `${bundlesHref}/kbn-ui-shared-deps-npm/`,
       'kbn-monaco': `${bundlesHref}/kbn-monaco/`,
+      'kbn-serviceworker': `${bundlesHref}/kbn-serviceworker/`,
       ...Object.fromEntries(
         [...bundlePaths.entries()].map(([pluginId, plugin]) => [pluginId, plugin.publicPath])
       ),

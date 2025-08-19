@@ -11,6 +11,7 @@ import type { PackageInfo } from '@kbn/config';
 import { fromRoot } from '@kbn/repo-info';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import { distDir as UiSharedDepsSrcDistDir } from '@kbn/ui-shared-deps-src';
+import * as KbnServiceWorker from '@kbn/serviceworker/server';
 import * as KbnMonaco from '@kbn/monaco/server';
 import type { IRouter } from '@kbn/core-http-server';
 import type { UiPlugins } from '@kbn/core-plugins-base-server-internal';
@@ -78,6 +79,19 @@ export function registerBundleRoutes({
     bundlesPath: KbnMonaco.bundleDir,
     fileHashCache,
     isDist,
+  });
+
+  const serviceWorkerPath = '/bundles/kbn-serviceworker/';
+  registerRouteForBundle(router, {
+    publicPath: staticAssets.prependPublicUrl(serviceWorkerPath) + '/',
+    routePath: staticAssets.prependServerPath(serviceWorkerPath) + '/',
+    bundlesPath: KbnServiceWorker.bundleDir,
+    fileHashCache,
+    isDist,
+    // TODO: figure out if there's an alternative to doing this, maybe fetch the file on the server and apply the header through our zither plugin
+    headers: {
+      'Service-Worker-Allowed': '/',
+    },
   });
 
   [...uiPlugins.internal.entries()].forEach(([id, { publicTargetDir, version }]) => {

@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core-http-server';
-import { createDynamicAssetHandler } from './dynamic_asset_response';
+import { createDynamicAssetHandler, type SupportedAssetHeaders } from './dynamic_asset_response';
 import type { FileHashCache } from './file_hash_cache';
 
 export function registerRouteForBundle(
@@ -20,12 +20,14 @@ export function registerRouteForBundle(
     bundlesPath,
     fileHashCache,
     isDist,
+    headers,
   }: {
-    publicPath: string;
     routePath: string;
+    publicPath: string;
     bundlesPath: string;
     fileHashCache: FileHashCache;
     isDist: boolean;
+    headers?: Partial<SupportedAssetHeaders>;
   }
 ) {
   router.get(
@@ -54,6 +56,7 @@ export function registerRouteForBundle(
       bundlesPath,
       isDist,
       fileHashCache,
+      headers,
     })
   );
 }

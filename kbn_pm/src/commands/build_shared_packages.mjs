@@ -34,6 +34,7 @@ export const command = {
     const kbnUiSharedDepsNpmPath = 'src/platform/packages/private/kbn-ui-shared-deps-npm';
     const kbnUiSharedDepsSrcPath = 'src/platform/packages/private/kbn-ui-shared-deps-src';
     const kbnMonacoPath = 'src/platform/packages/shared/kbn-monaco';
+    const kbnServiceWorkerPath = 'src/platform/packages/shared/kbn-serviceworker';
 
     // Build with some parallelization;
     // keeping in mind that kbn-ui-shared-deps-src depends on kbn-ui-shared-deps-npm
@@ -43,6 +44,7 @@ export const command = {
         () => buildPackage(kbnUiSharedDepsSrcPath, { quiet, dist, log }),
       ]),
       buildPackage(kbnMonacoPath, { quiet, dist, log }),
+      buildPackage(kbnServiceWorkerPath, { quiet, dist, log }),
     ]);
 
     log.success('shared packages built');
