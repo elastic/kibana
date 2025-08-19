@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { badRequest } from '@hapi/boom';
-import { UpdateFailureStoreResponse } from '../../../../common/api_types';
+import type { UpdateFailureStoreResponse } from '../../../../common/api_types';
 
 export async function updateFailureStore({
   esClient,

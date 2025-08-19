@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 // In case this retention is not present in cluster.
 // This is extracted from the docs that indicate that a thirty day (30d) retention is applied to failure store data:

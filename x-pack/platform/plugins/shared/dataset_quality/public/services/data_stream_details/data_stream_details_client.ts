@@ -16,6 +16,7 @@ import type {
   FailedDocsErrorsResponse,
   IntegrationDashboardsResponse,
   UpdateFieldLimitResponse,
+  UpdateFailureStoreResponse,
 } from '../../../common/api_types';
 import {
   checkAndLoadIntegrationResponseRt,
@@ -29,7 +30,6 @@ import {
   integrationDashboardsRT,
   qualityIssueBaseRT,
   updateFieldLimitResponseRt,
-  UpdateFailureStoreResponse,
   updateFailureStoreResponseRt,
 } from '../../../common/api_types';
 import type {
