@@ -240,6 +240,7 @@ export interface SubPlugins {
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
   siemMigrations: SiemMigrations;
+  siemReadiness: SiemReadiness;
   configurations: Configurations;
 }
 
@@ -262,5 +263,6 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
+  siemReadiness: ReturnType<SiemReadiness['start']>;
   configurations: ReturnType<Configurations['start']>;
 }
