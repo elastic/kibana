@@ -105,10 +105,11 @@ const IndexPatternEditorFlyoutContentComponent = ({
   } = useKibana<DataViewEditorContext>();
 
   const canSave = dataViews.getCanSaveSync();
+  const isManaged = !!editData?.managed;
   // Edit form is populated and disabled if the current data view is managed
   // and the data view is not being duplicated
-  const isFormDisabled = !!editData?.managed && !isDuplicatingManaged;
-  const isEditingExisting = editData && !editData.managed && !isDuplicatingManaged;
+  const isFormDisabled = isManaged && !isDuplicatingManaged;
+  const isEditingExisting = editData && !isManaged && !isDuplicatingManaged;
 
   const { form } = useForm<IndexPatternConfig, FormInternal>({
     // Prefill with data if editData exists
@@ -306,7 +307,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
       isPersisted={Boolean(editData && editData.isPersisted())}
       allowAdHoc={allowAdHoc}
       canSave={canSave}
-      isManaged={!!editData?.managed}
+      isManaged={isManaged}
       onDuplicate={onDuplicate}
       isDuplicatingManaged={isDuplicatingManaged}
     />
