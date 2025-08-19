@@ -224,6 +224,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                 isDisabled={!isEditMode || !editableSettings || settingsString === editableSettings}
                 isLoading={isLoading}
                 onClick={updateSettings}
+                aria-describedby={updateError ? 'indexSettingsUpdateError' : undefined}
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.settings.saveButtonLabel"
@@ -249,6 +250,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                id="indexSettingsUpdateError"
                 title={i18n.translate(
                   'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
                   {
@@ -257,6 +259,8 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                 )}
                 color="danger"
                 iconType="error"
+                role="alert"
+                aria-live="assertive"
               >
                 {updateError.message && <p>{updateError.message}</p>}
               </EuiCallOut>

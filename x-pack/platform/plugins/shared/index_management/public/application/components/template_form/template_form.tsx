@@ -155,6 +155,7 @@ export const TemplateForm = ({
   const apiError = saveError ? (
     <>
       <SectionError
+        id="templateCreationError"
         title={
           <FormattedMessage
             id="xpack.idxMgmt.templateForm.saveTemplateError"
@@ -162,6 +163,8 @@ export const TemplateForm = ({
           />
         }
         error={saveError}
+        role="alert"
+        aria-live="assertive"
         data-test-subj="saveTemplateError"
       />
       <EuiSpacer size="m" />
