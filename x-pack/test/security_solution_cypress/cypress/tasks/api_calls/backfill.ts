@@ -27,7 +27,8 @@ export const manualRuleRun = ({
     body: [
       {
         rule_id: ruleId,
-        ranges: [{ start, end }],
+        start,
+        end,
       },
     ],
   });
