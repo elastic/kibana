@@ -17,8 +17,12 @@ export const getUpdateScript = ({
   return {
     script: {
       source: `
+    /**
+    * Legacy conversations will not have created_by field or messages[0].user field,
+    * so before making updates we need to assign the fields from the single user in the users list,
+    * which we can safely assume is the creator of the conversation.
+    */
     if (ctx._source.created_by == null && ctx._source.users != null && ctx._source.users.length == 1) {
-      ctx._source.created_by = ctx._source.users[0];
       ctx._source.created_by = ctx._source.users[0];
       if (ctx._source.messages != null) {
         for (msg in ctx._source.messages) {

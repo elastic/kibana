@@ -138,6 +138,8 @@ export const postActionsConnectorExecuteRoute = (
               id: conversationId,
             });
             if (
+              // if no createdBy, skip check. This is a legacy conversation, and the update script will assign the conversation.user[0] to the createdBy
+              conversation?.createdBy &&
               conversation?.createdBy.name !== checkResponse.currentUser?.username &&
               conversation?.createdBy.id !== checkResponse.currentUser?.profile_uid
             ) {
