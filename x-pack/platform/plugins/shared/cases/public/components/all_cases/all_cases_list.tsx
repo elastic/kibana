@@ -67,7 +67,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       queryParams,
     });
 
-    const disabledCases = useCheckAlertAttachments({
+    const { disabledCases, isLoading: isLoadingCaseAttachments } = useCheckAlertAttachments({
       cases: data.cases,
       getAttachments,
     });
@@ -242,7 +242,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           data={data}
           goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}
-          isLoadingColumns={isLoadingColumns}
+          isLoadingColumns={isLoadingColumns || isLoadingCaseAttachments}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
