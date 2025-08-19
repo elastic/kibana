@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { generatePackage } from '.';
+import { generateKibanaPackageTool } from './generate_package';
 import execa from 'execa';
 
 jest.mock('execa');
@@ -15,7 +15,7 @@ jest.mock('@kbn/repo-info', () => ({ REPO_ROOT: '/repo/root' }));
 
 const mockedExeca = execa as jest.Mocked<typeof execa>;
 
-describe('generatePackage', () => {
+describe('generateKibanaPackageTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
@@ -23,13 +23,13 @@ describe('generatePackage', () => {
   it('executes the generate script and returns stdout', async () => {
     mockedExeca.command.mockResolvedValue({ stdout: 'package created' } as any);
 
-    const result = await generatePackage({
+    const result = await generateKibanaPackageTool.handler({
       name: '@kbn/some-pkg',
       owner: 'kibana-foo',
       group: 'chat',
     });
 
-    expect(result).toBe('package created');
+    expect(result.content[0].text).toBe('package created');
     expect(mockedExeca.command).toHaveBeenCalledTimes(1);
 
     const command = mockedExeca.command.mock.calls[0][0];

@@ -2183,13 +2183,13 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.0.3":
-  version "9.0.3"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.0.3.tgz#96302c6dfae27503d5271aba318883fdef4051bd"
-  integrity sha512-aagnssrVQi538wExO0Au169amtq68sXSwQMyzblQVAsqcmbqRTtzmGhKOjnDP0LK3ml0Mtje1uX+Vda7RhqDsA==
+"@elastic/elasticsearch@9.1.1":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.1.1.tgz#b51cf99664f930dd598490917684e4b7687273f6"
+  integrity sha512-s/JZtHZjtbAYC2gdSzm4LLOSReR724e7cf7ZauIAZlGvAyMgZPZCJpq7xHazSy4rZZhule4ubMs4vepBgWvKQA==
   dependencies:
     "@elastic/transport" "^9.0.1"
-    apache-arrow "18.x - 19.x"
+    apache-arrow "18.x - 20.x"
     tslib "^2.4.0"
 
 "@elastic/ems-client@8.6.3":
@@ -14579,7 +14579,7 @@ anymatch@^3.0.0, anymatch@^3.0.3, anymatch@^3.1.3, anymatch@~3.1.2:
     normalize-path "^3.0.0"
     picomatch "^2.0.4"
 
-"apache-arrow@18.x - 19.x":
+"apache-arrow@18.x - 19.x", "apache-arrow@18.x - 20.x":
   version "18.0.0"
   resolved "https://registry.yarnpkg.com/apache-arrow/-/apache-arrow-18.0.0.tgz#a187bd55318a7a68b6ff09835d05e89e019eba2e"
   integrity sha512-gFlPaqN9osetbB83zC29AbbZqGiCuFH1vyyPseJ+B7SIbfBtESV62mMT/CkiIt77W6ykC/nTWFzTXFs0Uldg4g==
