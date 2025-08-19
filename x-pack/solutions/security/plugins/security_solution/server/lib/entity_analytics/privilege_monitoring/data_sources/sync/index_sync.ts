@@ -21,7 +21,10 @@ import { getErrorFromBulkResponse } from './utils';
 
 export type IndexSyncService = ReturnType<typeof createIndexSyncService>;
 
-export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient) => {
+export const createIndexSyncService = (
+  dataClient: PrivilegeMonitoringDataClient,
+  maxUsersAllowed?: number
+) => {
   const { deps } = dataClient;
   const esClient = deps.clusterClient.asCurrentUser;
 
@@ -36,6 +39,7 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
    * This method:
    * - Retrieves all saved objects of type 'index' that define monitoring sources.
    * - For each valid source with an index pattern, fetches usernames from the monitoring index.
+   * -
    * - Identifies users no longer present in the source index (stale users).
    * - Performs a bulk soft-delete (marks as not privileged) for all stale users found.
    * - Handles missing indices gracefully by logging a warning and skipping them.
@@ -46,6 +50,37 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
    * @returns {Promise<void>} Resolves when synchronization and soft-deletion are complete.
    */
   const plainIndexSync = async (soClient: SavedObjectsClientContract) => {
+    let shouldSkipUserSync = false;
+
+    // Check user limit before starting sync operations
+    if (maxUsersAllowed !== undefined) {
+      const currentUserCount = await esClient.count({
+        index: dataClient.index,
+        query: {
+          term: {
+            'user.is_privileged': true,
+          },
+        },
+      });
+
+      if (currentUserCount.count >= maxUsersAllowed) {
+        shouldSkipUserSync = true;
+
+        dataClient.log(
+          'warn',
+          `User limit reached (${currentUserCount.count}/${maxUsersAllowed}). Skipping user sync but continuing with maintenance tasks.`
+        );
+      } else {
+        dataClient.log(
+          'info',
+          `Starting index sync. Current users: ${currentUserCount.count}/${maxUsersAllowed}`
+        );
+      }
+    } else if (!shouldSkipUserSync) {
+      // Only log if we're proceeding with sync and no limit is configured
+      dataClient.log('info', 'Starting index sync. No user limit configured.');
+    }
+
     const monitoringIndexSourceClient = new MonitoringEntitySourceDescriptorClient({
       soClient,
       namespace: deps.namespace,
@@ -64,15 +99,51 @@ export const createIndexSyncService = (dataClient: PrivilegeMonitoringDataClient
       const index: string = source.indexPattern;
 
       try {
-        const allUserNames = await syncUsernamesFromIndex({
-          indexName: index,
-          sourceId: source.id,
-          kuery: source.filter?.kuery,
-        });
+        let allUserNames: string[] = [];
 
-        // collect stale users
-        const staleUsers = await findStaleUsers(source.id, allUserNames);
-        allStaleUsers.push(...staleUsers);
+        // Only sync users if we haven't reached the limit
+        if (!shouldSkipUserSync) {
+          // Normal case: sync all users from the source
+          allUserNames = await syncUsernamesFromIndex({
+            indexName: index,
+            sourceId: source.id,
+            kuery: source.filter?.kuery,
+          });
+
+          // Detect stale users among the full set
+          const staleUsers = await findStaleUsers(source.id, allUserNames);
+          allStaleUsers.push(...staleUsers);
+        } else {
+          // Limited case: collect usernames from source but don't sync them
+          dataClient.log(
+            'debug',
+            `Skipping user sync for ${index} due to user limit, but checking for stale users among previously synced users`
+          );
+          const response = await searchService.searchUsernamesInIndex({
+            indexName: index,
+            batchSize: 1000,
+            query: source.filter?.kuery
+              ? toElasticsearchQuery(fromKueryExpression(source.filter.kuery))
+              : { match_all: {} },
+          });
+
+          // Get current usernames from the source
+          const currentUsernamesInSource = response.hits.hits
+            .map((hit) => hit._source?.user?.name)
+            .filter((username): username is string => !!username);
+
+          // For stale detection when at limit, we pass the current usernames from source
+          // The stale detection logic will find previously synced users from this source
+          // that are no longer present in the current source data
+          const staleUsers = await findStaleUsers(source.id, currentUsernamesInSource);
+          allStaleUsers.push(...staleUsers);
+
+          dataClient.log(
+            'debug',
+            `Found ${currentUsernamesInSource.length} current users in source ${index}, ` +
+              `identified ${staleUsers.length} stale users (sync skipped due to limit)`
+          );
+        }
       } catch (error) {
         if (
           error?.meta?.body?.error?.type === 'index_not_found_exception' ||
