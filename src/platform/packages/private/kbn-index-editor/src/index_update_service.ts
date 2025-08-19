@@ -542,15 +542,17 @@ export class IndexUpdateService {
 
     // Queue for bulk updates
     this._subscription.add(
-      combineLatest([this.bufferState$, this._flush$])
+      this._flush$
         .pipe(
+          withLatestFrom(this.bufferState$),
+          map(([, updates]) => updates),
           skipWhile(() => !this.isIndexCreated()),
-          filter(([updates]) => updates.length > 0),
+          filter((updates) => updates.length > 0),
           tap(() => {
             this._isSaving$.next(true);
           }),
           // Save updates
-          exhaustMap(([updates]) => {
+          exhaustMap((updates) => {
             return from(this.bulkUpdate(updates)).pipe(
               catchError((errors) => {
                 return of({ errors: true } as BulkResponse);
