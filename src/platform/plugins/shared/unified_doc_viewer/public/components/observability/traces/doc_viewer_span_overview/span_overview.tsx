@@ -112,11 +112,12 @@ export function SpanOverview({
               gutterSize="m"
               ref={setContainerRef}
               css={
-                containerHeight &&
-                css`
-                  height: ${containerHeight}px;
-                  overflow: auto;
-                `
+                containerHeight
+                  ? css`
+                      height: ${containerHeight}px;
+                      overflow: auto;
+                    `
+                  : undefined
               }
             >
               <EuiFlexItem>

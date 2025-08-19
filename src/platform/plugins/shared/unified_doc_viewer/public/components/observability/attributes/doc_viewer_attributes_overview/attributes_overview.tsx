@@ -160,11 +160,12 @@ export function AttributesOverview({
       responsive={false}
       ref={setContainerRef}
       css={
-        containerHeight &&
-        css`
-          height: ${containerHeight}px;
-          overflow: hidden;
-        `
+        containerHeight
+          ? css`
+              height: ${containerHeight}px;
+              overflow: hidden;
+            `
+          : undefined
       }
     >
       <EuiFlexItem grow={false}>

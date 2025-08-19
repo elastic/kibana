@@ -93,11 +93,12 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         <div
           ref={setContainerRef}
           css={
-            containerHeight &&
-            css`
-              height: ${containerHeight}px;
-              overflow: auto;
-            `
+            containerHeight
+              ? css`
+                  height: ${containerHeight}px;
+                  overflow: auto;
+                `
+              : undefined
           }
         >
           <EuiSpacer size="m" />
