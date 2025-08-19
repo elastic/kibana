@@ -95,7 +95,22 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
     }),
   },
   modelVersions: {
+    1: {
+      changes: [],
+    },
     2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deleted_at: {
+              type: 'date',
+            },
+          },
+        },
+      ],
+    },
+    3: {
       changes: [
         {
           type: 'mappings_addition',
@@ -112,21 +127,6 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
                 spaceId: 'default',
               },
             };
-          },
-        },
-      ],
-    },
-    1: {
-      changes: [],
-    },
-    2: {
-      changes: [
-        {
-          type: 'mappings_addition',
-          addedMappings: {
-            deleted_at: {
-              type: 'date',
-            },
           },
         },
       ],
