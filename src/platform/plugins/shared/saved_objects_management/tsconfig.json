@@ -10,6 +10,8 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/core-di",
+    "@kbn/core-di-server",
     "@kbn/data-plugin",
     "@kbn/home-plugin",
     "@kbn/kibana-react-plugin",
