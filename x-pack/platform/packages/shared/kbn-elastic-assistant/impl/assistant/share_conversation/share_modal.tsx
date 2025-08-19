@@ -83,9 +83,7 @@ const ShareModalComponent: React.FC<Props> = ({
           ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
         ],
       });
-      console.log('before refetch');
       await refetchCurrentUserConversations();
-      console.log('after refetch');
       refetchCurrentConversation({});
     }
   }, [

@@ -345,7 +345,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
       [
         handleCopyUrl,
         handleDuplicateConversation,
-        selectedConversation,
+        isConversationOwner,
         euiTheme.size.m,
         euiTheme.size.xs,
         euiTheme.colors.textDanger,
@@ -357,7 +357,8 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
         onChangeContentReferencesVisible,
         selectedConversationExists,
         showDestroyModal,
-        isConversationOwner,
+        showDeleteModal,
+        selectedConversation,
       ]
     );
 
