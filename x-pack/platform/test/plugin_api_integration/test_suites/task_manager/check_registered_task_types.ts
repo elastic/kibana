@@ -24,6 +24,7 @@ export default function ({ getService }: FtrProviderContext) {
     'lowPriorityTask',
     'normalLongRunningPriorityTask',
     'sampleOneTimeTaskThrowingError',
+    'sampleRecurringTaskDisablesItself',
     'sampleRecurringTaskTimingOut',
     'sampleRecurringTaskWhichHangs',
     'sampleRecurringTaskThatDeletesItself',
