@@ -285,9 +285,6 @@ export function privilegesFactory(
       });
     },
     async getWithActions(respectLicenseLevel: boolean = true) {
-      if (!getTypeRegistry) {
-        throw new Error('getTypeRegistry is required for getWithActions');
-      }
       const typeRegistry = await getTypeRegistry();
       const savedObjectTypesSupportingAccessControl = typeRegistry
         .getAllTypes()
