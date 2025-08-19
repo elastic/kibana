@@ -7,8 +7,8 @@
 
 import React from 'react';
 
-import { SuggestionType } from '@kbn/cases-plugin/public';
-import { SyntheticsMonitorSuggestion } from '../../common/types';
+import type { SuggestionType } from '@kbn/cases-plugin/public';
+import type { SyntheticsMonitorSuggestion } from '../../common/types';
 
 export const SyntheticsMonitorSuggestionDefinition: SuggestionType<SyntheticsMonitorSuggestion> = {
   id: 'example',

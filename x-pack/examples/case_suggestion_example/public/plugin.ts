@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import { mount } from './mount';
 import { SyntheticsMonitorSuggestionDefinition } from './example_suggestion/case_suggestion_definition';
-import { SyntheticsMonitorSuggestion } from '../common/types';
+import type { SyntheticsMonitorSuggestion } from '../common/types';
 
 export interface SetupDependencies {
   developerExamples: DeveloperExamplesSetup;
