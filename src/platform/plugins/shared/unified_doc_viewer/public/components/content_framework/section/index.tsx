@@ -76,44 +76,37 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
   );
 
   return (
-    <EuiPanel paddingSize="l">
-      <EuiAccordion
-        id={`sectionAccordion-${id}`}
-        initialIsOpen
-        buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="s">
+    <EuiAccordion
+      id={`sectionAccordion-${id}`}
+      initialIsOpen
+      buttonContent={
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>{title}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+          {description && (
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>{title}</h3>
-              </EuiTitle>
+              <EuiIconTip content={description} size="s" color="subdued" aria-label={description} />
             </EuiFlexItem>
-            {description && (
-              <EuiFlexItem grow={false}>
-                <EuiIconTip
-                  content={description}
-                  size="s"
-                  color="subdued"
-                  aria-label={description}
-                />
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        }
-        extraAction={
-          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-            {actions && <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>}
-          </EuiFlexGroup>
-        }
-      >
-        {children && (
-          <>
-            <EuiSpacer size="s" />
-            <EuiPanel hasBorder={true} hasShadow={false}>
-              {children}
-            </EuiPanel>
-          </>
-        )}
-      </EuiAccordion>
-    </EuiPanel>
+          )}
+        </EuiFlexGroup>
+      }
+      extraAction={
+        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+          {actions && <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>}
+        </EuiFlexGroup>
+      }
+    >
+      {children && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiPanel hasBorder={true} hasShadow={false}>
+            {children}
+          </EuiPanel>
+        </>
+      )}
+    </EuiAccordion>
   );
 };
