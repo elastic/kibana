@@ -83,4 +83,9 @@ export class IndexEditorObject extends FtrService {
     const docs = indexContent.hits.hits.map((hit) => hit._source);
     expect(docs).to.eql(expectedDocs);
   }
+
+  public async uploadFile(filePath: string): Promise<void> {
+    const fileInput = await this.testSubjects.find('indexEditorFileInput');
+    await fileInput.type(filePath);
+  }
 }

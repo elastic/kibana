@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -17,15 +18,16 @@ import {
   type EuiTabbedContentTab,
   EuiTitle,
   EuiBasicTable,
-  EuiBasicTableColumn,
 } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { FC, Fragment, useCallback, useEffect, useMemo, useState } from 'react';
-import { buildDataTableRecord, DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import type { FC } from 'react';
+import React, { Fragment, useCallback, useEffect, useMemo, useState } from 'react';
+import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { KibanaContextExtra } from '../types';
@@ -300,7 +302,9 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) =
           <EuiSpacer size={'s'} />
         </>
       ) : null}
-      {filePreview.sampleDocs?.length ? <EuiBasicTable columns={columns} items={items} /> : null}
+      {filePreview.sampleDocs?.length ? (
+        <EuiBasicTable data-test-subj="indexEditorPreviewFile" columns={columns} items={items} />
+      ) : null}
     </>
   );
 };

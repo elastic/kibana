@@ -18,13 +18,14 @@ import {
 import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC, PropsWithChildren, useCallback } from 'react';
+import type { PropsWithChildren } from 'react';
+import React, { type FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 
 const acceptedFileFormats = ['.csv'];
 
@@ -181,7 +182,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
       <div {...getRootProps({ css: { height: '100%', cursor: 'default' } })}>
         {isDragActive ? <div css={overlayDraggingFile} /> : null}
         {showLoadingOverlay ? loadingIndicator : null}
-        <input {...getInputProps()} />
+        <input {...getInputProps()} data-test-subj="indexEditorFileInput" />
         {content}
       </div>
     </FileSelectorContext.Provider>

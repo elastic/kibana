@@ -21,7 +21,7 @@ import React, { type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 
 export interface FlyoutFooterProps {
   onClose: () => void;
@@ -90,7 +90,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED && canImport ? (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onImportClick}>
+                <EuiButton data-test-subj="indexEditorImportButton" onClick={onImportClick}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.importButton"
                     defaultMessage="Import"
