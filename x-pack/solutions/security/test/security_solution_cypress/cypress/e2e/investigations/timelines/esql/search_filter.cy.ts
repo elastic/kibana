@@ -69,10 +69,8 @@ describe(
       addDiscoverEsqlQuery(`${esqlQuery} | limit 1`);
       updateDateRangeInLocalDatePickers(DISCOVER_CONTAINER, INITIAL_START_DATE, INITIAL_END_DATE);
       waitForDiscoverFieldsToLoad();
-      cy.get(DISCOVER_CONTAINER).within(() => {
-        addFieldToTable('host.name');
-        addFieldToTable('user.name');
-      });
+      addFieldToTable('host.name');
+      addFieldToTable('user.name');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('host.name')).should('be.visible');
       cy.get(GET_DISCOVER_DATA_GRID_CELL_HEADER('user.name')).should('be.visible');
     });

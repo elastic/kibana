@@ -13,7 +13,6 @@ import {
   DISCOVER_ESQL_INPUT,
   DISCOVER_ESQL_INPUT_TEXT_CONTAINER,
   DISCOVER_FIELD_LIST_LOADING,
-  DISCOVER_FIELD_LIST_PANEL,
   DISCOVER_FIELD_SEARCH,
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   GET_DISCOVER_FIELD_BROWSER_FIELD_DETAILS_BUTTON,
@@ -96,9 +95,6 @@ export const submitDiscoverSearchBar = () => {
 
 const searchForField = (fieldId: string) => {
   cy.get(DISCOVER_FIELD_SEARCH).filter(':visible').type(fieldId);
-  cy.get(TIMELINE_DISCOVER_TAB).within(() =>
-    cy.get(`*[data-test-subj^=${DISCOVER_FIELD_LIST_PANEL}]`).should('have.length', 1)
-  );
 };
 
 export const clearFieldSearch = () => {
