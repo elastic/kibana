@@ -740,7 +740,6 @@ export class IndexUpdateService {
   /** Adds an empty document */
   public addEmptyRow() {
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
-    console.log('🚀 ~ IndexUpdateService ~ addEmptyRow ~ newDocId:', newDocId);
     this.addAction('add-doc', { id: newDocId, value: {} });
   }
 

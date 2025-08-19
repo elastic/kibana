@@ -41,7 +41,7 @@ export function createEditLookupIndexContentAction(
       const fileManager = new FileUploadManager(
         fileUpload,
         coreStart.http,
-        data.dataViews,
+        data,
         coreStart.notifications,
         null,
         false,
