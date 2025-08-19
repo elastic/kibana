@@ -41,14 +41,21 @@ function createTestConfig(
 
 describe('RegexWorkerService', () => {
   let logger: MockedLogger;
+  let regexWorker: RegexWorkerService;
 
   beforeEach(() => {
     jest.resetAllMocks();
     logger = loggerMock.create();
   });
 
+  afterEach(async () => {
+    // Force immediate termination of worker pools
+    const piscinaWorker = (regexWorker as any).worker;
+    piscinaWorker?.destroy({ force: true });
+  });
+
   it('detects regex matches through the worker', async () => {
-    const regexWorker = new RegexWorkerService(createTestConfig(), logger);
+    regexWorker = new RegexWorkerService(createTestConfig(), logger);
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
     expect(worker).toBeDefined();
@@ -71,7 +78,7 @@ describe('RegexWorkerService', () => {
     expect(worker.completed).toBe(2);
   });
   it('times out task if greater than taskTimeout time', async () => {
-    const regexWorker = new RegexWorkerService(
+    regexWorker = new RegexWorkerService(
       createTestConfig({ taskTimeout: { asMilliseconds: () => 1 } } as any),
       logger
     );
@@ -84,7 +91,7 @@ describe('RegexWorkerService', () => {
     ).rejects.toThrow('Regex anonymization task timed out');
   });
   it('runs task synchronously when worker is disabled', async () => {
-    const regexWorker = new RegexWorkerService(createTestConfig({ enabled: false }), logger);
+    regexWorker = new RegexWorkerService(createTestConfig({ enabled: false }), logger);
     const result = await regexWorker.run(taskPayload);
     const worker = (regexWorker as any).worker;
     expect(worker).toBeUndefined();
