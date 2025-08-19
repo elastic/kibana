@@ -6,8 +6,9 @@
  */
 
 import moment from 'moment';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserRowData } from './types';
-
 export const PAGE_SIZE = 10;
 export const CURRENT_TIME = moment();
 
@@ -72,19 +73,39 @@ export const GRANTED_RIGHTS_DATA: UserRowData[] = [
 
 export const GRANTED_RIGHTS_STACK_BY_OPTIONS = [
   {
-    inputDisplay: 'Privileged User',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.privilegedUser"
+        defaultMessage="Privileged user"
+      />
+    ),
     value: 'privileged_user',
   },
   {
-    inputDisplay: 'Target user',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.targetUser"
+        defaultMessage="Target user"
+      />
+    ),
     value: 'target_user',
   },
   {
-    inputDisplay: 'Granted right',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.grantedRight"
+        defaultMessage="Granted right"
+      />
+    ),
     value: 'right',
   },
   {
-    inputDisplay: 'Source IP',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.sourceIp"
+        defaultMessage="Source IP"
+      />
+    ),
     value: 'ip',
   },
 ];
