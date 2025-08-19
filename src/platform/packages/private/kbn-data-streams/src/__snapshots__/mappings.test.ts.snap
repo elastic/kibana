@@ -51,6 +51,12 @@ Object {
 
 exports[`Snapshot for text mapping helper, do not change lightly or risk changing live mappings! 1`] = `
 Object {
+  "fields": Object {
+    "keyword": Object {
+      "ignore_above": 1024,
+      "type": "keyword",
+    },
+  },
   "type": "text",
 }
 `;
