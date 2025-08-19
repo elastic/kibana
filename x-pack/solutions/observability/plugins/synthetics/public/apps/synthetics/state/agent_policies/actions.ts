@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentPolicyInfo } from '../../../../../common/types';
+import type { AgentPolicyInfo } from '../../../../../common/types';
 import { createAsyncAction } from '../utils/actions';
 
 export const getAgentPoliciesAction = createAsyncAction<void, AgentPolicyInfo[]>(

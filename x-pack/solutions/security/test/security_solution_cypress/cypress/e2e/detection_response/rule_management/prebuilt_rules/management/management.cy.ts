@@ -6,6 +6,7 @@
  */
 
 import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 import {
   COLLAPSED_ACTION_BTN,
   ELASTIC_RULES_BTN,
@@ -22,7 +23,6 @@ import {
   getRulesManagementTableRows,
   selectAllRules,
   selectRulesByName,
-  waitForPrebuiltDetectionRulesToBeLoaded,
   waitForRuleToUpdate,
 } from '../../../../../tasks/alerts_detection_rules';
 import {
@@ -31,37 +31,38 @@ import {
   enableSelectedRules,
 } from '../../../../../tasks/rules_bulk_actions';
 import {
-  createAndInstallMockedPrebuiltRules,
-  getAvailablePrebuiltRulesCount,
-  preventPrebuiltRulesPackageInstallation,
+  getInstalledPrebuiltRulesCount,
+  installMockPrebuiltRulesPackage,
+  installPrebuiltRuleAssets,
+  installSpecificPrebuiltRulesRequest,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 import {
   deleteAlertsAndRules,
   deletePrebuiltRulesAssets,
 } from '../../../../../tasks/api_calls/common';
 import { login } from '../../../../../tasks/login';
-import { visit } from '../../../../../tasks/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
 
-const rules = Array.from(Array(5)).map((_, i) => {
-  return createRuleAssetSavedObject({
+const PREBUILT_RULE_ASSETS = Array.from(Array(5)).map((_, i) =>
+  createRuleAssetSavedObject({
     name: `Test rule ${i + 1}`,
     rule_id: `rule_${i + 1}`,
-  });
-});
+  })
+);
 
-// https://github.com/elastic/kibana/issues/179973
-// Failing: See https://github.com/elastic/kibana/issues/182442
-describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+describe('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
+  before(() => {
+    installMockPrebuiltRulesPackage();
+  });
+
   beforeEach(() => {
-    login();
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
-    preventPrebuiltRulesPackageInstallation();
-    visit(RULES_MANAGEMENT_URL);
-    createAndInstallMockedPrebuiltRules(rules);
-    cy.reload();
-    waitForPrebuiltDetectionRulesToBeLoaded();
+    installPrebuiltRuleAssets(PREBUILT_RULE_ASSETS);
+    installSpecificPrebuiltRulesRequest(PREBUILT_RULE_ASSETS);
+
+    login();
+
+    visitRulesManagementTable();
     disableAutoRefresh();
   });
 
@@ -71,7 +72,7 @@ describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerle
       getRulesManagementTableRows().should('have.length.gte', 1);
 
       // Check the correct count of prebuilt rules is displayed
-      getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+      getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
         cy.get(ELASTIC_RULES_BTN).should(
           'have.text',
           `Elastic rules (${availablePrebuiltRulesCount})`
@@ -118,7 +119,7 @@ describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       it('Deletes and recovers one rule', () => {
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
           const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 1;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;
 
@@ -150,7 +151,7 @@ describe.skip('Prebuilt rules', { tags: ['@ess', '@serverless', '@skipInServerle
       });
 
       it('Deletes and recovers more than one rule', () => {
-        getAvailablePrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
+        getInstalledPrebuiltRulesCount().then((availablePrebuiltRulesCount) => {
           const rulesToDelete = ['Test rule 1', 'Test rule 2'] as const;
           const expectedNumberOfRulesAfterDeletion = availablePrebuiltRulesCount - 2;
           const expectedNumberOfRulesAfterRecovering = availablePrebuiltRulesCount;

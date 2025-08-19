@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useEffect } from 'react';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
 import { act } from 'react-dom/test-utils';
 import { render, waitFor } from '@testing-library/react';
 import { of, BehaviorSubject } from 'rxjs';
@@ -17,7 +18,7 @@ import type { KibanaTheme } from '@kbn/react-kibana-context-common';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import { executionContextServiceMock } from '@kbn/core-execution-context-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
-import { I18nStart } from '@kbn/core-i18n-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { KibanaRootContextProvider } from './root_provider';
