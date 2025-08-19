@@ -9,7 +9,7 @@ import { PLUGIN_ID } from '@kbn/fleet-plugin/common';
 
 // NOTE: import path below should be the deep path to the actual module - else we get CI errors
 import { pagePathGetters } from '@kbn/fleet-plugin/public/constants/page_paths';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function AgentsPage({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common']);

@@ -10,10 +10,11 @@
 import React, { useCallback, useRef } from 'react';
 import { css } from '@emotion/react';
 import { CONSOLE_THEME_ID } from '@kbn/monaco';
-import { monaco, CodeEditor, CONSOLE_LANG_ID } from '@kbn/code-editor';
+import type { monaco } from '@kbn/code-editor';
+import { CodeEditor, CONSOLE_LANG_ID } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { formatRequestBodyDoc } from '../../../lib/utils';
-import { DevToolsSettings } from '../../../services';
+import type { DevToolsSettings } from '../../../services';
 import { useResizeCheckerUtils } from '../editor/hooks';
 
 export const HistoryViewer = ({

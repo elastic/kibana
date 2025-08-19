@@ -71,11 +71,20 @@ const globalLayoutStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     );
 
     // for forward compatibility with grid layout,
-    --kbn-application--content-height: calc(100vh - var(--kbnAppHeadersOffset, 0px));
-    --kbn-application--content-top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0));
+    // --kbn-layout--application includes everything except chrome's fixed headers
+    // for solution navigation, it also includes the top bar height (action menu)
+    --kbn-layout--application-top: var(--euiFixedHeadersOffset, 0px);
+    --kbn-layout--application-left: 0px;
+    --kbn-layout--application-bottom: 0px;
+    --kbn-layout--application-right: 0px;
+    --kbn-layout--application-height: calc(100vh - var(--kbn-layout--application-top, 0px));
+
+    // --kbn-application--content also excludes the top bar height (action menu)
+    --kbn-application--content-top: var(--kbnAppHeadersOffset, var(--euiFixedHeadersOffset, 0px));
     --kbn-application--content-left: 0px;
     --kbn-application--content-bottom: 0px;
     --kbn-application--content-right: 0px;
+    --kbn-application--content-height: calc(100vh - var(--kbn-application--content-top, 0px));
   }
 
   // Conditionally override :root CSS fixed header variable. Updating \`--euiFixedHeadersOffset\`
