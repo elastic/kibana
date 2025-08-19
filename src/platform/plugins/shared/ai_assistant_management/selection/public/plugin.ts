@@ -78,23 +78,24 @@ export class AIAssistantManagementPlugin
       });
     }
 
-    this.registeredAiAssistantManagementSelectionApp = management.sections.section.kibana.registerApp({
-      id: 'aiAssistantManagementSelection',
-      title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
-        defaultMessage: 'AI Assistants',
-      }),
-      order: 1,
-      mount: async (mountParams) => {
-        const { mountManagementSection } = await import('./management_section/mount_section');
+    this.registeredAiAssistantManagementSelectionApp =
+      management.sections.section.kibana.registerApp({
+        id: 'aiAssistantManagementSelection',
+        title: i18n.translate('aiAssistantManagementSelection.managementSectionLabel', {
+          defaultMessage: 'AI Assistants',
+        }),
+        order: 1,
+        mount: async (mountParams) => {
+          const { mountManagementSection } = await import('./management_section/mount_section');
 
-        return mountManagementSection({
-          core,
-          mountParams,
-          kibanaBranch: this.kibanaBranch,
-          buildFlavor: this.buildFlavor,
-        });
-      },
-    });
+          return mountManagementSection({
+            core,
+            mountParams,
+            kibanaBranch: this.kibanaBranch,
+            buildFlavor: this.buildFlavor,
+          });
+        },
+      });
 
     // Default to disabled until license check runs in start()
     this.registeredAiAssistantManagementSelectionApp.disable();
@@ -110,7 +111,7 @@ export class AIAssistantManagementPlugin
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
 
     const isAiAssistantManagementSelectionEnabled =
-      coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
+      coreStart.application.capabilities.management.kibana.aiAssistantManagementSelection;
 
     // Toggle visibility based on license at runtime
     if (licensing) {

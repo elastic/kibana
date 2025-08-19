@@ -39,8 +39,6 @@ export interface StartDependencies {
   serverless?: ServerlessPluginStart;
   productDocBase?: ProductDocBasePluginStart;
   ml: MlPluginSetup;
-  spaces?: SpacesPluginStart;
-  cloud?: CloudStart;
   licensing: LicensingPluginStart;
 }
 
