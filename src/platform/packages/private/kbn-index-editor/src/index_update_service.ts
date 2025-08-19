@@ -179,10 +179,6 @@ export class IndexUpdateService {
   public readonly exitAttemptWithUnsavedChanges$ =
     this._exitAttemptWithUnsavedChanges$.asObservable();
 
-  private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
-  public readonly exitAttemptWithUnsavedFields$ =
-    this._exitAttemptWithUnsavedFields$.asObservable();
-
   /** ES Documents */
   private readonly _docs$ = new BehaviorSubject<DataTableRecord[]>([]);
   /**
