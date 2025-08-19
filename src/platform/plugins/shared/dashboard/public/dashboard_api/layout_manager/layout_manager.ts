@@ -18,6 +18,7 @@ import {
   map,
   merge,
   mergeMap,
+  startWith,
   tap,
   type Observable,
 } from 'rxjs';
@@ -74,6 +75,7 @@ export function initializeLayoutManager(
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
+  const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {}));
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
     layout$.pipe(
       map(({ panels }) => {
@@ -88,10 +90,10 @@ export function initializeLayoutManager(
             settingsByPanelType[type] = panelSettings.panelResizeSettings;
         });
         return settingsByPanelType;
-      })
+      }),
+      startWith({})
     );
 
-  const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {}));
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
     ([layout, panelResizeSettings]) => {
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
