@@ -10,14 +10,13 @@ import { i18n } from '@kbn/i18n';
 import InfiniteLoader from 'react-window-infinite-loader';
 import type { ListChildComponentProps } from 'react-window';
 import { FixedSizeList } from 'react-window';
-import type { EuiAutoSize } from '@elastic/eui';
+import type { EuiAutoSize, EuiAutoSize } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiButtonEmpty,
   EuiText,
-  EuiAutoSize,
   EuiProgress,
 } from '@elastic/eui';
 import { MetricItem } from './metric_item/metric_item';
