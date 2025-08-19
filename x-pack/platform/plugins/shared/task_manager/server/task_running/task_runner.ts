@@ -648,6 +648,7 @@ export class TaskManagerRunner implements TaskRunner {
     result: Result<SuccessfulRunResult, FailedRunResult>
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
+    let shouldTaskBeDisabled = false;
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -659,10 +660,16 @@ export class TaskManagerRunner implements TaskRunner {
           state,
           attempts = 0,
           shouldDeleteTask,
+          shouldDisableTask,
         }: SuccessfulRunResult & { attempts: number }) => {
           if (shouldDeleteTask) {
             // set the status to failed so task will get deleted
             return asOk({ status: TaskStatus.ShouldDelete });
+          }
+
+          if (shouldDisableTask) {
+            shouldTaskBeDisabled = true;
+            return asOk({ status: TaskStatus.Idle });
           }
 
           const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
@@ -727,6 +734,14 @@ export class TaskManagerRunner implements TaskRunner {
         }
       } else {
         shouldUpdateTask = true;
+
+        if (shouldTaskBeDisabled) {
+          const label = `${this.taskType}:${this.instance.task.id}`;
+          this.logger.warn(`Disabling task ${label} as it indicated it should disable itself`, {
+            tags: [this.taskType],
+          });
+        }
+
         partialTask = {
           ...partialTask,
           ...fieldUpdates,
@@ -734,6 +749,7 @@ export class TaskManagerRunner implements TaskRunner {
           startedAt: null,
           retryAt: null,
           ownerId: null,
+          ...(shouldTaskBeDisabled ? { enabled: false } : {}),
         };
       }
 
