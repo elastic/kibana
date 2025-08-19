@@ -93,6 +93,43 @@ GET my-data-stream/_search
 
 Using painless in this way is powerful, but we should be careful to ship performant and well tested painless in our code. That's why we expose a set of parameterised scripts for the most common use cases.
 
+## Test utilites
+
+We can consider creating the following test utilities:
+
+```ts
+test('myDataStream should be backwards compatible', async () => {
+  await integrationTestHelpers.assertBackwardsCompatible([
+    {
+      sampleDocs: [
+        {
+          /* 1 */
+        },
+        // and so on...
+      ],
+      dataStream: v1,
+    },
+    {
+      sampleDocs: [
+        {
+          /* 1 */
+        },
+        // and so on...
+      ],
+      dataStream: current,
+    },
+  ]);
+});
+
+test('snapshot', async () => {
+  expect(integrationTestHelpers.toSnapshot(myDataStream)).toMatchSnapshot();
+});
+
+test('mappings hash v1', async () => {
+  expect(integrationTestHelpers.mappingsHash(myDataStream)).toMatchInlineSnapshot(`hash-1`);
+});
+```
+
 ## Additional notes
 
 1. How should we handle updating mappings? Do we just apply to the index template or go and update the existing write index as well? Yes.
