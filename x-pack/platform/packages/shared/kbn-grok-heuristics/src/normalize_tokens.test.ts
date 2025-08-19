@@ -6,7 +6,8 @@
  */
 
 import { PATTERN_PRECEDENCE } from './constants';
-import { NormalizedToken, normalizeTokensForColumn } from './normalize_tokens';
+import type { NormalizedToken } from './normalize_tokens';
+import { normalizeTokensForColumn } from './normalize_tokens';
 import { findMatchingPatterns } from './find_matching_patterns';
 import { uniq } from 'lodash';
 
