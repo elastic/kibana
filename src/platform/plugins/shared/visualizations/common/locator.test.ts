@@ -9,7 +9,6 @@
 
 import { VisualizeLocatorDefinition } from './locator';
 
-
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;
 

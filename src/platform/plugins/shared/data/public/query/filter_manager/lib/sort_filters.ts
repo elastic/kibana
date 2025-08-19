@@ -21,8 +21,6 @@ export const sortFilters = ({ $state: a }: Filter, { $state: b }: Filter): numbe
   if (a!.store === b!.store) {
     return 0;
   } else {
-    return a!.store === 'globalState' && b!.store !== 'globalState'
-      ? -1
-      : 1;
+    return a!.store === 'globalState' && b!.store !== 'globalState' ? -1 : 1;
   }
 };

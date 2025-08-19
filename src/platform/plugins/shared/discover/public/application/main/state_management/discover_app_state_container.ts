@@ -13,12 +13,7 @@ import {
   createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/common';
 import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  FilterStateStore,
-  isOfAggregateQueryType,
-} from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isOfAggregateQueryType } from '@kbn/es-query';
 import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { IKbnUrlStateStorage, ISyncStateRef } from '@kbn/kibana-utils-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';

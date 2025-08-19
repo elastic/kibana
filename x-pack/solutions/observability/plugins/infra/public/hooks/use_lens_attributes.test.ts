@@ -14,7 +14,6 @@ import type { CoreStart } from '@kbn/core/public';
 import type { InfraClientStartDeps } from '../types';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
-import { FilterStateStore } from '@kbn/es-query';
 import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 
 import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';

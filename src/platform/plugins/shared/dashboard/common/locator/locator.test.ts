@@ -10,7 +10,6 @@
 import { DashboardAppLocatorDefinition } from './locator';
 import { hashedItemStore } from '@kbn/kibana-utils-plugin/public';
 import { mockStorage } from '@kbn/kibana-utils-plugin/public/storage/hashed_item_store/mock';
-import { FilterStateStore } from '@kbn/es-query';
 
 describe('dashboard locator', () => {
   beforeEach(() => {

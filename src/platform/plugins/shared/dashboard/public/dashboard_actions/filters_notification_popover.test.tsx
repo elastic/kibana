@@ -8,7 +8,6 @@
  */
 
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { render, screen, waitFor } from '@testing-library/react';

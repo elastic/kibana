@@ -14,7 +14,6 @@ import dateMath from '@kbn/datemath';
 import type { estypes } from '@elastic/elasticsearch';
 
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import {

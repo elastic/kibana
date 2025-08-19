@@ -6,7 +6,6 @@
  */
 
 import type { Filter, RangeFilter, Query, TimeRange } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { type Context, EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilldown';
 import type { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { dashboardPluginMock } from '@kbn/dashboard-plugin/public/mocks';

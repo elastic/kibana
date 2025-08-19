@@ -8,7 +8,6 @@
  */
 
 import type { PhraseFilter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 
 export const phraseFilter: PhraseFilter = {
   meta: {

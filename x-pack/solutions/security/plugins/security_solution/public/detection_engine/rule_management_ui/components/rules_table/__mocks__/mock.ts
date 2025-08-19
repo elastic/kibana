@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
 import type {
   AboutStepRule,
   ActionsStepRule,

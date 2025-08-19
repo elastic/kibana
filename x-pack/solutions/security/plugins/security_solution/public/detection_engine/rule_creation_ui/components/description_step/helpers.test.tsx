@@ -13,7 +13,6 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { FilterBadgeGroup } from '@kbn/unified-search-plugin/public';
 import type { DataViewBase } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { SeverityBadge } from '../../../../common/components/severity_badge';
 
 import * as i18n from './translations';

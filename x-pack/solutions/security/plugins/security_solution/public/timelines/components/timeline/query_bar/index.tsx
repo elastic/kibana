@@ -10,7 +10,6 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch } from 'react-redux';
 
 import type { Filter, Query } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import styled from '@emotion/styled';
 import { useEnableExperimental } from '../../../../common/hooks/use_experimental_features';

@@ -25,7 +25,6 @@ import {
   removeNodeInfo,
 } from './job_utils';
 import type { CombinedJob, CombinedJobWithStats, Job } from '../types/anomaly_detection_jobs';
-import { FilterStateStore } from '@kbn/es-query';
 
 import moment from 'moment';
 
@@ -681,12 +680,7 @@ describe('getFiltersForDSLQuery', () => {
     });
 
     test('returns global state filter when GLOBAL_STATE is specified', () => {
-      const actual = getFiltersForDSLQuery(
-        query,
-        'dataview-id',
-        undefined,
-        'globalState'
-      );
+      const actual = getFiltersForDSLQuery(query, 'dataview-id', undefined, 'globalState');
       expect(actual).toEqual([
         {
           $state: { store: 'globalState' },

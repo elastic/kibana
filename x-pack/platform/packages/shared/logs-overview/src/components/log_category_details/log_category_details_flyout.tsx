@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { css } from '@emotion/react';
-import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+import { buildCustomFilter } from '@kbn/es-query';
 import type { LogCategory } from '../../types';
 import { LogCategoryPattern } from '../shared/log_category_pattern';
 import type { LogCategoryDocumentExamplesTableDependencies } from './log_category_document_examples_table';
@@ -93,14 +93,7 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
 
   const filters = useMemo(() => {
     return documentAndCategoryFilters.map((filter) =>
-      buildCustomFilter(
-        logsSource.indexName,
-        filter,
-        false,
-        false,
-        'Document filters',
-        'appState'
-      )
+      buildCustomFilter(logsSource.indexName, filter, false, false, 'Document filters', 'appState')
     );
   }, [documentAndCategoryFilters, logsSource.indexName]);
 

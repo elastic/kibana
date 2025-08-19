@@ -22,7 +22,6 @@ import {
   mockRule,
   mockRuleWithEverything,
 } from '../rule_management_ui/components/rules_table/__mocks__/mock';
-import { FilterStateStore } from '@kbn/es-query';
 import type { RuleAction } from '../../../common/api/detection_engine/model/rule_schema';
 import { AlertSuppressionMissingFieldsStrategyEnum } from '../../../common/api/detection_engine/model/rule_schema';
 

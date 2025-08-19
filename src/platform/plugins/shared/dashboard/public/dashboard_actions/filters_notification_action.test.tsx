@@ -8,7 +8,7 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore, type AggregateQuery, type Query } from '@kbn/es-query';
+import { type AggregateQuery, type Query } from '@kbn/es-query';
 
 import { BehaviorSubject, take } from 'rxjs';
 import type { FiltersNotificationActionApi } from './filters_notification_action';

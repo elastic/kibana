@@ -10,7 +10,8 @@
 import type { Subscription } from 'rxjs';
 import { filter, map } from 'rxjs';
 import _ from 'lodash';
-import { COMPARE_ALL_OPTIONS, compareFilters, FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters } from '@kbn/es-query';
 import type { BaseStateContainer } from '@kbn/kibana-utils-plugin/public';
 import type { QuerySetup, QueryStart } from '../query_service';
 import type { QueryState } from '../query_state';
@@ -142,10 +143,7 @@ export const connectToQueryState = <S extends QueryState>(
           if (syncConfig.filters) {
             if (syncConfig.filters === true && changes.filters) {
               newState.filters = filterManager.getFilters();
-            } else if (
-              syncConfig.filters === 'globalState' &&
-              changes.globalFilters
-            ) {
+            } else if (syncConfig.filters === 'globalState' && changes.globalFilters) {
               newState.filters = filterManager.getGlobalFilters();
             } else if (syncConfig.filters === 'appState' && changes.appFilters) {
               newState.filters = filterManager.getAppFilters();

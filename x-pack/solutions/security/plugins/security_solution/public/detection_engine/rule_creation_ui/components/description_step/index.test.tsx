@@ -18,7 +18,6 @@ import {
 
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import {
   mockAboutStepRule,
   mockDefineStepRule,

@@ -6,7 +6,6 @@
  */
 import type { FiltersSchema } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { FilterStateStore } from '@kbn/es-query';
 
 export const getGroupByCardinalityFilters = ({
   serviceName,

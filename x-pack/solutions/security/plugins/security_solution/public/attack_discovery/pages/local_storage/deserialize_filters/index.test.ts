@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
-
 import { deserializeFilters } from '.';
 
 describe('deserializeFilters', () => {

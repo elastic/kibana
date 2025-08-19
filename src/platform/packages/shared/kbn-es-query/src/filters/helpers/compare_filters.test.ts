@@ -8,13 +8,8 @@
  */
 
 import { COMPARE_ALL_OPTIONS, compareFilters } from './compare_filters';
-import {
-  BooleanRelation,
-  buildCombinedFilter,
-  buildEmptyFilter,
-  buildQueryFilter,
-  Filter,
-} from '..';
+import type { Filter } from '..';
+import { BooleanRelation, buildCombinedFilter, buildEmptyFilter, buildQueryFilter } from '..';
 import type { DataViewBase } from '../../..';
 
 describe('filter manager utilities', () => {

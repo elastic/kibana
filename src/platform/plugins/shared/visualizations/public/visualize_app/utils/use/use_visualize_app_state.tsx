@@ -13,7 +13,6 @@ import { map } from 'rxjs';
 import type { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
 
-
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { connectToQueryState } from '@kbn/data-plugin/public';

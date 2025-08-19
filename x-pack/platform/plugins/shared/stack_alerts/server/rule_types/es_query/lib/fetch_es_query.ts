@@ -17,7 +17,7 @@ import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types'
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+import { buildCustomFilter } from '@kbn/es-query';
 import { getComparatorScript } from '../../../../common';
 import type { OnlyEsQueryRuleParams } from '../types';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';

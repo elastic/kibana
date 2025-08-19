@@ -17,7 +17,6 @@ import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { FilterStateStore } from '@kbn/es-query';
 import { isDefined } from '@kbn/ml-is-defined';
 import {
   type MlEntityField,

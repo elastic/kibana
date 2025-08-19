@@ -8,7 +8,8 @@
  */
 
 import { sortFilters } from './sort_filters';
-import { buildQueryFilter, Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildQueryFilter } from '@kbn/es-query';
 
 describe('sortFilters', () => {
   describe('sortFilters()', () => {

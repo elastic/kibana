@@ -8,7 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiButtonEmpty } from '@elastic/eui';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+import { buildCustomFilter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

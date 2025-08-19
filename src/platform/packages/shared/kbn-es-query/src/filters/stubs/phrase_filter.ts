@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PhraseFilter } from '../build_filters';
+import type { PhraseFilter } from '../build_filters';
 
 export const phraseFilter: PhraseFilter = {
   meta: {

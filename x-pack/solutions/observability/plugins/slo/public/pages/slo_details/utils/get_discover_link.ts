@@ -8,7 +8,6 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { Filter, TimeRange } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';

@@ -6,12 +6,7 @@
  */
 
 import type { DataViewBase, EsQueryConfig, Filter, Query } from '@kbn/es-query';
-import {
-  buildEsQuery,
-  FilterStateStore,
-  fromKueryExpression,
-  toElasticsearchQuery,
-} from '@kbn/es-query';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { get, isEmpty } from 'lodash/fp';
 import memoizeOne from 'memoize-one';
 import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';

@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  BooleanRelation,
-  isCombinedFilter,
-  buildCombinedFilter,
-  isFilter,
-} from '@kbn/es-query';
+import { BooleanRelation, isCombinedFilter, buildCombinedFilter, isFilter } from '@kbn/es-query';
 import type { Filter, PhraseFilter } from '@kbn/es-query';
 import type {
   CombinedFilter,

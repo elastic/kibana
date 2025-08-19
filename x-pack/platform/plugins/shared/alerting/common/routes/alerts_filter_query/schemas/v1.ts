@@ -7,7 +7,6 @@
 
 import { schema } from '@kbn/config-schema';
 
-
 export const alertsFilterQuerySchema = schema.object({
   kql: schema.string({ meta: { description: 'A filter written in Kibana Query Language (KQL).' } }),
   filters: schema.arrayOf(
@@ -33,18 +32,12 @@ export const alertsFilterQuerySchema = schema.object({
       ),
       $state: schema.maybe(
         schema.object({
-          store: schema.oneOf(
-            [
-              schema.literal('appState'),
-              schema.literal('globalState'),
-            ],
-            {
-              meta: {
-                description:
-                  'A filter can be either specific to an application context or applied globally.',
-              },
-            }
-          ),
+          store: schema.oneOf([schema.literal('appState'), schema.literal('globalState')], {
+            meta: {
+              description:
+                'A filter can be either specific to an application context or applied globally.',
+            },
+          }),
         })
       ),
     }),

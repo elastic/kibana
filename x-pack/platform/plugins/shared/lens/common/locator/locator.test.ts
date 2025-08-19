@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { LensAppLocatorDefinition, type LensAppLocatorParams } from './locator';
 
 const savedObjectId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';

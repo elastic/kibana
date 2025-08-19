@@ -15,7 +15,6 @@ import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_hel
 import { MaintenanceWindowStatus } from '../../../common';
 import type { MaintenanceWindowCategoryIds } from '../../../common/routes/maintenance_window/shared';
 
-
 const alertingEventLogger = alertingEventLoggerMock.create();
 const logger = loggingSystemMock.createLogger();
 const maintenanceWindowClient = maintenanceWindowClientMock.create();

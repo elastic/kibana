@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
 import { type TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { useMemo } from 'react';
 import { useFilterQueryUpdates } from '../../hooks/use_filters_query';

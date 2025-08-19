@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-
 import { getEditPath } from './constants';
 
 describe('getEditPath', function () {

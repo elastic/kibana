@@ -15,7 +15,6 @@ import type {
   TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import { DOCUMENT_FIELD_NAME as RECORDS_FIELD } from '@kbn/lens-plugin/common/constants';
-import { FilterStateStore } from '@kbn/es-query';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';
 import type { LogsDataView } from '../common/hooks/use_logs_data_view';
 import { useKibana } from '../common/lib/kibana';

@@ -8,7 +8,6 @@
  */
 
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import type { Pre600FilterQuery } from './move_filters_to_query';
 import { moveFiltersToQuery } from './move_filters_to_query';
 

@@ -12,7 +12,6 @@ import cloneDeep from 'lodash/cloneDeep';
 
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 
 import {
   determineToAndFrom,

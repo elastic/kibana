@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FilterStateStore } from '@kbn/es-query';
 import { useKibana } from '../common/lib/kibana';
 import { useLogsDataView } from '../common/hooks/use_logs_data_view';
 import { ViewResultsActionButtonType } from '../live_queries/form/pack_queries_status_table';

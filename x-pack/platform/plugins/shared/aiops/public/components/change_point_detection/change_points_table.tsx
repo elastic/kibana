@@ -13,7 +13,7 @@ import {
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
-import { FilterStateStore, type Filter } from '@kbn/es-query';
+import { type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTableState } from '@kbn/ml-in-memory-table';

@@ -6,7 +6,6 @@
  */
 import { kqlWithFiltersSchema } from '@kbn/slo-schema';
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/observability-plugin/public';
 import type { KQLCustomIndicator, GroupingsSchema } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
