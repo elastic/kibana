@@ -151,13 +151,9 @@ const defaultUserRoleTestServices = ({ getService }: FtrProviderContext) => {
     if (job?.body?.path) {
       const path = job.body.path;
       log.info('test report job download path: ', path);
-      await reportingAPI.waitForJobToFinish(
-        path,
-        false,
-        PRIVILEGED_REPORTING_USER,
-        PRIVILEGED_REPORTING_USER_PASSWORD,
-        { checkStatus: false }
-      );
+      await reportingAPI.waitForJobToFinish(path, false, username, password, {
+        checkStatus: false,
+      });
     }
 
     return job;
@@ -193,10 +189,21 @@ const defaultUserRoleTestServices = ({ getService }: FtrProviderContext) => {
       return ECOMMERCE_CSV_GENERATION_PATH_DEFAULT_SPACE;
     } else {
       return LOGS_CSV_GENERATION_PATH_CUSTOM_SPACE.replace(
-        '__SPACE__',
+        /__SPACE__/g,
         encodeURIComponent(spaceId)
       );
     }
+  };
+
+  const getReportInfo = async (downloadPath: string, username: string, password: string) => {
+    // change the downloadPath to the info path
+    const infoPath = downloadPath.replace('/api/', '/internal/').replace('/download/', '/info/');
+    log.info(`getting report info from path: ${infoPath} with user: ${username}`);
+    const response = await supertestWithoutAuth
+      .get(infoPath)
+      .auth(username, password)
+      .set('kbn-xsrf', 'xxx');
+    return response.body;
   };
 
   return {
@@ -224,6 +231,7 @@ const defaultUserRoleTestServices = ({ getService }: FtrProviderContext) => {
     postJobCustomSpace,
 
     getCsvGenerationPath,
+    getReportInfo,
   };
 };
 
@@ -234,7 +242,7 @@ export default function (context: FtrProviderContext) {
 
   const api = defaultUserRoleTestServices(context); // Custom API for this test suite
 
-  describe.skip('Default reporting_user role', () => {
+  describe('Default reporting_user role', () => {
     before(async () => {
       const {
         createTestSpace,
@@ -304,7 +312,21 @@ export default function (context: FtrProviderContext) {
         api.UNPRIVILEGED_USER,
         api.UNPRIVILEGED_USER_PASSWORD
       );
-      expect(jobDefaultSpace?.statusCode).to.be(403);
+
+      // the request should succeed
+      expect(jobDefaultSpace?.statusCode).to.be(200);
+
+      // the job WILL NOT BE generated
+      const result = await api.getReportInfo(
+        jobDefaultSpace?.body?.path,
+        api.UNPRIVILEGED_USER,
+        api.UNPRIVILEGED_USER_PASSWORD
+      );
+
+      expect(result.status).to.be('failed');
+      expect(result.output?.warnings).to.eql([
+        'ReportingError(code: unknown_error) "Unable to bulk_get index-pattern"',
+      ]);
     });
 
     it('privileged user is not able to generate a report in the default space', async () => {
@@ -313,7 +335,21 @@ export default function (context: FtrProviderContext) {
         api.PRIVILEGED_REPORTING_USER,
         api.PRIVILEGED_REPORTING_USER_PASSWORD
       );
-      expect(jobDefaultSpace?.statusCode).to.be(403);
+
+      // the request should succeed
+      expect(jobDefaultSpace?.statusCode).to.be(200);
+
+      // the job WILL NOT BE generated
+      const result = await api.getReportInfo(
+        jobDefaultSpace?.body?.path,
+        api.PRIVILEGED_REPORTING_USER,
+        api.PRIVILEGED_REPORTING_USER_PASSWORD
+      );
+
+      expect(result.status).to.be('failed');
+      expect(result.output?.warnings).to.eql([
+        'ReportingError(code: unknown_error) "Unable to bulk_get index-pattern"',
+      ]);
     });
 
     it('privileged user is able to generate a report in a custom space only', async () => {
@@ -322,7 +358,23 @@ export default function (context: FtrProviderContext) {
         api.PRIVILEGED_REPORTING_USER,
         api.PRIVILEGED_REPORTING_USER_PASSWORD
       );
+
+      // the request should succeed and the job WILL BE generated
       expect(jobCustomSpace?.statusCode).to.be(200);
+      const result = await api.getReportInfo(
+        jobCustomSpace?.body?.path,
+        api.PRIVILEGED_REPORTING_USER,
+        api.PRIVILEGED_REPORTING_USER_PASSWORD
+      );
+
+      expect(result.status).to.contain('completed'); // could be 'completed' or 'completed_with_warnings'
+      expect(result.output?.error_code).to.be(undefined);
+      expect(result.output).to.eql({
+        content_type: 'text/csv',
+        size: 5722,
+        csv_contains_formulas: true,
+        max_size_reached: true,
+      });
     });
   });
 }
