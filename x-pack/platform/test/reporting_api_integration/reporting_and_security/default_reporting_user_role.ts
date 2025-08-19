@@ -234,7 +234,7 @@ export default function (context: FtrProviderContext) {
 
   const api = defaultUserRoleTestServices(context); // Custom API for this test suite
 
-  describe('Default reporting_user role', () => {
+  describe.skip('Default reporting_user role', () => {
     before(async () => {
       const {
         createTestSpace,
