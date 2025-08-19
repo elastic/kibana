@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import type { Attachment } from '../../../common/types/domain';
+import { AttachmentType } from '../../../common';
 import { createCasesClientMockArgs } from '../mocks';
-import { getCasesByAlertID, getTags, getReporters, getCategories } from './get';
+import { getCasesByAlertID, getTags, getReporters, getCategories, getMetadata } from './get';
+import { ALERT_GROUPING, TAGS } from '@kbn/rule-data-utils';
 
 describe('get', () => {
   const clientArgs = createCasesClientMockArgs();
@@ -51,6 +54,61 @@ describe('get', () => {
       await expect(getCategories({ owner: 'cases', foo: 'bar' }, clientArgs)).rejects.toThrow(
         'invalid keys "foo"'
       );
+    });
+  });
+
+  describe('getMetadata', () => {
+    it('aggregates metadata from alerts using tags and grouping', async () => {
+      clientArgs.services.alertsService.getAlerts.mockResolvedValue({
+        docs: [
+          {
+            _id: 'alert-1',
+            _index: 'alerts-index',
+            found: true,
+            _source: {
+              [TAGS]: ['tag-a', 'tag-b'],
+              [ALERT_GROUPING]: {
+                foo: 'bar',
+                nested: { deep: 'value' },
+              },
+            },
+          },
+          {
+            _id: 'alert-2',
+            _index: 'alerts-index',
+            found: true,
+            _source: {
+              [TAGS]: ['tag-a', 'tag-c'],
+              [ALERT_GROUPING]: {
+                foo: 'foo',
+                nested: { deep: 'value' },
+              },
+            },
+          },
+        ],
+      });
+
+      const res = await getMetadata(
+        {
+          comments: [
+            {
+              type: AttachmentType.alert,
+              alertId: 'alert-1',
+              index: 'alerts-index',
+            } as unknown as Attachment,
+            {
+              type: AttachmentType.alert,
+              alertId: 'alert-2',
+              index: 'alerts-index',
+            } as unknown as Attachment,
+          ],
+        },
+        clientArgs
+      );
+
+      expect(res.tags).toEqual(['tag-a', 'tag-b', 'tag-c']);
+      expect(res.foo).toEqual(['bar', 'foo']);
+      expect(res['nested.deep']).toEqual(['value']);
     });
   });
 });
