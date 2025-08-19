@@ -41,7 +41,6 @@
     "@kbn/core-pricing-server-mocks",
     "@kbn/core-di-mocks",
     "@kbn/core-data-streams-server-mocks",
-    "@kbn/core",
   ],
   "exclude": [
     "target/**/*",
