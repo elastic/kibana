@@ -8,7 +8,6 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';

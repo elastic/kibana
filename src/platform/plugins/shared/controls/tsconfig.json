@@ -15,6 +15,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/embeddable-plugin",
+    "@kbn/dashboard-plugin",
     "@kbn/presentation-util-plugin",
     "@kbn/data-plugin",
     "@kbn/unified-search-plugin",

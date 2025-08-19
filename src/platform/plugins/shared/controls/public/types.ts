@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -36,4 +37,5 @@ export interface ControlsPluginStartDeps {
   uiActions: UiActionsStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  dashboard: DashboardStart;
 }

@@ -12,7 +12,6 @@ import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
   DEFAULT_CONTROLS_LABEL_POSITION,
 } from '@kbn/controls-constants';
-import { serializeRuntimeState } from '@kbn/controls-plugin/public';
 import { DashboardState } from '../../../../common';
 
 export function extractControlGroupState(state: {
@@ -20,7 +19,7 @@ export function extractControlGroupState(state: {
 }): DashboardState['controlGroupInput'] {
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
-    return serializeRuntimeState(state.controlGroupState).rawState;
+    // return serializeRuntimeState(state.controlGroupState).rawState;
   }
 
   if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') return;

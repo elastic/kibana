@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isEmpty } from 'lodash';
-
-import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import {
-  initializeControlGroupTelemetry,
-  type ControlGroupTelemetry,
-} from '@kbn/controls-plugin/server';
 import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
@@ -39,7 +32,6 @@ export interface DashboardCollectorData {
       };
     };
   };
-  controls: ControlGroupTelemetry;
   sections: {
     total: number;
   };
@@ -52,7 +44,6 @@ export const getEmptyDashboardData = (): DashboardCollectorData => ({
     by_value: 0,
     by_type: {},
   },
-  controls: initializeControlGroupTelemetry({}),
   sections: {
     total: 0,
   },
@@ -105,22 +96,6 @@ export const collectDashboardSections = (
   collectorData.sections.total += attributes.sections?.length ?? 0;
   return collectorData;
 };
-
-export const controlsCollectorFactory =
-  (embeddableService: EmbeddablePersistableStateService) =>
-  (attributes: DashboardSavedObjectAttributes, collectorData: DashboardCollectorData) => {
-    if (!isEmpty(attributes.controlGroupInput)) {
-      collectorData.controls = embeddableService.telemetry(
-        {
-          ...attributes.controlGroupInput,
-          type: CONTROLS_GROUP_TYPE,
-        },
-        collectorData.controls
-      ) as ControlGroupTelemetry;
-    }
-
-    return collectorData;
-  };
 
 async function getLatestTaskState(taskManager: TaskManagerStartContract) {
   try {
