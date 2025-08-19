@@ -25,7 +25,7 @@ interface Action {
   icon: IconType;
   onClick: () => void;
   ariaLabel: string;
-  dataTestSubj?: string;
+  dataTestSubj: string;
   label?: string;
 }
 
@@ -57,9 +57,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
                 iconType={icon}
                 aria-label={ariaLabel}
                 onClick={onClick}
-                data-test-subj={
-                  dataTestSubj ? dataTestSubj : `unifiedDocViewerSectionActionButton-${icon}`
-                }
+                data-test-subj={dataTestSubj}
               >
                 {label}
               </EuiButtonEmpty>
@@ -69,9 +67,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
                 iconType={icon}
                 onClick={onClick}
                 aria-label={ariaLabel}
-                data-test-subj={
-                  dataTestSubj ? dataTestSubj : `unifiedDocViewerSectionActionButton-${icon}`
-                }
+                data-test-subj={dataTestSubj}
               />
             )}
           </EuiFlexItem>
