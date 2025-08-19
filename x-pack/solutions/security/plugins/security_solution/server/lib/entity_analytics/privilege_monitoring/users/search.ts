@@ -37,7 +37,6 @@ export const createSearchService = (dataClient: PrivilegeMonitoringDataClient) =
     const monitoredUsersMap = new Map<string, string | undefined>();
     for (const hit of resp.hits.hits) {
       const username = hit._source?.user?.name;
-      dataClient.log('debug', `Found existing user: ${username} with ID: ${hit._id}`);
       if (username) monitoredUsersMap.set(username, hit._id);
     }
 
