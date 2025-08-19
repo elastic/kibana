@@ -171,7 +171,7 @@ const layoutStackedLabels = (
   );
   const stackSize = children.length;
   const labelNodeWidth = NODE_LABEL_WIDTH + STACK_NODE_HORIZONTAL_PADDING * 2;
-  const spaceBetweenLabelShapes = NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING;
+  const spaceBetweenLabelShapes = snapped(NODE_LABEL_DETAILS + STACK_NODE_VERTICAL_PADDING);
   const stackHeight = spaceBetweenLabelShapes * (stackSize + 1) + NODE_LABEL_HEIGHT * stackSize;
 
   // Layout children relative to parent
