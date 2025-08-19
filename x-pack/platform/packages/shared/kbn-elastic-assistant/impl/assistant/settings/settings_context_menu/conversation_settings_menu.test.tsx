@@ -19,6 +19,9 @@ import {
   welcomeConvo,
 } from '../../../mock/conversation';
 const props = {
+  conversations: {},
+  onConversationDeleted: jest.fn(),
+  onConversationSelected: jest.fn(),
   selectedConversation: welcomeConvo,
   isConversationOwner: true,
   refetchCurrentUserConversations: jest.fn(),

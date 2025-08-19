@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { findIndex, isEmpty } from 'lodash';
-import type { Conversation } from '../../../..';
+import type { Conversation } from '../../..';
 import * as i18n from './conversation_sidepanel/translations';
 
 interface Props {

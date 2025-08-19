@@ -56,18 +56,8 @@ const fullSheepConversation = {
 };
 
 const mockData = {
-  welcome_id: {
-    id: fullWelcomeConversation.id,
-    title: fullWelcomeConversation.title,
-    apiConfig: fullWelcomeConversation.apiConfig,
-    updatedAt: fullWelcomeConversation.updatedAt,
-  },
-  electric_sheep_id: {
-    id: fullSheepConversation.id,
-    title: fullSheepConversation.title,
-    apiConfig: fullSheepConversation.apiConfig,
-    updatedAt: fullSheepConversation.updatedAt,
-  },
+  welcome_id: fullWelcomeConversation,
+  electric_sheep_id: fullSheepConversation,
 };
 
 const renderAssistant = async (extraProps = {}) => {

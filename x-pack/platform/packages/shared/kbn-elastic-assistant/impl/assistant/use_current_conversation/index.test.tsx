@@ -429,7 +429,12 @@ describe('useCurrentConversation', () => {
 
   it('should refetch the conversation multiple times if isStreamRefetch is true', async () => {
     const conversationId = 'test-id';
-    const conversation = { id: conversationId, messages: [{ role: 'user' }] } as Conversation;
+    const conversation = {
+      id: conversationId,
+      messages: [{ role: 'user' }],
+      users: [MOCK_CURRENT_USER],
+      createdBy: MOCK_CURRENT_USER,
+    } as Conversation;
     mockUseConversation.getConversation.mockResolvedValue(conversation);
 
     const { result } = setupHook({

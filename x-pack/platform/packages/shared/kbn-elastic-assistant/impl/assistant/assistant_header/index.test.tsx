@@ -14,6 +14,7 @@ import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
 import { CLOSE } from './translations';
+import { ConversationSharedState } from '../share_conversation/utils';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {
@@ -21,6 +22,7 @@ const mockConversations = {
   [welcomeConvo.title]: welcomeConvo,
 };
 const testProps = {
+  conversationSharedState: ConversationSharedState.Private,
   conversationsLoaded: true,
   selectedConversation: welcomeConvo,
   title: 'Test Title',
@@ -36,6 +38,7 @@ const testProps = {
   onToggleShowAnonymizedValues: jest.fn(),
   setIsSettingsModalVisible: jest.fn(),
   onConversationCreate: jest.fn(),
+  onConversationDeleted: jest.fn(),
   onChatCleared: jest.fn(),
   showAnonymizedValues: false,
   conversations: mockConversations,
