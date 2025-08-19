@@ -17,7 +17,6 @@ import { EuiFocusTrap, EuiForm, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useUnmount from 'react-use/lib/useUnmount';
 import { getInputComponentForType } from '../value_inputs_factory';
-import type { PendingSave } from '../../index_update_service';
 import { isPlaceholderColumn } from '../../utils';
 
 export type OnCellValueChange = (docId: string, update: any) => void;
@@ -26,19 +25,17 @@ export const getValueInputPopover =
     rows,
     columns,
     onValueChange,
-    savingDocs,
     dataTableRef,
   }: {
     rows: DataTableRecord[];
     columns: DatatableColumn[];
     onValueChange: OnCellValueChange;
-    savingDocs: PendingSave | undefined;
     dataTableRef: RefObject<EuiDataGridRefProps>;
   }) =>
   ({ rowIndex, colIndex, columnId, cellContentsElement }: EuiDataGridCellPopoverElementProps) => {
     const row = rows[rowIndex];
-    const docId = row.raw._id as string;
-    const cellValue = row.flattened[columnId]?.toString() ?? savingDocs?.get(docId)?.[columnId];
+    const docId = row.id as string;
+    const cellValue = row.flattened[columnId]?.toString() ?? '';
 
     const isPlaceholder = isPlaceholderColumn(columnId);
 
@@ -47,7 +44,7 @@ export const getValueInputPopover =
       inputWidth = cellContentsElement.offsetWidth;
     }
 
-    const [inputValue, setInputValue] = useState(cellValue ?? '');
+    const [inputValue, setInputValue] = useState<string>(cellValue ?? '');
     const [error, setError] = useState<string | null>(null);
 
     const columnType = useMemo(() => {
