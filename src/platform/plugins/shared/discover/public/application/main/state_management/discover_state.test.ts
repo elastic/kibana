@@ -167,13 +167,13 @@ describe('Discover state', () => {
     test('changing URL to be propagated to appState', async () => {
       history.push('/#?_a=(dataSource:(dataViewId:modified,type:dataView))');
       expect(state.appState.getState()).toMatchInlineSnapshot(`
-      Object {
-        "dataSource": Object {
-          "dataViewId": "modified",
-          "type": "dataView",
-        },
-      }
-    `);
+              Object {
+                "dataSource": Object {
+                  "dataViewId": "modified",
+                  "type": "dataView",
+                },
+              }
+          `);
     });
 
     test('URL navigation to url without _a, state should not change', async () => {
@@ -266,13 +266,13 @@ describe('Discover state', () => {
       await jest.runAllTimersAsync();
 
       expect(state.appState.getState()).toMatchInlineSnapshot(`
-      Object {
-        "dataSource": Object {
-          "dataViewId": "modified",
-          "type": "dataView",
-        },
-      }
-    `);
+              Object {
+                "dataSource": Object {
+                  "dataViewId": "modified",
+                  "type": "dataView",
+                },
+              }
+          `);
     });
   });
 
@@ -317,16 +317,16 @@ describe('Discover state', () => {
         { savedSearch: savedSearchMockWithTimeFieldNew }
       );
       expect(state.appState.getState().query).toMatchInlineSnapshot(`
-      Object {
-        "language": "lucene",
-        "query": Object {
-          "query_string": Object {
-            "analyze_wildcard": true,
-            "query": "type:nice name:\\"yeah\\"",
-          },
-        },
-      }
-    `);
+              Object {
+                "language": "lucene",
+                "query": Object {
+                  "query_string": Object {
+                    "analyze_wildcard": true,
+                    "query": "type:nice name:\\"yeah\\"",
+                  },
+                },
+              }
+          `);
     });
   });
 
@@ -511,22 +511,22 @@ describe('Discover state', () => {
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       const { searchSource, ...savedSearch } = state.savedSearchState.getState();
       expect(savedSearch).toMatchInlineSnapshot(`
-      Object {
-        "columns": Array [
-          "default_column",
-        ],
-        "density": undefined,
-        "headerRowHeight": undefined,
-        "hideAggregatedPreview": undefined,
-        "hideChart": undefined,
-        "refreshInterval": undefined,
-        "rowHeight": undefined,
-        "rowsPerPage": undefined,
-        "sampleSize": undefined,
-        "sort": Array [],
-        "timeRange": undefined,
-      }
-    `);
+              Object {
+                "columns": Array [
+                  "default_column",
+                ],
+                "density": undefined,
+                "headerRowHeight": undefined,
+                "hideAggregatedPreview": undefined,
+                "hideChart": undefined,
+                "refreshInterval": undefined,
+                "rowHeight": undefined,
+                "rowsPerPage": undefined,
+                "sampleSize": undefined,
+                "sort": Array [],
+                "timeRange": undefined,
+              }
+          `);
       expect(searchSource.getField('index')?.id).toEqual('the-data-view-id');
       state.actions.stopSyncing();
     });
@@ -572,7 +572,7 @@ describe('Discover state', () => {
       expect(newSavedSearch?.id).toBeUndefined();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
+        `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       state.actions.stopSyncing();
@@ -597,7 +597,7 @@ describe('Discover state', () => {
       expect(newSavedSearch?.id).toBeUndefined();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
+        `"/#?_a=(columns:!(bytes),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       state.actions.stopSyncing();
@@ -659,7 +659,7 @@ describe('Discover state', () => {
       );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=()"`
+        `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
       state.actions.stopSyncing();
