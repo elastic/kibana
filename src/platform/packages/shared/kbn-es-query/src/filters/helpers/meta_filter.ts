@@ -65,7 +65,7 @@ export const toggleFilterNegated = (filter: Filter) => {
  * @public
  */
 export const toggleFilterPinned = (filter: Filter) => {
-  const store:FilterStateStore = isFilterPinned(filter) ? 'appState' : 'globalState';
+  const store: FilterStateStore = isFilterPinned(filter) ? 'appState' : 'globalState';
   const $state = { ...filter.$state, store };
 
   return { ...filter, $state };

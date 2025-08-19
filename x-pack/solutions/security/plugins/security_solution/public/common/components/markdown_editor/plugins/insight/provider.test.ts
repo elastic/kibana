@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type FilterStateStore, type CombinedFilter, FILTERS, BooleanRelation } from '@kbn/es-query';
+import type { FilterStateStore, CombinedFilter } from '@kbn/es-query';
+import { FILTERS, BooleanRelation } from '@kbn/es-query';
 import { filtersToInsightProviders } from './provider';
 
 const flatValueFilters = [

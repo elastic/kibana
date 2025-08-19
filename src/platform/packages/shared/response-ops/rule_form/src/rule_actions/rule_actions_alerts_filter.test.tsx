@@ -15,7 +15,7 @@ import type { AlertsSearchBarProps } from '@kbn/alerts-ui-shared';
 import { AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { getAction } from '../common/test_utils/actions_test_utils';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 
 const http = httpServiceMock.createStartContract();
 
@@ -187,7 +187,7 @@ describe('ruleActionsAlertsFilter', () => {
   });
 
   test('renders filters correctly', async () => {
-    const filters:Filter[] = [
+    const filters: Filter[] = [
       {
         meta: {
           negate: false,

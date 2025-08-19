@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore, FILTERS, BooleanRelation, Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
-import type { Filter } from '@kbn/es-query';
-import { FILTERS, BooleanRelation } from '@kbn/es-query';
 import type { QueryOperator, DataProvider } from '@kbn/timelines-plugin/common';
 import { DataProviderTypeEnum } from '../../../../../../common/api/timeline';
 import { replaceParamsQuery } from './replace_params_query';
