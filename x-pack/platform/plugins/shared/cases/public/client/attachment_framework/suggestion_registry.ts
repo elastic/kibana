@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Registry } from '../../../common/registry';
+import { AttachmentRegistry } from '../../../common/registry';
 import type { SuggestionType } from './types';
 
-export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
+export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionType> {
   constructor() {
     super('AttachmentSuggestionRegistry');
   }

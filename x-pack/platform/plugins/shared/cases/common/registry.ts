@@ -11,7 +11,7 @@ export interface RegistryBaseItem {
   id: string;
 }
 
-export class Registry<T extends RegistryBaseItem> {
+export class AttachmentRegistry<T extends RegistryBaseItem> {
   private readonly collection: Map<string, T> = new Map();
 
   constructor(private readonly name: string) {}

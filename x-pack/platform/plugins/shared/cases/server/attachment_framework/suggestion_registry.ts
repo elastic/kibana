@@ -7,7 +7,7 @@
 
 import { flatten } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
-import { Registry } from '../../common/registry';
+import { AttachmentRegistry } from '../../common/registry';
 import type {
   SuggestionContext,
   SuggestionOwner,
@@ -15,7 +15,7 @@ import type {
 } from '../../common/types/domain';
 import type { SuggestionType } from './types';
 
-export class AttachmentSuggestionRegistry extends Registry<SuggestionType> {
+export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionType> {
   constructor() {
     super('AttachmentSuggestionRegistry');
   }

@@ -24,7 +24,7 @@ import type {
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { UserActionTimestamp } from '../timestamp';
-import type { Registry } from '../../../../common/registry';
+import type { AttachmentRegistry } from '../../../../common/registry';
 import type { Attachment } from '../../../../common/types/domain';
 import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { SnakeToCamelCase } from '../../../../common/types';
@@ -78,7 +78,7 @@ const getAttachmentRenderer = memoize((cachingKey: string) => {
 export const createRegisteredAttachmentUserActionBuilder = <
   C extends Attachment,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  R extends Registry<AttachmentType<any>>
+  R extends AttachmentRegistry<AttachmentType<any>>
 >({
   userAction,
   userProfiles,
