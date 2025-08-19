@@ -20,11 +20,9 @@ export const getComponentData = async ({
   setFlyoutRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
-  const formattedPath = fileInfo.fileName.split('/kibana')[1];
-
   try {
     const { codeowners }: InspectComponentResponse = await core.http.post(INSPECT_COMPONENT_ROUTE, {
-      body: JSON.stringify({ path: formattedPath }),
+      body: JSON.stringify({ path: fileInfo.fileName }),
     });
 
     const flyout = core.overlays.openFlyout(

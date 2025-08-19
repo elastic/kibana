@@ -9,6 +9,8 @@
 
 import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
+import { sep } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { INSPECT_COMPONENT_ROUTE } from '../common';
 import { getComponentCodeowners } from './codeowners';
 
@@ -46,7 +48,9 @@ export const registerInspectComponentRoutes = ({ http, logger }: InspectComponen
 
       logger.debug(`Inspecting component at path: ${path}`);
 
-      const codeowners = getComponentCodeowners(path);
+      const pathWithoutRoot = path.slice(REPO_ROOT.length + sep.length);
+
+      const codeowners = getComponentCodeowners(pathWithoutRoot);
 
       return res.ok({ body: { codeowners } });
     }
