@@ -967,7 +967,7 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       }
     }
 
-    const authorizationResult = await this.authorize({
+    return await this.authorize({
       actions: new Set([action]),
       types: new Set(enforceMap.keys()),
       spaces: spacesToAuthorize,
@@ -976,7 +976,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         objects,
       },
     });
-    return authorizationResult;
   }
 
   async authorizeGet<A extends string>(
