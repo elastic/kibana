@@ -51,7 +51,7 @@ import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type { GetWorkflowsParams } from './workflows_management_api';
 
 const SO_ATTRIBUTES_PREFIX = `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes`;
-const WORKFLOW_EXECUTION_STATUS_STATS_INTERVAL = '30s';
+const WORKFLOW_EXECUTION_STATUS_STATS_BUCKET = 50;
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -129,7 +129,7 @@ export class WorkflowsService {
     const baseSavedObjectsClient = await this.getSavedObjectsClient();
     const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
 
-    const filters: string[] = [`not ${SO_ATTRIBUTES_PREFIX}.deleted_at: *`,];
+    const filters: string[] = [`not ${SO_ATTRIBUTES_PREFIX}.deleted_at: *`];
 
     if (createdBy && createdBy.length > 0) {
       const createdByFilter = createdBy
@@ -754,9 +754,9 @@ export class WorkflowsService {
       },
       aggs: {
         by_time: {
-          date_histogram: {
-            field: 'startedAt',
-            fixed_interval: WORKFLOW_EXECUTION_STATUS_STATS_INTERVAL,
+          auto_date_histogram: {
+            field: 'finishedAt',
+            buckets: WORKFLOW_EXECUTION_STATUS_STATS_BUCKET,
           },
           aggs: {
             by_status: {
@@ -770,9 +770,9 @@ export class WorkflowsService {
     };
 
     const response = await this.esClient.search(query);
-    const { by_time: by30sec } = response.aggregations as any;
+    const { by_time: byTime } = response.aggregations as any;
 
-    return by30sec.buckets.map((interval: any) => {
+    return byTime.buckets.map((interval: any) => {
       // Default values
       let completed = 0;
       let failed = 0;

@@ -89,7 +89,7 @@ export function WorkflowExecutionStatsBar({ height }: WorkflowExecutionStatsBarP
       <Axis
         id="bottom-axis"
         position={Position.Bottom}
-        title="@timestamp per 30 seconds"
+        title="@timestamp"
         tickFormat={dateFormatter}
       />
       <Axis id="left-axis" position={Position.Left} title="Executions" />
