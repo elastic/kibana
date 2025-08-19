@@ -21,6 +21,7 @@ import type {
   AtomicGraphNode,
   WaitGraphNode,
   WorkflowYaml,
+  WaitStep,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -31,19 +32,20 @@ function getNodeId(node: BaseStep): string {
 }
 
 function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
-  if (currentStep.type === 'if') {
-    return visitIfStep(graph, previousStep, currentStep);
+  const modifiedCurrentStep = handleStepLevelOperations(currentStep);
+  if ((modifiedCurrentStep as IfStep).type === 'if') {
+    return visitIfStep(graph, previousStep, modifiedCurrentStep);
   }
 
-  if (currentStep.type === 'foreach') {
-    return visitForeachStep(graph, previousStep, currentStep);
+  if ((modifiedCurrentStep as ForEachStep).type === 'foreach') {
+    return visitForeachStep(graph, previousStep, modifiedCurrentStep);
   }
 
-  if (currentStep.type === 'wait') {
-    return visitWaitStep(graph, previousStep, currentStep);
+  if ((modifiedCurrentStep as WaitStep).type === 'wait') {
+    return visitWaitStep(graph, previousStep, modifiedCurrentStep);
   }
 
-  return visitAtomicStep(graph, previousStep, currentStep);
+  return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
 }
 
 export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
@@ -210,8 +212,6 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
  *          any step-level control flow operations (if/foreach)
  */
 function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
-  let toVisit = currentStep;
-
   /** !IMPORTANT!
    * The order of operations is important here.
    * The order affects what context will be available in the step if/foreach/etc operation.
@@ -219,25 +219,27 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
 
   // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
   // when the step is already a foreach step
-  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
-    toVisit = {
-      name: `foreach_${getNodeId(currentStep)}`,
-      type: 'foreach',
-      foreach: currentStep.foreach,
-      steps: [toVisit],
-    } as ForEachStep;
-  }
-
   if (currentStep.if) {
-    toVisit = {
+    const modifiedStep = omit(currentStep, ['if']);
+    return {
       name: `if_${getNodeId(currentStep)}`,
       type: 'if',
       condition: currentStep.if,
-      steps: [toVisit],
+      steps: [handleStepLevelOperations(modifiedStep)],
     } as IfStep;
   }
 
-  return toVisit;
+  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
+    const modifiedStep = omit(currentStep, ['foreach']);
+    return {
+      name: `foreach_${getNodeId(currentStep)}`,
+      type: 'foreach',
+      foreach: currentStep.foreach,
+      steps: [handleStepLevelOperations(modifiedStep)],
+    } as ForEachStep;
+  }
+
+  return currentStep;
 }
 
 export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
