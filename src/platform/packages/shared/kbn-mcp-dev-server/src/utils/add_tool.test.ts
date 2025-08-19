@@ -12,7 +12,7 @@ import { z } from '@kbn/zod';
 import { addTool } from './add_tool';
 import type { ToolDefinition } from '../types';
 
-jest.mock('@modelcontextprotocol/sdk/server', () => ({
+jest.mock('@modelcontextprotocol/sdk/server/mcp.js', () => ({
   McpServer: jest.fn().mockImplementation(() => {
     return {
       registerTool: jest.fn(),
