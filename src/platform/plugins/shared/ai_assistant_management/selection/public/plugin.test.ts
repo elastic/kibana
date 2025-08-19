@@ -33,13 +33,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       },
       application: {
         capabilities: {
-          management: {
-            ai: {
-              aiAssistantManagementSelection: true,
-              securityAiAssistantManagement: true,
-              observabilityAiAssistantManagement: false,
-            },
-          },
+          management: { kibana: { aiAssistantManagementSelection: true } },
         },
       },
     } as unknown as CoreStart;
@@ -103,15 +97,7 @@ describe('AI Assistant Management Selection Plugin', () => {
     });
 
     const applicationCapabilities = {
-      capabilities: {
-        management: {
-          ai: {
-            aiAssistantManagementSelection: true,
-            securityAiAssistantManagement: true,
-            observabilityAiAssistantManagement: false,
-          },
-        },
-      },
+      capabilities: { management: { kibana: { aiAssistantManagementSelection: true } } },
     };
 
     it('is disabled by default and only enabled for enterprise license', async () => {
@@ -203,15 +189,7 @@ describe('AI Assistant Management Selection Plugin', () => {
         {
           uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
           application: {
-            capabilities: {
-              management: {
-                ai: {
-                  aiAssistantManagementSelection: false,
-                  securityAiAssistantManagement: true,
-                  observabilityAiAssistantManagement: true,
-                },
-              },
-            },
+            capabilities: { management: { kibana: { aiAssistantManagementSelection: false } } },
           },
         } as any,
         {
@@ -245,7 +223,7 @@ describe('AI Assistant Management Selection Plugin', () => {
         {
           uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
           application: {
-            capabilities: { management: { ai: { aiAssistantManagementSelection: true } } },
+            capabilities: { management: { kibana: { aiAssistantManagementSelection: true } } },
           },
         } as any,
         { licensing: { license$ } } as any
