@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { BoundInferenceClient } from '@kbn/inference-common';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import type { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
-import { Evaluator } from '../../types';
+import type { Evaluator } from '../../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
 import {
   calculateFactualScore,
   calculateRelevanceScore,
   calculateProceduralFidelityScore,
 } from './scoring';
-import { CorrectnessAnalysis } from './types';
+import type { CorrectnessAnalysis } from './types';
 
 export function createCorrectnessAnalysisEvaluator({
   inferenceClient,

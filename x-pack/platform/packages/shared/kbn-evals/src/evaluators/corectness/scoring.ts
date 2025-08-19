@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CorrectnessAnalysis } from './types';
+import type { CorrectnessAnalysis } from './types';
 
 // Scoring weights based on the severity of each error type
 const CLAIM_FACTUAL_SCORE_MAP = {
