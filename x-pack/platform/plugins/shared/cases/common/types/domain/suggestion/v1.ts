@@ -6,8 +6,17 @@
  */
 import { z } from '@kbn/zod';
 import type { CaseAttachmentWithoutOwner } from '../attachment/v1';
+import {
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
+  GENERAL_CASES_OWNER,
+} from '../../../constants/owners';
 
-const suggestionOwnerSchema = z.enum(['observability', 'security', 'stack']);
+const suggestionOwnerSchema = z.enum([
+  SECURITY_SOLUTION_OWNER,
+  OBSERVABILITY_OWNER,
+  GENERAL_CASES_OWNER,
+]);
 
 export const suggestionContextRt = z.object({
   'service.name': z.string().optional(),
