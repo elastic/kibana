@@ -16,12 +16,13 @@ import type {
   Logger,
   ISavedObjectsRepository,
   IScopedClusterClient,
+  StartServicesAccessor,
 } from '@kbn/core/server';
 import type { AnySchema } from 'joi';
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 import type { ActionTypeRegistry } from './action_type_registry';
-import type { PluginSetupContract, PluginStartContract } from './plugin';
+import type { ActionsPluginsStart, PluginSetupContract, PluginStartContract } from './plugin';
 import type { ActionsClient } from './actions_client';
 import type { ActionTypeExecutorResult, SubFeature } from '../common';
 import type { TaskInfo } from './lib/action_executor';
@@ -38,6 +39,7 @@ export type ActionTypeConfig = Record<string, unknown>;
 export type ActionTypeSecrets = Record<string, unknown>;
 export type ActionTypeParams = Record<string, unknown>;
 export type ConnectorTokenClientContract = PublicMethodsOf<ConnectorTokenClient>;
+export type GetStartServices = StartServicesAccessor<ActionsPluginsStart, PluginStartContract>;
 
 import type { Connector, ConnectorWithExtraFindData } from './application/connector/types';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './lib';

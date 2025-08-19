@@ -4,12 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { ContainerModule } from 'inversify';
+import { OnSetup, OnStart, Setup, Start } from '@kbn/core-di';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 import type { ActionsConfig } from './config';
 import { configSchema } from './config';
 import type { ActionsClient as ActionsClientClass } from './actions_client';
 import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
+import { Actions } from './module';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -38,10 +41,10 @@ export {
 } from './lib';
 export { ACTION_SAVED_OBJECT_TYPE } from './constants/saved_objects';
 
-export const plugin = async (initContext: PluginInitializerContext) => {
-  const { ActionsPlugin } = await import('./plugin');
-  return new ActionsPlugin(initContext);
-};
+// export const plugin = async (initContext: PluginInitializerContext) => {
+//   const { ActionsPlugin } = await import('./plugin');
+//   return new ActionsPlugin(initContext);
+// };
 
 export { SubActionConnector } from './sub_action_framework/sub_action_connector';
 export { CaseConnector } from './sub_action_framework/case';
@@ -58,3 +61,12 @@ export const config: PluginConfigDescriptor<ActionsConfig> = {
 
 export { urlAllowListValidator } from './sub_action_framework/helpers';
 export { ActionExecutionSourceType } from './lib/action_execution_source';
+
+export const module = new ContainerModule(({ bind }) => {
+  bind(Start).toResolvedValue((actions) => ({ actions }), [Actions]);
+  bind(Setup).toResolvedValue((actions) => ({ actions }), [Actions]);
+
+  bind(OnSetup).toResolvedValue((actions) => () => actions.setup(), [Actions]);
+  bind(OnStart).toResolvedValue((actions) => () => actions.start(), [Actions]);
+  bind(Actions).toSelf().inSingletonScope();
+});

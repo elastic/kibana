@@ -10,17 +10,16 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
-import type { CoreSetup } from '@kbn/core/server';
-import type { ActionsPluginsStart } from '../plugin';
 import type { ClusterActionsMetric } from './types';
 import { EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
+import { GetStartServices } from '../types';
 
 export function registerClusterCollector({
   monitoringCollection,
-  core,
+  getStartServices,
 }: {
   monitoringCollection: MonitoringCollectionSetup;
-  core: CoreSetup<ActionsPluginsStart, unknown>;
+  getStartServices: GetStartServices;
 }) {
   monitoringCollection.registerMetric({
     type: 'cluster_actions',
@@ -41,7 +40,7 @@ export function registerClusterCollector({
     },
     fetch: async () => {
       try {
-        const [_, pluginStart] = await core.getStartServices();
+        const [_, pluginStart] = await getStartServices();
         const results = await pluginStart.taskManager.aggregate(
           aggregateTaskOverduePercentilesForType('actions')
         );
