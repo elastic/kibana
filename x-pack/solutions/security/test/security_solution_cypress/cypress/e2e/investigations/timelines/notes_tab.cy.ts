@@ -22,7 +22,7 @@ import { createTimeline, deleteTimelines } from '../../../tasks/api_calls/timeli
 
 import { login } from '../../../tasks/login';
 import { visitTimeline } from '../../../tasks/navigation';
-import { addNotesToTimeline, goToNotesTab } from '../../../tasks/timeline';
+import { addNotesToTimeline } from '../../../tasks/timeline';
 import { getFullname } from '../../../tasks/common';
 
 const author = Cypress.env('ELASTICSEARCH_USERNAME');
