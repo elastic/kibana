@@ -121,12 +121,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public enterScope(scopeId?: string): void {
     const currentStep = this.getCurrentStep();
-    if (!currentStep) {
-      throw new Error('WorkflowRuntime: Cannot enter scope without a current step');
-    }
-
     const resolvedScopeId = scopeId || currentStep.id;
-
     this.stack.push(resolvedScopeId);
   }
 
@@ -159,12 +154,12 @@ export class WorkflowExecutionRuntimeManager {
   public getStepState(stepId: string): Record<string, any> | undefined {
     const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(stepId);
 
-    return stepExecutions?.[0]?.state;
+    return stepExecutions?.[stepExecutions.length - 1]?.state;
   }
 
   public async setStepState(stepId: string, state: Record<string, any> | undefined): Promise<void> {
     const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(stepId);
-    const stepExecution = stepExecutions?.[0];
+    const stepExecution = stepExecutions?.[stepExecutions.length - 1];
     if (!stepExecution) {
       throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
     }
@@ -177,7 +172,6 @@ export class WorkflowExecutionRuntimeManager {
 
   public async startStep(stepId: string): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    this.enterScope();
     return withSpan(
       {
         name: `workflow.step.${stepId}`,
@@ -212,7 +206,6 @@ export class WorkflowExecutionRuntimeManager {
 
   public async finishStep(stepId: string): Promise<void> {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    this.exitScope();
     return withSpan(
       {
         name: `workflow.step.${stepId}.complete`,
@@ -526,7 +519,7 @@ export class WorkflowExecutionRuntimeManager {
    * @returns {string} A string representing the unique step execution ID
    */
   private getStepExecutionId(): string {
-    return this.stack.join('__');
+    return this.stack.concat([this.getCurrentStep().id]).join('__');
   }
 
   private getCurrentStepError(): any | undefined {
