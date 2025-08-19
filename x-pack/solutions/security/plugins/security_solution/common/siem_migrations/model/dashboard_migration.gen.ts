@@ -83,9 +83,9 @@ export const OriginalDashboard = z.object({
    */
   description: z.string(),
   /**
-   * The data of the dashboard, typically in JSON format
+   * The data of the dashboard, format could depend on the vendor
    */
-  data: z.object({}),
+  data: z.string(),
   /**
    * The last updated timestamp of the dashboard
    */

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import type { SiemMigrationResourceType } from '../../../../../../common/siem_migrations/model/common.gen';
 import type {
   RuleMigrationResource,
-  RuleMigrationResourceType,
   RuleMigrationRule,
 } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
@@ -21,7 +21,7 @@ export type RuleMigrationResourcesData = Pick<
   'name' | 'content' | 'type'
 >;
 export type RuleMigrationResources = Partial<
-  Record<RuleMigrationResourceType, RuleMigrationResourcesData[]>
+  Record<SiemMigrationResourceType, RuleMigrationResourcesData[]>
 >;
 interface ExistingResources {
   macro: Record<string, RuleMigrationDefinedResource>;
@@ -61,8 +61,8 @@ export class RuleResourceRetriever {
       throw new Error('initialize must be called before calling getResources');
     }
 
-    const resourceIdentifier = new ResourceIdentifier(originalRule.vendor);
-    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginalRule(originalRule);
+    const resourceIdentifier = new RuleResourceIdentifier(originalRule);
+    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal(originalRule);
 
     const macrosFound = new Map<string, RuleMigrationDefinedResource>();
     const lookupsFound = new Map<string, RuleMigrationDefinedResource>();

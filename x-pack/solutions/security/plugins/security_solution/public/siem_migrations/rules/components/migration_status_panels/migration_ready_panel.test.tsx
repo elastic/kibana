@@ -11,9 +11,9 @@ import { MigrationReadyPanel } from './migration_ready_panel';
 import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
 import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
@@ -58,11 +58,11 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
 
-const missingMacro: RuleMigrationResourceBase = {
+const missingMacro: SiemMigrationResourceBase = {
   type: 'macro',
   name: 'macro1',
 };
-const missingLookup: RuleMigrationResourceBase = {
+const missingLookup: SiemMigrationResourceBase = {
   type: 'lookup',
   name: 'lookup1',
 };

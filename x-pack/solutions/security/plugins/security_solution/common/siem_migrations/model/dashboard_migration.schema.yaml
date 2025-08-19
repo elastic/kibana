@@ -111,8 +111,8 @@ components:
           type: string
           description: The description of the dashboard
         data:
-          type: object
-          description: The data of the dashboard, typically in JSON format
+          type: string
+          description: The data of the dashboard, format could depend on the vendor
         last_updated:
           type: string
           description: The last updated timestamp of the dashboard

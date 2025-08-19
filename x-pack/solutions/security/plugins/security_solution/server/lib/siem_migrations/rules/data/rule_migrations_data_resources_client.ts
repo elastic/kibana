@@ -11,10 +11,8 @@ import type {
   Duration,
   BulkOperationContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  RuleMigrationResource,
-  RuleMigrationResourceType,
-} from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { SiemMigrationResourceType } from '../../../../../common/siem_migrations/model/common.gen';
+import type { RuleMigrationResource } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { StoredRuleMigrationResource } from '../types';
 import { SiemMigrationsDataBaseClient } from '../../common/data/siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from '../constants';
@@ -24,7 +22,7 @@ export type CreateRuleMigrationResourceInput = Pick<
   'migration_id' | 'type' | 'name' | 'content' | 'metadata'
 >;
 export interface RuleMigrationResourceFilters {
-  type?: RuleMigrationResourceType;
+  type?: SiemMigrationResourceType;
   names?: string[];
   hasContent?: boolean;
 }

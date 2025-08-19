@@ -28,6 +28,40 @@ interface SplunkXmlElement extends XmlElement {
   [key: string]: SplunkXmlElement[] | SplunkXmlElement | string | undefined;
 }
 
+/**
+ *
+ * Per [Splunk XML Reference](https://help.splunk.com/en/splunk-enterprise/create-dashboards-and-reports/simple-xml-dashboards/10.0/simple-xml-reference/simple-xml-reference#using-the-simple-xml-reference-0),
+ * below is the status of features supported in this parser:
+
+  - Build dashboards or forms. Configure structure and layout.
+    - [x] dashboard or form
+    - [x] row
+    - [x] panel
+
+  - Add and configure visualizations
+    - [x] vizualizations
+    - [] event
+    - [] table
+    - [x] chart
+    - [] map
+    - [x] single value (metric)
+    - [] html
+
+  - Work with searches to drive dashboard content
+    - search
+      - [x] Inline ( query element)
+      - [] Report reference
+      - [] Base search
+      - [] Post-process search
+  - [] Add interactivity
+    - fieldset (form)
+    - input (form)
+    - drilldown
+    - Predefined drilldown tokens
+    - eval, link, set, unset
+ *
+ *
+ **/
 export class SplunkXmlDashboardParser {
   constructor(private readonly xml: string) {}
 
@@ -317,22 +351,12 @@ export class SplunkXmlDashboardParser {
   /**
     Finds the first occurrence of a `<` character, but only if it is NOT immediately followed by a `?` or a `!`. After that, skip over any optional whitespace, and then capture the following sequence of letters, numbers, underscores, and colons. That captured sequence is our root tag name.
 
+    Per [Splunk Doc](https://help.splunk.com/en/splunk-enterprise/create-dashboards-and-reports/simple-xml-dashboards/10.0/simple-xml-reference/simple-xml-reference#id_645cf346_45ec_49af_8a69_5f826a15109a__Simple_XML_Reference)
+
     #### Examples:
 
-  `"<form version='1.1'>"`**:
-    1.  Finds `<`.
-    2.  Checks the next character (`f`). It's not `?` or `!`. The check passes.
-    3.  There is no whitespace, so `\s*` matches nothing.
-    4.  Captures `form`. **Result: `form`**
-
-  `"  <?xml ...> <!-- comment --> <dashboard>"`**:
-    1.  The regex starts scanning and finds the first `<`.
-    2.  It looks ahead and sees `?`. The negative lookahead `(?!\?|!)` fails. The engine discards this match.
-    3.  It continues scanning and finds the next `<` in `<!--`.
-    4.  It looks ahead and sees `!`. The negative lookahead fails again. The engine discards this match.
-    5.  It continues scanning and finds the next `<` in `<dashboard>`.
-    6.  It looks ahead and sees `d`. The check passes.
-    7.  It captures `dashboard`. **Result: `dashboard`**
+    - `"<form version='1.1'>"`
+    - <?xml ...> <!-- comment --> <dashboard>"`
    */
   public static isSupportedSplunkXml(xmlContent: string): {
     isSupported: boolean;
@@ -349,11 +373,22 @@ export class SplunkXmlDashboardParser {
       };
     }
 
+    // Check if rootTag has an attribute `version=1.1`
+    const versionMatch = xmlContent.match(/<\s*([a-zA-Z0-9_:]+)\s*.*version=['"]?1\.1['"]?/);
+    if (!versionMatch) {
+      return {
+        isSupported: false,
+        reason: `Unsupported version. Only version 1.1 is supported.`,
+      };
+    }
+
     // Ensure it's a dashboard with rows
     const hasRows = xmlContent.includes('<row');
-    return {
-      isSupported: hasRows,
-      reason: hasRows ? undefined : 'No <row> elements found in the provided Dashboard XML.',
-    };
+    return hasRows
+      ? { isSupported: true }
+      : {
+          isSupported: false,
+          reason: 'No <row> elements found in the provided Dashboard XML.',
+        };
   }
 }

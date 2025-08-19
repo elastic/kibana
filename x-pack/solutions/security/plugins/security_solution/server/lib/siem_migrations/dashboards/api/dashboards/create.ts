@@ -96,10 +96,14 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             originalDashboards.map((i) => i.original_dashboard)
           );
 
+          logger.error(JSON.stringify(extractedResources, null, 2));
+
           const resources = extractedResources.map((resource) => ({
             ...resource,
             migration_id: migrationId,
           }));
+
+          logger.error(JSON.stringify(resources, null, 2));
 
           if (resources.length > 0) {
             dashboardMigrationsClient.data.resources.create(resources);
