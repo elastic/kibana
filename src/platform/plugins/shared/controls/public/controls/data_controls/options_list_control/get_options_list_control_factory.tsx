@@ -262,11 +262,13 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
       const { placeholder, hideActionBar, hideExclude, hideExists, hideSort } = state;
 
       function serializeState() {
+        console.log('titles', titlesManager.getLatestState());
         return {
           rawState: {
             ...dataControlManager.getLatestState(),
             ...selectionsManager.getLatestState(),
             ...editorStateManager.getLatestState(),
+            ...titlesManager.getLatestState(),
             sort: sort$.getValue(),
 
             // serialize state that cannot be changed to keep it consistent
@@ -288,6 +290,7 @@ export const getOptionsListControlFactory = (): EmbeddableFactory<
           dataControlManager.anyStateChange$,
           selectionsManager.anyStateChange$,
           editorStateManager.anyStateChange$,
+          titlesManager.anyStateChange$,
           sort$
         ).pipe(map(() => undefined)),
         getComparators: () => {

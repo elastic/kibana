@@ -79,7 +79,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     resolveInitialDataViewReady = resolve;
   });
 
-  const defaultTitle$ = new BehaviorSubject<string | undefined>(undefined);
+  const defaultTitle$ = new BehaviorSubject<string | undefined>(state.fieldName);
   const dataViews$ = new BehaviorSubject<DataView[] | undefined>(undefined);
   const field$ = new BehaviorSubject<DataViewField | undefined>(undefined);
   const fieldFormatter = new BehaviorSubject<DataControlFieldFormatter>((toFormat: any) =>
@@ -184,6 +184,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       fieldFormatter,
       onEdit,
       filters$,
+      defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
     },

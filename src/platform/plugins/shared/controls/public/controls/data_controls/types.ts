@@ -15,6 +15,7 @@ import {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesFilters,
+  PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import { DefaultDataControlState } from '../../../common';
@@ -30,6 +31,7 @@ export type DataControlApi = HasEditCapabilities &
   PublishesDataViews &
   PublishesBlockingError &
   PublishesField &
+  Pick<PublishesTitle, 'defaultTitle$'> &
   PublishesDataLoading &
   PublishesFilters & {
     setDataLoading: (loading: boolean) => void;
