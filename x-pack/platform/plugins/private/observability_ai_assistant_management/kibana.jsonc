@@ -22,9 +22,7 @@
     "optionalPlugins": [
       "home",
       "serverless",
-      "productDocBase",
-      "spaces",
-      "cloud"
+      "productDocBase"
     ],
     "requiredBundles": [
       "kibanaReact",

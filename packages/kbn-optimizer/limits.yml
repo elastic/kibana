@@ -1,6 +1,5 @@
 pageLoadAssetSize:
   actions: 20000
-<<<<<<< HEAD
   advancedSettings: 27596
   aiAssistantManagementSelection: 19146
   aiops: 32733
@@ -24,32 +23,6 @@ pageLoadAssetSize:
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
-=======
-  advancedSettings: 6196
-  aiAssistantManagementSelection: 6917
-  aiops: 19890
-  alerting: 28395
-  apm: 38573
-  apmSourcesAccess: 2278
-  automaticImport: 12584
-  banners: 4087
-  canvas: 15210
-  cases: 153204
-  charts: 40269
-  cloud: 8836
-  cloudDataMigration: 5687
-  cloudExperiments: 103984
-  cloudFullStory: 4752
-  cloudLinks: 36333
-  cloudSecurityPosture: 21520
-  console: 31337
-  contentConnectors: 33036
-  contentManagement: 8350
-  controls: 13000
-  core: 602071
-  crossClusterReplication: 12662
-  customIntegrations: 11715
->>>>>>> eb1d6c13a2a ([Obs AI Assistant] Only show AI Assistant Settings for Enterprise license (#231989))
   dashboard: 19000
   dashboardEnhanced: 65646
   data: 454087

@@ -116,7 +116,7 @@ export class AIAssistantManagementPlugin
     const aiAssistantType$ = new BehaviorSubject(preferredAIAssistantType);
 
     const isAiAssistantManagementSelectionEnabled =
-      coreStart.application.capabilities.management.ai.aiAssistantManagementSelection;
+      coreStart.application.capabilities.management.kibana.aiAssistantManagementSelection;
 
     // Toggle visibility based on license at runtime
     if (licensing) {
