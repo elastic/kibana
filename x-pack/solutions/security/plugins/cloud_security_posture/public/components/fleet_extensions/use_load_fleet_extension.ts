@@ -233,14 +233,6 @@ export const useLoadFleetExtension = ({
           posture: { value: getPostureType(selectedInput.type) },
         }),
       };
-      // Update the policy with the new
-      if (isValid !== undefined) {
-        console.log('isValid changed:', isValid);
-        const error = new Error();
-        // Show in the console the function that called this
-        const callerFunction = error.stack?.split('\n')[2]?.trim();
-        console.log('Called by:', callerFunction);
-      }
       onChange({
         isValid,
         updatedPolicy: newUpdatedPolicy,
