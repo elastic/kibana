@@ -200,7 +200,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         ) : (
           <EuiSuperSelect
             aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
-            className={css`
+            css={css`
               .euiSuperSelectControl__placeholder {
                 color: ${euiTheme.colors.textPrimary};
                 margin-right: ${euiTheme.size.xs};

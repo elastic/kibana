@@ -46,6 +46,7 @@ interface OwnProps {
   isSettingsModalVisible: boolean;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   onChatCleared: () => void;
+  onConversationDeleted: (conversationId: string) => void;
   onCloseFlyout?: () => void;
   chatHistoryVisible?: boolean;
   setChatHistoryVisible?: React.Dispatch<React.SetStateAction<boolean>>;
@@ -94,6 +95,7 @@ export const AssistantHeader: React.FC<Props> = ({
   onChatCleared,
   onCloseFlyout,
   onConversationCreate,
+  onConversationDeleted,
   onConversationSelected,
   refetchCurrentConversation,
   refetchCurrentUserConversations,
@@ -239,6 +241,9 @@ export const AssistantHeader: React.FC<Props> = ({
                     <ConversationSettingsMenu
                       isConversationOwner={isConversationOwner}
                       isDisabled={isDisabled}
+                      conversations={conversations}
+                      onConversationSelected={onConversationSelected}
+                      onConversationDeleted={onConversationDeleted}
                       onChatCleared={onChatCleared}
                       refetchCurrentUserConversations={refetchCurrentUserConversations}
                       selectedConversation={selectedConversation}

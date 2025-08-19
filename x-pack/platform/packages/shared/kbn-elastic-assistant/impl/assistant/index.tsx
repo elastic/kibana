@@ -506,6 +506,7 @@ const AssistantComponent: React.FC<Props> = ({
                     onChatCleared={handleOnChatCleared}
                     onCloseFlyout={onCloseFlyout}
                     onConversationCreate={handleCreateConversation}
+                    onConversationDeleted={handleOnConversationDeleted}
                     onConversationSelected={handleOnConversationSelected}
                     refetchCurrentConversation={refetchCurrentConversation}
                     refetchCurrentUserConversations={refetchCurrentUserConversations}

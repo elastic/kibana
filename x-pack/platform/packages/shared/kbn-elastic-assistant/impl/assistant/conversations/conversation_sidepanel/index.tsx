@@ -11,18 +11,17 @@ import {
   EuiButton,
   EuiListGroup,
   EuiPanel,
-  EuiConfirmModal,
   EuiText,
   EuiSpacer,
   useEuiTheme,
   EuiLoadingSpinner,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
 
 import { css } from '@emotion/react';
 import { isEmpty, findIndex } from 'lodash';
+import { DeleteConversationModal } from '../delete_conversation_modal';
 import { ConversationListItem } from './conversation_list_item';
 import { useConversation } from '../../use_conversation';
 import type { ConversationWithOwner } from '../../api';
@@ -98,8 +97,6 @@ export const ConversationSidePanel = React.memo<Props>(
   }) => {
     const euiTheme = useEuiTheme();
 
-    const confirmModalTitleId = useGeneratedHtmlId();
-
     const titleClassName = css`
       text-transform: uppercase;
       font-weight: ${euiTheme.euiTheme.font.weight.bold};
@@ -117,20 +114,6 @@ export const ConversationSidePanel = React.memo<Props>(
     const lastConversationId = conversationList[conversationList.length - 1]?.id;
 
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
-
-    // Callback for when user deletes a conversation
-    const onDelete = useCallback(
-      (conversation: Conversation) => {
-        if (currentConversation?.id === conversation.id) {
-          const previousConversation = getNextConversation(conversationList, conversation);
-          onConversationSelected({
-            cId: previousConversation.id,
-          });
-        }
-        onConversationDeleted(conversation.id);
-      },
-      [currentConversation?.id, onConversationDeleted, conversationList, onConversationSelected]
-    );
 
     const onArrowUpClick = useCallback(() => {
       const previousConversation = getPreviousConversation(conversationList, currentConversation);
@@ -178,17 +161,6 @@ export const ConversationSidePanel = React.memo<Props>(
         shouldDisableKeyboardShortcut,
       ]
     );
-
-    const handleCloseModal = useCallback(() => {
-      setDeleteConversationItem(null);
-    }, []);
-
-    const handleDelete = useCallback(() => {
-      if (deleteConversationItem) {
-        setDeleteConversationItem(null);
-        onDelete(deleteConversationItem);
-      }
-    }, [deleteConversationItem, onDelete]);
 
     const handleDuplicateConversation = useCallback(
       (conversation?: Conversation) =>
@@ -318,19 +290,14 @@ export const ConversationSidePanel = React.memo<Props>(
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-        {deleteConversationItem && (
-          <EuiConfirmModal
-            aria-labelledby={confirmModalTitleId}
-            title={i18n.DELETE_CONVERSATION_TITLE}
-            titleProps={{ id: confirmModalTitleId }}
-            onCancel={handleCloseModal}
-            onConfirm={handleDelete}
-            cancelButtonText={i18n.CANCEL_BUTTON_TEXT}
-            confirmButtonText={i18n.DELETE_BUTTON_TEXT}
-            buttonColor="danger"
-            defaultFocusedButton="confirm"
-          />
-        )}
+        <DeleteConversationModal
+          conversationList={conversationList}
+          currentConversationId={currentConversation?.id}
+          deleteConversationItem={deleteConversationItem}
+          onConversationDeleted={onConversationDeleted}
+          onConversationSelected={onConversationSelected}
+          setDeleteConversationItem={setDeleteConversationItem}
+        />
       </>
     );
   }

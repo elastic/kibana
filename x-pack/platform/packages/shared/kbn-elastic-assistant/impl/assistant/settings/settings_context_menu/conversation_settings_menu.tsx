@@ -26,6 +26,9 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ConversationWithOwner } from '../../api';
+import { DeleteConversationModal } from '../../conversations/delete_conversation_modal';
+import { DELETE_CONVERSATION } from '../../conversations/conversation_sidepanel/translations';
 import { COPY_URL, DUPLICATE } from '../../use_conversation/translations';
 import type { DataStreamApis } from '../../use_data_stream_apis';
 import { useConversation } from '../../use_conversation';
@@ -40,6 +43,9 @@ import {
 interface Params {
   isConversationOwner: boolean;
   isDisabled?: boolean;
+  conversations: Record<string, ConversationWithOwner>;
+  onConversationDeleted: (conversationId: string) => void;
+  onConversationSelected: ({ cId }: { cId: string }) => void;
   onChatCleared?: () => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   selectedConversation?: Conversation;
@@ -60,6 +66,9 @@ const ConditionalWrap = ({
 
 export const ConversationSettingsMenu: React.FC<Params> = React.memo(
   ({
+    conversations,
+    onConversationDeleted,
+    onConversationSelected,
     isConversationOwner,
     isDisabled = false,
     onChatCleared,
@@ -78,6 +87,7 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
+    const [deleteConversationItem, setDeleteConversationItem] = useState<Conversation | null>(null);
 
     const [isResetConversationModalVisible, setIsResetConversationModalVisible] = useState(false);
 
@@ -95,6 +105,14 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
       closePopover?.();
       setIsResetConversationModalVisible(true);
     }, [closePopover]);
+
+    const showDeleteModal = useCallback(
+      (conversation?: Conversation) => {
+        closePopover?.();
+        setDeleteConversationItem(conversation ?? null);
+      },
+      [closePopover]
+    );
 
     const onChangeContentReferencesVisible = useCallback(
       (e: EuiSwitchEvent) => {
@@ -148,23 +166,36 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
     const items = useMemo(
       () => [
         <EuiContextMenuItem
-          aria-label={'duplicate'}
-          key={'duplicate'}
-          onClick={handleDuplicateConversation}
-          icon={'gear'}
-          data-test-subj={'duplicate'}
-        >
-          {DUPLICATE}
-        </EuiContextMenuItem>,
-        <EuiContextMenuItem
           aria-label={'copy-url'}
           key={'copy-url'}
-          icon={'documents'}
+          icon={'link'}
           data-test-subj={'copy-url'}
           onClick={handleCopyUrl}
         >
           {COPY_URL}
         </EuiContextMenuItem>,
+        <EuiContextMenuItem
+          aria-label={'duplicate'}
+          key={'duplicate'}
+          onClick={handleDuplicateConversation}
+          icon={'copy'}
+          data-test-subj={'duplicate'}
+        >
+          {DUPLICATE}
+        </EuiContextMenuItem>,
+        ...(isConversationOwner
+          ? [
+              <EuiContextMenuItem
+                aria-label={'delete'}
+                key={'delete'}
+                onClick={() => showDeleteModal(selectedConversation)}
+                icon={'trash'}
+                data-test-subj={'delete'}
+              >
+                {DELETE_CONVERSATION}
+              </EuiContextMenuItem>,
+            ]
+          : []),
         <EuiPanel color="transparent" paddingSize="none" key={'chat-options-panel'}>
           <EuiTitle
             size="xxxs"
@@ -312,8 +343,9 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
         </EuiPanel>,
       ],
       [
-        handleDuplicateConversation,
         handleCopyUrl,
+        handleDuplicateConversation,
+        selectedConversation,
         euiTheme.size.m,
         euiTheme.size.xs,
         euiTheme.colors.textDanger,
@@ -377,6 +409,14 @@ export const ConversationSettingsMenu: React.FC<Params> = React.memo(
             <p>{i18n.CLEAR_CHAT_CONFIRMATION}</p>
           </EuiConfirmModal>
         )}
+        <DeleteConversationModal
+          conversationList={Object.values(conversations)}
+          currentConversationId={selectedConversation?.id}
+          deleteConversationItem={deleteConversationItem}
+          onConversationDeleted={onConversationDeleted}
+          onConversationSelected={onConversationSelected}
+          setDeleteConversationItem={setDeleteConversationItem}
+        />
       </>
     );
   }
