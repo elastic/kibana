@@ -10,13 +10,13 @@
 import { Logger } from '@kbn/logging';
 import { DataStreamClient } from '../client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { TestElasticsearchUtils, createTestServers } from '@kbn/core-test-helpers-kbn-server';
+import { ToolingLog } from '@kbn/tooling-log';
+import { EsTestCluster, createTestEsCluster } from '@kbn/test';
 import { DataStreamDefinition } from '../types';
-import { Client } from '@elastic/elasticsearch';
 import * as mappings from '../mappings';
 
 describe('DataStreamClient', () => {
-  let esServer: TestElasticsearchUtils;
+  let esServer: EsTestCluster;
   let logger: Logger;
   interface MyTestDoc {
     '@timestamp': string;
@@ -33,16 +33,17 @@ describe('DataStreamClient', () => {
   };
 
   const cleanup = async () => {
-    const client: Client = esServer.es.getClient();
+    const client = esServer.getClient();
     await client.indices.deleteDataStream({ name: testDataStream.name }).catch(() => {});
     await client.indices.deleteIndexTemplate({ name: testDataStream.name }).catch(() => {});
   };
 
   beforeAll(async () => {
-    const { startES } = createTestServers({
-      adjustTimeout: jest.setTimeout,
+    jest.setTimeout(30_000);
+    esServer = createTestEsCluster({
+      log: new ToolingLog({ writeTo: process.stdout, level: 'debug' }),
     });
-    esServer = await startES();
+    await esServer.start();
   });
 
   afterAll(async () => {
@@ -60,7 +61,7 @@ describe('DataStreamClient', () => {
   describe('operations', () => {
     let client: DataStreamClient<MyTestDoc, {}>;
     beforeEach(async () => {
-      const elasticsearchClient: Client = esServer.es.getClient();
+      const elasticsearchClient = esServer.getClient();
       client = await DataStreamClient.setup({
         logger,
         elasticsearchClient,
@@ -95,7 +96,7 @@ describe('DataStreamClient', () => {
 
   describe('setup', () => {
     async function assertStateOfIndexTemplate() {
-      const esClient: Client = esServer.es.getClient();
+      const esClient = esServer.getClient();
       const {
         index_templates: [indexTemplate],
       } = await esClient.indices.getIndexTemplate({
@@ -114,6 +115,7 @@ describe('DataStreamClient', () => {
       });
       expect(indexTemplate.index_template.template).toEqual({
         mappings: {
+          dynamic: 'false',
           properties: {
             '@timestamp': {
               type: 'date',
@@ -133,7 +135,7 @@ describe('DataStreamClient', () => {
     }
 
     it('sets up a data stream as expected', async () => {
-      const elasticsearchClient: Client = esServer.es.getClient();
+      const elasticsearchClient = esServer.getClient();
       expect(
         await elasticsearchClient.indices.existsIndexTemplate({ name: testDataStream.name })
       ).toBe(false);
@@ -154,7 +156,7 @@ describe('DataStreamClient', () => {
     });
 
     it('is idempotent', async () => {
-      const elasticsearchClient: Client = esServer.es.getClient();
+      const elasticsearchClient = esServer.getClient();
       const ps: Promise<DataStreamClient<any, any>>[] = [];
       for (const _ of [1, 2, 3])
         ps.push(
@@ -176,7 +178,7 @@ describe('DataStreamClient', () => {
     });
 
     it('updates mappings as expected', async () => {
-      const elasticsearchClient: Client = esServer.es.getClient();
+      const elasticsearchClient = esServer.getClient();
       await DataStreamClient.setup({
         logger,
         elasticsearchClient,
@@ -199,12 +201,14 @@ describe('DataStreamClient', () => {
           enabled: true,
         },
         ...testDataStream.mappings,
+        dynamic: 'false',
       });
 
       const nextDefinition: DataStreamDefinition<MyTestDoc & { newField: string }> = {
         ...testDataStream,
         mappings: {
           ...testDataStream.mappings,
+          dynamic: false,
           properties: {
             ...testDataStream.mappings!.properties,
             newField: mappings.text(),
@@ -225,13 +229,16 @@ describe('DataStreamClient', () => {
       });
 
       expect(indexTemplate.index_template._meta).toEqual({
-        previousVersions: ['c8d3eb967ceefa51957228606494ed36c62455d0'],
+        previousVersions: ['a13f161660c3a282f79f86a1d7429fce206dc249'],
         userAgent: '@kbn/data-streams',
-        version: '31fad584a7a542d96f14a8868b42076e318e89f5',
+        version: 'e9c2064c34299e4324db009d5a4da5482ae3ec43',
       });
 
       expect(indexTemplate.index_template.template).toEqual({
-        mappings: nextDefinition.mappings,
+        mappings: {
+          ...nextDefinition.mappings,
+          dynamic: 'false',
+        },
         settings: {
           index: {
             hidden: 'true',
@@ -253,6 +260,7 @@ describe('DataStreamClient', () => {
           enabled: true,
         },
         ...nextDefinition.mappings,
+        dynamic: 'false',
       });
     });
   });

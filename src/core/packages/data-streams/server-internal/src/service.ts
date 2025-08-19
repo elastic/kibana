@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/logging';
 import pLimit from 'p-limit';
+import type { ElasticsearchServiceStart } from '@kbn/core/server';
+
+import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
@@ -16,7 +18,6 @@ import {
   type IDataStreamClient,
   DataStreamClient,
 } from '@kbn/data-streams';
-import type { ElasticsearchServiceStart } from '../../../../server';
 
 interface StartDeps {
   elasticsearch: ElasticsearchServiceStart;
@@ -42,12 +43,10 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
   }
 
   async start({ elasticsearch }: StartDeps) {
-    const dataStreams = this.dataStreams.entries();
-
     const limit = pLimit(5);
     const setupPromises: Promise<void>[] = [];
 
-    for (const [dataStreamDefinition, _] of dataStreams) {
+    for (const dataStreamDefinition of this.dataStreams.keys()) {
       setupPromises.push(
         limit(async () => {
           this.dataStreams.set(

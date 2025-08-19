@@ -13,5 +13,9 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": [
+    "@kbn/logging",
+    "@kbn/test",
+    "@kbn/core-logging-server-mocks",
+  ]
 }

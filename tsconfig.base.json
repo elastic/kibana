@@ -344,6 +344,8 @@
       "@kbn/core-data-streams-server/*": ["src/core/packages/data-streams/server/*"],
       "@kbn/core-data-streams-server-internal": ["src/core/packages/data-streams/server-internal"],
       "@kbn/core-data-streams-server-internal/*": ["src/core/packages/data-streams/server-internal/*"],
+      "@kbn/core-data-streams-server-mocks": ["src/core/packages/data-streams/server-mocks"],
+      "@kbn/core-data-streams-server-mocks/*": ["src/core/packages/data-streams/server-mocks/*"],
       "@kbn/core-deprecations-browser": ["src/core/packages/deprecations/browser"],
       "@kbn/core-deprecations-browser/*": ["src/core/packages/deprecations/browser/*"],
       "@kbn/core-deprecations-browser-internal": ["src/core/packages/deprecations/browser-internal"],

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import {
   IDataStreamClient,
@@ -21,6 +21,11 @@ import {
 import { setup } from './setup';
 
 type AnyDataStream = DataStreamDefinition<any>;
+
+type ElasticsearchClient = Omit<
+  Client,
+  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
+>;
 
 export interface DataStreamClientArgs<
   S extends object,
@@ -102,6 +107,4 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
     await setup(args);
     return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.logger, args.dataStreams);
   }
-
-  // TODO public static async create... that skips setup
 }
