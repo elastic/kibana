@@ -15,7 +15,6 @@ describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', async () => {
     const dashboardState: DashboardAttributes = {
       controlGroupInput: {
-        chainingSystem: 'NONE',
         labelPosition: 'twoLine',
         controls: [
           {
@@ -70,7 +69,6 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": Object {
           "controlGroupInput": Object {
-            "chainingSystem": "NONE",
             "controlStyle": "twoLine",
             "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
             "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",

@@ -10,12 +10,10 @@
 import { flow } from 'lodash';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-constants';
 import type {
-  ControlsChainingSystem,
   ControlsGroupState,
   ControlsLabelPosition,
   ControlsIgnoreParentSettings,
@@ -33,7 +31,6 @@ function transformControlGroupSetDefaults(
 ) {
   return {
     controlStyle: DEFAULT_CONTROLS_LABEL_POSITION,
-    chainingSystem: DEFAULT_CONTROLS_CHAINING,
     showApplySelections: !DEFAULT_AUTO_APPLY_SELECTIONS,
     ...controlGroupInput,
   };
@@ -41,14 +38,12 @@ function transformControlGroupSetDefaults(
 
 function transformControlGroupProperties({
   controlStyle,
-  chainingSystem,
   showApplySelections,
   ignoreParentSettingsJSON,
   panelsJSON,
 }: Required<NonNullable<DashboardSavedObjectAttributes['controlGroupInput']>>): ControlsGroupState {
   return {
     labelPosition: controlStyle as ControlsLabelPosition,
-    chainingSystem: chainingSystem as ControlsChainingSystem,
     autoApplySelections: !showApplySelections,
     ignoreParentSettings: ignoreParentSettingsJSON
       ? flow(

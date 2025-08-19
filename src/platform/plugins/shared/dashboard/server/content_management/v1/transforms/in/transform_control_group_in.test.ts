@@ -17,7 +17,6 @@ jest.mock('uuid', () => ({
 
 describe('transformControlGroupIn', () => {
   const mockControlsGroupState: ControlsGroupState = {
-    chainingSystem: 'NONE',
     labelPosition: 'oneLine',
     autoApplySelections: true,
     ignoreParentSettings: {
@@ -54,7 +53,6 @@ describe('transformControlGroupIn', () => {
     const result = transformControlGroupIn(mockControlsGroupState);
 
     expect(result).toEqual({
-      chainingSystem: 'NONE',
       controlStyle: 'oneLine',
       showApplySelections: false,
       ignoreParentSettingsJSON: JSON.stringify({
@@ -91,7 +89,6 @@ describe('transformControlGroupIn', () => {
     const result = transformControlGroupIn(controlsGroupState);
 
     expect(result).toEqual({
-      chainingSystem: 'NONE',
       controlStyle: 'oneLine',
       showApplySelections: false,
       ignoreParentSettingsJSON: JSON.stringify({

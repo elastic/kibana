@@ -9,7 +9,6 @@
 
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
-  DEFAULT_CONTROLS_CHAINING,
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROLS_LABEL_POSITION,
   DEFAULT_CONTROL_WIDTH,
@@ -57,7 +56,6 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
-        chainingSystem: DEFAULT_CONTROLS_CHAINING,
         labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
         ignoreParentSettings: DEFAULT_IGNORE_PARENT_SETTINGS,
         autoApplySelections: DEFAULT_AUTO_APPLY_SELECTIONS,
@@ -108,7 +106,6 @@ describe('transformDashboardOut', () => {
         }),
         ignoreParentSettingsJSON: JSON.stringify({ ignoreFilters: true }),
         controlStyle: 'twoLine',
-        chainingSystem: 'NONE',
         showApplySelections: true,
       },
       description: 'description',
@@ -131,7 +128,6 @@ describe('transformDashboardOut', () => {
     };
     expect(transformDashboardOut(input)).toEqual<DashboardAttributes>({
       controlGroupInput: {
-        chainingSystem: 'NONE',
         labelPosition: 'twoLine',
         ignoreParentSettings: {
           ignoreFilters: true,

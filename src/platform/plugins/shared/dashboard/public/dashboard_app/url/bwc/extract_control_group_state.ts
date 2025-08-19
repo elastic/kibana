@@ -64,7 +64,6 @@ export function extractControlGroupState(state: {
   return {
     autoApplySelections,
     controls,
-    chainingSystem: controlGroupInput.chainingSystem as ControlsGroupState['chainingSystem'],
     labelPosition,
     ...(controlGroupInput.ignoreParentSettings &&
     typeof controlGroupInput.ignoreParentSettings === 'object'
