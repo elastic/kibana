@@ -37,6 +37,7 @@ import {
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
 import { PostureTypes } from '../../common/types_old';
+import type { PostureTypes } from '../../common/types_old';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
 import vulnerabilitiesVendorsSVG from '../assets/illustrations/vulnerabilities_vendors.svg';

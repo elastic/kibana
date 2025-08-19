@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export function componentTemplateHelpers(getService: FtrProviderContext['getService']) {
   const log = getService('log');
