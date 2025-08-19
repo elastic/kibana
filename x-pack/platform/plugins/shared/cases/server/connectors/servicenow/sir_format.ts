@@ -48,8 +48,7 @@ export const format: ServiceNowSIRFormat = (theCase, alerts) => {
     sirFields = alerts.reduce<Record<SirFieldKey, string[]>>((acc, alert) => {
       let temp = {};
       fieldsToAdd.forEach((alertField) => {
-        const maybeStringField = get(alertFieldMapping[alertField].alertPath, alert);
-        const field = typeof maybeStringField === 'string' ? maybeStringField : undefined;
+        const field = get(alertFieldMapping[alertField].alertPath, alert);
 
         if (field && !manageDuplicate[alertFieldMapping[alertField].sirFieldKey].has(field)) {
           manageDuplicate[alertFieldMapping[alertField].sirFieldKey].add(field);
