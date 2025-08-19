@@ -7,7 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useState } from 'react';
+import type { FC } from 'react';
+import React, { useState } from 'react';
 import {
   EuiSpacer,
   EuiFilePicker,
@@ -102,6 +103,7 @@ export const PipelinesCsvUploader: FC<Props> = ({
           options={options}
           idSelected={action}
           onChange={(id) => setAction(id as FieldCopyAction)}
+          name="defaultAction"
         />
       </EuiFormRow>
 

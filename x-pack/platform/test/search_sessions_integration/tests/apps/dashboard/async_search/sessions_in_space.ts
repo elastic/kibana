@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const spacesService = getService('spaces');
@@ -85,11 +85,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   });
   async function load(dashboards: string[]) {
     await kibanaServer.importExport.load(
-      `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_space`
+      `x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/session_in_space`
     );
     await spacesService.create({ id: 'another-space', name: 'Another Space' });
     await kibanaServer.importExport.load(
-      `x-pack/test/functional/fixtures/kbn_archiver/dashboard/session_in_another_space`,
+      `x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/session_in_another_space`,
       { space: 'another-space' }
     );
     await kibanaServer.uiSettings.replace(

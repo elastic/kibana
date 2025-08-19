@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
+import type { GetEventsOptions } from '@kbn/analytics-ftr-helpers-plugin/common/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../services';
+import type { FtrProviderContext } from '../../../services';
 
 const DASHBOARD_LOADED_EVENT = 'dashboard_loaded';
 

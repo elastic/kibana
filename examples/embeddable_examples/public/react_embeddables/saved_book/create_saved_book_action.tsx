@@ -7,28 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
-import { EmbeddableApiContext, initializeStateManager } from '@kbn/presentation-publishing';
-import { ADD_PANEL_TRIGGER, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { initializeStateManager } from '@kbn/presentation-publishing';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { BookState } from '../../../server';
 import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { defaultBookState } from './default_book_state';
 import { ADD_SAVED_BOOK_ACTION_ID } from './constants';
-
-export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, core: CoreStart) => {
-  uiActions.registerAction<EmbeddableApiContext>({
+export const createSavedBookAction = (core: CoreStart) => {
+  return {
     id: ADD_SAVED_BOOK_ACTION_ID,
     getIconType: () => 'folderClosed',
     grouping: [embeddableExamplesGrouping],
-    isCompatible: async ({ embeddable }) => {
+    isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
       return apiCanAddNewPanel(embeddable);
     },
-    execute: async ({ embeddable }) => {
+    execute: async ({ embeddable }: EmbeddableApiContext) => {
       if (!apiCanAddNewPanel(embeddable)) throw new IncompatibleActionError();
       const newBookStateManager = initializeStateManager<BookState>(
         defaultBookState,
@@ -61,6 +60,5 @@ export const registerCreateSavedBookAction = (uiActions: UiActionsPublicStart, c
       i18n.translate('embeddableExamples.savedbook.addBookAction.displayName', {
         defaultMessage: 'Book',
       }),
-  });
-  uiActions.attachAction(ADD_PANEL_TRIGGER, ADD_SAVED_BOOK_ACTION_ID);
+  };
 };

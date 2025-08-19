@@ -7,7 +7,11 @@
 
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, IRouter } from '@kbn/core/server';
-import type { OnechatPluginStart, OnechatStartDependencies } from '../types';
+import type {
+  OnechatPluginStart,
+  OnechatStartDependencies,
+  OnechatSetupDependencies,
+} from '../types';
 import type { InternalStartServices } from '../services';
 
 export interface RouteDependencies {
@@ -15,4 +19,5 @@ export interface RouteDependencies {
   logger: Logger;
   coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
   getInternalServices: () => InternalStartServices;
+  pluginsSetup: OnechatSetupDependencies;
 }

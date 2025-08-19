@@ -278,7 +278,6 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
         });
       })
     );
-
   // execute a tool
   router.versioned
     .post({
@@ -326,7 +325,7 @@ export function registerToolsRoutes({ router, getInternalServices, logger }: Rou
 
         return response.ok({
           body: {
-            result: toolResult.result,
+            results: toolResult.results,
           },
         });
       })

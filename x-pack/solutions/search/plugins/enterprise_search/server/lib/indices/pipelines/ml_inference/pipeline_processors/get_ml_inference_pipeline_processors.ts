@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { IngestGetPipelineResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
 import {
   getMlModelTypesForModelConfig,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '../../../../../../common/ml_inference_pipeline';
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 
 export type InferencePipelineData = InferencePipeline & {
@@ -27,6 +28,7 @@ export const fetchMlInferencePipelines = async (client: ElasticsearchClient) => 
     return await client.ingest.getPipeline({
       id: getInferencePipelineNameFromIndexName('*'),
     });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (error) {
     // The GET /_ingest/pipeline API returns an empty object on 404 Not Found. If there are no `@ml-inference`
     // pipelines then return an empty record of pipelines

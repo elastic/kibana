@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { read } from './plugin_reader';
+
 export const mockPlugin = {
   setup: jest.fn(),
   start: jest.fn(),
@@ -14,7 +16,9 @@ export const mockPlugin = {
 };
 export const mockInitializer = jest.fn(() => mockPlugin);
 
-export const mockPluginReader = jest.fn(() => mockInitializer);
+export const mockPluginReader = jest.fn((() => ({
+  plugin: mockInitializer,
+})) as typeof read);
 
 jest.mock('./plugin_reader', () => ({
   read: mockPluginReader,

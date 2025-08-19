@@ -10,17 +10,15 @@ import {
   MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
   MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
-import type {
-  MicrosoftDefenderEndpointGetActionsParams,
-  MicrosoftDefenderEndpointGetActionsResponse,
-  MicrosoftDefenderEndpointRunScriptParams,
-  MicrosoftDefenderGetLibraryFilesResponse,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import {
   type MicrosoftDefenderEndpointAgentDetailsParams,
   type MicrosoftDefenderEndpointIsolateHostParams,
   type MicrosoftDefenderEndpointMachine,
   type MicrosoftDefenderEndpointMachineAction,
+  type MicrosoftDefenderEndpointGetActionsParams,
+  type MicrosoftDefenderEndpointGetActionsResponse,
+  type MicrosoftDefenderEndpointRunScriptParams,
+  type MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
 import type { Readable } from 'stream';
@@ -51,12 +49,10 @@ import type {
   ResponseActionsApiCommandNames,
 } from '../../../../../../../../common/endpoint/service/response_actions/constants';
 import type { NormalizedExternalConnectorClient } from '../../../lib/normalized_external_connector_client';
-import type {
-  ResponseActionsClientPendingAction,
-  ResponseActionsClientValidateRequestResponse,
-  ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
-} from '../../../lib/base_response_actions_client';
 import {
+  type ResponseActionsClientPendingAction,
+  type ResponseActionsClientValidateRequestResponse,
+  type ResponseActionsClientWriteActionRequestToEndpointIndexOptions,
   ResponseActionsClientImpl,
   type ResponseActionsClientOptions,
 } from '../../../lib/base_response_actions_client';
@@ -379,7 +375,8 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
   }
 
   protected async validateRequest(
-    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    payload: ResponseActionsClientWriteActionRequestToEndpointIndexOptions<any, any, any>
   ): Promise<ResponseActionsClientValidateRequestResponse> {
     // TODO: support multiple agents
     if (payload.endpoint_ids.length > 1) {
@@ -406,6 +403,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'isolate',
     };
 
@@ -457,6 +455,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     > = {
       ...actionRequest,
       ...this.getMethodOptions(options),
+      parameters: undefined,
       command: 'unisolate',
     };
 

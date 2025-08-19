@@ -126,6 +126,6 @@ export interface PackageVerificationResult {
 
 export * from './models';
 export * from './rest_spec';
-export * from './extensions';
-export * from './so_attributes';
+export type * from './extensions';
+export type * from './so_attributes';
 export type { FleetRequestHandler, FleetRequestHandlerContext } from './request_context';

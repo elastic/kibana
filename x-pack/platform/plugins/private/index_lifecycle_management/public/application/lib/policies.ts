@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PolicyFromES } from '../../../common/types';
+import type { PolicyFromES } from '../../../common/types';
 
 export const splitSizeAndUnits = (field: string): { size: string; units: string } => {
   let size = '';

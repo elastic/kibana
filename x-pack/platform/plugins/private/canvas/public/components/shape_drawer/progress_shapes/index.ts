@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ShapeType } from '..';
+import type { ShapeType } from '..';
 import { Gauge as gauge } from './gauge';
 import { HorizontalBar as horizontalBar } from './horizontal_bar';
 import { HorizontalPill as horizontalPill } from './horizontal_pill';

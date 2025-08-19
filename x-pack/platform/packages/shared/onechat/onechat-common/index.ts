@@ -56,6 +56,7 @@ export {
   type OnechatConversationNotFoundError,
   type OnechatBadRequestError,
   type OnechatRequestAbortedError,
+  type SerializedOnechatError,
 } from './base/errors';
 export { type UserIdAndName } from './base/users';
 export {

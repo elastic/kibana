@@ -11,18 +11,11 @@ import { IngestManagerProvider } from '@kbn/test-suites-xpack-platform/api_integ
 import { UsageAPIProvider } from '@kbn/test-suites-xpack-platform/api_integration/services/usage_api';
 import { services as commonServices } from '../../common/services';
 
-// @ts-ignore not ts yet
-import { EsSupertestWithoutAuthProvider } from './es_supertest_without_auth';
-import { SecuritySolutionApiProvider } from './security_solution_api.gen';
-
 export const services = {
   ...commonServices,
 
-  esSupertest: kibanaApiIntegrationServices.esSupertest,
   supertest: kibanaApiIntegrationServices.supertest,
-  esSupertestWithoutAuth: EsSupertestWithoutAuthProvider,
   usageAPI: UsageAPIProvider,
   ml: MachineLearningProvider,
   ingestManager: IngestManagerProvider,
-  securitySolutionApi: SecuritySolutionApiProvider,
 };

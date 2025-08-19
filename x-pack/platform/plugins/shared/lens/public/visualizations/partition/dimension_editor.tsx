@@ -8,14 +8,16 @@
 import React, { useCallback } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { PaletteRegistry, ColorMapping } from '@kbn/coloring';
-import { ColorPicker, FormatFactory } from '@kbn/visualization-ui-components';
+import type { PaletteRegistry, ColorMapping } from '@kbn/coloring';
+import type { FormatFactory } from '@kbn/visualization-ui-components';
+import { ColorPicker } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
 
-import { PieVisualizationState } from '../../../common/types';
-import { VisualizationDimensionEditorProps } from '../../types';
+import type { PieVisualizationState } from '../../../common/types';
+import type { VisualizationDimensionEditorProps } from '../../types';
 import { CollapseSetting } from '../../shared_components/collapse_setting';
 import { getDatatableColumn } from '../../../common/expressions/impl/datatable/utils';
 import { getSortedAccessorsForGroup } from './to_expression';
