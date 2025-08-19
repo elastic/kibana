@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { LinksSection } from './links_section';
@@ -38,6 +38,12 @@ export const InspectFlyout = ({ codeowners, componentData }: Props) => {
       <Header />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="l">
+          {/* TODO: Improve styling */}
+          {componentData.icon && (
+            <EuiText size="s" color="subdued">
+              Icon: {componentData.icon}
+            </EuiText>
+          )}
           <CodeownersSection codeowners={codeowners} />
           <LinksSection componentData={componentData} />
         </EuiFlexGroup>

@@ -14,7 +14,7 @@ import type {
   ReactFiberNode,
 } from './types';
 import { getComponentData } from './get_component_data';
-import { INSPECT_OVERLAY_ID } from '../common';
+import { EUI_DATA_ICON_TYPE, INSPECT_OVERLAY_ID } from '../common';
 
 const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileData | null => {
   if (!fiberNode) return null;
@@ -92,12 +92,15 @@ export const getInspectedElementData = async ({
     return;
   }
 
-  const icon = target.querySelector('svg')?.getAttribute('data-icon-type') ?? undefined;
+  const icon =
+    target instanceof SVGElement
+      ? target.getAttribute(EUI_DATA_ICON_TYPE)
+      : target.querySelector('svg')?.getAttribute(EUI_DATA_ICON_TYPE);
 
   await getComponentData({
     core,
     fileData,
-    icon,
+    icon: icon || undefined,
     setFlyoutRef,
     setIsInspecting,
   });
