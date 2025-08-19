@@ -18,7 +18,6 @@ import type {
 import type { SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart } from './types';
 import { SavedObjectsManagement } from './services';
 import { registerRoutes } from './routes';
-import { capabilitiesProvider } from './capabilities_provider';
 
 export class SavedObjectsManagementPlugin
   implements Plugin<SavedObjectsManagementPluginSetup, SavedObjectsManagementPluginStart, {}, {}>
@@ -30,14 +29,12 @@ export class SavedObjectsManagementPlugin
     this.logger = this.context.logger.get();
   }
 
-  public setup({ http, capabilities }: CoreSetup) {
+  public setup({ http }: CoreSetup) {
     this.logger.debug('Setting up SavedObjectsManagement plugin');
     registerRoutes({
       http,
       managementServicePromise: firstValueFrom(this.managementService$),
     });
-
-    capabilities.registerProvider(capabilitiesProvider);
 
     return {};
   }
