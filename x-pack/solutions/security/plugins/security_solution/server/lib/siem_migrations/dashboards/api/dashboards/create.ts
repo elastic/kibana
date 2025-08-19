@@ -64,46 +64,42 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           });
 
           // Convert the original splunk dashboards format to the migration dashboard item document format
-          const originalDashboards = originalDashboardsExport.map<CreateDashboardsInput>(
-            ({ result: { ...originalDashboard } }) => ({
-              migration_id: migrationId,
-              original_dashboard: {
-                id: originalDashboard.id as string,
-                title: originalDashboard.label ?? originalDashboard.title ?? '',
-                description: originalDashboard.description ?? '',
-                data: originalDashboard['eai:data'] ?? '<empty/>',
-                format: 'xml',
-                vendor: 'splunk',
-                last_updated: originalDashboard.updated ?? new Date().toISOString(),
-                splunk_properties: {
-                  app: originalDashboard['eai:acl.app'],
-                  owner: originalDashboard['eai:acl.owner'],
-                  sharing: originalDashboard['eai:acl.sharing'],
+          const dashboardsInput = originalDashboardsExport.map<CreateDashboardsInput>(
+            ({ result: { ...originalDashboard } }) => {
+              logger.warn(JSON.stringify({ originalDashboard }, null, 2));
+              return {
+                migration_id: migrationId,
+                original_dashboard: {
+                  id: originalDashboard.id as string,
+                  title: originalDashboard.label ?? originalDashboard.title ?? '',
+                  description: originalDashboard.description ?? '',
+                  data: originalDashboard['eai:data'] ?? '<empty/>',
+                  format: 'xml',
+                  vendor: 'splunk',
+                  last_updated: originalDashboard.updated ?? new Date().toISOString(),
+                  splunk_properties: {
+                    app: originalDashboard['eai:acl.app'],
+                    owner: originalDashboard['eai:acl.owner'],
+                    sharing: originalDashboard['eai:acl.sharing'],
+                  },
                 },
-              },
-            })
+              };
+            }
           );
 
-          await dashboardMigrationsClient.data.dashboards.create(
-            migrationId,
-            originalDashboardsExport
-          );
+          await dashboardMigrationsClient.data.dashboards.create(migrationId, dashboardsInput);
 
           const resourceIdentifier = new DashboardResourceIdentifier(
-            originalDashboards[0].original_dashboard.vendor
+            dashboardsInput[0].original_dashboard.vendor
           );
           const extractedResources = await resourceIdentifier.fromOriginals(
-            originalDashboards.map((i) => i.original_dashboard)
+            dashboardsInput.map((dash) => dash.original_dashboard)
           );
-
-          logger.error(JSON.stringify(extractedResources, null, 2));
 
           const resources = extractedResources.map((resource) => ({
             ...resource,
             migration_id: migrationId,
           }));
-
-          logger.error(JSON.stringify(resources, null, 2));
 
           if (resources.length > 0) {
             dashboardMigrationsClient.data.resources.create(resources);
