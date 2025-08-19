@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -14,8 +15,8 @@ import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { MetricItemExtra } from './metric_item_extra';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -31,7 +32,7 @@ import { formatDuration } from '../../../../../utils/formatting';
 import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
 import { MetricItemIcon } from './metric_item_icon';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 
 export const METRIC_ITEM_HEIGHT = 180;
 

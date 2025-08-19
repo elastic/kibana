@@ -6,7 +6,7 @@
  */
 
 import { PromptContextService } from './prompt_contexts';
-import { PromptContextTemplate } from '@kbn/elastic-assistant';
+import type { PromptContextTemplate } from '@kbn/elastic-assistant';
 
 describe('PromptContextService', () => {
   it('start returns correct object', () => {

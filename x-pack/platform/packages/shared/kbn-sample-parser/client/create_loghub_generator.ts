@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { LoghubSystem } from '../src/read_loghub_system_files';
-import { LoghubParser } from '../src/types';
-import { StreamLogDocument, StreamLogGenerator } from './types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { LoghubSystem } from '../src/read_loghub_system_files';
+import type { LoghubParser } from '../src/types';
+import type { StreamLogDocument, StreamLogGenerator } from './types';
 import { parseDataset } from './parse_dataset';
-import { LoghubQuery } from '../src/validate_queries';
+import type { LoghubQuery } from '../src/validate_queries';
 
 export function createLoghubGenerator({
   system,

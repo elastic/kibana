@@ -7,10 +7,10 @@
 
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { alertFieldMap } from '@kbn/alerts-as-data-utils';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { Dataset, createPersistenceRuleTypeWrapper } from '@kbn/rule-registry-plugin/server';
 import { STREAMS_FEATURE_ID, STREAMS_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
-import { StreamsPluginSetupDependencies } from '../../types';
+import type { StreamsPluginSetupDependencies } from '../../types';
 import { esqlRuleType } from './esql/register';
 
 interface Props {

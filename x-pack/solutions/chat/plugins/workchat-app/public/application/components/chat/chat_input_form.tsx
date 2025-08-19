@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState, KeyboardEvent } from 'react';
+import type { KeyboardEvent } from 'react';
+import React, { useCallback, useState } from 'react';
 import { css } from '@emotion/css';
 import {
   EuiButtonIcon,

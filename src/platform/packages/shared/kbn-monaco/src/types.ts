@@ -9,7 +9,7 @@
 
 import type { Observable } from 'rxjs';
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco } from './monaco_imports';
+import type { monaco } from './monaco_imports';
 
 export interface LangModuleType {
   ID: string;
