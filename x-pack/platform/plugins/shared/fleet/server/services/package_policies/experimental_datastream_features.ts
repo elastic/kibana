@@ -229,7 +229,6 @@ export async function handleExperimentalDatastreamFeatureOptIn({
 
       await esClient.indices.putIndexTemplate({
         name: featureMapEntry.data_stream,
-        // @ts-expect-error
         body: indexTemplateBody,
         _meta: {
           has_experimental_data_stream_indexing_features: featureMapEntry.features.tsdb,
