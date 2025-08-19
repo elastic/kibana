@@ -17,69 +17,69 @@ export const getExampleByServiceName = (dependencies: {
     id: 'example',
     attachmentId: '.page',
     owner: 'observability',
-    /* The tools object defines the parameters your suggestion handlers expect to receive
-     * when called by an LLM. When an LLM chooses to use this tool, the associated
-     * handler, matching the same key, will be called with the required params */
-    tools: {
+    handlers: {
       searchExampleByServiceName: {
-        description: 'Suggest synthetics monitor matching the same service.',
-        schema: {
-          type: 'object',
-          properties: {
-            serviceName: {
-              type: 'string',
-              description: 'Name of the relevant service',
-            },
-            timeRange: {
-              type: 'object',
-              description: 'The time range to search within',
-              properties: {
-                from: {
-                  type: 'string',
-                  description: 'The start time of the range, in ISO 8601 format',
-                },
-                to: {
-                  type: 'string',
-                  description: 'The end time of the range, in ISO 8601 format',
-                },
+        /* The tools object defines the parameters your suggestion handlers expect to receive
+         * when called by an LLM. When an LLM chooses to use this tool, the associated
+         * handler, matching the same key, will be called with the required params */
+        tool: {
+          description: 'Suggest synthetics monitor matching the same service.',
+          schema: {
+            type: 'object',
+            properties: {
+              serviceName: {
+                type: 'string',
+                description: 'Name of the relevant service',
               },
-              required: ['from', 'to'],
+              timeRange: {
+                type: 'object',
+                description: 'The time range to search within',
+                properties: {
+                  from: {
+                    type: 'string',
+                    description: 'The start time of the range, in ISO 8601 format',
+                  },
+                  to: {
+                    type: 'string',
+                    description: 'The end time of the range, in ISO 8601 format',
+                  },
+                },
+                required: ['from', 'to'],
+              },
             },
           },
         },
-      },
-    },
-    handlers: {
-      searchExampleByServiceName: async ({ context, request }: SuggestionHandlerParams) => {
-        const { getExampleByServiceName: getExampleByServiceNameHandler } = await import(
-          './handlers'
-        );
+        handler: async ({ context, request }: SuggestionHandlerParams) => {
+          const { getExampleByServiceName: getExampleByServiceNameHandler } = await import(
+            './handlers'
+          );
 
-        const { 'service.name': serviceName, timeRange } = context;
+          const { 'service.name': serviceName, timeRange } = context;
 
-        /* All handler parameters are optional. If your required params
-         * are not present, return an empty response rather than throwing
-         * an error to indicate that assets are not available for the
-         * provided context
-         *
-         * You could alternatively create a runtime schema to validate your required parameters */
-        if (!serviceName || !timeRange) {
-          return {
-            suggestions: [],
-          };
-        }
-        /* Example of providing dependencies to your handler.
-         * Dependencies must be provided by the registering plugin */
-        return getExampleByServiceNameHandler({
-          dependencies: {
-            savedObjectsClient: dependencies.savedObjectsClient,
-            share: dependencies.share,
-          },
-          params: {
-            timeRange,
-            serviceName,
-          },
-        });
+          /* All handler parameters are optional. If your required params
+           * are not present, return an empty response rather than throwing
+           * an error to indicate that assets are not available for the
+           * provided context
+           *
+           * You could alternatively create a runtime schema to validate your required parameters */
+          if (!serviceName || !timeRange) {
+            return {
+              suggestions: [],
+            };
+          }
+          /* Example of providing dependencies to your handler.
+           * Dependencies must be provided by the registering plugin */
+          return getExampleByServiceNameHandler({
+            dependencies: {
+              savedObjectsClient: dependencies.savedObjectsClient,
+              share: dependencies.share,
+            },
+            params: {
+              timeRange,
+              serviceName,
+            },
+          });
+        },
       },
     },
   } as const;

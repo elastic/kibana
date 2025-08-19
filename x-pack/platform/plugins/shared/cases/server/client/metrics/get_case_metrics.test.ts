@@ -195,7 +195,7 @@ function createMockClientArgs() {
     return {
       id: '1',
       attributes: {
-        owner: 'security',
+        owner: 'securitySolution',
       },
     } as unknown as CaseSavedObjectTransformed;
   });
