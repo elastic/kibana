@@ -56,6 +56,13 @@ export const SELECT_OS_LABEL = i18n.translate(
   }
 );
 
+export const OS_OPTIONS_PLACEHOLDER = i18n.translate(
+  'xpack.securitySolution.trustedDevices.form.osOptionsPlaceholder',
+  {
+    defaultMessage: 'Select an operating system',
+  }
+);
+
 export const POLICY_SELECT_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.trustedDevices.form.policySelectDescription',
   {
