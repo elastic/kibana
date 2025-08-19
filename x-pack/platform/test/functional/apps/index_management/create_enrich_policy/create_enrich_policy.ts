@@ -52,15 +52,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Cleaning up created index and policy');
 
       try {
+        await es.enrich.deletePolicy({ name: POLICY_NAME });
         await es.indices.delete({ index: INDEX_NAME });
       } catch (e) {
-        log.debug('[Teardown error] Error deleting test index');
-      }
-
-      try {
-        await es.enrich.deletePolicy({ name: POLICY_NAME });
-      } catch (e) {
-        log.debug('[Teardown error] Error deleting test policy');
+        log.debug(`[Teardown error] Error deleting test index: ${e.message}`);
       }
     });
 

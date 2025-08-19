@@ -57,21 +57,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await log.debug('Navigating to the enrich policies tab');
       await security.testUser.setRoles(['index_management_user']);
       await pageObjects.indexManagement.navigateToIndexManagementTab('enrich_policies');
-      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
       await log.debug('Cleaning up created index and policy');
       try {
         await es.enrich.deletePolicy({ name: ENRICH_POLICY_NAME });
-      } catch (e) {
-        log.debug('[Teardown error] Error deleting policy');
-      }
-
-      try {
         await es.indices.delete({ index: ENRICH_INDEX_NAME });
       } catch (e) {
-        log.debug(`[Teardown error] Error deleting test index: ${e.message}`);
+        log.debug(`[Teardown error] Error deleting test policy: ${e.message}`);
       }
     });
 
