@@ -636,38 +636,30 @@ export const getPackageUsageStats = async ({
     `${packagePolicySavedObjectType}.package.name: ${pkgName}`
   );
   const agentPolicyCount = new Set<string>();
-  let page = 1;
-  let hasMore = true;
+  // using saved Objects client directly, instead of the `list()` method of `package_policy` service
+  // in order to not cause a circular dependency (package policy service imports from this module)
+  const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
+    type: packagePolicySavedObjectType,
+    fields: ['name', 'policy_ids'],
+    perPage: SO_SEARCH_LIMIT,
+    filter,
+  });
 
-  while (hasMore) {
-    // using saved Objects client directly, instead of the `list()` method of `package_policy` service
-    // in order to not cause a circular dependency (package policy service imports from this module)
-    const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
-      type: packagePolicySavedObjectType,
-      perPage: 1000,
-      page: page++,
-      filter,
+  for (const packagePolicy of packagePolicies.saved_objects) {
+    auditLoggingService.writeCustomSoAuditLog({
+      action: 'find',
+      id: packagePolicy.id,
+      name: packagePolicy.attributes.name,
+      savedObjectType: packagePolicySavedObjectType,
     });
+  }
 
-    for (const packagePolicy of packagePolicies.saved_objects) {
-      auditLoggingService.writeCustomSoAuditLog({
-        action: 'find',
-        id: packagePolicy.id,
-        name: packagePolicy.attributes.name,
-        savedObjectType: packagePolicySavedObjectType,
-      });
-    }
-
-    for (let index = 0, total = packagePolicies.saved_objects.length; index < total; index++) {
-      packagePolicies.saved_objects[index].attributes.policy_ids.forEach((policyId) =>
-        agentPolicyCount.add(policyId)
-      );
-    }
-
-    hasMore = packagePolicies.saved_objects.length > 0;
+  for (const packagePolicy of packagePolicies.saved_objects) {
+    packagePolicy.attributes.policy_ids.forEach((policyId) => agentPolicyCount.add(policyId));
   }
 
   return {
+    package_policy_count: packagePolicies.saved_objects.length,
     agent_policy_count: agentPolicyCount.size,
   };
 };

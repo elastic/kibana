@@ -694,6 +694,7 @@ export interface Installation {
 
 export interface PackageUsageStats {
   agent_policy_count: number;
+  package_policy_count: number;
 }
 
 export type Installable<T> =
