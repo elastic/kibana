@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { ILicense } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
 import { Subject } from 'rxjs';
-import { MonitoringLicenseService } from './types';
+import type { MonitoringLicenseService } from './types';
 
 const createLicenseServiceMock = (): jest.Mocked<MonitoringLicenseService> => ({
   refresh: jest.fn(),

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Assign } from '@kbn/utility-types';
+import type { Assign } from '@kbn/utility-types';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { aggTimeSeries } from './buckets/time_series_fn';
-import {
+import type { aggTimeSeries } from './buckets/time_series_fn';
+import type {
   aggAvg,
   aggBucketAvg,
   aggBucketMax,
@@ -115,10 +115,10 @@ import {
   AggParamsTopHitSerialized,
   AggParamsTimeSeries,
 } from '.';
-import { AggParamsSampler } from './buckets/sampler';
-import { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
-import { AggParamsSignificantText } from './buckets/significant_text';
-import { aggTopMetrics } from './metrics/top_metrics_fn';
+import type { AggParamsSampler } from './buckets/sampler';
+import type { AggParamsDiversifiedSampler } from './buckets/diversified_sampler';
+import type { AggParamsSignificantText } from './buckets/significant_text';
+import type { aggTopMetrics } from './metrics/top_metrics_fn';
 
 export type { IAggConfig, AggConfigSerialized } from './agg_config';
 export type { CreateAggConfigParams, IAggConfigs, AggConfigsOptions } from './agg_configs';

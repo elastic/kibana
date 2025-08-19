@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { HttpInterceptorResponseError, HttpResponse, HttpSetup } from '@kbn/core/public';
+import type { HttpInterceptorResponseError, HttpResponse, HttpSetup } from '@kbn/core/public';
 
 import { ERROR_CONNECTING_HEADER, READ_ONLY_MODE_HEADER } from '../../../../common/constants';
 

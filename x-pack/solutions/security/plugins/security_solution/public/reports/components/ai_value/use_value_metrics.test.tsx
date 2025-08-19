@@ -89,18 +89,18 @@ describe('useValueMetrics', () => {
       filteredAlerts: 5,
       filteredAlertsPerc: 50,
       escalatedAlertsPerc: 50,
-      hoursSaved: 0.8333333333333334,
+      hoursSaved: 1.6666666666666667,
       totalAlerts: 10,
-      costSavings: 83.33333333333334,
+      costSavings: 166.66666666666669,
     });
     expect(result.current.valueMetricsCompare).toEqual({
       attackDiscoveryCount: 2,
       filteredAlerts: 5,
       filteredAlertsPerc: 50,
       escalatedAlertsPerc: 50,
-      hoursSaved: 0.8333333333333334,
+      hoursSaved: 1.6666666666666667,
       totalAlerts: 10,
-      costSavings: 83.33333333333334,
+      costSavings: 166.66666666666669,
     });
   });
 });
