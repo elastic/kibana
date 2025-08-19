@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   CreateIn,
   CreateResult,
   GetIn,
@@ -17,8 +17,8 @@ import {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
-import { WithRequiredProperty } from '@kbn/utility-types';
-import {
+import type { WithRequiredProperty } from '@kbn/utility-types';
+import type {
   dashboardItemSchema,
   panelGridDataSchema,
   panelSchema,
@@ -35,7 +35,7 @@ import {
   mayBeDashboardItemSchema,
   dashboardUpdateRequestAttributesSchema,
 } from './cm_services';
-import { CONTENT_ID } from '../../../common/content_management';
+import type { CONTENT_ID } from '../../../common/content_management';
 
 export type DashboardFilter = TypeOf<typeof filterSchema>;
 export type DashboardQuery = TypeOf<typeof querySchema>;

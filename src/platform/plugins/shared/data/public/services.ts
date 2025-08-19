@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import type { CoreStart, ThemeServiceStart } from '@kbn/core/public';
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/public';
-import { DataViewsContract } from '@kbn/data-views-plugin/common';
-import { DataPublicPluginStart } from './types';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataPublicPluginStart } from './types';
 
 export const [getUiSettings, setUiSettings] =
   createGetterSetter<CoreStart['uiSettings']>('UiSettings');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AggregationsCompositeAggregateKey } from '@elastic/elasticsearch/lib/api/types';
 import {
   SUMMARY_DESTINATION_INDEX_PATTERN,

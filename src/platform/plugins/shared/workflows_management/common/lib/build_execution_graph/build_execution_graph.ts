@@ -8,17 +8,19 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import {
+import type {
   BaseStep,
   IfStep,
   ForEachStep,
-  WorkflowExecutionEngineModel,
   EnterIfNode,
   ExitIfNode,
   EnterForeachNode,
   ExitForeachNode,
   EnterConditionBranchNode,
   ExitConditionBranchNode,
+  AtomicGraphNode,
+  WaitGraphNode,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -29,8 +31,6 @@ function getNodeId(node: BaseStep): string {
 }
 
 function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
-  const currentStepId = getNodeId(currentStep);
-
   if (currentStep.type === 'if') {
     return visitIfStep(graph, previousStep, currentStep);
   }
@@ -39,13 +39,45 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
     return visitForeachStep(graph, previousStep, currentStep);
   }
 
-  graph.setNode(getNodeId(currentStep), currentStep);
-
-  if (previousStep) {
-    graph.setEdge(getNodeId(previousStep), currentStepId);
+  if (currentStep.type === 'wait') {
+    return visitWaitStep(graph, previousStep, currentStep);
   }
 
-  return currentStep;
+  return visitAtomicStep(graph, previousStep, currentStep);
+}
+
+export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const waitNode: WaitGraphNode = {
+    id: getNodeId(currentStep),
+    type: 'wait',
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(waitNode.id, waitNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), waitNode.id);
+  }
+
+  return waitNode;
+}
+
+export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const atomicNode: AtomicGraphNode = {
+    id: getNodeId(currentStep),
+    type: 'atomic',
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(atomicNode.id, atomicNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), atomicNode.id);
+  }
+
+  return atomicNode;
 }
 
 export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
@@ -76,11 +108,12 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
 
   graph.setNode(enterThenBranchNode.id, enterThenBranchNode);
   graph.setEdge(enterConditionNodeId, enterThenBranchNode.id);
-  trueSteps.forEach((ifTrueCurrentStep: any, index: number) => {
-    const _previousStep = index > 0 ? trueSteps[index - 1] : enterThenBranchNode;
-    const currentNode = visitAbstractStep(graph, _previousStep, ifTrueCurrentStep);
+  let thenPreviousStep: any = enterThenBranchNode;
+  trueSteps.forEach((ifTrueCurrentStep: any) => {
+    const currentNode = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep);
     graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(previousStep), getNodeId(currentNode));
+    graph.setEdge(getNodeId(thenPreviousStep), getNodeId(currentNode));
+    thenPreviousStep = currentNode;
   });
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
@@ -88,7 +121,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
     startNodeId: enterThenBranchNode.id,
   };
   graph.setNode(exitThenBranchNode.id, exitThenBranchNode);
-  graph.setEdge(getNodeId(trueSteps[trueSteps.length - 1]), exitThenBranchNode.id);
+  graph.setEdge(getNodeId(thenPreviousStep), exitThenBranchNode.id);
   graph.setEdge(exitThenBranchNode.id, exitConditionNode.id);
 
   if (falseSteps?.length > 0) {
@@ -98,11 +131,12 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
     };
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
-    falseSteps.forEach((ifFalseCurrentStep: any, index: number) => {
-      const _previousStep = index > 0 ? falseSteps[index - 1] : enterElseBranchNode;
-      const currentNode = visitAbstractStep(graph, _previousStep, ifFalseCurrentStep);
+    let elsePreviousStep: any = enterElseBranchNode;
+    falseSteps.forEach((ifFalseCurrentStep: any) => {
+      const currentNode = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep);
       graph.setNode(getNodeId(currentNode), currentNode);
-      graph.setEdge(getNodeId(previousStep), getNodeId(currentNode));
+      graph.setEdge(getNodeId(elsePreviousStep), getNodeId(currentNode));
+      elsePreviousStep = currentNode;
     });
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse(${enterConditionNodeId})`,
@@ -110,7 +144,7 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
       startNodeId: enterElseBranchNode.id,
     };
     graph.setNode(exitElseBranchNode.id, exitElseBranchNode);
-    graph.setEdge(getNodeId(falseSteps[falseSteps.length - 1]), exitElseBranchNode.id);
+    graph.setEdge(getNodeId(elsePreviousStep), exitElseBranchNode.id);
     graph.setEdge(exitElseBranchNode.id, exitConditionNode.id);
   }
 
@@ -128,33 +162,33 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   const enterForeachNodeId = getNodeId(currentStep);
   const foreachStep = currentStep as ForEachStep;
   const foreachNestedSteps: BaseStep[] = foreachStep.steps || [];
-
+  const exitNodeId = `exitForeach(${enterForeachNodeId})`;
   const enterForeachNode: EnterForeachNode = {
     id: enterForeachNodeId,
     type: 'enter-foreach',
     itemNodeIds: [],
+    exitNodeId,
     configuration: {
       ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
     },
   };
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
-    id: enterForeachNodeId + '_exit',
+    id: exitNodeId,
     startNodeId: enterForeachNodeId,
   };
 
-  foreachNestedSteps.forEach((step: any, index: number) => {
-    const _previousStep = index > 0 ? foreachNestedSteps[index - 1] : foreachStep;
+  let previousNodeToLink: any = enterForeachNode;
+  foreachNestedSteps.forEach((step: any) => {
     enterForeachNode.itemNodeIds.push(getNodeId(step));
-    const currentNode = visitAbstractStep(graph, _previousStep, step);
+    const currentNode = visitAbstractStep(graph, previousNodeToLink, step);
     graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(previousStep), getNodeId(currentNode));
+    graph.setEdge(getNodeId(previousNodeToLink), getNodeId(currentNode));
+    previousNodeToLink = currentNode;
   });
 
-  const lastNestedForeachStep = foreachNestedSteps[foreachNestedSteps.length - 1];
-
   graph.setNode(exitForeachNode.id, exitForeachNode);
-  graph.setEdge(getNodeId(lastNestedForeachStep), exitForeachNode.id);
+  graph.setEdge(getNodeId(previousNodeToLink), exitForeachNode.id);
   graph.setNode(enterForeachNodeId, enterForeachNode);
 
   if (previousStep) {
@@ -164,12 +198,13 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   return exitForeachNode;
 }
 
-export function convertToWorkflowGraph(workflow: WorkflowExecutionEngineModel): graphlib.Graph {
+export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
-  let previousStep: BaseStep | null = null;
+  let previousNode: any | null = null;
 
-  workflow.definition.workflow.steps.forEach((currentStep, index) => {
-    previousStep = visitAbstractStep(graph, previousStep, currentStep);
+  workflowSchema.steps.forEach((currentStep, index) => {
+    const currentNode = visitAbstractStep(graph, previousNode, currentStep);
+    previousNode = currentNode;
   });
 
   return graph;

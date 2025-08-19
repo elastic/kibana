@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Conversation } from '@kbn/onechat-common';
+import type { Conversation } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 export const newConversationId = 'new';

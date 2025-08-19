@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiThemeComputed } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const getListItemStyle = ({ border, colors, size }: EuiThemeComputed<{}>) => ({
