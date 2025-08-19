@@ -92,3 +92,15 @@ GET my-data-stream/_search
 ```
 
 Using painless in this way is powerful, but we should be careful to ship performant and well tested painless in our code. That's why we expose a set of parameterised scripts for the most common use cases.
+
+## Additional notes
+
+1. How should we handle updating mappings? Do we just apply to the index template or go and update the existing write index as well? Yes.
+2. Lazy creation possible... but eager update of mappings to existing data streams
+   2.1. With option to eagerly create for when we know the data stream will be used, failing Kibana startup if data stream cannot be created.
+   2.2. Data stream deletion a future possibility
+3. Data streams for CRUD-like use cases: specifically updates
+   3.1. Likely a future phase (requires updating underlying index)
+   3.2. Consider removing possibility to control IDs at doc creation
+4. We need guidance for teams to mostly be able to self-service their management/creation of data streams.
+   4.1. We can largely rely on convention to start with: write a Jest integration test and take a snapshot of the serialized data stream declaration that you want to ship. Note: once merged these test snapshots should never change in a breaking way...
