@@ -22,7 +22,7 @@ export const vizLanguagePlugin = () => {
     if (t !== 'code' && t !== 'codeBlock') return;
 
     const lang = (node as any).lang;
-    if (lang !== 'viz') return;
+    if (lang !== 'toolresult') return;
 
     // Prefer the block body; fallback to meta if you ever place JSON there
     const raw =
@@ -38,18 +38,20 @@ export const vizLanguagePlugin = () => {
         const i = parent.children.indexOf(node as any);
         const errorPara: Paragraph = {
           type: 'paragraph',
-          children: [{ type: 'text', value: `Invalid viz spec: ${(e as Error).message}` } as Text],
+          children: [
+            { type: 'text', value: `Invalid toolresult spec: ${(e as Error).message}` } as Text,
+          ],
         };
         (parent.children as any[]).splice(i, 1, errorPara);
       }
       return;
     }
 
-    // Replace with a custom node -> will become <viz spec={...} />
-    (node as any).type = 'viz';
+    // Replace with a custom node -> will become <toolresult spec={...} />
+    (node as any).type = 'toolresult';
     (node as any).data = {
       ...(node as any).data,
-      hName: 'viz',
+      hName: 'toolresult',
       hProperties: { spec },
     };
     delete (node as any).value;

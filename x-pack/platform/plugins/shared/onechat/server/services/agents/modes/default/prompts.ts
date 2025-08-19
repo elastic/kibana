@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BaseMessageLike } from '@langchain/core/messages';
+import { type BaseMessageLike } from '@langchain/core/messages';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
 
 export const getActPrompt = ({
@@ -29,47 +29,47 @@ export const getActPrompt = ({
 
         ### Visualizing ES|QL tool results
 
-        **Goal:** When you want to visualize executed ES|QL results, insert a fenced code block with language \`viz\` that references the **exact** \`toolResultId\` of the \`.execute_esql\` step that returned the a result of type \`tabular_data\`.
+        **Goal:** When you want to visualize executed ES|QL results, insert a code block with language \`toolresult\` that references the **exact** \`toolResultId\` of the \`.execute_esql\` step that returned the a result of type \`tabular_data\`.
 
         **Strict rules**
 
         1. **Only visualize executed data.** 
-        Emit a \`viz\` block **only after** a tool call has returned a \`tabular_data\` result in this conversation.
+        Emit a \`toolresult\` block **only after** a tool call has returned a \`tabular_data\` result in this conversation.
 
         2. **Reference by \`toolResultId\`.** 
-        Do not include rows, columns, or invented fields. The \`viz\` block must contain **strict JSON** with a single key:
+        Do not include rows, columns, or invented fields. The \`toolresult\` block must contain **strict JSON** with a single "toolResultId" key:
 
-        \`\`\`json
+        \`\`\`toolresult
         { "toolResultId": "<the toolResultId of the step that produced the tabular_data>" }
         \`\`\`
-        3. **Placement.** Put the \`viz\` block exactly where the chart should appear in your Markdown response.
-        4. **Multiple charts.** If the user asks for multiple visualizations, include multiple \`viz\` blocks—one per relevant \`toolResultId\`.
+        3. **Placement.** Put the \`toolresult\` block exactly where the chart should appear in your Markdown response.
+        4. **Multiple charts.** If the user asks for multiple visualizations, include multiple \`toolresult\` code blocks - one per relevant \`toolResultId\`.
 
         **Examples**
 
         *User asks:* “Please visualize my logs grouped by \`service.name\` over time.”
 
-        *(You run the tool: \`\`.execute_esql\` which returns a result containing \`type=tabular_data\` with \`toolResultId\` \`tooluse_my_example\`.)*
+        *(You run the tool: \`\`.execute_esql\` which returns a result containing \`type=tabular_data\` with \`toolResultId\` \`4DFt\`.)*
 
         *Your final Markdown (place where the chart should render):*
 
-        \`\`\`viz
-        { "toolResultId": "tooluse_my_example" }
+        \`\`\`toolresult
+        { "toolResultId": "4DFt" }
         \`\`\`
 
-        *User asks for two charts (errors and latency). You run \`.execute_esql\` twice and get two \`toolResultId\`s: \`tooluse_A\` and \`tooluse_B\`.*
+        *User asks for two charts (errors and latency). You run \`.execute_esql\` twice and get two \`toolResultId\`s: \`6jUc\` and \`s9Jw\`.*
 
         *Your final Markdown:*
         Errors over time:
 
-        \`\`\`viz
-        { "toolResultId": "tooluse_A" }
+        \`\`\`toolresult
+        { "toolResultId": "6jUc" }
         \`\`\`
 
         Latency over time:
 
-        \`\`\`viz
-        { "toolResultId": "tooluse_B" }
+        \`\`\`toolresult
+        { "toolResultId": "s9Jw" }
         \`\`\`
 
 

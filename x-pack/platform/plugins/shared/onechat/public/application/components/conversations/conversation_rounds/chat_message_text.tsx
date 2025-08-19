@@ -22,7 +22,7 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
-import { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
@@ -176,7 +176,7 @@ export function ChatMessageText({ content }: Props) {
           </EuiTableRowCell>
         );
       },
-      viz: (props) => {
+      toolresult: (props) => {
         const { toolResultId } = props.spec;
 
         if (!toolResultId) {
