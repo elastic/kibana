@@ -171,7 +171,7 @@ export function SpanOverview({
                 />
               </EuiFlexItem>
               <EuiFlexItem>
-                <SpanLinks traceId={traceId} spanId={spanId} />
+                <SpanLinks traceId={traceId} docId={spanId} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </FieldActionsProvider>

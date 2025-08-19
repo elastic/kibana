@@ -48,7 +48,7 @@ export interface ObservabilityTracesSpanLinksFeature {
   fetchSpanLinks: (
     params: {
       traceId: string;
-      spanId: string;
+      docId: string;
       start: string;
       end: string;
     },

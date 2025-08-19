@@ -36,6 +36,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
+import { SpanLinks } from '../components/span_links';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -158,6 +159,9 @@ export function TransactionOverview({
                   showActions={showActions}
                 />
               )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <SpanLinks traceId={traceId} docId={transactionId} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FieldActionsProvider>

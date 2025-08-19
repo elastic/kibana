@@ -9,12 +9,12 @@ import { callApmApi } from './create_call_apm_api';
 export const fetchSpanLinks = (
   {
     traceId,
-    spanId,
+    docId,
     start,
     end,
   }: {
     traceId: string;
-    spanId: string;
+    docId: string;
     start: string;
     end: string;
     kuery?: string;
@@ -22,6 +22,6 @@ export const fetchSpanLinks = (
   signal: AbortSignal
 ) =>
   callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
-    params: { path: { traceId, spanId }, query: { kuery: '', start, end } },
+    params: { path: { traceId, spanId: docId }, query: { kuery: '', start, end } },
     signal,
   });

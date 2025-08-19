@@ -31,10 +31,10 @@ import { ServiceNameWithIcon } from '../service_name_with_icon';
 
 export interface Props {
   traceId: string;
-  spanId: string;
+  docId: string;
 }
 
-export function SpanLinks({ spanId, traceId }: Props) {
+export function SpanLinks({ docId, traceId }: Props) {
   const { discoverShared, data } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
@@ -49,7 +49,7 @@ export function SpanLinks({ spanId, traceId }: Props) {
       }
 
       return fetchSpanLinks.fetchSpanLinks(
-        { spanId, traceId, start: timeFilter.from, end: timeFilter.to },
+        { docId, traceId, start: timeFilter.from, end: timeFilter.to },
         signal
       );
     },
