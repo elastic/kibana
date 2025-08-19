@@ -44,6 +44,7 @@ const compatibilityCheck = (api: unknown | null): api is ClearControlActionApi =
     apiHasType(api) &&
       apiHasUniqueId(api) &&
       isClearableControl(api) &&
+      api.hasSelections$.getValue() &&
       apiHasParentApi(api) &&
       apiCanAccessViewMode(api.parentApi)
   );
