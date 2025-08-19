@@ -109,7 +109,7 @@ export default function QualitySummaryCards({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={true}>
-        {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore ? (
+        {!dataStreamSettingsLoading && !(hasFailureStore && canUserReadFailureStore) ? (
           <>
             <Card
               isDisabled={true}
@@ -118,17 +118,19 @@ export default function QualitySummaryCards({
                 defaultMessage: 'No failure store',
               })}
               footer={
-                <EuiButtonEmpty
-                  onClick={onClick}
-                  data-test-subj="datasetQualityDetailsEnableFailureStoreButton"
-                >
-                  {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                    defaultMessage: 'Enable failure store',
-                  })}
-                </EuiButtonEmpty>
+                canUserReadFailureStore && (
+                  <EuiButtonEmpty
+                    onClick={onClick}
+                    data-test-subj="datasetQualityDetailsEnableFailureStoreButton"
+                  >
+                    {i18n.translate('xpack.datasetQuality.enableFailureStore', {
+                      defaultMessage: 'Enable failure store',
+                    })}
+                  </EuiButtonEmpty>
+                )
               }
             />
-            {isFailureStoreModalOpen && defaultRetentionPeriod && (
+            {canUserReadFailureStore && isFailureStoreModalOpen && defaultRetentionPeriod && (
               <FailureStoreModal
                 onCloseModal={closeModal}
                 onSaveModal={handleSaveModal}

@@ -21,6 +21,7 @@ export interface WorkflowSavedObjectAttributes {
   definition: WorkflowYaml;
   createdBy: string;
   lastUpdatedBy: string;
+  deleted_at: Date | null;
 }
 
 export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttributes> = {
@@ -68,6 +69,9 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
       lastUpdatedBy: {
         type: 'keyword',
       },
+      deleted_at: {
+        type: 'date',
+      },
     },
   },
   management: {
@@ -83,6 +87,18 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
   modelVersions: {
     1: {
       changes: [],
+    },
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            deleted_at: {
+              type: 'date',
+            },
+          },
+        },
+      ],
     },
   },
 };
