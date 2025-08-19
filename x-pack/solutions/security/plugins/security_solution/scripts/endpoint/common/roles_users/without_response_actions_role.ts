@@ -49,6 +49,8 @@ export const getNoResponseActionsRole: () => Omit<Role, 'name'> = () => ({
           'endpoint_list_read',
           'trusted_applications_all',
           'trusted_applications_read',
+          'trusted_devices_all',
+          'trusted_devices_read',
           'host_isolation_exceptions_all',
           'host_isolation_exceptions_read',
           'blocklist_all',
