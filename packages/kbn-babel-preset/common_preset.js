@@ -50,7 +50,7 @@ module.exports = () => ({
       ],
     },
 
-    // development: true is need for InspectComponent plugin to work. Possibly enable it only in DEV mode
+    // development: true is needed for InspectComponent plugin to work. Possibly enable it only in DEV mode
     [require.resolve('@babel/preset-react'), { development: true }],
 
     [

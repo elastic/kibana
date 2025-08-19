@@ -20,6 +20,11 @@ export interface FileInfo {
   fileName: string;
 }
 
+export interface ReactFiberNode {
+  _debugSource?: FileInfo;
+  _debugOwner?: ReactFiberNode | null;
+}
+
 export interface GetComponentDataOptions {
   core: CoreStart;
   fileInfo: FileInfo;
@@ -27,7 +32,9 @@ export interface GetComponentDataOptions {
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
-export type GetInspectedElementOptions = Omit<
-  GetElementFromPointOptions & GetComponentDataOptions,
-  'fileInfo'
->;
+export interface GetInspectedElementOptions {
+  event: PointerEvent;
+  core: CoreStart;
+  setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
+  setIsInspecting: Dispatch<SetStateAction<boolean>>;
+}

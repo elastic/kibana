@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FileInfo, GetElementFromPointOptions, GetInspectedElementOptions } from './types';
+import type {
+  FileInfo,
+  GetElementFromPointOptions,
+  GetInspectedElementOptions,
+  ReactFiberNode,
+} from './types';
 import { getComponentData } from './get_component_data';
 import { INSPECT_OVERLAY_ID } from '../common';
 
-const findDebugSourceUpwards = (fiberNode: any): any | null => {
+const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileInfo | null => {
   if (!fiberNode) return null;
 
   if (fiberNode._debugSource) return fiberNode._debugSource;
@@ -67,7 +72,7 @@ export const getInspectedElementData = async ({
   }
 
   const reactFiberKey = Object.keys(target).find((key) => key.startsWith('__reactFiber$'));
-  const targetReactFiber = reactFiberKey ? (target as any)[reactFiberKey] : null;
+  const targetReactFiber = reactFiberKey ? target[reactFiberKey] : null;
 
   if (targetReactFiber) {
     if (targetReactFiber._debugSource) {
