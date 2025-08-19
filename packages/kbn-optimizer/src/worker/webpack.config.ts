@@ -253,15 +253,7 @@ export function getWebpackConfig(
             options: {
               babelrc: false,
               envName: worker.dist ? 'production' : 'development',
-              presets: [
-                [BABEL_PRESET, { useTransformRequireDefault: true }],
-                [
-                  '@babel/preset-react',
-                  {
-                    development: true,
-                  },
-                ],
-              ],
+              presets: [[BABEL_PRESET, { useTransformRequireDefault: true }]],
             },
           },
         },
