@@ -638,7 +638,9 @@ export const getPackageUsageStats = async ({
   const agentPolicyCount = new Set<string>();
   // using saved Objects client directly, instead of the `list()` method of `package_policy` service
   // in order to not cause a circular dependency (package policy service imports from this module)
-  const packagePolicies = await savedObjectsClient.find<PackagePolicySOAttributes>({
+  const packagePolicies = await savedObjectsClient.find<
+    Pick<PackagePolicySOAttributes, 'name' | 'policy_ids'>
+  >({
     type: packagePolicySavedObjectType,
     fields: ['name', 'policy_ids'],
     perPage: SO_SEARCH_LIMIT,
