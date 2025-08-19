@@ -32,7 +32,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { pricingServiceMock } from '@kbn/core-pricing-server-mocks';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
-import { dataStreamServiceMock } from '@kbn/core/packages/data-streams/server-mocks';
+import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
 
 export function createInternalCoreSetupMock() {
   const setupDeps = {

@@ -8,7 +8,7 @@
  */
 
 import { type DataStreamDefinition, mappings } from '@kbn/core-data-streams-server';
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 
 interface MyDocument {
   '@timestamp': string;

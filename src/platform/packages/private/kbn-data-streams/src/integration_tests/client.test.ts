@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { DataStreamClient } from '../client';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ToolingLog } from '@kbn/tooling-log';
-import { EsTestCluster, createTestEsCluster } from '@kbn/test';
-import { DataStreamDefinition } from '../types';
+import type { EsTestCluster } from '@kbn/test';
+import { createTestEsCluster } from '@kbn/test';
+import type { DataStreamDefinition } from '../types';
 import * as mappings from '../mappings';
 
 describe('DataStreamClient', () => {

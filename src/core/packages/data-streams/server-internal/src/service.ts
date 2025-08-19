@@ -12,7 +12,7 @@ import type { ElasticsearchServiceStart } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
+import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
   type DataStreamDefinition,
   type IDataStreamClient,

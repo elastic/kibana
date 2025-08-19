@@ -10,7 +10,7 @@
 import type { Logger } from '@kbn/logging';
 import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   IDataStreamClient,
   BaseSearchRuntimeMappings,
   DataStreamDefinition,

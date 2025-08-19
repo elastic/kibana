@@ -12,8 +12,8 @@ import type api from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
 import { retryEs } from './retry_es';
-import { DataStreamClientArgs } from './client';
-import { StrictMappingTypeMapping } from './types';
+import type { DataStreamClientArgs } from './client';
+import type { StrictMappingTypeMapping } from './types';
 
 const defaultIndexSettings: () => api.IndicesIndexSettings = () => ({
   hidden: true,
