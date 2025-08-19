@@ -19,6 +19,8 @@ import {
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
+  ToolChoiceType,
+  ToolCallsOf,
 } from '@kbn/inference-common';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
@@ -133,18 +135,16 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
                 toolCallId: fakeRequestDocsToolCall.toolCallId,
               },
             ],
-        toolChoice: !functionLimitReached ? toolChoice : 'none',
-        tools: {
-          ...(!functionLimitReached
-            ? {
-                ...tools,
-                request_documentation: {
-                  description: 'Request additional ES|QL documentation if needed',
-                  schema: requestDocumentationSchema,
-                },
-              }
-            : {}),
-        },
+        toolChoice: !functionLimitReached ? toolChoice : ToolChoiceType.none,
+        tools: functionLimitReached
+          ? {}
+          : {
+              ...tools,
+              request_documentation: {
+                description: 'Request additional ES|QL documentation if needed',
+                schema: requestDocumentationSchema,
+              },
+            },
       }).pipe(
         withoutTokenCountEvents(),
         map((generateEvent) => {
@@ -161,10 +161,10 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         }),
         switchMap((generateEvent) => {
           if (isChatCompletionMessageEvent(generateEvent)) {
-            const onlyToolCall =
-              generateEvent.toolCalls.length === 1 ? generateEvent.toolCalls[0] : undefined;
+            const toolCalls = generateEvent.toolCalls as ToolCallsOf<TToolOptions>['toolCalls'];
+            const onlyToolCall = toolCalls.length === 1 ? toolCalls[0] : undefined;
 
-            if (onlyToolCall?.function.name === 'request_documentation') {
+            if (onlyToolCall && onlyToolCall.function.name === 'request_documentation') {
               if (functionLimitReached) {
                 return of({
                   ...generateEvent,
