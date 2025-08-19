@@ -87,7 +87,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
         const fullText = model.getValue();
         // Get the text before the cursor
         const textBeforeCursor = model.getValueInRange({
-          startLineNumber: position.lineNumber,
+          startLineNumber: 1,
           startColumn: 1,
           endLineNumber: position.lineNumber,
           endColumn: position.column,
