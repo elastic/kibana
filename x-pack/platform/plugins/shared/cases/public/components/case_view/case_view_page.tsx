@@ -129,12 +129,8 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               onAlertsTableLoaded={onAlertsTableLoaded}
             />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.alerts.enabled && (
-            <CaseViewEvents
-              caseData={caseData}
-              renderAlertsTable={renderAlertsTable}
-              onAlertsTableLoaded={onAlertsTableLoaded}
-            />
+          {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
+            <CaseViewEvents caseData={caseData} />
           )}
           {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
           {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
