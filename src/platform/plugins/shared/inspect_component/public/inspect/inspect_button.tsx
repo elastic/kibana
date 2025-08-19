@@ -7,21 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
-import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import { isMac, isKeyboardShortcut } from '../utils';
-import { InspectOverlay } from './overlay';
+import React, { useState } from 'react';
+import { css } from '@emotion/react';
+import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { InspectOverlay } from './overlay/inspect_overlay';
+import { isKeyboardShortcut, isMac } from '../utils';
+
+const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
+  defaultMessage: 'Inspect component',
+});
 
 const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.tooltip', {
   values: { keyboardShortcut: isMac ? "⌘ '" : "Ctrl '" },
   defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
-});
-
-const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
-  defaultMessage: 'Inspect component',
 });
 
 interface Props {

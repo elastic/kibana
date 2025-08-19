@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import type { Dispatch, SetStateAction, CSSProperties } from 'react';
-import { createPortal } from 'react-dom';
-import { EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
+import type { CSSProperties, Dispatch, SetStateAction } from 'react';
+import React, { useState } from 'react';
+import { createPortal } from 'react-dom';
 import { css } from '@emotion/css';
-import { INSPECT_OVERLAY_ID } from '../../../common';
-import { InspectHighlight } from './inspect_highlight';
+import { EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { getElementFromPoint, getInspectedElementData } from '../../utils';
+import { InspectHighlight } from './inspect_highlight';
+import { INSPECT_OVERLAY_ID } from '../../../common';
 
 interface Props {
   core: CoreStart;
@@ -24,15 +24,16 @@ interface Props {
 }
 
 export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) => {
-  const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
 
+  const { euiTheme } = useEuiTheme();
+
   const overlayCss = css`
-    position: fixed;
-    inset: 0;
     background-color: ${transparentize(euiTheme.colors.backgroundFilledText, 0.2)};
-    z-index: ${Number(euiTheme.levels.modal) + 1};
     cursor: crosshair;
+    inset: 0;
+    position: fixed;
+    z-index: ${Number(euiTheme.levels.modal) + 1};
   `;
 
   const handleClick = async (event: PointerEvent) => {
@@ -46,6 +47,7 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
 
   const handlePointerMove = (event: PointerEvent) => {
     const target = getElementFromPoint({ event });
+
     if (!target) return;
 
     const { top, left, width, height } = target.getBoundingClientRect();

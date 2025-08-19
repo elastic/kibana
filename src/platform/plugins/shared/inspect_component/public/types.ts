@@ -14,14 +14,20 @@ export interface GetElementFromPointOptions {
   event: PointerEvent;
 }
 
+export interface FileInfo {
+  columnNumber: number;
+  lineNumber: number;
+  fileName: string;
+}
+
 export interface GetComponentDataOptions {
   core: CoreStart;
-  path: string;
+  fileInfo: FileInfo;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
 export type GetInspectedElementOptions = Omit<
   GetElementFromPointOptions & GetComponentDataOptions,
-  'path'
+  'fileInfo'
 >;

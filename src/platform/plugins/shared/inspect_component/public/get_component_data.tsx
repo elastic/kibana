@@ -9,30 +9,26 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { INSPECT_COMPONENT_ROUTE } from '../common/constants';
-import { InspectFlyout, flyoutOptions } from './inspect';
-import type { InspectComponentResponse } from '../common';
 import type { GetComponentDataOptions } from './types';
+import type { InspectComponentResponse } from '../common';
+import { flyoutOptions, InspectFlyout } from './inspect';
+import { INSPECT_COMPONENT_ROUTE } from '../common/constants';
 
 export const getComponentData = async ({
   core,
-  path,
+  fileInfo,
   setFlyoutRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
+  const formattedPath = fileInfo.fileName?.split('/kibana')[1];
+
   try {
-    const { codeowners, fullPath }: InspectComponentResponse = await core.http.post(
-      INSPECT_COMPONENT_ROUTE,
-      {
-        body: JSON.stringify({ path }),
-      }
-    );
+    const { codeowners }: InspectComponentResponse = await core.http.post(INSPECT_COMPONENT_ROUTE, {
+      body: JSON.stringify({ path: formattedPath }),
+    });
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(
-        <InspectFlyout codeowners={codeowners} fullPath={fullPath} path={path} />,
-        core.rendering
-      ),
+      toMountPoint(<InspectFlyout codeowners={codeowners} fileInfo={fileInfo} />, core.rendering),
       flyoutOptions
     );
 
