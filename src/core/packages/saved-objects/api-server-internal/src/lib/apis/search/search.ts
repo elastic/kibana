@@ -45,7 +45,12 @@ export const performSearch = async <
     extensions = {},
   }: ApiExecutionContext
 ): Promise<estypes.SearchResponse<T, A>> => {
-  const { common: commonHelper, migration: migrationHelper } = helpers;
+  const {
+    common: commonHelper,
+    migration: migrationHelper,
+    serializer: serializerHelper,
+    encryption: encryptionHelper,
+  } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   const { namespaces: requestedNamespaces, types, ...esOptions } = options;
   if (requestedNamespaces.length === 0)
@@ -59,9 +64,22 @@ export const performSearch = async <
     );
   }
 
+  /**
+   * TODO Revisit if this is the right approach
+   * Maintains same behavior as SO where if a user includes an non existing or a "hidden" type they get an empty response back. We should rather fail fast.
+   * Probably want behavior to be:
+   *  1. remove concept of hidden types
+   *  2. Only allow plugins to search types they registered
+   *  3. Throw error if plugin tries to search a type it didn't register
+   */
   const allowedTypes = types.filter((t) => rawAllowedTypes.includes(t));
   if (allowedTypes.length === 0) {
-    return {};
+    return {
+      hits: { hits: [] },
+      took: 0,
+      timed_out: false,
+      _shards: { total: 0, successful: 0, failed: 0 },
+    };
   }
 
   let namespaces: string[] = requestedNamespaces;
@@ -164,30 +182,42 @@ export const performSearch = async <
     ? await securityExtension?.getFindRedactTypeMap(redactTypeMapParams)
     : undefined;
 
-  const hasFieldsOption = Boolean(options.fields?.length);
-
-  const migratedHits: estypes.SearchHit<T>[] = [];
+  // Migrations and encryption don't work on raw documents. To process them we have
+  // to serialize raw documents to saved objects and then deserialize them back to
+  // raw documents again.
+  const processedHits: estypes.SearchHit<T>[] = [];
   for (const hit of result.body.hits.hits) {
-    if (hit._source?.type && hit._id && !hasFieldsOption) {
-      // This is a bit silly, maybe we can just return saved objects in `hits.hits`? But that is also a bit weird.
-      const so = serializer.rawToSavedObject(hit as SavedObjectsRawDoc);
-      const migratedSo = await migrationHelper.migrateAndDecryptStorageDocument({
-        document: so,
-        typeMap: redactTypeMap,
-      });
-      migratedHits.push(
-        {
+    if (serializer.isRawSavedObject(hit as SavedObjectsRawDoc)) {
+      const so = serializerHelper.rawToSavedObject(hit as SavedObjectsRawDoc);
+      if (Boolean(options.fields?.length)) {
+        // If the fields argument is set, don't migrate.
+        // This document may only contains a subset of it's fields meaning the migration
+        // (transform and forwardCompatibilitySchema) is not guaranteed to succeed. We
+        // still try to decrypt/redact the fields that are present in the document.
+        const decrypted = await encryptionHelper.optionallyDecryptAndRedactSingleResult(
+          so,
+          redactTypeMap
+        );
+        processedHits.push({
+          ...hit,
+          ...serializer.savedObjectToRaw(decrypted),
+        } as estypes.SearchHit<T>);
+      } else {
+        const migratedSo = await migrationHelper.migrateAndDecryptStorageDocument({
+          document: so,
+          typeMap: redactTypeMap,
+        });
+        processedHits.push({
           ...hit,
           ...serializer.savedObjectToRaw(migratedSo),
-          _index: hit._index,
-        } as estypes.SearchHit<T> // need to figure something better out here
-      );
+        } as estypes.SearchHit<T>);
+      }
     } else {
-      migratedHits.push(hit);
+      processedHits.push(hit);
     }
   }
 
-  result.body.hits.hits = migratedHits;
+  result.body.hits.hits = processedHits;
 
   return result.body;
 };
