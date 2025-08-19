@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
 import { mount } from 'enzyme';
 import React from 'react';
 
