@@ -34,7 +34,7 @@ interface Dependencies {
   logger: Logger;
 }
 
-export async function generateSignificantEventDefinitions(
+export async function generateSignificantEventQueriesUsingLogPatterns(
   params: Params,
   dependencies: Dependencies
 ): Promise<GeneratedSignificantEventQuery[]> {

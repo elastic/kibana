@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
 import React, { useEffect, useState } from 'react';
@@ -13,10 +13,10 @@ import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useSignificantEventsApi } from '../../../../hooks/use_significant_events_api';
 import { validateQuery } from '../common/validate_query';
-import { AIConnectorSelector } from './ai_connector_selector';
 import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
+import { AIConnectorSelector } from './ai_connector_selector';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -35,6 +35,52 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
+
+  const onGenerateClick = () => {
+    setIsGenerating(true);
+    setGeneratedQueries([]);
+    setSelectedQueries([]);
+
+    const generation$ = generate(aiFeatures?.genAiConnectors.selectedConnector!, 'log_patterns');
+
+    generation$.subscribe({
+      next: (result) => {
+        const validation = validateQuery({
+          title: result.query.title,
+          kql: { query: result.query.kql },
+        });
+
+        if (!validation.kql.isInvalid) {
+          setGeneratedQueries((prev) => [
+            ...prev,
+            { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
+          ]);
+        }
+      },
+      error: (error) => {
+        setIsGenerating(false);
+        if (error.name === 'AbortError') {
+          return;
+        }
+        notifications.showErrorDialog({
+          title: i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
+            { defaultMessage: `Could not generate significant events queries` }
+          ),
+          error,
+        });
+      },
+      complete: () => {
+        notifications.toasts.addSuccess({
+          title: i18n.translate(
+            'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
+            { defaultMessage: `Generated significant events queries successfully` }
+          ),
+        });
+        setIsGenerating(false);
+      },
+    });
+  };
 
   const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
     setSelectedQueries(selectedItems);
@@ -58,77 +104,27 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
       {aiFeatures && !aiFeatures.enabled && !aiFeatures.genAiConnectors.loading && (
         <AIFeaturesDisabledCallout couldBeEnabled={aiFeatures?.couldBeEnabled ?? false} />
       )}
-
       {aiFeatures && aiFeatures.enabled && (
-        <>
+        <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
           <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                isLoading={isGenerating}
-                size="s"
-                disabled={
-                  isSubmitting || isGenerating || !aiFeatures.genAiConnectors.selectedConnector
-                }
-                iconType="sparkles"
-                onClick={() => {
-                  setIsGenerating(true);
-                  setGeneratedQueries([]);
-                  setSelectedQueries([]);
+            <EuiButton
+              disabled={isGenerating || isSubmitting}
+              isLoading={isGenerating}
+              iconType="sparkles"
+              size="s"
+              onClick={() => onGenerateClick()}
+            >
+              {isGenerating
+                ? i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
+                    { defaultMessage: 'Generating...' }
+                  )
+                : i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
 
-                  const generation$ = generate(aiFeatures.genAiConnectors.selectedConnector!);
-                  generation$.subscribe({
-                    next: (result) => {
-                      const validation = validateQuery({
-                        title: result.query.title,
-                        kql: { query: result.query.kql },
-                      });
-
-                      if (!validation.kql.isInvalid) {
-                        setGeneratedQueries((prev) => [
-                          ...prev,
-                          { id: v4(), kql: { query: result.query.kql }, title: result.query.title },
-                        ]);
-                      }
-                    },
-                    error: (error) => {
-                      setIsGenerating(false);
-                      if (error.name === 'AbortError') {
-                        return;
-                      }
-
-                      notifications.showErrorDialog({
-                        title: i18n.translate(
-                          'xpack.streams.addSignificantEventFlyout.aiFlow.generateErrorToastTitle',
-                          { defaultMessage: `Could not generate significant events queries` }
-                        ),
-                        error,
-                      });
-                    },
-                    complete: () => {
-                      notifications.toasts.addSuccess({
-                        title: i18n.translate(
-                          'xpack.streams.addSignificantEventFlyout.aiFlow.generateSuccessToastTitle',
-                          { defaultMessage: `Generated significant events queries successfully` }
-                        ),
-                      });
-                      setIsGenerating(false);
-                    },
-                  });
-                }}
-              >
-                {isGenerating
-                  ? i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                      { defaultMessage: 'Generating...' }
-                    )
-                  : i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
-                      {
-                        defaultMessage: 'Generate',
-                      }
-                    )}
-              </EuiButton>
-            </EuiFlexItem>
+                    { defaultMessage: 'Generate' }
+                  )}
+            </EuiButton>
             <AIConnectorSelector
               genAiConnectors={aiFeatures.genAiConnectors}
               disabled={isSubmitting || isGenerating}
@@ -142,7 +138,7 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
             onSelectionChange={onSelectionChange}
             definition={definition}
           />
-        </>
+        </EuiFlexGroup>
       )}
     </EuiFlexGroup>
   );
