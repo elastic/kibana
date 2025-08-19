@@ -407,7 +407,7 @@ export function defineRoutes(
         if (!workflow) {
           return response.notFound();
         }
-        const createdWorkflow = await api.cloneWorkflow(workflow);
+        const createdWorkflow = await api.cloneWorkflow(workflow, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({

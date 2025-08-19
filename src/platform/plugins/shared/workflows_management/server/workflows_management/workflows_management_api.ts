@@ -30,9 +30,9 @@ export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
   page: number;
-  createdBy: string[];
-  enabled: boolean[];
-  query: string;
+  createdBy?: string[];
+  enabled?: boolean[];
+  query?: string;
   _full?: boolean;
 }
 
@@ -89,13 +89,16 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.createWorkflow(workflow, spaceId, request);
   }
 
-  public async cloneWorkflow(workflow: WorkflowDetailDto): Promise<WorkflowDetailDto> {
+  public async cloneWorkflow(
+    workflow: WorkflowDetailDto,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
     const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
       name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
         defaultMessage: 'Copy',
       })}`,
     });
-    return await this.workflowsService.createWorkflow({ yaml: clonedYaml });
+    return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, request);
   }
 
   public async updateWorkflow(
