@@ -401,33 +401,6 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               }}
             />
           </EuiFormRow>
-          {!editorConfig?.hideWidthSettings && (
-            <EuiFormRow
-              data-test-subj="control-editor-width-settings"
-              label={DataControlEditorStrings.manageControl.displaySettings.getWidthInputTitle()}
-            >
-              <div>
-                <EuiButtonGroup
-                  buttonSize="compressed"
-                  legend={DataControlEditorStrings.management.controlWidth.getWidthSwitchLegend()}
-                  options={CONTROL_WIDTH_OPTIONS}
-                  idSelected={editorState.width ?? DEFAULT_CONTROL_WIDTH}
-                  onChange={(newWidth: string) =>
-                    setEditorState({ ...editorState, width: newWidth as ControlWidth })
-                  }
-                />
-                <EuiSpacer size="s" />
-                <EuiSwitch
-                  compressed
-                  label={DataControlEditorStrings.manageControl.displaySettings.getGrowSwitchTitle()}
-                  color="primary"
-                  checked={editorState.grow ?? DEFAULT_CONTROL_GROW}
-                  onChange={() => setEditorState({ ...editorState, grow: !editorState.grow })}
-                  data-test-subj="control-editor-grow-switch"
-                />
-              </div>
-            </EuiFormRow>
-          )}
           {!editorConfig?.hideAdditionalSettings && CustomSettingsComponent}
         </EuiForm>
       </EuiFlyoutBody>
