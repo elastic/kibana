@@ -100,14 +100,12 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
         </EuiFlexGroup>
       }
     >
-      {children && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiPanel hasBorder={true} hasShadow={false}>
-            {children}
-          </EuiPanel>
-        </>
-      )}
+      <>
+        <EuiSpacer size="s" />
+        <EuiPanel hasBorder={true} hasShadow={false}>
+          {children}
+        </EuiPanel>
+      </>
     </EuiAccordion>
   );
 };
