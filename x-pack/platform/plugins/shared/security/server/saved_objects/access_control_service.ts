@@ -82,7 +82,6 @@ export class AccessControlService {
         }
       }
     }
-
     // If we found unauthorized types, throw an error
     if (unauthorizedTypes.size > 0) {
       const typeList = [...unauthorizedTypes].sort().join(',');

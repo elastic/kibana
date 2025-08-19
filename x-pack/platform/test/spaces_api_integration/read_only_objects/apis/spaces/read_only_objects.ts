@@ -233,6 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
           'test_user',
           'changeme'
         );
+
         const createResponse = await supertestWithoutAuth
           .post('/read_only_objects/create')
           .set('kbn-xsrf', 'true')
@@ -240,7 +241,6 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
-
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         await supertestWithoutAuth
@@ -305,6 +305,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({ type: 'read_only_type', isReadOnly: true })
           .expect(200);
         const objectId = createResponse.body.id;
+
         expect(createResponse.body.accessControl).to.have.property('owner', profileUid);
 
         const { cookie: adminCookie } = await loginAsKibanaAdmin();

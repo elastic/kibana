@@ -266,7 +266,10 @@ export const changeObjectAccessControl = async (
       return left({ id, type, error });
     }
 
-    if (!authorizationResult.typeMap.has(type)) {
+    if (
+      authorizationResult.status !== 'fully_authorized' &&
+      !authorizationResult.typeMap.has(type)
+    ) {
       const error = SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(
           `User is not authorized to ${

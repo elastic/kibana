@@ -512,7 +512,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     const privilegeActions = [...privilegeActionsMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
-
     const { hasAllRequested, privileges } = await this.checkPrivileges(
       privilegeActions,
       getAuthorizableSpaces(spaces, allowGlobalResource)
@@ -1184,39 +1183,45 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
      * Saved Objects, but still require authorization. Hence, we pass an empty actions list to the base
      * authorization checks.
      */
-    const authorizationResult = await this.checkAuthorization({
-      types: new Set(typesRequiringAccessControl),
-      spaces: spacesToAuthorize,
-      actions: new Set<A>([]),
-      options: { allowGlobalResource: true, typesRequiringAccessControl },
-    });
-
-    let errMessage: string;
-    try {
-      this.accessControlService.enforceAccessControl({
-        typesRequiringAccessControl,
-        authorizationResult,
-        currentSpace: namespaceString,
+    if (typesRequiringAccessControl.size > 0) {
+      const authorizationResult = await this.checkAuthorization({
+        types: new Set(typesRequiringAccessControl),
+        spaces: spacesToAuthorize,
+        actions: new Set<A>([]),
+        options: { allowGlobalResource: true, typesRequiringAccessControl },
       });
-    } catch (err) {
-      errMessage = err;
-    }
 
-    if (authorizationResult.status === 'unauthorized') {
-      errMessage = `Unable to ${authzAction} for types ${[...typesRequiringAccessControl].join(
-        ', '
-      )}`;
-      const err = new Error(errMessage);
-      this.addAuditEvent({
-        action: auditAction!,
-        error: err,
-        unauthorizedTypes: [...typesRequiringAccessControl],
-        unauthorizedSpaces: [...spacesToAuthorize],
-      });
-      throw SavedObjectsErrorHelpers.decorateForbiddenError(err);
-    }
+      let errMessage: string;
+      try {
+        this.accessControlService.enforceAccessControl({
+          typesRequiringAccessControl,
+          authorizationResult,
+          currentSpace: namespaceString,
+        });
+      } catch (err) {
+        errMessage = err;
+      }
 
-    return authorizationResult;
+      if (authorizationResult.status === 'unauthorized') {
+        errMessage = `Unable to ${authzAction} for types ${[...typesRequiringAccessControl].join(
+          ', '
+        )}`;
+        const err = new Error(errMessage);
+        this.addAuditEvent({
+          action: auditAction!,
+          error: err,
+          unauthorizedTypes: [...typesRequiringAccessControl],
+          unauthorizedSpaces: [...spacesToAuthorize],
+        });
+        throw SavedObjectsErrorHelpers.decorateForbiddenError(err);
+      }
+
+      return authorizationResult;
+    }
+    return {
+      status: 'fully_authorized',
+      typeMap: new Map(),
+    };
   }
 
   auditClosePointInTime() {
