@@ -16,6 +16,7 @@ import type { Subscription } from 'rxjs';
 import type { ChromeBreadcrumb, ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
+import { SEARCH_HOMEPAGE } from '@kbn/deeplinks-search';
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,
@@ -126,12 +127,13 @@ export class SearchNavigationPlugin
   }
 
   private getSearchHomeBreadcrumb(): ChromeBreadcrumb {
-    // TODO: When search_navigation handles solution nav, use the default
     // home deep link for this breadcrumb's path.
+    const homeHref = this.coreStart?.chrome.navLinks.get(SEARCH_HOMEPAGE)?.href;
     return {
       text: i18n.translate('xpack.searchNavigation.breadcrumbs.home.title', {
         defaultMessage: 'Elasticsearch',
       }),
+      href: homeHref,
     };
   }
 }

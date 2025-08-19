@@ -8,7 +8,7 @@
  */
 
 import { Builder, mutate } from '@kbn/esql-ast';
-import { Query } from '../types';
+import type { Query } from '../types';
 
 export const buildQueryAst = (source: Query) => {
   const { root, commands } = source;

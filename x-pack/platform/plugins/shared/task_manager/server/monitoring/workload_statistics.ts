@@ -487,9 +487,8 @@ export interface TaskTypeAggregation extends estypes.AggregationsFiltersAggregat
   sum_other_doc_count?: number | undefined;
 }
 
-// @ts-expect-error key doesn't accept a string
 export interface ScheduleAggregation extends estypes.AggregationsFiltersAggregate {
-  buckets: Array<{ doc_count: number; key: string | number }>;
+  buckets: Array<{ doc_count: number; key: string }>;
   doc_count_error_upper_bound?: number | undefined;
   sum_other_doc_count?: number | undefined;
 }

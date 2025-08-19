@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import {
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObjectsClientContract,
+  SecurityServiceStart,
+} from '@kbn/core/server';
+import type {
   CreateWorkflowCommand,
   EsWorkflow,
-  transformWorkflowYamlJsontoEsWorkflow,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -19,14 +24,13 @@ import {
   WorkflowExecutionListDto,
   WorkflowListDto,
 } from '@kbn/workflows';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common';
-import { parseWorkflowYamlToJSON } from '../../common/lib/yaml-utils';
-import {
-  WORKFLOW_SAVED_OBJECT_TYPE,
-  WorkflowSavedObjectAttributes,
-} from '../saved_objects/workflow';
+import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
+import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
+import { getAuthenticatedUser } from '../lib/get_user';
+import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
+import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import { WorkflowEventLoggerService, type IWorkflowEventLogger } from '../workflow_event_logger';
 import { createIndexWithMappings } from './lib/create_index';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import {
@@ -34,7 +38,9 @@ import {
   WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
 } from './lib/index_mappings';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import { GetWorkflowsParams } from './workflows_management_api';
+import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
+import { SimpleWorkflowLogger } from './lib/workflow_logger';
+import type { GetWorkflowsParams } from './workflows_management_api';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -43,7 +49,9 @@ export class WorkflowsService {
   private getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
   private workflowsExecutionIndex: string;
   private stepsExecutionIndex: string;
-  private workflowEventLoggerService: WorkflowEventLoggerService | null = null;
+  private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
+  private workflowExecutionLogsIndex: string;
+  private security?: SecurityServiceStart;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -51,33 +59,35 @@ export class WorkflowsService {
     getSavedObjectsClient: () => Promise<SavedObjectsClientContract>,
     workflowsExecutionIndex: string,
     stepsExecutionIndex: string,
-    workflowExecutionLogsIndex: string
+    workflowExecutionLogsIndex: string,
+    enableConsoleLogging: boolean = false
   ) {
     this.logger = logger;
     this.getSavedObjectsClient = getSavedObjectsClient;
     this.stepsExecutionIndex = stepsExecutionIndex;
     this.workflowsExecutionIndex = workflowsExecutionIndex;
-    void this.initialize(esClientPromise, workflowExecutionLogsIndex);
+    this.workflowExecutionLogsIndex = workflowExecutionLogsIndex;
+    void this.initialize(esClientPromise, workflowExecutionLogsIndex, enableConsoleLogging);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
     this.taskScheduler = taskScheduler;
   }
 
+  public setSecurityService(security: SecurityServiceStart) {
+    this.security = security;
+  }
+
   private async initialize(
     esClientPromise: Promise<ElasticsearchClient>,
-    workflowExecutionLogsIndex: string
+    workflowExecutionLogsIndex: string,
+    enableConsoleLogging: boolean = false
   ) {
     this.esClient = await esClientPromise;
     this.logger.debug('Elasticsearch client initialized');
 
-    // Initialize workflow event logger service
-    this.workflowEventLoggerService = new WorkflowEventLoggerService({
-      esClient: this.esClient,
-      logger: this.logger,
-      indexName: workflowExecutionLogsIndex,
-    });
-    await this.workflowEventLoggerService.initialize();
+    // Initialize simple workflow logger
+    this.workflowEventLoggerService = new SimpleWorkflowLogger(this.logger, enableConsoleLogging);
 
     // Create required indices with proper mappings (workflows are now saved objects)
     await Promise.all([
@@ -107,6 +117,8 @@ export class WorkflowsService {
       perPage: 100,
       sortField: 'updated_at',
       sortOrder: 'desc',
+      // Exclude deleted workflows by checking for null/undefined deleted_at
+      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
     });
 
     // Get workflow IDs to fetch execution history
@@ -212,7 +224,7 @@ export class WorkflowsService {
         createdBy: response.attributes.createdBy,
         lastUpdatedAt: new Date(response.updated_at!),
         lastUpdatedBy: response.attributes.lastUpdatedBy,
-        definition: response.attributes.definition as any,
+        definition: response.attributes.definition,
         yaml: response.attributes.yaml,
       };
     } catch (error: any) {
@@ -223,7 +235,10 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
@@ -232,6 +247,7 @@ export class WorkflowsService {
     // @ts-expect-error - TODO: fix this
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
       name: workflowToCreate.name,
       description: workflowToCreate.description,
@@ -239,8 +255,9 @@ export class WorkflowsService {
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
       definition: workflowToCreate.definition,
-      createdBy: 'system', // TODO: get from context
-      lastUpdatedBy: 'system', // TODO: get from context
+      createdBy: authenticatedUser,
+      lastUpdatedBy: authenticatedUser,
+      deleted_at: null,
     };
 
     const response = await savedObjectsClient.create<WorkflowSavedObjectAttributes>(
@@ -249,9 +266,9 @@ export class WorkflowsService {
     );
 
     // Schedule the workflow if it has triggers
-    if (this.taskScheduler && workflowToCreate.definition.workflow.triggers) {
-      for (const trigger of workflowToCreate.definition.workflow.triggers) {
-        if (trigger.type === 'triggers.elastic.scheduled' && trigger.enabled) {
+    if (this.taskScheduler && workflowToCreate.definition.triggers) {
+      for (const trigger of workflowToCreate.definition.triggers) {
+        if (trigger.type === 'scheduled' && trigger.enabled) {
           await this.taskScheduler.scheduleWorkflowTask(response.id, 'default', trigger);
         }
       }
@@ -273,7 +290,8 @@ export class WorkflowsService {
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
+    workflow: Partial<EsWorkflow>,
+    request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto> {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const { yaml, definition, ...rest } = workflow;
@@ -294,7 +312,7 @@ export class WorkflowsService {
         tags: updatedWorkflow.tags || [],
         yaml,
         definition: updatedWorkflow.definition,
-        lastUpdatedBy: 'system', // TODO: get from context
+        lastUpdatedBy: getAuthenticatedUser(request, this.security),
       };
 
       // Update scheduled tasks if triggers changed
@@ -304,7 +322,7 @@ export class WorkflowsService {
 
         // Add new scheduled tasks
         for (const trigger of updatedWorkflow.definition.workflow.triggers) {
-          if (trigger.type === 'triggers.elastic.scheduled') {
+          if (trigger.type === 'scheduled') {
             await this.taskScheduler.scheduleWorkflowTask(id, 'default', trigger);
           }
         }
@@ -312,7 +330,7 @@ export class WorkflowsService {
     } else {
       updateData = {
         ...rest,
-        lastUpdatedBy: 'system', // TODO: get from context
+        lastUpdatedBy: getAuthenticatedUser(request, this.security),
       };
     }
 
@@ -329,7 +347,7 @@ export class WorkflowsService {
     };
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
+  public async deleteWorkflows(workflowIds: string[], request: KibanaRequest): Promise<void> {
     const savedObjectsClient = await this.getSavedObjectsClient();
 
     // Remove scheduled tasks for deleted workflows
@@ -339,8 +357,16 @@ export class WorkflowsService {
       }
     }
 
+    // Soft delete workflows by setting deleted_at timestamp instead of removing them
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const deletedAt = new Date();
     await Promise.all(
-      workflowIds.map((id) => savedObjectsClient.delete(WORKFLOW_SAVED_OBJECT_TYPE, id))
+      workflowIds.map((id) =>
+        savedObjectsClient.update<WorkflowSavedObjectAttributes>(WORKFLOW_SAVED_OBJECT_TYPE, id, {
+          deleted_at: deletedAt,
+          lastUpdatedBy: authenticatedUser,
+        })
+      )
     );
   }
 
@@ -350,6 +376,7 @@ export class WorkflowsService {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
+
     return await searchWorkflowExecutions({
       esClient: this.esClient,
       logger: this.logger,
@@ -363,7 +390,7 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService.createWorkflowLogger(workflowId, workflowName);
+    return this.workflowEventLoggerService;
   }
 
   public getExecutionLogger(
@@ -374,11 +401,7 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService.createExecutionLogger(
-      workflowId,
-      executionId,
-      workflowName
-    );
+    return this.workflowEventLoggerService;
   }
 
   public getStepLogger(
@@ -392,27 +415,92 @@ export class WorkflowsService {
     if (!this.workflowEventLoggerService) {
       throw new Error('Workflow event logger service not initialized');
     }
-    return this.workflowEventLoggerService.createStepLogger(
-      workflowId,
-      executionId,
-      stepId,
-      stepName,
-      stepType,
-      workflowName
-    );
+    return this.workflowEventLoggerService;
   }
 
-  public async getExecutionLogs(executionId: string) {
-    if (!this.workflowEventLoggerService) {
-      throw new Error('Workflow event logger service not initialized');
+  // Direct log search methods - query ES logs index directly
+  private async searchWorkflowLogs(query: any): Promise<LogSearchResult> {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
     }
-    return this.workflowEventLoggerService.getExecutionLogs(executionId);
+
+    try {
+      const response = await this.esClient.search({
+        index: this.workflowExecutionLogsIndex,
+        query,
+        sort: [{ '@timestamp': { order: 'desc' } }],
+        size: 1000,
+      });
+
+      return {
+        total:
+          typeof response.hits.total === 'number'
+            ? response.hits.total
+            : response.hits.total?.value || 0,
+        logs: response.hits.hits
+          .map((hit: any) => hit._source)
+          .filter((source: any) => source && source['@timestamp']), // Filter out invalid entries
+      };
+    } catch (error) {
+      this.logger.error('Failed to search workflow logs', error);
+      // Return empty result instead of throwing - logs might not exist yet
+      return {
+        total: 0,
+        logs: [],
+      };
+    }
   }
 
-  public async getStepLogs(executionId: string, stepId: string) {
-    if (!this.workflowEventLoggerService) {
-      throw new Error('Workflow event logger service not initialized');
-    }
-    return this.workflowEventLoggerService.getStepLogs(executionId, stepId);
+  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
+    const query = {
+      bool: {
+        must: [
+          {
+            match: {
+              'workflow.execution_id': executionId,
+            },
+          },
+        ],
+      },
+    };
+
+    return this.searchWorkflowLogs(query);
+  }
+
+  public async getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
+    const query = {
+      bool: {
+        must: [
+          {
+            match: {
+              'workflow.execution_id': executionId,
+            },
+          },
+          {
+            match: {
+              'workflow.step_id': stepId,
+            },
+          },
+        ],
+      },
+    };
+
+    return this.searchWorkflowLogs(query);
+  }
+
+  public async getWorkflowLogs(workflowId: string): Promise<LogSearchResult> {
+    const query = {
+      bool: {
+        must: [
+          {
+            term: {
+              'workflow.id': workflowId,
+            },
+          },
+        ],
+      },
+    };
+
+    return this.searchWorkflowLogs(query);
   }
 }

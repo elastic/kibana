@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { Plugin } from './load_kibana_platform_plugin';
-import { Config } from './config';
+import type { Plugin } from './load_kibana_platform_plugin';
+import type { Config } from './config';
 
 export interface TaskContext {
   log: ToolingLog;
@@ -22,4 +22,5 @@ export interface TaskContext {
   sourceDir: string;
   buildDir: string;
   kibanaVersion: string;
+  quiet?: boolean;
 }

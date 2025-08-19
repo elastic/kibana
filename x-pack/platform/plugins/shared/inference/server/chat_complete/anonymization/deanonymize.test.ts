@@ -6,13 +6,8 @@
  */
 
 import { deanonymize } from './deanonymize';
-import {
-  Anonymization,
-  AssistantMessage,
-  Message,
-  MessageRole,
-  UserMessage,
-} from '@kbn/inference-common';
+import type { Anonymization, AssistantMessage, Message, UserMessage } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 
 function createMask(entityClass: string, value: string) {
   return `${entityClass}_${Buffer.from(value).toString('hex').slice(0, 40)}`;

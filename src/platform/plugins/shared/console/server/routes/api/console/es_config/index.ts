@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsConfigApiResponse } from '../../../../../common/types/api_responses';
-import { RouteDependencies } from '../../..';
+import type { EsConfigApiResponse } from '../../../../../common/types/api_responses';
+import type { RouteDependencies } from '../../..';
 
 export const registerEsConfigRoute = ({ router, services }: RouteDependencies): void => {
   router.get(
@@ -25,15 +25,16 @@ export const registerEsConfigRoute = ({ router, services }: RouteDependencies): 
     async (ctx, req, res) => {
       const cloudUrl = services.esLegacyConfigService.getCloudUrl();
       if (cloudUrl) {
-        const body: EsConfigApiResponse = { host: cloudUrl };
+        const body: EsConfigApiResponse = { host: cloudUrl, allHosts: [cloudUrl] };
 
         return res.ok({ body });
       }
-      const {
-        hosts: [host],
-      } = await services.esLegacyConfigService.readConfig();
+      const { hosts } = await services.esLegacyConfigService.readConfig();
 
-      const body: EsConfigApiResponse = { host };
+      const body: EsConfigApiResponse = {
+        host: hosts[0],
+        allHosts: hosts,
+      };
 
       return res.ok({ body });
     }

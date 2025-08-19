@@ -5,24 +5,25 @@
  * 2.0.
  */
 
-import { APP_WRAPPER_CLASS, AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { PerformanceContextProvider } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
+import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { ExperimentalFeatures } from '../common/config';
+import type { ExperimentalFeatures } from '../common/config';
 import { PluginContext } from './context/plugin_context';
 import { usePluginContext } from './hooks/use_plugin_context';
 import { getRoutes } from './routes/routes';
-import { SLOPublicPluginsStart, SLORepositoryClient } from './types';
+import type { SLOPublicPluginsStart, SLORepositoryClient } from './types';
 
 interface Props {
   core: CoreStart;

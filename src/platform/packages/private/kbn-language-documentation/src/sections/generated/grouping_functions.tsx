@@ -30,6 +30,7 @@ export const functions = {
         defaultMessage: 'BUCKET',
       }),
       preview: false,
+      license: undefined,
       description: (
         <Markdown
           openLinksInNewTab
@@ -63,6 +64,10 @@ export const functions = {
         defaultMessage: 'CATEGORIZE',
       }),
       preview: false,
+      license: {
+        licenses: [{ name: 'platinum', isSignatureSpecific: false, paramsWithLicense: [] }],
+        hasMultipleLicenses: false,
+      },
       description: (
         <Markdown
           openLinksInNewTab

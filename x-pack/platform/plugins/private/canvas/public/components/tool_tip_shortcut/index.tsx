@@ -6,7 +6,8 @@
  */
 
 import { compose, mapProps } from 'react-recompose';
-import { ToolTipShortcut as Component, Props as ComponentProps } from './tool_tip_shortcut';
+import type { Props as ComponentProps } from './tool_tip_shortcut';
+import { ToolTipShortcut as Component } from './tool_tip_shortcut';
 import { getClientPlatform } from '../../lib/get_client_platform';
 import { keymap } from '../../lib/keymap';
 import { getPrettyShortcut } from '../../lib/get_pretty_shortcut';

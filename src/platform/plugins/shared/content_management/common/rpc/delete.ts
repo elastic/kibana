@@ -13,7 +13,7 @@ import { versionSchema } from './constants';
 
 import type { ProcedureSchemas } from './types';
 
-export const deleteSchemas: ProcedureSchemas = {
+export const deleteSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
@@ -35,7 +35,7 @@ export const deleteSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export interface DeleteIn<T extends string = string, Options extends void | object = object> {
   contentTypeId: T;

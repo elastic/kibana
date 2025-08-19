@@ -22,7 +22,7 @@ export const validate = (
 ): ESQLMessage[] => {
   const messages: ESQLMessage[] = [];
 
-  const { prompt, location, targetField } = command as ESQLAstCompletionCommand;
+  const { prompt, location, targetField, inferenceId } = command as ESQLAstCompletionCommand;
 
   const promptExpressionType = getExpressionType(
     prompt,
@@ -43,7 +43,16 @@ export const validate = (
     });
   }
 
-  messages.push(...validateCommandArguments(command, ast, context, callbacks));
+  if (inferenceId.incomplete) {
+    messages.push({
+      location: command.location,
+      text: i18n.translate('kbn-esql-ast.esql.validation.completionInferenceIdRequired', {
+        defaultMessage: '[COMPLETION] inference_id parameter is required',
+      }),
+      type: 'error',
+      code: 'completionInferenceIdRequired',
+    });
+  }
 
   const targetName = targetField?.name || 'completion';
 
@@ -55,6 +64,8 @@ export const validate = (
       type: 'keyword',
     },
   ]);
+
+  messages.push(...validateCommandArguments(command, ast, context, callbacks));
 
   return messages;
 };

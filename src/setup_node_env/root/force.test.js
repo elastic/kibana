@@ -18,9 +18,9 @@ describe('forceRoot', function () {
     expect(forceRoot(['--foo'])).toBeFalsy();
   });
 
-  test('remove argument', function () {
+  test('retains argument', function () {
     var args = ['--allow-root', 'foo'];
     forceRoot(args);
-    expect(args.includes('--allow-root')).toBeFalsy();
+    expect(args.includes('--allow-root')).toBeTruthy();
   });
 });

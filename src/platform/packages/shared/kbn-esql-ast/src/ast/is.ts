@@ -8,7 +8,7 @@
  */
 
 import type * as types from '../types';
-import { ESQLInlineCast, ESQLProperNode, ESQLTimeInterval } from '../types';
+import type { ESQLInlineCast, ESQLProperNode } from '../types';
 import { Walker } from '../walker';
 
 export const isProperNode = (node: unknown): node is types.ESQLProperNode =>
@@ -72,6 +72,12 @@ export const isDoubleLiteral = (node: unknown): node is types.ESQLIntegerLiteral
 export const isBooleanLiteral = (node: unknown): node is types.ESQLStringLiteral =>
   isLiteral(node) && node.literalType === 'boolean';
 
+export const isTimeDurationLiteral = (node: unknown): node is types.ESQLTimeDurationLiteral =>
+  isLiteral(node) && node.literalType === 'time_duration';
+
+export const isDatePeriodLiteral = (node: unknown): node is types.ESQLDatePeriodLiteral =>
+  isLiteral(node) && node.literalType === 'date_period';
+
 export const isParamLiteral = (node: unknown): node is types.ESQLParamLiteral =>
   isLiteral(node) && node.literalType === 'param';
 
@@ -93,9 +99,6 @@ export const isList = (node: unknown): node is types.ESQLList =>
 export const isOptionNode = (node: types.ESQLAstNode): node is types.ESQLCommandOption => {
   return !!node && typeof node === 'object' && !Array.isArray(node) && node.type === 'option';
 };
-
-export const isTimeInterval = (node: unknown): node is ESQLTimeInterval =>
-  isProperNode(node) && node.type === 'timeInterval';
 
 export const isInlineCast = (node: unknown): node is ESQLInlineCast =>
   isProperNode(node) && node.type === 'inlineCast';

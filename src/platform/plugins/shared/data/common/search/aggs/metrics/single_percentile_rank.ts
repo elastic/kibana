@@ -13,7 +13,7 @@ import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import type { IResponseAggConfig } from './lib/get_response_agg_config_class';
 import { KBN_FIELD_TYPES } from '../../..';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 
 const singlePercentileTitle = i18n.translate('data.search.aggs.metrics.singlePercentileRankTitle', {
   defaultMessage: 'Percentile rank',
