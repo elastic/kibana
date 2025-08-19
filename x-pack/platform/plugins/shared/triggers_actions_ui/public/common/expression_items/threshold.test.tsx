@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ThresholdExpression } from './threshold';
@@ -81,8 +81,8 @@ describe('threshold expression', () => {
 
     const thresholdInput = screen.getByTestId('alertThresholdInput0') as HTMLInputElement;
 
-    await user.clear(thresholdInput);
-    await user.type(thresholdInput, '1000');
+  // Use a single change event instead of per-character typing to avoid multiple handler calls
+  fireEvent.change(thresholdInput, { target: { value: '1000' } });
 
     await waitFor(() => {
       expect(onChangeSelectedThreshold).toHaveBeenCalledTimes(1);
