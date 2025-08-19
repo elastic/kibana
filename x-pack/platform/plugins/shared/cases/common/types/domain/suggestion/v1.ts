@@ -20,13 +20,7 @@ export const suggestionContextRt = z.object({
     .optional(),
 });
 
-export const suggestionRequestRt = z.object({
-  owners: z.array(suggestionOwnerSchema),
-  context: suggestionContextRt,
-});
-
 export type SuggestionContext = z.infer<typeof suggestionContextRt>;
-export type SuggestionRequest = z.infer<typeof suggestionRequestRt>;
 
 export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
 export type SuggestionOwners = SuggestionOwner[];

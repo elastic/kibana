@@ -66,7 +66,6 @@ export {
   ConnectorTypes,
   AttachmentType,
   ExternalReferenceStorageType,
-  type SuggestionRequest,
   type SuggestionResponse,
   type SuggestionContext,
   type SuggestionItem,
