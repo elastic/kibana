@@ -5492,6 +5492,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/data-streams-example-plugin@link:examples/data_streams_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/data-streams@link:src/platform/packages/private/kbn-data-streams":
   version "0.0.0"
   uid ""
