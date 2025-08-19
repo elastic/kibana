@@ -48,6 +48,7 @@ import type {
   ActionsClientLlm,
 } from '@kbn/langchain/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { ElasticAssistantCheckpointSaverPluginStart } from '@kbn/elastic-assistant-checkpoint-saver-plugin/server'
 import type { IEventLogger, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
@@ -87,6 +88,10 @@ export interface ElasticAssistantPluginStart {
    * Inference plugin start contract.
    */
   inference: InferenceServerStart;
+  /**
+   * Elastic Assistant Checkpoint Saver plugin start contract.
+   */
+  elasticAssistantCheckpointSaver: ElasticAssistantCheckpointSaverPluginStart;
   /**
    * Register features to be used by the elastic assistant.
    *
@@ -139,6 +144,7 @@ export interface ElasticAssistantPluginStartDependencies {
   alerting: AlertingServerStart;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  elasticAssistantCheckpointSaver: ElasticAssistantCheckpointSaverPluginStart;
   spaces?: SpacesPluginStart;
   licensing: LicensingPluginStart;
   productDocBase: ProductDocBaseStartContract;
@@ -148,6 +154,7 @@ export interface ElasticAssistantPluginStartDependencies {
 export interface ElasticAssistantApiRequestHandlerContext {
   core: CoreRequestHandlerContext;
   actions: ActionsPluginStart;
+  elasticAssistantCheckpointSaver: ElasticAssistantCheckpointSaverPluginStart;
   auditLogger?: AuditLogger;
   eventLogger: IEventLogger;
   eventLogIndex: string;

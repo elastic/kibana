@@ -96,6 +96,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       core: coreContext,
 
       actions: startPlugins.actions,
+      elasticAssistantCheckpointSaver: startPlugins.elasticAssistantCheckpointSaver,
       auditLogger: coreStart.security.audit?.asScoped(request),
       logger: this.logger,
       eventLogIndex,

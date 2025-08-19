@@ -83,7 +83,7 @@ describe('ElasticSearchSaver', () => {
       await esClient.indices.create({
         index: ElasticSearchSaver.defaultCheckpointIndex,
         mappings: {
-          properties: ElasticSearchSaver.checkpointIndexMapping,
+          properties: ElasticSearchSaver.checkpointFieldMap,
         },
       });
     }
@@ -95,7 +95,7 @@ describe('ElasticSearchSaver', () => {
       await esClient.indices.create({
         index: ElasticSearchSaver.defaultCheckpointWritesIndex,
         mappings: {
-          properties: ElasticSearchSaver.checkpointWritesIndexMapping,
+          properties: ElasticSearchSaver.checkpointWritesFieldMap,
         },
       });
     }

@@ -1,0 +1,18 @@
+{
+  "esModuleInterop": true,
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+  },
+  "include": [
+    "../../../../../typings/**/*",
+    "public/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/elastic-assistant-shared-state",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}
