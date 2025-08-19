@@ -27,7 +27,7 @@ import { registerMappingRoute } from './routes/mapping';
 import { registerSearchRoute } from './routes/search';
 import { PLUGIN_ID } from '../common/constants';
 import { registerApiKeysRoutes } from './routes/api_keys';
-import { SearchConnectorsConfig } from './config';
+import type { SearchConnectorsConfig } from './config';
 import { AgentlessConnectorDeploymentsSyncService } from './task';
 import { AgentlessConnectorsInfraServiceFactory } from './services/infra_service_factory';
 

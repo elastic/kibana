@@ -7,20 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiText,
   EuiLoadingSpinner,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { ExecutionStatus, WorkflowDetailDto } from '@kbn/workflows';
+import type { ExecutionStatus, WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
-import { WorkflowExecution } from '../../workflow_detail/ui/workflow_execution';
+import { WorkflowExecution } from '../../workflow_execution_detail/ui/workflow_execution';
 import { StatusBadge } from '../../../shared/ui/status_badge';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 

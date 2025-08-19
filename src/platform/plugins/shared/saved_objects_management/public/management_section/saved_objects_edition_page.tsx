@@ -11,7 +11,7 @@ import React, { useEffect } from 'react';
 import { useParams, useLocation } from 'react-router-dom';
 import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
-import { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { css } from '@emotion/react';
 import { SavedObjectEdition } from './object_view';

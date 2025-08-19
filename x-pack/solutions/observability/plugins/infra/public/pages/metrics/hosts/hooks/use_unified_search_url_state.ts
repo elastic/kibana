@@ -16,12 +16,12 @@ import { enumeration } from '@kbn/securitysolution-io-ts-types';
 import { FilterStateStore } from '@kbn/es-query';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
-import { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import {
   useKibanaTimefilterTime,
   useSyncKibanaTimeFilterTime,
 } from '../../../../hooks/use_kibana_timefilter_time';
 import { DEFAULT_HOST_LIMIT, LOCAL_STORAGE_HOST_LIMIT_KEY } from '../constants';
+import { DataSchemaFormatRT } from '../../../../../common/http_api/shared';
 
 const DEFAULT_QUERY = {
   language: 'kuery',
@@ -147,11 +147,7 @@ const HostsStateRT = rt.type({
   query: HostsQueryStateRT,
   dateRange: StringDateRangeRT,
   limit: rt.number,
-  preferredSchema: rt.union([
-    rt.literal(DataSchemaFormat.ECS),
-    rt.literal(DataSchemaFormat.SEMCONV),
-    rt.null,
-  ]),
+  preferredSchema: rt.union([DataSchemaFormatRT, rt.null]),
 });
 
 export type HostsState = rt.TypeOf<typeof HostsStateRT>;

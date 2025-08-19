@@ -11,7 +11,7 @@ import { ALERT_RULE_PARAMETERS } from '@kbn/rule-data-utils';
 import dedent from 'dedent';
 import { type AlertDetailsContextualInsight } from '../../../server/services';
 import { useKibana } from '../../utils/kibana_react';
-import { AlertData } from '../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 
 export function AlertDetailContextualInsights({ alert }: { alert: AlertData | null }) {
   const {

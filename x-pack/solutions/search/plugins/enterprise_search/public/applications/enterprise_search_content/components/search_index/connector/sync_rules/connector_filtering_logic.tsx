@@ -5,36 +5,33 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
 import { isEqual } from 'lodash';
 
-import {
-  FilteringConfig,
-  FilteringRule,
-  FilteringValidation,
-  FilteringValidationState,
-} from '@kbn/search-connectors';
+import type { FilteringConfig, FilteringRule, FilteringValidation } from '@kbn/search-connectors';
+import { FilteringValidationState } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../../common/types/api';
 
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { clearFlashMessages } from '../../../../../shared/flash_messages';
-import {
-  ConnectorFilteringApiLogic,
+import type {
   PutConnectorFilteringArgs,
   PutConnectorFilteringResponse,
 } from '../../../../api/connector/update_connector_filtering_api_logic';
-import {
-  ConnectorFilteringDraftApiLogic,
+import { ConnectorFilteringApiLogic } from '../../../../api/connector/update_connector_filtering_api_logic';
+import type {
   PutConnectorFilteringDraftArgs,
   PutConnectorFilteringDraftResponse,
 } from '../../../../api/connector/update_connector_filtering_draft_api_logic';
-import {
-  FetchIndexApiLogic,
+import { ConnectorFilteringDraftApiLogic } from '../../../../api/connector/update_connector_filtering_draft_api_logic';
+import type {
   FetchIndexApiParams,
   FetchIndexApiResponse,
 } from '../../../../api/index/fetch_index_api_logic';
+import { FetchIndexApiLogic } from '../../../../api/index/fetch_index_api_logic';
 import { isConnectorIndex } from '../../../../utils/indices';
 
 type ConnectorFilteringActions = Pick<
@@ -198,7 +195,6 @@ export const ConnectorFilteringLogic = kea<
     filteringConfig: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: (filteringConfig, filteringRules) =>
           filteringConfig
             ? {
@@ -206,7 +202,6 @@ export const ConnectorFilteringLogic = kea<
                 active: filteringRules,
               }
             : null,
-        // @ts-expect-error upgrade typescript v5.1.6
         draftApiSuccess: (filteringConfig, filteringRules) =>
           filteringConfig
             ? {
@@ -214,7 +209,6 @@ export const ConnectorFilteringLogic = kea<
                 draft: filteringRules,
               }
             : null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setFilteringConfig: (_, filteringConfig) => filteringConfig,
       },
     ],
@@ -223,21 +217,18 @@ export const ConnectorFilteringLogic = kea<
       {
         draftApiError: () => false,
         draftApiSuccess: () => false,
-        // @ts-expect-error upgrade typescript v5.1.6
         setIsEditing: (_, { isEditing }) => isEditing,
       },
     ],
     localAdvancedSnippet: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setLocalAdvancedSnippet: (_, { advancedSnippet }) => advancedSnippet,
       },
     ],
     localFilteringRules: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         addFilteringRule: (filteringRules, filteringRule) => {
           const newFilteringRules: FilteringRule[] = filteringRules.length
             ? [
@@ -248,22 +239,16 @@ export const ConnectorFilteringLogic = kea<
             : [filteringRule, createDefaultRule(1)];
           return newFilteringRules.map((rule, index) => ({ ...rule, order: index }));
         },
-        // @ts-expect-error upgrade typescript v5.1.6
         deleteFilteringRule: (filteringRules, filteringRule) =>
-          // @ts-expect-error upgrade typescript v5.1.6
           filteringRules.filter((rule) => rule.id !== filteringRule.id),
-        // @ts-expect-error upgrade typescript v5.1.6
         reorderFilteringRules: (filteringRules, newFilteringRules) => {
           const lastItem = filteringRules.length
             ? filteringRules[filteringRules.length - 1]
             : createDefaultRule(0);
           return [...newFilteringRules, lastItem].map((rule, index) => ({ ...rule, order: index }));
         },
-        // @ts-expect-error upgrade typescript v5.1.6
         setLocalFilteringRules: (_, filteringRules) => filteringRules,
-        // @ts-expect-error upgrade typescript v5.1.6
         updateFilteringRule: (filteringRules, filteringRule) =>
-          // @ts-expect-error upgrade typescript v5.1.6
           filteringRules.map((rule) => (rule.id === filteringRule.id ? filteringRule : rule)),
       },
     ],

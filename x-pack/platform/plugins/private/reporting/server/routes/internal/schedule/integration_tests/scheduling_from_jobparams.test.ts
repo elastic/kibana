@@ -17,16 +17,16 @@ import { PdfExportType } from '@kbn/reporting-export-types-pdf';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
 
-import { ReportingCore } from '../../../..';
+import type { ReportingCore } from '../../../..';
 import { reportingMock } from '../../../../mocks';
 import {
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../../types';
+import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerScheduleRoutesInternal } from '../schedule_from_jobparams';
-import { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import type { FakeRawRequest, KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 
 const fakeRawRequest: FakeRawRequest = {

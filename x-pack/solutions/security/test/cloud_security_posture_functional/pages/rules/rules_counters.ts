@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cloud-security-posture-settings',
         ],
       });
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
@@ -85,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'cloud-security-posture-settings',
         ],
       });
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
     });
 
     afterEach(async () => {

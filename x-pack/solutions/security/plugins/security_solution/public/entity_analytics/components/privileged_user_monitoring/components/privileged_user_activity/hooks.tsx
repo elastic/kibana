@@ -10,6 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { encode } from '@kbn/rison';
+import * as E from 'fp-ts/Either';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import {
@@ -88,16 +89,15 @@ export const usePrivilegedUserActivityParams = (
             indexPattern,
             fields
           )
-        : undefined,
+        : E.left({
+            error: 'GenerateEsqlSource requires spaceId, indexPattern, fields to be defined',
+          }),
     [selectedToggleOption, spaceId, indexPattern, fields]
   );
 
-  const generateTableQuery = useMemo(
-    () => (esqlSource ? generateListESQLQuery(esqlSource) : undefined),
-    [esqlSource]
-  );
+  const generateTableQuery = useMemo(() => generateListESQLQuery(esqlSource), [esqlSource]);
   const generateVisualizationQuery = useMemo(
-    () => (esqlSource ? generateVisualizationESQLQuery(esqlSource) : undefined),
+    () => generateVisualizationESQLQuery(esqlSource),
     [esqlSource]
   );
 

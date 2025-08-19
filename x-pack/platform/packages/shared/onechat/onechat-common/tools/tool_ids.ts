@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { builtInToolIdPrefix } from './constants';
+import { builtInToolIdPrefix, reservedKeywords } from './constants';
 
 export const idRegexp = /^[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?$/;
 
@@ -21,5 +21,5 @@ export const isBuiltInToolId = (id: string) => {
  * Atm this only checks for built-in IDs, but it will check for MCP and such later.
  */
 export const isReservedToolId = (id: string) => {
-  return isBuiltInToolId(id);
+  return isBuiltInToolId(id) || reservedKeywords.includes(id);
 };
