@@ -28,6 +28,7 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { SerializedStyles } from '@emotion/serialize';
+import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 
 /**
  * The fetch status of a Unified Histogram request
@@ -240,9 +241,22 @@ export interface ChartSectionProps {
  */
 export type ChartSectionConfiguration =
   | {
+      /**
+       * The component to render for the chart section
+       */
       Component: React.ComponentType<ChartSectionProps>;
+      /**
+       * Controls whether or not to replace the default histogram and activate the custom chart
+       */
       replaceDefaultChart: true;
-      localStorageKeyPrefix: string;
+      /**
+       * Prefix for the local storage key used to store the chart section state
+       */
+      localStorageKeyPrefix?: string;
+      /**
+       * The initial chart section height
+       */
+      initialTopPanelHeight?: ResizableLayoutProps['fixedPanelSize'];
     }
   | {
       replaceDefaultChart: false;

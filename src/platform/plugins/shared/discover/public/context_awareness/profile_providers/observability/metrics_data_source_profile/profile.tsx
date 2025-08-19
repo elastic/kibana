@@ -32,6 +32,7 @@ export const createMetricsDataSourceProfileProvider = (
       Component: LazyMetricsGridSection,
       replaceDefaultChart: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
+      initialTopPanelHeight: 'max-content',
     }),
   },
   resolve: (params) => {
