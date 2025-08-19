@@ -74,6 +74,7 @@ const getContextMenuAriaLabel = (title?: string, index?: number) => {
 const QUICK_ACTION_IDS = {
   edit: [
     'editPanel',
+    'clearControl',
     'ACTION_CONFIGURE_IN_LENS',
     'ACTION_CUSTOMIZE_PANEL',
     'ACTION_OPEN_IN_DISCOVER',
@@ -81,6 +82,7 @@ const QUICK_ACTION_IDS = {
     'CONVERT_LEGACY_MARKDOWN',
   ],
   view: [
+    'clearControl',
     'ACTION_SHOW_CONFIG_PANEL',
     'ACTION_OPEN_IN_DISCOVER',
     'ACTION_VIEW_SAVED_SEARCH',

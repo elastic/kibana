@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_CLEAR_CONTROL,
   ACTION_CREATE_CONTROL,
   ACTION_DELETE_CONTROL,
   ACTION_EDIT_CONTROL,
-  ADD_OPTIONS_LIST_ACTION_ID,
   OPTIONS_LIST_ACTION,
 } from './constants';
-import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from './controls_hover_trigger';
 import { CONTROL_MENU_TRIGGER } from './control_panel_actions';
+import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from './controls_hover_trigger';
 
 export function registerActions(uiActions: UiActionsStart) {
   uiActions.registerTrigger(controlHoverTrigger);
@@ -38,7 +38,7 @@ export function registerActions(uiActions: UiActionsStart) {
     const { ClearControlAction } = await import('../controls_module');
     return new ClearControlAction();
   });
-  uiActions.attachAction(CONTROL_HOVER_TRIGGER, ACTION_CLEAR_CONTROL);
+  uiActions.attachAction(CONTEXT_MENU_TRIGGER, ACTION_CLEAR_CONTROL);
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ACTION_CREATE_CONTROL, async () => {
     const { createControlAction } = await import('../controls_module');

@@ -45,9 +45,7 @@ const compatibilityCheck = (api: unknown | null): api is ClearControlActionApi =
       apiHasUniqueId(api) &&
       isClearableControl(api) &&
       apiHasParentApi(api) &&
-      apiCanAccessViewMode(api.parentApi) &&
-      apiIsOfType(api.parentApi, CONTROLS_GROUP_TYPE) &&
-      apiIsPresentationContainer(api.parentApi)
+      apiCanAccessViewMode(api.parentApi)
   );
 
 export class ClearControlAction
@@ -59,30 +57,13 @@ export class ClearControlAction
 
   constructor() {}
 
-  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
-    return (
-      <EuiToolTip content={this.getDisplayName(context)} disableScreenReaderOutput>
-        <EuiButtonIcon
-          data-test-subj={`control-action-${(context.embeddable as HasUniqueId).uuid}-erase`}
-          aria-label={this.getDisplayName(context)}
-          iconType={this.getIconType(context)}
-          onClick={(event: SyntheticEvent<HTMLButtonElement>) => {
-            (event.target as HTMLButtonElement).blur();
-            this.execute(context);
-          }}
-          color="text"
-        />
-      </EuiToolTip>
-    );
-  };
-
-  public getDisplayName({ embeddable }: EmbeddableApiContext) {
+  public getDisplayName() {
     return i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
-      defaultMessage: 'Clear',
+      defaultMessage: 'Clear control',
     });
   }
 
-  public getIconType({ embeddable }: EmbeddableApiContext) {
+  public getIconType() {
     return 'eraser';
   }
 
@@ -102,7 +83,6 @@ export class ClearControlAction
 
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
-
     embeddable.clearSelections();
   }
 }
