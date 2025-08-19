@@ -76,8 +76,14 @@ export const AwsCredentialsFormAgentless = ({
   showCloudConnectors,
   cloud,
 }: AwsAgentlessFormProps) => {
-  const { awsOverviewPath, awsPolicyType, templateName, showCloudTemplates, shortName } =
-    useCloudSetup();
+  const {
+    awsOverviewPath,
+    awsPolicyType,
+    awsInputFieldMapping,
+    templateName,
+    showCloudTemplates,
+    shortName,
+  } = useCloudSetup();
 
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
@@ -135,21 +141,21 @@ export const AwsCredentialsFormAgentless = ({
     awsCredentialsType === AWS_CREDENTIALS_TYPE.DIRECT_ACCESS_KEYS ||
     awsCredentialsType === AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS;
   const agentlessOptions = showCloudConnectors
-    ? getAwsCloudConnectorsCredentialsFormOptions()
-    : getAwsAgentlessFormOptions();
+    ? getAwsCloudConnectorsCredentialsFormOptions(awsInputFieldMapping)
+    : getAwsAgentlessFormOptions(awsInputFieldMapping);
 
   const group = agentlessOptions[awsCredentialsType as keyof typeof agentlessOptions];
   const fields = getInputVarsFields(input, group.fields);
 
   const selectorOptions = () => {
     if (isEditPage && AWS_CREDENTIALS_TYPE.CLOUD_CONNECTORS !== awsCredentialsType) {
-      return getAwsCredentialsFormAgentlessOptions();
+      return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
     }
     if (showCloudConnectors) {
-      return getAwsCloudConnectorsFormAgentlessOptions();
+      return getAwsCloudConnectorsFormAgentlessOptions(awsInputFieldMapping);
     }
 
-    return getAwsCredentialsFormAgentlessOptions();
+    return getAwsCredentialsFormAgentlessOptions(awsInputFieldMapping);
   };
 
   const disabled =

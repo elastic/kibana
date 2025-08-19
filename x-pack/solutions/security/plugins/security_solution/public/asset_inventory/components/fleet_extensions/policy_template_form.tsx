@@ -61,6 +61,14 @@ export const CloudAssetInventoryPolicyTemplateForm =
             type: CLOUDBEAT_AWS,
             enableOrganization: true,
             getStartedPath: `https://ela.st/cloud-asset-discovery-get-started-aws.html`,
+            inputFieldMapping: {
+              access_key_id: 'aws.access_key_id',
+              secret_access_key: 'aws.secret_access_key',
+              session_token: 'aws.session_token',
+              role_arn: 'aws.role_arn',
+              shared_credential_file: 'aws.shared_credential_file',
+              credential_profile_name: 'aws.credential_profile_name',
+            },
           },
           gcp: {
             type: CLOUDBEAT_GCP,

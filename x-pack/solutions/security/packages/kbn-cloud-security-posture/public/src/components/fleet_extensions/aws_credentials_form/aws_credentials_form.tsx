@@ -131,7 +131,7 @@ export const AwsCredentialsForm = ({
   hasInvalidRequiredVars,
   isValid,
 }: AwsFormProps) => {
-  const { awsPolicyType, shortName } = useCloudSetup();
+  const { awsPolicyType, shortName, awsInputFieldMapping } = useCloudSetup();
   const {
     awsCredentialsType,
     setupFormat,
@@ -194,7 +194,7 @@ export const AwsCredentialsForm = ({
                 defaultMessage: 'Preferred manual method',
               }
             )}
-            options={getAwsCredentialsFormManualOptions()}
+            options={getAwsCredentialsFormManualOptions(awsInputFieldMapping)}
             type={awsCredentialsType}
             onChange={(optionId) => {
               updatePolicy({

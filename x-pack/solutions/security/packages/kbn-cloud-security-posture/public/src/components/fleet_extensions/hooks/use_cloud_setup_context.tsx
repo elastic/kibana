@@ -112,10 +112,6 @@ export function useCloudSetup() {
           providerConfig.enableOrganization !== undefined
             ? providerConfig.enableOrganization
             : true,
-        manualFieldsEnabled:
-          providerConfig.manualFieldsEnabled !== undefined
-            ? providerConfig.manualFieldsEnabled
-            : true,
         policyType: providerConfig.type,
         overviewPath: providerConfig.getStartedPath,
       };
@@ -131,11 +127,12 @@ export function useCloudSetup() {
       showCloudTemplates: config.showCloudTemplates,
       defaultProvider: config.defaultProvider,
       defaultProviderType: config.providers[config.defaultProvider].type,
+      awsInputFieldMapping: config.providers[AWS_PROVIDER].inputFieldMapping,
       awsPolicyType: getProviderDetails(AWS_PROVIDER).policyType,
       awsOrganizationEnabled: getProviderDetails(AWS_PROVIDER).organizationEnabled,
       awsOverviewPath: getProviderDetails(AWS_PROVIDER).overviewPath,
       azureEnabled: getProviderDetails(AZURE_PROVIDER).enabled,
-      azureManualFieldsEnabled: getProviderDetails(AZURE_PROVIDER).manualFieldsEnabled,
+      azureManualFieldsEnabled: config.providers[AZURE_PROVIDER].manualFieldsEnabled,
       azureOrganizationEnabled: getProviderDetails(AZURE_PROVIDER).organizationEnabled,
       azureOverviewPath: getProviderDetails(AZURE_PROVIDER).overviewPath,
       azurePolicyType: getProviderDetails(AZURE_PROVIDER).policyType,
