@@ -70,7 +70,6 @@ const ENDPOINT_EXCEPTIONS_PAGE_LABELS: ArtifactListPageProps['labels'] = {
       values: { name },
     }),
   flyoutDowngradedLicenseDocsInfo: (
-    // todo
     securitySolutionDocsLinks: DocLinks['securitySolution']
   ): React.ReactNode => {
     return (
