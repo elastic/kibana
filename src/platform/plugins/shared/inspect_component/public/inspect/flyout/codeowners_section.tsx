@@ -30,10 +30,8 @@ export const CodeownersSection = ({ codeowners }: Props) => (
       <EuiFlexGroup direction="column" gutterSize="s">
         {codeowners.length > 0
           ? codeowners.map((codeowner) => (
-              <EuiFlexItem grow={false}>
-                <EuiText key={codeowner} size="s">
-                  {codeowner}
-                </EuiText>
+              <EuiFlexItem grow={false} key={codeowner}>
+                <EuiText size="s">{codeowner}</EuiText>
               </EuiFlexItem>
             ))
           : null}
