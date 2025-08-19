@@ -63,7 +63,11 @@ export class ApmSystem {
     this.addHttpRequestNormalization(apm);
     this.addRouteChangeNormalization(apm);
 
-    init(apmConfig);
+    init({
+      ...apmConfig,
+      logLevel: 'debug',
+      transactionNameCustomAttribute: 'data-test-subj',
+    });
     // hold page load transaction blocks a transaction implicitly created by init.
     this.holdPageLoadTransaction(apm);
   }

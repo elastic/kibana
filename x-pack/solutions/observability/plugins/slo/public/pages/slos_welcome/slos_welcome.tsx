@@ -14,6 +14,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
@@ -119,6 +120,18 @@ export function SlosWelcomePage() {
                       {i18n.translate('xpack.slo.sloList.welcomePrompt.buttonLabel', {
                         defaultMessage: 'Create SLO',
                       })}
+                    </EuiButton>
+                    &nbsp;
+                    <EuiButton
+                      data-test-subj="o11ySloListWelcomePromptCreateSloButton2"
+                      fill
+                      color="primary"
+                      onClick={async () => {
+                        await fetch('https://www.google.com/');
+                      }}
+                    >
+                      <span>Some text</span>
+                      <EuiIcon type="logoElasticsearch" size="xl" />
                     </EuiButton>
                   </span>
                 </EuiFlexItem>
