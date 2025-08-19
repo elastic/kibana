@@ -4,38 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ContainerModule } from 'inversify';
-import { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { Container, ContainerModule, ServiceIdentifier } from 'inversify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import {
-  type PluginConfigDescriptor,
-  StartServicesAccessor,
-  PluginInitializerContext,
-} from '@kbn/core/server';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
+import { Logger, type PluginConfigDescriptor } from '@kbn/core/server';
 import type { ActionsConfig } from './config';
-import { configSchema } from './config';
+import { configSchema, getValidatedConfig } from './config';
 import type { ActionsClient as ActionsClientClass } from './actions_client';
 import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 import { Actions } from './module';
-import { ActionsPluginsStart, PluginStartContract } from './plugin';
-import { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '@kbn/encrypted-saved-objects-plugin/server';
-import { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import type { ServerlessPluginStart } from '@kbn/serverless/server';
-import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { resolveCustomHosts } from './lib/custom_host_settings';
+import { InMemoryMetrics } from './monitoring';
+import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core/packages/di/common';
+import { LicenseState } from './lib';
+import { satisfies } from 'semver';
+import { ActionsPluginsSetup } from './plugin';
+import { ActionsPluginSetupDeps, ActionsPluginStartDeps } from './types';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -87,33 +71,23 @@ export { ActionExecutionSourceType } from './lib/action_execution_source';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(Actions).toSelf().inSingletonScope();
-  bind(Start).toResolvedValue((actions) => ({ actions }), [Actions]);
-  bind(Setup).toResolvedValue((actions) => ({ actions }), [Actions]);
 
-  bind(OnSetup).toConstantValue((container) => {
-    const actions = container.get(Actions);
-    const savedObjects = container.get(CoreSetup('savedObjects'));
-    const analytics = container.get(CoreSetup('analytics'));
-    const getStartServices = container.get<
-      StartServicesAccessor<ActionsPluginsStart, PluginStartContract>
-    >(CoreSetup('getStartServices'));
-    const http = container.get(CoreSetup('http'));
-
-    const licensing = container.get<LicensingPluginSetup>(PluginSetup('licensing'));
-    const taskManager = container.get<TaskManagerSetupContract>(PluginSetup('taskManager'));
-    const encryptedSavedObjects = container.get<EncryptedSavedObjectsPluginSetup>(
-      PluginSetup('encryptedSavedObjects')
-    );
-    const eventLog = container.get<IEventLogService>(PluginSetup('eventLog'));
-    const features = container.get<FeaturesPluginSetup>(PluginSetup('features'));
-    const cloud = container.get<CloudSetup>(PluginSetup('cloud'));
-    const security = container.get<SecurityPluginSetup>(PluginSetup('security'));
-    const usageCollection = container.get<UsageCollectionSetup>(PluginSetup('usageCollection'));
-    // TODO Uncomment
-    // const serverless = await container.getAsync<ServerlessPluginSetup>(PluginSetup('serverless'));
-    const monitoringCollection = container.get<MonitoringCollectionSetup>(
-      PluginSetup('monitoringCollection')
-    );
+  bind(Setup).toDynamicValue(({ get }) => {
+    const actions = get(Actions);
+    const savedObjects = get(CoreSetup('savedObjects'));
+    const analytics = get(CoreSetup('analytics'));
+    const getStartServices = get(CoreSetup('getStartServices'));
+    const http = get(CoreSetup('http'));
+    const licensing = get(PluginSetup('licensing'));
+    const taskManager = get(PluginSetup('taskManager'));
+    const encryptedSavedObjects = get(PluginSetup('encryptedSavedObjects'));
+    const eventLog = get(PluginSetup('eventLog'));
+    const features = get(PluginSetup('features'));
+    const cloud = get(PluginSetup('cloud'));
+    const security = get(PluginSetup('security'));
+    const usageCollection = get(PluginSetup('usageCollection'));
+    // const serverless = get(PluginSetup('serverless'));
+    const monitoringCollection = get(PluginSetup('monitoringCollection'));
 
     return actions.setup({
       core: { savedObjects, analytics, getStartServices, http },
@@ -129,29 +103,24 @@ export const module = new ContainerModule(({ bind }) => {
         // serverless,
         monitoringCollection,
       },
-    });
+    } as ActionsPluginSetupDeps);
   });
 
-  bind(OnStart).toConstantValue(async (container) => {
-    const actions = await container.getAsync(Actions);
-    const http = await container.getAsync(CoreStart('http'));
-    const savedObjects = await container.getAsync(CoreStart('savedObjects'));
-    const elasticsearch = await container.getAsync(CoreStart('elasticsearch'));
-    const featureFlags = await container.getAsync(CoreStart('featureFlags'));
-    const analytics = await container.getAsync(CoreStart('analytics'));
-    const security = await container.getAsync(CoreStart('security'));
-
-    const encryptedSavedObjects = await container.getAsync<EncryptedSavedObjectsPluginStart>(
-      PluginStart('encryptedSavedObjects')
-    );
-    const taskManager = await container.getAsync<TaskManagerStartContract>(
-      PluginStart('taskManager')
-    );
-    const licensing = await container.getAsync<LicensingPluginStart>(PluginStart('licensing'));
-    const eventLog = await container.getAsync<IEventLogClientService>(PluginStart('eventLog'));
-    const spaces = await container.getAsync<SpacesPluginStart>(PluginStart('spaces'));
-    const securityPlugin = await container.getAsync<SecurityPluginStart>(PluginStart('security'));
-    const serverless = await container.getAsync<ServerlessPluginStart>(PluginStart('serverless'));
+  bind(Start).toDynamicValue(({ get }) => {
+    const actions = get(Actions);
+    const http = get(CoreStart('http'));
+    const savedObjects = get(CoreStart('savedObjects'));
+    const elasticsearch = get(CoreStart('elasticsearch'));
+    const featureFlags = get(CoreStart('featureFlags'));
+    const analytics = get(CoreStart('analytics'));
+    const security = get(CoreStart('security'));
+    const encryptedSavedObjects = get(PluginStart('encryptedSavedObjects'));
+    const taskManager = get(PluginStart('taskManager'));
+    const licensing = get(PluginStart('licensing'));
+    const eventLog = get(PluginStart('eventLog'));
+    const spaces = get(PluginStart('spaces'));
+    const securityPlugin = get(PluginStart('security'));
+    // const serverless = get(PluginStart('serverless'));
 
     return actions.start({
       core: { http, savedObjects, elasticsearch, featureFlags, analytics, security },
@@ -162,8 +131,8 @@ export const module = new ContainerModule(({ bind }) => {
         eventLog,
         spaces,
         security: securityPlugin,
-        serverless,
+        // serverless,
       },
-    });
+    } as ActionsPluginStartDeps);
   });
 });

@@ -83,6 +83,8 @@ import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/aler
 import { renderMustacheObject } from './lib/mustache_renderer';
 import { ServerlessPluginStart } from '@kbn/serverless/server';
 import { ActionsPluginsStart } from './plugin';
+import { PluginSetup } from '@kbn/core/packages/di/common';
+import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
 type Config = PluginInitializerContext<ActionsConfig>['config'];
 
