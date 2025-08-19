@@ -41,5 +41,5 @@ export async function analyzeDataset(params: Params, dependencies: Dependencies)
     ? 'body.text'
     : undefined;
 
-  return { categorizationField, short };
+  return { analysis, categorizationField, short };
 }
