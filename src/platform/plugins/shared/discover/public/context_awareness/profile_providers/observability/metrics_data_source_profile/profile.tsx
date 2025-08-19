@@ -49,7 +49,7 @@ export const createMetricsDataSourceProfileProvider = (
     return {
       isMatch: true,
       context: {
-        category: DataSourceCategory.Logs,
+        category: DataSourceCategory.Metrics,
       },
     };
   },
