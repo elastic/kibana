@@ -70,7 +70,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
     );
     const samlIdPPlugin = path.resolve(
       __dirname,
-      '../../../../test/security_api_integration/plugins/saml_provider'
+      '../../security_api_integration/plugins/saml_provider'
     );
 
     const servers = {
@@ -97,7 +97,7 @@ export function createStatefulFeatureFlagTestConfig<T extends DeploymentAgnostic
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
         },
       }),
       testFiles: options.testFiles,

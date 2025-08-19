@@ -100,16 +100,13 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
         hidden: [],
       },
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onCurationLoad: (_, { curation }) => curation,
       },
     ],
     queries: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onCurationLoad: (_, { curation }) => curation.queries,
-        // @ts-expect-error upgrade typescript v5.1.6
         updateQueries: (_, { queries }) => queries,
       },
     ],
@@ -124,9 +121,7 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     activeQuery: [
       '',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         setActiveQuery: (_, { query }) => query,
-        // @ts-expect-error upgrade typescript v5.1.6
         onCurationLoad: (activeQuery, { curation }) => activeQuery || curation.queries[0],
       },
     ],
@@ -141,13 +136,9 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     promotedIds: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onCurationLoad: (_, { curation }) => curation.promoted.map((document) => document.id),
-        // @ts-expect-error upgrade typescript v5.1.6
         setPromotedIds: (_, { promotedIds }) => promotedIds,
-        // @ts-expect-error upgrade typescript v5.1.6
         addPromotedId: (promotedIds, { id }) => addDocument(promotedIds, id),
-        // @ts-expect-error upgrade typescript v5.1.6
         removePromotedId: (promotedIds, { id }) => removeDocument(promotedIds, id),
         clearPromotedIds: () => [],
       },
@@ -166,11 +157,8 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     hiddenIds: [
       [],
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onCurationLoad: (_, { curation }) => curation.hidden.map((document) => document.id),
-        // @ts-expect-error upgrade typescript v5.1.6
         addHiddenId: (hiddenIds, { id }) => addDocument(hiddenIds, id),
-        // @ts-expect-error upgrade typescript v5.1.6
         removeHiddenId: (hiddenIds, { id }) => removeDocument(hiddenIds, id),
         clearHiddenIds: () => [],
       },
@@ -188,7 +176,6 @@ export const CurationLogic = kea<MakeLogicType<CurationValues, CurationActions, 
     selectedPageTab: [
       'promoted',
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         onSelectPageTab: (_, { pageTab }) => pageTab,
       },
     ],

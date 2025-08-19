@@ -4,6 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export * from './v1';
+export type * from './v1';
 export { policiesQueryParamsSchema } from './schemas/v1';
 export type { PoliciesQueryParams } from './schemas/v1';

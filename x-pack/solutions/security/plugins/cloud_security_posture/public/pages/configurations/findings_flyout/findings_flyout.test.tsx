@@ -76,6 +76,51 @@ describe('<FindingsFlyout/>', () => {
       const missingInfoCallout = queryByText('Some fields not provided by Wiz');
       expect(missingInfoCallout).toBeNull();
     });
+
+    it('does not display evidence field when result.evidence and resource.raw are missing', () => {
+      const { queryByText } = render(
+        <TestComponent
+          finding={{
+            ...mockFindingsHit,
+            result: { ...mockFindingsHit.result, evidence: undefined },
+            rule: {
+              ...mockFindingsHit.rule,
+              // resource.raw is only shown for CIS GCP rules
+              benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+            },
+            resource: {
+              ...mockFindingsHit.resource,
+              raw: undefined,
+            },
+          }}
+        />
+      );
+      const missingEvidenceTitle = queryByText('Evidence');
+      expect(missingEvidenceTitle).toBeNull();
+    });
+
+    it('displays evidence field when it exists', () => {
+      const { getByText } = render(<TestComponent finding={mockFindingsHit} />);
+      const evidenceTitle = getByText('Evidence');
+      expect(evidenceTitle).toBeInTheDocument();
+    });
+
+    it('displays evidence as resource.raw for CIS_GCP when evidence field does not exists', () => {
+      const { getByText } = render(
+        <TestComponent
+          finding={{
+            ...mockFindingsHit,
+            result: { ...mockFindingsHit.result, evidence: undefined },
+            rule: {
+              ...mockFindingsHit.rule,
+              benchmark: { ...mockFindingsHit.rule.benchmark, id: 'cis_gcp' },
+            },
+          }}
+        />
+      );
+      const evidenceTitle = getByText('Evidence');
+      expect(evidenceTitle).toBeInTheDocument();
+    });
   });
 
   describe('Table Tab', () => {

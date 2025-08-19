@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
   ThreatMapping,
   ThreatMappingEntries,
@@ -14,7 +13,12 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
-import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  OpenPointInTimeResponse,
+  SortResults,
+  SearchHit,
+  SearchResponse,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
@@ -138,7 +142,7 @@ export interface GetThreatListOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
   esClient: ElasticsearchClient;
   perPage?: number;
-  searchAfter: estypes.SortResults | undefined;
+  searchAfter: SortResults | undefined;
   threatFilters: unknown[];
   threatListConfig: ThreatListConfig;
   pitId: OpenPointInTimeResponse['id'];
@@ -164,7 +168,7 @@ export interface ThreatListDoc {
  * This is an ECS document being returned, but the user could return or use non-ecs based
  * documents potentially.
  */
-export type ThreatListItem = estypes.SearchHit<ThreatListDoc>;
+export type ThreatListItem = SearchHit<ThreatListDoc>;
 
 export interface ThreatEnrichment {
   feed: Record<string, unknown>;
@@ -202,7 +206,7 @@ export interface BuildThreatEnrichmentOptions {
 export interface EventsOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
   services: SecurityRuleServices;
-  searchAfter: estypes.SortResults | undefined;
+  searchAfter: SortResults | undefined;
   perPage?: number;
   filters: unknown[];
   eventListConfig?: OverrideBodyQuery;
@@ -214,7 +218,7 @@ export interface EventDoc {
   [key: string]: unknown;
 }
 
-export type EventItem = estypes.SearchHit<EventDoc>;
+export type EventItem = SearchHit<EventDoc>;
 
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
@@ -235,8 +239,8 @@ export interface SignalMatch {
 }
 
 export type GetDocumentListInterface = (params: {
-  searchAfter: estypes.SortResults | undefined;
-}) => Promise<estypes.SearchResponse<EventDoc | ThreatListDoc, unknown>>;
+  searchAfter: SortResults | undefined;
+}) => Promise<SearchResponse<EventDoc | ThreatListDoc, unknown>>;
 
 export type CreateSignalInterface = (
   params: EventItem[] | ThreatListItem[]

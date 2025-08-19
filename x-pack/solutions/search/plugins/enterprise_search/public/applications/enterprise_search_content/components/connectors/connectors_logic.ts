@@ -140,13 +140,11 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
     },
   }),
   path: ['enterprise_search', 'content', 'connectors_logic'],
-  // @ts-expect-error upgrade typescript v5.1.6
   reducers: () => ({
     deleteModalConnectorId: [
       '',
       {
         closeDeleteModal: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { connectorId }) => connectorId,
       },
     ],
@@ -154,7 +152,6 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       '',
       {
         closeDeleteModal: () => '',
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { connectorName }) => connectorName,
       },
     ],
@@ -162,7 +159,6 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
       null,
       {
         closeDeleteModal: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         openDeleteModal: (_, { indexName }) => indexName,
       },
     ],
@@ -189,19 +185,16 @@ export const ConnectorsLogic = kea<MakeLogicType<ConnectorsValues, ConnectorsAct
         size: 10,
       },
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         apiSuccess: ({ fetchCrawlersOnly, searchQuery }, { meta }) => ({
           fetchCrawlersOnly,
           from: meta.page.from,
           searchQuery,
           size: meta.page.size,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         fetchConnectors: (state, payload) => ({
           ...state,
           ...payload,
         }),
-        // @ts-expect-error upgrade typescript v5.1.6
         onPaginate: (state, { newPageIndex }) => ({
           ...state,
           from: (newPageIndex - 1) * state.size,

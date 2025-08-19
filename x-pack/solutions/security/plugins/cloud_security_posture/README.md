@@ -74,7 +74,7 @@ yarn test:ftr --config x-pack/test_serverless/api_integration/test_suites/securi
 yarn test:ftr --config x-pack/test_serverless/functional/test_suites/security/config.cloud_security_posture.ts
 ```
 
-Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/test/security_solution_cypress/cypress):
+Run [**End-to-End Cypress Tests**](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security/test/security_solution_cypress/cypress):
 > **Note**
 >
 > Run this from security_solution_cypress folder

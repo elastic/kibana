@@ -47,7 +47,6 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
     logRetention: [
       null,
       {
-        // @ts-expect-error upgrade typescript v5.1.6
         updateLogRetention: (_, { logRetention }) => logRetention,
       },
     ],
@@ -65,7 +64,6 @@ export const LogRetentionLogic = kea<MakeLogicType<LogRetentionValues, LogRetent
       {
         closeModals: () => null,
         saveLogRetention: () => null,
-        // @ts-expect-error upgrade typescript v5.1.6
         setOpenedModal: (_, { option }) => option,
       },
     ],

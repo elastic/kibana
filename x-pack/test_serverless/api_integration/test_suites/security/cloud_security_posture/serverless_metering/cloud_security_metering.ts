@@ -9,11 +9,8 @@ import expect from '@kbn/expect';
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
-import {
-  createPackagePolicy,
-  createCloudDefendPackagePolicy,
-} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
+import { createPackagePolicy, createCloudDefendPackagePolicy } from '../helper';
+import { EsIndexDataProvider } from '../utils';
 import { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings, getMockDefendForContainersHeartbeats } from './mock_data';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -59,7 +56,7 @@ export default function (providerContext: FtrProviderContext) {
       internalRequestHeader = svlCommonApi.getInternalRequestHeader();
 
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
       const { body: agentPolicyResponse } = await supertestWithoutAuth
         .post(`/api/fleet/agent_policies`)
@@ -79,7 +76,7 @@ export default function (providerContext: FtrProviderContext) {
 
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await findingsIndex.deleteAll();
       await vulnerabilitiesIndex.deleteAll();
       await cloudDefinedIndex.deleteAll();

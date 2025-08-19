@@ -15,6 +15,7 @@ import { IndicatorBarchartLegendAction } from './legend_action';
 import { barChartTimeAxisLabelFormatter } from '../../../../utils/dates';
 import type { ChartSeries } from '../../services/fetch_aggregated_indicators';
 import { useTimeZone } from '../../../../hooks/use_kibana_ui_settings';
+import { useScreenReaderAnnouncements } from '../../hooks/use_screen_reader_context';
 
 const ID = 'tiIndicator';
 const DEFAULT_CHART_HEIGHT = '200px';
@@ -51,6 +52,7 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
 }) => {
   const chartBaseTheme = useElasticChartsTheme();
   const timeZone = useTimeZone();
+  const { announce } = useScreenReaderAnnouncements();
 
   return (
     <Chart size={{ width: DEFAULT_CHART_WIDTH, height }}>
@@ -59,7 +61,13 @@ export const IndicatorsBarChart: VFC<IndicatorsBarChartProps> = ({
         showLegend
         legendPosition={Position.Right}
         legendSize={DEFAULT_LEGEND_SIZE}
-        legendAction={({ label }) => <IndicatorBarchartLegendAction field={field} data={label} />}
+        legendAction={({ label }) => (
+          <IndicatorBarchartLegendAction
+            announceIndicatorActionChange={announce}
+            field={field}
+            data={label}
+          />
+        )}
         locale={i18n.getLocale()}
       />
       <Axis

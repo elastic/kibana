@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
-import { defaultNamespace } from '@kbn/test-suites-xpack/functional/apps/dataset_quality/data';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   datasetNames,
@@ -15,6 +14,7 @@ import {
   getLogsForDataset,
   createDegradedFieldsRecord,
   productionNamespace,
+  defaultNamespace,
 } from './data';
 
 const integrationActions = {
@@ -164,25 +164,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           const currentUrl = await browser.getCurrentUrl();
           expect(currentUrl).to.not.contain('breakdownField');
         });
-      });
-    });
-
-    // FLAKY: https://github.com/elastic/kibana/issues/194575
-    describe.skip('overview summary panel', () => {
-      it('should show summary KPIs', async () => {
-        await PageObjects.datasetQuality.navigateToDetails({
-          dataStream: apacheAccessDataStreamName,
-        });
-
-        const { docsCountTotal, degradedDocs, services, hosts, size } =
-          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
-        expect(parseInt(docsCountTotal, 10)).to.be(226);
-        expect(parseInt(degradedDocs, 10)).to.be(1);
-        expect(parseInt(services, 10)).to.be(3);
-        expect(parseInt(hosts, 10)).to.be(52);
-        // metering stats API is cached for 30seconds, waiting for the exact value is not optimal in this case
-        // rather we can just check if any value is present
-        expect(size).to.be.ok();
       });
     });
 
@@ -470,6 +451,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const singleValueNow = parseInt(updatedCellTexts[0], 10);
 
         expect(singleValueNow).to.be.greaterThan(singleValuePreviously);
+      });
+    });
+
+    describe('overview summary panel', () => {
+      it('should show summary KPIs', async () => {
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
+
+        const { docsCountTotal, degradedDocs, services, hosts } =
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis(['size']);
+        expect(parseInt(docsCountTotal, 10)).to.be(226);
+        expect(parseInt(degradedDocs, 10)).to.be(1);
+        expect(parseInt(services, 10)).to.be(3);
+        expect(parseInt(hosts, 10)).to.be(52);
+      });
+
+      // this test must always stay at the last because here we log the user in as admin.
+      // We need admin priviledge for the `size` attribute to be present in the summary panel.
+      it('should show summary panel with size attributte for admin role only', async () => {
+        await PageObjects.svlCommonPage.loginAsAdmin();
+        await PageObjects.datasetQuality.navigateToDetails({
+          dataStream: apacheAccessDataStreamName,
+        });
+
+        const { docsCountTotal, degradedDocs, services, hosts, size } =
+          await PageObjects.datasetQuality.parseOverviewSummaryPanelKpis();
+        expect(parseInt(docsCountTotal, 10)).to.be(226);
+        expect(parseInt(degradedDocs, 10)).to.be(1);
+        expect(parseInt(services, 10)).to.be(3);
+        expect(parseInt(hosts, 10)).to.be(52);
+        // metering stats API is cached for 30seconds, waiting for the exact value is not optimal in this case
+        // rather we can just check if any value is present
+        expect(size).to.be.ok();
       });
     });
   });

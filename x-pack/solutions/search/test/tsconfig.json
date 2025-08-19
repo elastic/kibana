@@ -27,5 +27,10 @@
     "@kbn/test-suites-src",
     "@kbn/guided-onboarding",
     "@kbn/core-http-common",
+    "@kbn/tooling-log",
+    "@kbn/ftr-common-functional-ui-services",
+    "@kbn/observability-ai-assistant-plugin",
+    "@kbn/inference-common",
+    "@kbn/test-suites-src",
   ]
 }

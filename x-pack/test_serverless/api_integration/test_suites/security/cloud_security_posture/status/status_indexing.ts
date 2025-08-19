@@ -11,12 +11,9 @@ import {
   FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { createPackagePolicy } from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/helper';
-import {
-  findingsMockData,
-  vulnerabilityMockData,
-} from '@kbn/test-suites-xpack-security/api_integration/apis/cloud_security_posture/mock_data';
-import { EsIndexDataProvider } from '@kbn/test-suites-xpack-security/cloud_security_posture_api/utils';
+import { createPackagePolicy } from '../helper';
+import { findingsMockData, vulnerabilityMockData } from '../mock_data';
+import { EsIndexDataProvider } from '../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
 
@@ -51,7 +48,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('STATUS = INDEXING TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
         const { body: agentPolicyResponse } = await supertestWithoutAuth
           .post(`/api/fleet/agent_policies`)
@@ -71,7 +68,9 @@ export default function (providerContext: FtrProviderContext) {
         await findingsIndex.deleteAll();
         await vulnerabilitiesIndex.deleteAll();
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it(`Return kspm status indexing when logs-cloud_security_posture.findings_latest-default doesn't contain new kspm documents, but has newly connected agents`, async () => {

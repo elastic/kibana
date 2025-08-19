@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './data_request_descriptor_types';
-export * from './source_descriptor_types';
-export * from './layer_descriptor_types';
-export * from './map_descriptor';
-export * from './style_property_descriptor_types';
+export type * from './data_request_descriptor_types';
+export type * from './source_descriptor_types';
+export type * from './layer_descriptor_types';
+export type * from './map_descriptor';
+export type * from './style_property_descriptor_types';

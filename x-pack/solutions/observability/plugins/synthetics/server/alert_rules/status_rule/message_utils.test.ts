@@ -168,7 +168,7 @@ describe('message_utils', () => {
           configId: monitorId,
           monitorQueryId: monitorId,
           locationId,
-          ping: {
+          latestPing: {
             observer: {
               geo: {
                 name: locationName,
@@ -185,7 +185,7 @@ describe('message_utils', () => {
           configId: monitorId,
           monitorQueryId: monitorId,
           locationId: secondLocationId,
-          ping: {
+          latestPing: {
             observer: {
               geo: {
                 name: secondLocationName,

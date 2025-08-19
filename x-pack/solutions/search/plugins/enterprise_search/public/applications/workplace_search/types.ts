@@ -7,7 +7,7 @@
 
 import { RoleMapping } from '../shared/types';
 
-export * from '../../../common/types/workplace_search';
+export type * from '../../../common/types/workplace_search';
 
 export type SpacerSizeTypes = 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 

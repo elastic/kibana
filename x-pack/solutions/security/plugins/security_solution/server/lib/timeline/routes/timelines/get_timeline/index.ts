@@ -15,12 +15,13 @@ import { TIMELINE_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
 import { buildFrameworkRequest } from '../../../utils/common';
-import {
-  GetTimelineRequestQuery,
-  type GetTimelineResponse,
+import type {
+  ResolvedTimeline,
+  TimelineResponse,
+  GetTimelineResponse,
 } from '../../../../../../common/api/timeline';
+import { GetTimelineRequestQuery } from '../../../../../../common/api/timeline';
 import { getTimelineTemplateOrNull, getTimelineOrNull } from '../../../saved_object/timelines';
-import type { ResolvedTimeline, TimelineResponse } from '../../../../../../common/api/timeline';
 
 export const getTimelineRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

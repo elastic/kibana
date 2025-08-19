@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/resolver-test-plugin",
+  "owner": "@elastic/security-solution",
+  "group": "security",
+  "visibility": "private",
+  "plugin": {
+    "id": "resolverTest",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "resolverTest"
+    ],
+    "requiredPlugins": [
+      "securitySolution"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ]
+  }
+}
