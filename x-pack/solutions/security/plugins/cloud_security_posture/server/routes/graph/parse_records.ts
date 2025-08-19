@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { castArray } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import { ApiMessageCode } from '@kbn/cloud-security-posture-common/types/graph/latest';
-import { DOCUMENT_TYPE_SINGLE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { DOCUMENT_TYPE_ENTITY } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import type {
   EdgeColor,
   EdgeDataModel,
@@ -93,7 +93,7 @@ const getEntityDocuments = (
   const matchingTargetDocs = targetsDocDataArray.filter((doc) => doc.id === entityId);
   const matchingDocs = [...matchingActorDocs, ...matchingTargetDocs];
 
-  return matchingDocs.map((doc) => ({ ...doc, type: DOCUMENT_TYPE_SINGLE_ENTITY }));
+  return matchingDocs.map((doc) => ({ ...doc, type: DOCUMENT_TYPE_ENTITY }));
 };
 
 const createNodes = (records: GraphEdge[], context: Omit<ParseContext, 'edgesMap'>) => {

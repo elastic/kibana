@@ -403,7 +403,7 @@ describe('parseRecords', () => {
     expect(entity4Node).not.toHaveProperty('tag');
   });
 
-  it('assigns correct documentsData with DOCUMENT_TYPE_SINGLE_ENTITY for matching entity IDs', () => {
+  it('assigns correct documentsData with DOCUMENT_TYPE_ENTITY for matching entity IDs', () => {
     const records: GraphEdge[] = [
       {
         action: 'connect',
@@ -433,7 +433,7 @@ describe('parseRecords', () => {
     expect(user1Node.documentsData).toHaveLength(1);
     expect(user1Node.documentsData[0]).toMatchObject({
       id: 'user1',
-      type: 'single-entity',
+      type: 'entity',
       entity: {
         name: 'John Doe',
         type: 'Identity',
@@ -446,7 +446,7 @@ describe('parseRecords', () => {
     expect(host1Node.documentsData).toHaveLength(2);
     expect(host1Node.documentsData[0]).toMatchObject({
       id: 'host1',
-      type: 'single-entity',
+      type: 'entity',
       entity: {
         name: 'server-01',
         type: 'host',
@@ -454,7 +454,7 @@ describe('parseRecords', () => {
     });
     expect(host1Node.documentsData[1]).toMatchObject({
       id: 'host1',
-      type: 'single-entity',
+      type: 'entity',
       entity: {
         name: 'server-01-updated',
         type: 'host',
@@ -467,7 +467,7 @@ describe('parseRecords', () => {
     expect(service1Node.documentsData).toHaveLength(1);
     expect(service1Node.documentsData[0]).toMatchObject({
       id: 'service1',
-      type: 'single-entity',
+      type: 'entity',
       entity: {
         name: 'web-service',
         type: 'service',

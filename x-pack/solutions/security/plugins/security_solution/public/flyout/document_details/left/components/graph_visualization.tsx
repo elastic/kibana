@@ -91,7 +91,7 @@ export const GraphVisualization: React.FC = memo(() => {
             isPreviewMode: true,
           },
         });
-      } else if (getNodeDocumentMode(node) === 'single-entity' && documentData) {
+      } else if (getNodeDocumentMode(node) === 'entity' && documentData) {
         openPreviewPanel({
           id: GenericEntityPanelKey,
           params: {
