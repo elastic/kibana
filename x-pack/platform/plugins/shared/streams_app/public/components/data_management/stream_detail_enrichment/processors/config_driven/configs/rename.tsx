@@ -19,7 +19,7 @@ import type {
 } from '../types';
 import { getConvertFormStateToConfig, getConvertProcessorToFormState } from '../utils';
 
-export type RenameProcessorFormState = RenameProcessor;
+export type RenameProcessorFormState = RenameProcessor & { parentId: string | null };
 
 const defaultFormState: RenameProcessorFormState = {
   action: 'rename' as const,
@@ -29,6 +29,7 @@ const defaultFormState: RenameProcessorFormState = {
   override: false,
   where: ALWAYS_CONDITION,
   ignore_failure: false,
+  parentId: null,
 };
 
 const fieldOptions: FieldOptions = {

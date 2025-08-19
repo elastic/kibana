@@ -39,7 +39,7 @@ export const RootStreamEmptyPrompt = () => {
   );
 };
 
-export const NoProcessorsEmptyPrompt = () => {
+export const NoStepsEmptyPrompt = () => {
   return (
     <EuiEmptyPrompt
       aria-live="polite"
@@ -47,21 +47,16 @@ export const NoProcessorsEmptyPrompt = () => {
       icon={<AssetImage type="extractFields" />}
       title={
         <h2>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.title',
-            { defaultMessage: 'Extract useful fields from your data' }
-          )}
+          {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.title', {
+            defaultMessage: 'Extract useful fields from your data',
+          })}
         </h2>
       }
       body={
         <p>
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.noProcessorsEmptyPrompt.body',
-            {
-              defaultMessage:
-                'Transform your data before indexing with processors. You can start from scratch or let AI generate a set of processors based on your data.',
-            }
-          )}
+          {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body', {
+            defaultMessage: 'Transform your data before indexing with conditions and processors.',
+          })}
         </p>
       }
     />

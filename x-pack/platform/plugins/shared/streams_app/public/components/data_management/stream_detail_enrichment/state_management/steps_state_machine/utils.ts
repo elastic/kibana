@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export * from './processor_state_machine';
-export type * from './types';
-export * from './utils';
+import type { StepActorSnapshot } from './steps_state_machine';
+
+export const isProcessorUnderEdit = (stepSnapshot: StepActorSnapshot) => {
+  return stepSnapshot.matches('draft') || stepSnapshot.matches({ configured: 'editing' });
+};

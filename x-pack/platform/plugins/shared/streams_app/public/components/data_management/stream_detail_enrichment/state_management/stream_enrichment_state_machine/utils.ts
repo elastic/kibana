@@ -9,7 +9,8 @@ import type { FieldDefinition } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import type { AssignArgs } from 'xstate5';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang/types/processors';
+import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamlangStepWithUIAttributesWithCustomIdentifier } from '@kbn/streamlang';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
 import {
@@ -24,8 +25,9 @@ import type {
   CustomSamplesDataSource,
   EnrichmentDataSource,
 } from '../../../../../../common/url_schema';
-import { dataSourceConverter, processorConverter } from '../../utils';
-import { isProcessorUnderEdit } from '../processor_state_machine';
+import { dataSourceConverter } from '../../utils';
+import type { StepActorRef } from '../steps_state_machine';
+import { isProcessorUnderEdit } from '../steps_state_machine';
 
 export const defaultRandomSamplesDataSource: RandomSamplesDataSource = {
   type: 'random-samples',
@@ -92,30 +94,30 @@ export function getDataSourcesSamples(
  * - If no processor is being edited: returns all new processors
  * - If a processor is being edited: returns new processors up to and including the one being edited
  */
-export function getProcessorsForSimulation({
-  processorsRefs,
-}: Pick<StreamEnrichmentContextType, 'processorsRefs'>) {
-  let newProcessorsSnapshots = processorsRefs
+export function getStepsForSimulation({ stepRefs }: Pick<StreamEnrichmentContextType, 'stepRefs'>) {
+  let newStepSnapshots = stepRefs
     .map((procRef) => procRef.getSnapshot())
-    .filter((snapshot) => snapshot.context.isNew);
+    .filter((snapshot) => isWhereBlock(snapshot.context) || snapshot.context.isNew);
 
   // Find if any processor is currently being edited
-  const editingProcessorIndex = newProcessorsSnapshots.findIndex(isProcessorUnderEdit);
+  const editingProcessorIndex = newStepSnapshots.findIndex(
+    (snapshot) => isActionBlock(snapshot.context) && isProcessorUnderEdit(snapshot)
+  );
 
   // If a processor is being edited, set new processors up to and including the one being edited
   if (editingProcessorIndex !== -1) {
-    newProcessorsSnapshots = newProcessorsSnapshots.slice(0, editingProcessorIndex + 1);
+    newStepSnapshots = newStepSnapshots.slice(0, editingProcessorIndex + 1);
   }
 
   // Return processors
-  return newProcessorsSnapshots.map((snapshot) => snapshot.context.processor);
+  return newStepSnapshots.map((snapshot) => snapshot.context.step);
 }
 
-export function getConfiguredProcessors(context: StreamEnrichmentContextType) {
-  return context.processorsRefs
+export function getConfiguredSteps(context: StreamEnrichmentContextType) {
+  return context.stepRefs
     .map((proc) => proc.getSnapshot())
     .filter((proc) => proc.matches('configured'))
-    .map((proc) => proc.context.processor);
+    .map((proc) => proc.context.step);
 }
 
 export function getUpsertWiredFields(
@@ -144,21 +146,20 @@ export function getUpsertWiredFields(
   return { ...originalFieldDefinition, ...simulationMappedFieldDefinition };
 }
 
-export const spawnProcessor = <
+export const spawnStep = <
   TAssignArgs extends AssignArgs<StreamEnrichmentContextType, any, any, any>
 >(
-  processor: StreamlangProcessorDefinition,
+  step: StreamlangStepWithUIAttributesWithCustomIdentifier,
   assignArgs: Pick<TAssignArgs, 'self' | 'spawn'>,
   options?: { isNew: boolean }
 ) => {
   const { spawn, self } = assignArgs;
-  const convertedProcessor = processorConverter.toUIDefinition(processor);
 
-  return spawn('processorMachine', {
-    id: convertedProcessor.customIdentifier,
+  return spawn('stepMachine', {
+    id: step.customIdentifier,
     input: {
       parentRef: self,
-      processor: convertedProcessor,
+      step,
       isNew: options?.isNew ?? false,
     },
   });
@@ -182,3 +183,44 @@ export const spawnDataSource = <
     },
   });
 };
+
+/* Find insert index based on step hierarchy */
+export function findInsertIndex(stepRefs: StepActorRef[], parentId: string | null): number {
+  // Find the index of the parent step
+  const parentIndex = parentId ? stepRefs.findIndex((step) => step.id === parentId) : -1;
+
+  // Find the last index of any step with the same parentId
+  let lastSiblingIndex = -1;
+  for (let i = 0; i < stepRefs.length; i++) {
+    if (stepRefs[i].getSnapshot().context.step.parentId === parentId) {
+      lastSiblingIndex = i;
+    }
+  }
+
+  if (lastSiblingIndex !== -1) {
+    // Insert after the last sibling with the same parentId
+    return lastSiblingIndex + 1;
+  } else if (parentIndex !== -1) {
+    // Insert right after the parent if no siblings
+    return parentIndex + 1;
+  } else {
+    // No parent, insert at the end
+    return stepRefs.length;
+  }
+}
+
+export function insertAtIndex<T>(array: T[], item: T, index: number): T[] {
+  return [...array.slice(0, index), item, ...array.slice(index)];
+}
+
+export function collectDescendantIds(id: string, stepRefs: StepActorRef[]): Set<string> {
+  const ids = new Set<string>();
+  function collect(currentId: string) {
+    ids.add(currentId);
+    stepRefs
+      .filter((step) => step.getSnapshot().context.step.parentId === currentId)
+      .forEach((child) => collect(child.id));
+  }
+  collect(id);
+  return ids;
+}

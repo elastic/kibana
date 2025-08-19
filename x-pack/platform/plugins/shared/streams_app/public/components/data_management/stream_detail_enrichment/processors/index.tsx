@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiForm,
@@ -17,7 +16,6 @@ import {
   EuiHorizontalRule,
   EuiAccordion,
   EuiButtonIcon,
-  EuiIcon,
   EuiText,
   EuiBadge,
   EuiFlexItem,
@@ -31,7 +29,7 @@ import type { SubmitHandler, DeepPartial } from 'react-hook-form';
 import { useForm, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributesWithCustomIdentifier } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import type { DiscardPromptOptions } from '../../../../hooks/use_discard_confirm';
 import { useDiscardConfirm } from '../../../../hooks/use_discard_confirm';
@@ -46,84 +44,49 @@ import {
   useStreamEnrichmentSelector,
   useGetStreamEnrichmentState,
 } from '../state_management/stream_enrichment_state_machine';
-import type { ProcessorMetrics } from '../state_management/simulation_state_machine';
 import { DateProcessorForm } from './date';
 import { ConfigDrivenProcessorFields } from './config_driven/components/fields';
 import type { ConfigDrivenProcessorType } from './config_driven/types';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { ManualIngestPipelineProcessorForm } from './manual_ingest_pipeline';
-import { isProcessorUnderEdit } from '../state_management/processor_state_machine';
+import { isProcessorUnderEdit } from '../state_management/steps_state_machine';
 import { SetProcessorForm } from './set';
 
-export interface ProcessorConfigurationProps {
-  dragHandleProps: DraggableProvidedDragHandleProps | null;
-  processorRef: StreamEnrichmentContextType['processorsRefs'][number];
-  processorMetrics?: ProcessorMetrics;
+export interface StepConfigurationProps {
+  stepRef: StreamEnrichmentContextType['stepRefs'][number];
 }
 
-export function ProcessorConfiguration({
-  dragHandleProps,
-  processorRef,
-  processorMetrics,
-}: ProcessorConfigurationProps) {
-  const isOpen = useSelector(processorRef, isProcessorUnderEdit);
+export function ActionConfiguration({ stepRef, processorMetrics }: StepConfigurationProps) {
+  const isOpen = useSelector(stepRef, isProcessorUnderEdit);
 
   if (!isOpen) {
-    return (
-      <ProcessorConfigurationListItem
-        dragHandleProps={dragHandleProps}
-        processorMetrics={processorMetrics}
-        processorRef={processorRef}
-      />
-    );
+    return <StepConfigurationListItem processorMetrics={processorMetrics} stepRef={stepRef} />;
   }
 
-  return (
-    <ProcessorConfigurationEditor processorMetrics={processorMetrics} processorRef={processorRef} />
-  );
+  return <StepConfigurationEditor processorMetrics={processorMetrics} stepRef={stepRef} />;
 }
 
-const ProcessorConfigurationListItem = ({
-  dragHandleProps,
-  processorMetrics,
-  processorRef,
-}: ProcessorConfigurationProps) => {
-  const canEdit = useStreamEnrichmentSelector((snapshot) =>
-    snapshot.can({ type: 'processor.edit' })
-  );
-  const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
+const StepConfigurationListItem = ({ processorMetrics, stepRef }: StepConfigurationProps) => {
+  const canEdit = useStreamEnrichmentSelector((snapshot) => snapshot.can({ type: 'step.edit' }));
+  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
-  const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
   const isUnsaved = useSelector(
-    processorRef,
+    stepRef,
     (snapshot) => snapshot.context.isNew || snapshot.context.isUpdated
   );
-  const canDragAndDrop = isConfigured && dragHandleProps;
 
-  const processorDescription = getProcessorDescription(processor);
+  const stepDescription = getStepDescription(step);
 
   const handleOpen = () => {
-    processorRef.send({ type: 'processor.edit' });
+    stepRef.send({ type: 'step.edit' });
   };
 
   return (
     <ProcessorPanel>
       <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
-        {canDragAndDrop && (
-          <EuiPanel
-            data-test-subj="streamsAppProcessorDragHandle"
-            grow={false}
-            hasShadow={false}
-            color="transparent"
-            paddingSize="none"
-            {...dragHandleProps}
-          >
-            <EuiIcon type="grab" size="m" />
-          </EuiPanel>
-        )}
-        <strong data-test-subj="streamsAppProcessorLegend">{processor.action.toUpperCase()}</strong>
+        <strong data-test-subj="streamsAppProcessorLegend">{step.action?.toUpperCase()}</strong>
         <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
-          {processorDescription}
+          {stepDescription}
         </EuiText>
         <EuiFlexItem grow={1} />
         <EuiFlexItem grow={false}>
@@ -146,7 +109,7 @@ const ProcessorConfigurationListItem = ({
               size="xs"
               aria-label={i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.enrichment.ProcessorAction',
-                { defaultMessage: 'Edit {type} processor', values: { type: processor.action } }
+                { defaultMessage: 'Edit {type} processor', values: { type: step.action } }
               )}
             />
           </EuiFlexGroup>
@@ -156,23 +119,20 @@ const ProcessorConfigurationListItem = ({
   );
 };
 
-const ProcessorConfigurationEditor = ({
-  processorMetrics,
-  processorRef,
-}: Omit<ProcessorConfigurationProps, 'dragHandleProps'>) => {
+const StepConfigurationEditor = ({ processorMetrics, stepRef }: StepConfigurationProps) => {
   const { appParams, core } = useKibana();
 
   const getEnrichmentState = useGetStreamEnrichmentState();
 
   const grokCollection = useStreamEnrichmentSelector((snapshot) => snapshot.context.grokCollection);
 
-  const processor = useSelector(processorRef, (snapshot) => snapshot.context.processor);
+  const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
 
   const [defaultValues] = useState(() =>
     getFormStateFrom(
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
       { grokCollection },
-      processor
+      step
     )
   );
 
@@ -186,33 +146,31 @@ const ProcessorConfigurationEditor = ({
       const { processorDefinition, processorResources } = convertFormStateToProcessor(
         value as ProcessorFormState
       );
-      processorRef.send({
-        type: 'processor.change',
-        processor: processorDefinition,
+      stepRef.send({
+        type: 'step.changeProcessor',
+        step: processorDefinition,
         resources: processorResources,
       });
     });
     return () => unsubscribe();
-  }, [methods, processorRef]);
+  }, [methods, stepRef]);
 
-  const isConfigured = useSelector(processorRef, (snapshot) => snapshot.matches('configured'));
-  const canDelete = useSelector(processorRef, (snapshot) =>
-    snapshot.can({ type: 'processor.delete' })
-  );
-  const canSave = useSelector(processorRef, (snapshot) => snapshot.can({ type: 'processor.save' }));
+  const isConfigured = useSelector(stepRef, (snapshot) => snapshot.matches('configured'));
+  const canDelete = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.delete' }));
+  const canSave = useSelector(stepRef, (snapshot) => snapshot.can({ type: 'step.save' }));
 
   const hasStreamChanges = useStreamEnrichmentSelector((state) =>
     state.can({ type: 'stream.reset' })
   );
-  const hasProcessorChanges = useSelector(
-    processorRef,
-    (snapshot) => !isEqual(snapshot.context.previousProcessor, snapshot.context.processor)
+  const hasStepChanges = useSelector(
+    stepRef,
+    (snapshot) => !isEqual(snapshot.context.previousStep, snapshot.context.step)
   );
 
   const type = useWatch({ control: methods.control, name: 'action' });
 
   useUnsavedChangesPrompt({
-    hasUnsavedChanges: hasStreamChanges || hasProcessorChanges,
+    hasUnsavedChanges: hasStreamChanges || hasStepChanges,
     history: appParams.history,
     http: core.http,
     navigateToUrl: core.application.navigateToUrl,
@@ -220,18 +178,18 @@ const ProcessorConfigurationEditor = ({
     shouldPromptOnReplace: false,
   });
 
-  const handleCancel = useDiscardConfirm(() => processorRef.send({ type: 'processor.cancel' }), {
-    enabled: hasProcessorChanges,
+  const handleCancel = useDiscardConfirm(() => stepRef.send({ type: 'step.cancel' }), {
+    enabled: hasStepChanges,
     ...discardChangesPromptOptions,
   });
 
-  const handleDelete = useDiscardConfirm(() => processorRef.send({ type: 'processor.delete' }), {
+  const handleDelete = useDiscardConfirm(() => stepRef.send({ type: 'step.delete' }), {
     enabled: canDelete,
     ...deleteProcessorPromptOptions,
   });
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = () => {
-    processorRef.send({ type: 'processor.save' });
+    stepRef.send({ type: 'step.save' });
   };
 
   return (
@@ -241,7 +199,7 @@ const ProcessorConfigurationEditor = ({
         arrowProps={{
           css: { display: 'none' },
         }}
-        buttonContent={<strong>{processor.action.toUpperCase()}</strong>}
+        buttonContent={<strong>{step.action.toUpperCase()}</strong>}
         buttonElement="legend"
         buttonProps={{
           css: css`
@@ -343,13 +301,15 @@ const ProcessorPanel = (props: PropsWithChildren) => {
   );
 };
 
-const getProcessorDescription = (processor: StreamlangProcessorDefinition) => {
-  if (processor.action === 'grok') {
-    return processor.patterns.join(' • ');
-  } else if (processor.action === 'dissect') {
-    return processor.pattern;
-  } else if (processor.action === 'date') {
-    return `${processor.from} • ${processor.formats.join(' - ')}`;
+const getStepDescription = (step: StreamlangStepWithUIAttributesWithCustomIdentifier) => {
+  if ('action' in step) {
+    if (step.action === 'grok') {
+      return step.patterns.join(' • ');
+    } else if (step.action === 'dissect') {
+      return step.pattern;
+    } else if (step.action === 'date') {
+      return `${step.from} • ${step.formats.join(' - ')}`;
+    }
   }
 
   return '';

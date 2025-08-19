@@ -28,6 +28,7 @@ export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
  * Nested where block (recursive)
  */
 export interface StreamlangWhereBlock {
+  customIdentifier?: string;
   where: ConditionWithSteps;
 }
 
@@ -35,6 +36,7 @@ export interface StreamlangWhereBlock {
  * Zod schema for a where block
  */
 export const streamlangWhereBlockSchema: z.ZodType<StreamlangWhereBlock> = z.object({
+  customIdentifier: z.string().optional(),
   where: conditionWithStepsSchema,
 });
 
