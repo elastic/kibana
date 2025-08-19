@@ -64,6 +64,18 @@ export class WorkflowExecutionState {
     );
   }
 
+  public getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
+    const allExecutions = Array.from(this.stepExecutions.values()).filter(
+      (stepExecution) => stepExecution.stepId === stepId
+    );
+
+    if (allExecutions.length === 0) {
+      return undefined;
+    }
+
+    return allExecutions[allExecutions.length - 1];
+  }
+
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
     if (!step.id) {
       throw new Error('Step execution ID is required for update');

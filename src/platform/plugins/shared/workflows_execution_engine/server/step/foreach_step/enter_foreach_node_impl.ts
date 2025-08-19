@@ -22,6 +22,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
+    this.wfExecutionRuntimeManager.enterScope();
     let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {
@@ -66,7 +67,6 @@ export class EnterForeachNodeImpl implements StepImplementation {
       };
     }
 
-    this.wfExecutionRuntimeManager.enterScope(foreachState.index.toString());
     this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
   }
