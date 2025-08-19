@@ -29,6 +29,7 @@ interface Action {
 }
 
 export interface ContentFrameworkSectionProps {
+  id: string;
   title: string;
   description?: string;
   actions?: Action[];
@@ -36,6 +37,7 @@ export interface ContentFrameworkSectionProps {
 }
 
 export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
+  id,
   title,
   description,
   actions,
@@ -76,7 +78,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
   return (
     <EuiPanel paddingSize="l">
       <EuiAccordion
-        id={`sectionAccordion`}
+        id={`sectionAccordion-${id}`}
         initialIsOpen
         buttonContent={
           <EuiFlexGroup alignItems="center" gutterSize="s">

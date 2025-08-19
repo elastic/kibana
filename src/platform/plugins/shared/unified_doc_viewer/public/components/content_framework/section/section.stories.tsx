@@ -25,6 +25,7 @@ type Story = StoryObj<Args>;
 export const Basic: Story = {
   args: {
     hit: APMSpanFixture,
+    id: 'basic',
     title: 'Section Title',
     description: 'This is a description for the section.',
     actions: [
