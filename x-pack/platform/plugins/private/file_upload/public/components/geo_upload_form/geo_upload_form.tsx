@@ -181,7 +181,7 @@ export class GeoUploadForm extends Component<Props, State> {
               >
                 <CodeEditor
                   value={this.props.indexSettings}
-                  height="300px"
+                  height="100px"
                   languageId="json"
                   languageConfiguration={{
                     autoClosingPairs: [
