@@ -13,7 +13,7 @@ import type { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useIndexMappings } from './use_index_mappings';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 jest.mock('./use_index_mappings');
 

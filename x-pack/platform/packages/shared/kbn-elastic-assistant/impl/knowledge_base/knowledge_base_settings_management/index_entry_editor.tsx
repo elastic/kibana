@@ -23,7 +23,7 @@ import React, { useCallback, useMemo } from 'react';
 import type { IndexEntry } from '@kbn/elastic-assistant-common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { useIndexMappings } from './use_index_mappings';
 import * as i18n from './translations';
 import { isGlobalEntry } from './helpers';
