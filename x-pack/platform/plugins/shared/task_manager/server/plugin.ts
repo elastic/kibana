@@ -275,6 +275,13 @@ export class TaskManagerPlugin
       setupIntervalLogging(monitoredHealth$, this.logger, LogHealthForBackgroundTasksOnlyMinutes);
     }
 
+    this.definitions.registerTaskDefinitions({
+      testscript: {
+        title: 'Test script',
+        createTaskRunner: `${__dirname}/script.js`,
+      },
+    });
+
     return {
       index: TASK_MANAGER_INDEX,
       addMiddleware: (middleware: Middleware) => {
@@ -414,6 +421,19 @@ export class TaskManagerPlugin
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
     scheduleMarkRemovedTasksAsUnrecognizedDefinition(this.logger, taskScheduling).catch(() => {});
+
+    (async () => {
+      await taskStore.remove('testscript');
+      await taskScheduling.ensureScheduled({
+        id: 'testscript',
+        taskType: 'testscript',
+        schedule: {
+          interval: '10s',
+        },
+        params: { foo: true },
+        state: {},
+      });
+    })();
 
     return {
       fetch: (opts: SearchOpts): Promise<FetchResult> => taskStore.fetch(opts),

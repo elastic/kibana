@@ -196,6 +196,7 @@ export const taskDefinitionSchema = schema.object(
     ),
 
     paramsSchema: schema.maybe(schema.any()),
+    createTaskRunner: schema.any(),
   },
   {
     validate({ timeout, priority, cost }) {
@@ -227,7 +228,7 @@ export type TaskDefinition = Omit<TypeOf<typeof taskDefinitionSchema>, 'paramsSc
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
-  createTaskRunner: TaskRunCreatorFunction;
+  createTaskRunner: TaskRunCreatorFunction | string;
   stateSchemaByVersion?: Record<
     number,
     {
