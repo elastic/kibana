@@ -100,7 +100,7 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
-import { useRowHeight, RowHeightType } from '../hooks/use_row_height';
+import { RowHeightType, useRowHeight } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
 import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
@@ -913,6 +913,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       onChangeRowHeight: onChangeHeaderRowHeight,
       onChangeRowHeightLines: onChangeHeaderRowHeightLines,
     } = useRowHeight({
+      type: RowHeightType.header,
       storage,
       consumer,
       key: 'dataGridHeaderRowHeight',
@@ -924,6 +925,7 @@ const InternalUnifiedDataTable = React.forwardRef<
 
     const { rowHeight, rowHeightLines, lineCountInput, onChangeRowHeight, onChangeRowHeightLines } =
       useRowHeight({
+        type: RowHeightType.row,
         storage,
         consumer,
         key: 'dataGridRowHeight',

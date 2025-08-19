@@ -8,10 +8,11 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
-import { EditLookupIndexContentContext } from '@kbn/index-editor';
+import type { EditLookupIndexContentContext } from '@kbn/index-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { monaco } from '@kbn/monaco';
-import React, { useCallback, useEffect, useRef } from 'react';
+import type React from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import {
@@ -23,7 +24,7 @@ import {
   mutate,
   Parser,
 } from '@kbn/esql-ast';
-import { IndexAutocompleteItem } from '@kbn/esql-types';
+import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import type { ESQLEditorDeps } from '../types';
 

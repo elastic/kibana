@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useGeneratedHtmlId } from '@elastic/eui';
-import { KibanaContextExtra } from '../../types';
+import type { KibanaContextExtra } from '../../types';
 
 export interface UnsavedChangesModal {
   onClose: () => void;

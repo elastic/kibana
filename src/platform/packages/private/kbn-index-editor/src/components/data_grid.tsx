@@ -12,12 +12,11 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
+import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
 import {
-  CustomCellRenderer,
   DataLoadingState,
   UnifiedDataTable,
   type SortOrder,
-  CustomGridColumnsConfiguration,
   type EuiDataGridRefProps,
 } from '@kbn/unified-data-table';
 import type { RestorableStateProviderApi } from '@kbn/restorable-state';
@@ -28,7 +27,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
-import { KibanaContextExtra } from '../types';
+import { type KibanaContextExtra } from '../types';
 import { getCellValueRenderer } from './grid_custom_renderers/cell_value_renderer';
 import { getValueInputPopover } from './grid_custom_renderers/value_input_popover';
 
@@ -48,8 +47,6 @@ const DEFAULT_ROWS_PER_PAGE = 10;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
-  const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
-
   const { rows } = props;
 
   const {
@@ -65,9 +62,8 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     },
   } = useKibana<KibanaContextExtra>();
 
-  const savingDocs = useObservable(indexUpdateService.savingDocs$);
-
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
+  const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
 
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
@@ -167,14 +163,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         rows,
         columns: props.columns,
         onValueChange,
-        savingDocs,
         dataTableRef,
       }),
-    [rows, props.columns, onValueChange, dataTableRef, savingDocs]
+    [rows, props.columns, onValueChange, dataTableRef]
   );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, savingDocs, dataTableRef, isIndexCreated);
-  }, [rows, savingDocs, isIndexCreated]);
+    return getCellValueRenderer(rows, dataTableRef, isIndexCreated);
+  }, [rows, isIndexCreated]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
@@ -247,7 +242,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           dataView={props.dataView}
           onSetColumns={onSetColumns}
           onUpdateRowsPerPage={setRowsPerPage}
-          onSort={(newSort) => setSortOrder(newSort as SortOrder[])}
+          onSort={(newSort) => indexUpdateService.setSort(newSort as SortOrder[])}
           sort={sortOrder}
           ariaLabelledBy="lookupIndexDataGrid"
           maxDocFieldsDisplayed={100}
