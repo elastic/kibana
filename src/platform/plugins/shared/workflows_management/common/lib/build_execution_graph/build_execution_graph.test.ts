@@ -634,7 +634,6 @@ describe('convertToWorkflowGraph', () => {
               message: 'Hello from foreach nested step 2',
             },
           } as ConnectorStep,
-          ,
         ],
       } as Partial<WorkflowYaml>;
 
