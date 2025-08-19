@@ -179,10 +179,6 @@ export class IndexUpdateService {
   public readonly exitAttemptWithUnsavedChanges$ =
     this._exitAttemptWithUnsavedChanges$.asObservable();
 
-  private readonly _isProcessingImportedFiles = new BehaviorSubject<boolean>(false);
-  public readonly isProcessingImportedFiles$: Observable<boolean> =
-    this._isProcessingImportedFiles.asObservable();
-
   private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
   public readonly exitAttemptWithUnsavedFields$ =
     this._exitAttemptWithUnsavedFields$.asObservable();
@@ -686,7 +682,6 @@ export class IndexUpdateService {
             this._docs$.next(resultRows);
             this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
-            this.setIsImportingFile(false);
           },
           error: (error) => {
             this._isFetching$.next(false);
@@ -778,8 +773,8 @@ export class IndexUpdateService {
     this._isFetching$.next(isFetching);
   }
 
-  public setIsImportingFile(isImporting: boolean) {
-    this._isProcessingImportedFiles.next(isImporting);
+  public setIsSaving(isSaving: boolean) {
+    this._isSaving$.next(isSaving);
   }
 
   public setIndexName(indexName: string) {
@@ -955,10 +950,12 @@ export class IndexUpdateService {
         const dataView = await firstValueFrom(this.dataView$);
         await this.data.dataViews.refreshFields(dataView, false, true);
         this.refresh();
+        this._isSaving$.next(false);
       }, 2000);
     } else {
       this.setIndexName(indexName);
       this.setIndexCreated(true);
+      this._isSaving$.next(false);
     }
   }
 

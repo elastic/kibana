@@ -54,10 +54,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
-  const isProcessingImportedFiles = useObservable(
-    indexUpdateService.isProcessingImportedFiles$,
-    false
-  );
+  const isSaving = useObservable(indexUpdateService.isSaving$, false);
 
   const isAnalyzing =
     uploadStatus.analysisStatus === STATUS.STARTED &&
@@ -65,7 +62,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const isUploading =
     uploadStatus.overallImportStatus === STATUS.STARTED ||
-    (uploadStatus.overallImportStatus === STATUS.COMPLETED && isProcessingImportedFiles);
+    (uploadStatus.overallImportStatus === STATUS.COMPLETED && isSaving);
   const overallImportProgress = uploadStatus.overallImportProgress;
 
   const onFilesSelected = useCallback(
@@ -164,14 +161,14 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   );
 
   const showFilePreview =
-    isProcessingImportedFiles ||
+    isSaving ||
     (!isDragActive &&
       filesStatus.length > 0 &&
       uploadStatus.overallImportStatus !== STATUS.COMPLETED);
 
   let content: React.ReactNode = children;
 
-  if (noResults && !showFilePreview && !isProcessingImportedFiles) {
+  if (noResults && !showFilePreview && !isSaving) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>{content}</EuiFlexItem>

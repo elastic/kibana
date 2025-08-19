@@ -42,7 +42,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
 
   const onImport = useCallback(async () => {
-    indexUpdateService.setIsImportingFile(true);
+    indexUpdateService.setIsSaving(true);
     await onImportClick();
   }, [indexUpdateService, onImportClick]);
 
