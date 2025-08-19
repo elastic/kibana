@@ -7,14 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface PackageItem {
-  name: string;
-  directory: string;
-  description: string;
-  owner: string[];
-}
-
-export interface ListPackagesResponse {
-  packages: PackageItem[];
-  plugins?: PackageItem[];
-}
+export type * from './tool_definition';
