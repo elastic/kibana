@@ -27,7 +27,7 @@ import {
   type DefaultRuleType,
   type SyntheticsDefaultRule,
 } from '../../../common/types/default_alerts';
-export class DefaultAlertService {
+export class DefaultRuleService {
   private settings?: DynamicSettingsAttributes;
 
   constructor(
@@ -53,7 +53,7 @@ export class DefaultAlertService {
    */
   private acquireLockOrFail<T>(cb: () => Promise<T>, spaceId: string): Promise<T> {
     const lockService = new LockManagerService(this.server.coreSetup, this.server.logger);
-    return lockService.withLock(`synthetics-default-alerts-lock-${spaceId}`, cb);
+    return lockService.withLock(`synthetics-default-rules-lock-${spaceId}`, cb);
   }
 
   /**
@@ -62,7 +62,7 @@ export class DefaultAlertService {
    * @returns A promise that resolves when the rules have been set up.
    * @throws LockAcquisitionError if a lock cannot be acquired to modify the shared resource. Calling code must handle this error.
    */
-  public async setupDefaultAlerts(spaceId: string) {
+  public async setupDefaultRules(spaceId: string) {
     this.settings = await this.getSettings();
     return this.acquireLockOrFail(async () => {
       const [statusRule, tlsRule] = await Promise.allSettled([
@@ -118,7 +118,7 @@ export class DefaultAlertService {
     );
   }
 
-  public async getExistingAlert(
+  public async getExistingRule(
     ruleType: DefaultRuleType
   ): Promise<SyntheticsDefaultRule | undefined> {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
@@ -134,8 +134,8 @@ export class DefaultAlertService {
     if (data.length === 0) {
       return;
     }
-    const { actions = [], systemActions = [], ...alert } = data[0];
-    return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
+    const { actions = [], systemActions = [], ...rule } = data[0];
+    return { ...rule, actions: [...actions, ...systemActions], ruleTypeId: rule.alertTypeId };
   }
 
   private async createDefaultRuleIfNotExist(
@@ -146,12 +146,10 @@ export class DefaultAlertService {
   ): Promise<SyntheticsDefaultRule | undefined> {
     const actions = await this.getRuleActions(ruleType);
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
-    // create the rule with hardcoded ID (we only ever want one of these)
-    // the request will fail if the rule already exists
     const {
       actions: actionsFromRules = [],
       systemActions = [],
-      ...newAlert
+      ...newRule
     } = await rulesClient.create({
       data: {
         actions,
@@ -169,9 +167,9 @@ export class DefaultAlertService {
       },
     });
     return {
-      ...newAlert,
+      ...newRule,
       actions: [...actionsFromRules, ...systemActions],
-      ruleTypeId: newAlert.alertTypeId,
+      ruleTypeId: newRule.alertTypeId,
     };
   }
 
@@ -187,7 +185,7 @@ export class DefaultAlertService {
   private async updateStatusRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
       const minimumRuleInterval = this.getMinimumRuleInterval();
-      return this.upsertDefaultAlert(
+      return this.upsertDefaultRule(
         SYNTHETICS_STATUS_RULE,
         `Synthetics status internal rule`,
         minimumRuleInterval,
@@ -204,7 +202,7 @@ export class DefaultAlertService {
   private async updateTlsRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
       const minimumRuleInterval = this.getMinimumRuleInterval();
-      return this.upsertDefaultAlert(
+      return this.upsertDefaultRule(
         SYNTHETICS_TLS_RULE,
         `Synthetics internal TLS rule`,
         minimumRuleInterval,
@@ -218,7 +216,7 @@ export class DefaultAlertService {
     }
   }
 
-  private async upsertDefaultAlert(
+  private async upsertDefaultRule(
     ruleType: DefaultRuleType,
     name: string,
     interval: string,
@@ -226,32 +224,31 @@ export class DefaultAlertService {
   ) {
     const rulesClient = await (await this.context.alerting)?.getRulesClient();
 
-    const alert = await this.getExistingAlert(ruleType);
-    if (alert) {
-      const currentIntervalInMs = parseDuration(alert.schedule.interval);
+    const rule = await this.getExistingRule(ruleType);
+    if (rule) {
+      const currentIntervalInMs = parseDuration(rule.schedule.interval);
       const minimumIntervalInMs = parseDuration(interval);
       const actions = await this.getRuleActions(ruleType);
       const {
         actions: actionsFromRules = [],
         systemActions = [],
-        ...updatedAlert
+        ...updatedRule
       } = await rulesClient.update({
-        id: alert.id,
+        id: rule.id,
         data: {
           actions,
-          name: alert.name,
-          tags: alert.tags,
+          name: rule.name,
+          tags: rule.tags,
           schedule: {
-            interval:
-              currentIntervalInMs < minimumIntervalInMs ? interval : alert.schedule.interval,
+            interval: currentIntervalInMs < minimumIntervalInMs ? interval : rule.schedule.interval,
           },
-          params: alert.params,
+          params: rule.params,
         },
       });
       return {
-        ...updatedAlert,
+        ...updatedRule,
         actions: [...actionsFromRules, ...systemActions],
-        ruleTypeId: updatedAlert.alertTypeId,
+        ruleTypeId: updatedRule.alertTypeId,
       };
     }
 

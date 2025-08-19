@@ -7,7 +7,7 @@
 
 import { LockAcquisitionError } from '@kbn/lock-manager';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { DefaultAlertService } from './default_alert_service';
+import { DefaultRuleService } from './default_alert_service';
 import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { DEFAULT_ALERT_RESPONSE } from '../../../common/types/default_alerts';
@@ -29,11 +29,11 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
   }): Promise<DEFAULT_ALERT_RESPONSE | IKibanaResponse<{}>> => {
     try {
       const activeSpace = await server.spaces?.spacesService.getActiveSpace(request);
-      const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+      const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
 
       const [statusRule, tlsRule] = await Promise.all([
-        defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
-        defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
+        defaultAlertService.getExistingRule(SYNTHETICS_STATUS_RULE),
+        defaultAlertService.getExistingRule(SYNTHETICS_TLS_RULE),
       ]);
       if (statusRule && tlsRule) {
         return {
@@ -42,7 +42,7 @@ export const enableDefaultAlertingRoute: SyntheticsRestApiRouteFactory = () => (
         };
       }
       // do not delete this `await`, or we will skip the custom exception handling
-      const result = await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+      const result = await defaultAlertService.setupDefaultRules(activeSpace?.id ?? 'default');
       return result;
     } catch (error) {
       if (error instanceof LockAcquisitionError) {

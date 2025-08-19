@@ -37,7 +37,7 @@ import {
   DEFAULT_NAMESPACE_STRING,
 } from '../../../../common/constants/monitor_defaults';
 import { triggerTestNow } from '../../synthetics_service/test_now_monitor';
-import { DefaultAlertService } from '../../default_alerts/default_alert_service';
+import { DefaultRuleService } from '../../default_alerts/default_alert_service';
 import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { formatKibanaNamespace } from '../../../../common/formatters';
@@ -244,10 +244,10 @@ export class AddEditMonitorAPI {
       return;
     }
 
-    const defaultAlertService = new DefaultAlertService(context, server, savedObjectsClient);
+    const defaultAlertService = new DefaultRuleService(context, server, savedObjectsClient);
     const [statusRule, tlsRule] = await Promise.all([
-      defaultAlertService.getExistingAlert(SYNTHETICS_STATUS_RULE),
-      defaultAlertService.getExistingAlert(SYNTHETICS_TLS_RULE),
+      defaultAlertService.getExistingRule(SYNTHETICS_STATUS_RULE),
+      defaultAlertService.getExistingRule(SYNTHETICS_TLS_RULE),
     ]);
     if (statusRule && tlsRule) {
       return {
@@ -255,7 +255,7 @@ export class AddEditMonitorAPI {
         tlsRule,
       };
     }
-    return await defaultAlertService.setupDefaultAlerts(activeSpace?.id ?? 'default');
+    return await defaultAlertService.setupDefaultRules(activeSpace?.id ?? 'default');
   }
 
   setupGettingStarted = (configId: string) => {

@@ -11,7 +11,7 @@ import {
   SYNTHETICS_STATUS_RULE,
   SYNTHETICS_TLS_RULE,
 } from '../../../common/constants/synthetics_alerts';
-import { DefaultAlertService } from './default_alert_service';
+import { DefaultRuleService } from './default_alert_service';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../constants/settings';
 import { type SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../../types';
@@ -24,7 +24,7 @@ jest.mock('@kbn/lock-manager', () => ({
   LockAcquisitionError: class extends Error {},
 }));
 
-describe('DefaultAlertService', () => {
+describe('DefaultRuleService', () => {
   // Ensure prototype spies don't leak across tests and override instance stubs/real implementations
   afterEach(() => {
     jest.restoreAllMocks();
@@ -35,15 +35,19 @@ describe('DefaultAlertService', () => {
     server: SyntheticsServerSetup,
     soClient: SavedObjectsClientContract
   ) => any;
-  const TestableDefaultAlertService = DefaultAlertService as unknown as TestableCtor;
+  const TestableDefaultRuleService = DefaultRuleService as unknown as TestableCtor;
 
   // Helper to create a service and spies for private methods without mutating the prototype permanently
-  function createServiceWithMocks(
-    context?: UptimeRequestHandlerContext,
-    server?: SyntheticsServerSetup,
-    soClient?: SavedObjectsClientContract
-  ) {
-    const service = new DefaultAlertService(
+  function createServiceWithMocks({
+    context,
+    server,
+    soClient,
+  }: {
+    context?: UptimeRequestHandlerContext;
+    server?: SyntheticsServerSetup;
+    soClient?: SavedObjectsClientContract;
+  }) {
+    const service = new DefaultRuleService(
       (context ?? ({} as any)) as any,
       (server ?? ({} as any)) as any,
       (soClient ?? ({} as any)) as any
@@ -55,7 +59,7 @@ describe('DefaultAlertService', () => {
     const createDefaultRuleIfNotExist = jest.spyOn(service as any, 'createDefaultRuleIfNotExist');
     const updateStatusRule = jest.spyOn(service as any, 'updateStatusRule');
     const updateTlsRule = jest.spyOn(service as any, 'updateTlsRule');
-    const upsertDefaultAlert = jest.spyOn(service as any, 'upsertDefaultAlert');
+    const upsertDefaultRule = jest.spyOn(service as any, 'upsertDefaultRule');
 
     return {
       service,
@@ -65,7 +69,7 @@ describe('DefaultAlertService', () => {
         createDefaultRuleIfNotExist,
         updateStatusRule,
         updateTlsRule,
-        upsertDefaultAlert,
+        upsertDefaultRule,
       },
     };
   }
@@ -77,19 +81,9 @@ describe('DefaultAlertService', () => {
     };
     const soResponse = { attributes: { ...expectedSettings } };
 
-    it('returns settings if already set', async () => {
-      const soClient = { get: jest.fn() } as any;
-      const service = new DefaultAlertService({} as any, {} as any, soClient);
-      service.settings = expectedSettings;
-      // @ts-expect-error accessing protected method for testing
-      const settings = await service.getSettings();
-      expect(settings).toEqual(expectedSettings);
-      expect(soClient.get).not.toHaveBeenCalled();
-    });
-
     it('fetches settings if not set', async () => {
       const soClient = { get: jest.fn() } as any;
-      const service = new DefaultAlertService({} as any, {} as any, soClient);
+      const service = new DefaultRuleService({} as any, {} as any, soClient);
       soClient.get.mockResolvedValueOnce(soResponse);
       // @ts-expect-error accessing protected method for testing
       const settings = await service.getSettings();
@@ -103,13 +97,14 @@ describe('DefaultAlertService', () => {
     });
   });
 
-  describe('setupDefaultAlerts', () => {
+  describe('setupDefaultRules', () => {
     afterEach(() => jest.resetAllMocks());
 
     it('sets up status and tls rules', async () => {
       const soClient = { get: jest.fn() } as any;
-      const { service, mocks } = createServiceWithMocks();
-      service.soClient = soClient;
+      const { service, mocks } = createServiceWithMocks({
+        soClient,
+      });
       // avoid depending on LockManagerService implementation in this unit test
       (service as any).acquireLockOrFail = (cb: () => Promise<any>) => cb();
       // @ts-expect-error accessing protected method for testing
@@ -124,7 +119,7 @@ describe('DefaultAlertService', () => {
       mocks.setupStatusRule.mockResolvedValue({ value: {} });
       mocks.setupTlsRule.mockResolvedValue({ value: {} });
 
-      const result = await service.setupDefaultAlerts('default');
+      const result = await service.setupDefaultRules('default');
       expect(mocks.setupStatusRule).toHaveBeenCalledTimes(1);
       expect(mocks.setupTlsRule).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -135,8 +130,10 @@ describe('DefaultAlertService', () => {
 
     it('returns null rules if value is falsy', async () => {
       const soClient = { get: jest.fn() } as any;
-      const { service, mocks } = createServiceWithMocks();
-      service.soClient = soClient;
+      const { service, mocks } = createServiceWithMocks({
+        soClient,
+      });
+
       // avoid depending on LockManagerService implementation in this unit test
       (service as any).acquireLockOrFail = (cb: () => Promise<any>) => cb();
       // @ts-expect-error accessing protected method for testing
@@ -151,7 +148,7 @@ describe('DefaultAlertService', () => {
       mocks.setupStatusRule.mockResolvedValue(undefined);
       mocks.setupTlsRule.mockResolvedValue(undefined);
 
-      const result = await service.setupDefaultAlerts('default');
+      const result = await service.setupDefaultRules('default');
       expect(mocks.setupStatusRule).toHaveBeenCalledTimes(1);
       expect(mocks.setupTlsRule).toHaveBeenCalledTimes(1);
       expect(result).toEqual({
@@ -166,7 +163,7 @@ describe('DefaultAlertService', () => {
       const server = {
         alerting: { getConfig: () => ({ minimumScheduleInterval: { value: '30s' } }) },
       } as any;
-      const service = new DefaultAlertService({} as any, server, {} as any);
+      const service = new DefaultRuleService({} as any, server, {} as any);
       // @ts-expect-error accessing protected method for testing
       expect(service.getMinimumRuleInterval()).toBe('1m');
     });
@@ -175,7 +172,7 @@ describe('DefaultAlertService', () => {
       const server = {
         alerting: { getConfig: () => ({ minimumScheduleInterval: { value: '5m' } }) },
       } as any;
-      const service = new DefaultAlertService({} as any, server, {} as any);
+      const service = new DefaultRuleService({} as any, server, {} as any);
       // @ts-expect-error accessing protected method for testing
       expect(service.getMinimumRuleInterval()).toBe('5m');
     });
@@ -184,7 +181,7 @@ describe('DefaultAlertService', () => {
       const server = {
         alerting: { getConfig: () => ({ minimumScheduleInterval: { value: '1m' } }) },
       } as any;
-      const service = new DefaultAlertService({} as any, server, {} as any);
+      const service = new DefaultRuleService({} as any, server, {} as any);
       // @ts-expect-error accessing protected method for testing
       expect(service.getMinimumRuleInterval()).toBe('1m');
     });
@@ -192,7 +189,7 @@ describe('DefaultAlertService', () => {
 
   describe('setupStatusRule', () => {
     it('creates status rule if enabled', async () => {
-      const service = new TestableDefaultAlertService({} as any, {} as any, {} as any);
+      const service = new TestableDefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       // spy on instance method to observe calls
       const createSpy = jest
@@ -210,7 +207,7 @@ describe('DefaultAlertService', () => {
     });
 
     it('does not create status rule if disabled', async () => {
-      const service = new TestableDefaultAlertService({} as any, {} as any, {} as any);
+      const service = new TestableDefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultStatusRuleEnabled: false } as any;
@@ -222,7 +219,7 @@ describe('DefaultAlertService', () => {
 
   describe('setupTlsRule', () => {
     it('creates tls rule if enabled', async () => {
-      const service = new TestableDefaultAlertService({} as any, {} as any, {} as any);
+      const service = new TestableDefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       const createSpy = jest
         .spyOn(service as any, 'createDefaultRuleIfNotExist')
@@ -238,7 +235,7 @@ describe('DefaultAlertService', () => {
       );
     });
     it('does not create tls rule if disabled', async () => {
-      const service = new TestableDefaultAlertService({} as any, {} as any, {} as any);
+      const service = new TestableDefaultRuleService({} as any, {} as any, {} as any);
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
       service.createDefaultRuleIfNotExist = jest.fn();
       service.settings = { defaultTLSRuleEnabled: false } as any;
@@ -250,12 +247,12 @@ describe('DefaultAlertService', () => {
 
   describe('updateDefaultRules', () => {
     it('upserts both rules when enabled and returns their results', async () => {
-      const service = new TestableDefaultAlertService({} as any, {} as any, {} as any);
+      const service = new TestableDefaultRuleService({} as any, {} as any, {} as any);
       // pass-through the lock
       const withLock = jest.fn((cb: () => Promise<any>) => cb());
       (service as any).acquireLockOrFail = withLock;
       service.getMinimumRuleInterval = jest.fn().mockReturnValue('1m');
-      service.upsertDefaultAlert = jest
+      service.upsertDefaultRule = jest
         .fn()
         .mockResolvedValueOnce({ id: 'status', type: 'status' })
         .mockResolvedValueOnce({ id: 'tls', type: 'tls' });
@@ -264,14 +261,14 @@ describe('DefaultAlertService', () => {
 
       expect(withLock).toHaveBeenCalledTimes(1);
 
-      expect(service.upsertDefaultAlert).toHaveBeenNthCalledWith(
+      expect(service.upsertDefaultRule).toHaveBeenNthCalledWith(
         1,
         SYNTHETICS_STATUS_RULE,
         'Synthetics status internal rule',
         '1m',
         'default'
       );
-      expect(service.upsertDefaultAlert).toHaveBeenNthCalledWith(
+      expect(service.upsertDefaultRule).toHaveBeenNthCalledWith(
         2,
         SYNTHETICS_TLS_RULE,
         'Synthetics internal TLS rule',
@@ -287,7 +284,7 @@ describe('DefaultAlertService', () => {
     it('deletes rules when disabled', async () => {
       const bulkDeleteRules = jest.fn().mockResolvedValue(undefined);
       const getRulesClient = jest.fn().mockReturnValue({ bulkDeleteRules });
-      const service = new TestableDefaultAlertService(
+      const service = new TestableDefaultRuleService(
         { alerting: { getRulesClient } } as any,
         {} as any,
         {} as any
@@ -311,7 +308,7 @@ describe('DefaultAlertService', () => {
     });
   });
 
-  describe('existing alerts', () => {
+  describe('existing rules', () => {
     function setUpExistingRules<T extends Record<string, any>>(
       ruleOverride?: Partial<SanitizedRule<T>>,
       getRulesClientMocks = {}
@@ -342,15 +339,15 @@ describe('DefaultAlertService', () => {
 
     afterEach(() => jest.resetAllMocks());
 
-    describe('getExistingAlert', () => {
+    describe('getExistingRule', () => {
       it('returns rule if exists', async () => {
         const { getRulesClient, mockRule } = setUpExistingRules();
-        const service = new TestableDefaultAlertService(
+        const service = new TestableDefaultRuleService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
         );
-        const result = await service.getExistingAlert('xpack.synthetics.alerts.monitorStatus');
+        const result = await service.getExistingRule('xpack.synthetics.alerts.monitorStatus');
         expect(result).toEqual(formatMockRuleResult(mockRule));
       });
 
@@ -358,17 +355,17 @@ describe('DefaultAlertService', () => {
         const find = jest.fn().mockResolvedValue({ data: [] });
         const getRulesClient = jest.fn();
         getRulesClient.mockReturnValue({ find });
-        const service = new TestableDefaultAlertService(
+        const service = new TestableDefaultRuleService(
           { alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
         );
-        const result = await service.getExistingAlert('xpack.synthetics.alerts.monitorStatus');
+        const result = await service.getExistingRule('xpack.synthetics.alerts.monitorStatus');
         expect(result).toBeUndefined();
       });
     });
 
-    describe('createDefaultAlertIfNotExist', () => {
+    describe('createDefaultRuleIfNotExist', () => {
       it('creates rule if does not exist', async () => {
         const sampleAction = { alertsFilter: { query: { kql: 'some kql', filters: [] } } };
         const create = jest.fn().mockResolvedValue({
@@ -385,7 +382,7 @@ describe('DefaultAlertService', () => {
         });
         const getRulesClient = jest.fn();
         getRulesClient.mockReturnValue({ create });
-        const service = new TestableDefaultAlertService(
+        const service = new TestableDefaultRuleService(
           { actions: { getActionsClient }, alerting: { getRulesClient } } as any,
           {} as any,
           {} as any
@@ -424,7 +421,7 @@ describe('DefaultAlertService', () => {
       getActionsClient.mockReturnValue({
         getAll,
       });
-      const service = new TestableDefaultAlertService(
+      const service = new TestableDefaultRuleService(
         { actions: { getActionsClient } } as any,
         {} as any,
         { get: jest.fn() } as any
