@@ -128,6 +128,9 @@ const bodySchema = schema.object({
   runtimeMappings: schema.maybe(schema.recordOf(schema.string(), schema.any())),
   minScore: schema.maybe(schema.number()),
   trackScores: schema.maybe(schema.boolean()),
+  pagination: schema.maybe(
+    schema.object({ pageIndex: schema.number(), pageSize: schema.number() })
+  ),
 });
 
 export const findAlertsRoute = (
@@ -156,6 +159,10 @@ export const findAlertsRoute = (
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
+          if (req.body.pagination && req.body.search_after) {
+            throw new Error('Cannot search_after and paginate at the same time');
+          }
+
           let esRuleTypes = req.body.ruleTypeIds.filter(isSiemRuleType);
           let kbRuleTypes = req.body.ruleTypeIds.filter((type) => !isSiemRuleType(type));
 
@@ -213,7 +220,7 @@ export const findAlertsRoute = (
           const sort = req.body.sort
             ? [...req.body.sort, { _shard_doc: 'asc' }]
             : [{ '@timestamp': 'desc' }, { _shard_doc: 'asc' }];
-          const size = req.body.size ?? 10;
+          const requestedSize = req.body.size ?? 10;
           const fields = req.body.fields ?? [];
           fields.push({ field: 'kibana.alert.*', include_unmapped: false });
 
@@ -254,7 +261,10 @@ export const findAlertsRoute = (
               _source: false,
               fields: esAuthFields,
               sort,
-              size,
+              size: req.body.pagination
+                ? req.body.pagination.pageSize +
+                  req.body.pagination.pageIndex * req.body.pagination.pageSize
+                : requestedSize,
               query: esQuery,
               search_after: req.body.search_after,
               ...(req.body.runtimeMappings ? { runtime_mappings: req.body.runtimeMappings } : {}),
@@ -273,7 +283,10 @@ export const findAlertsRoute = (
               _source: false,
               fields: kbAuthFields,
               sort,
-              size,
+              size: req.body.pagination
+                ? req.body.pagination.pageSize +
+                  req.body.pagination.pageIndex * req.body.pagination.pageSize
+                : requestedSize,
               query: kbQuery,
               search_after: req.body.search_after,
               ...(req.body.runtimeMappings ? { runtime_mappings: req.body.runtimeMappings } : {}),
@@ -282,6 +295,12 @@ export const findAlertsRoute = (
             },
           });
 
+          const sliceStart = req.body.pagination
+            ? req.body.pagination.pageIndex * req.body.pagination.pageSize
+            : 0;
+          const sliceEnd = req.body.pagination
+            ? req.body.pagination.pageIndex * req.body.pagination.pageSize + req.body.pagination.pageSize
+            : requestedSize;
           const mergedResult = {
             hits: {
               total: {
@@ -295,7 +314,7 @@ export const findAlertsRoute = (
               hits: esAuthResult.hits.hits
                 .concat(kbAuthResult.hits.hits)
                 .sort(makeEsSortComparator(sort))
-                .slice(0, size),
+                .slice(sliceStart, sliceEnd),
             },
           };
 
