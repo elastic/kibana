@@ -7,16 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
-import { Subscription } from 'rxjs';
-import { Filter } from '@kbn/es-query';
-import { FilterManager } from '../filter_manager';
-=======
 import type { Subscription } from 'rxjs';
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import type { FilterManager } from '../filter_manager';
->>>>>>> upstream/main
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';

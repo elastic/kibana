@@ -15,16 +15,10 @@ import type {
   KibanaExecutionContext,
   ScopedHistory,
 } from '@kbn/core/public';
-<<<<<<< HEAD
-import { Adapters } from '@kbn/inspector-plugin/public';
-import { Subscription } from 'rxjs';
-import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
-=======
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import type { Adapters } from '@kbn/inspector-plugin/public';
 import type { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
->>>>>>> upstream/main
+import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import type {

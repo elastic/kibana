@@ -9,15 +9,9 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-<<<<<<< HEAD
-import { Filter } from '@kbn/es-query';
-import { FilterEditor, FilterEditorProps } from './filter_editor';
-=======
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import type { FilterEditorProps } from './filter_editor';
 import { FilterEditor } from './filter_editor';
->>>>>>> upstream/main
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';

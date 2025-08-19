@@ -8,12 +8,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-<<<<<<< HEAD
-import { Query } from '@kbn/es-query';
-=======
 import type { Query } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
->>>>>>> upstream/main
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import type { InternalSavedQueryAttributes } from './route_handler_context';

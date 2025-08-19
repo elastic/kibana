@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-<<<<<<< HEAD
-import { Filter } from '@kbn/es-query';
-=======
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
->>>>>>> upstream/main
 import { isLensEqual } from './lens_document_equality';
 import type { LensDocument } from '../persistence';
 import type {

@@ -7,19 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
-import {
-  createStateContainer,
-  IKbnUrlStateStorage,
-  syncState,
-} from '@kbn/kibana-utils-plugin/public';
-import { QuerySetup, QueryStart } from '../query_service';
-=======
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createStateContainer, syncState } from '@kbn/kibana-utils-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
 import type { QuerySetup, QueryStart } from '../query_service';
->>>>>>> upstream/main
 import { connectToQueryState } from './connect_to_query_state';
 import type { GlobalQueryStateFromUrl } from './types';
 

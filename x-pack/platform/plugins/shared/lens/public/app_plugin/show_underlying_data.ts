@@ -16,12 +16,6 @@ import type {
 import {
   buildCustomFilter,
   buildEsQuery,
-<<<<<<< HEAD
-  TimeRange,
-  EsQueryConfig,
-=======
-  FilterStateStore,
->>>>>>> upstream/main
   isOfQueryType,
   isOfAggregateQueryType,
 } from '@kbn/es-query';

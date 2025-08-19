@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-<<<<<<< HEAD
-import { Filter } from '@kbn/es-query';
-=======
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
->>>>>>> upstream/main
 
 /**
  * Sort filters according to their store - global filters go first
