@@ -15,15 +15,17 @@ A set of (generally) stateless tools and utilities to ease working with Elastics
 * Automatically detecting and applying mapping updates
 * BYO serialization & deserialization (incoming)
 * TypeScript utilities. Was type-safety already mentioned?
+* Helpers for creating (search) runtime fields (incoming)
 * Test utilities (incoming)
 
-## Backwards compatibility
 
-These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error!
-
-### Mapping updates
+## Mapping updates
 
 Mapping updates will apply to the current write-index and your index template. This means new mappings will only be applied to docs that arrive after your mappings update land.
+
+### A note on backwards compatibility
+
+These tools assume that you will be introducing backwards compatible changes to your mappings. If you do not apply bwc mappings you will hit a runtime error when running the `DataStreamClient.setup` method as it will try to update the current write index with your new mappings.
 
 ### Search-time runtime mappings (incoming)
 

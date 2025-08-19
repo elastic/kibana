@@ -7,6 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export function foo() {
-  return 'hello world';
-}
+export * as mappings from './src/mappings';
+export { DataStreamClient, type DataStreamClientArgs } from './src/client';
