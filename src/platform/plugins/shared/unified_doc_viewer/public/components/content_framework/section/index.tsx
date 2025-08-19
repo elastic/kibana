@@ -95,9 +95,11 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
         </EuiFlexGroup>
       }
       extraAction={
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          {actions && <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>}
-        </EuiFlexGroup>
+        actions?.length && (
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>{' '}
+          </EuiFlexGroup>
+        )
       }
     >
       <>
