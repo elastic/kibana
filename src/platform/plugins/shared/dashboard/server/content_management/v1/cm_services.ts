@@ -48,18 +48,12 @@ export const filterSchema = schema.object(
     query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     $state: schema.maybe(
       schema.object({
-        store: schema.oneOf(
-          [
-            schema.literal('appState'),
-            schema.literal('globalState'),
-          ],
-          {
-            meta: {
-              description:
-                "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
-            },
-          }
-        ),
+        store: schema.oneOf([schema.literal('appState'), schema.literal('globalState')], {
+          meta: {
+            description:
+              "Denote whether a filter is specific to an application's context (e.g. 'appState') or whether it should be applied globally (e.g. 'globalState').",
+          },
+        }),
       })
     ),
   },

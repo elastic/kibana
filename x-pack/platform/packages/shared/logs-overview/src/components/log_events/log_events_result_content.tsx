@@ -11,7 +11,7 @@ import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
 import React from 'react';
-import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
+import { buildCustomFilter } from '@kbn/es-query';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 
 export interface LogEventsResultContentProps {
