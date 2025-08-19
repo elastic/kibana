@@ -12,10 +12,11 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { LensPublicStart, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { getLensAttributesFromSuggestion, ChartType } from '@kbn/visualization-utils';
+import type { ChartType } from '@kbn/visualization-utils';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import React, { useEffect, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 
 interface VisualizeESQLProps {

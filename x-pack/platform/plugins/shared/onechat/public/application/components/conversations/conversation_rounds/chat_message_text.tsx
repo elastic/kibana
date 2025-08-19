@@ -23,6 +23,7 @@ import {
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import { ChartType } from '@kbn/visualization-utils';
 import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
@@ -177,7 +178,7 @@ export function ChatMessageText({ content }: Props) {
         );
       },
       toolresult: (props) => {
-        const { toolResultId } = props.spec;
+        const { toolResultId, params } = props.spec;
 
         if (!toolResultId) {
           return <p>Visualization requires a tool result ID.</p>;
@@ -187,7 +188,7 @@ export function ChatMessageText({ content }: Props) {
           .flatMap((r) => r.steps || [])
           .filter((s) => s.type === 'tool_call')
           .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-          .find((r) => r.toolResultId === toolResultId && r.type === 'tabular_data') as
+          .find((r) => r.ui?.toolResultId === toolResultId && r.type === 'tabular_data') as
           | TabularDataResult
           | undefined;
 
@@ -204,6 +205,7 @@ export function ChatMessageText({ content }: Props) {
             uiActions={pluginsStart.uiActions}
             esqlQuery={esqlQuery}
             esqlResult={esqlResult}
+            preferredChartType={(params.chartType as ChartType | undefined) || ChartType.Line}
           />
         );
       },

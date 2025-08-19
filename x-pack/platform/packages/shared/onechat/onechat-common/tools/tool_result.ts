@@ -19,8 +19,26 @@ export enum ToolResultType {
   error = 'error',
 }
 
-export interface ResourceResult {
-  toolResultId: string;
+interface ToolResultTypeBase {
+  type: ToolResultType;
+  data: Record<string, unknown>;
+  ui?: {
+    toolResultId: string;
+    description: string;
+    params: {
+      [key: string]: {
+        description: string;
+        type: string;
+        default: unknown;
+        options?: unknown[];
+        required?: boolean;
+      };
+    };
+    example: string;
+  };
+}
+
+export interface ResourceResult extends ToolResultTypeBase {
   type: ToolResultType.resource;
   data: {
     reference: {
@@ -34,8 +52,7 @@ export interface ResourceResult {
   };
 }
 
-export interface TabularDataResult {
-  toolResultId: string;
+export interface TabularDataResult extends ToolResultTypeBase {
   type: ToolResultType.tabularData;
   data: {
     esqlQuery: string;
@@ -46,20 +63,17 @@ export interface TabularDataResult {
   };
 }
 
-export interface QueryResult {
-  toolResultId: string;
+export interface QueryResult extends ToolResultTypeBase {
   type: ToolResultType.query;
   data: { dsl: SearchRequest } | { esql: string };
 }
 
-export interface OtherResult {
-  toolResultId: string;
+export interface OtherResult extends ToolResultTypeBase {
   type: ToolResultType.other;
-  data: unknown;
+  data: Record<string, unknown>;
 }
 
-export interface ErrorResult {
-  toolResultId: string;
+export interface ErrorResult extends ToolResultTypeBase {
   type: ToolResultType.error;
   data: {
     message: string;

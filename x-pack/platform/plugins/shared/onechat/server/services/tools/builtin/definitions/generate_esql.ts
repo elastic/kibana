@@ -11,7 +11,6 @@ import { generateEsql } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { getToolResultId } from '../../utils/tool_result_id';
 
 const nlToEsqlToolSchema = z.object({
   query: z.string().describe('A natural language query to generate an ES|QL query from.'),
@@ -43,7 +42,6 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
       });
 
       const toolResults: ToolResult[] = esqlResponse.queries.map((esqlQuery) => ({
-        toolResultId: getToolResultId(),
         type: ToolResultType.query,
         data: {
           esql: esqlQuery,
@@ -52,7 +50,6 @@ export const generateEsqlTool = (): BuiltinToolDefinition<typeof nlToEsqlToolSch
 
       if (esqlResponse.answer) {
         toolResults.push({
-          toolResultId: getToolResultId(),
           type: ToolResultType.other,
           data: {
             answer: esqlResponse.answer,
