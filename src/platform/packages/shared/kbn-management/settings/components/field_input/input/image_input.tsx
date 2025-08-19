@@ -15,7 +15,7 @@ import type {
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
 
-import { ResetInputRef } from '@kbn/management-settings-types';
+import type { ResetInputRef } from '@kbn/management-settings-types';
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
 import type { InputProps } from '../types';

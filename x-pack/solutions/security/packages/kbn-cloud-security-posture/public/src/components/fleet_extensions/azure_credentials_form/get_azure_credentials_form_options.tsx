@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiText } from '@elastic/eui';
 import { AZURE_CREDENTIALS_TYPE } from '../constants';
-import { AzureCredentialsType } from '../types';
-import { CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS } from './azure_test_subjects';
+import type { AzureCredentialsType } from '../types';
+import { AZURE_INPUT_FIELDS_TEST_SUBJECTS } from './azure_test_subjects';
 
 export type AzureCredentialsFields = Record<
   string,
@@ -106,11 +106,11 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_secret': {
         type: 'password',
@@ -118,7 +118,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
         label: i18n.translate('securitySolutionPackages.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_SECRET,
       },
     },
   },
@@ -132,11 +132,11 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_certificate_path': {
         label: i18n.translate(
@@ -145,7 +145,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Certificate Path',
           }
         ),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PATH,
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
@@ -156,7 +156,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
             defaultMessage: 'Client Certificate Password',
           }
         ),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_CERTIFICATE_PASSWORD,
       },
     },
   },
@@ -168,17 +168,17 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {
       'azure.credentials.tenant_id': {
         label: I18N_TENANT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.TENANT_ID,
       },
       'azure.credentials.client_id': {
         label: I18N_CLIENT_ID,
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_ID,
       },
       'azure.credentials.client_username': {
         label: i18n.translate('securitySolutionPackages.azureIntegration.clientUsernameLabel', {
           defaultMessage: 'Client Username',
         }),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_USERNAME,
       },
       'azure.credentials.client_password': {
         type: 'password',
@@ -186,7 +186,7 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
         label: i18n.translate('securitySolutionPackages.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),
-        testSubj: CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
+        testSubj: AZURE_INPUT_FIELDS_TEST_SUBJECTS.CLIENT_PASSWORD,
       },
     },
   },

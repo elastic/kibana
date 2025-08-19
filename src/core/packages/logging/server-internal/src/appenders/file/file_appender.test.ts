@@ -9,7 +9,8 @@
 
 import { mockCreateWriteStream, mockMkdirSync } from './file_appender.test.mocks';
 
-import { LogRecord, LogLevel } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { FileAppender } from './file_appender';
 
 const tickMs = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));

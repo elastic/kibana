@@ -8,9 +8,9 @@
 import _ from 'lodash';
 import turfBboxPolygon from '@turf/bbox-polygon';
 import turfBooleanContains from '@turf/boolean-contains';
-import { ISource } from '../sources/source';
-import { DataRequestMeta, Timeslice } from '../../../common/descriptor_types';
-import { DataRequest } from './data_request';
+import type { ISource } from '../sources/source';
+import type { DataRequestMeta, Timeslice } from '../../../common/descriptor_types';
+import type { DataRequest } from './data_request';
 
 const SOURCE_UPDATE_REQUIRED = true;
 const NO_SOURCE_UPDATE_REQUIRED = false;

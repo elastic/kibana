@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod';
+import type { z } from '@kbn/zod';
 
 import { EndpointList } from '../model/endpoint_list_common.gen';
 
