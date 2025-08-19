@@ -5,7 +5,8 @@ The tests and helper methods (services, page objects) defined here in
 
 **Important**: Only tests that validate platform-shared functionality should be located here. Solution-specific serverless tests should be located in their respective solution directories: `x-pack/solutions/<solution>/test/serverless`.
 
-For how to set up Docker for serverless ES images, please refer to
+For instructions on how to set up Docker for serverless ES images, please refer to
+[src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 [src/platform/packages/shared/kbn-es/README](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-es/README.mdx).
 
 ## Platform Serverless Testing Structure and Conventions
