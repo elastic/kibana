@@ -213,30 +213,30 @@ export const useBulkAlertActionItems = ({
               onClick: getOnAction(FILTER_CLOSED as AlertWorkflowStatus),
             },
             {
-              key: AlertClosingReasonValues.FALSE_POSITIVE,
+              key: AlertClosingReasonValues.false_positive,
               disableOnQuery: false,
               label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
               onClick: getOnAction(
                 FILTER_CLOSED as AlertWorkflowStatus,
-                AlertClosingReasonValues.FALSE_POSITIVE
+                AlertClosingReasonValues.false_positive
               ),
             },
             {
-              key: AlertClosingReasonValues.DUPLICATE,
+              key: AlertClosingReasonValues.duplicate,
               disableOnQuery: false,
               label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
               onClick: getOnAction(
                 FILTER_CLOSED as AlertWorkflowStatus,
-                AlertClosingReasonValues.DUPLICATE
+                AlertClosingReasonValues.duplicate
               ),
             },
             {
-              key: AlertClosingReasonValues.INVESTIGATION_REQUIRED,
+              key: AlertClosingReasonValues.investigation_required,
               disableOnQuery: false,
               label: i18n.BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
               onClick: getOnAction(
                 FILTER_CLOSED as AlertWorkflowStatus,
-                AlertClosingReasonValues.INVESTIGATION_REQUIRED
+                AlertClosingReasonValues.investigation_required
               ),
             },
           ],
