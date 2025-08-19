@@ -9,15 +9,14 @@ import type { Serializable } from '@kbn/utility-types';
 import { encode } from 'gpt-tokenizer';
 import { compact, last } from 'lodash';
 import { Observable } from 'rxjs';
-import { FunctionRegistrationParameters } from '..';
-import { MessageAddEvent } from '../../../common/conversation_complete';
-import { Message } from '../../../common/types';
+import type { FunctionRegistrationParameters } from '..';
+import { CONTEXT_FUNCTION_NAME } from '../../../common';
+import type { MessageAddEvent } from '../../../common/conversation_complete';
+import type { Message } from '../../../common/types';
 import { createFunctionResponseMessage } from '../../../common/utils/create_function_response_message';
 import { recallAndScore } from './utils/recall_and_score';
 
 const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
-
-export const CONTEXT_FUNCTION_NAME = 'context';
 
 export function registerContextFunction({
   client,
@@ -39,8 +38,8 @@ export function registerContextFunction({
         const screenDescription = compact(
           screenContexts.map((context) => context.screenDescription)
         ).join('\n\n');
-        // any data that falls within the token limit, send it automatically
 
+        // any data that falls within the token limit, send it automatically
         const dataWithinTokenLimit = compact(
           screenContexts.flatMap((context) => context.data)
         ).filter(

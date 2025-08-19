@@ -10,7 +10,7 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import React, { useMemo } from 'react';
 import type { Observable } from 'rxjs';
-import { AIAssistantAppService } from '@kbn/ai-assistant';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
 import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
 export function SharedProviders({

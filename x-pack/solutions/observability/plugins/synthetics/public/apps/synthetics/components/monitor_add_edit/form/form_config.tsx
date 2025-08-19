@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConfigKey, FormMonitorType, FieldMeta } from '../types';
+import type { FieldMeta } from '../types';
+import { ConfigKey, FormMonitorType } from '../types';
 import { AlertConfigKey } from '../constants';
 import { FIELD } from './field_config';
 

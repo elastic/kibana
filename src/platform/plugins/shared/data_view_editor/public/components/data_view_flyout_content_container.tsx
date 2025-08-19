@@ -10,10 +10,11 @@
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import { DataViewSpec, useKibana } from '../shared_imports';
+import type { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import type { DataViewSpec } from '../shared_imports';
+import { useKibana } from '../shared_imports';
 import { IndexPatternEditorFlyoutContent } from './data_view_editor_flyout_content';
-import { DataViewEditorContext, DataViewEditorProps } from '../types';
+import type { DataViewEditorContext, DataViewEditorProps } from '../types';
 import { DataViewEditorService } from '../data_view_editor_service';
 
 const DataViewFlyoutContentContainer = ({
@@ -24,6 +25,7 @@ const DataViewFlyoutContentContainer = ({
   editData,
   allowAdHocDataView,
   showManagementLink,
+  getDataViewHelpText,
 }: DataViewEditorProps) => {
   const {
     services: { dataViews, notifications, http },
@@ -99,6 +101,7 @@ const DataViewFlyoutContentContainer = ({
       showManagementLink={showManagementLink}
       allowAdHoc={allowAdHocDataView || false}
       dataViewEditorService={dataViewEditorService}
+      getDataViewHelpText={getDataViewHelpText}
     />
   );
 };

@@ -35,8 +35,17 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import * as LABELS from '../translations';
 import { DEFAULT_TASK_TYPE, internalProviderKeys } from '../constants';
-import { Config, ConfigEntryView } from '../types/types';
-import { TaskTypeOption } from '../utils/helpers';
+import type { Config, ConfigEntryView } from '../types/types';
+import type { TaskTypeOption } from '../utils/helpers';
+
+const taskTypeConfig = {
+  validations: [
+    {
+      validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
+      isBlocking: true,
+    },
+  ],
+};
 
 // Custom trigger button CSS
 const buttonCss = css`
@@ -92,17 +101,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             />
           </EuiText>
           <EuiSpacer size="m" />
-          <UseField
-            path="config.taskType"
-            config={{
-              validations: [
-                {
-                  validator: fieldValidators.emptyField(LABELS.getRequiredMessage('Task type')),
-                  isBlocking: true,
-                },
-              ],
-            }}
-          >
+          <UseField path="config.taskType" config={taskTypeConfig}>
             {(field) => {
               const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(field);
 

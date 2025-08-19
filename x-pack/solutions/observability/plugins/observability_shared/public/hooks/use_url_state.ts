@@ -6,9 +6,10 @@
  */
 
 import { parse, stringify } from 'query-string';
-import { Location } from 'history';
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { decode, encode, RisonValue } from '@kbn/rison';
+import type { Location } from 'history';
+import { useCallback, useEffect, useMemo } from 'react';
+import type { RisonValue } from '@kbn/rison';
+import { decode, encode } from '@kbn/rison';
 import { useHistory } from 'react-router-dom';
 import { url } from '@kbn/kibana-utils-plugin/common';
 
@@ -77,16 +78,11 @@ export const useUrlState = <State>({
     [decodeUrlState, encodeUrlState, history, urlStateKey]
   );
 
-  const [shouldInitialize, setShouldInitialize] = useState(
-    writeDefaultState && typeof decodedState === 'undefined'
-  );
-
   useEffect(() => {
-    if (shouldInitialize) {
-      setShouldInitialize(false);
+    if (writeDefaultState && decodedState === undefined) {
       setState(defaultState);
     }
-  }, [shouldInitialize, setState, defaultState]);
+  }, [writeDefaultState, decodedState, defaultState, setState]);
 
   return [state, setState] as [typeof state, typeof setState];
 };
