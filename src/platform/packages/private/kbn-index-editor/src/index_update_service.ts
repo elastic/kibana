@@ -669,11 +669,13 @@ export class IndexUpdateService {
 
   public async processImportedData(indexName: string) {
     if (this.isIndexCreated()) {
-      // We are appending the imported file to existing data, we need to refresh the fields
-      this.refresh();
-      const dataView = await firstValueFrom(this.dataView$);
-      await this.data.dataViews.refreshFields(dataView, false, true);
-      this._fileImported$.next();
+      // This timeout can be cleaned when https://github.com/elastic/kibana/issues/232225 is resolved
+      setTimeout(async () => {
+        const dataView = await firstValueFrom(this.dataView$);
+        await this.data.dataViews.refreshFields(dataView, false, true);
+        this._fileImported$.next();
+        this.refresh();
+      }, 2000);
     } else {
       this.setIndexName(indexName);
       this.setIndexCreated(true);
