@@ -13,16 +13,21 @@ import {
   IDataStreamClient,
 } from '@kbn/data-streams';
 
+/** @public */
 export interface DataStreamsSetup {
   /**
    * Register your data stream definition for setup.
    *
    * @remark This will ensure that at start time you do not need to set up this data stream definition
+   *
+   * @public
    */
   registerDataStream: (dataStreams: DataStreamDefinition) => Promise<void>;
 }
 
+/** @public */
 export interface DataStreamsStart {
+  /** @public */
   getClient<S extends {}, SRM extends BaseSearchRuntimeMappings>(
     dataStream: DataStreamDefinition<S, SRM>
   ): IDataStreamClient<S, SRM>;
