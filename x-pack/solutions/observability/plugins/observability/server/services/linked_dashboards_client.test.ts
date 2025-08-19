@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { LinkedDashboardsClient } from './linked_dashboards_client';
-import { Logger } from '@kbn/core/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import { GetResponse } from '@kbn/content-management-plugin/server/core/crud';
+import type { Logger } from '@kbn/core/server';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { GetResponse } from '@kbn/content-management-plugin/server/core/crud';
 
 describe('LinkedDashboardsClient', () => {
   let logger: jest.Mocked<Logger>;

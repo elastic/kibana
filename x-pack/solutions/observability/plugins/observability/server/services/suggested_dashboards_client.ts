@@ -5,16 +5,16 @@
  * 2.0.
  */
 import { isEmpty } from 'lodash';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { SuggestedDashboard } from '@kbn/observability-schema';
+import type { SuggestedMatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
 import type { AlertData } from './alert_data';
 import { isSuggestedDashboardsValidPanelType } from './helpers';
-import { ReferencedPanelManager } from './referenced_panel_manager';
-import { SuggestedMatchedBy } from '@kbn/observability-schema/related_dashboards/schema/related_dashboard/v1';
+import type { ReferencedPanelManager } from './referenced_panel_manager';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
 
 // How many managed dashboards to allow in the suggested list before we start filtering them out

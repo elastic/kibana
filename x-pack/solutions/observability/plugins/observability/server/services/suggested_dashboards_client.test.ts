@@ -5,14 +5,14 @@
  * 2.0.
  */
 import { SuggestedDashboardsClient } from './suggested_dashboards_client';
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
-import { InvestigateAlertsClient } from './investigate_alerts_client';
-import { AlertData } from './alert_data';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { InvestigateAlertsClient } from './investigate_alerts_client';
+import type { AlertData } from './alert_data';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ReferencedPanelManager } from './referenced_panel_manager';
-import { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
+import type { ReferencedPanelManager } from './referenced_panel_manager';
+import type { SearchResponse } from '@kbn/content-management-plugin/server/core/crud';
 
 describe('SuggestedDashboardsClient', () => {
   let logger: jest.Mocked<Logger>;

@@ -6,11 +6,11 @@
  */
 
 import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
-import { IContentClient } from '@kbn/content-management-plugin/server/types';
+import type { IContentClient } from '@kbn/content-management-plugin/server/types';
 import type { DashboardAttributes } from '@kbn/dashboard-plugin/server';
 import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
 import type { InvestigateAlertsClient } from './investigate_alerts_client';
-import { ReferencedPanelManager } from './referenced_panel_manager';
+import type { ReferencedPanelManager } from './referenced_panel_manager';
 import { SuggestedDashboardsClient } from './suggested_dashboards_client';
 import { LinkedDashboardsClient } from './linked_dashboards_client';
 
