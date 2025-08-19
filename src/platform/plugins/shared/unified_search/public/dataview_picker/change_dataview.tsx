@@ -160,8 +160,8 @@ export function ChangeDataView({
   }, [currentDataViewId, dataViews, dataViewEditor, onDataViewCreated]);
 
   const onEdit = useCallback(async () => {
-    if (onEditDataView) {
-      const dataView = await dataViews.get(currentDataViewId!);
+    if (onEditDataView && currentDataViewId) {
+      const dataView = await dataViews.get(currentDataViewId);
       dataViewEditor.openEditor({
         editData: dataView,
         onSave: (updatedDataView) => {

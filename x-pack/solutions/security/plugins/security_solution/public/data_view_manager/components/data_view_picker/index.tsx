@@ -134,7 +134,7 @@ export const DataViewPicker = memo(({ scope, onClosePopover, disabled }: DataVie
       dv.id === defaultDataViewId ? (
         <FormattedMessage
           id="xpack.securitySolution.dataViewManager.getDataViewHelpText"
-          defaultMessage="Changes made here won't be saved permanently. To update the default Security indices, edit {code} in Advanced Settings."
+          defaultMessage="Changes made here won't be saved permanently. To update the default Security indices, edit {code} in Stack Management > Advanced Settings."
           values={{
             code: <EuiCode>{'securitySolution:defaultIndex'}</EuiCode>,
           }}
