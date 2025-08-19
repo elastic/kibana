@@ -635,7 +635,7 @@ export class FleetPlugin
       this.initializerContext.logger.get('fleet_authz_router')
     );
 
-    registerRoutes(fleetAuthzRouter, config);
+    registerRoutes(fleetAuthzRouter, config, deps.cloud?.isServerlessEnabled);
 
     this.telemetryEventsSender.setup(deps.telemetry);
     // Register tasks
