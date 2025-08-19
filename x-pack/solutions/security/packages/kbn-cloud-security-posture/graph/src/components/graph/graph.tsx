@@ -36,6 +36,7 @@ import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 import '@xyflow/react/dist/style.css';
 import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
+import { filterNonEmptyStrings } from '../utils';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -59,6 +60,12 @@ export interface GraphProps extends CommonProps {
    * Additional children to be rendered inside the graph component.
    */
   children?: React.ReactNode;
+  /**
+   * Callback invoked when the graph is updated with new nodes.
+   * Receives the newly added nodes and should return the IDs of nodes to center the graph on.
+   * If no IDs are returned or callback is undefined, the graph keeps its current behavior.
+   */
+  onCenterGraphAfterRefresh?: (newNodes: NodeViewModel[]) => 'fit-view' | string[] | undefined;
 }
 
 const nodeTypes = {
@@ -94,7 +101,15 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph = memo<GraphProps>(
-  ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
+  ({
+    nodes,
+    edges,
+    interactive,
+    isLocked = false,
+    children,
+    onCenterGraphAfterRefresh,
+    ...rest
+  }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
@@ -115,6 +130,12 @@ export const Graph = memo<GraphProps>(
         !isArrayOfObjectsEqual(nodes, currNodesRef.current) ||
         !isArrayOfObjectsEqual(edges, currEdgesRef.current)
       ) {
+        // Identify new nodes by comparing node IDs
+        const previousNodeIds = new Set<NodeViewModel['id']>(
+          currNodesRef.current.map((node) => node.id)
+        );
+        const newNodes = nodes.filter((node) => !previousNodeIds.has(node.id));
+
         const { initialNodes, initialEdges } = processGraph(nodes, edges, isGraphInteractive);
         const { nodes: layoutedNodes } = layoutGraph(initialNodes, initialEdges);
 
@@ -122,11 +143,50 @@ export const Graph = memo<GraphProps>(
         setEdges(initialEdges);
         currNodesRef.current = nodes;
         currEdgesRef.current = edges;
+
         setTimeout(() => {
-          fitViewRef.current?.();
+          // If nodes haven't changed, fit graph into view
+          if (newNodes.length === 0) {
+            fitViewRef.current?.(fitViewOptions);
+            return;
+          }
+
+          // If nodes have changed but callback is undefined, center on new nodes
+          if (!onCenterGraphAfterRefresh) {
+            fitViewRef.current?.({
+              ...fitViewOptions,
+              nodes: newNodes.map((node) => ({ id: node.id })),
+            });
+            return;
+          }
+
+          // Get node IDs given by consumer to center the graph on
+          const callbackRetValue = onCenterGraphAfterRefresh(newNodes);
+
+          // If callback returned 'fit-view', fit graph into view
+          if (callbackRetValue === 'fit-view') {
+            fitViewRef.current?.(fitViewOptions);
+            return;
+          }
+
+          // If callback did not return a non-empty array, default to center on new nodes
+          if (!Array.isArray(callbackRetValue) || callbackRetValue.length === 0) {
+            fitViewRef.current?.({
+              ...fitViewOptions,
+              nodes: newNodes.map((node) => ({ id: node.id })),
+            });
+            return;
+          }
+
+          // Center graph on specified nodes
+          const sanitizedNodeIdsToCenter = filterNonEmptyStrings(callbackRetValue);
+          fitViewRef.current?.({
+            ...fitViewOptions,
+            nodes: sanitizedNodeIdsToCenter.map((nodeId) => ({ id: nodeId })),
+          });
         }, 30);
       }
-    }, [nodes, edges, setNodes, setEdges, isGraphInteractive]);
+    }, [nodes, edges, setNodes, setEdges, isGraphInteractive, onCenterGraphAfterRefresh]);
 
     const onInitCallback = useCallback(
       (xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) => {

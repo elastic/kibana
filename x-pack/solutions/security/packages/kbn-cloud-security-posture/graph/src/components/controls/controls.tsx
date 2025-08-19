@@ -26,6 +26,7 @@ import {
 } from '../test_ids';
 import fitToViewIcon from '../../assets/icons/fit_to_view.svg';
 import type { NodeViewModel } from '../types';
+import { filterNonEmptyStrings } from '../utils';
 
 const selector = (s: ReactFlowState) => ({
   minZoomReached: s.transform[2] <= s.minZoom,
@@ -78,11 +79,11 @@ export const Controls = ({
   const { zoomIn, zoomOut, fitView } = useReactFlow();
   const { maxZoomReached, minZoomReached } = useStore(selector);
 
-  // Memoize a sanitized list of node ids filtering out undefined/null, empty and whitespace strings
+  // Memoize a sanitized list of node ids.
   // Converts ['node1', 'node2'] into [{ id: 'node1' }, { id: 'node2' }]
+  // to match ReactFlow's fitView expected input type
   const sanitizedNodeIds = useMemo(
-    () =>
-      (nodeIdsToCenterOn ?? []).filter((id) => id && id.trim().length > 0).map((id) => ({ id })),
+    () => filterNonEmptyStrings(nodeIdsToCenterOn ?? []).map((id) => ({ id })),
     [nodeIdsToCenterOn]
   );
 
