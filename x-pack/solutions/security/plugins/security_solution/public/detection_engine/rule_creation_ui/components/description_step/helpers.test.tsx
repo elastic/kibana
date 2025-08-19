@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
@@ -49,7 +50,7 @@ const mockQueryBar = {
   filters: [
     {
       $state: {
-        store: 'globalState',
+        store: 'globalState' as FilterStateStore,
       },
       meta: {
         alias: null,
