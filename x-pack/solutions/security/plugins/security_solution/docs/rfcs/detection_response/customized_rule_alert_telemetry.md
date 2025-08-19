@@ -72,7 +72,8 @@ We need to establish a method to add which specific rule fields are customized t
 
 ## Non-Goals
 
-Though we want any solution to be extensible, this RFC is not attempting to discuss any specific rule schema changes coming in the future that aren't related to this issue. 
+ - Though we want any solution to be extensible, this RFC is not attempting to discuss any specific rule schema changes coming in the future that aren't related to this issue.
+ - We also want to limit the scope of this solution to *what* has been changed on the rule object, not *how*. Any discussion of the how starts to evolve into the rule auditing conversation which is outside the scope of this feature.
 
 ---
 
@@ -95,11 +96,47 @@ This solution would have compared a hash of functional fields (most notably quer
 ### Approach and technical details
 At its core, this solution is pretty simple: adding a new field to the rule schema that would keep track of which field(s) were customized on the rule object. This would allow us to write the customized field list to the alert object at rule execution the same as we do any rule field, without any runtime calculations that'd slow down rule execution. The field would be updated in the same places `rule_source` is currently updated (basically any CRUD operation on the rule object), and would be either omitted or defaulted to an empty array if a rule's base version didn't exist as there'd be no way to accurately calculate the field list.
 
-This field would be an array and it would contain a list of customized fields. It was considered to have this field be a key/value pair with the key being the field name and the value be the original, unmodified rule field but was rejected. Having the original values would no doubt be helpful in some cases but would also introduce a whole host of new edge cases and potentially double the size of the rule object if most fields were customized. Having the names of the fields customized is all we'd need for our use case and some of the previously linked telemetry tickets. Furthermore, the querying of an array within the alerts telemetry cluster would be far more straightforward than querying for keys on an object, as KQL doesn't support the direct querying of object keys and we'd have to rely on wildcard queries or some other syntax. Arrays also allow us to easily chain together multiple clauses in order to be extremely granular with our telemetry analysis. I've listed some example KQL queries below. 
+This field would be an array and it would contain a list of objects that have . It was considered to have this field be a key/value pair with the key being the field name and the value be the original, unmodified rule field but was rejected. Having the original values would no doubt be helpful in some cases but would also introduce a whole host of new edge cases and potentially double the size of the rule object if most fields were customized. Having the names of the fields customized and whether or not they're functional fields is all we'd need for our use case and some of the previously linked telemetry tickets. Furthermore, the querying of an array within the alerts telemetry cluster would be far more straightforward than querying for keys on an object, as KQL doesn't support the direct querying of object keys and we'd have to rely on wildcard queries or some other syntax. Arrays also allow us to easily chain together multiple clauses in order to be extremely granular with our telemetry analysis. I've listed some example KQL queries below. The addition of the `is_functional` field in the object would be there primarily for filtering purposes. Having a way to easily filter out all alerts from rules with customized functional fields makes for a better, less error prone method for writing queries than having to chain potentially 20+ field names together. It also helps with the extensibility of these queries, as anytime we add a field to the rule object we wouldn't have to update the telemetry and related dashboards to account for the rule, we'd just have to set it properly on rule update.
 
-This field would live on its own in the rule params object. Given the extensibility likelihood for `rule_source` with third party packages, it has the potential to get crowded quickly and doesn't need to be mixed with the customizations calculation itself.
+This field would live under the `rule_source` field object. Given its relation to the other fields in this object, it would make sense to consolidate all this logic into one area.
 
-I believe a good name for this field would be `rule_customizations` because of the existing language we have in `rule_source` with `is_customized`. It's also a fairly good descriptor of exactly what the field contains.
+A good name for this field would be `customized_fields` because of the existing language we have in `rule_source` with `is_customized`. It's also a fairly good descriptor of exactly what the field contains.
+
+### Rule customization diff return value proposal
+The value we currently return from the `calculateRuleDiff` function is based off the `DiffableRule` schema - a schema that is similar to our overall detection rule schema but groups certain fields into one (for instance: `query`, `filters`, and `language` become `kql_query`) and omits other fields that we don't intend on diffing (e.g. `exception_list`, `actions`, etc.). This is the implementation currently used for the existing endpoints that run the `calculateRuleDiff` function, most notably the `upgrade/_review` and `upgrade/_perform` routes, but would not be a good return structure for our use case. The grouped fields are essentially an implementation detail and the mixing of the two schemas could cause lots of maintenance pain as well as confusion for consumers of the data on the telemetry side of things. Instead we will need to divide this data up into its original one-to-one field name match with our detection rule schema. 
+
+This work has been done before on the front-end for our per-field rule diff flyout, but proved to be pretty difficult to write due to typing conflicts. Furthermore, extracting the individual fields from the nested, post-diff structure we return from the `calculateRuleDiff` function requires us to essentially compare these grouped fields twice - one during the diffing and then another to know how to extract them out of the diffed result.
+
+In order to properly return these fields I believe some refactoring of the `calculateRuleDiff` will need to be done to somehow return these ungrouped fields during the diffing process so that we aren't repeating comparisions needlessly. This work shouldn't need to change the underlying implemetation of the function in any of these endpoints, and with our current test coverage, I think it would be safe enough to refactor this isolated step within the rule diffing process.
+
+### Schema definitions
+
+We will want to map this new field to the existing `rule_source` field mapping. Notably **NOT** as a nested field, as it would constrain us heavily for KQL queries and dashboard tooling later on down the line. 
+
+Putting it all together under one field also makes it very easy to allowlist into the alert telemetry schema they already have without including the rest of the `kibana.alert.rule.parameters` field. Including this whole parameters object could increase the size of the alert document by a lot and wouldn't really add a lot of useful data at scale. Plus, if this data *was* ever needed further down the line, it wouldn't be that difficult to add on the telemetry side of things.
+
+**Mapping example of new rule source object for prebuilt rules**
+
+```js
+rule_source: {
+    type: 'external';
+    is_customized: boolean;
+    customized_fields: Array<{
+        field_name: string;
+        is_functional: boolean;
+    }>;
+};
+```
+
+The mapping for our detection rules is carried over onto the alert document schema as the flattened `kibana.alert.rule.parameters` field. Changing the rule schema here should carry the same change to the detection alert schema on both the kibana side and telemetry side of things.
+
+The current implementation of the prebuilt rule alert schema uses [this list](https://github.com/elastic/kibana/blob/0ad59fab8835d67b476ffbdb82850649e70ab4d9/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/filterlists/prebuilt_rules_alerts.ts) to include alert fields onto the sanitized alert documents. In order to include the `rule_source` object and *not* the rest of the `kibana.alert.rule.parameters` field we would need to include the following mapping:
+
+```js
+'kibana.alert.rule.parameters': {
+  rule_source: true,
+}
+```
 
 ### Examples
 
@@ -111,13 +148,13 @@ I believe a good name for this field would be `rule_customizations` because of t
     "rule_source": {
         "type": "external",
         "is_customized": true,
+        // New field
+        "customized_fields": [
+            { "field_name": 'query', "is_functional": true },
+            { "field_name": 'note', "is_functional": false },
+            { "field_name": 'tags', "is_functional": false },
+        ]
     },
-    // New field
-    "rule_customizations": [
-        "kql_query",
-        "note",
-        "tags",
-    ],
     ...
 }
 ```
@@ -125,21 +162,12 @@ I believe a good name for this field would be `rule_customizations` because of t
 **Example KQL queries in the alerts telemetry cluster**
 
 ```
-not kibana.alert.rule.params.rule_customizations : "kql_query"
+not kibana.alert.rule.params.rule_customizations.is_functional : true
 ```
-A query we could use to filter out any alerts generated by prebuilt rules that have their query field customized. This could easily be expanded to every rule type to exclude all alerts from rules with modified query strings.
-
-
-```
-kibana.alert.rule.params.rule_customizations : "note" and kibana.alert.rule.params.rule_customizations : "tags" and not kibana.alert.rule.params.rule_customizations : "kql_query"
-```
-Still filtering out any rules with customized query fields, but this example shows we can be more granular with the fields we include and exclude.
+A query we could use to filter out any alerts generated by prebuilt rules that have functional fields customized.
 
 
 ### Pros  
-- Lightweight and relatively easy to implement
-  - Obviously adding a field to the rule schema isn't a one line PR, but there wouldn't be much overhead to add this field and not a lot of intersection with areas of the app that would actually break things
-  - We're adding something new, not changing something
 - Would have a negligible effect on performance
   - We already calculate the rule diff everywhere we'd modify this field, would just need to carry over the field names.
   - No need to run the rule diff calculation at rule execution time, just copy it to the alert object like we do any other field
@@ -147,9 +175,6 @@ Still filtering out any rules with customized query fields, but this example sho
   - Building aggregation visualizations and dashboards in the alert telemetry cluster would be fairly straightforward with this implementation. As shown in some of the examples above, we can be granular and specific with our queries.
 
 ### Cons 
-- The field names stored would be diffable fields (grouped fields) which aren't a one-to-one match with the fields on the rest of the rule object
-  - e.g. `query` would be on the rule object but represented as `kql_query` in the `rule_customizations` field
-  - This means we'd be intersecting 2 schemas: the rule schema and the diffable rule schema
 - Once we add it there's (basically) no going back
   - Not necessarily a con but something to consider in terms of longevity 
 
@@ -170,48 +195,58 @@ This is all in addition to the then-unblocked telemetry work that could take pla
 
 ### Defining functional rule fields
 
-| Rule type        | Field name in UI          | Diffable rule field       | Functional field? |
-| ---------------- | ------------------------- | ------------------------- | ----------------- |
-| All rule types   | Rule name                 | `name`                    | No                |
-| All rule types   | Rule description          | `description`             | No                |
-| All rule types   | Rule type                 | `type`                    | Yes               |
-| All rule types   | Rule version              | `version`                 | No                |
-| All rule types   | Rule author               | `author`                  | No                |
-| All rule types   | Rule license              | `license`                 | No                |
-| All rule types   | Tags                      | `tags`                    | No                |
-| All rule types   | Default severity          | `severity`                | No                |
-| All rule types   | Severity Override         | `severity_mapping`        | No                |
-| All rule types   | Default risk score        | `risk_score`              | No                |
-| All rule types   | Risk score override       | `risk_score_mapping`      | No                |
-| All rule types   | Reference URLs            | `references`              | No                |
-| All rule types   | False positive examples   | `false_positives`         | No                |
-| All rule types   | MITRE ATT&CK™ threats     | `threat`                  | No                |
-| All rule types   | Setup guide               | `setup`                   | No                |
-| All rule types   | Investigation guide       | `note`                    | No                |
-| All rule types   | Related integrations      | `related_integrations`    | No                |
-| All rule types   | Required fields           | `required_fields`         | No                |
-| All rule types   | Rule schedule             | `rule_schedule`           | Yes               |
-| All rule types   | Max alerts per run        | `max_signals`             | Yes               |
-| All rule types   | Rule name override        | `rule_name_override`      | No                |
-| All rule types   | Timestamp override        | `timestamp_override`      | No                |
-| All rule types   | Timeline template         | `timeline_template`       | No                |
-| All rule types   | Building block            | `building_block`          | No                |
-| All rule types   | Investigation fields      | `investigation_fields`    | No                |
-| All rule types   | Data source               | `data_source`             | Yes               |
-| All rule types   | Suppress alerts           | `alert_suppression`       | Yes               |
-| Custom Query     | Custom query              | `kql_query`               | Yes               |
-| Saved Query      | Custom query              | `kql_query`               | Yes               |
-| EQL              | EQL query                 | `eql_query`               | Yes               |
-| ESQL             | ESQL query                | `esql_query`              | Yes               |
-| Threat Match     | Custom query              | `kql_query`               | Yes               |
-| Threat Match     | Indicator index patterns  | `threat_index`            | Yes               |
-| Threat Match     | Indicator index query     | `threat_query`            | Yes               |
-| Threat Match     | Indicator mapping         | `threat_mapping`          | Yes               |
-| Threat Match     | Indicator prefix override | `threat_indicator_path`   | Yes               |
-| Threshold        | Custom query              | `kql_query`               | Yes               |
-| Threshold        | Threshold config          | `threshold`               | Yes               |
-| Machine Learning | Machine Learning job      | `machine_learning_job_id` | Yes               |
-| Machine Learning | Anomaly score threshold   | `anomaly_threshold`       | Yes               |
-| New Terms        | Custom query              | `kql_query`               | Yes               |
-| New Terms        | Fields                    | `new_terms_fields`        | Yes               |
-| New Terms        | History Window Size       | `history_window_start`    | Yes               |
+| Rule fields                           | Functional field? |
+|---------------------------------------|-------------------|
+| `name`                                | no                |
+| `description`                         | no                |
+| `risk_score`                          | yes               |
+| `severity`                            | yes               |
+| `rule_name_override`                  | yes               |
+| `timestamp_override`                  | yes               |
+| `timestamp_override_fallback_disabled`| yes               |
+| `timeline_id`                         | no                |
+| `timeline_title`                      | no                |
+| `license`                             | no                |
+| `note`                                | no                |
+| `building_block_type`                 | no                |
+| `investigation_fields`                | no                |
+| `version`                             | no                |
+| `tags`                                | no                |
+| `risk_score_mapping`                  | yes               |
+| `severity_mapping`                    | yes               |
+| `interval`                            | yes               |
+| `from`                                | yes               |
+| `to`                                  | yes               |
+| `author`                              | no                |
+| `false_positives`                     | no                |
+| `references`                          | no                |
+| `max_signals`                         | yes               |
+| `threat`                              | no                |
+| `setup`                               | no                |
+| `related_integrations`                | no                |
+| `required_fields`                     | no                |
+| `query`                               | yes               |
+| `type`                                | yes               |
+| `language`                            | yes               |
+| `index`                               | yes               |
+| `data_view_id`                        | yes               |
+| `filters`                             | yes               |
+| `event_category_override`             | yes               |
+| `tiebreaker_field`                    | yes               |
+| `timestamp_field`                     | yes               |
+| `alert_suppression`                   | yes               |
+| `saved_id`                            | yes               |
+| `threshold`                           | yes               |
+| `threat_query`                        | yes               |
+| `threat_mapping`                      | yes               |
+| `threat_index`                        | yes               |
+| `threat_filters`                      | yes               |
+| `threat_indicator_path`               | yes               |
+| `threat_language`                     | yes               |
+| `concurrent_searches`                 | yes               |
+| `items_per_search`                    | yes               |
+| `anomaly_threshold`                   | yes               |
+| `machine_learning_job_id`             | yes               |
+| `new_terms_fields`                    | yes               |
+| `history_window_start`                | yes               |
+
