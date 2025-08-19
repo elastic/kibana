@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import { mount } from 'enzyme';
 import React from 'react';
 
@@ -40,7 +41,7 @@ describe('Timeline QueryBar ', () => {
   test('check if we format the appropriate props to QueryBar', () => {
     const filters = [
       {
-        $state: { store: 'appState' },
+        $state: { store: 'appState' as FilterStateStore },
         meta: {
           alias: null,
           controlledBy: TIMELINE_FILTER_DROP_AREA,
@@ -54,7 +55,7 @@ describe('Timeline QueryBar ', () => {
         query: { match: { 'event.category': { query: 'file', type: 'phrase' } } },
       },
       {
-        $state: { store: 'appState' },
+        $state: { store: 'appState' as FilterStateStore },
         meta: {
           alias: null,
           controlledBy: undefined,
@@ -262,7 +263,7 @@ describe('Timeline QueryBar ', () => {
       const filter = getDataProviderFilter(dataProvidersDsl);
       expect(filter).toEqual({
         $state: {
-          store: 'appState',
+          store: 'appState' as FilterStateStore,
         },
         bool: {
           minimum_should_match: 1,
@@ -312,7 +313,7 @@ describe('Timeline QueryBar ', () => {
       const filter = getDataProviderFilter(dataProvidersDsl);
       expect(filter).toEqual({
         $state: {
-          store: 'appState',
+          store: 'appState' as FilterStateStore,
         },
         bool: {
           minimum_should_match: 1,

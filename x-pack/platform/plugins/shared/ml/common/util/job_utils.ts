@@ -880,7 +880,7 @@ export function getFiltersForDSLQuery(
   datafeedQuery: estypes.QueryDslQueryContainer,
   dataViewId: string | undefined,
   alias?: string,
-  store = 'appState'
+  store: 'appState' | 'globalState' = 'appState'
 ): Filter[] {
   if (isKnownEmptyQuery(datafeedQuery)) {
     return [];

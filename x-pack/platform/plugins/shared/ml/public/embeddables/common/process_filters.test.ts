@@ -60,8 +60,7 @@ describe('processFilters', () => {
             },
 
             $state: {
-              // @ts-ignore
-              store: 'appState',
+              store: 'appState' as const,
             },
           },
           {
@@ -74,12 +73,13 @@ describe('processFilters', () => {
               key: 'instance',
               value: 'exists',
             },
-            exists: {
-              field: 'instance',
+            query: {
+              exists: {
+                field: 'instance',
+              },
             },
             $state: {
-              // @ts-ignore
-              store: 'appState',
+              store: 'appState' as const,
             },
           },
           {
@@ -92,8 +92,10 @@ describe('processFilters', () => {
               key: 'instance',
               value: 'exists',
             },
-            exists: {
-              field: 'region',
+            query: {
+              exists: {
+                field: 'region',
+              },
             },
             $state: {
               // @ts-ignore
@@ -135,8 +137,10 @@ describe('processFilters', () => {
             },
           },
           {
-            exists: {
-              field: 'instance',
+            query: {
+              exists: {
+                field: 'instance',
+              },
             },
           },
         ],
@@ -216,8 +220,10 @@ describe('processFilters', () => {
               key: 'instance',
               value: 'exists',
             },
-            exists: {
-              field: 'instance',
+            query: {
+              exists: {
+                field: 'instance',
+              },
             },
             $state: {
               // @ts-ignore
@@ -234,8 +240,10 @@ describe('processFilters', () => {
               key: 'instance',
               value: 'exists',
             },
-            exists: {
-              field: 'region',
+            query: {
+              exists: {
+                field: 'region',
+              },
             },
             $state: {
               // @ts-ignore
@@ -270,8 +278,10 @@ describe('processFilters', () => {
             },
           },
           {
-            exists: {
-              field: 'instance',
+            query: {
+              exists: {
+                field: 'instance',
+              },
             },
           },
         ],

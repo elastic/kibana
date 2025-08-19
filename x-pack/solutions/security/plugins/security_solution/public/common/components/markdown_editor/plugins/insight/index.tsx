@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import { pickBy, isEmpty } from 'lodash';
 import type { Plugin } from 'unified';
 import moment from 'moment';
@@ -418,7 +419,7 @@ const InsightEditorComponent = ({
     return [
       {
         $state: {
-          store: 'appState',
+          store: 'appState' as FilterStateStore,
         },
         meta: {
           disabled: false,

@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FilterStateStore } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
@@ -66,7 +67,7 @@ function createDiscoverLocator({
     const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
 
     filters.push({
-      $state: { store: 'appState' },
+      $state: { store: 'appState' as FilterStateStore },
       meta: {
         type: 'custom',
         alias: i18n.translate('xpack.slo.sloDetails.goodFilterLabel', {
@@ -80,7 +81,7 @@ function createDiscoverLocator({
     });
 
     filters.push({
-      $state: { store: 'appState' },
+      $state: { store: 'appState' as FilterStateStore },
       meta: {
         type: 'custom',
         alias: i18n.translate('xpack.slo.sloDetails.badFilterLabel', {
@@ -94,7 +95,7 @@ function createDiscoverLocator({
     });
 
     filters.push({
-      $state: { store: 'appState' },
+      $state: { store: 'appState' as FilterStateStore },
       meta: {
         type: 'custom',
         alias: i18n.translate('xpack.slo.sloDetails.totalFilterLabel', {
@@ -123,7 +124,7 @@ function createDiscoverLocator({
         index: indexId,
       },
       $state: {
-        store: 'appState',
+        store: 'appState' as FilterStateStore,
       },
       query: {
         match_phrase: {

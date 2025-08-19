@@ -55,7 +55,7 @@ export const useCommonChartProps = ({
                 },
               },
               $state: {
-                store: 'appState',
+                store: 'appState' as const,
               },
             },
           ]

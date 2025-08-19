@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
@@ -184,7 +185,7 @@ function getLensAttributes(
       },
       filters: [
         {
-          $state: { store: 'appState' },
+          $state: { store: 'appState' as FilterStateStore },
           meta: {
             index: 'filter-index-pattern-0',
             negate: false,
@@ -205,7 +206,7 @@ function getLensAttributes(
         ...(agentIdsQuery
           ? [
               {
-                $state: { store: 'appState' },
+                $state: { store: 'appState' as FilterStateStore },
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,

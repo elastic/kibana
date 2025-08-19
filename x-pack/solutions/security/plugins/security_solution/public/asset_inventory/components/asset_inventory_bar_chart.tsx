@@ -70,7 +70,7 @@ export interface AssetInventoryBarChartProps {
 
 const createAssetFilter = (key: string, value: string, index: string) => {
   return {
-    $state: { store: 'appState' },
+    $state: { store: 'appState' as FilterStateStore },
     meta: {
       alias: null,
       disabled: false,

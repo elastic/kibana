@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { FILTERS, BooleanRelation } from '@kbn/es-query';
@@ -47,7 +48,7 @@ const dataProviderQueryType = (type: string): QueryOperator => {
 
 const filterStub = {
   $state: {
-    store: 'appState',
+    store: 'appState' as FilterStateStore,
   },
   meta: {
     disabled: false,
@@ -212,7 +213,7 @@ const buildFiltersFromInsightProviders = (
       });
       const combinedFilter = {
         $state: {
-          store: 'appState',
+          store: 'appState' as FilterStateStore,
         },
         meta: {
           type: FILTERS.COMBINED,

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { FilterStateStore } from '@kbn/es-query';
 import { defaultQuery, getSearchConfiguration } from './get_search_configuration';
 
 describe('getSearchConfiguration()', () => {
@@ -59,7 +60,7 @@ describe('getSearchConfiguration()', () => {
           },
         },
         $state: {
-          store: 'appState',
+          store: 'appState' as FilterStateStore,
         },
       },
     ];
@@ -91,7 +92,7 @@ describe('getSearchConfiguration()', () => {
           },
         },
         $state: {
-          store: 'appState',
+          store: 'appState' as FilterStateStore,
         },
       },
     ];

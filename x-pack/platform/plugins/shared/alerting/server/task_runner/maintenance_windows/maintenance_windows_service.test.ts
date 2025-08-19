@@ -339,7 +339,7 @@ describe('MaintenanceWindowsService', () => {
               type: 'phrase',
             },
             $state: {
-              store: 'appState',
+              store: 'appState' as const,
             },
             query: {
               match_phrase: {

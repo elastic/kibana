@@ -115,7 +115,7 @@ export const addFilter = (dataViewId: string, prev: Filter[], key: string, value
     return [
       {
         $state: {
-          store: 'appState',
+          store: 'appState' as const,
         },
         ...buildPhraseFilter(key, value, dataViewId),
       },
