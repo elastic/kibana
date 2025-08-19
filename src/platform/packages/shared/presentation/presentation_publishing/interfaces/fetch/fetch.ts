@@ -36,6 +36,7 @@ import { apiPublishesSearchSession, PublishesSearchSession } from './publishes_s
 import { apiHasParentApi, HasParentApi } from '../has_parent_api';
 import { apiPublishesReload } from './publishes_reload';
 import { useStateFromPublishingSubject } from '../../publishing_subject';
+import { apiHasUniqueId } from '../has_uuid';
 
 export interface FetchContext {
   isReload: boolean;
@@ -50,9 +51,14 @@ function getFetchContext(api: unknown, isReload: boolean) {
   const typeApi = api as Partial<
     PublishesTimeRange & HasParentApi<Partial<PublishesUnifiedSearch & PublishesSearchSession>>
   >;
+  const uuid = apiHasUniqueId(typeApi) ? typeApi.uuid : undefined;
+  const allFilters = typeApi?.parentApi?.filters$?.value;
+  const filters = uuid
+    ? allFilters?.filter((currentFilter) => currentFilter.meta.controlledBy !== uuid)
+    : allFilters;
   return {
     isReload,
-    filters: typeApi?.parentApi?.filters$?.value,
+    filters,
     query: typeApi?.parentApi?.query$?.value,
     searchSessionId: typeApi?.parentApi?.searchSessionId$?.value,
     timeRange: typeApi?.timeRange$?.value ?? typeApi?.parentApi?.timeRange$?.value,

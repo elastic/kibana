@@ -37,7 +37,10 @@ export function fetchAndValidate$({
   searchTechnique$,
   sort$,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<
+    OptionsListControlApi,
+    'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi' | 'uuid'
+  > &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       loadingSuggestions$: BehaviorSubject<boolean>;
       debouncedSearchString: Observable<string>;
@@ -101,7 +104,7 @@ export function fetchAndValidate$({
           field: field.toSpec(),
           size: requestSize,
 
-          // TODO get expensive queries setting and ignore validations from parent
+          // TODO get expensive queries setting and ignore validations
           allowExpensiveQueries: true,
           ignoreValidations: false,
           ...fetchContext,

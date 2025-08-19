@@ -70,7 +70,10 @@ export function initializeLayoutManager(
   const untilAllChildrenAreAvailable = () =>
     new Promise<void>((resolve) => {
       const expectedChildCount = initialPanels.length;
-
+      if (Object.keys(children$.value).length === expectedChildCount) {
+        resolve();
+        return;
+      }
       const subscription = children$.subscribe((children) => {
         if (Object.keys(children).length === expectedChildCount) {
           subscription?.unsubscribe();
