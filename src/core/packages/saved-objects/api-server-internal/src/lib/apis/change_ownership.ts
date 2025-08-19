@@ -28,8 +28,13 @@ export const performChangeOwnership = async (
   { objects, options }: PerformChangeOwnershipParams,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsChangeAccessControlResponse> => {
-  const { common: commonHelper } = helpers;
+  const { common: commonHelper, user: userHelper } = helpers;
   const { securityExtension } = extensions;
+  const currentUserProfileUid = userHelper.getCurrentUserProfileUid();
+
+  if (!currentUserProfileUid) {
+    throw new Error('Unable to determine current user profile.');
+  }
 
   if (!isSavedObjectsChangeOwnershipOptions(options)) {
     throw new Error('Invalid options provided to change ownership');
@@ -46,5 +51,6 @@ export const performChangeOwnership = async (
     options: { ...options, namespace },
     securityExtension,
     actionType: 'changeOwnership',
+    currentUserProfileUid,
   });
 };
