@@ -41,7 +41,7 @@ describe('Timeline QueryBar ', () => {
   test('check if we format the appropriate props to QueryBar', () => {
     const filters = [
       {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         meta: {
           alias: null,
           controlledBy: TIMELINE_FILTER_DROP_AREA,
@@ -55,7 +55,7 @@ describe('Timeline QueryBar ', () => {
         query: { match: { 'event.category': { query: 'file', type: 'phrase' } } },
       },
       {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         meta: {
           alias: null,
           controlledBy: undefined,

@@ -14,7 +14,7 @@ import { maintenanceWindowClientMock } from '../../maintenance_window_client.moc
 import { getMockMaintenanceWindow } from '../../data/maintenance_window/test_helpers';
 import { MaintenanceWindowStatus } from '../../../common';
 import type { MaintenanceWindowCategoryIds } from '../../../common/routes/maintenance_window/shared';
-import { FilterStateStore } from '@kbn/es-query';
+
 
 const alertingEventLogger = alertingEventLoggerMock.create();
 const logger = loggingSystemMock.createLogger();
@@ -340,7 +340,7 @@ describe('MaintenanceWindowsService', () => {
               type: 'phrase',
             },
             $state: {
-              store: FilterStateStore.APP_STATE,
+              store: 'appState',
             },
             query: {
               match_phrase: {

@@ -7,7 +7,6 @@
 
 import {
   BooleanRelation,
-  FilterStateStore,
   isCombinedFilter,
   buildCombinedFilter,
   isFilter,
@@ -121,7 +120,7 @@ export const addFilter = (dataViewId: string, prev: Filter[], key: string, value
     return [
       {
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
         ...buildPhraseFilter(key, value, dataViewId),
       },

@@ -60,7 +60,7 @@ describe('getSearchConfiguration()', () => {
           },
         },
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
       },
     ];
@@ -92,7 +92,7 @@ describe('getSearchConfiguration()', () => {
           },
         },
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
       },
     ];

@@ -10,7 +10,7 @@
 import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
+
 import { mockFilter } from '../../mocks/get_stub_filter';
 
 describe('populateStateFromSavedQuery', () => {
@@ -47,7 +47,7 @@ describe('populateStateFromSavedQuery', () => {
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
-    const f1 = mockFilter('D1', FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f1 = mockFilter('D1', 'appState', false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
     populateStateFromSavedQuery(dataMock.query, savedQuery);
     expect(dataMock.query.queryString.setQuery).toHaveBeenCalled();
@@ -55,12 +55,12 @@ describe('populateStateFromSavedQuery', () => {
   });
 
   it('should preserve global filters', async () => {
-    const globalFilter = mockFilter('D1', FilterStateStore.GLOBAL_STATE, false, false, 'age', 34);
+    const globalFilter = mockFilter('D1', 'globalState', false, false, 'age', 34);
     dataMock.query.filterManager.getGlobalFilters = jest.fn().mockReturnValue([globalFilter]);
     const savedQuery: SavedQuery = {
       ...baseSavedQuery,
     };
-    const f1 = mockFilter('D1', FilterStateStore.APP_STATE, false, false, 'age', 34);
+    const f1 = mockFilter('D1', 'appState', false, false, 'age', 34);
     savedQuery.attributes.filters = [f1];
     populateStateFromSavedQuery(dataMock.query, savedQuery);
     expect(dataMock.query.queryString.setQuery).toHaveBeenCalled();

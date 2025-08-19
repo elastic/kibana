@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore, RangeFilter } from '@kbn/es-query';
+import { RangeFilter } from '@kbn/es-query';
 
 export const rangeFilter: RangeFilter = {
   meta: {
@@ -24,7 +24,7 @@ export const rangeFilter: RangeFilter = {
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   query: { range: { bytes: { gt: 0, lt: 10 } } },
 };

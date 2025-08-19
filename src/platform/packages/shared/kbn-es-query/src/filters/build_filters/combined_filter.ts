@@ -61,7 +61,7 @@ export function buildCombinedFilter(
   disabled: FilterMeta['disabled'] = false,
   negate: FilterMeta['negate'] = false,
   alias?: FilterMeta['alias'],
-  store: FilterStateStore = FilterStateStore.APP_STATE
+  store: FilterStateStore = 'appState'
 ): CombinedFilter {
   return {
     $state: { store },

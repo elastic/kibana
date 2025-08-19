@@ -19,7 +19,7 @@ import {
 } from './get_maintenance_windows';
 import { getFakeKibanaRequest } from '../rule_loader';
 import type { TaskRunnerContext } from '../types';
-import { FilterStateStore } from '@kbn/es-query';
+
 import type { KibanaRequest } from '@kbn/core-http-server';
 
 const logger = loggingSystemMock.create().get();
@@ -267,7 +267,7 @@ describe('filterMaintenanceWindows', () => {
               type: 'phrase',
             },
             $state: {
-              store: FilterStateStore.APP_STATE,
+              store: 'appState',
             },
             query: {
               match_phrase: {
@@ -335,7 +335,7 @@ describe('filterMaintenanceWindowsIds', () => {
               type: 'phrase',
             },
             $state: {
-              store: FilterStateStore.APP_STATE,
+              store: 'appState',
             },
             query: {
               match_phrase: {

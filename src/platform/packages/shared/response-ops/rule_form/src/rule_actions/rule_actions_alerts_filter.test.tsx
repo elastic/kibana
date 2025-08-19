@@ -11,7 +11,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { httpServiceMock } from '@kbn/core/public/mocks';
-import { FilterStateStore } from '@kbn/es-query';
+
 import { AlertsSearchBarProps, AlertsSearchBar } from '@kbn/alerts-ui-shared';
 import { getAction } from '../common/test_utils/actions_test_utils';
 import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
@@ -65,7 +65,7 @@ describe('ruleActionsAlertsFilter', () => {
           onClick={() =>
             onFiltersUpdated?.([
               {
-                $state: { store: FilterStateStore.APP_STATE },
+                $state: { store: 'appState' },
                 meta: {},
               },
             ])
@@ -196,7 +196,7 @@ describe('ruleActionsAlertsFilter', () => {
           key: 'query',
         },
         query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
       },
     ];
 

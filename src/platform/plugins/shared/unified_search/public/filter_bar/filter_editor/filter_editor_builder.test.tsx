@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { FilterEditor, FilterEditorProps } from './filter_editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -65,7 +65,7 @@ const filterIs = (value: string | undefined = '23', negate = false): Filter => (
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
 });
 
@@ -96,7 +96,7 @@ const filterIsOneOf = (values: string[] | undefined = undefined, negate = false)
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
 });
 
@@ -119,7 +119,7 @@ const filterIsBetween = (
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
 });
 

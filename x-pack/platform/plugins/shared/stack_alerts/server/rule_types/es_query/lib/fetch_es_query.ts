@@ -180,7 +180,7 @@ export function generateLink(
     false,
     false,
     'Rule query DSL',
-    FilterStateStore.APP_STATE
+    'appState'
   );
   const redirectUrlParams: DiscoverAppLocatorParams = {
     dataViewSpec: {

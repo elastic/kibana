@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildFilter, FilterStateStore, FILTERS } from '.';
+import { buildFilter, FILTERS } from '.';
 import { DataViewBase } from '../../..';
 import { fields as stubFields } from '../stubs';
 
@@ -21,7 +21,7 @@ describe('buildFilter', () => {
   it('should build phrase filters', () => {
     const params = 'foo';
     const alias = 'bar';
-    const state = FilterStateStore.APP_STATE;
+    const state = 'appState';
     const filter = buildFilter(
       stubIndexPattern,
       stubFields[0],
@@ -44,7 +44,7 @@ describe('buildFilter', () => {
   it('should build phrases filters', () => {
     const params = ['foo', 'bar'];
     const alias = 'bar';
-    const state = FilterStateStore.APP_STATE;
+    const state = 'appState';
     const filter = buildFilter(
       stubIndexPattern,
       stubFields[0],
@@ -67,7 +67,7 @@ describe('buildFilter', () => {
   it('should build range filters', () => {
     const params = { from: 'foo', to: 'qux' };
     const alias = 'bar';
-    const state = FilterStateStore.APP_STATE;
+    const state = 'appState';
     const filter = buildFilter(
       stubIndexPattern,
       stubFields[0],
@@ -89,7 +89,7 @@ describe('buildFilter', () => {
   it('should build exists filters', () => {
     const params = undefined;
     const alias = 'bar';
-    const state = FilterStateStore.APP_STATE;
+    const state = 'appState';
     const filter = buildFilter(
       stubIndexPattern,
       stubFields[0],
@@ -111,7 +111,7 @@ describe('buildFilter', () => {
   it('should include disabled state', () => {
     const params = undefined;
     const alias = 'bar';
-    const state = FilterStateStore.APP_STATE;
+    const state = 'appState';
     const filter = buildFilter(
       stubIndexPattern,
       stubFields[0],

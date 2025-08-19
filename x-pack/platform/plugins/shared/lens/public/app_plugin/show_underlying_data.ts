@@ -11,7 +11,6 @@ import {
   DataViewBase,
   buildCustomFilter,
   buildEsQuery,
-  FilterStateStore,
   TimeRange,
   EsQueryConfig,
   isOfQueryType,
@@ -271,7 +270,7 @@ export function combineQueryAndFilters(
           defaultMessage: 'Lens context ({language})',
           values: { language: filtersLanguage },
         }),
-        FilterStateStore.APP_STATE
+        'appState'
       )
     );
   }
@@ -292,7 +291,7 @@ export function combineQueryAndFilters(
           true,
           false,
           label,
-          FilterStateStore.APP_STATE
+          'appState'
         )
       );
     }

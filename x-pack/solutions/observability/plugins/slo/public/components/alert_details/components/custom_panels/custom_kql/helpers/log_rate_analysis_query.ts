@@ -54,7 +54,7 @@ export const getESQueryForLogRateAnalysis = (
             index: params.index,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           query: {
             match_phrase: {

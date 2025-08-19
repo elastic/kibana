@@ -10,7 +10,7 @@
 import { getVisualizeListItemLink } from './get_visualize_list_item_link';
 import { ApplicationStart } from '@kbn/core/public';
 import { createHashHistory } from 'history';
-import { FilterStateStore } from '@kbn/es-query';
+
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { GLOBAL_STATE_STORAGE_KEY } from '../../../common/constants';
 
@@ -105,7 +105,7 @@ describe('listing item link is correct for each app', () => {
           },
           query: { query: 'q1' },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ];

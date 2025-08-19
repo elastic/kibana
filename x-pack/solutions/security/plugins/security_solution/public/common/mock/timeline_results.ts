@@ -1879,7 +1879,7 @@ export const mockTimelineModel: TimelineModel = {
   filters: [
     {
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
       meta: {
         alias: null,
@@ -1943,7 +1943,7 @@ export const mockDataTableModel: DataTableModel = {
   filters: [
     {
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
       meta: {
         alias: null,

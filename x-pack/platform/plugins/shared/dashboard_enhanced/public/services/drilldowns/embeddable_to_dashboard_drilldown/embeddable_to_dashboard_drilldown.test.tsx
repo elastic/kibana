@@ -316,7 +316,7 @@ describe('.execute() & getHref', () => {
 function getFilter(isPinned: boolean, queryKey: string): Filter {
   return {
     $state: {
-      store: isPinned ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE,
+      store: isPinned ? 'globalState' : 'appState',
     },
     meta: {
       index: 'logstash-*',

@@ -91,4 +91,5 @@ export type {
   CombinedFilterMeta,
 } from './build_filters';
 
-export { FilterStateStore, FILTERS } from './build_filters/types';
+export { FILTERS } from './build_filters/types';
+export type { FilterStateStore } from './build_filters/types';

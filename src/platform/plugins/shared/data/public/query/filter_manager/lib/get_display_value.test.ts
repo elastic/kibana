@@ -8,7 +8,7 @@
  */
 
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
+import { Filter, PhraseFilter } from '@kbn/es-query';
 import {
   stubIndexPattern,
   phraseFilter,
@@ -39,7 +39,7 @@ describe('getDisplayValueFromFilter', () => {
   });
 
   it('returns 0 if value undefined and numeric field', () => {
-    const filter = {
+    const filter: Filter = {
       meta: {
         negate: false,
         index: 'logstash-*',
@@ -53,7 +53,7 @@ describe('getDisplayValueFromFilter', () => {
         },
       },
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
       query: {
         match_phrase: {
@@ -131,7 +131,7 @@ describe('getFieldDisplayValueFromFilter', () => {
         alias: null,
       },
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
       query: {},
     };

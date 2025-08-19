@@ -52,10 +52,10 @@ export const connectToQueryState = <S extends QueryState>(
       case true:
         syncKeys.push('filters');
         break;
-      case FilterStateStore.APP_STATE:
+      case 'appState':
         syncKeys.push('appFilters');
         break;
-      case FilterStateStore.GLOBAL_STATE:
+      case 'globalState':
         syncKeys.push('globalFilters');
         break;
     }
@@ -89,7 +89,7 @@ export const connectToQueryState = <S extends QueryState>(
         initialState.filters = filterManager.getFilters();
         initialDirty = true;
       }
-    } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
+    } else if (syncConfig.filters === 'globalState') {
       if (
         !initialState.filters ||
         !compareFilters(initialState.filters, filterManager.getGlobalFilters(), {
@@ -100,7 +100,7 @@ export const connectToQueryState = <S extends QueryState>(
         initialState.filters = filterManager.getGlobalFilters();
         initialDirty = true;
       }
-    } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
+    } else if (syncConfig.filters === 'appState') {
       if (
         !initialState.filters ||
         !compareFilters(initialState.filters, filterManager.getAppFilters(), {
@@ -143,11 +143,11 @@ export const connectToQueryState = <S extends QueryState>(
             if (syncConfig.filters === true && changes.filters) {
               newState.filters = filterManager.getFilters();
             } else if (
-              syncConfig.filters === FilterStateStore.GLOBAL_STATE &&
+              syncConfig.filters === 'globalState' &&
               changes.globalFilters
             ) {
               newState.filters = filterManager.getGlobalFilters();
-            } else if (syncConfig.filters === FilterStateStore.APP_STATE && changes.appFilters) {
+            } else if (syncConfig.filters === 'appState' && changes.appFilters) {
               newState.filters = filterManager.getAppFilters();
             }
           }
@@ -189,7 +189,7 @@ export const connectToQueryState = <S extends QueryState>(
           if (!compareFilters(filters, filterManager.getFilters(), COMPARE_ALL_OPTIONS)) {
             filterManager.setFilters(_.cloneDeep(filters));
           }
-        } else if (syncConfig.filters === FilterStateStore.APP_STATE) {
+        } else if (syncConfig.filters === 'appState') {
           if (
             !compareFilters(filters, filterManager.getAppFilters(), {
               ...COMPARE_ALL_OPTIONS,
@@ -198,7 +198,7 @@ export const connectToQueryState = <S extends QueryState>(
           ) {
             filterManager.setAppFilters(_.cloneDeep(filters));
           }
-        } else if (syncConfig.filters === FilterStateStore.GLOBAL_STATE) {
+        } else if (syncConfig.filters === 'globalState') {
           if (
             !compareFilters(filters, filterManager.getGlobalFilters(), {
               ...COMPARE_ALL_OPTIONS,

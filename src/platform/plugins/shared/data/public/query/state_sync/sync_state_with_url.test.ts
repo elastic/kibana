@@ -9,7 +9,7 @@
 
 import { Subscription } from 'rxjs';
 import { createBrowserHistory, History } from 'history';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../../common';
@@ -85,8 +85,8 @@ describe('sync_query_state_with_url', () => {
     history = createBrowserHistory();
     kbnUrlStateStorage = createKbnUrlStateStorage({ useHash: false, history });
 
-    gF = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
-    aF = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
+    gF = getFilter('globalState', true, true, 'key1', 'value1');
+    aF = getFilter('appState', true, true, 'key3', 'value3');
   });
   afterEach(() => {
     filterManagerChangeSub.unsubscribe();

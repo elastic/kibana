@@ -12,7 +12,7 @@ import { cloneDeep, isEqual } from 'lodash';
 import { map } from 'rxjs';
 import { EventEmitter } from 'events';
 import { i18n } from '@kbn/i18n';
-import { FilterStateStore } from '@kbn/es-query';
+
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Markdown } from '@kbn/shared-ux-markdown';
@@ -86,7 +86,7 @@ export const useVisualizeAppState = (
           ),
         },
         {
-          filters: FilterStateStore.APP_STATE,
+          filters: 'appState',
           query: true,
         }
       );

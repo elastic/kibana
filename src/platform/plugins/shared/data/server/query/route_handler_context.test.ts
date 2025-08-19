@@ -8,7 +8,7 @@
  */
 
 import { coreMock } from '@kbn/core/server/mocks';
-import { FilterStateStore, Query } from '@kbn/es-query';
+import { Query } from '@kbn/es-query';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../../common';
 import type { SavedObject, SavedQueryAttributes } from '../../common';
 import {
@@ -53,7 +53,7 @@ const savedQueryAttributesWithFilters: SavedQueryAttributes = {
   filters: [
     {
       query: { match_all: {} },
-      $state: { store: FilterStateStore.APP_STATE },
+      $state: { store: 'appState' },
       meta: {
         index: 'my-index',
         disabled: false,

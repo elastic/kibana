@@ -173,8 +173,8 @@ const searchSourceSchema = schema.object(
               schema.object({
                 store: schema.oneOf(
                   [
-                    schema.literal(FilterStateStore.APP_STATE),
-                    schema.literal(FilterStateStore.GLOBAL_STATE),
+                    schema.literal('appState'),
+                    schema.literal('globalState'),
                   ],
                   {
                     meta: {

@@ -25,7 +25,7 @@ describe('deserializeFilters', () => {
   it('returns an array of filters if the input matches the schema', () => {
     const validFilters = [
       {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         meta: { key: 'value' },
         query: { match: { field: 'value' } },
       },

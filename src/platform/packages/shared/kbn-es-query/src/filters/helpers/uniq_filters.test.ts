@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildQueryFilter, Filter, FilterStateStore } from '../build_filters';
+import { buildQueryFilter, Filter } from '../build_filters';
 import { uniqFilters } from './uniq_filters';
 
 describe('filter manager utilities', () => {
@@ -35,11 +35,11 @@ describe('filter manager utilities', () => {
     test('should filter out duplicates, ignoring $state attributes', () => {
       const before: Filter[] = [
         {
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
           ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
         },
         {
-          $state: { store: FilterStateStore.GLOBAL_STATE },
+          $state: { store: 'globalState' },
           ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
         },
       ];

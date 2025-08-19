@@ -19,7 +19,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { Filter, Query } from '@kbn/es-query';
 import { CoreStart } from '@kbn/core/public';
 import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
@@ -158,7 +158,7 @@ function useAppStateSyncing<AppState extends QueryState>(
     const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(
       query,
       appStateContainer,
-      { filters: FilterStateStore.APP_STATE, query: true }
+      { filters: 'appState', query: true }
     );
 
     // sets up syncing app state container with url

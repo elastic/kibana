@@ -150,7 +150,7 @@ function getLensAttributes(
       },
       filters: [
         {
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
           meta: {
             index: 'filter-index-pattern-0',
             negate: false,
@@ -268,7 +268,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
               params: { query: actionId },
             },
             query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: 'appState' },
           },
         ],
         refreshInterval: {

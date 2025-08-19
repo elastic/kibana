@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { ToastsStart } from '@kbn/core-notifications-browser';
 import { useAlertsDataView } from '../common/hooks';
 import { AlertsSearchBar } from '.';
@@ -110,7 +110,7 @@ describe('AlertsSearchBar', () => {
           key: 'query',
         },
         query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
       },
     ];
 

@@ -47,7 +47,6 @@ import { EuiCallOut, EuiEmptyPrompt, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { Filter } from '@kbn/es-query';
-import { FilterStateStore } from '@kbn/es-query';
 import { ENABLE_ESQL, getESQLAdHocDataview } from '@kbn/esql-utils';
 import { ACTION_GLOBAL_APPLY_FILTER } from '@kbn/unified-search-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -377,7 +376,7 @@ export const getFieldStatsChartEmbeddableFactory = (
             );
             filters = filters.map((filter) => ({
               ...filter,
-              $state: { store: FilterStateStore.APP_STATE },
+              $state: { store: 'appState' },
             }));
             addFilters(filters);
           };

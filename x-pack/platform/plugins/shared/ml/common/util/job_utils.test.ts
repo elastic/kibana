@@ -685,7 +685,7 @@ describe('getFiltersForDSLQuery', () => {
         query,
         'dataview-id',
         undefined,
-        FilterStateStore.GLOBAL_STATE
+        'globalState'
       );
       expect(actual).toEqual([
         {

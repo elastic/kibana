@@ -18,7 +18,7 @@ import {
 } from '@kbn/core/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
 import { Subscription } from 'rxjs';
-import { type Filter, FilterStateStore, type Query, type TimeRange } from '@kbn/es-query';
+import { type Filter, type Query, type TimeRange } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import {
@@ -571,7 +571,7 @@ export class MapApp extends React.Component<Props, State> {
 
   _addFilter = async (newFilters: Filter[]) => {
     newFilters.forEach((filter) => {
-      filter.$state = { store: FilterStateStore.APP_STATE };
+      filter.$state = { store: 'appState' };
     });
     this._onFiltersChange([...this.props.filters, ...newFilters]);
   };

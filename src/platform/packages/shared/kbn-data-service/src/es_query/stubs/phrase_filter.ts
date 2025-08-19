@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore, PhraseFilter } from '@kbn/es-query';
+import { PhraseFilter } from '@kbn/es-query';
 
 export const phraseFilter: PhraseFilter = {
   meta: {
@@ -23,7 +23,7 @@ export const phraseFilter: PhraseFilter = {
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   query: {
     match_phrase: {

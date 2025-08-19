@@ -43,6 +43,7 @@ export type {
   RelativeTimeRange,
   AbsoluteTimeRange,
   CombinedFilter,
+  FilterStateStore,
 } from './src/filters';
 
 export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
@@ -64,7 +65,6 @@ export {
 export {
   COMPARE_ALL_OPTIONS,
   FILTERS,
-  FilterStateStore,
   buildCustomFilter,
   buildEmptyFilter,
   buildExistsFilter,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 
 /**
  * Sort filters according to their store - global filters go first
@@ -21,7 +21,7 @@ export const sortFilters = ({ $state: a }: Filter, { $state: b }: Filter): numbe
   if (a!.store === b!.store) {
     return 0;
   } else {
-    return a!.store === FilterStateStore.GLOBAL_STATE && b!.store !== FilterStateStore.GLOBAL_STATE
+    return a!.store === 'globalState' && b!.store !== 'globalState'
       ? -1
       : 1;
   }

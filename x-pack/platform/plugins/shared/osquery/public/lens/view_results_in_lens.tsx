@@ -185,7 +185,7 @@ function getLensAttributes(
       },
       filters: [
         {
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
           meta: {
             index: 'filter-index-pattern-0',
             negate: false,
@@ -206,7 +206,7 @@ function getLensAttributes(
         ...(agentIdsQuery
           ? [
               {
-                $state: { store: FilterStateStore.APP_STATE },
+                $state: { store: 'appState' },
                 meta: {
                   alias: 'agent IDs',
                   disabled: false,

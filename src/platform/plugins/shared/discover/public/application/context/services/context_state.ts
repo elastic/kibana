@@ -213,10 +213,10 @@ export function getState({
       data.query.filterManager.setFilters(getValidFilters(dataView, getAllFilters()));
 
       const stopSyncingAppFilters = connectToQueryState(data.query, appStateContainer, {
-        filters: FilterStateStore.APP_STATE,
+        filters: 'appState',
       });
       const stopSyncingGlobalFilters = connectToQueryState(data.query, globalStateContainer, {
-        filters: FilterStateStore.GLOBAL_STATE,
+        filters: 'globalState',
       });
 
       stopSyncingFilters = () => {

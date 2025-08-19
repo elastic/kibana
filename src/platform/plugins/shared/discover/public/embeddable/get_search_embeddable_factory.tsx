@@ -290,7 +290,7 @@ export const getSearchEmbeddableFactory = ({
               );
               newFilters = newFilters.map((filter) => ({
                 ...filter,
-                $state: { store: FilterStateStore.APP_STATE },
+                $state: { store: 'appState' },
               }));
 
               await startServices.executeTriggerActions(APPLY_FILTER_TRIGGER, {

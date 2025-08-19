@@ -13,7 +13,7 @@ import {
   buildCombinedFilter,
   buildEmptyFilter,
   buildQueryFilter,
-  FilterStateStore,
+  Filter,
 } from '..';
 import { DataViewBase } from '../../..';
 
@@ -54,13 +54,13 @@ describe('filter manager utilities', () => {
 
     test('should compare duplicates, ignoring $state attributes', () => {
       const f1 = {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       expect(compareFilters(f1, f2)).toBeTruthy();
     });
@@ -98,39 +98,39 @@ describe('filter manager utilities', () => {
 
     test('should compare array of duplicates, ignoring $state attributes', () => {
       const f1 = {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       expect(compareFilters([f1], [f2])).toBeTruthy();
     });
 
     test('should compare duplicates with COMPARE_ALL_OPTIONS should check store', () => {
       const f1 = {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       expect(compareFilters([f1], [f2], COMPARE_ALL_OPTIONS)).toBeFalsy();
     });
 
     test('should compare duplicates with COMPARE_ALL_OPTIONS should not check key and value ', () => {
       const f1 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       f2.meta.key = 'wassup';
       f2.meta.value = 'dog';
@@ -140,13 +140,13 @@ describe('filter manager utilities', () => {
 
     test('should compare alias with alias true', () => {
       const f1 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       f2.meta.alias = 'wassup';
       f2.meta.alias = 'dog';
@@ -156,13 +156,13 @@ describe('filter manager utilities', () => {
 
     test('should compare alias with COMPARE_ALL_OPTIONS', () => {
       const f1 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       f2.meta.alias = 'wassup';
       f2.meta.alias = 'dog';
@@ -172,13 +172,13 @@ describe('filter manager utilities', () => {
 
     test('should compare index with index true', () => {
       const f1 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       f2.meta.index = 'wassup';
       f2.meta.index = 'dog';

@@ -30,7 +30,7 @@ const mockFilter: Filter = {
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
 };
 

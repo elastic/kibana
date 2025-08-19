@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from './filter_manager';
 import { QueryStringContract } from './query_string';
 import { getFilter } from './filter_manager/test_helpers/get_stub_filter';
@@ -83,7 +82,7 @@ describe('query_service', () => {
   });
 
   test('state is updated when underlying state in service updates', () => {
-    const filters = [getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1')];
+    const filters = [getFilter('globalState', true, true, 'key1', 'value1')];
     const query = { language: 'kql', query: 'query' };
     const time = { from: new Date().toISOString(), to: new Date().toISOString() };
     const refreshInterval = { pause: false, value: 2000 };

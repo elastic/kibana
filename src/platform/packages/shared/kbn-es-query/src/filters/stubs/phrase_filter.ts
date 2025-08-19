@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore } from '..';
+import { PhraseFilter } from '../build_filters';
 
-export const phraseFilter = {
+export const phraseFilter: PhraseFilter = {
   meta: {
     negate: false,
     index: 'logstash-*',
@@ -23,7 +23,7 @@ export const phraseFilter = {
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   query: {
     match_phrase: {},

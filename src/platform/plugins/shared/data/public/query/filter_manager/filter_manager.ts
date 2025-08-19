@@ -141,7 +141,7 @@ export class FilterManager implements PersistableStateService<Filter[]> {
       return;
     }
 
-    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
+    const store = pinFilterStatus ? 'globalState' : 'appState';
 
     FilterManager.setFiltersStore(filters, store);
 
@@ -161,7 +161,7 @@ export class FilterManager implements PersistableStateService<Filter[]> {
     newFilters: Filter[],
     pinFilterStatus: boolean = this.uiSettings.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT)
   ) {
-    const store = pinFilterStatus ? FilterStateStore.GLOBAL_STATE : FilterStateStore.APP_STATE;
+    const store = pinFilterStatus ? 'globalState' : 'appState';
 
     FilterManager.setFiltersStore(newFilters, store);
 
@@ -178,7 +178,7 @@ export class FilterManager implements PersistableStateService<Filter[]> {
    */
   public setGlobalFilters(newGlobalFilters: Filter[]) {
     newGlobalFilters = mapAndFlattenFilters(newGlobalFilters);
-    FilterManager.setFiltersStore(newGlobalFilters, FilterStateStore.GLOBAL_STATE, true);
+    FilterManager.setFiltersStore(newGlobalFilters, 'globalState', true);
     const { appFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
       appFilters,
@@ -195,7 +195,7 @@ export class FilterManager implements PersistableStateService<Filter[]> {
    */
   public setAppFilters(newAppFilters: Filter[]) {
     newAppFilters = mapAndFlattenFilters(newAppFilters);
-    FilterManager.setFiltersStore(newAppFilters, FilterStateStore.APP_STATE, true);
+    FilterManager.setFiltersStore(newAppFilters, 'appState', true);
     const { globalFilters } = this.getPartitionedFilters();
     const newFilters = this.mergeIncomingFilters({
       globalFilters,

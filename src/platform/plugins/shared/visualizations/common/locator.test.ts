@@ -8,7 +8,7 @@
  */
 
 import { VisualizeLocatorDefinition } from './locator';
-import { FilterStateStore } from '@kbn/es-query';
+
 
 describe('visualize locator', () => {
   let definition: VisualizeLocatorDefinition;
@@ -71,7 +71,7 @@ describe('visualize locator', () => {
           },
           query: { query: 'hi' },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ],

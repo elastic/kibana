@@ -52,7 +52,7 @@ export function createApplyEntityFieldFiltersAction(
           .map<Filter>(({ fieldName, fieldValue, operation }) => {
             return {
               $state: {
-                store: FilterStateStore.APP_STATE,
+                store: 'appState',
               },
               meta: {
                 alias: i18n.translate('xpack.ml.actions.entityFieldFilterAliasLabel', {

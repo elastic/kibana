@@ -11,7 +11,7 @@ import type { PhrasesFilter } from '@kbn/es-query';
 import { FILTERS, FilterStateStore } from '@kbn/es-query';
 
 const $state = {
-  store: FilterStateStore.APP_STATE,
+  store: 'appState',
 };
 
 export type AlertsFeatureIdsFilter = PhrasesFilter & {

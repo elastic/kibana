@@ -100,7 +100,7 @@ export const LogCategoryDetailsFlyout: React.FC<LogCategoryDetailsFlyoutProps> =
         false,
         false,
         'Document filters',
-        FilterStateStore.APP_STATE
+        'appState'
       )
     );
   }, [documentAndCategoryFilters, logsSource.indexName]);

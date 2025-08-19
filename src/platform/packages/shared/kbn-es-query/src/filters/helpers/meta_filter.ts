@@ -8,7 +8,7 @@
  */
 
 import { omit, get } from 'lodash';
-import { Filter, FilterStateStore } from '../build_filters';
+import { Filter } from '../build_filters';
 
 /**
  *
@@ -18,7 +18,7 @@ import { Filter, FilterStateStore } from '../build_filters';
  * @public
  */
 export const isFilterPinned = (filter: Filter) => {
-  return filter.$state && filter.$state.store === FilterStateStore.GLOBAL_STATE;
+  return filter.$state && filter.$state.store === 'globalState';
 };
 
 /**
@@ -65,7 +65,7 @@ export const toggleFilterNegated = (filter: Filter) => {
  * @public
  */
 export const toggleFilterPinned = (filter: Filter) => {
-  const store = isFilterPinned(filter) ? FilterStateStore.APP_STATE : FilterStateStore.GLOBAL_STATE;
+  const store = isFilterPinned(filter) ? 'appState' : 'globalState';
   const $state = { ...filter.$state, store };
 
   return { ...filter, $state };

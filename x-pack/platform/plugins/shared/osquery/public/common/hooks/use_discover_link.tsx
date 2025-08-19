@@ -38,7 +38,7 @@ export const useDiscoverLink = ({ filters }: UseDiscoverLink) => {
             params: { query: filter.value },
           },
           query: { match_phrase: { action_id: filter.value } },
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
         })),
       });
       setDiscoverUrl(newUrl);

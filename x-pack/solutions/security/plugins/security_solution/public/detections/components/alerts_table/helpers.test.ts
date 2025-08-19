@@ -560,7 +560,7 @@ describe('helpers', () => {
             },
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
       ]);

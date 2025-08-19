@@ -13,7 +13,7 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
-import { FilterStateStore } from '@kbn/es-query';
+
 import { Frequency } from '@kbn/rrule';
 
 import type { MaintenanceWindowClientContext } from '../../../../../common';
@@ -183,7 +183,7 @@ describe('MaintenanceWindowClient - create', () => {
                 type: 'phrase',
               },
               $state: {
-                store: FilterStateStore.APP_STATE,
+                store: 'appState',
               },
               query: {
                 match_phrase: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
+
 import { LensAppLocatorDefinition, type LensAppLocatorParams } from './locator';
 
 const savedObjectId: string = '571aaf70-4c88-11e8-b3d7-01146121b73d';
@@ -88,7 +88,7 @@ describe('Lens url generator', () => {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
         {
@@ -98,7 +98,7 @@ describe('Lens url generator', () => {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ],
@@ -115,7 +115,7 @@ describe('Lens url generator', () => {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
         {
@@ -125,7 +125,7 @@ describe('Lens url generator', () => {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ],

@@ -84,7 +84,7 @@ export type FilterMeta = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Filter = {
   $state?: {
-    store: FilterStateStore;
+    store?: FilterStateStore;
   };
   meta: FilterMeta;
   query?: Record<string, any>;

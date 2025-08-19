@@ -30,7 +30,7 @@ const getMockPhraseFilter = (key: string, value: string): Filter => {
       },
     },
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: 'appState',
     },
   };
 };

@@ -266,7 +266,7 @@ describe('getSharingData', () => {
     const searchSourceMock = createSearchSourceMock({ index: dataViewMock });
     const appFilter = {
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
       meta: {
         alias: null,

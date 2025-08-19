@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterStateStore } from '@kbn/es-query';
+
 import { getEditPath } from './constants';
 
 describe('getEditPath', function () {
@@ -39,7 +39,7 @@ describe('getEditPath', function () {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
         {
@@ -49,7 +49,7 @@ describe('getEditPath', function () {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ])
@@ -77,7 +77,7 @@ describe('getEditPath', function () {
               negate: false,
             },
             $state: {
-              store: FilterStateStore.APP_STATE,
+              store: 'appState',
             },
           },
           {
@@ -87,7 +87,7 @@ describe('getEditPath', function () {
               negate: false,
             },
             $state: {
-              store: FilterStateStore.GLOBAL_STATE,
+              store: 'globalState',
             },
           },
         ],

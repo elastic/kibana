@@ -1176,7 +1176,7 @@ describe('alert actions', () => {
             },
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
       ];
@@ -1214,7 +1214,7 @@ describe('alert actions', () => {
             params: eventIds,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
       ];
@@ -1252,7 +1252,7 @@ describe('alert actions', () => {
             params: eventIds,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
       ];

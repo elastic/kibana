@@ -52,7 +52,7 @@ const ViewResultsInDiscoverActionComponent: React.FC<ViewResultsInDiscoverAction
               params: { query: actionId },
             },
             query: { match_phrase: { action_id: actionId } },
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: 'appState' },
           },
         ],
         refreshInterval: {

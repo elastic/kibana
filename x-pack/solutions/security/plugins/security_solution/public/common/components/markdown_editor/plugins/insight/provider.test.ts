@@ -45,7 +45,7 @@ const flatValueFilters = [
 
 const combinedFilter: CombinedFilter = {
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   meta: {
     type: FILTERS.COMBINED,
@@ -60,7 +60,7 @@ const combinedFilter: CombinedFilter = {
 const combined = [
   {
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: 'appState',
     },
     meta: {
       type: 'combined',
@@ -83,7 +83,7 @@ const combined = [
         },
         {
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           meta: {
             type: 'combined',

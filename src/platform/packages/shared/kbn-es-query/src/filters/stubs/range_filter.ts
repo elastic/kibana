@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore } from '..';
+import { RangeFilter } from "../build_filters";
 
-export const rangeFilter = {
+export const rangeFilter: RangeFilter = {
   meta: {
     index: 'logstash-*',
     negate: false,
@@ -24,7 +24,7 @@ export const rangeFilter = {
     },
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   query: { range: {} },
 };

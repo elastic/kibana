@@ -420,7 +420,7 @@ const InsightEditorComponent = ({
     return [
       {
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
         meta: {
           disabled: false,

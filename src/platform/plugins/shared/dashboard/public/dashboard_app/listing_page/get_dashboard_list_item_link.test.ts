@@ -86,7 +86,7 @@ describe('when global filters change', () => {
         },
         query: { query: 'q1' },
         $state: {
-          store: FilterStateStore.GLOBAL_STATE,
+          store: 'globalState',
         },
       },
     ];

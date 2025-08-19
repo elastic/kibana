@@ -47,7 +47,7 @@ export function createApplyInfluencerFiltersAction(
         data.lanes.map<Filter>((influencerValue) => {
           return {
             $state: {
-              store: FilterStateStore.APP_STATE,
+              store: 'appState',
             },
             meta: {
               alias: i18n.translate('xpack.ml.actions.influencerFilterAliasLabel', {

@@ -64,7 +64,7 @@ function getFilterConfig(
       },
     },
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: 'appState',
     },
   };
 }

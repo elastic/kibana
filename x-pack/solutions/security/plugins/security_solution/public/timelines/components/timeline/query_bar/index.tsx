@@ -336,7 +336,7 @@ export const getDataProviderFilter = (dataProviderDsl: string): Filter => {
       value: dataProviderDsl,
     },
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: 'appState',
     },
   };
 };

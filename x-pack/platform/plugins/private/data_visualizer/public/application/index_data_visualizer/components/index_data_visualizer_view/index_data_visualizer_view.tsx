@@ -22,7 +22,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 
-import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
+import { type Filter, type Query, buildEsQuery } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
@@ -314,7 +314,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         // when navigating to other pages
         data.query.filterManager
           .getFilters()
-          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .filter((f) => f.$state?.store !== 'globalState')
           .forEach((f) => data.query.filterManager.removeFilter(f));
       };
     },

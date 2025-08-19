@@ -94,7 +94,7 @@ describe('description_step', () => {
       const filters: Filter[] = [
         {
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
           meta: {
             alias: null,
@@ -114,7 +114,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
           meta: {
             alias: null,
@@ -137,7 +137,7 @@ describe('description_step', () => {
       const expected: Filter[] = [
         {
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
           meta: {
             alias: null,
@@ -157,7 +157,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
           meta: {
             alias: null,
@@ -220,7 +220,7 @@ describe('description_step', () => {
       const expected: Filter[] = [
         {
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           meta: {
             alias: null,
@@ -240,7 +240,7 @@ describe('description_step', () => {
         },
         {
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           meta: {
             alias: null,

@@ -13,7 +13,7 @@ import { moveFiltersToQuery, Pre600FilterQuery } from './move_filters_to_query';
 const filter: Filter = {
   meta: { disabled: false, negate: false, alias: '' },
   query: {},
-  $state: { store: FilterStateStore.APP_STATE },
+  $state: { store: 'appState' },
 };
 
 const queryFilter: Pre600FilterQuery = {
@@ -28,7 +28,7 @@ test('Migrates an old filter query into the query field', () => {
   expect(newSearchSource).toEqual({
     filter: [
       {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         meta: {
           alias: '',
           disabled: false,

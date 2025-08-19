@@ -241,7 +241,7 @@ export class QuickJobCreatorBase {
         datafeedConfig.query,
         undefined,
         datafeedConfig.job_id,
-        FilterStateStore.GLOBAL_STATE
+        'globalState'
       ),
     };
 

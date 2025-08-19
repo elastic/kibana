@@ -18,7 +18,6 @@ import {
   isRangeFilter,
   isScriptedPhraseFilter,
   buildFilter,
-  FilterStateStore,
   FILTERS,
   DataViewFieldBase,
   DataViewBase,
@@ -105,7 +104,7 @@ export function generateFilters(
         false,
         value,
         null,
-        FilterStateStore.APP_STATE
+        'appState'
       );
     }
 
@@ -125,7 +124,7 @@ export function generateFilters(
       false,
       value,
       null,
-      FilterStateStore.APP_STATE
+      'appState'
     );
   }
 

@@ -50,7 +50,7 @@ export const getFilters = ({
     false,
     value,
     null,
-    FilterStateStore.APP_STATE
+    'appState'
   );
 
   const nextFilters = [

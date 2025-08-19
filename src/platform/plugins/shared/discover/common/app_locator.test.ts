@@ -141,7 +141,7 @@ describe('Discover url generator', () => {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
         },
         {
@@ -151,7 +151,7 @@ describe('Discover url generator', () => {
             negate: false,
           },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ],

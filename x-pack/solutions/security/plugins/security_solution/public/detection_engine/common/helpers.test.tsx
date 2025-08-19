@@ -74,7 +74,7 @@ describe('rule helpers', () => {
           filters: [
             {
               $state: {
-                store: FilterStateStore.GLOBAL_STATE,
+                store: 'globalState',
               },
               meta: {
                 alias: null,

@@ -47,7 +47,7 @@ const dataProviderQueryType = (type: string): QueryOperator => {
 
 const filterStub = {
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   meta: {
     disabled: false,
@@ -212,7 +212,7 @@ const buildFiltersFromInsightProviders = (
       });
       const combinedFilter = {
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
         meta: {
           type: FILTERS.COMBINED,

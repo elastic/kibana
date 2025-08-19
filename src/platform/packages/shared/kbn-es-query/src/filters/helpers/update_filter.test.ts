@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildQueryFilter, Filter, FilterStateStore } from '../build_filters';
+import { buildQueryFilter, Filter } from '../build_filters';
 import { updateFilter } from './update_filter';
 
 describe('updateFilter', () => {
   test('should return the correct filter with type undefined if the given operator is undefined', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
     };
     const updatedFilter = updateFilter(filter, 'test-field');
@@ -34,7 +34,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter if the operator type is exists', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
     };
     const operator = {
@@ -59,7 +59,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter if the operator type is exists even if params are given', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', ''),
     };
     const operator = {
@@ -84,7 +84,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter for the is operator', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', '', {
         key: 'test-field',
       }),
@@ -112,7 +112,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter for the is operator for number field and no params given', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', '', {
         key: 'test-field',
       }),
@@ -140,7 +140,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter for the range operator without params', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', '', {
         key: 'test-field',
       }),
@@ -177,7 +177,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter for the range operator with params', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', '', {
         key: 'test-field',
       }),
@@ -218,7 +218,7 @@ describe('updateFilter', () => {
 
   test('should return the correct filter for is one of operator', () => {
     const filter: Filter = {
-      $state: { store: FilterStateStore.GLOBAL_STATE },
+      $state: { store: 'globalState' },
       ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index1', '', {
         key: 'test-field',
       }),

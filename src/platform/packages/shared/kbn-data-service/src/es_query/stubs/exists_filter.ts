@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExistsFilter, FilterStateStore } from '@kbn/es-query';
+import { ExistsFilter } from '@kbn/es-query';
 
 export const existsFilter: ExistsFilter = {
   meta: {
@@ -19,7 +19,7 @@ export const existsFilter: ExistsFilter = {
     alias: null,
   },
   $state: {
-    store: FilterStateStore.APP_STATE,
+    store: 'appState',
   },
   query: {},
 };

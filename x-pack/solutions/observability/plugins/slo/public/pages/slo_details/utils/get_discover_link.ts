@@ -65,7 +65,7 @@ function createDiscoverLocator({
     const customBadFilter = { bool: { filter: customTotalFilter, must_not: customGoodFilter } };
 
     filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
+      $state: { store: 'appState' },
       meta: {
         type: 'custom',
         alias: i18n.translate('xpack.slo.sloDetails.goodFilterLabel', {
@@ -79,7 +79,7 @@ function createDiscoverLocator({
     });
 
     filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
+      $state: { store: 'appState' },
       meta: {
         type: 'custom',
         alias: i18n.translate('xpack.slo.sloDetails.badFilterLabel', {
@@ -93,7 +93,7 @@ function createDiscoverLocator({
     });
 
     filters.push({
-      $state: { store: FilterStateStore.APP_STATE },
+      $state: { store: 'appState' },
       meta: {
         type: 'custom',
         alias: i18n.translate('xpack.slo.sloDetails.totalFilterLabel', {
@@ -121,7 +121,7 @@ function createDiscoverLocator({
         index: indexId,
       },
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
       query: {
         match_phrase: {

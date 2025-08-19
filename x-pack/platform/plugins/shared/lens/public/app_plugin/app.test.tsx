@@ -24,7 +24,7 @@ import { createMemoryHistory } from 'history';
 import type { Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { buildExistsFilter, FilterStateStore } from '@kbn/es-query';
+import { buildExistsFilter } from '@kbn/es-query';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
@@ -696,7 +696,7 @@ describe('Lens App', () => {
         const unpinned = buildExistsFilter(field, indexPattern);
         const pinned = buildExistsFilter(pinnedField, indexPattern);
         await act(async () => {
-          FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
+          FilterManager.setFiltersStore([pinned], 'globalState');
         });
 
         await save({
@@ -1147,7 +1147,7 @@ describe('Lens App', () => {
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = buildExistsFilter(field, indexPattern);
       const pinned = buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
+      FilterManager.setFiltersStore([pinned], 'globalState');
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       act(() => onClearSavedQuery());
       expect(lensStore.getState()).toEqual({
@@ -1209,7 +1209,7 @@ describe('Lens App', () => {
       const pinnedField = { name: 'pinnedField' } as unknown as FieldSpec;
       const unpinned = buildExistsFilter(field, indexPattern);
       const pinned = buildExistsFilter(pinnedField, indexPattern);
-      FilterManager.setFiltersStore([pinned], FilterStateStore.GLOBAL_STATE);
+      FilterManager.setFiltersStore([pinned], 'globalState');
       act(() => services.data.query.filterManager.setFilters([pinned, unpinned]));
       act(() => onClearSavedQuery());
       expect(lensStore.getState()).toEqual({

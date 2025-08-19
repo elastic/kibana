@@ -94,7 +94,7 @@ describe('useLensAttributes hook', () => {
       },
       filters: [
         {
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
           meta: {
             alias: null,
             disabled: false,

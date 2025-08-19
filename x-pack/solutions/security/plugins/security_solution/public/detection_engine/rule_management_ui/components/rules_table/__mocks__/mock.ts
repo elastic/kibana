@@ -39,7 +39,7 @@ export const mockQueryBar: FieldValueQueryBar = {
   filters: [
     {
       $state: {
-        store: FilterStateStore.GLOBAL_STATE,
+        store: 'globalState',
       },
       meta: {
         alias: null,
@@ -119,7 +119,7 @@ export const mockRuleWithEverything = (id: string): RuleResponse => ({
   filters: [
     {
       $state: {
-        store: FilterStateStore.GLOBAL_STATE,
+        store: 'globalState',
       },
       meta: {
         alias: null,

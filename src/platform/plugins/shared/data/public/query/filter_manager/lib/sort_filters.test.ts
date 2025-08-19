@@ -8,19 +8,19 @@
  */
 
 import { sortFilters } from './sort_filters';
-import { FilterStateStore, buildQueryFilter } from '@kbn/es-query';
+import { buildQueryFilter, Filter } from '@kbn/es-query';
 
 describe('sortFilters', () => {
   describe('sortFilters()', () => {
     test('Not sort two application level filters', () => {
       const f1 = {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       const filters = [f1, f2].sort(sortFilters);
       expect(filters[0]).toBe(f1);
@@ -28,13 +28,13 @@ describe('sortFilters', () => {
 
     test('Not sort two global level filters', () => {
       const f1 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       const filters = [f1, f2].sort(sortFilters);
       expect(filters[0]).toBe(f1);
@@ -42,13 +42,13 @@ describe('sortFilters', () => {
 
     test('Move global level filter to the beginning of the array', () => {
       const f1 = {
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
       const f2 = {
-        $state: { store: FilterStateStore.GLOBAL_STATE },
+        $state: { store: 'globalState' },
         ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-      };
+      } as Filter;
 
       const filters = [f1, f2].sort(sortFilters);
       expect(filters[0]).toBe(f2);

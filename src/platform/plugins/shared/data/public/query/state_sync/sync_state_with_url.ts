@@ -12,7 +12,6 @@ import {
   IKbnUrlStateStorage,
   syncState,
 } from '@kbn/kibana-utils-plugin/public';
-import { FilterStateStore } from '@kbn/es-query';
 import { QuerySetup, QueryStart } from '../query_service';
 import { connectToQueryState } from './connect_to_query_state';
 import { GlobalQueryStateFromUrl } from './types';
@@ -57,7 +56,7 @@ export const syncGlobalQueryStateWithUrl = (
   const stopSyncingWithStateContainer = connectToQueryState(query, globalQueryStateContainer, {
     refreshInterval: true,
     time: true,
-    filters: FilterStateStore.GLOBAL_STATE,
+    filters: 'globalState',
   });
 
   // if there weren't any initial state in url,

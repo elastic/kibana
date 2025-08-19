@@ -157,7 +157,7 @@ export const LogRateAnalysisPage: FC<LogRateAnalysisPageProps> = ({
         // when navigating to other pages
         dataService.query.filterManager
           .getFilters()
-          .filter((f) => f.$state?.store === FilterStateStore.APP_STATE)
+          .filter((f) => f.$state?.store !== 'globalState')
           .forEach((f) => dataService.query.filterManager.removeFilter(f));
       };
     },

@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { FilterStateStore } from '@kbn/es-query';
+
 import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,
@@ -185,8 +185,8 @@ export const rawRuleAlertsFilterSchema = schema.object({
           $state: schema.maybe(
             schema.object({
               store: schema.oneOf([
-                schema.literal(FilterStateStore.APP_STATE), // change
-                schema.literal(FilterStateStore.GLOBAL_STATE), // change
+                schema.literal('appState'), // change
+                schema.literal('globalState'), // change
               ]),
             })
           ),

@@ -258,7 +258,7 @@ describe('Timeline save middleware', () => {
         historyIds: [],
         filters: [
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: 'appState' },
             meta: {
               alias: null,
               disabled: false,
@@ -270,7 +270,7 @@ describe('Timeline save middleware', () => {
             query: { match_phrase: { 'event.category': 'file' } },
           },
           {
-            $state: { store: FilterStateStore.APP_STATE },
+            $state: { store: 'appState' },
             meta: {
               alias: null,
               disabled: false,

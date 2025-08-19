@@ -49,7 +49,7 @@ const mockQueryBar = {
   filters: [
     {
       $state: {
-        store: FilterStateStore.GLOBAL_STATE,
+        store: 'globalState',
       },
       meta: {
         alias: null,

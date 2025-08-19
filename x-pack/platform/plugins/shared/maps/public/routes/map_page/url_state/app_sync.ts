@@ -6,7 +6,7 @@
  */
 
 import { map } from 'rxjs';
-import { FilterStateStore } from '@kbn/es-query';
+
 import { connectToQueryState } from '@kbn/data-plugin/public';
 import {
   IKbnUrlStateStorage,
@@ -43,7 +43,7 @@ export function startAppStateSyncing(
     ),
   };
   const stopSyncingQueryAppStateWithStateContainer = connectToQueryState(query, stateContainer, {
-    filters: FilterStateStore.APP_STATE,
+    filters: 'appState',
     query: true,
   });
 

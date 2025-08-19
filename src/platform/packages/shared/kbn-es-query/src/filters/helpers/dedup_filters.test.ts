@@ -8,7 +8,7 @@
  */
 
 import { DataViewBase, DataViewFieldBase } from '../../es_query';
-import { buildQueryFilter, buildRangeFilter, Filter, FilterStateStore } from '../build_filters';
+import { buildQueryFilter, buildRangeFilter, Filter } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
 
 describe('filter manager utilities', () => {
@@ -84,7 +84,7 @@ describe('filter manager utilities', () => {
         ),
         {
           ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-          $state: { store: FilterStateStore.APP_STATE },
+          $state: { store: 'appState' },
         },
       ];
       const filters: Filter[] = [
@@ -96,7 +96,7 @@ describe('filter manager utilities', () => {
         ),
         {
           ...buildQueryFilter({ query_string: { query: 'apache' } }, 'index', ''),
-          $state: { store: FilterStateStore.GLOBAL_STATE },
+          $state: { store: 'globalState' },
         },
       ];
       const results = dedupFilters(existing, filters);

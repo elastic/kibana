@@ -30,7 +30,7 @@ export const getGroupByCardinalityFilters = ({
             type: 'phrases',
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           query: {
             bool: {
@@ -57,7 +57,7 @@ export const getGroupByCardinalityFilters = ({
             type: 'phrases',
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           query: {
             bool: {
@@ -84,7 +84,7 @@ export const getGroupByCardinalityFilters = ({
             type: 'phrases',
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           query: {
             bool: {
@@ -111,7 +111,7 @@ export const getGroupByCardinalityFilters = ({
             type: 'phrases',
           },
           $state: {
-            store: FilterStateStore.APP_STATE,
+            store: 'appState',
           },
           query: {
             bool: {

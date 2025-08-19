@@ -117,7 +117,7 @@ describe('AlertsSearchBar', () => {
           key: 'query',
         },
         query: { bool: { filter: [{ term: { 'kibana.alert.rule.consumer': 'stackAlerts' } }] } },
-        $state: { store: FilterStateStore.APP_STATE },
+        $state: { store: 'appState' },
       },
     ];
 

@@ -309,7 +309,7 @@ export const buildAlertsKqlFilter = (
           },
         },
         $state: {
-          store: FilterStateStore.APP_STATE,
+          store: 'appState',
         },
       },
     ];
@@ -336,7 +336,7 @@ export const buildAlertsKqlFilter = (
         params: alertIds,
       },
       $state: {
-        store: FilterStateStore.APP_STATE,
+        store: 'appState',
       },
     },
   ];

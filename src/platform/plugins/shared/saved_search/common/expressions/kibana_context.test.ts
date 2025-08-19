@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilterStateStore, buildFilter, FILTERS } from '@kbn/es-query';
+import { buildFilter, FILTERS } from '@kbn/es-query';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import type { KibanaContext, ExpressionFunctionKibanaContext } from '@kbn/data-plugin/common';
@@ -244,7 +244,7 @@ describe('kibanaContextFn', () => {
         query: 'JetBeats',
       },
       null,
-      FilterStateStore.APP_STATE
+      'appState'
     );
     const filter2 = buildFilter(
       { fields: [], title: 'dataView' },
@@ -256,7 +256,7 @@ describe('kibanaContextFn', () => {
         query: 'JetBeats',
       },
       null,
-      FilterStateStore.APP_STATE
+      'appState'
     );
 
     const filter3 = buildFilter(
@@ -269,7 +269,7 @@ describe('kibanaContextFn', () => {
         query: 'JetBeats',
       },
       null,
-      FilterStateStore.APP_STATE
+      'appState'
     );
 
     const input: KibanaContext = {

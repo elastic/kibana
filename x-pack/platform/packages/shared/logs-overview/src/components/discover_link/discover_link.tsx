@@ -56,7 +56,7 @@ export const DiscoverLink = React.memo(
             false,
             false,
             filter.meta?.name ?? categorizedLogsFilterLabel,
-            FilterStateStore.APP_STATE
+            'appState'
           )
         ),
       }),

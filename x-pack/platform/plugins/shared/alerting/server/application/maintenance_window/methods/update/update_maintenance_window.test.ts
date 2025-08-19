@@ -19,7 +19,7 @@ import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import type { MaintenanceWindow } from '../../types';
-import { FilterStateStore } from '@kbn/es-query';
+
 
 const savedObjectsClient = savedObjectsClientMock.create();
 const uiSettings = uiSettingsServiceMock.createClient();
@@ -281,7 +281,7 @@ describe('MaintenanceWindowClient - update', () => {
                 type: 'phrase',
               },
               $state: {
-                store: FilterStateStore.APP_STATE,
+                store: 'appState',
               },
               query: {
                 match_phrase: {

@@ -80,7 +80,7 @@ describe('dashboard locator', () => {
           },
           query: { query: 'hi' },
           $state: {
-            store: FilterStateStore.GLOBAL_STATE,
+            store: 'globalState',
           },
         },
       ],

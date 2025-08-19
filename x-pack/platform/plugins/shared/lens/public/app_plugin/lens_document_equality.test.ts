@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { isLensEqual } from './lens_document_equality';
 import { LensDocument } from '../persistence/saved_object_store';
 import {
@@ -286,7 +286,7 @@ describe('lens document equality', () => {
     // ignores pinned filters
     const pinnedFilter: Filter = {
       $state: {
-        store: FilterStateStore.GLOBAL_STATE,
+        store: 'globalState',
       },
       meta: {},
     };

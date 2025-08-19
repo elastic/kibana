@@ -8,7 +8,7 @@
  */
 
 import { Subscription } from 'rxjs';
-import { Filter, FilterStateStore } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import { FilterManager } from '../filter_manager';
 import { getFilter } from '../filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../../common';
@@ -25,12 +25,12 @@ const connectToQueryGlobalState = (query: QueryStart, state: BaseStateContainer<
   connectToQueryState(query, state, {
     refreshInterval: true,
     time: true,
-    filters: FilterStateStore.GLOBAL_STATE,
+    filters: 'globalState',
   });
 
 const connectToQueryAppState = (query: QueryStart, state: BaseStateContainer<QueryState>) =>
   connectToQueryState(query, state, {
-    filters: FilterStateStore.APP_STATE,
+    filters: 'appState',
   });
 
 const setupMock = coreMock.createSetup();
@@ -88,10 +88,10 @@ describe('connect_to_global_state', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    gF1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
-    gF2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'key2', 'value2');
-    aF1 = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
-    aF2 = getFilter(FilterStateStore.APP_STATE, false, false, 'key4', 'value4');
+    gF1 = getFilter('globalState', true, true, 'key1', 'value1');
+    gF2 = getFilter('globalState', false, false, 'key2', 'value2');
+    aF1 = getFilter('appState', true, true, 'key3', 'value3');
+    aF2 = getFilter('appState', false, false, 'key4', 'value4');
   });
   afterEach(() => {
     globalStateSub.unsubscribe();
@@ -331,10 +331,10 @@ describe('connect_to_app_state', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    gF1 = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
-    gF2 = getFilter(FilterStateStore.GLOBAL_STATE, false, false, 'key2', 'value2');
-    aF1 = getFilter(FilterStateStore.APP_STATE, true, true, 'key3', 'value3');
-    aF2 = getFilter(FilterStateStore.APP_STATE, false, false, 'key4', 'value4');
+    gF1 = getFilter('globalState', true, true, 'key1', 'value1');
+    gF2 = getFilter('globalState', false, false, 'key2', 'value2');
+    aF1 = getFilter('appState', true, true, 'key3', 'value3');
+    aF2 = getFilter('appState', false, false, 'key4', 'value4');
   });
   afterEach(() => {
     appStateSub.unsubscribe();
@@ -510,18 +510,18 @@ describe('filters with different state', () => {
     filterManagerChangeTriggered = jest.fn();
     filterManagerChangeSub = filterManager.getUpdates$().subscribe(filterManagerChangeTriggered);
 
-    filter = getFilter(FilterStateStore.GLOBAL_STATE, true, true, 'key1', 'value1');
+    filter = getFilter('globalState', true, true, 'key1', 'value1');
   });
 
   // applies filter state changes, changes only internal $state.store value
   function runChanges() {
-    filter = { ...filter, $state: { store: FilterStateStore.GLOBAL_STATE } };
+    filter = { ...filter, $state: { store: 'globalState' } };
 
     state.set({
       filters: [filter],
     });
 
-    filter = { ...filter, $state: { store: FilterStateStore.APP_STATE } };
+    filter = { ...filter, $state: { store: 'appState' } };
 
     state.set({
       filters: [filter],
@@ -549,7 +549,7 @@ describe('filters with different state', () => {
 
   test('when syncing app state filters, changes to filter.state$ should be ignored', () => {
     const stop = connectToQueryState(queryServiceStart, state, {
-      filters: FilterStateStore.APP_STATE,
+      filters: 'appState',
     });
 
     runChanges();
@@ -561,7 +561,7 @@ describe('filters with different state', () => {
 
   test('when syncing global state filters, changes to filter.state$ should be ignored', () => {
     const stop = connectToQueryState(queryServiceStart, state, {
-      filters: FilterStateStore.GLOBAL_STATE,
+      filters: 'globalState',
     });
 
     runChanges();

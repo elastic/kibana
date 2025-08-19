@@ -30,7 +30,7 @@ describe('updateSavedSearch', () => {
       },
     },
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: 'appState',
     },
   };
   const globalFilter: Filter = {
@@ -44,7 +44,7 @@ describe('updateSavedSearch', () => {
       },
     },
     $state: {
-      store: FilterStateStore.GLOBAL_STATE,
+      store: 'globalState',
     },
   };
   const createGlobalStateContainer = () => ({

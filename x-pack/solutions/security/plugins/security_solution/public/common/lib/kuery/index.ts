@@ -192,7 +192,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter =>
       },
     },
     $state: {
-      store: FilterStateStore.APP_STATE,
+      store: 'appState',
     },
   } as Filter);
 

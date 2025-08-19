@@ -307,7 +307,7 @@ export const getDiscoverAppStateContainer = ({
       data.query,
       enhancedAppContainer,
       {
-        filters: FilterStateStore.APP_STATE,
+        filters: 'appState',
         query: true,
       }
     );
