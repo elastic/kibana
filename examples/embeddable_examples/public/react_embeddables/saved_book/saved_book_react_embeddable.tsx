@@ -27,7 +27,6 @@ import {
   useBatchedPublishingSubjects,
   initializeStateManager,
   titleComparators,
-  apiHasUniqueId,
 } from '@kbn/presentation-publishing';
 import React from 'react';
 import type { PresentationContainer } from '@kbn/presentation-containers';

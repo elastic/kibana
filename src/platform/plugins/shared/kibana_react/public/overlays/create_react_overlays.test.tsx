@@ -87,11 +87,9 @@ test('passes through modal options when opening modal', () => {
 
   overlays.openModal(<>foo</>, {
     'data-test-subj': 'foo2',
-    closeButtonAriaLabel: 'bar2',
   });
 
   expect(coreOverlays.openModal.mock.calls[0][1]).toEqual({
     'data-test-subj': 'foo2',
-    closeButtonAriaLabel: 'bar2',
   });
 });

@@ -32,7 +32,11 @@ import { coreServices } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { dashboardCopyToDashboardActionStrings } from './_dashboard_actions_strings';
 import { CopyToDashboardModal } from './copy_to_dashboard_modal';
-import { ACTION_COPY_TO_DASHBOARD, DASHBOARD_ACTION_GROUP } from './constants';
+import {
+  ACTION_COPY_TO_DASHBOARD,
+  DASHBOARD_ACTION_GROUP,
+  copyToDashboardDescriptionId,
+} from './constants';
 
 export interface DashboardCopyToCapabilities {
   canCreateNew: boolean;
@@ -84,24 +88,23 @@ export class CopyToDashboardAction implements Action<EmbeddableApiContext> {
   public async execute({ embeddable }: EmbeddableApiContext) {
     if (!apiIsCompatible(embeddable)) throw new IncompatibleActionError();
 
+    const closeModal = () => {
+      session.close();
+      // focus the panel
+      const triggerId = apiHasUniqueId(embeddable) ? `panel-${embeddable.uuid}` : undefined;
+      if (triggerId) {
+        focusFirstFocusable(document.getElementById(triggerId));
+      }
+    };
+
     const session = coreServices.overlays.openModal(
-      toMountPoint(
-        <CopyToDashboardModal
-          closeModal={() => {
-            session.close();
-            // focus the panel
-            const triggerId = apiHasUniqueId(embeddable) ? `panel-${embeddable.uuid}` : undefined;
-            if (triggerId) {
-              focusFirstFocusable(document.getElementById(triggerId));
-            }
-          }}
-          api={embeddable}
-        />,
-        coreServices
-      ),
+      toMountPoint(<CopyToDashboardModal closeModal={closeModal} api={embeddable} />, coreServices),
       {
         maxWidth: 400,
         'data-test-subj': 'copyToDashboardPanel',
+        onClose: closeModal,
+        'aria-label': dashboardCopyToDashboardActionStrings.getDisplayName(),
+        'aria-describedby': copyToDashboardDescriptionId,
       }
     );
   }

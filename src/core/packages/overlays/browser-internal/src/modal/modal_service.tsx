@@ -73,7 +73,10 @@ export class ModalService {
     this.targetDomElement = targetDomElement;
 
     return {
-      open: (mount: MountPoint, options: OverlayModalOpenOptions = {}): OverlayRef => {
+      open: (
+        mount: MountPoint,
+        { onClose, ...options }: OverlayModalOpenOptions = {}
+      ): OverlayRef => {
         // If there is an active modal, close it before opening a new one.
         if (this.activeModal) {
           this.activeModal.close();
@@ -87,6 +90,7 @@ export class ModalService {
           if (this.activeModal === modal) {
             this.cleanupDom();
           }
+          onClose?.();
         });
 
         this.activeModal = modal;

@@ -56,8 +56,15 @@ export const mountInlinePanel = async ({
       focusedPanelId: uuid,
       determineFocusTargetAfterClose: () => {
         console.log('determineFocusTargetAfterClose');
-        console.log(document.getElementById(`panel-${uuid}`) ?? document.getElementById('dashboardEditorMenuButton'));
-        return document.getElementById(`panel-${uuid}`) ?? document.getElementById('dashboardEditorMenuButton')}, //TODO
+        console.log(
+          document.getElementById(`panel-${uuid}`) ??
+            document.getElementById('dashboardEditorMenuButton')
+        );
+        return (
+          document.getElementById(`panel-${uuid}`) ??
+          document.getElementById('dashboardEditorMenuButton')
+        );
+      }, // TODO
     },
   });
 };

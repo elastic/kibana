@@ -396,7 +396,7 @@ export function initializeLayoutManager(
           sections,
         });
 
-        console.log('waht is this', newId)
+        console.log('waht is this', newId);
         trackPanel.setScrollToPanelId(newId);
         // complete.then(() => {
         //   // focus the new section

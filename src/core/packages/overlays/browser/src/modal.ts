@@ -18,7 +18,6 @@ export interface OverlayModalConfirmOptions {
   cancelButtonText?: string;
   confirmButtonText?: string;
   className?: string;
-  closeButtonAriaLabel?: string;
   'data-test-subj'?: string;
   defaultFocusedButton?: EuiConfirmModalProps['defaultFocusedButton'];
   buttonColor?: EuiConfirmModalProps['buttonColor'];
@@ -62,10 +61,7 @@ export interface OverlayModalStart {
 /**
  * @public
  */
-export interface OverlayModalOpenOptions {
-  className?: string;
-  closeButtonAriaLabel?: string;
+export interface OverlayModalOpenOptions extends Partial<EuiModalProps> {
   'data-test-subj'?: string;
-  maxWidth?: boolean | number | string;
-  'aria-labelledby'?: EuiModalProps['aria-labelledby'];
+  onClose?: () => void;
 }
