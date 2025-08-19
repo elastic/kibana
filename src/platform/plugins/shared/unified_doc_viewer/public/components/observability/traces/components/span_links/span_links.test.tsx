@@ -10,8 +10,8 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 import { SpanLinksComponent } from '.';
-import { AbortableAsyncState } from '@kbn/react-hooks';
-import { SpanLinks } from '@kbn/apm-types';
+import type { AbortableAsyncState } from '@kbn/react-hooks';
+import type { SpanLinks } from '@kbn/apm-types';
 
 describe('SpanLinksComponent', () => {
   const incomingSpanLinks = [

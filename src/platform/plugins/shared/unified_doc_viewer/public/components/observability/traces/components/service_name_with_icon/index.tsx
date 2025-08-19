@@ -10,7 +10,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiTextTruncate } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import React from 'react';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 
 interface Props {
   agentName?: string;
