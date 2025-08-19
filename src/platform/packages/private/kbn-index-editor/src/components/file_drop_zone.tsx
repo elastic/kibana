@@ -19,7 +19,7 @@ import { css } from '@emotion/react';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PropsWithChildren } from 'react';
-import React, { type FC, useCallback, useEffect, useRef } from 'react';
+import React, { type FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
@@ -52,7 +52,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 }) => {
   const { services } = useKibana<KibanaContextExtra>();
   const { indexUpdateService } = services;
-  const { fileUploadManager, filesStatus, uploadStatus, indexName } = useFileUploadContext();
+  const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
   const isProcessingImportedFiles = useObservable(
     indexUpdateService.isProcessingImportedFiles$,
@@ -101,17 +101,6 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
     }
     inputRef.current?.click();
   }, [inputRef]);
-
-  const filesProcessed = useRef(false);
-  useEffect(
-    function processNewFilesData() {
-      if (uploadStatus.indexSearchable && !filesProcessed.current) {
-        indexUpdateService.processImportedData(indexName);
-        filesProcessed.current = true;
-      }
-    },
-    [uploadStatus, indexUpdateService, indexName]
-  );
 
   const { euiTheme } = useEuiTheme();
 

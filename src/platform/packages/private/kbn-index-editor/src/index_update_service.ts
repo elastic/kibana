@@ -677,8 +677,6 @@ export class IndexUpdateService {
     } else {
       this.setIndexName(indexName);
       this.setIndexCreated(true);
-
-      this.refresh(); // HD needed?
     }
   }
 
