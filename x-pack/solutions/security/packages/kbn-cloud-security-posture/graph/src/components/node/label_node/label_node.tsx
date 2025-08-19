@@ -59,7 +59,8 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
 
   const numEvents = eventsCount ?? 0;
   const numAlerts = alertsCount ?? 0;
-  const analysis = analyzeDocuments({ eventsCount: numEvents, alertsCount: numAlerts });
+  // TODO Remove color when API returns `eventsCount` and `alertsCount`
+  const analysis = analyzeDocuments({ color, eventsCount: numEvents, alertsCount: numAlerts });
   const shouldShowTooltip = numEvents > BADGES_LIMIT || numAlerts > BADGES_LIMIT;
 
   return (

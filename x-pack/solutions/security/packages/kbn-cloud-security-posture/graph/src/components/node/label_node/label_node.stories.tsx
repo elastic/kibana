@@ -22,6 +22,7 @@ const meta: Meta<LabelNodeViewModel> = {
     id: 'mixed-group',
     label: 'Mixed security activity',
     shape: 'label',
+    color: 'primary',
     interactive: true,
     eventsCount: 2,
     alertsCount: 2,
