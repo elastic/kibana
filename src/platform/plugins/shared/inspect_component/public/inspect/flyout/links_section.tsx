@@ -17,19 +17,19 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FileInfo } from '../../types';
+import type { ComponentData } from '../../types';
 
 interface Props {
-  fileInfo: FileInfo;
+  componentData: ComponentData;
 }
 
-export const LinksSection = ({ fileInfo }: Props) => {
-  if (!fileInfo) return null;
+export const LinksSection = ({ componentData }: Props) => {
+  if (!componentData) return null;
 
-  const formattedPath = fileInfo.fileName?.split('/kibana')[1];
+  const { fileName, lineNumber, columnNumber, relativePath } = componentData;
 
-  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${formattedPath}#L${fileInfo.lineNumber}`;
-  const VSCODE_LINK = `vscode://file/${fileInfo.fileName}:${fileInfo.lineNumber}:${fileInfo.columnNumber}`;
+  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
+  const VSCODE_LINK = `vscode://file/${fileName}:${lineNumber}:${columnNumber}`;
 
   return (
     <EuiFlexItem grow={false}>

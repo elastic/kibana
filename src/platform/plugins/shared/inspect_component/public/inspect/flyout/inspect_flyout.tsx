@@ -14,11 +14,11 @@ import { css } from '@emotion/react';
 import { LinksSection } from './links_section';
 import { CodeownersSection } from './codeowners_section';
 import { Header } from './header';
-import type { FileInfo } from '../../types';
+import type { ComponentData } from '../../types';
 
 interface Props {
   codeowners: string[];
-  fileInfo: FileInfo;
+  componentData: ComponentData;
 }
 
 export const flyoutOptions: OverlayFlyoutOpenOptions = {
@@ -26,7 +26,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   'data-test-subj': 'inspectComponentFlyout',
 };
 
-export const InspectFlyout = ({ codeowners, fileInfo }: Props) => {
+export const InspectFlyout = ({ codeowners, componentData }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const flyoutCss = css`
@@ -39,7 +39,7 @@ export const InspectFlyout = ({ codeowners, fileInfo }: Props) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="l">
           <CodeownersSection codeowners={codeowners} />
-          <LinksSection fileInfo={fileInfo} />
+          <LinksSection componentData={componentData} />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

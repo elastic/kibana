@@ -14,20 +14,26 @@ export interface GetElementFromPointOptions {
   event: PointerEvent;
 }
 
-export interface FileInfo {
+export interface FileData {
   columnNumber: number;
   lineNumber: number;
   fileName: string;
 }
 
+export interface ComponentData extends FileData {
+  icon?: string;
+  relativePath?: string;
+}
+
 export interface ReactFiberNode {
-  _debugSource?: FileInfo;
+  _debugSource?: FileData;
   _debugOwner?: ReactFiberNode | null;
 }
 
 export interface GetComponentDataOptions {
   core: CoreStart;
-  fileInfo: FileInfo;
+  fileData: FileData;
+  icon?: string;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }

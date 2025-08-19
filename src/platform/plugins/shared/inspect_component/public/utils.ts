@@ -8,7 +8,7 @@
  */
 
 import type {
-  FileInfo,
+  FileData,
   GetElementFromPointOptions,
   GetInspectedElementOptions,
   ReactFiberNode,
@@ -16,7 +16,7 @@ import type {
 import { getComponentData } from './get_component_data';
 import { INSPECT_OVERLAY_ID } from '../common';
 
-const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileInfo | null => {
+const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileData | null => {
   if (!fiberNode) return null;
 
   if (fiberNode._debugSource) return fiberNode._debugSource;
@@ -33,9 +33,8 @@ export const getElementFromPoint = ({
     const isSvg = el instanceof SVGElement;
     const isOverlay = el.id === INSPECT_OVERLAY_ID;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
-    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
+    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg; // the !isSvg check is done because there is some weird edge case with SVG elements and elementsFromPoint
 
-    // Skip elements that are not inspectable, overlay, or <path> inside an SVG
     if (isNotInspectable || isOverlay || isPath) continue;
 
     return el;
@@ -62,7 +61,7 @@ export const getInspectedElementData = async ({
   event.preventDefault();
   event.stopPropagation();
 
-  let fileInfo: FileInfo | null = null;
+  let fileData: FileData | null = null;
 
   const target = getElementFromPoint({ event });
 
@@ -76,26 +75,29 @@ export const getInspectedElementData = async ({
 
   if (targetReactFiber) {
     if (targetReactFiber._debugSource) {
-      fileInfo = targetReactFiber._debugSource;
+      fileData = targetReactFiber._debugSource;
     } else {
       const parentDebugSource = findDebugSourceUpwards(targetReactFiber._debugOwner);
 
       if (parentDebugSource) {
-        fileInfo = parentDebugSource;
+        fileData = parentDebugSource;
       } else {
-        fileInfo = null;
+        fileData = null;
       }
     }
   }
 
-  if (!fileInfo) {
+  if (!fileData) {
     setIsInspecting(false);
     return;
   }
 
+  const icon = target.querySelector('svg')?.getAttribute('data-icon-type') ?? undefined;
+
   await getComponentData({
     core,
-    fileInfo,
+    fileData,
+    icon,
     setFlyoutRef,
     setIsInspecting,
   });

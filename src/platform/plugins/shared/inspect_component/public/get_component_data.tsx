@@ -16,17 +16,30 @@ import { INSPECT_COMPONENT_ROUTE } from '../common/constants';
 
 export const getComponentData = async ({
   core,
-  fileInfo,
+  fileData,
+  icon,
   setFlyoutRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
   try {
-    const { codeowners }: InspectComponentResponse = await core.http.post(INSPECT_COMPONENT_ROUTE, {
-      body: JSON.stringify({ path: fileInfo.fileName }),
-    });
+    const { codeowners, relativePath }: InspectComponentResponse = await core.http.post(
+      INSPECT_COMPONENT_ROUTE,
+      {
+        body: JSON.stringify({ path: fileData.fileName }),
+      }
+    );
+
+    const componentData = {
+      ...fileData,
+      icon,
+      relativePath,
+    };
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(<InspectFlyout codeowners={codeowners} fileInfo={fileInfo} />, core.rendering),
+      toMountPoint(
+        <InspectFlyout codeowners={codeowners} componentData={componentData} />,
+        core.rendering
+      ),
       flyoutOptions
     );
 
