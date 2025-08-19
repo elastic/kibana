@@ -8,3 +8,26 @@
  */
 
 export type { DataStreamsSetup, DataStreamsStart } from './src/contracts';
+
+/** Re-export some of these types from here */
+export type {
+  IDataStreamClient,
+  DataStreamDefinition,
+  BaseSearchRuntimeMappings,
+  BooleanMapping,
+  ClientHelpers,
+  DataStreamClient,
+  DataStreamClientArgs,
+  DateMapping,
+  DateNanosMapping,
+  FlattenedMapping,
+  IDataStreamClientIndexRequest,
+  IntegerMapping,
+  KeywordMapping,
+  LongMapping,
+  ShortMapping,
+  Strict,
+  TextMapping,
+  SearchRequestImproved,
+} from '@kbn/data-streams';
+export { mappings } from '@kbn/data-streams';

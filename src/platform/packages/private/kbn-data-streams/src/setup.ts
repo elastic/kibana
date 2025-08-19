@@ -13,9 +13,14 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
 import { retryEs } from './retry_es';
 import { DataStreamClientArgs } from './client';
+import { StrictMappingTypeMapping } from './types';
 
 const defaultIndexSettings: () => api.IndicesIndexSettings = () => ({
   hidden: true,
+});
+
+const defaultMappings: () => StrictMappingTypeMapping = () => ({
+  dynamic: false,
 });
 
 /**
@@ -53,9 +58,10 @@ export async function setup({
     dataStreams.settings,
     defaultIndexSettings()
   );
+  const mappings: api.MappingTypeMapping = defaultsDeep(dataStreams.mappings, defaultMappings());
   const dataStreamSettings = { hidden: true }; // Not configurable for now
   const nextHash = objectHash({
-    mappings: dataStreams.mappings ?? {},
+    mappings,
     settings,
     dataStreamSettings,
   });
@@ -76,7 +82,7 @@ export async function setup({
       index_patterns: [`${dataStreams.name}*`],
       data_stream: dataStreamSettings,
       template: {
-        mappings: dataStreams.mappings,
+        mappings,
         settings,
       },
       _meta: {
@@ -120,7 +126,7 @@ export async function setup({
         throw error;
       }
     }
-  } else if (dataStreams.mappings) {
+  } else {
     logger.debug(
       `Data stream already exists: ${dataStreams.name}, applying mappings to write index`
     );
@@ -139,7 +145,7 @@ export async function setup({
       await retryEs(() =>
         elasticsearchClient.indices.putMapping({
           index: writeIndex.index_name,
-          ...dataStreams.mappings,
+          ...mappings,
         })
       );
     }

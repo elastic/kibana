@@ -2,6 +2,8 @@
 
 A set of (generally) stateless tools and utilities to ease working with Elasticsearch Data streams in TypeScript.
 
+Inspired by `@kbn/storage-adapter`
+
 ## Core themes
 
 * Safe defaults: e.g. when specifying mappings our utilities default to settings that avoid accidental mappings explosions. This is similar to the "principle of least surprise".

@@ -106,7 +106,7 @@ describe('DataStreamClient', () => {
       expect(indexTemplate.index_template._meta).toEqual({
         previousVersions: [],
         userAgent: '@kbn/data-streams',
-        version: 'c8d3eb967ceefa51957228606494ed36c62455d0',
+        version: 'a13f161660c3a282f79f86a1d7429fce206dc249',
       });
       expect(indexTemplate.index_template.data_stream).toEqual({
         allow_custom_routing: false,

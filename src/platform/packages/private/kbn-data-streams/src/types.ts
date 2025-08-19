@@ -60,7 +60,7 @@ export interface MappingsHelpers {
 
 type DataStreamDefinitionMappings<Schema extends {}> = Pick<
   Omit<StrictMappingTypeMapping, 'properties'> & {
-    properties: ObjectToPropertiesDefinition<Schema>;
+    properties?: ObjectToPropertiesDefinition<Schema>;
   },
   'dynamic' | 'properties'
 >;

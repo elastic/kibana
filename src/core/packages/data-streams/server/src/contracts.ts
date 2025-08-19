@@ -22,7 +22,7 @@ export interface DataStreamsSetup {
    *
    * @public
    */
-  registerDataStream: (dataStreams: DataStreamDefinition) => Promise<void>;
+  registerDataStream: (dataStreams: DataStreamDefinition<any, any>) => Promise<void>;
 }
 
 /** @public */
