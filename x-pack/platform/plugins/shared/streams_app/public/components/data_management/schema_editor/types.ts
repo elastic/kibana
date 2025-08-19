@@ -52,6 +52,10 @@ export interface SchemaEditorProps {
   withFieldSimulation?: boolean;
   withTableActions?: boolean;
   withToolbar?: boolean;
+  withStagedFields?: boolean;
+  stagedFields?: SchemaField[];
+  setStagedFields?: (fields: SchemaField[]) => void;
+  commitStagedFields?: () => void;
 }
 
 export const isSchemaFieldTyped = (field: SchemaField): field is MappedSchemaField => {

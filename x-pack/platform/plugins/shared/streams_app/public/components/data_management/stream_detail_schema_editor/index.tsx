@@ -19,11 +19,19 @@ interface SchemaEditorProps {
 export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: SchemaEditorProps) => {
   const { loading } = useStreamDetail();
 
-  const { fields, isLoadingUnmappedFields, refreshFields, unmapField, updateField } =
-    useSchemaFields({
-      definition,
-      refreshDefinition,
-    });
+  const {
+    fields,
+    isLoadingUnmappedFields,
+    refreshFields,
+    unmapField,
+    updateField,
+    commitStagedFields,
+    stagedFields,
+    setStagedFields,
+  } = useSchemaFields({
+    definition,
+    refreshDefinition,
+  });
 
   return (
     <SchemaEditor
@@ -33,6 +41,10 @@ export const StreamDetailSchemaEditor = ({ definition, refreshDefinition }: Sche
       onFieldUnmap={unmapField}
       onFieldUpdate={updateField}
       onRefreshData={refreshFields}
+      stagedFields={stagedFields}
+      setStagedFields={setStagedFields}
+      commitStagedFields={commitStagedFields}
+      withStagedFields
       withControls
       withFieldSimulation
       withTableActions={!isRootStreamDefinition(definition.stream) && definition.privileges.manage}

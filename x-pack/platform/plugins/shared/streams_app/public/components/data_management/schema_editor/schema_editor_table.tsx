@@ -17,18 +17,20 @@ import {
   EuiDataGrid,
   EuiIconTip,
   EuiFlexGroup,
+  EuiComboBox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import type { TableColumnName } from './constants';
-import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT, FIELD_TYPE_MAP } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
 import type { TControls } from './hooks/use_controls';
-import type { SchemaField } from './types';
+import type { SchemaField, SchemaFieldType } from './types';
 import { FieldType } from './field_type';
+import { useSchemaEditorContext } from './schema_editor_context';
 
 export function FieldsTable({
   isLoading,
@@ -38,12 +40,14 @@ export function FieldsTable({
   stream,
   withTableActions,
   withToolbar,
+  withStagedFields,
 }: {
   isLoading: boolean;
   controls: TControls;
   defaultColumns: TableColumnName[];
   fields: SchemaField[];
   stream: Streams.ingest.all.Definition;
+  withStagedFields: boolean;
   withTableActions: boolean;
   withToolbar: boolean;
 }) {
@@ -64,8 +68,8 @@ export function FieldsTable({
   }, [withTableActions, filteredFields]);
 
   const RenderCellValue = useMemo(
-    () => createCellRenderer(filteredFields, stream),
-    [filteredFields, stream]
+    () => createCellRenderer(filteredFields, stream, withStagedFields),
+    [filteredFields, stream, withStagedFields]
   );
 
   return (
@@ -106,7 +110,8 @@ export function FieldsTable({
 const createCellRenderer =
   (
     fields: SchemaField[],
-    stream: Streams.ingest.all.Definition
+    stream: Streams.ingest.all.Definition,
+    withStagedFields: boolean
   ): EuiDataGridCellProps['renderCellValue'] =>
   ({ rowIndex, columnId }) => {
     const field = fields[rowIndex];
@@ -132,7 +137,18 @@ const createCellRenderer =
             </EuiFlexGroup>
           );
         }
-        return EMPTY_CONTENT;
+        if (!withStagedFields) {
+          return '------';
+        }
+        return <FieldTypePicker field={field} />;
+      }
+      if (
+        withStagedFields &&
+        !field.alias_for &&
+        field.type !== 'system' &&
+        field.status !== 'inherited'
+      ) {
+        return <FieldTypePicker field={field} />;
       }
       return <FieldType type={field.type} aliasFor={field.alias_for} />;
     }
@@ -147,6 +163,58 @@ const createCellRenderer =
 
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
   };
+
+const options = [
+  ...Object.entries(FIELD_TYPE_MAP)
+    .filter(([, { readonly }]) => !readonly)
+    .map(([value, { label }]) => ({
+      value,
+      label,
+    })),
+  {
+    value: 'unmapped',
+    label: i18n.translate('xpack.streams.streamDetailSchemaEditorFieldsTableUnmappedType', {
+      defaultMessage: 'Unmapped',
+    }),
+  },
+];
+
+function FieldTypePicker({ field }: { field: SchemaField }) {
+  const { setStagedFields, stagedFields } = useSchemaEditorContext();
+  const stagedField = stagedFields?.find((f) => f.name === field.name);
+  const effectiveType =
+    stagedField?.status === 'unmapped' ? 'unmapped' : stagedField?.type || field.type;
+  return (
+    <EuiComboBox
+      aria-label="Accessible screen reader label"
+      placeholder="Select a single option"
+      singleSelection={{ asPlainText: true }}
+      options={options}
+      selectedOptions={
+        effectiveType
+          ? [
+              {
+                value: effectiveType,
+                label:
+                  effectiveType === 'unmapped' ? 'Unmapped' : FIELD_TYPE_MAP[effectiveType].label,
+              },
+            ]
+          : []
+      }
+      isClearable={false}
+      onChange={(selectedOptions) => {
+        const selectedType = selectedOptions[0]?.value;
+        if (!selectedType) return;
+        setStagedFields?.([
+          ...(stagedFields || []).filter((f) => f.name !== field.name),
+          selectedType === 'unmapped'
+            ? { ...field, status: 'unmapped', type: undefined }
+            : { ...field, status: 'mapped', type: selectedType as SchemaFieldType },
+        ]);
+      }}
+    />
+  );
+}
 
 const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridControlColumn => ({
   id: 'field-actions',

@@ -6,10 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { NamedFieldDefinitionConfig, Streams } from '@kbn/streams-schema';
+import type {
+  FieldDefinitionConfig,
+  NamedFieldDefinitionConfig,
+  Streams,
+} from '@kbn/streams-schema';
 import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useState } from 'react';
 import { useAbortController } from '@kbn/react-hooks';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -94,6 +98,79 @@ export const useSchemaFields = ({
     refreshDefinition();
     refreshUnmappedFields();
   }, [refreshDefinition, refreshUnmappedFields]);
+
+  const [stagedFields, setStagedFields] = useState<SchemaField[]>([]);
+
+  const commitStagedFields = useCallback(async () => {
+    if (stagedFields.length === 0) {
+      return;
+    }
+    try {
+      const nextFields = stagedFields.reduce((acc, field) => {
+        if (!isSchemaFieldTyped(field)) {
+          // just skip it
+          return acc;
+        }
+        acc[field.name] = convertToFieldDefinitionConfig(field);
+        return acc;
+      }, {} as Record<string, FieldDefinitionConfig>);
+
+      const removedFields = stagedFields
+        .filter((field) => field.status === 'unmapped')
+        .map((field) => field.name);
+
+      const fieldsToUpdate = {
+        ...definition.stream.ingest.wired.fields,
+        ...nextFields,
+      };
+      if (removedFields.length > 0) {
+        removedFields.forEach((fieldName) => {
+          delete fieldsToUpdate[fieldName];
+        });
+      }
+
+      await streamsRepositoryClient.fetch(`PUT /api/streams/{name}/_ingest 2023-10-31`, {
+        signal: abortController.signal,
+        params: {
+          path: {
+            name: definition.stream.name,
+          },
+          body: {
+            ingest: {
+              ...definition.stream.ingest,
+              wired: {
+                ...definition.stream.ingest.wired,
+                fields: fieldsToUpdate,
+              },
+            },
+          },
+        },
+      });
+      toasts.addSuccess(
+        i18n.translate('xpack.streams.streamDetailSchemaEditorCommitSuccessToast', {
+          defaultMessage: 'Fields were successfully committed',
+        })
+      );
+      setStagedFields([]);
+      refreshFields();
+    } catch (error) {
+      toasts.addError(new Error(error.body.message), {
+        title: i18n.translate('xpack.streams.streamDetailSchemaEditorCommitErrorToast', {
+          defaultMessage: 'Something went wrong committing the fields',
+        }),
+        toastMessage: getFormattedError(error).message,
+        toastLifeTimeMs: 5000,
+      });
+    }
+  }, [
+    abortController.signal,
+    definition.stream.ingest,
+    definition.stream.name,
+    refreshFields,
+    stagedFields,
+    streamsRepositoryClient,
+    toasts,
+  ]);
 
   const updateField = useCallback(
     async (field: SchemaField) => {
@@ -207,6 +284,9 @@ export const useSchemaFields = ({
     refreshFields,
     unmapField,
     updateField,
+    commitStagedFields,
+    setStagedFields,
+    stagedFields,
   };
 };
 
