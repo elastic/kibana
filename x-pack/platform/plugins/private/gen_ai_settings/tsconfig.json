@@ -21,7 +21,8 @@
     "@kbn/server-route-repository-utils",
     "@kbn/server-route-repository-client",
     "@kbn/inference-common",
-    "@kbn/logging"
+    "@kbn/logging",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }
