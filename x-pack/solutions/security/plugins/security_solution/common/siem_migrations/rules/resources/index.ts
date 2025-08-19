@@ -8,14 +8,9 @@
 import { ResourceIdentifier } from '../../common/resources';
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { OriginalRule } from '../../model/rule_migration.gen';
-import type { SiemMigrationVendor } from '../../types';
 
 export class RuleResourceIdentifier extends ResourceIdentifier<OriginalRule> {
-  protected getVendor(): SiemMigrationVendor {
-    return this.item.vendor;
-  }
-
-  public fromOriginal(rule: OriginalRule = this.item): SiemMigrationResourceBase[] {
+  public fromOriginal(rule: OriginalRule): SiemMigrationResourceBase[] {
     const originalRule = rule;
     return this.identifier(originalRule.query);
   }

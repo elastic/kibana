@@ -18,12 +18,10 @@ const identifiers: Record<SiemMigrationVendor, VendorResourceIdentifier> = {
 export abstract class ResourceIdentifier<I> {
   protected identifier: VendorResourceIdentifier;
 
-  constructor(protected readonly item: I) {
+  constructor(protected readonly vendor: SiemMigrationVendor) {
     // The constructor may need query_language as an argument for other vendors
-    this.identifier = identifiers[this.getVendor()];
+    this.identifier = identifiers[this.vendor];
   }
-
-  protected abstract getVendor(): SiemMigrationVendor;
 
   public abstract fromOriginal(
     item?: I

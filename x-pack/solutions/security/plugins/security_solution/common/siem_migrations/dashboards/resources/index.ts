@@ -10,16 +10,9 @@ import { ResourceIdentifier } from '../../common/resources';
 import type { SiemMigrationResourceBase } from '../../model/common.gen';
 import type { OriginalDashboard } from '../../model/dashboard_migration.gen';
 import { SplunkXmlDashboardParser } from '../../parsers/splunk/dashboard_xml';
-import type { SiemMigrationVendor } from '../../types';
 
 export class DashboardResourceIdentifier extends ResourceIdentifier<OriginalDashboard> {
-  protected getVendor(): SiemMigrationVendor {
-    return this.item.vendor as SiemMigrationVendor;
-  }
-
-  public async fromOriginal(
-    item: OriginalDashboard = this.item
-  ): Promise<SiemMigrationResourceBase[]> {
+  public async fromOriginal(item: OriginalDashboard): Promise<SiemMigrationResourceBase[]> {
     const originalDashboardXMLString = item?.data;
 
     if (!originalDashboardXMLString) {

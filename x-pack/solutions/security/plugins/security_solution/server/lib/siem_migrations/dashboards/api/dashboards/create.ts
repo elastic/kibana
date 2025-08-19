@@ -90,7 +90,7 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           );
 
           const resourceIdentifier = new DashboardResourceIdentifier(
-            originalDashboards[0].original_dashboard
+            originalDashboards[0].original_dashboard.vendor
           );
           const extractedResources = await resourceIdentifier.fromOriginals(
             originalDashboards.map((i) => i.original_dashboard)

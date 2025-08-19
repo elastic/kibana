@@ -61,7 +61,7 @@ export class RuleResourceRetriever {
       throw new Error('initialize must be called before calling getResources');
     }
 
-    const resourceIdentifier = new RuleResourceIdentifier(originalRule);
+    const resourceIdentifier = new RuleResourceIdentifier(originalRule.vendor);
     const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal(originalRule);
 
     const macrosFound = new Map<string, RuleMigrationDefinedResource>();

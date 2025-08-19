@@ -26,6 +26,12 @@ import {
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
+ * The original dashboard vendor identifier.
+ */
+export type OriginalDashboardVendor = z.infer<typeof OriginalDashboardVendor>;
+export const OriginalDashboardVendor = z.literal('splunk');
+
+/**
  * The dashboard migration object ( without Id ) with its settings.
  */
 export type DashboardMigrationData = z.infer<typeof DashboardMigrationData>;
@@ -71,9 +77,9 @@ export const OriginalDashboard = z.object({
    */
   id: z.string(),
   /**
-   * The vendor of the dashboard (e.g., 'splunk')
+   * The original dashboard vendor identifier.
    */
-  vendor: z.string(),
+  vendor: OriginalDashboardVendor,
   /**
    * The title of the dashboard
    */
