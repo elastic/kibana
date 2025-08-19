@@ -53,13 +53,7 @@ export const hasNodeDocumentsData = (
  */
 export const getNodeDocumentMode = (
   node: NodeViewModel
-):
-  | 'single-alert'
-  | 'single-event'
-  | 'entity'
-  | 'grouped-events'
-  | 'grouped-entities'
-  | 'na' => {
+): 'single-alert' | 'single-event' | 'entity' | 'grouped-events' | 'grouped-entities' | 'na' => {
   if (!hasNodeDocumentsData(node)) {
     return 'na';
   }
