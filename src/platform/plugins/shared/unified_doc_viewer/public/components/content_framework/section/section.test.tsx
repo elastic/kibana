@@ -20,15 +20,18 @@ const defaultProps: ContentFrameworkSectionProps = {
       icon: 'expand',
       onClick: jest.fn(),
       ariaLabel: 'Expand section',
+      dataTestSubj: 'unifiedDocViewerSectionActionButton-expand',
     },
     {
       icon: 'fullScreen',
       onClick: jest.fn(),
       ariaLabel: 'Full screen',
+      dataTestSubj: 'unifiedDocViewerSectionActionButton-fullScreen',
       label: 'Full Screen',
     },
   ],
   children: <div>Section children</div>,
+  id: 'testSection',
 };
 
 describe('ContentFrameworkSection', () => {
