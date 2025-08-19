@@ -142,8 +142,6 @@
       "@kbn/canvas-plugin/*": ["x-pack/platform/plugins/private/canvas/*"],
       "@kbn/capture-oas-snapshot-cli": ["packages/kbn-capture-oas-snapshot-cli"],
       "@kbn/capture-oas-snapshot-cli/*": ["packages/kbn-capture-oas-snapshot-cli/*"],
-      "@kbn/case-suggestion-example-plugin": ["x-pack/examples/case_suggestion_example"],
-      "@kbn/case-suggestion-example-plugin/*": ["x-pack/examples/case_suggestion_example/*"],
       "@kbn/cases-api-integration-test-plugin": ["x-pack/platform/test/cases_api_integration/common/plugins/cases"],
       "@kbn/cases-api-integration-test-plugin/*": ["x-pack/platform/test/cases_api_integration/common/plugins/cases/*"],
       "@kbn/cases-components": ["src/platform/packages/shared/kbn-cases-components"],
