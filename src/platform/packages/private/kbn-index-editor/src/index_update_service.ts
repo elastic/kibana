@@ -40,6 +40,8 @@ import {
 import { v4 as uuidv4 } from 'uuid';
 import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import type { SortOrder } from '@kbn/unified-data-table';
+import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive, isPlaceholderColumn } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
@@ -131,6 +133,13 @@ export class IndexUpdateService {
     this._qstr$.next(queryString);
   }
 
+  /** User sort */
+  private readonly _sortOrder$ = new BehaviorSubject<SortOrder[]>([]);
+  public readonly sortOrder$ = this._sortOrder$.asObservable();
+  public setSort(update: SortOrder[]) {
+    this._sortOrder$.next(update);
+  }
+
   // Indicated if the index exists (has been created) in Elasticsearch.
   private _indexCrated$ = new BehaviorSubject<boolean>(false);
   public readonly indexCreated$: Observable<boolean> = this._indexCrated$.asObservable();
@@ -192,29 +201,37 @@ export class IndexUpdateService {
     this._indexCrated$,
     this._indexName$,
     this._qstr$,
+    this._sortOrder$,
   ]).pipe(
     skipWhile(([indexCreated, indexName]) => !indexCreated || !indexName),
-    map(([indexCreated, indexName, qstr]) => {
-      return this._buildESQLQuery(indexName, qstr, true);
+    map(([indexCreated, indexName, qstr, sortOrder]) => {
+      return this._buildESQLQuery({ indexName, qstr, includeMetadata: true, sortOrder });
     })
   );
 
   public readonly esqlDiscoverQuery$: Observable<string | undefined> = combineLatest([
     this._indexName$,
     this._qstr$,
+    this._sortOrder$,
   ]).pipe(
-    map(([indexName, qstr]) => {
+    map(([indexName, qstr, sortOrder]) => {
       if (indexName) {
-        return this._buildESQLQuery(indexName, qstr, false);
+        return this._buildESQLQuery({ indexName, qstr, includeMetadata: false, sortOrder });
       }
     })
   );
 
-  private _buildESQLQuery(
-    indexName: string | null,
-    qstr: string | null,
-    includeMetadata: boolean
-  ): string {
+  private _buildESQLQuery({
+    indexName,
+    qstr,
+    includeMetadata,
+    sortOrder,
+  }: {
+    indexName: string | null;
+    qstr: string | null;
+    includeMetadata: boolean;
+    sortOrder?: SortOrder[];
+  }): string {
     // FROM
     const fromCmd = Builder.command({
       name: 'from',
@@ -247,11 +264,32 @@ export class IndexUpdateService {
       name: 'limit',
       args: [Builder.expression.literal.integer(DOCS_PER_FETCH)],
     });
+
+    // SORT
+    let sortCmd;
+    if (sortOrder && sortOrder.length > 0) {
+      sortCmd = Builder.command({
+        name: 'sort',
+        args: sortOrder.map(([field, direction]) =>
+          Builder.expression.order(
+            Builder.expression.column({
+              args: [Builder.identifier({ name: field })],
+            }),
+            {
+              order: direction as ESQLOrderExpression['order'],
+              nulls: '',
+            }
+          )
+        ),
+      });
+    }
+
     // Combine the commands into a query node
     const queryExpression = Builder.expression.query([
       fromCmd,
       ...(qstr ? [whereCmd] : []),
       limitCmd,
+      ...(sortCmd ? [sortCmd] : []),
     ]);
     const queryText: string = BasicPrettyPrinter.print(queryExpression);
 

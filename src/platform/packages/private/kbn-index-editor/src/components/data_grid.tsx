@@ -47,8 +47,6 @@ const DEFAULT_ROWS_PER_PAGE = 10;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
-  const [sortOrder, setSortOrder] = useState<SortOrder[]>([]);
-
   const { rows } = props;
 
   const {
@@ -65,6 +63,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   } = useKibana<KibanaContextExtra>();
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
+  const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
 
   const isIndexCreated = useObservable(
     indexUpdateService.indexCreated$,
@@ -243,7 +242,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           dataView={props.dataView}
           onSetColumns={onSetColumns}
           onUpdateRowsPerPage={setRowsPerPage}
-          onSort={(newSort) => setSortOrder(newSort as SortOrder[])}
+          onSort={(newSort) => indexUpdateService.setSort(newSort as SortOrder[])}
           sort={sortOrder}
           ariaLabelledBy="lookupIndexDataGrid"
           maxDocFieldsDisplayed={100}
