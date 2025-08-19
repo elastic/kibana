@@ -7,20 +7,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiButtonGroup,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiFieldNumber,
   EuiFlexItem,
   EuiFlexGroup,
   EuiComboBox,
 } from '@elastic/eui';
-import { Position, VerticalAlignment, HorizontalAlignment, LegendValue } from '@elastic/charts';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
+import { Position, LegendValue } from '@elastic/charts';
+import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-import { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import type { XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
 import { ToolbarDivider } from '../toolbar_divider';
 import { ToolbarPopover, type ToolbarPopoverProps } from '../toolbar_popover';
 import { LegendLocationSettings } from './location/legend_location_settings';

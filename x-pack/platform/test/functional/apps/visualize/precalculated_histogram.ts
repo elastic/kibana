@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -24,12 +24,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('pre_calculated_histogram', function () {
     before(async function () {
       log.debug('Starting pre_calculated_histogram before method');
-      await esArchiver.load('x-pack/test/functional/es_archives/pre_calculated_histogram');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/pre_calculated_histogram');
       await kibanaServer.uiSettings.replace({ defaultIndex: 'test-histogram' });
     });
 
     after(async function () {
-      await esArchiver.unload('x-pack/test/functional/es_archives/pre_calculated_histogram');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/pre_calculated_histogram');
       await kibanaServer.uiSettings.unset('defaultIndex');
     });
 

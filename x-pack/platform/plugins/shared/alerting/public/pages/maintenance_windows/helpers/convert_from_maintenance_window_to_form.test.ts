@@ -36,7 +36,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
       endDate: endDate.toISOString(),
       timezone: ['UTC'],
       recurring: false,
-      solutionId: undefined,
     });
   });
 
@@ -65,7 +64,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.DAILY,
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -98,7 +96,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.DAILY,
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -129,7 +126,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.DAILY,
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -158,7 +154,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         byweekday: { 1: false, 2: false, 3: true, 4: false, 5: false, 6: false, 7: false },
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -187,7 +182,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         bymonth: 'weekday',
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -216,7 +210,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: Frequency.YEARLY,
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -244,7 +237,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -274,7 +266,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -304,7 +295,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 1,
       },
-      solutionId: undefined,
     });
   });
 
@@ -334,104 +324,6 @@ describe('convertFromMaintenanceWindowToForm', () => {
         frequency: 'CUSTOM',
         interval: 3,
       },
-      solutionId: undefined,
-    });
-  });
-
-  test('should convert categoryIds into solutionId when scopedQuery is on', () => {
-    const maintenanceWindow = convertFromMaintenanceWindowToForm({
-      title,
-      duration,
-      rRule: {
-        dtstart: startDate.toISOString(),
-        tzid: 'UTC',
-        freq: Frequency.YEARLY,
-        interval: 3,
-        bymonth: [3],
-        bymonthday: [22],
-      },
-      categoryIds: ['observability'],
-      scopedQuery: null,
-    } as MaintenanceWindow);
-
-    expect(maintenanceWindow).toEqual({
-      title,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      timezone: ['UTC'],
-      recurring: true,
-      recurringSchedule: {
-        customFrequency: Frequency.YEARLY,
-        ends: 'never',
-        frequency: 'CUSTOM',
-        interval: 3,
-      },
-      solutionId: undefined,
-      scopedQuery: null,
-    });
-  });
-
-  test('should convert categoryIds into solutionId when scopedQuery is off', () => {
-    const maintenanceWindow = convertFromMaintenanceWindowToForm({
-      title,
-      duration,
-      rRule: {
-        dtstart: startDate.toISOString(),
-        tzid: 'UTC',
-        freq: Frequency.YEARLY,
-        interval: 3,
-        bymonth: [3],
-        bymonthday: [22],
-      },
-      categoryIds: ['observability'],
-      scopedQuery: { kql: '' },
-    } as MaintenanceWindow);
-
-    expect(maintenanceWindow).toEqual({
-      title,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      timezone: ['UTC'],
-      recurring: true,
-      recurringSchedule: {
-        customFrequency: Frequency.YEARLY,
-        ends: 'never',
-        frequency: 'CUSTOM',
-        interval: 3,
-      },
-      solutionId: 'observability',
-      scopedQuery: { kql: '' },
-    });
-  });
-
-  test('should convert old multivalued categoryIds into solutionId equal undefined', () => {
-    const maintenanceWindow = convertFromMaintenanceWindowToForm({
-      title,
-      duration,
-      rRule: {
-        dtstart: startDate.toISOString(),
-        tzid: 'UTC',
-        freq: Frequency.YEARLY,
-        interval: 3,
-        bymonth: [3],
-        bymonthday: [22],
-      },
-      categoryIds: ['observability', 'security'],
-    } as MaintenanceWindow);
-
-    expect(maintenanceWindow).toEqual({
-      title,
-      startDate: startDate.toISOString(),
-      endDate: endDate.toISOString(),
-      timezone: ['UTC'],
-      recurring: true,
-      recurringSchedule: {
-        customFrequency: Frequency.YEARLY,
-        ends: 'never',
-        frequency: 'CUSTOM',
-        interval: 3,
-      },
-      solutionId: undefined,
     });
   });
 });

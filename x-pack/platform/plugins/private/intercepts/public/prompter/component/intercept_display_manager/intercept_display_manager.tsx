@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import React, { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -26,7 +26,7 @@ import {
 } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { EuiTourStepStatus } from '@elastic/eui/src/components/tour/tour_step_indicator';
-import { InterceptDialogApi } from '../../service/intercept_dialog_api';
+import type { InterceptDialogApi } from '../../service/intercept_dialog_api';
 
 export type Intercept = Rx.ObservedValueOf<ReturnType<InterceptDialogApi['get$']>>[number];
 
@@ -254,7 +254,7 @@ export function InterceptDisplayManager({
                     <EuiFlexItem>
                       <EuiButtonEmpty
                         size="s"
-                        data-test-subj="productInterceptDismiss"
+                        data-test-subj="productInterceptDismissButton"
                         onClick={dismissProductIntercept}
                         color="text"
                       >

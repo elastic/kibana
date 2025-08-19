@@ -11,7 +11,7 @@ import type {
   TransformPivotConfig,
 } from '@kbn/transform-plugin/common/types/transform';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { getLatestTransformConfig, getPivotTransformConfig } from '../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -26,7 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
     };
 
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       await transform.api.createAndRunTransform(

@@ -10,7 +10,7 @@
 import execa from 'execa';
 import * as Rx from 'rxjs';
 import { tap } from 'rxjs';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 
 /**

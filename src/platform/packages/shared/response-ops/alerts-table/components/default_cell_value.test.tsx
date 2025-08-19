@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import {
   ALERT_DURATION,
   ALERT_RULE_CONSUMER,
@@ -19,7 +20,7 @@ import {
 import { screen, render } from '@testing-library/react';
 import { DefaultCellValue } from './default_cell_value';
 import { createPartialObjectMock } from '../utils/test';
-import { CellComponentProps } from '../types';
+import type { CellComponentProps } from '../types';
 import { mockRenderContext } from '../mocks/context.mock';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 

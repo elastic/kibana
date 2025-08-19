@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
-import { DetailedHTMLProps, HTMLAttributes } from 'react';
+import type { Observable } from 'rxjs';
+import type { DetailedHTMLProps, HTMLAttributes } from 'react';
 
 export type NavigateToUrl = (url: string) => Promise<void> | void;
 

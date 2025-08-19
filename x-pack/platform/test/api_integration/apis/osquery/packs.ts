@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const getDefaultPack = ({ policyIds = [] }: { policyIds?: string[] }) => ({
   name: 'TestPack',
@@ -53,13 +53,13 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').load(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
     });
     after(async () => {
       await getService('kibanaServer').savedObjects.cleanStandardList();
       await getService('esArchiver').unload(
-        'x-pack/test/functional/es_archives/fleet/empty_fleet_server'
+        'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
       );
       await supertest
         .post(`/api/fleet/agent_policies/delete`)

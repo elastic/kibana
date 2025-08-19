@@ -13,7 +13,7 @@ import { TRANSFORM_STATE, type TransformState } from '@kbn/transform-plugin/comm
 import { getCommonRequestHeader } from '../../services/ml/common_api';
 import { USER } from '../../services/transform/security_common';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 import { generateTransformConfig } from './common';
 
@@ -78,7 +78,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('/internal/transform/transforms/_stats', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
       await createTransform('transform-test-stats-1');
       await createTransform('transform-test-stats-2');

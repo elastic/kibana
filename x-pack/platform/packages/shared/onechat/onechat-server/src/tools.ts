@@ -11,6 +11,7 @@ import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type { ModelProvider } from './model_provider';
 import type { ScopedRunner, RunToolReturn, ScopedRunnerRunToolsParams } from './runner';
 import type { ToolEventEmitter } from './events';
@@ -20,10 +21,8 @@ export type BuiltinToolId = `.${string}`;
 /**
  * Onechat tool, as registered by built-in tool providers.
  */
-export interface BuiltinToolDefinition<
-  RunInput extends ZodObject<any> = ZodObject<any>,
-  RunOutput = unknown
-> extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
+export interface BuiltinToolDefinition<RunInput extends ZodObject<any> = ZodObject<any>>
+  extends Omit<ToolDefinition, 'id' | 'type' | 'configuration'> {
   /**
    * Built-in tool ID following the {@link BuiltinToolId} pattern
    */
@@ -35,7 +34,7 @@ export interface BuiltinToolDefinition<
   /**
    * Handler to call to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<RunInput>, RunOutput>;
+  handler: ToolHandlerFn<z.infer<RunInput>>;
 }
 
 /**
@@ -43,8 +42,7 @@ export interface BuiltinToolDefinition<
  */
 export interface ExecutableTool<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>,
-  TResult = unknown
+  TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TConfig> {
   /**
    * Tool's input schema, defined as a zod schema.
@@ -53,7 +51,7 @@ export interface ExecutableTool<
   /**
    * Run handler that can be used to execute the tool.
    */
-  execute: ExecutableToolHandlerFn<z.infer<TSchema>, TResult>;
+  execute: ExecutableToolHandlerFn<z.infer<TSchema>>;
 }
 
 /**
@@ -67,24 +65,24 @@ export type ExecutableToolHandlerParams<TParams = Record<string, unknown>> = Omi
 /**
  * Execution handler for {@link ExecutableTool}
  */
-export type ExecutableToolHandlerFn<TParams = Record<string, unknown>, TResult = unknown> = (
+export type ExecutableToolHandlerFn<TParams = Record<string, unknown>> = (
   params: ExecutableToolHandlerParams<TParams>
-) => Promise<RunToolReturn<TResult>>;
+) => Promise<RunToolReturn>;
 
 /**
  * Return value for {@link ToolHandlerFn} / {@link BuiltinToolDefinition}
  */
-export interface ToolHandlerReturn<T = unknown> {
-  result: T;
+export interface ToolHandlerReturn {
+  results: ToolResult[];
 }
 
 /**
  * Tool handler function for {@link BuiltinToolDefinition} handlers.
  */
-export type ToolHandlerFn<
-  TParams extends Record<string, unknown> = Record<string, unknown>,
-  RunOutput = unknown
-> = (args: TParams, context: ToolHandlerContext) => MaybePromise<ToolHandlerReturn<RunOutput>>;
+export type ToolHandlerFn<TParams extends Record<string, unknown> = Record<string, unknown>> = (
+  args: TParams,
+  context: ToolHandlerContext
+) => MaybePromise<ToolHandlerReturn>;
 
 /**
  * Scoped context which can be used during tool execution to access

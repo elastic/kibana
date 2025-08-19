@@ -10,7 +10,7 @@ import {
   PROCESS_EVENTS_ROUTE,
   CURRENT_API_VERSION,
 } from '@kbn/session-view-plugin/common/constants';
-import { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
+import type { User } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/types';
 import {
   superUser,
   globalRead,
@@ -18,7 +18,7 @@ import {
   obsOnlySpacesAll,
   noKibanaPrivileges,
 } from '@kbn/test-suites-xpack-platform/rule_registry/common/lib/authentication/users';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_PAGE_SIZE = 400;
 const ALERTS_IN_FIRST_PAGE = 8;
@@ -54,15 +54,27 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
   describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with a basic license`, () => {
     describe(`using typical process event data`, () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
-        await esArchiver.load('x-pack/test/functional/es_archives/session_view/alerts');
-        await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events'
+        );
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/alerts'
+        );
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/io_events'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/session_view/process_events');
-        await esArchiver.unload('x-pack/test/functional/es_archives/session_view/alerts');
-        await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events'
+        );
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/alerts'
+        );
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/io_events'
+        );
       });
 
       it(`${PROCESS_EVENTS_ROUTE} fails when an invalid api version is specified`, async () => {
@@ -207,13 +219,13 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
     describe(`Session view - ${PROCESS_EVENTS_ROUTE} - with merged fork/exec/end events`, () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/session_view/process_events_merged'
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events_merged'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/session_view/process_events_merged'
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events_merged'
         );
       });
 
@@ -235,19 +247,19 @@ export default function processEventsTests({ getService }: FtrProviderContext) {
 
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat'
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events_auditbeat'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events_auditbeat_alerts'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat'
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events_auditbeat'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/session_view/process_events_auditbeat_alerts'
+          'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events_auditbeat_alerts'
         );
       });
 

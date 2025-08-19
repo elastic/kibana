@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import {
   createToolNotFoundError,
   createBadRequestError,
@@ -40,9 +40,9 @@ export interface ToolRegistry {
   create(tool: ToolCreateParams): Promise<InternalToolDefinition>;
   update(toolId: string, update: ToolUpdateParams): Promise<InternalToolDefinition>;
   delete(toolId: string): Promise<boolean>;
-  execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
+  execute<TParams extends object = Record<string, unknown>>(
     params: ScopedRunnerRunToolsParams<TParams>
-  ): Promise<RunToolReturn<TResult>>;
+  ): Promise<RunToolReturn>;
 }
 
 interface CreateToolClientParams {
@@ -68,11 +68,11 @@ class ToolClientImpl implements ToolRegistry {
 
   async execute<TParams extends object = Record<string, unknown>, TResult = unknown>(
     params: ScopedRunnerRunToolsParams<TParams>
-  ): Promise<RunToolReturn<TResult>> {
+  ): Promise<RunToolReturn> {
     const { toolId, ...otherParams } = params;
     const tool = await this.get(toolId);
     const executable = toExecutableTool({ tool, runner: this.getRunner(), request: this.request });
-    return (await executable.execute(otherParams)) as RunToolReturn<TResult>;
+    return (await executable.execute(otherParams)) as RunToolReturn;
   }
 
   async has(toolId: string) {

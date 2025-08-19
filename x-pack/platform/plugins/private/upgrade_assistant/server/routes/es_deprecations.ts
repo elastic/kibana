@@ -5,19 +5,18 @@
  * 2.0.
  */
 
+import { versionCheckHandlerWrapper } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
-import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';
-import { reindexActionsFactory } from '../lib/reindexing/reindex_actions';
-import { reindexServiceFactory } from '../lib/reindexing';
 
 export function registerESDeprecationRoutes({
   config: { featureSet, dataSourceExclusions },
   router,
   lib: { handleEsError },
-  licensing,
   log,
+  current,
+  cleanupReindexOperations,
 }: RouteDependencies) {
   router.get(
     {
@@ -30,24 +29,21 @@ export function registerESDeprecationRoutes({
       },
       validate: false,
     },
-    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+    versionCheckHandlerWrapper(current.major)(async ({ core }, request, response) => {
       try {
         const {
-          savedObjects: { client: savedObjectsClient },
           elasticsearch: { client },
         } = await core;
         const status = await getESUpgradeStatus(client.asCurrentUser, {
           featureSet,
           dataSourceExclusions,
         });
-        const asCurrentUser = client.asCurrentUser;
-        const reindexActions = reindexActionsFactory(savedObjectsClient, asCurrentUser, log);
-        const reindexService = reindexServiceFactory(asCurrentUser, reindexActions, log, licensing);
+
         const indexNames = [...status.migrationsDeprecations, ...status.enrichedHealthIndicators]
           .filter(({ index }) => typeof index !== 'undefined')
           .map(({ index }) => index as string);
 
-        await reindexService.cleanupReindexOperations(indexNames);
+        await cleanupReindexOperations(indexNames);
 
         return response.ok({
           body: status,

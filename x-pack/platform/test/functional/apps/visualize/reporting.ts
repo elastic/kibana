@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import path from 'path';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const REPORTS_FOLDER = path.resolve(__dirname, 'reports');
 
@@ -43,11 +43,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('Print PDF button', () => {
       const ecommerceSOPath =
-        'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce.json';
+        'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce.json';
 
       before('initialize tests', async () => {
         log.debug('ReportingPage:initTests');
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
         await kibanaServer.importExport.load(ecommerceSOPath);
         await kibanaServer.uiSettings.replace({
           'timepicker:timeDefaults':
@@ -56,7 +56,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
       after('clean up archives', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce');
         await kibanaServer.importExport.unload(ecommerceSOPath);
         await es.deleteByQuery({
           index: '.reporting-*',
@@ -101,9 +101,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           defaultIndex: '5193f870-d861-11e9-a311-0fa548c5f953',
         });
 
-        await esArchiver.load('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce_76.json'
         );
 
         log.debug('navigate to visualize');
@@ -111,9 +111,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/reporting/ecommerce_76');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/reporting/ecommerce_76');
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_76.json'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce_76.json'
         );
         await kibanaServer.uiSettings.unset('defaultIndex');
       });

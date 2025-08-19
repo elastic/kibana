@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import type { Condition } from '@kbn/streamlang';
+import { conditionSchema } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
-import { Condition, conditionSchema } from '../../../conditions';
 
 export interface RoutingDefinition {
   destination: string;
-  if: Condition;
+  where: Condition;
 }
 
 export const routingDefinitionSchema: z.Schema<RoutingDefinition> = z.object({
   destination: NonEmptyString,
-  if: conditionSchema,
+  where: conditionSchema,
 });
 
 export const routingDefinitionListSchema: z.Schema<RoutingDefinition[]> =

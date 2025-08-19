@@ -23,7 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../../../../shared/doc_links';
 
-import { TextExpansionCallOutState, TextExpansionDismissButton } from './text_expansion_callout';
+import type { TextExpansionCallOutState } from './text_expansion_callout';
+import { TextExpansionDismissButton } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export const DeployModel = ({

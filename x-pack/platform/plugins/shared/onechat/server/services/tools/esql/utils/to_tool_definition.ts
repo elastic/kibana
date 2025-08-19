@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { EsqlToolConfig, ToolType } from '@kbn/onechat-common';
+import type { EsqlToolConfig } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { z } from '@kbn/zod';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { FieldValue } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolPersistedDefinition } from '../../client';
-import { InternalToolDefinition } from '../../tool_provider';
+import type { InternalToolDefinition } from '../../tool_provider';
 
-export function toToolDefinition<
-  TSchema extends z.ZodObject<any> = z.ZodObject<any>,
-  TResult = unknown
->(
+export function toToolDefinition<TSchema extends z.ZodObject<any> = z.ZodObject<any>>(
   esqlTool: ToolPersistedDefinition<EsqlToolConfig>
-): InternalToolDefinition<EsqlToolConfig, TSchema, TResult> {
+): InternalToolDefinition<EsqlToolConfig, TSchema> {
   const { id, description, tags, configuration } = esqlTool;
   return {
     id,
@@ -28,17 +28,22 @@ export function toToolDefinition<
       const client = esClient.asCurrentUser;
       const paramArray = Object.entries(params).map(([key, value]) => ({ [key]: value }));
 
-      const response = await client.transport.request({
-        method: 'POST',
-        path: '/_query',
-        body: {
-          query: configuration.query,
-          params: paramArray,
-        },
+      const response = await client.esql.query({
+        query: configuration.query,
+        // TODO: wait until client is fixed: https://github.com/elastic/elasticsearch-specification/issues/5083
+        params: paramArray as unknown as FieldValue[],
       });
 
       return {
-        result: response as TResult,
+        results: [
+          {
+            type: ToolResultType.tabularData,
+            data: {
+              columns: response.columns,
+              values: response.values,
+            },
+          },
+        ],
       };
     },
   };
