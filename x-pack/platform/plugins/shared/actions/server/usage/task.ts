@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { Logger, CoreSetup } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
   IntervalSchedule,
 } from '@kbn/task-manager-plugin/server';
-import type { GetStartServices, InMemoryConnector } from '../types';
+import type { ActionsPluginSetupDeps, InMemoryConnector } from '../types';
 import { getTotalCount, getInUseTotalCount, getExecutionsPerDayCount } from './actions_telemetry';
 import { stateSchemaByVersion, emptyState, type LatestTaskStateSchema } from './task_state';
 
@@ -24,17 +24,11 @@ export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 export function initializeActionsTelemetry(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  getStartServices: GetStartServices,
+  core: ActionsPluginSetupDeps['core'],
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
-  registerActionsTelemetryTask(
-    logger,
-    taskManager,
-    getStartServices,
-    getInMemoryConnectors,
-    eventLogIndex
-  );
+  registerActionsTelemetryTask(logger, taskManager, core, getInMemoryConnectors, eventLogIndex);
 }
 
 export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManagerStartContract) {
@@ -46,7 +40,7 @@ export function scheduleActionsTelemetry(logger: Logger, taskManager: TaskManage
 function registerActionsTelemetryTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  getStartServices: GetStartServices,
+  core: ActionsPluginSetupDeps['core'],
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
@@ -55,12 +49,7 @@ function registerActionsTelemetryTask(
       title: 'Actions usage fetch task',
       timeout: '5m',
       stateSchemaByVersion,
-      createTaskRunner: telemetryTaskRunner(
-        logger,
-        getStartServices,
-        getInMemoryConnectors,
-        eventLogIndex
-      ),
+      createTaskRunner: telemetryTaskRunner(logger, core, getInMemoryConnectors, eventLogIndex),
     },
   });
 }
@@ -81,7 +70,7 @@ async function scheduleTasks(logger: Logger, taskManager: TaskManagerStartContra
 
 export function telemetryTaskRunner(
   logger: Logger,
-  getStartServices: GetStartServices,
+  core: ActionsPluginSetupDeps['core'],
   getInMemoryConnectors: () => InMemoryConnector[],
   eventLogIndex: string
 ) {
@@ -90,7 +79,7 @@ export function telemetryTaskRunner(
   return ({ taskInstance }: RunContext) => {
     const state = taskInstance.state as LatestTaskStateSchema;
     const getEsClient = () =>
-      getStartServices().then(
+      core.getStartServices().then(
         ([
           {
             elasticsearch: { client },
@@ -98,7 +87,9 @@ export function telemetryTaskRunner(
         ]) => client.asInternalUser
       );
     const getActionIndex = () =>
-      getStartServices().then(([coreStart]) => coreStart.savedObjects.getIndexForType('action'));
+      core
+        .getStartServices()
+        .then(([coreStart]) => coreStart.savedObjects.getIndexForType('action'));
     return {
       async run() {
         const actionIndex = await getActionIndex();

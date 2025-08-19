@@ -12,14 +12,14 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
 import type { ClusterActionsMetric } from './types';
 import { EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
-import { GetStartServices } from '../types';
+import { ActionsPluginSetupDeps } from '../types';
 
 export function registerClusterCollector({
   monitoringCollection,
-  getStartServices,
+  core,
 }: {
   monitoringCollection: MonitoringCollectionSetup;
-  getStartServices: GetStartServices;
+  core: ActionsPluginSetupDeps['core'];
 }) {
   monitoringCollection.registerMetric({
     type: 'cluster_actions',
@@ -40,7 +40,7 @@ export function registerClusterCollector({
     },
     fetch: async () => {
       try {
-        const [_, pluginStart] = await getStartServices();
+        const [_, pluginStart] = await core.getStartServices();
         const results = await pluginStart.taskManager.aggregate(
           aggregateTaskOverduePercentilesForType('actions')
         );

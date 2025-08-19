@@ -20,7 +20,6 @@ import https from 'https';
 import type { ActionsConfig } from '../config';
 import type { ConnectorUsageReport } from './types';
 import type { ActionsPluginsStart } from '../plugin';
-import { GetStartServices } from '../types';
 
 export const CONNECTOR_USAGE_REPORTING_TASK_SCHEDULE: IntervalSchedule = { interval: '1h' };
 export const CONNECTOR_USAGE_REPORTING_TASK_ID = 'connector_usage_reporting';
@@ -41,14 +40,14 @@ export class ConnectorUsageReportingTask {
   constructor({
     logger,
     eventLogIndex,
-    getStartServices,
+    core,
     taskManager,
     projectId,
     config,
   }: {
     logger: Logger;
     eventLogIndex: string;
-    getStartServices: GetStartServices;
+    core: ActionsPluginSetupDeps['core'];
     taskManager: TaskManagerSetupContract;
     projectId: string | undefined;
     config: ActionsConfig['usage'];
@@ -77,7 +76,7 @@ export class ConnectorUsageReportingTask {
         timeout: '1m',
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
-            run: async () => this.runTask(taskInstance, getStartServices),
+            run: async () => this.runTask(taskInstance, core),
             cancel: async () => {},
           };
         },
@@ -115,7 +114,7 @@ export class ConnectorUsageReportingTask {
 
   private runTask = async (
     taskInstance: ConcreteTaskInstance,
-    getStartServices: GetStartServices
+    core: CoreSetup<ActionsPluginsStart>
   ) => {
     const { state } = taskInstance;
 
@@ -156,7 +155,7 @@ export class ConnectorUsageReportingTask {
       };
     }
 
-    const [{ elasticsearch }] = await getStartServices();
+    const [{ elasticsearch }] = await core.getStartServices();
     const esClient = elasticsearch.client.asInternalUser;
 
     const now = new Date();

@@ -1,20 +1,13 @@
 import { injectable, inject } from 'inversify';
-import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
-import { PluginSetup, PluginStart } from '@kbn/core/packages/di/common';
+import { PluginInitializer } from '@kbn/core-di-server';
 import type {
   Logger,
   LoggerFactory,
   PluginInitializerContext,
   EventTypeOpts,
-  AnalyticsServiceSetup,
-  SavedObjectsServiceSetup,
-  HttpServiceSetup,
   IContextProvider,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
-  SecurityServiceStart,
-  AnalyticsServiceStart,
-  HttpServiceStart,
   KibanaRequest,
   SavedObjectsBulkGetObject,
   ISavedObjectsRepository,
@@ -50,11 +43,7 @@ import {
 import { ACTIONS_FEATURE } from './feature';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './lib/event_based_telemetry';
-import {
-  IEventLogClientService,
-  IEventLogService,
-  IEventLogger,
-} from '@kbn/event-log-plugin/server';
+import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -70,8 +59,9 @@ import type {
   ActionTypeConfig,
   ActionTypeParams,
   ActionTypeSecrets,
+  ActionsPluginSetupDeps,
+  ActionsPluginStartDeps,
   ActionsRequestHandlerContext,
-  GetStartServices,
   Services,
   UnsecuredServices,
 } from './types';
@@ -79,7 +69,7 @@ import { ActionsClient } from './actions_client';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { createSubActionConnectorFramework } from './sub_action_framework';
@@ -91,20 +81,8 @@ import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { renderMustacheObject } from './lib/mustache_renderer';
-import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  EncryptedSavedObjectsPluginSetup,
-  EncryptedSavedObjectsPluginStart,
-} from '@kbn/encrypted-saved-objects-plugin/server';
-import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
-import type {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
-} from '@kbn/task-manager-plugin/server';
-import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { ServerlessPluginStart } from '@kbn/serverless/server';
+import { ActionsPluginsStart } from './plugin';
 
 type Config = PluginInitializerContext<ActionsConfig>['config'];
 
@@ -135,37 +113,7 @@ export class Actions {
 
   constructor(
     @inject(PluginInitializer('logger')) private loggerFactory: LoggerFactory,
-    @inject(PluginInitializer('config')) private config: Config,
-    // Setup
-    @inject(CoreSetup('analytics')) private setupAnalytics: AnalyticsServiceSetup,
-    @inject(CoreSetup('savedObjects')) private setupSavedObjects: SavedObjectsServiceSetup,
-    @inject(CoreSetup('getStartServices')) private getStartServices: GetStartServices,
-    @inject(CoreSetup('http')) private setupHttp: HttpServiceSetup,
-    @inject(PluginSetup('licensing')) private licensing: LicensingPluginSetup,
-    @inject(PluginSetup('features')) private features: FeaturesPluginSetup,
-    @inject(PluginSetup('eventLog')) private eventLog: IEventLogService,
-    @inject(PluginSetup('security')) private setupSecurity: SecurityPluginSetup,
-    @inject(PluginSetup('usageCollection')) private usageCollection: UsageCollectionSetup,
-    @inject(PluginSetup('taskManager')) private taskManager: TaskManagerSetupContract,
-    @inject(PluginSetup('cloud')) private cloud: CloudSetup,
-    // @inject(PluginSetup('serverless')) private setupServerless: ServerlessPluginSetup,
-    @inject(PluginSetup('monitoringCollection'))
-    private monitoringCollection: MonitoringCollectionSetup,
-    @inject(PluginSetup('encryptedSavedObjects'))
-    private encryptedSavedObjects: EncryptedSavedObjectsPluginSetup,
-    // Start
-    @inject(CoreStart('savedObjects')) private startSavedObjects: SavedObjectsServiceStart,
-    @inject(CoreStart('elasticsearch')) private startElasticsearch: ElasticsearchServiceStart,
-    @inject(CoreStart('security')) private startSecurity: SecurityServiceStart,
-    @inject(CoreStart('analytics')) private startAnalytics: AnalyticsServiceStart,
-    @inject(CoreStart('http')) private startHttp: HttpServiceStart,
-    @inject(PluginStart('licensing')) private startLicensing: LicensingPluginStart,
-    @inject(PluginStart('taskManager')) private startTaskManager: TaskManagerStartContract,
-    @inject(PluginStart('eventLog')) private startEventLog: IEventLogClientService,
-    @inject(PluginStart('spaces')) private startSpaces: SpacesPluginStart,
-    // @inject(PluginStart('serverless')) private startServerless: ServerlessPluginStart,
-    @inject(PluginStart('encryptedSavedObjects'))
-    private startEncryptedSavedObjects: EncryptedSavedObjectsPluginStart
+    @inject(PluginInitializer('config')) private config: Config
   ) {
     this.logger = this.loggerFactory.get();
     this.telemetryLogger = this.loggerFactory.get('usage');
@@ -179,9 +127,9 @@ export class Actions {
     this.inMemoryMetrics = new InMemoryMetrics(this.loggerFactory.get('in_memory_metrics'));
   }
 
-  setup(): PluginSetupContract {
-    this.licenseState = new LicenseState(this.licensing.license$);
-    this.isESOCanEncrypt = this.encryptedSavedObjects.canEncrypt;
+  public setup({ plugins, core }: ActionsPluginSetupDeps): PluginSetupContract {
+    this.licenseState = new LicenseState(plugins.licensing.license$);
+    this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
 
     if (!this.isESOCanEncrypt) {
       this.logger.warn(
@@ -189,13 +137,13 @@ export class Actions {
       );
     }
 
-    this.features.registerKibanaFeature(ACTIONS_FEATURE);
-    this.eventLogService = this.eventLog;
-    this.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
-    this.eventLogger = this.eventLog.getLogger({
+    plugins.features.registerKibanaFeature(ACTIONS_FEATURE);
+    this.eventLogService = plugins.eventLog;
+    plugins.eventLog.registerProviderActions(EVENT_LOG_PROVIDER, Object.values(EVENT_LOG_ACTIONS));
+    this.eventLogger = plugins.eventLog.getLogger({
       event: { provider: EVENT_LOG_PROVIDER },
     });
-    events.forEach((eventConfig) => this.setupAnalytics.registerEventType(eventConfig));
+    events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
 
     const actionExecutor = new ActionExecutor({
       isESOCanEncrypt: this.isESOCanEncrypt,
@@ -231,9 +179,9 @@ export class Actions {
     }
 
     const actionTypeRegistry = new ActionTypeRegistry({
-      licensing: this.licensing,
+      licensing: plugins.licensing,
       taskRunnerFactory,
-      taskManager: this.taskManager,
+      taskManager: plugins.taskManager,
       actionsConfigUtils,
       licenseState: this.licenseState,
       inMemoryConnectors: this.inMemoryConnectors,
@@ -241,28 +189,28 @@ export class Actions {
     this.taskRunnerFactory = taskRunnerFactory;
     this.actionTypeRegistry = actionTypeRegistry;
     this.actionExecutor = actionExecutor;
-    this.security = this.setupSecurity;
+    this.security = plugins.security;
 
     setupSavedObjects(
-      this.setupSavedObjects,
-      this.encryptedSavedObjects,
+      core.savedObjects,
+      plugins.encryptedSavedObjects,
       this.actionTypeRegistry!,
-      this.taskManager.index,
+      plugins.taskManager.index,
       this.inMemoryConnectors
     );
 
-    const usageCollection = this.usageCollection;
+    const usageCollection = plugins.usageCollection;
     if (usageCollection) {
       registerActionsUsageCollector(
         usageCollection,
         this.actionsConfig,
-        this.getStartServices().then(([_, { taskManager }]) => taskManager)
+        core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
     }
 
-    this.setupHttp.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
+    core.http.registerRouteHandlerContext<ActionsRequestHandlerContext, 'actions'>(
       'actions',
-      this.createRouteHandlerContext(actionsConfigUtils)
+      this.createRouteHandlerContext(core, actionsConfigUtils)
     );
 
     if (usageCollection) {
@@ -270,8 +218,8 @@ export class Actions {
 
       initializeActionsTelemetry(
         this.telemetryLogger,
-        this.taskManager,
-        this.getStartServices,
+        plugins.taskManager,
+        core,
         this.getInMemoryConnectors,
         eventLogIndex
       );
@@ -279,24 +227,24 @@ export class Actions {
       this.connectorUsageReportingTask = new ConnectorUsageReportingTask({
         logger: this.logger,
         eventLogIndex,
-        getStartServices: this.getStartServices,
-        taskManager: this.taskManager,
-        projectId: this.cloud.serverless.projectId,
+        core,
+        taskManager: plugins.taskManager,
+        projectId: plugins.cloud.serverless.projectId,
         config: this.actionsConfig.usage,
       });
     }
 
     // Usage counter for telemetry
-    this.usageCounter = this.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
+    this.usageCounter = plugins.usageCollection?.createUsageCounter(ACTIONS_FEATURE_ID);
 
-    if (this.monitoringCollection) {
+    if (plugins.monitoringCollection) {
       registerNodeCollector({
-        monitoringCollection: this.monitoringCollection,
+        monitoringCollection: plugins.monitoringCollection,
         inMemoryMetrics: this.inMemoryMetrics,
       });
       registerClusterCollector({
-        monitoringCollection: this.monitoringCollection,
-        getStartServices: this.getStartServices,
+        monitoringCollection: plugins.monitoringCollection,
+        core,
       });
     }
 
@@ -308,7 +256,7 @@ export class Actions {
 
     // Routes
     defineRoutes({
-      router: this.setupHttp.createRouter<ActionsRequestHandlerContext>(),
+      router: core.http.createRouter<ActionsRequestHandlerContext>(),
       licenseState: this.licenseState,
       actionsConfigUtils,
       usageCounter: this.usageCounter,
@@ -344,13 +292,13 @@ export class Actions {
       getCaseConnectorClass: () => CaseConnector,
       getActionsHealth: () => {
         return {
-          hasPermanentEncryptionKey: this.encryptedSavedObjects.canEncrypt,
+          hasPermanentEncryptionKey: plugins.encryptedSavedObjects.canEncrypt,
         };
       },
       getActionsConfigurationUtilities: () => actionsConfigUtils,
       setEnabledConnectorTypes: (connectorTypes) => {
         if (
-          // !!this.setupServerless &&
+          !!plugins.serverless &&
           this.actionsConfig.enabledActionTypes.length === 1 &&
           this.actionsConfig.enabledActionTypes[0] === AllowedHosts.Any
         ) {
@@ -368,7 +316,7 @@ export class Actions {
     };
   }
 
-  start(): PluginStartContract {
+  public start({ plugins, core }: ActionsPluginStartDeps): PluginStartContract {
     const {
       logger,
       licenseState,
@@ -383,9 +331,9 @@ export class Actions {
 
     const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
 
-    licenseState?.setNotifyUsage(this.startLicensing.featureUsage.notifyUsage);
+    licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
-    const encryptedSavedObjectsClient = this.startEncryptedSavedObjects.getClient({
+    const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
 
@@ -412,7 +360,7 @@ export class Actions {
       }
 
       const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
-        this.startSavedObjects,
+        core.savedObjects,
         request
       );
 
@@ -420,14 +368,14 @@ export class Actions {
         logger,
         unsecuredSavedObjectsClient,
         actionTypeRegistry: actionTypeRegistry!,
-        kibanaIndices: this.startSavedObjects.getAllIndices(),
-        scopedClusterClient: this.startElasticsearch.client.asScoped(request),
+        kibanaIndices: core.savedObjects.getAllIndices(),
+        scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
         authorization: instantiateAuthorization(request),
         actionExecutor: actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
-          taskManager: this.startTaskManager,
+          taskManager: plugins.taskManager,
           actionTypeRegistry: actionTypeRegistry!,
           isESOCanEncrypt: isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
@@ -442,29 +390,29 @@ export class Actions {
           logger,
         }),
         getEventLogClient: async () => {
-          return this.startEventLog.getClient(request);
+          return plugins.eventLog.getClient(request);
         },
       });
     };
 
     const getUnsecuredActionsClient = () => {
-      const internalSavedObjectsRepository = this.startSavedObjects.createInternalRepository([
+      const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
         ACTION_SAVED_OBJECT_TYPE,
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);
 
       return new UnsecuredActionsClient({
         actionExecutor: actionExecutor!,
-        clusterClient: this.startElasticsearch.client,
+        clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
-          taskManager: this.startTaskManager,
+          taskManager: plugins.taskManager,
           connectorTypeRegistry: actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
         inMemoryConnectors: this.inMemoryConnectors,
         internalSavedObjectsRepository,
-        kibanaIndices: this.startSavedObjects.getAllIndices(),
+        kibanaIndices: core.savedObjects.getAllIndices(),
         logger: this.logger,
       });
     };
@@ -489,28 +437,27 @@ export class Actions {
     });
 
     const getScopedSavedObjectsClientWithoutAccessToActions = (request: KibanaRequest) =>
-      this.startSavedObjects.getScopedClient(request);
+      core.savedObjects.getScopedClient(request);
 
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
-      this.startSavedObjects.createInternalRepository();
+      core.savedObjects.createInternalRepository();
 
     actionExecutor!.initialize({
       logger,
       eventLogger: this.eventLogger!,
-      spaces: this.startSpaces?.spacesService,
-      security: this.startSecurity,
+      spaces: plugins.spaces?.spacesService,
+      security: core.security,
       getServices: this.getServicesFactory(
         getScopedSavedObjectsClientWithoutAccessToActions,
-        this.startElasticsearch,
+        core.elasticsearch,
         encryptedSavedObjectsClient,
-        (request: KibanaRequest) =>
-          this.getUnsecuredSavedObjectsClient(this.startSavedObjects, request)
+        (request: KibanaRequest) => this.getUnsecuredSavedObjectsClient(core.savedObjects, request)
       ),
       getUnsecuredServices: this.getUnsecuredServicesFactory(
         getInternalSavedObjectsRepositoryWithoutAccessToActions,
-        this.startElasticsearch,
+        core.elasticsearch,
         encryptedSavedObjectsClient,
-        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(this.startSavedObjects)
+        () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
       ),
       encryptedSavedObjectsClient,
       actionTypeRegistry: actionTypeRegistry!,
@@ -518,36 +465,36 @@ export class Actions {
       getActionsAuthorizationWithRequest(request: KibanaRequest) {
         return instantiateAuthorization(request);
       },
-      analyticsService: this.startAnalytics,
+      analyticsService: core.analytics,
     });
 
     taskRunnerFactory!.initialize({
       logger,
       actionTypeRegistry: actionTypeRegistry!,
       encryptedSavedObjectsClient,
-      basePathService: this.startHttp.basePath,
-      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(this.startSpaces, spaceId),
-      savedObjectsRepository: this.startSavedObjects.createInternalRepository([
+      basePathService: core.http.basePath,
+      spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
+      savedObjectsRepository: core.savedObjects.createInternalRepository([
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]),
     });
 
     this.eventLogService!.isEsContextReady()
       .then(() => {
-        scheduleActionsTelemetry(this.telemetryLogger, this.startTaskManager);
+        scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
       })
       .catch(() => {});
 
     if (this.actionsConfig.preconfiguredAlertHistoryEsIndex) {
       createAlertHistoryIndexTemplate({
-        client: this.startElasticsearch.client.asInternalUser,
+        client: core.elasticsearch.client.asInternalUser,
         logger: this.logger,
       }).catch(() => {});
     }
 
-    this.validateEnabledConnectorTypes(/* his.startServerless */);
+    this.validateEnabledConnectorTypes(plugins);
 
-    this.connectorUsageReportingTask?.start(this.startTaskManager).catch(() => {});
+    this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
 
     return {
       isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
@@ -579,6 +526,7 @@ export class Actions {
   }
 
   private createRouteHandlerContext = (
+    core: ActionsPluginSetupDeps['core'],
     actionsConfigUtils: ActionsConfigurationUtilities
   ): IContextProvider<ActionsRequestHandlerContext, 'actions'> => {
     const {
@@ -590,12 +538,11 @@ export class Actions {
       security,
       usageCounter,
       logger,
-      getStartServices,
     } = this;
 
     return async function actionsRouteHandlerContext(context, request) {
       const [{ savedObjects }, { taskManager, encryptedSavedObjects, eventLog }] =
-        await getStartServices();
+        await core.getStartServices();
 
       const coreContext = await context.core;
       const inMemoryConnectors = getInMemoryConnectors();
@@ -737,9 +684,9 @@ export class Actions {
     };
   }
 
-  private validateEnabledConnectorTypes = (/* serverless: ServerlessPluginStart*/) => {
+  private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
     if (
-      // !!serverless &&
+      !!plugins.serverless &&
       this.actionsConfig.enabledActionTypes.length > 0 &&
       this.actionsConfig.enabledActionTypes[0] !== AllowedHosts.Any
     ) {

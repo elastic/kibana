@@ -322,7 +322,7 @@ export class ActionsPlugin
       initializeActionsTelemetry(
         this.telemetryLogger,
         plugins.taskManager,
-        core.getStartServices,
+        core,
         this.getInMemoryConnectors,
         eventLogIndex
       );
@@ -347,7 +347,7 @@ export class ActionsPlugin
       });
       registerClusterCollector({
         monitoringCollection: plugins.monitoringCollection,
-        getStartServices: core.getStartServices,
+        core,
       });
     }
 
