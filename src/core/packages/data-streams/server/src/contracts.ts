@@ -1,0 +1,29 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import {
+  BaseSearchRuntimeMappings,
+  DataStreamDefinition,
+  IDataStreamClient,
+} from '@kbn/data-streams';
+
+export interface DataStreamsSetup {
+  /**
+   * Register your data stream definition for setup.
+   *
+   * @remark This will ensure that at start time you do not need to set up this data stream definition
+   */
+  registerDataStream: (dataStreams: DataStreamDefinition) => Promise<void>;
+}
+
+export interface DataStreamsStart {
+  getClient<S extends {}, SRM extends BaseSearchRuntimeMappings>(
+    dataStream: DataStreamDefinition<S, SRM>
+  ): IDataStreamClient<S, SRM>;
+}

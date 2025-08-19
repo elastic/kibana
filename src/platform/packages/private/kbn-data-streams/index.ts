@@ -9,3 +9,21 @@
 
 export * as mappings from './src/mappings';
 export { DataStreamClient, type DataStreamClientArgs } from './src/client';
+export type {
+  DataStreamDefinition,
+  IDataStreamClient,
+  IDataStreamClientIndexRequest,
+  BaseSearchRuntimeMappings,
+  BooleanMapping,
+  ClientHelpers,
+  DateMapping,
+  DateNanosMapping,
+  FlattenedMapping,
+  IntegerMapping,
+  KeywordMapping,
+  LongMapping,
+  ShortMapping,
+  Strict,
+  TextMapping,
+  SearchRequestImproved,
+} from './src/types';
