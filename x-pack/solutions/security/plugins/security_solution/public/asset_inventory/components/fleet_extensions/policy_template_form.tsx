@@ -8,7 +8,6 @@ import React, { memo, useCallback } from 'react';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { type PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { i18n } from '@kbn/i18n';
-import semverGte from 'semver/functions/gte';
 import { CloudSetup, type CloudSetupConfig } from '@kbn/cloud-security-posture';
 
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
@@ -39,10 +38,6 @@ export const CloudAssetInventoryPolicyTemplateForm =
       const CLOUD_CONNECTOR_VERSION_ENABLED_ESS = '0.18.0';
       const { cloud, uiSettings } = useKibana().services;
       const isValidFormState = !hasErrors(validationResults);
-      const showCloudConnectors = semverGte(
-        packageInfo.version,
-        CLOUD_CONNECTOR_VERSION_ENABLED_ESS
-      );
 
       const CLOUD_SETUP_MAPPING: CloudSetupConfig = {
         policyTemplate: ASSET_POLICY_TEMPLATE,
@@ -59,7 +54,7 @@ export const CloudAssetInventoryPolicyTemplateForm =
         ),
         overviewPath: `https://ela.st/cloud-asset-discovery-overview`,
         getStartedPath: `https://ela.st/cloud-asset-discovery-get-started`,
-        showCloudConnectors,
+        cloudConnectorEnabledVersion: CLOUD_CONNECTOR_VERSION_ENABLED_ESS,
         showCloudTemplates: true,
         providers: {
           aws: {

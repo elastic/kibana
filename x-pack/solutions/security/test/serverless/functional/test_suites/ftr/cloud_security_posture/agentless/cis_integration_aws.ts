@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type * as http from 'http';
+import { AWS_PROVIDER_TEST_SUBJ, AWS_SINGLE_ACCOUNT_TEST_ID } from '@kbn/cloud-security-posture';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -50,8 +51,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.navigateToAddIntegrationCspmPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-        await cisIntegration.clickOptionButton(testSubjectIds.AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
         await cisIntegration.inputIntegrationName(
           `cloud_security_posture-${new Date().toISOString()}`
@@ -72,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await cisIntegration.navigateToAddIntegrationCspmPage();
         await pageObjects.header.waitUntilLoadingHasFinished();
 
-        await cisIntegration.clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
         await cisIntegration.selectSetupTechnology('agentless');
 
         await cisIntegration.selectAwsCredentials('direct');
