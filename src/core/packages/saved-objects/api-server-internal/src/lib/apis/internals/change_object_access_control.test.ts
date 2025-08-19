@@ -48,6 +48,7 @@ const BULK_ERROR = {
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
+const mockUserProfileId = 'u_mock_id';
 
 describe('changeObjectAccessControl', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
@@ -139,11 +140,30 @@ describe('changeObjectAccessControl', () => {
               newOwnerProfileUid: undefined,
             },
             actionType: 'changeOwnership',
+            currentUserProfileUid: '',
           })
         ).rejects.toThrow(
           'The "newOwnerProfileUid" field is required to change ownership of a saved object.: Bad Request'
         );
       });
+
+      it('throws if owner has invalid user profile id', async () => {
+        const params = setup({
+          objects: [{ type: READ_ONLY_TYPE, id: 'id-1' }],
+        });
+
+        await expect(() =>
+          changeObjectAccessControl({
+            ...params,
+            options: {
+              newOwnerProfileUid: 'invalid_user_profile_id',
+            },
+            actionType: 'changeOwnership',
+            currentUserProfileUid: mockUserProfileId,
+          })
+        ).rejects.toThrow('User profile ID is invalid: invalid_user_profile_id: Bad Request');
+      });
+
       it('returns error if no read-only objects are specified', async () => {
         const params = setup({
           objects: [{ type: NON_READ_ONLY_TYPE, id: 'id-1' }],
@@ -155,6 +175,7 @@ describe('changeObjectAccessControl', () => {
             newOwnerProfileUid: 'u_unittestuser_version',
           },
           actionType: 'changeOwnership',
+          currentUserProfileUid: mockUserProfileId,
         });
         expect(result.objects[0]).toHaveProperty('error');
         const error = result.objects[0].error;
@@ -175,6 +196,7 @@ describe('changeObjectAccessControl', () => {
           ...params,
           options: { newOwnerProfileUid: 'u_unittestuser_version' },
           actionType: 'changeOwnership',
+          currentUserProfileUid: mockUserProfileId,
         });
         expect(client.mget).not.toHaveBeenCalled();
         expect(client.bulk).not.toHaveBeenCalled();
@@ -205,6 +227,7 @@ describe('changeObjectAccessControl', () => {
           securityExtension: params.securityExtension,
           options: { newOwnerProfileUid: 'u_unittestuser_version', namespace: 'default' },
           actionType: 'changeOwnership',
+          currentUserProfileUid: mockUserProfileId,
         });
         expect(mockSecurityExt.authorizeChangeAccessControl).toHaveBeenCalledWith(
           {
