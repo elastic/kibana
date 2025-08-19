@@ -17,5 +17,6 @@
     "@kbn/logging",
     "@kbn/test",
     "@kbn/core-logging-server-mocks",
+    "@kbn/tooling-log",
   ]
 }

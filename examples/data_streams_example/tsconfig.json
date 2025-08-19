@@ -10,5 +10,8 @@
   "exclude": [
     "target/**/*",
   ],
-  "kbn_references": [ ]
+  "kbn_references": [
+    "@kbn/core-data-streams-server",
+    "@kbn/core",
+  ]
 }
