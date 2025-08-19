@@ -7,8 +7,9 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { IKbnUrlStateStorage, createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { Primitive } from 'utility-types';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { Primitive } from 'utility-types';
 
 export interface UseQueryStateOptions<T> {
   defaultValue?: T;

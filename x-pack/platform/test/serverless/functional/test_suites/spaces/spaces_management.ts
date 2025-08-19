@@ -10,7 +10,7 @@
 // These tests can be moved to the appropriate test file (spaces_selection,
 // spaces_management) once multiple spaces are permanently enabled in production.
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommon = getPageObject('common');

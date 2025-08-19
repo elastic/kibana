@@ -14,7 +14,8 @@ import { pipeline } from 'stream';
 import { promisify } from 'util';
 
 import * as tar from 'tar';
-import Yauzl, { ZipFile, Entry } from 'yauzl';
+import type { ZipFile, Entry } from 'yauzl';
+import Yauzl from 'yauzl';
 import * as Rx from 'rxjs';
 import { map, mergeMap, takeUntil } from 'rxjs';
 

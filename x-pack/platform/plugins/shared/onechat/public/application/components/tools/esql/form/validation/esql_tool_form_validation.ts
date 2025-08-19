@@ -13,8 +13,8 @@ import { set } from '@kbn/safer-lodash-set';
 import { z } from '@kbn/zod';
 import { get } from 'lodash';
 import { useCallback } from 'react';
-import { Resolver } from 'react-hook-form';
-import { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { Resolver } from 'react-hook-form';
+import type { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
 
 const i18nMessages = {
   name: {
