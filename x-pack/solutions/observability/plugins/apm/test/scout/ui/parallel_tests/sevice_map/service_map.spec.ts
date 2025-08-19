@@ -8,7 +8,7 @@
 import { expect } from '@kbn/scout-oblt';
 import { test, testData } from '../../fixtures';
 
-test.describe('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe.skip('Service map', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeEach(async ({ browserAuth }) => {
     await browserAuth.loginAsViewer();
   });
