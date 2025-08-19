@@ -179,4 +179,58 @@ describe('getStateDefaults', () => {
       }
     `);
   });
+
+  test('should enable ES|QL by default when enableEsqlByDefault is true and no saved query exists', () => {
+    const savedSearchWithoutQuery = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({
+        index: dataViewMock,
+        query: undefined, // no saved query
+      }),
+    };
+
+    const actualWithEsqlEnabled = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchWithoutQuery,
+      enableEsqlByDefault: true,
+    });
+
+    expect(actualWithEsqlEnabled.dataSource).toEqual(createEsqlDataSource());
+    expect(actualWithEsqlEnabled.query).toEqual({
+      esql: `FROM ${dataViewMock.title} | LIMIT 10`,
+    });
+
+    const actualWithEsqlDisabled = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchWithoutQuery,
+      enableEsqlByDefault: false,
+    });
+
+    expect(actualWithEsqlDisabled.dataSource).toEqual(
+      createDataViewDataSource({ dataViewId: dataViewMock.id! })
+    );
+    expect(actualWithEsqlDisabled.query).toEqual(
+      discoverServiceMock.data.query.queryString.getDefaultQuery()
+    );
+  });
+
+  test('should not enable ES|QL by default when saved query exists', () => {
+    const savedQueryObj = { language: 'kuery', query: 'test query' };
+    const savedSearchWithQuery = {
+      ...savedSearchMock,
+      searchSource: createSearchSourceMock({
+        index: dataViewMock,
+        query: savedQueryObj,
+      }),
+    };
+
+    const actual = getStateDefaults({
+      services: discoverServiceMock,
+      savedSearch: savedSearchWithQuery,
+      enableEsqlByDefault: true, // should be ignored since query exists
+    });
+
+    expect(actual.dataSource).toEqual(createDataViewDataSource({ dataViewId: dataViewMock.id! }));
+    expect(actual.query).toEqual(savedQueryObj);
+  });
 });
