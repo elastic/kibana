@@ -58,7 +58,6 @@ describe('http', () => {
     container.loadSync(httpModule);
     container.bind(CoreSetup('http')).toConstantValue(http);
     container.bind(CoreStart('injection')).toConstantValue(injection);
-    container.bind(TestRoute).toSelf().inRequestScope();
     container.bind(Route).toConstantValue(TestRoute);
   });
 

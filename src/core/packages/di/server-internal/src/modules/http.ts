@@ -31,7 +31,7 @@ export const http = new ContainerModule(({ bind, onActivation }) => {
       scope.bind(Global).toConstantValue(Response);
 
       try {
-        return await scope.get(route).handle();
+        return await scope.get(route, { autobind: true }).handle();
       } finally {
         scope.unbindAll();
       }
