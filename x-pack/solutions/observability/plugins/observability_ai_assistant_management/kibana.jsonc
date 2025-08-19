@@ -8,7 +8,10 @@
     "id": "observabilityAiAssistantManagement",
     "server": true,
     "browser": true,
-    "configPath": ["xpack", "observabilityAiAssistantManagement"],
+    "configPath": [
+      "xpack",
+      "observabilityAiAssistantManagement"
+    ],
     "requiredPlugins": [
       "actions",
       "management",
@@ -17,7 +20,14 @@
       "ml",
       "licensing"
     ],
-    "optionalPlugins": ["home", "serverless", "productDocBase"],
-    "requiredBundles": ["kibanaReact", "logsDataAccess"]
+    "optionalPlugins": [
+      "home",
+      "serverless",
+      "productDocBase"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "logsDataAccess"
+    ]
   }
 }
