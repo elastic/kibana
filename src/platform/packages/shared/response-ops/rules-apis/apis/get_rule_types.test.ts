@@ -41,6 +41,7 @@ const ruleTypeResponse = {
     name: 'Recovered',
   },
   rule_task_timeout: '10m',
+  auto_recover_alerts: false,
 };
 
 const expectedRuleType = {
@@ -72,6 +73,7 @@ const expectedRuleType = {
     name: 'Recovered',
   },
   ruleTaskTimeout: '10m',
+  autoRecoverAlerts: false,
 };
 
 describe('getRuleTypes', () => {

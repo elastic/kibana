@@ -9,7 +9,8 @@ import { act } from 'react-dom/test-utils';
 
 import type { MlAction } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import { esDeprecationsMockResponse, MOCK_SNAPSHOT_ID, MOCK_JOB_ID } from './mocked_responses';
 
 describe('Machine learning deprecation flyout', () => {
@@ -47,7 +48,7 @@ describe('Machine learning deprecation flyout', () => {
 
     const { actions, component } = testBed;
     component.update();
-    await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+    await actions.table.clickDeprecationRowAt({ deprecationType: 'mlSnapshot', index: 0 });
   });
 
   test('renders a flyout with deprecation details', async () => {
@@ -99,7 +100,7 @@ describe('Machine learning deprecation flyout', () => {
       expect(find('mlActionResolutionCell').text()).toContain('Upgrade complete');
 
       // Reopen the flyout
-      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+      await actions.table.clickDeprecationRowAt({ deprecationType: 'mlSnapshot', index: 0 });
 
       // Flyout actions should be hidden if deprecation was resolved
       expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
@@ -137,7 +138,7 @@ describe('Machine learning deprecation flyout', () => {
       expect(find('mlActionResolutionCell').text()).toContain('Upgrade failed');
 
       // Reopen the flyout
-      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+      await actions.table.clickDeprecationRowAt({ deprecationType: 'mlSnapshot', index: 0 });
 
       // Verify the flyout shows an error message
       expect(find('mlSnapshotDetails.resolveSnapshotError').text()).toContain(
@@ -160,7 +161,7 @@ describe('Machine learning deprecation flyout', () => {
 
       component.update();
 
-      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+      await actions.table.clickDeprecationRowAt({ deprecationType: 'mlSnapshot', index: 0 });
 
       // Shows an error callout with a docs link
       expect(exists('mlSnapshotDetails.mlUpgradeModeEnabledError')).toBe(true);
@@ -195,7 +196,7 @@ describe('Machine learning deprecation flyout', () => {
       expect(find('mlActionResolutionCell').at(0).text()).toEqual('Deletion complete');
 
       // Reopen the flyout
-      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+      await actions.table.clickDeprecationRowAt({ deprecationType: 'mlSnapshot', index: 0 });
 
       // Flyout actions should be hidden if deprecation was resolved
       expect(exists('mlSnapshotDetails.upgradeSnapshotButton')).toBe(false);
@@ -228,7 +229,7 @@ describe('Machine learning deprecation flyout', () => {
       expect(find('mlActionResolutionCell').at(0).text()).toEqual('Deletion failed');
 
       // Reopen the flyout
-      await actions.table.clickDeprecationRowAt('mlSnapshot', 0);
+      await actions.table.clickDeprecationRowAt({ deprecationType: 'mlSnapshot', index: 0 });
 
       // Verify the flyout shows an error message
       expect(find('mlSnapshotDetails.resolveSnapshotError').text()).toContain(

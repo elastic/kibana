@@ -10,14 +10,8 @@
 // @ts-ignore
 import chroma from 'chroma-js';
 import React from 'react';
-import {
-  AreaSeries,
-  ScaleType,
-  CurveType,
-  AreaSeriesStyle,
-  PointShape,
-  RecursivePartial,
-} from '@elastic/charts';
+import type { AreaSeriesStyle, RecursivePartial } from '@elastic/charts';
+import { AreaSeries, ScaleType, CurveType, PointShape } from '@elastic/charts';
 import type { VisSeries } from '../../../common/vis_data';
 
 interface AreaSeriesComponentProps {
@@ -71,6 +65,7 @@ export const AreaSeriesComponent = ({ index, groupId, visData }: AreaSeriesCompo
     id={index + visData.label}
     groupId={groupId}
     name={visData.label}
+    // Defaults to multi layer time axis as of Elastic Charts v70
     xScaleType={ScaleType.Time}
     yScaleType={ScaleType.Linear}
     xAccessor={0}

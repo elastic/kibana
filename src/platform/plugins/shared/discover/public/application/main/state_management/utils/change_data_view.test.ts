@@ -84,6 +84,7 @@ describe('changeDataView', () => {
         columns: false,
         rowHeight: false,
         breakdownField: false,
+        hideChart: false,
       })
     );
     await changeDataView({ dataViewId: dataViewComplexMock.id!, ...params });
@@ -92,6 +93,7 @@ describe('changeDataView', () => {
         columns: true,
         rowHeight: true,
         breakdownField: true,
+        hideChart: true,
       })
     );
   });

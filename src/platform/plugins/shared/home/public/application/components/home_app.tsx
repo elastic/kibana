@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
@@ -18,8 +19,7 @@ import { Tutorial } from './tutorial/tutorial';
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
-import { GettingStarted } from './guided_onboarding';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services';
+import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services';
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
@@ -29,14 +29,8 @@ export interface HomeAppProps {
 }
 
 export function HomeApp({ directories, solutions }: HomeAppProps) {
-  const {
-    application,
-    getBasePath,
-    addBasePath,
-    environmentService,
-    dataViewsService,
-    guidedOnboardingService,
-  } = getServices();
+  const { application, getBasePath, addBasePath, environmentService, dataViewsService } =
+    getServices();
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
@@ -75,11 +69,6 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
         <Routes>
           <Route path="/tutorial/:id" render={renderTutorial} />
           <Route path="/tutorial_directory/:tab?" render={renderTutorialDirectory} />
-          {guidedOnboardingService?.isEnabled && (
-            <Route path="/getting_started">
-              <GettingStarted />
-            </Route>
-          )}
           <Route exact path="/">
             <Home
               addBasePath={addBasePath}

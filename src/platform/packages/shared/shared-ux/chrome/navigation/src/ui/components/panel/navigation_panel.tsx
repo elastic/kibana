@@ -13,14 +13,13 @@ import {
   EuiPanel,
   EuiWindowEvent,
   keys,
-  useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, type FC } from 'react';
 import classNames from 'classnames';
 
 import type { PanelSelectedNode } from '@kbn/core-chrome-browser';
 import { usePanel } from './context';
-import { getNavPanelStyles, getPanelWrapperStyles } from './styles';
+import { navPanelStyles, panelWrapperStyles } from './styles';
 
 const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined => {
   if (!selectedNode) return;
@@ -33,7 +32,6 @@ const getTestSubj = (selectedNode: PanelSelectedNode | null): string | undefined
 };
 
 export const NavigationPanel: FC = () => {
-  const { euiTheme } = useEuiTheme();
   const { isOpen, close, getContent, selectedNode, selectedNodeEl } = usePanel();
 
   // ESC key closes PanelNav
@@ -68,22 +66,21 @@ export const NavigationPanel: FC = () => {
     [close, selectedNodeEl]
   );
 
-  const panelWrapperClasses = getPanelWrapperStyles();
-  const sideNavPanelStyles = getNavPanelStyles(euiTheme);
-  const panelClasses = classNames('sideNavPanel', 'eui-yScroll', sideNavPanelStyles);
-
   if (!isOpen) {
     return null;
   }
 
+  const panelClasses = classNames('sideNavPanel', 'eui-yScroll');
+
   return (
     <>
       <EuiWindowEvent event="keydown" handler={onKeyDown} />
-      <div className={panelWrapperClasses}>
-        <EuiFocusTrap autoFocus css={{ height: '100%' }}>
+      <div css={panelWrapperStyles}>
+        <EuiFocusTrap autoFocus style={{ height: '100%' }}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
             <EuiPanel
               className={panelClasses}
+              css={navPanelStyles}
               hasShadow
               borderRadius="none"
               paddingSize="none"

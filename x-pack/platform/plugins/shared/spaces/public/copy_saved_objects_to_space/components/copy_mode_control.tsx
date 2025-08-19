@@ -99,7 +99,7 @@ const createLabel = ({ text, tooltip }: { text: string; tooltip: string }) => (
       <EuiText>{text}</EuiText>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
-      <EuiIconTip content={tooltip} position="left" type="iInCircle" />
+      <EuiIconTip content={tooltip} position="left" type="info" />
     </EuiFlexItem>
   </EuiFlexGroup>
 );
@@ -149,6 +149,7 @@ export const CopyModeControl = ({ initialValues, updateSelection }: CopyModeCont
             onChange={(id: string) => onChange({ overwrite: id === overwriteEnabled.id })}
             disabled={createNewCopies}
             data-test-subj={'cts-copyModeControl-overwriteRadioGroup'}
+            name="overwriteOption"
           />
         </EuiCheckableCard>
       </EuiFormFieldset>

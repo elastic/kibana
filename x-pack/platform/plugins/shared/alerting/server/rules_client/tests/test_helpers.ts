@@ -81,22 +81,8 @@ export const siemRule1 = {
   id: 'siem-id1',
 };
 
-export const siemRuleForBulkOps1 = {
-  ...defaultRuleForBulkDelete,
-  attributes: {
-    ...defaultRuleForBulkDelete.attributes,
-    consumer: AlertConsumers.SIEM,
-  },
-  id: 'siem-id1',
-};
-
 export const siemRule2 = {
   ...siemRule1,
-  id: 'siem-id2',
-};
-
-export const siemRuleForBulkOps2 = {
-  ...siemRuleForBulkOps1,
   id: 'siem-id2',
 };
 

@@ -28,7 +28,7 @@ export interface UseShowRelatedAlertsByAncestryParams {
   /**
    * Boolean indicating if the flyout is open in preview
    */
-  isPreview: boolean;
+  isRulePreview: boolean;
 }
 
 export interface UseShowRelatedAlertsByAncestryResult {
@@ -49,12 +49,12 @@ export const useShowRelatedAlertsByAncestry = ({
   getFieldsData,
   dataAsNestedObject,
   eventId,
-  isPreview,
+  isRulePreview,
 }: UseShowRelatedAlertsByAncestryParams): UseShowRelatedAlertsByAncestryResult => {
   const hasProcessEntityInfo = useIsInvestigateInResolverActionEnabled(dataAsNestedObject);
 
   const ancestorId = getField(getFieldsData(ANCESTOR_ID)) ?? '';
-  const documentId = isPreview ? ancestorId : eventId;
+  const documentId = isRulePreview ? ancestorId : eventId;
 
   const hasAtLeastPlatinum = useLicense().isPlatinumPlus();
 

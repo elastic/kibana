@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddablePersistableStateService } from './types';
+import type { EmbeddablePersistableStateService } from '.';
 
 export const createEmbeddablePersistableStateServiceMock =
   (): jest.Mocked<EmbeddablePersistableStateService> => {

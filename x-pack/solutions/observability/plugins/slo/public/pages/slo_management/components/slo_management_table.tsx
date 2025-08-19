@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import {
+import type {
   Criteria,
   DefaultItemAction,
+  EuiBasicTableColumn,
+  EuiTableSelectionType,
+} from '@elastic/eui';
+import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHealth,
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiTableSelectionType,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALL_VALUE, SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useState } from 'react';
 import { sloPaths } from '../../../../common';
 import { SLO_MODEL_VERSION } from '../../../../common/constants';
@@ -97,6 +100,7 @@ export function SloManagementTable() {
       description: i18n.translate('xpack.slo.item.actions.clone', {
         defaultMessage: 'Clone',
       }),
+      enabled: () => !!permissions?.hasAllWriteRequested,
       'data-test-subj': 'sloActionsClone',
       onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'clone' }),
     },
@@ -136,10 +140,22 @@ export function SloManagementTable() {
         defaultMessage: 'Delete',
       }),
       'data-test-subj': 'sloActionsDelete',
-      enabled: (slo: SLODefinitionResponse) => !!permissions?.hasAllWriteRequested,
+      enabled: () => !!permissions?.hasAllWriteRequested,
       onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'delete' }),
     },
-
+    {
+      type: 'icon',
+      icon: 'logstashOutput',
+      name: i18n.translate('xpack.slo.item.actions.purge', {
+        defaultMessage: 'Purge',
+      }),
+      description: i18n.translate('xpack.slo.item.actions.purge', {
+        defaultMessage: 'Purge',
+      }),
+      'data-test-subj': 'sloActionsPurge',
+      enabled: () => !!permissions?.hasAllWriteRequested,
+      onClick: (slo: SLODefinitionResponse) => triggerAction({ item: slo, type: 'purge' }),
+    },
     {
       type: 'icon',
       icon: 'refresh',
@@ -287,7 +303,7 @@ export function SloManagementTable() {
         pagination={pagination}
         onChange={onTableChange}
         loading={isLoading}
-        selection={selection}
+        selection={permissions?.hasAllWriteRequested ? selection : undefined}
       />
     </EuiPanel>
   );

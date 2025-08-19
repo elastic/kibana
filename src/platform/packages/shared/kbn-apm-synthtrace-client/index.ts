@@ -54,4 +54,3 @@ export {
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';
-export { type EntityFields, entities } from './src/lib/entities';

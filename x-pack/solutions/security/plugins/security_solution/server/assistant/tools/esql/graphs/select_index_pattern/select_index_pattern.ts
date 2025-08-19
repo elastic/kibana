@@ -6,11 +6,6 @@
  */
 
 import { START, StateGraph, Send, END } from '@langchain/langgraph';
-import type {
-  ActionsClientChatBedrockConverse,
-  ActionsClientChatVertexAI,
-  ActionsClientChatOpenAI,
-} from '@kbn/langchain/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { SelectIndexPatternAnnotation } from './state';
 import {
@@ -24,27 +19,30 @@ import { getShortlistIndexPatterns } from './nodes/shortlist_index_patterns/shor
 import { getAnalyzeIndexPattern } from './nodes/analyse_index_pattern/analyse_index_pattern';
 import { getSelectIndexPattern } from './nodes/select_index/select_index';
 import { getAnalyzeIndexPatternGraph } from '../analyse_index_pattern/analyse_index_pattern';
+import type { CreateLlmInstance } from '../../utils/common';
 
-export const getSelectIndexPatternGraph = ({
+export const getSelectIndexPatternGraph = async ({
   createLlmInstance,
   esClient,
 }: {
-  createLlmInstance: () =>
-    | ActionsClientChatBedrockConverse
-    | ActionsClientChatVertexAI
-    | ActionsClientChatOpenAI;
+  createLlmInstance: CreateLlmInstance;
   esClient: ElasticsearchClient;
 }) => {
-  const analyzeIndexPatternGraph = getAnalyzeIndexPatternGraph({
-    esClient,
-    createLlmInstance,
-  });
+  const [analyzeIndexPatternGraph, shortlistIndexPatterns] = await Promise.all([
+    getAnalyzeIndexPatternGraph({
+      esClient,
+      createLlmInstance,
+    }),
+    getShortlistIndexPatterns({
+      createLlmInstance,
+    }),
+  ]);
 
   const graph = new StateGraph(SelectIndexPatternAnnotation)
     .addNode(GET_INDEX_PATTERNS, fetchIndexPatterns({ esClient }), {
       retryPolicy: { maxAttempts: 3 },
     })
-    .addNode(SHORTLIST_INDEX_PATTERNS, getShortlistIndexPatterns({ createLlmInstance }))
+    .addNode(SHORTLIST_INDEX_PATTERNS, shortlistIndexPatterns)
     .addNode(
       ANALYZE_INDEX_PATTERN,
       getAnalyzeIndexPattern({
@@ -52,7 +50,7 @@ export const getSelectIndexPatternGraph = ({
       }),
       { retryPolicy: { maxAttempts: 3 }, subgraphs: [analyzeIndexPatternGraph] }
     )
-    .addNode(SELECT_INDEX_PATTERN, getSelectIndexPattern({ createLlmInstance }), {
+    .addNode(SELECT_INDEX_PATTERN, getSelectIndexPattern(), {
       retryPolicy: { maxAttempts: 3 },
     })
 

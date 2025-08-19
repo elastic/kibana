@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExistsFilter } from '../build_filters';
+import type { ExistsFilter } from '..';
 
 export const existsFilter: ExistsFilter = {
   meta: {

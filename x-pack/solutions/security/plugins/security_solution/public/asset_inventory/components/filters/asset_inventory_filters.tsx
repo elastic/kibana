@@ -18,6 +18,7 @@ import type { AssetsURLQuery } from '../../hooks/use_asset_inventory_url_state/u
 import { ASSET_FIELDS } from '../../constants';
 import { FilterGroupLoading } from './asset_inventory_filters_loading';
 import { ASSET_INVENTORY_RULE_TYPE_IDS } from './asset_inventory_rule_type_ids';
+import { addEmptyDataFilter } from '../../utils/add_empty_data_filter';
 
 const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
   {
@@ -42,13 +43,14 @@ const DEFAULT_ASSET_INVENTORY_FILTERS: FilterControlConfig[] = [
 
 export interface AssetInventoryFiltersProps {
   setQuery: (v: Partial<AssetsURLQuery>) => void;
+  query: AssetsURLQuery;
 }
 
-export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) => {
+export const AssetInventoryFilters = ({ setQuery, query }: AssetInventoryFiltersProps) => {
   const { dataView, dataViewIsLoading } = useDataViewContext();
   const spaceId = useSpaceId();
 
-  if (!spaceId) {
+  if (!spaceId || !dataView?.id) {
     // TODO Add error handling if no spaceId is found
     return null;
   }
@@ -61,9 +63,11 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
     );
   }
 
+  const filters = addEmptyDataFilter(query.filters, dataView.id);
+
   return (
     <FilterGroup
-      dataViewId={dataView.id || null}
+      dataViewId={dataView.id}
       onFiltersChange={(pageFilters: Filter[]) => {
         setQuery({ pageFilters });
       }}
@@ -74,6 +78,8 @@ export const AssetInventoryFilters = ({ setQuery }: AssetInventoryFiltersProps) 
       spaceId={spaceId}
       ControlGroupRenderer={ControlGroupRenderer}
       maxControls={4}
+      query={query.query}
+      filters={filters}
     />
   );
 };

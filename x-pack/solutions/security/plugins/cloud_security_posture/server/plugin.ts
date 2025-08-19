@@ -12,7 +12,10 @@ import type {
   Plugin,
   Logger,
   SavedObjectsClientContract,
+  ElasticsearchClient,
 } from '@kbn/core/server';
+import type { FailedAttemptError, Options } from 'p-retry';
+import pRetry from 'p-retry';
 import type { DeepReadonly } from 'utility-types';
 import {
   type PostDeletePackagePoliciesResponse,
@@ -29,6 +32,11 @@ import type {
   CspBenchmarkRule,
   CspSettings,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
+import semver from 'semver';
 import { isCspPackage } from '../common/utils/helpers';
 import { isSubscriptionAllowed } from '../common/utils/subscription';
 import { cleanupCredentials } from '../common/utils/helpers';
@@ -42,7 +50,10 @@ import type {
 import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
 import { initializeCspIndices } from './create_indices/create_indices';
-import { initializeCspTransforms } from './create_transforms/create_transforms';
+import {
+  deletePreviousTransformsVersions,
+  initializeCspTransforms,
+} from './create_transforms/create_transforms';
 import { isCspPackagePolicyInstalled } from './fleet_integration/fleet_integration';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
@@ -51,7 +62,7 @@ import {
   setupFindingsStatsTask,
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
-import { CloudSecurityPostureConfig } from './config';
+import type { CloudSecurityPostureConfig } from './config';
 
 export class CspPlugin
   implements
@@ -104,13 +115,17 @@ export class CspPlugin
     plugins.fleet
       .fleetSetupCompleted()
       .then(async () => {
-        const packageInfo = await plugins.fleet.packageService.asInternalUser.getInstallation(
-          CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+        const packageInfo = await pRetry(
+          () =>
+            plugins.fleet.packageService.asInternalUser.getInstallation(
+              CLOUD_SECURITY_POSTURE_PACKAGE_NAME
+            ),
+          getRetryOptions(this.logger, 'getInstallation')
         );
 
         // If package is installed we want to make sure all needed assets are installed
         if (packageInfo) {
-          this.initialize(core, plugins.taskManager).catch(() => {});
+          this.initialize(core, plugins.taskManager, packageInfo.install_version).catch(() => {});
         }
 
         plugins.fleet.registerExternalCallback(
@@ -151,9 +166,18 @@ export class CspPlugin
           'packagePolicyUpdate',
           async (
             packagePolicy: UpdatePackagePolicy,
-            soClient: SavedObjectsClientContract
+            soClient: SavedObjectsClientContract,
+            esClient: ElasticsearchClient
           ): Promise<UpdatePackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
+              const isIntegrationVersionIncludesTransformAsset = isTransformAssetIncluded(
+                packagePolicy.package!.version
+              );
+              await deletePreviousTransformsVersions(
+                esClient,
+                isIntegrationVersionIncludesTransformAsset,
+                this.logger
+              );
               return cleanupCredentials(packagePolicy);
             }
 
@@ -168,7 +192,7 @@ export class CspPlugin
             soClient: SavedObjectsClientContract
           ): Promise<PackagePolicy> => {
             if (isCspPackage(packagePolicy.package?.name)) {
-              await this.initialize(core, plugins.taskManager);
+              await this.initialize(core, plugins.taskManager, packagePolicy.package!.version);
               return packagePolicy;
             }
 
@@ -196,7 +220,9 @@ export class CspPlugin
           }
         );
       })
-      .catch(() => {}); // it shouldn't reject, but just in case
+      .catch((err) => {
+        this.logger.error('CSP plugin getInstallation operation failed after all retries', err);
+      });
 
     return {};
   }
@@ -206,14 +232,70 @@ export class CspPlugin
   /**
    * Initialization is idempotent and required for (re)creating indices and transforms.
    */
-  async initialize(core: CoreStart, taskManager: TaskManagerStartContract): Promise<void> {
+  async initialize(
+    core: CoreStart,
+    taskManager: TaskManagerStartContract,
+    packagePolicyVersion: string
+  ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
-    await initializeCspIndices(esClient, this.config, this.logger);
-    await initializeCspTransforms(esClient, this.logger);
+    const isIntegrationVersionIncludesTransformAsset =
+      isTransformAssetIncluded(packagePolicyVersion);
+    await initializeCspIndices(
+      esClient,
+      this.config,
+      isIntegrationVersionIncludesTransformAsset,
+      this.logger
+    );
+    await initializeCspTransforms(
+      esClient,
+      isIntegrationVersionIncludesTransformAsset,
+      this.logger
+    );
     await scheduleFindingsStatsTask(taskManager, this.logger);
+    await this.initializeIndexAlias(esClient, this.logger);
     this.#isInitialized = true;
   }
+
+  // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
+  // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
+  initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    const isAliasExists = await esClient.indices.existsAlias({
+      name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+
+    const isDeprecatedLatestIndexExists = await esClient.indices.exists({
+      index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+    });
+
+    // This handles the following scenarios:
+    // 1. A customer using an older integration version (pre-2.00) who has upgraded their Kibana stack.
+    // 2. A customer with a new Kibana stack who installs an integration version earlier than 2.00 for the first time (e.g., in a serverless environment).
+    if (isDeprecatedLatestIndexExists && !isAliasExists) {
+      try {
+        await esClient.indices.updateAliases({
+          actions: [
+            {
+              add: {
+                index: DEPRECATED_CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_PATTERN,
+                alias: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+                is_write_index: true,
+              },
+            },
+          ],
+        });
+        this.logger.info(
+          `Index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS} created successfully`
+        );
+      } catch (error) {
+        this.logger.error(
+          `Failed to create index alias ${CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS}`,
+          error
+        );
+        throw error;
+      }
+    }
+  };
 
   async uninstallResources(taskManager: TaskManagerStartContract, logger: Logger): Promise<void> {
     await removeFindingsStatsTask(taskManager, logger);
@@ -230,3 +312,18 @@ export class CspPlugin
 
 const isSingleEnabledInput = (inputs: NewPackagePolicy['inputs']): boolean =>
   inputs.filter((i) => i.enabled).length === 1;
+
+const isTransformAssetIncluded = (integrationVersion: string): boolean => {
+  const majorVersion = semver.major(integrationVersion);
+  return majorVersion >= 3;
+};
+
+const getRetryOptions = (logger: Logger, operation: string): Options => {
+  return {
+    retries: 3,
+    onFailedAttempt: (err: FailedAttemptError) => {
+      const message = `CSP plugin ${operation} operation failed and will be retried: ${err.retriesLeft} more times; error: ${err.message}`;
+      logger.warn(message);
+    },
+  };
+};

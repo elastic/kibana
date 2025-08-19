@@ -31,7 +31,7 @@ import { i18n } from '@kbn/i18n';
 import { IconPreview } from './icon_preview';
 import { getCustomIconId } from '../../symbol_utils';
 import { ValidatedRange } from '../../../../../components/validated_range';
-import { CustomIcon } from '../../../../../../common/descriptor_types';
+import type { CustomIcon } from '../../../../../../common/descriptor_types';
 import { APP_ID } from '../../../../../../common';
 import { getUsageCollection } from '../../../../../kibana_services';
 
@@ -55,7 +55,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.cutoffRangeLabel', {
           defaultMessage: 'Alpha threshold',
         })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
+        <EuiIcon color="subdued" type="question" />
       </>
     </EuiToolTip>
   ),
@@ -91,7 +91,7 @@ const strings = {
         {i18n.translate('xpack.maps.customIconModal.radiusRangeLabel', {
           defaultMessage: 'Radius',
         })}{' '}
-        <EuiIcon color="subdued" type="questionInCircle" />
+        <EuiIcon color="subdued" type="question" />
       </>
     </EuiToolTip>
   ),

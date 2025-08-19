@@ -165,7 +165,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
               {!policyHasElasticDefend && (
                 <span data-test-subj="tamperMissingIntegrationTooltip">
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate(
                       'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
@@ -325,7 +325,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 ),
                 tooltip: !userHasAccessToAllPolicySpaces && (
                   <EuiIconTip
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                     content={i18n.translate('xpack.fleet.agentPolicyForm.spaceTooltip', {
                       defaultMessage: 'Access to all policy spaces is required for edit.',
@@ -405,7 +405,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 namespace: (selectedOptions.length ? selectedOptions[0] : '') as string,
               });
             }}
-            isInvalid={Boolean(touchedFields.namespace && validation.namespace)}
+            isInvalid={Boolean(validation.namespace)}
             onBlur={() => setTouchedFields({ ...touchedFields, namespace: true })}
           />
         </EuiFormRow>
@@ -458,7 +458,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       }
                     )}
                     position="right"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </>
@@ -481,7 +481,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                       }
                     )}
                     position="right"
-                    type="iInCircle"
+                    type="info"
                     color="subdued"
                   />
                 </>
@@ -835,7 +835,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
               });
             }}
-            name="radio group"
+            name="hostNameFormat"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>

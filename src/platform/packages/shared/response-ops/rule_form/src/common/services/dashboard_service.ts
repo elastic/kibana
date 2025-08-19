@@ -36,11 +36,11 @@ export function dashboardServiceProvider(contentManagementService: ContentManage
      * @param query - The query to search for dashboards
      * @returns - The dashboards that match the query
      */
-    async fetchDashboards(query: SearchQuery = {}) {
+    async fetchDashboards(query: SearchQuery = {}): Promise<DashboardItem[]> {
       const response = await contentManagementService.client.search({
         contentTypeId: 'dashboard',
         query,
-        options: { spaces: ['*'], fields: ['title', 'description'] },
+        options: { fields: ['title', 'description'], includeReferences: ['tag'] },
       });
 
       // Assert the type of response to access hits property

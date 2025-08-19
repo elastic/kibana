@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
-import { UsageStats } from './types';
+import type { MakeSchemaFrom } from '@kbn/usage-collection-plugin/server';
+import type { UsageStats } from './types';
 
 export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   'securitySolution:defaultIndex': {
@@ -62,10 +62,6 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'long',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'visualization:useLegacyTimeAxis': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'visualization:regionmap:showWarnings': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -104,6 +100,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'securitySolution:timeDefaults': {
     type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'securitySolution:enablePrivilegedUserMonitoring': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'securitySolution:defaultAnomalyScore': {
@@ -468,20 +468,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:entityCentricExperience': {
-    type: 'boolean',
-    _meta: { description: 'Non-default value of setting.' },
-  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:apmAWSLambdaRequestCostPerMillion': {
     type: 'integer',
-    _meta: { description: 'Non-default value of setting.' },
-  },
-  'observability:apmEnableServiceMapApiV2': {
-    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
   'observability:aiAssistantSimulatedFunctionCalling': {
@@ -492,12 +484,36 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'ai:anonymizationSettings': {
+    type: 'text',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:logSources': {
     type: 'array',
     items: {
       type: 'keyword',
       _meta: { description: 'Non-default value of setting.' },
     },
+  },
+  'onechat:mcp:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:a2a:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'onechat:api:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'workflows:ui:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
   },
   'banners:placement': {
     type: 'keyword',
@@ -650,6 +666,24 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable the new logs overview component.',
+    },
+  },
+  'observability:enableStreamsUI': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams UI.',
+    },
+  },
+  'observability:streamsEnableSignificantEvents': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable significant events in streams.',
+    },
+  },
+  'observability:enableDiagnosticMode': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable diagnostic mode',
     },
   },
 };

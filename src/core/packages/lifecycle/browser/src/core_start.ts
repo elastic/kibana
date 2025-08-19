@@ -10,6 +10,7 @@
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
+import type { CoreDiServiceStart } from '@kbn/core-di';
 import type { ExecutionContextStart } from '@kbn/core-execution-context-browser';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
@@ -23,6 +24,7 @@ import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { ChromeStart } from '@kbn/core-chrome-browser';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { PluginsServiceStart } from '@kbn/core-plugins-contracts-browser';
+import type { PricingServiceStart } from '@kbn/core-pricing-browser';
 import type { SecurityServiceStart } from '@kbn/core-security-browser';
 import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
@@ -54,6 +56,8 @@ export interface CoreStart {
   featureFlags: FeatureFlagsStart;
   /** {@link HttpStart} */
   http: HttpStart;
+  /** {@link CoreDiServiceStart} */
+  injection: CoreDiServiceStart;
   /**
    * {@link SavedObjectsStart}
    * @deprecated See https://github.com/elastic/kibana/issues/149098
@@ -78,6 +82,8 @@ export interface CoreStart {
   theme: ThemeServiceStart;
   /** {@link PluginsServiceStart} */
   plugins: PluginsServiceStart;
+  /** {@link PricingServiceStart} */
+  pricing: PricingServiceStart;
   /** {@link SecurityServiceStart} */
   security: SecurityServiceStart;
   /** {@link UserProfileServiceStart} */

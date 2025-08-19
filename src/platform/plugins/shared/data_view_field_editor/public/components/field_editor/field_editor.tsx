@@ -12,18 +12,16 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
+import type { FormHook, RuntimeType, RuntimePrimitiveTypes } from '../../shared_imports';
 import {
   Form,
   useForm,
   useFormData,
   useFormIsModified,
-  FormHook,
   UseField,
   TextField,
-  RuntimeType,
-  RuntimePrimitiveTypes,
 } from '../../shared_imports';
-import { Field } from '../../types';
+import type { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';
 import { useFieldPreviewContext } from '../preview';
 
@@ -33,7 +31,7 @@ import { getNameFieldConfig, getFieldPreviewChanges } from './lib';
 import { TypeField } from './form_fields';
 import { FieldDetail } from './field_detail';
 import { CompositeEditor } from './composite_editor';
-import { TypeSelection } from './types';
+import type { TypeSelection } from './types';
 import { ChangeType } from '../preview/types';
 
 export interface FieldEditorFormState {
@@ -296,7 +294,7 @@ const FieldEditorComponent = ({ field, onChange, onFormModifiedChange }: Props) 
       {field?.parentName && (
         <>
           <EuiCallOut
-            iconType="iInCircle"
+            iconType="info"
             title={i18n.translate('indexPatternFieldEditor.editor.form.subFieldParentInfo', {
               defaultMessage: "Field value is defined by ''{parentName}''",
               values: { parentName: field?.parentName },

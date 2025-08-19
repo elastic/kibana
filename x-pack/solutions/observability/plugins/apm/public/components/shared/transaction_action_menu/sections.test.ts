@@ -29,8 +29,8 @@ const mockAssetDetailsLocator = {
   getRedirectUrl: jest
     .fn()
     .mockImplementation(
-      ({ assetId, assetType, assetDetails }: AssetDetailsLocatorParams) =>
-        `/node-mock/${assetType}/${assetId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
+      ({ entityId, entityType, assetDetails }: AssetDetailsLocatorParams) =>
+        `/node-mock/${entityType}/${entityId}?receivedParams=${rison.encodeUnknown(assetDetails)}`
     ),
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
@@ -99,7 +99,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service Map',
+          title: 'Service map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -186,7 +186,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service Map',
+          title: 'Service map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {
@@ -273,7 +273,7 @@ describe('Transaction action menu', () => {
         },
         {
           key: 'serviceMap',
-          title: 'Service Map',
+          title: 'Service map',
           subtitle: 'View service map filtered by this trace.',
           actions: [
             {

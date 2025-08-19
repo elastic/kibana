@@ -9,7 +9,7 @@
 
 import { transform, size, cloneDeep, get, defaults } from 'lodash';
 import { createCustomFieldFormat } from './converters/custom';
-import {
+import type {
   FieldFormatsGetConfigFn,
   FieldFormatsContentType,
   FieldFormatInstanceType,
@@ -21,7 +21,7 @@ import {
   FieldFormatParams,
 } from './types';
 import { htmlContentTypeSetup, textContentTypeSetup, TEXT_CONTEXT_TYPE } from './content_types';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from './types';
 
 const DEFAULT_CONTEXT_TYPE = TEXT_CONTEXT_TYPE;
 
@@ -53,13 +53,13 @@ export abstract class FieldFormat {
 
   /**
    * @property {string} - Field Format Type
-   * @private
+   * @internal
    */
   static fieldType: string | string[];
 
   /**
    * @property {FieldFormatConvert}
-   * @private
+   * @internal
    * have to remove the private because of
    * https://github.com/Microsoft/TypeScript/issues/17293
    */
@@ -83,7 +83,7 @@ export abstract class FieldFormat {
 
   /**
    * @property {Function} - ref to child class
-   * @private
+   * @internal
    */
   public type = this.constructor as typeof FieldFormat;
   public allowsNumericalAggregations?: boolean;

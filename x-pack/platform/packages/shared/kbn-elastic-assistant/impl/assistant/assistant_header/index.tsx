@@ -6,7 +6,11 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import type {
+  QueryObserverResult,
+  RefetchOptions,
+  RefetchQueryFilters,
+} from '@tanstack/react-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,17 +20,19 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ApiConfig } from '@kbn/elastic-assistant-common';
+import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
-import { DataStreamApis } from '../use_data_stream_apis';
-import { Conversation } from '../../..';
+import type { DataStreamApis } from '../use_data_stream_apis';
+import type { Conversation } from '../../..';
 import { AssistantTitle } from '../assistant_title';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
-import { AIConnector } from '../../connectorland/connector_selector';
+import type { AIConnector } from '../../connectorland/connector_selector';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 import * as i18n from './translations';
+import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -177,12 +183,18 @@ export const AssistantHeader: React.FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems={'center'}>
               <EuiFlexItem>
-                <ConnectorSelectorInline
-                  isDisabled={isDisabled || selectedConversation === undefined}
+                <ElasticLLMCostAwarenessTour
+                  isDisabled={isDisabled}
                   selectedConnectorId={selectedConnectorId}
-                  selectedConversation={selectedConversation}
-                  onConnectorSelected={onConversationChange}
-                />
+                  storageKey={NEW_FEATURES_TOUR_STORAGE_KEYS.ELASTIC_LLM_USAGE_ASSISTANT_HEADER}
+                >
+                  <ConnectorSelectorInline
+                    isDisabled={isDisabled || selectedConversation === undefined}
+                    selectedConnectorId={selectedConnectorId}
+                    selectedConversation={selectedConversation}
+                    onConnectorSelected={onConversationChange}
+                  />
+                </ElasticLLMCostAwarenessTour>
               </EuiFlexItem>
               <EuiFlexItem id={AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID}>
                 <SettingsContextMenu

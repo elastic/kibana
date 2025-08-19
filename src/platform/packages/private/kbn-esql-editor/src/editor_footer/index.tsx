@@ -16,8 +16,10 @@ import {
   EuiCode,
   EuiButtonIcon,
   EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
-import { Interpolation, Theme, css } from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
+import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   LanguageDocumentationInline,
@@ -30,7 +32,7 @@ import { QueryHistoryAction, HistoryAndStarredQueriesTabs } from './history_star
 import { SubmitFeedbackComponent } from './feedback_component';
 import { QueryWrapComponent } from './query_wrap_component';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
-import type { ESQLEditorDeps } from '../types';
+import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
@@ -61,6 +63,7 @@ interface EditorFooterProps {
   hideTimeFilterInfo?: boolean;
   hideQueryHistory?: boolean;
   displayDocumentationAsFlyout?: boolean;
+  dataErrorsControl?: DataErrorsControl;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -86,6 +89,7 @@ export const EditorFooter = memo(function EditorFooter({
   displayDocumentationAsFlyout,
   measuredContainerWidth,
   code,
+  dataErrorsControl,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();
   const { docLinks } = kibana.services;
@@ -209,6 +213,7 @@ export const EditorFooter = memo(function EditorFooter({
                     setIsErrorPopoverOpen(isOpen);
                   }}
                   onErrorClick={onErrorClick}
+                  dataErrorsControl={dataErrorsControl}
                 />
               )}
               {warnings && warnings.length > 0 && (
@@ -272,6 +277,9 @@ export const EditorFooter = memo(function EditorFooter({
                     data-test-subj="ESQLEditor-documentation"
                     size="m"
                     onClick={() => toggleLanguageComponent()}
+                    aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                      defaultMessage: 'Open documentation',
+                    })}
                     css={css`
                       cursor: pointer;
                     `}
@@ -299,13 +307,20 @@ export const EditorFooter = memo(function EditorFooter({
                     />
                   )}
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="documentation"
-                      onClick={toggleLanguageComponent}
-                      aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
-                        defaultMessage: 'Open documentation',
+                    <EuiToolTip
+                      position="top"
+                      content={i18n.translate('esqlEditor.query.quickReferenceLabel', {
+                        defaultMessage: 'Quick reference',
                       })}
-                    />
+                    >
+                      <EuiButtonIcon
+                        iconType="documentation"
+                        onClick={toggleLanguageComponent}
+                        aria-label={i18n.translate('esqlEditor.query.documentationAriaLabel', {
+                          defaultMessage: 'Open documentation',
+                        })}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                   <KeyboardShortcuts />
                 </EuiFlexGroup>

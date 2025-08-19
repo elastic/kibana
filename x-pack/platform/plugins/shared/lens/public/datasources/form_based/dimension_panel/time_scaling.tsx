@@ -15,11 +15,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import {
-  adjustTimeScaleLabelSuffix,
-  GenericIndexPatternColumn,
-  operationDefinitionMap,
-} from '../operations';
+import type { GenericIndexPatternColumn } from '../operations';
+import { adjustTimeScaleLabelSuffix, operationDefinitionMap } from '../operations';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import { unitSuffixesLong } from '../../../../common/suffix_formatter';
 import type { FormBasedLayer } from '../types';
@@ -83,7 +80,7 @@ export function TimeScaling({ selectedColumn, columnId, layer, updateLayer }: Ti
             {i18n.translate('xpack.lens.indexPattern.timeScale.label', {
               defaultMessage: 'Normalize by unit',
             })}{' '}
-            <EuiIcon type="questionInCircle" color="subdued" size="s" className="eui-alignTop" />
+            <EuiIcon type="question" color="subdued" size="s" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       }

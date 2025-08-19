@@ -54,6 +54,8 @@ export interface KibanaMigratorOptions {
   waitForMigrationCompletion: boolean;
   nodeRoles: NodeRoles;
   esCapabilities: ElasticsearchCapabilities;
+  /** Specify a minimum supported Kibana version, e.g. '8.18.0' */
+  kibanaVersionCheck?: string;
 }
 
 /**
@@ -81,6 +83,7 @@ export class KibanaMigrator implements IKibanaMigrator {
   private readonly esCapabilities: ElasticsearchCapabilities;
 
   public readonly kibanaVersion: string;
+  public readonly kibanaVersionCheck: string | undefined;
 
   /**
    * Creates an instance of KibanaMigrator.
@@ -98,6 +101,7 @@ export class KibanaMigrator implements IKibanaMigrator {
     waitForMigrationCompletion,
     nodeRoles,
     esCapabilities,
+    kibanaVersionCheck,
   }: KibanaMigratorOptions) {
     this.client = client;
     this.kibanaIndex = kibanaIndex;
@@ -123,20 +127,24 @@ export class KibanaMigrator implements IKibanaMigrator {
     this.activeMappings = buildActiveMappings(this.mappingProperties);
     this.docLinks = docLinks;
     this.esCapabilities = esCapabilities;
+    this.kibanaVersionCheck = kibanaVersionCheck;
   }
 
   public getDocumentMigrator() {
     return this.documentMigrator;
   }
 
-  public runMigrations({ rerun = false }: { rerun?: boolean } = {}): Promise<MigrationResult[]> {
+  public runMigrations({
+    rerun = false,
+    skipVersionCheck = false,
+  }: { rerun?: boolean; skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
     if (this.migrationResult === undefined || rerun) {
       // Reruns are only used by CI / EsArchiver. Publishing status updates on reruns results in slowing down CI
       // unnecessarily, so we skip it in this case.
       if (!rerun) {
         this.status$.next({ status: 'running' });
       }
-      this.migrationResult = this.runMigrationsInternal().then((result) => {
+      this.migrationResult = this.runMigrationsInternal({ skipVersionCheck }).then((result) => {
         // Similar to above, don't publish status updates when rerunning in CI.
         if (!rerun) {
           this.status$.next({ status: 'completed', result });
@@ -156,7 +164,9 @@ export class KibanaMigrator implements IKibanaMigrator {
     return this.status$.asObservable();
   }
 
-  private runMigrationsInternal(): Promise<MigrationResult[]> {
+  private runMigrationsInternal({
+    skipVersionCheck = false,
+  }: { skipVersionCheck?: boolean } = {}): Promise<MigrationResult[]> {
     const migrationAlgorithm = this.soMigrationsConfig.algorithm;
     if (migrationAlgorithm === 'zdt') {
       return runZeroDowntimeMigration({
@@ -188,6 +198,7 @@ export class KibanaMigrator implements IKibanaMigrator {
         mappingProperties: this.mappingProperties,
         waitForMigrationCompletion: this.waitForMigrationCompletion,
         esCapabilities: this.esCapabilities,
+        kibanaVersionCheck: skipVersionCheck ? undefined : this.kibanaVersionCheck,
       });
     }
   }

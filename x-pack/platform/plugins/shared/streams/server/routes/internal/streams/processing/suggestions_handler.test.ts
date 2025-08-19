@@ -7,16 +7,15 @@
 
 import { handleProcessingSuggestion } from './suggestions_handler';
 import { simulateProcessing } from './simulation_handler';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { ScopedClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
-import { StreamsClient } from '../../../../lib/streams/client';
-import { ProcessingSuggestionBody } from './route';
+import type { InferenceClient } from '@kbn/inference-common';
+import type { ScopedClusterClient } from '@kbn/core-elasticsearch-client-server-internal';
+import type { StreamsClient } from '../../../../lib/streams/client';
+import type { ProcessingSuggestionBody } from './route';
 
 jest.mock('./simulation_handler', () => ({
   simulateProcessing: jest.fn((params) =>
     Promise.resolve({
       documents: [],
-      is_non_additive_simulation: false,
       documents_metrics: {
         parsed_rate: 1,
       },
@@ -725,7 +724,6 @@ describe('handleProcessingSuggestion', () => {
           documents_metrics: {
             parsed_rate: 1,
           },
-          is_non_additive_simulation: false,
           simulationField: 'dummy',
         },
       },

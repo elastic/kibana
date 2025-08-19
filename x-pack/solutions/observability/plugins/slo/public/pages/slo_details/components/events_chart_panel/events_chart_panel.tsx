@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useGetPreviewData } from '../../../../hooks/use_get_preview_data';
 import { useKibana } from '../../../../hooks/use_kibana';
-import { TimeBounds } from '../../types';
+import type { TimeBounds } from '../../types';
 import { getDiscoverLink } from '../../utils/get_discover_link';
 import { GoodBadEventsChart } from './good_bad_events_chart';
 import { MetricTimesliceEventsChart } from './metric_timeslice_events_chart';
@@ -114,7 +114,7 @@ export function EventsChartPanel({ slo, range, hideRangeDurationLabel = false, o
                 })}
                 data-test-subj="sloDetailDiscoverLink"
               >
-                <EuiIcon type="sortRight" style={{ marginRight: '4px' }} />
+                <EuiIcon type="sortRight" css={{ marginRight: '4px' }} />
                 <FormattedMessage
                   id="xpack.slo.sloDetails.viewEventsLink"
                   defaultMessage="View events"

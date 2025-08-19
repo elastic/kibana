@@ -7,7 +7,7 @@
 
 import type { EuiDataGridColumn } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../common/types';
 
 export interface DataTableModelSettings {
@@ -39,8 +39,6 @@ export interface DataTableModel extends DataTableModelSettings {
   /** Events to not be rendered **/
   deletedEventIds: string[];
   filters?: Filter[];
-  /** When non-empty, display a graph view for this event */
-  graphEventId?: string;
   /** Uniquely identifies the data table */
   id: string;
   indexNames: string[];
@@ -83,7 +81,6 @@ export type SubsetDataTableModel = Readonly<
     | 'showCheckboxes'
     | 'sort'
     | 'selectedEventIds'
-    | 'graphEventId'
     | 'queryFields'
     | 'title'
     | 'initialized'

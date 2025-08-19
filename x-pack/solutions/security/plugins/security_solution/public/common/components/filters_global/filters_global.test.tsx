@@ -44,21 +44,4 @@ describe('rendering', () => {
       ).not.toHaveStyleRule('display', 'none');
     });
   });
-
-  describe('when show is false', () => {
-    test('it renders the container with a `display: none` style', () => {
-      const wrapper = mount(
-        <TestProviders>
-          <FiltersGlobal show={false}>
-            <p>{'Filter content'}</p>
-          </FiltersGlobal>
-        </TestProviders>
-      );
-
-      expect(wrapper.find('[data-test-subj="filters-global-container"]').first()).toHaveStyleRule(
-        'display',
-        'none'
-      );
-    });
-  });
 });

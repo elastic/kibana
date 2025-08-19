@@ -4,6 +4,21 @@
       "format": [
         "text"
       ],
+      "help": "__flag__",
+      "v": "__flag__",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_match": "__flag__",
+      "bytes": [
+        "b",
+        "kb",
+        "mb",
+        "gb",
+        "tb",
+        "pb"
+      ],
       "h": [
         "assignment_explanation",
         "buckets.count",
@@ -66,7 +81,6 @@
         "opened_time",
         "state"
       ],
-      "help": "__flag__",
       "s": [
         "assignment_explanation",
         "buckets.count",
@@ -129,20 +143,6 @@
         "opened_time",
         "state"
       ],
-      "v": "__flag__",
-      "error_trace": "__flag__",
-      "filter_path": [],
-      "human": "__flag__",
-      "pretty": "__flag__",
-      "allow_no_match": "__flag__",
-      "bytes": [
-        "b",
-        "kb",
-        "mb",
-        "gb",
-        "tb",
-        "pb"
-      ],
       "time": [
         "nanos",
         "micros",
@@ -160,7 +160,7 @@
       "_cat/ml/anomaly_detectors",
       "_cat/ml/anomaly_detectors/{job_id}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cat-anomaly-detectors.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-cat-ml-jobs",
     "availability": {
       "stack": true,
       "serverless": true

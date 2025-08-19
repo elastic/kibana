@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingLogo } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 import React, { useEffect } from 'react';
 import { AnnotationsContextProvider } from '../../../context/annotations/annotations_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
@@ -13,14 +13,8 @@ import { useApmServiceContext } from '../../../context/apm_service/use_apm_servi
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../hooks/use_time_range';
-import { isApmSignal, isLogsSignal, isLogsOnlySignal } from '../../../utils/get_signal_type';
 import { ApmOverview } from './apm_overview';
-import { LogsOverview } from './logs_overview';
-import { ServiceTabEmptyState } from '../service_tab_empty_state';
-import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { SearchBar } from '../../shared/search_bar/search_bar';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_centric_experience_setting';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -28,8 +22,7 @@ import { useEntityCentricExperienceSetting } from '../../../hooks/use_entity_cen
 export const chartHeight = 288;
 
 export function ServiceOverview() {
-  const { isEntityCentricExperienceEnabled } = useEntityCentricExperienceSetting();
-  const { serviceName, serviceEntitySummary, serviceEntitySummaryStatus } = useApmServiceContext();
+  const { serviceName } = useApmServiceContext();
 
   const setScreenContext = useApmPluginContext().observabilityAIAssistant?.service.setScreenContext;
 
@@ -52,32 +45,6 @@ export function ServiceOverview() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const [dismissedLogsOnlyEmptyState, setDismissedLogsOnlyEmptyState] = useLocalStorage(
-    `apm.dismissedLogsOnlyEmptyState.overview`,
-    false
-  );
-
-  const hasSignal =
-    serviceEntitySummary?.dataStreamTypes && serviceEntitySummary?.dataStreamTypes?.length > 0;
-
-  const hasLogsOnlySignal = hasSignal && isLogsOnlySignal(serviceEntitySummary.dataStreamTypes);
-
-  const hasLogsSignal = hasSignal && isLogsSignal(serviceEntitySummary.dataStreamTypes);
-
-  // Shows APM overview when entity has APM signal or when Entity centric is not enabled
-  const hasApmSignal = hasSignal && isApmSignal(serviceEntitySummary.dataStreamTypes);
-
-  // Shows APM overview when entity has APM signal or when Entity centric is not enabled or when entity has no signal
-  const showApmOverview = isEntityCentricExperienceEnabled === false || hasApmSignal || !hasSignal;
-
-  if (serviceEntitySummaryStatus === FETCH_STATUS.LOADING) {
-    return (
-      <div style={{ textAlign: 'center' }}>
-        <EuiLoadingLogo logo="logoObservability" size="l" />
-      </div>
-    );
-  }
-
   return (
     <>
       <SearchBar showTimeComparison showTransactionTypeSelector />
@@ -89,23 +56,7 @@ export function ServiceOverview() {
       >
         <ChartPointerEventContextProvider>
           <EuiFlexGroup direction="column" gutterSize="s">
-            {showApmOverview ? <ApmOverview /> : null}
-            {/* Only shows Logs overview when entity has Logs signal */}
-            {hasLogsSignal ? (
-              <>
-                {hasLogsOnlySignal && !dismissedLogsOnlyEmptyState && (
-                  <EuiFlexItem>
-                    <ServiceTabEmptyState
-                      id="serviceOverview"
-                      onDismiss={() => setDismissedLogsOnlyEmptyState(true)}
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem>
-                  <LogsOverview />
-                </EuiFlexItem>
-              </>
-            ) : null}
+            <ApmOverview />
           </EuiFlexGroup>
         </ChartPointerEventContextProvider>
       </AnnotationsContextProvider>

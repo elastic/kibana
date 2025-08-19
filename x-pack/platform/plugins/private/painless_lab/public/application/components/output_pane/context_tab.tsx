@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -18,7 +19,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { PainlessContext } from '@kbn/monaco';
+import type { PainlessContext } from '@kbn/monaco';
 
 import { CodeEditor } from '@kbn/code-editor';
 import { painlessContextOptions } from '../../constants';
@@ -47,7 +48,7 @@ export const ContextTab: FunctionComponent = () => {
                 id="xpack.painlessLab.contextFieldLabel"
                 defaultMessage="Execution context"
               />{' '}
-              <EuiIcon type="questionInCircle" color="subdued" />
+              <EuiIcon type="question" color="subdued" />
             </span>
           </EuiToolTip>
         }
@@ -86,7 +87,7 @@ export const ContextTab: FunctionComponent = () => {
                   id="xpack.painlessLab.indexFieldLabel"
                   defaultMessage="Index name"
                 />{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }
@@ -125,7 +126,7 @@ export const ContextTab: FunctionComponent = () => {
             >
               <span>
                 <FormattedMessage id="xpack.painlessLab.queryFieldLabel" defaultMessage="Query" />{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }
@@ -171,7 +172,7 @@ export const ContextTab: FunctionComponent = () => {
                   id="xpack.painlessLab.documentFieldLabel"
                   defaultMessage="Sample document (JSON)"
                 />{' '}
-                <EuiIcon type="questionInCircle" color="subdued" />
+                <EuiIcon type="question" color="subdued" />
               </span>
             </EuiToolTip>
           }

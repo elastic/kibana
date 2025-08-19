@@ -122,6 +122,7 @@ export const SpaceSelectorComponent: React.FC<SpaceSelectorProps> = ({
       isInvalid={Boolean(error)}
     >
       <EuiComboBox
+        isInvalid={Boolean(error)}
         data-test-subj={'spaceSelectorComboBox'}
         aria-label={i18n.translate('xpack.fleet.agentPolicies.spaceSelectorLabel', {
           defaultMessage: 'Spaces',

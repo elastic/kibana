@@ -39,9 +39,9 @@ const renderHighlightedFields = (showEditButton = false) =>
       <HighlightedFields
         dataFormattedForFieldBrowser={mockContextValue.dataFormattedForFieldBrowser}
         investigationFields={mockContextValue.investigationFields}
-        isPreview={mockContextValue.isPreview}
         scopeId={mockContextValue.scopeId}
         showEditButton={showEditButton}
+        showCellActions={false}
       />
     </TestProviders>
   );

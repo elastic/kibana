@@ -9,7 +9,7 @@
 
 import _ from 'lodash';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -23,8 +23,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // Prompt autocomplete for 'settings'
     await PageObjects.console.promptAutocomplete('s');
 
-    await retry.waitFor('autocomplete to be visible', () =>
-      PageObjects.console.isAutocompleteVisible()
+    await retry.waitFor(
+      'autocomplete to be visible',
+      async () => await PageObjects.console.isAutocompleteVisible()
     );
     await PageObjects.console.pressEnter();
     await retry.try(async () => {
@@ -56,7 +57,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.promptAutocomplete();
-      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
     });
 
     it('correctly autocompletes inline JSON', async () => {
@@ -68,8 +69,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.promptAutocomplete('e');
 
       // 3) Wait for the autocomplete suggestions to appear
-      await retry.waitFor('autocomplete to be visible', () =>
-        PageObjects.console.isAutocompleteVisible()
+      await retry.waitFor(
+        'autocomplete to be visible',
+        async () => await PageObjects.console.isAutocompleteVisible()
       );
 
       // 4) Press Enter to accept the first suggestion (likely "term")
@@ -96,13 +98,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
       await PageObjects.console.enterText(`"`);
-      expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+      await retry.waitFor(
+        'autocomplete to be visible',
+        async () => await PageObjects.console.isAutocompleteVisible()
+      );
 
       // Iterate on the first 10 suggestions (the ones that are only visible without scrolling)
-      const suggestions = [];
+      const suggestionsPromise = [];
       for (let i = 0; i < 10; i++) {
-        suggestions.push(await PageObjects.console.getAutocompleteSuggestion(i));
+        suggestionsPromise.push(PageObjects.console.getAutocompleteSuggestion(i));
       }
+
+      const suggestions = await Promise.all(suggestionsPromise);
 
       // and expect the array to not have duplicates
       expect(suggestions).to.eql(_.uniq(suggestions));
@@ -125,9 +132,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('Key type "%s"', char);
           await PageObjects.console.enterText(char);
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.isAutocompleteVisible()
+          await retry.waitFor(
+            'autocomplete to be visible',
+            async () => await PageObjects.console.isAutocompleteVisible()
           );
+
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
           for (const [i, method] of methods.entries()) {
@@ -154,8 +163,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.console.enterText(char);
           }
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.isAutocompleteVisible()
+          await retry.waitFor(
+            'autocomplete to be visible',
+            async () => await PageObjects.console.isAutocompleteVisible()
           );
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
@@ -179,8 +189,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('Key type "%s"', char);
           await PageObjects.console.enterText(char);
         }
-        await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.isAutocompleteVisible()
+        await retry.waitFor(
+          'autocomplete to be visible',
+          async () => await PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
         await PageObjects.console.pressEnter();
@@ -211,8 +222,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           log.debug('Key type "%s"', char);
           await PageObjects.console.enterText(char);
         }
-        await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.isAutocompleteVisible()
+        await retry.waitFor(
+          'autocomplete to be visible',
+          async () => await PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
 
@@ -271,8 +283,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.console.sleepForDebouncePeriod();
             log.debug('Key type "%s"', char);
             await PageObjects.console.enterText(char); // e.g. 'P' -> 'Po' -> 'Pos'
-            await retry.waitFor('autocomplete to be visible', () =>
-              PageObjects.console.isAutocompleteVisible()
+            await retry.waitFor(
+              'autocomplete to be visible',
+              async () => await PageObjects.console.isAutocompleteVisible()
             );
             expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
           }
@@ -283,8 +296,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await PageObjects.console.enterText(char!); // e.g. 'Post ' -> 'Post _'
           }
 
-          await retry.waitFor('autocomplete to be visible', () =>
-            PageObjects.console.isAutocompleteVisible()
+          await retry.waitFor(
+            'autocomplete to be visible',
+            async () => await PageObjects.console.isAutocompleteVisible()
           );
           expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
         }
@@ -299,8 +313,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.console.enterText(char); // i.e. 'GET .kibana/' -> 'GET .kibana/_'
         }
 
-        await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.isAutocompleteVisible()
+        await retry.waitFor(
+          'autocomplete to be visible',
+          async () => await PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
@@ -316,8 +331,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('Key type Ctrl+SPACE');
         await PageObjects.console.pressCtrlSpace();
 
-        await retry.waitFor('autocomplete to be visible', () =>
-          PageObjects.console.isAutocompleteVisible()
+        await retry.waitFor(
+          'autocomplete to be visible',
+          async () => await PageObjects.console.isAutocompleteVisible()
         );
         expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
       });
@@ -428,6 +444,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
+    describe('ESQL queries', () => {
+      beforeEach(async () => {
+        await PageObjects.console.clearEditorText();
+      });
+
+      it('autocompletes ESQL inside triple quotes query', async () => {
+        await PageObjects.console.enterText(`POST _query\n`);
+        await PageObjects.console.enterText(`{\n\t"query": """`);
+        await PageObjects.console.sleepForDebouncePeriod();
+        await retry.waitFor(
+          'autocomplete to be visible',
+          async () => await PageObjects.console.isAutocompleteVisible()
+        );
+        const suggestions = await PageObjects.console.getAllAutocompleteSuggestions();
+        expect(suggestions).to.contain('FROM');
+        expect(suggestions).to.contain('ROW');
+        expect(suggestions).to.contain('SHOW');
+      });
+
+      it('does not suggest ESQL when inside non-query triple quotes', async () => {
+        await PageObjects.console.enterText(`POST _query\n`);
+        await PageObjects.console.enterText(`{\n\t"script": """`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+      });
+
+      it('does not suggest ESQL in other parts of the request', async () => {
+        await PageObjects.console.enterText(`GET _search\n`);
+        await PageObjects.console.enterText(`{\n\t"query": {`);
+        await PageObjects.console.pressEnter();
+        await PageObjects.console.sleepForDebouncePeriod();
+        await PageObjects.console.promptAutocomplete();
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(true);
+        const suggestions = await PageObjects.console.getAllAutocompleteSuggestions();
+        expect(suggestions).to.not.contain('FROM');
+        expect(suggestions).to.not.contain('ROW');
+        expect(suggestions).to.not.contain('SHOW');
+      });
+    });
+
     describe('Autocomplete shouldnt trigger within', () => {
       beforeEach(async () => {
         await PageObjects.console.skipTourIfExists();
@@ -438,21 +495,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.enterText(`# GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
 
       it('a simple double slash comment', async () => {
         await PageObjects.console.enterText(`// GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
 
       it('a single line block comment', async () => {
         await PageObjects.console.enterText(`/* GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
 
       it('a multiline block comment', async () => {
@@ -460,7 +517,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           GET /`);
         await PageObjects.console.sleepForDebouncePeriod();
 
-        expect(PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
+        expect(await PageObjects.console.isAutocompleteVisible()).to.be.eql(false);
       });
     });
   });

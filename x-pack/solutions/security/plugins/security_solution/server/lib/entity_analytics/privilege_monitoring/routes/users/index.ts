@@ -6,9 +6,7 @@
  */
 
 export * from './create';
-export * from './get';
 export * from './list';
 export * from './update';
 export * from './delete';
-export * from './upload_json';
 export * from './upload_csv';

@@ -18,8 +18,8 @@ import * as fixtures from '../../../test/fixtures';
 import { setupEnvironment } from '../helpers';
 import { notificationService } from '../../../public/application/services/notification';
 
+import type { DataStreamsTabTestBed } from './data_streams_tab.helpers';
 import {
-  DataStreamsTabTestBed,
   setup,
   createDataStreamPayload,
   createDataStreamBackingIndex,
@@ -460,11 +460,19 @@ describe('Data Streams tab', () => {
 
         const ds1 = createDataStreamPayload({
           name: 'dataStream1',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
         });
         const ds2 = createDataStreamPayload({
           name: 'dataStream2',
-          privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+          privileges: {
+            delete_index: true,
+            manage_data_stream_lifecycle: true,
+            read_failure_store: true,
+          },
         });
 
         setLoadDataStreamsResponse([ds1, ds2]);
@@ -961,6 +969,28 @@ describe('Data Streams tab', () => {
         expect(exists('editDataRetentionButton')).toBe(false);
       });
 
+      test('displays/hides bulk edit data retention depending if data stream fully managed by ILM is selected', async () => {
+        const {
+          find,
+          actions: { selectDataStream, clickManageDataStreamsButton },
+        } = testBed;
+
+        // Select data stream fully managed by ILM
+        selectDataStream('dataStream1', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        // Select data stream managed by DSL
+        selectDataStream('dataStream2', true);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeFalsy();
+
+        // Unselect data stream fully managed by ILM
+        selectDataStream('dataStream1', false);
+        clickManageDataStreamsButton();
+        expect(find('bulkEditDataRetentionButton').exists()).toBeTruthy();
+      });
+
       test('when partially managed by dsl but has backing indices managed by ILM should show a warning', async () => {
         const { setLoadDataStreamResponse } = httpRequestsMockHelpers;
 
@@ -1217,20 +1247,36 @@ describe('Data Streams tab', () => {
 
     const dataStreamFullPermissions = createDataStreamPayload({
       name: 'dataStreamFullPermissions',
-      privileges: { delete_index: true, manage_data_stream_lifecycle: true },
+      privileges: {
+        delete_index: true,
+        manage_data_stream_lifecycle: true,
+        read_failure_store: true,
+      },
     });
     const dataStreamNoDelete = createDataStreamPayload({
       name: 'dataStreamNoDelete',
-      privileges: { delete_index: false, manage_data_stream_lifecycle: true },
+      privileges: {
+        delete_index: false,
+        manage_data_stream_lifecycle: true,
+        read_failure_store: true,
+      },
     });
     const dataStreamNoEditRetention = createDataStreamPayload({
       name: 'dataStreamNoEditRetention',
-      privileges: { delete_index: true, manage_data_stream_lifecycle: false },
+      privileges: {
+        delete_index: true,
+        manage_data_stream_lifecycle: false,
+        read_failure_store: true,
+      },
     });
 
     const dataStreamNoPermissions = createDataStreamPayload({
       name: 'dataStreamNoPermissions',
-      privileges: { delete_index: false, manage_data_stream_lifecycle: false },
+      privileges: {
+        delete_index: false,
+        manage_data_stream_lifecycle: false,
+        read_failure_store: false,
+      },
     });
 
     describe('delete', () => {

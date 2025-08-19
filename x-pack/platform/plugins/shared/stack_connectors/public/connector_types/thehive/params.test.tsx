@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import TheHiveParamsFields from './params';
-import { SUB_ACTION } from '../../../common/thehive/constants';
-import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
+import { SUB_ACTION, TheHiveSeverity } from '../../../common/thehive/constants';
+import type { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionPushParams = {
@@ -69,7 +69,7 @@ describe('TheHiveParamsFields renders', () => {
       'subActionParams',
       {
         tlp: 2,
-        severity: 2,
+        severity: TheHiveSeverity.MEDIUM,
         tags: [],
         sourceRef: '{{alert.uuid}}',
       },

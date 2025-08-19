@@ -8,12 +8,13 @@
 import {
   DEFAULT_TRANSLATION_RISK_SCORE,
   DEFAULT_TRANSLATION_SEVERITY,
+  SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER,
 } from '../../../../../../constants';
 import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
 export const getTranslationResultNode = (): GraphNode => {
-  return async (state) => {
+  return async (state, config) => {
     // Set defaults
     const elasticRule = {
       title: state.original_rule.title,
@@ -30,7 +31,10 @@ export const getTranslationResultNode = (): GraphNode => {
       translationResult = RuleTranslationResult.UNTRANSLATABLE;
     } else {
       if (query.startsWith('FROM logs-*')) {
-        elasticRule.query = query.replace('FROM logs-*', 'FROM [indexPattern]');
+        elasticRule.query = query.replace(
+          'FROM logs-*',
+          `FROM ${SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER}`
+        );
         translationResult = RuleTranslationResult.PARTIAL;
       } else if (state.validation_errors?.esql_errors) {
         translationResult = RuleTranslationResult.PARTIAL;

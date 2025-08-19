@@ -21,5 +21,6 @@
     "@kbn/config-schema",
     "@kbn/config-mocks",
     "@kbn/logging-mocks",
+    "@kbn/std",
   ]
 }

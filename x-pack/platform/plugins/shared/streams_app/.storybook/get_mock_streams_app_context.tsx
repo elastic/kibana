@@ -5,27 +5,27 @@
  * 2.0.
  */
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { Subject } from 'rxjs';
+import { getChartsTheme } from '@elastic/charts';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
+import type { DataStreamsStatsClient } from '@kbn/dataset-quality-plugin/public/services/data_streams_stats/data_streams_stats_client';
+import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
-import { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
-import { IngestPipelinesPluginStart } from '@kbn/ingest-pipelines-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import type { StreamsPluginStart } from '@kbn/streams-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public';
+import { SearchBar } from '@kbn/unified-search-plugin/public';
+import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { merge } from 'lodash';
+import React, { useMemo } from 'react';
+import { Subject } from 'rxjs';
+import type { DeepPartial } from 'utility-types';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 import { StreamsTelemetryService } from '../public/telemetry/service';
+import type { StreamsAppStartDependencies } from '../public/types';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
   const appParams = coreMock.createAppMountParameters();
@@ -58,28 +58,85 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
     refresh: jest.fn(),
   });
 
+  jest.spyOn(core.pricing, 'isFeatureAvailable').mockReturnValue(true);
+
   return {
     appParams,
     core,
     dependencies: {
       start: {
-        dataViews: {} as unknown as DataViewsPublicPluginStart,
-        data: {} as unknown as DataPublicPluginStart,
-        unifiedSearch: {} as unknown as UnifiedSearchPublicPluginStart,
-        streams: {} as unknown as StreamsPluginStart,
-        share: {} as unknown as SharePublicStart,
-        navigation: {} as unknown as NavigationPublicStart,
-        savedObjectsTagging: {} as unknown as SavedObjectTaggingPluginStart,
+        dataViews: {},
+        data: dataMock,
+        unifiedSearch: merge({}, unifiedSearchPluginMock.createStartContract(), {
+          ui: {
+            SearchBar: function SearchBarWithContext(props: {}) {
+              const unifiedSearchServices = useMemo(() => {
+                return {
+                  data: dataMock,
+                  storage: new Storage(window.localStorage),
+                  uiSettings: core.uiSettings,
+                } as unknown as IUnifiedSearchPluginServices;
+              }, []);
+              return (
+                <KibanaContextProvider services={unifiedSearchServices}>
+                  <SearchBar {...props} />
+                </KibanaContextProvider>
+              );
+            },
+          },
+        }),
+        streams: {},
+        share: {},
+        navigation: {},
+        savedObjectsTagging: {},
+        fieldFormats: fieldFormatsServiceMock.createStartContract(),
         fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-        licensing: {} as unknown as LicensingPluginStart,
-        indexManagement: {} as unknown as IndexManagementPluginStart,
-        ingestPipelines: {} as unknown as IngestPipelinesPluginStart,
-        discoverShared: {} as unknown as DiscoverSharedPublicStart,
-        charts: {} as unknown as ChartsPluginStart,
-        discover: {} as unknown as DiscoverStart,
-        observabilityAIAssistant: {} as unknown as ObservabilityAIAssistantPublicStart,
-      },
-    },
+        licensing: licensingMock.createStart(),
+        indexManagement: {},
+        ingestPipelines: {},
+        discoverShared: {},
+        discover: {
+          locator: {
+            getRedirectUrl: () => '',
+          },
+        },
+        observabilityAIAssistant: {
+          service: {
+            isEnabled: () => true,
+          },
+          useGenAIConnectors: () => {
+            return {
+              loading: false,
+              selectedConnector: 'azure-gpt4o',
+              connectors: [
+                {
+                  id: 'azure-gpt4o',
+                  actionTypeId: '.gen-ai',
+                  name: 'GPT-4o Azure',
+                  config: {
+                    apiUrl: '',
+                    apiProvider: 'Azure OpenAI',
+                  },
+                },
+              ],
+            };
+          },
+        } as unknown as ObservabilityAIAssistantPublicStart,
+        unifiedDocViewer: {} as unknown as UnifiedDocViewerStart,
+        charts: {
+          theme: {
+            useSparklineOverrides: () => {
+              return {} as ReturnType<
+                StreamsAppStartDependencies['charts']['theme']['useSparklineOverrides']
+              >;
+            },
+            useChartsBaseTheme: () => {
+              return getChartsTheme({ name: 'base', darkMode: false });
+            },
+          },
+        },
+      } as DeepPartial<StreamsAppStartDependencies>,
+    } as { start: StreamsAppStartDependencies },
     services: {
       dataStreamsClient: Promise.resolve({} as unknown as DataStreamsStatsClient),
       PageTemplate: () => null,

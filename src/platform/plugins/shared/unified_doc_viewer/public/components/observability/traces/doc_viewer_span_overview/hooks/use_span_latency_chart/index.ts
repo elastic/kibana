@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useEffect } from 'react';
 
-import { EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import type { HistogramItem } from '@kbn/apm-types-shared';
-import { DurationDistributionChartData } from '@kbn/apm-ui-shared';
+import type { DurationDistributionChartData } from '@kbn/apm-ui-shared';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getUnifiedDocViewerServices } from '../../../../../../plugin';
 
@@ -46,6 +47,7 @@ interface GetLatencyChartParams {
   signal: AbortSignal;
   spanName: string;
   serviceName: string;
+  isOtelSpan: boolean;
 }
 
 const getSpanLatencyChart = ({
@@ -53,6 +55,7 @@ const getSpanLatencyChart = ({
   signal,
   spanName,
   serviceName,
+  isOtelSpan,
 }: GetLatencyChartParams): Promise<{
   overallHistogram?: HistogramItem[];
   percentileThresholdValue?: number;
@@ -65,6 +68,7 @@ const getSpanLatencyChart = ({
       spanName,
       serviceName,
       chartType: 'spanLatency',
+      isOtel: isOtelSpan,
       end: timeFilter.to,
       environment: 'ENVIRONMENT_ALL',
       kuery: '',
@@ -83,9 +87,14 @@ interface SpanLatencyChartData {
 interface UseSpanLatencyChartParams {
   spanName: string;
   serviceName: string;
+  isOtelSpan?: boolean;
 }
 
-export const useSpanLatencyChart = ({ spanName, serviceName }: UseSpanLatencyChartParams) => {
+export const useSpanLatencyChart = ({
+  spanName,
+  serviceName,
+  isOtelSpan = false,
+}: UseSpanLatencyChartParams) => {
   const { core } = getUnifiedDocViewerServices();
   const { euiTheme } = useEuiTheme();
 
@@ -100,6 +109,7 @@ export const useSpanLatencyChart = ({ spanName, serviceName }: UseSpanLatencyCha
         signal,
         spanName,
         serviceName,
+        isOtelSpan,
       });
 
       return {

@@ -1,0 +1,28 @@
+{
+  "inference.put_elasticsearch": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "url_components": {
+      "task_type": [
+        "rerank",
+        "sparse_embedding",
+        "text_embedding"
+      ]
+    },
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "_inference/{task_type}/{elasticsearch_inference_id}"
+    ],
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-inference-put-elasticsearch",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

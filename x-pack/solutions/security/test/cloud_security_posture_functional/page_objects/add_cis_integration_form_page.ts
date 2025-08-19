@@ -34,6 +34,10 @@ const TEST_IDS = {
   AGENTLESS_STATUS_BADGE: 'agentlessStatusBadge',
   CREATE_AGENT_POLICY_NAME_FIELD: 'createAgentPolicyNameField',
   CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
+  GCP_POLICY_OPTION_TEST_ID: 'cloudSetupGcpTestId',
+  AWS_POLICY_OPTION_TEST_ID: 'cloudSetupAwsTestId',
+  AZURE_POLICY_OPTION_TEST_ID: 'cloudSetupAzureTestId',
+  INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID: 'agentPolicyFormSystemMonitoringCheckbox',
 } as const;
 
 export function AddCisIntegrationFormPageProvider({
@@ -306,7 +310,7 @@ export function AddCisIntegrationFormPageProvider({
   const findOptionInPage = async (text: string) => {
     await PageObjects.header.waitUntilLoadingHasFinished();
     const optionToBeClicked = await testSubjects.find(text);
-    return await optionToBeClicked;
+    return optionToBeClicked;
   };
 
   const clickAccordianButton = async (text: string) => {
@@ -352,7 +356,41 @@ export function AddCisIntegrationFormPageProvider({
     await optionToBeClicked.click();
   };
 
-  const clickSaveButton = async () => {
+  const isSaveButtonEnabled = async () => {
+    const saveButton = await testSubjects.find(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
+    const isEnabled = await saveButton.getAttribute('disabled');
+    return isEnabled === null; // If the button is enabled, it won't have a 'disabled' attribute
+  };
+
+  const clickAwsPolicyOption = async () => {
+    const awsPolicyOption = await findOptionInPage(TEST_IDS.AWS_POLICY_OPTION_TEST_ID);
+    await awsPolicyOption.click();
+  };
+
+  const clickGcpPolicyOption = async () => {
+    const gcpPolicyOption = await findOptionInPage(TEST_IDS.GCP_POLICY_OPTION_TEST_ID);
+    await gcpPolicyOption.click();
+  };
+
+  const clickAzurePolicyOption = async () => {
+    const azurePolicyOption = await findOptionInPage(TEST_IDS.AZURE_POLICY_OPTION_TEST_ID);
+    await azurePolicyOption.click();
+  };
+
+  const clickSaveButton = async (includeSystemPackage: boolean = false) => {
+    await PageObjects.header.waitUntilLoadingHasFinished();
+    const isIncludeSystemPackageCheckboxExists = await testSubjects.exists(
+      TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
+    );
+
+    // If the checkbox is not found, it means the system package option is not available (e.g., when using agentless setup)
+    if (isIncludeSystemPackageCheckboxExists) {
+      const includeSystemPackageCheckbox = (await findOptionInPage(
+        TEST_IDS.INCLUDE_SYSTEM_INTEGRATION_CHECKBOX_TEST_ID
+      )) as unknown as HTMLInputElement;
+      includeSystemPackageCheckbox.checked = includeSystemPackage;
+    }
+
     const optionToBeClicked = await findOptionInPage(TEST_IDS.CREATE_PACKAGE_POLICY_SAVE_BUTTON);
     await optionToBeClicked.click();
   };
@@ -377,6 +415,19 @@ export function AddCisIntegrationFormPageProvider({
     const textField = await testSubjects.find(selector);
     await textField.clearValueWithKeyboard();
     await textField.type(text);
+  };
+
+  const fillInComboBox = async (selector: string, text: string) => {
+    const comboBox = await testSubjects.find(selector);
+    // Click to open the combobox
+    await comboBox.click();
+    // Find the input within the combobox
+    const input = await comboBox.findByCssSelector('input');
+    // Clear and type new value
+    await input.clearValueWithKeyboard();
+    await input.type(text);
+    // Press Enter to create the custom option
+    await input.pressKeys(browser.keys.ENTER);
   };
 
   const chooseDropDown = async (selector: string, text: string) => {
@@ -654,5 +705,10 @@ export function AddCisIntegrationFormPageProvider({
     closeAllOpenTabs,
     waitUntilLaunchCloudFormationButtonAppears,
     showCredentialJsonSecretPanel,
+    isSaveButtonEnabled,
+    clickAwsPolicyOption,
+    clickGcpPolicyOption,
+    clickAzurePolicyOption,
+    fillInComboBox,
   };
 }

@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
 import { ProfilingApiError } from '../common/api_supertest';
-import { getProfilingApiClient } from '../common/config';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { getProfilingApiClient } from '../common/config';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { setupProfiling } from '../utils/profiling_data';
 import { getBettertest } from '../common/bettertest';
 
@@ -105,7 +105,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
             `Endpoint: ${endpointPath}
               Status code: ${e.res.status}
               Response: ${e.res}
-    
+
               ${e.message}`
           );
         }

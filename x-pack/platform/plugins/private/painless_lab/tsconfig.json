@@ -7,7 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "ui_tests/**/*",
+    "test/scout/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
@@ -23,6 +23,8 @@
     "@kbn/code-editor",
     "@kbn/react-kibana-context-render",
     "@kbn/scout",
+    "@kbn/css-utils",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

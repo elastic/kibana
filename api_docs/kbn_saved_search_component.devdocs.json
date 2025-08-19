@@ -240,6 +240,20 @@
           },
           {
             "parentPluginId": "@kbn/saved-search-component",
+            "id": "def-public.SavedSearchComponentProps.columns",
+            "type": "Array",
+            "tags": [],
+            "label": "columns",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-saved-search-component/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/saved-search-component",
             "id": "def-public.SavedSearchComponentProps.height",
             "type": "CompoundType",
             "tags": [],

@@ -42,16 +42,17 @@ describe('getCellRendererForGivenRecord', () => {
   });
 
   it('should return cell renderer correctly for allowed fields with correct data format', () => {
-    const cellRenderer = getCellRendererForGivenRecord('host.name');
+    const cellRenderer = getCellRendererForGivenRecord('kibana.alert.workflow_status');
     expect(cellRenderer).toBeDefined();
     const props: DataGridCellValueElementProps = {
-      columnId: 'host.name',
+      columnId: 'kibana.alert.workflow_status',
       isDetails: false,
       isExpanded: false,
       row: {
         id: '1',
         raw: {},
         flattened: {
+          'kibana.alert.workflow_status': 'open',
           'host.name': 'host1',
           'user.name': 'user1',
         },
@@ -72,6 +73,7 @@ describe('getCellRendererForGivenRecord', () => {
         isTimeline: false,
         isDetails: false,
         data: [
+          { field: 'kibana.alert.workflow_status', value: ['open'] },
           { field: 'host.name', value: ['host1'] },
           { field: 'user.name', value: ['user1'] },
         ],
@@ -79,7 +81,7 @@ describe('getCellRendererForGivenRecord', () => {
         scopeId: 'one-discover',
         linkValues: undefined,
         header: {
-          id: 'host.name',
+          id: 'kibana.alert.workflow_status',
           columnHeaderType: 'not-filtered',
           type: 'string',
         },
@@ -92,7 +94,7 @@ describe('getCellRendererForGivenRecord', () => {
         isExpandable: false,
         isExpanded: false,
         setCellProps: props.setCellProps,
-        columnId: 'host.name',
+        columnId: 'kibana.alert.workflow_status',
       },
       {}
     );

@@ -14,8 +14,9 @@ jest.mock('../../../../capabilities/check_capabilities', () => ({
 }));
 jest.mock('../../../../services/ml_api_service', () => 'ml');
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { screen, fireEvent, waitFor } from '@testing-library/react';
 
 import { DeleteFilterListModal } from './delete_filter_list_modal';
 
@@ -27,32 +28,76 @@ const testProps = {
 };
 
 describe('DeleteFilterListModal', () => {
-  test('renders as disabled delete button when no lists selected', () => {
-    const component = shallowWithIntl(<DeleteFilterListModal {...testProps} />);
+  test('renders as disabled delete button when no lists selected', async () => {
+    const emptyListsProps = {
+      ...testProps,
+      selectedFilterLists: [],
+    };
 
-    expect(component).toMatchSnapshot();
+    const { container } = renderWithI18n(<DeleteFilterListModal {...emptyListsProps} />);
+
+    // Find the delete button
+    const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
+
+    // Verify it's disabled
+    expect(deleteButton).toBeDisabled();
+
+    // Take a snapshot of the rendered component
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('renders as enabled delete button when a list is selected', () => {
-    const component = shallowWithIntl(<DeleteFilterListModal {...testProps} />);
+  test('renders as enabled delete button when a list is selected', async () => {
+    const { container } = renderWithI18n(<DeleteFilterListModal {...testProps} />);
 
-    expect(component).toMatchSnapshot();
+    // Find the delete button
+    const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
+
+    // Verify it's enabled
+    expect(deleteButton).not.toBeDisabled();
+
+    // Take a snapshot of the rendered component
+    expect(container.firstChild).toMatchSnapshot();
   });
 
-  test('renders modal after clicking delete button', () => {
-    const wrapper = shallowWithIntl(<DeleteFilterListModal {...testProps} />);
-    wrapper.find('EuiButton').simulate('click');
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+  test('renders modal after clicking delete button', async () => {
+    renderWithI18n(<DeleteFilterListModal {...testProps} />);
+
+    // Find and click the delete button
+    const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
+    fireEvent.click(deleteButton);
+
+    // Wait for the modal to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('mlFilterListDeleteConfirmation')).toBeInTheDocument();
+    });
+
+    // Verify the modal content
+    expect(screen.getByText('Delete 2 filter lists?')).toBeInTheDocument();
   });
 
-  test('renders as delete button after opening and closing modal', () => {
-    const wrapper = shallowWithIntl(<DeleteFilterListModal {...testProps} />);
-    wrapper.find('EuiButton').simulate('click');
-    const instance = wrapper.instance();
-    instance.closeModal();
-    wrapper.update();
-    expect(wrapper).toMatchSnapshot();
+  test('renders as delete button after opening and closing modal', async () => {
+    renderWithI18n(<DeleteFilterListModal {...testProps} />);
+
+    // Find and click the delete button to open the modal
+    const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
+    fireEvent.click(deleteButton);
+
+    // Wait for the modal to appear
+    await waitFor(() => {
+      expect(screen.getByTestId('mlFilterListDeleteConfirmation')).toBeInTheDocument();
+    });
+
+    // Find and click the cancel button to close the modal
+    const cancelButton = screen.getByText('Cancel');
+    fireEvent.click(cancelButton);
+
+    // Wait for the modal to disappear
+    await waitFor(() => {
+      expect(screen.queryByTestId('mlFilterListDeleteConfirmation')).not.toBeInTheDocument();
+    });
+
+    // Verify the delete button is visible again
+    expect(screen.getByTestId('mlFilterListsDeleteButton')).toBeInTheDocument();
   });
 });
 
@@ -61,13 +106,20 @@ describe('DeleteFilterListModal false canDeleteFilter privilege', () => {
     jest.resetModules();
   });
 
-  test('renders as disabled delete button', () => {
-    mockCheckPermission.mockImplementationOnce(() => {
-      return false;
-    });
+  test('renders as disabled delete button', async () => {
+    mockCheckPermission.mockImplementationOnce(() => false);
 
-    const component = shallowWithIntl(<DeleteFilterListModal {...testProps} />);
+    const { container } = renderWithI18n(
+      <DeleteFilterListModal {...testProps} canDeleteFilter={false} />
+    );
 
-    expect(component).toMatchSnapshot();
+    // Find the delete button
+    const deleteButton = screen.getByTestId('mlFilterListsDeleteButton');
+
+    // Verify it's disabled
+    expect(deleteButton).toBeDisabled();
+
+    // Take a snapshot of the rendered component
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

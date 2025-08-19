@@ -7,29 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BinaryExpressionGroup } from '../ast/constants';
-import { binaryExpressionGroup, isBinaryExpression } from '../ast/helpers';
+import type { BinaryExpressionGroup } from '../ast/grouping';
+import { binaryExpressionGroup } from '../ast/grouping';
+import { isBinaryExpression } from '../ast/is';
 import type { ESQLAstBaseItem, ESQLAstQueryExpression } from '../types';
-import {
+import type {
   CommandOptionVisitorContext,
-  CommandVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
   ListLiteralExpressionVisitorContext,
   MapExpressionVisitorContext,
-  Visitor,
 } from '../visitor';
+import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
-import { BasicPrettyPrinter, BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
+import { BasicPrettyPrinter } from './basic_pretty_printer';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
 import { getPrettyPrintStats } from './helpers';
 import { LeafPrinter } from './leaf_printer';
-
-/**
- * @todo
- *
- * 1. Implement list literal pretty printing.
- */
 
 interface Input {
   indent: string;
@@ -480,6 +475,7 @@ export class WrappingPrettyPrinter {
   protected readonly visitor: Visitor<any> = new Visitor()
     .on('visitExpression', (ctx, inp: Input): Output => {
       const txt = ctx.node.text ?? '<EXPRESSION>';
+      // TODO: decorate with comments
       return { txt };
     })
 
@@ -506,13 +502,6 @@ export class WrappingPrettyPrinter {
 
     .on('visitLiteralExpression', (ctx, inp: Input): Output => {
       const formatted = LeafPrinter.literal(ctx.node);
-      const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
-
-      return { txt, indented };
-    })
-
-    .on('visitTimeIntervalLiteralExpression', (ctx, inp: Input): Output => {
-      const formatted = LeafPrinter.timeInterval(ctx.node);
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
 
       return { txt, indented };
@@ -547,25 +536,17 @@ export class WrappingPrettyPrinter {
       return { txt, indented };
     })
 
-    .on('visitRenameExpression', (ctx, inp: Input): Output => {
-      const operator = this.keyword('AS');
-      const expression = this.printBinaryOperatorExpression(ctx, operator, inp);
-      const { txt, indented } = this.decorateWithComments(
-        { ...inp, suffix: '' },
-        ctx.node,
-        expression.txt,
-        expression.indented
-      );
-
-      return { txt, indented };
-    })
-
     .on('visitListLiteralExpression', (ctx, inp: Input): Output => {
       const args = this.printChildrenList(ctx, {
         indent: inp.indent,
         remaining: inp.remaining - 1,
       });
-      const formatted = `[${args.txt}]`;
+      const node = ctx.node;
+      const isTuple = node.subtype === 'tuple';
+      const leftParenthesis = isTuple ? '(' : '[';
+      const rightParenthesis = isTuple ? ')' : ']';
+      const rightParenthesisIndent = args.oneArgumentPerLine ? '\n' + inp.indent : '';
+      const formatted = leftParenthesis + args.txt + rightParenthesisIndent + rightParenthesis;
       const { txt, indented } = this.decorateWithComments(inp, ctx.node, formatted);
 
       return { txt, indented };
@@ -609,7 +590,9 @@ export class WrappingPrettyPrinter {
       switch (node.subtype) {
         case 'unary-expression': {
           const separator = operator === '-' || operator === '+' ? '' : ' ';
-          txt = `${operator}${separator}${ctx.visitArgument(0, inp).txt}`;
+          const formatted = ctx.visitArgument(0, inp);
+
+          txt = `${operator}${separator}${formatted.txt}`;
           break;
         }
         case 'postfix-unary-expression': {
@@ -628,7 +611,7 @@ export class WrappingPrettyPrinter {
 
           let breakClosingParenthesis = false;
 
-          if (getPrettyPrintStats(ctx.node).hasRightSingleLineComments) {
+          if (getPrettyPrintStats(ctx.node.args).hasRightSingleLineComments) {
             breakClosingParenthesis = true;
           }
 
@@ -642,7 +625,7 @@ export class WrappingPrettyPrinter {
         }
       }
 
-      return { txt };
+      return this.decorateWithComments({ ...inp, suffix: '' }, ctx.node, txt);
     })
 
     .on('visitCommandOption', (ctx, inp: Input): Output => {
@@ -654,6 +637,8 @@ export class WrappingPrettyPrinter {
       const argsFormatted = args.txt ? `${args.txt[0] === '\n' ? '' : ' '}${args.txt}` : '';
       const separator = commandOptionsWithEqualsSeparator.has(ctx.node.name) ? ' =' : '';
       const txt = `${option}${separator}${argsFormatted}`;
+
+      // TODO: decorate with comments
 
       return { txt, lines: args.lines };
     })

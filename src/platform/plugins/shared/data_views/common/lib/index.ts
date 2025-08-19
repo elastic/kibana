@@ -9,5 +9,4 @@
 
 export { DataViewMissingIndices } from './errors';
 
-export * from './types';
-export { validateDataView } from './validate_data_view';
+export * from '@kbn/data-view-validation';

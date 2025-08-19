@@ -7,6 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { API_VERSIONS } from '../../../common/constants';
 import { PLUGIN_ID } from '../../../common';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
@@ -33,12 +34,15 @@ export const getAgentDetailsRoute = (router: IRouter, osqueryContext: OsqueryApp
         },
       },
       async (context, request, response) => {
+        const space = await osqueryContext.service.getActiveSpace(request);
+
         let agent;
 
         try {
           agent = await osqueryContext.service
             .getAgentService()
-            ?.asInternalUser?.getAgent(request.params.id);
+            ?.asInternalScopedUser(space?.id ?? DEFAULT_SPACE_ID)
+            ?.getAgent(request.params.id);
         } catch (err) {
           return response.notFound();
         }

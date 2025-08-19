@@ -24,7 +24,8 @@ import {
 } from '@kbn/optimizer-webpack-helpers';
 import { NodeLibsBrowserPlugin } from '@kbn/node-libs-browser-webpack-plugin';
 
-import { Bundle, BundleRemotes, WorkerConfig, parseDllManifest } from '../common';
+import type { Bundle, BundleRemotes, WorkerConfig } from '../common';
+import { parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';
 import { BundleRemoteUsedExportsPlugin } from './bundle_remote_used_exports_plugin';
@@ -224,6 +225,12 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
+                      silenceDeprecations: [
+                        'color-functions',
+                        'import',
+                        'global-builtin',
+                        'legacy-js-api',
+                      ],
                     },
                   },
                 },
@@ -254,6 +261,10 @@ export function getWebpackConfig(
           test: /\.peggy$/,
           loader: require.resolve('@kbn/peggy-loader'),
         },
+        {
+          test: /\.text$/,
+          loader: require.resolve('@kbn/dot-text-loader'),
+        },
         // emits a separate file and exports the URL. Previously achievable by using file-loader.
         {
           include: [
@@ -273,7 +284,7 @@ export function getWebpackConfig(
         },
         // automatically chooses between exporting a data URI and emitting a separate file. Previously achievable by using url-loader with asset size limit.
         {
-          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg)(\?|$)/,
+          test: /\.(woff|woff2|ttf|eot|svg|ico|png|jpg|gif|jpeg|webp)(\?|$)/,
           type: 'asset',
           parser: {
             dataUrlCondition: {
@@ -288,10 +299,6 @@ export function getWebpackConfig(
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'module', 'main'],
       alias: {
-        core_app_image_assets: Path.resolve(
-          worker.repoRoot,
-          'src/core/public/styles/core_app/images'
-        ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
         'react-dom$': 'react-dom/profiling',
         'scheduler/tracing': 'scheduler/tracing-profiling',

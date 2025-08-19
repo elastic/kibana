@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { getQueryFromSavedSearchObject, getEsQueryFromSavedSearch } from './saved_search_utils';
-import type { SavedSearchSavedObject } from '../../../../common/types';
+import { getEsQueryFromSavedSearch } from './saved_search_utils';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { stubbedSavedObjectIndexPattern } from '@kbn/data-views-plugin/common/data_view.stub';
 import { DataView } from '@kbn/data-views-plugin/public';
@@ -120,6 +119,7 @@ const luceneSavedSearch: SavedSearch = {
   }),
 } as unknown as SavedSearch;
 
+<<<<<<< HEAD
 // @ts-expect-error We don't need the full object here
 const luceneSavedSearchObj: SavedSearchSavedObject = {
   attributes: {
@@ -222,6 +222,8 @@ describe('getQueryFromSavedSearchObject()', () => {
   });
 });
 
+=======
+>>>>>>> upstream/main
 describe('getEsQueryFromSavedSearch()', () => {
   it('return undefined if saved search is not provided', () => {
     expect(

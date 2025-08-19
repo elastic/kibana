@@ -16,9 +16,10 @@ import {
   FLYOUT_HISTORY_BUTTON_TEST_ID,
   HEADER_ACTIONS_TEST_ID,
 } from './test_ids';
-import type { ExpandableFlyoutState, FlyoutPanelHistory } from '@kbn/expandable-flyout';
 import {
   type ExpandableFlyoutApi,
+  type ExpandableFlyoutState,
+  type FlyoutPanelHistory,
   useExpandableFlyoutApi,
   useExpandableFlyoutHistory,
   useExpandableFlyoutState,
@@ -165,7 +166,7 @@ describe('<FlyoutNavigation />', () => {
     it('should not render history button if in rule preview', () => {
       const { container } = render(
         <ExpandableFlyoutTestProviders>
-          <FlyoutNavigation flyoutIsExpandable={false} isPreview={true} />
+          <FlyoutNavigation flyoutIsExpandable={false} isRulePreview={true} />
         </ExpandableFlyoutTestProviders>
       );
       expect(container).toBeEmptyDOMElement();

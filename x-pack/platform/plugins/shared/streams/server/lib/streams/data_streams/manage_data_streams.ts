@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { IngestStreamLifecycle, isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
-import { omit } from 'lodash';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  IngestStreamLifecycle,
+  IngestStreamLifecycleDSL,
+  IngestStreamLifecycleDisabled,
+  IngestStreamLifecycleILM,
+} from '@kbn/streams-schema';
+import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
+import type { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -26,6 +32,12 @@ interface UpdateOrRolloverDataStreamOptions {
   esClient: ElasticsearchClient;
   name: string;
   logger: Logger;
+}
+
+interface UpdateDefaultIngestPipelineOptions {
+  esClient: ElasticsearchClient;
+  name: string;
+  pipeline: string | undefined;
 }
 
 export async function upsertDataStream({ esClient, name, logger }: DataStreamManagementOptions) {
@@ -54,64 +66,33 @@ export async function deleteDataStream({ esClient, name, logger }: DeleteDataStr
   }
 }
 
-export async function updateOrRolloverDataStream({
+export async function rolloverDataStream({
   esClient,
   name,
   logger,
 }: UpdateOrRolloverDataStreamOptions) {
+  await retryTransientEsErrors(() => esClient.indices.rollover({ alias: name, lazy: true }), {
+    logger,
+  });
+}
+
+export async function updateDefaultIngestPipeline({
+  esClient,
+  name,
+  pipeline,
+}: UpdateDefaultIngestPipelineOptions) {
   const dataStreams = await esClient.indices.getDataStream({ name });
   for (const dataStream of dataStreams.data_streams) {
-    // simulate index and try to patch the write index
-    // if that doesn't work, roll it over
-    const simulatedIndex = await esClient.indices.simulateIndexTemplate({
-      name,
-    });
     const writeIndex = dataStream.indices.at(-1);
     if (!writeIndex) {
       continue;
     }
-    try {
-      // Apply blocklist to avoid changing settings we don't want to
-      const simulatedIndexSettings = omit(simulatedIndex.template.settings, [
-        'index.codec',
-        'index.mapping.ignore_malformed',
-        'index.mode',
-        'index.logsdb.sort_on_host_name',
-      ]);
-
-      await retryTransientEsErrors(
-        () =>
-          Promise.all([
-            esClient.indices.putMapping({
-              index: writeIndex.index_name,
-              properties: simulatedIndex.template.mappings.properties,
-            }),
-            esClient.indices.putSettings({
-              index: writeIndex.index_name,
-              settings: simulatedIndexSettings,
-            }),
-          ]),
-        {
-          logger,
-        }
-      );
-    } catch (error: any) {
-      if (
-        typeof error.message !== 'string' ||
-        !error.message.includes('illegal_argument_exception')
-      ) {
-        throw error;
-      }
-      try {
-        await retryTransientEsErrors(() => esClient.indices.rollover({ alias: dataStream.name }), {
-          logger,
-        });
-        logger.debug(() => `Rolled over data stream: ${dataStream.name}`);
-      } catch (rolloverError: any) {
-        logger.error(`Error rolling over data stream: ${error.message}`);
-        throw error;
-      }
-    }
+    await esClient.indices.putSettings({
+      index: writeIndex.index_name,
+      settings: {
+        'index.default_pipeline': pipeline,
+      },
+    });
   }
 }
 
@@ -129,39 +110,147 @@ export async function updateDataStreamsLifecycle({
   isServerless: boolean;
 }) {
   try {
-    await retryTransientEsErrors(
-      () =>
-        esClient.indices.putDataLifecycle({
-          name: names,
-          data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
-        }),
-      { logger }
-    );
+    if (isIlmLifecycle(lifecycle)) {
+      await putDataStreamsSettings({
+        esClient,
+        names,
+        logger,
+        settings: {
+          'index.lifecycle.name': lifecycle.ilm.policy,
+          'index.lifecycle.prefer_ilm': true,
+        },
+      });
+    } else if (isDslLifecycle(lifecycle)) {
+      await retryTransientEsErrors(
+        () =>
+          esClient.indices.putDataLifecycle({
+            name: names,
+            data_retention: lifecycle.dsl.data_retention,
+          }),
+        { logger }
+      );
 
-    // if we transition from ilm to dsl or vice versa, the rolled over backing
-    // indices need to be updated or they'll retain the lifecycle configuration
-    // set at the time of creation.
-    // this is not needed for serverless since only dsl is allowed.
-    if (isServerless) {
-      return;
-    }
-
-    const isIlm = isIlmLifecycle(lifecycle);
-    await retryTransientEsErrors(
-      () =>
-        // TODO: use client method once available
-        esClient.transport.request({
-          method: 'PUT',
-          path: `/_data_stream/${names.join(',')}/_settings`,
-          body: {
-            'index.lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
-            'index.lifecycle.prefer_ilm': isIlm,
+      if (!isServerless) {
+        // we don't need overrides for serverless since data streams can
+        // only be managed by dsl
+        await putDataStreamsSettings({
+          esClient,
+          names,
+          logger,
+          settings: {
+            'index.lifecycle.name': null,
+            'index.lifecycle.prefer_ilm': false,
           },
-        }),
-      { logger }
-    );
+        });
+      }
+    } else if (isInheritLifecycle(lifecycle)) {
+      // classic streams only - inheriting a lifecycle means falling back to
+      // the template configuration. if we find a DSL we need to set it
+      // explicitly since there is no way to fall back to the template value,
+      // for ILM or disabled we only have to unset any overrides
+      await Promise.all(
+        names.map(async (name) => {
+          const { template } = (await retryTransientEsErrors(
+            () => esClient.indices.simulateIndexTemplate({ name }),
+            {
+              logger,
+            }
+          )) as {
+            template: IndicesSimulateTemplateTemplate & {
+              lifecycle?: { enabled: boolean; data_retention?: string };
+            };
+          };
+
+          const templateLifecycle = getTemplateLifecycle(template);
+          if (isDslLifecycle(templateLifecycle)) {
+            await retryTransientEsErrors(
+              () =>
+                esClient.indices.putDataLifecycle({
+                  name,
+                  data_retention: templateLifecycle.dsl.data_retention,
+                }),
+              { logger }
+            );
+          } else {
+            await retryTransientEsErrors(() => esClient.indices.deleteDataLifecycle({ name }), {
+              logger,
+            });
+          }
+
+          if (!isServerless) {
+            // unset any overriden settings
+            await putDataStreamsSettings({
+              esClient,
+              names: [name],
+              logger,
+              settings: {
+                'index.lifecycle.name': null,
+                'index.lifecycle.prefer_ilm': null,
+              },
+            });
+          }
+        })
+      );
+    }
   } catch (err: any) {
     logger.error(`Error updating data stream lifecycle: ${err.message}`);
     throw err;
   }
+}
+
+async function putDataStreamsSettings({
+  esClient,
+  names,
+  logger,
+  settings,
+}: {
+  esClient: ElasticsearchClient;
+  names: string[];
+  logger: Logger;
+  settings: {
+    'index.lifecycle.name'?: string | null;
+    'index.lifecycle.prefer_ilm'?: boolean | null;
+  };
+}) {
+  await retryTransientEsErrors(
+    () =>
+      // TODO: use client method once available
+      esClient.transport.request({
+        method: 'PUT',
+        path: `/_data_stream/${names.join(',')}/_settings`,
+        body: settings,
+      }),
+    { logger }
+  );
+}
+
+export function getTemplateLifecycle(
+  template: IndicesSimulateTemplateTemplate & {
+    lifecycle?: { enabled: boolean; data_retention?: string };
+  }
+): IngestStreamLifecycleILM | IngestStreamLifecycleDSL | IngestStreamLifecycleDisabled {
+  const toBoolean = (value: boolean | string | undefined): boolean => {
+    if (typeof value === 'boolean') {
+      return value;
+    }
+    return value === 'true';
+  };
+
+  const hasEffectiveDsl =
+    toBoolean(template.lifecycle?.enabled) &&
+    !(
+      toBoolean(template.settings.index?.lifecycle?.prefer_ilm) &&
+      template.settings.index?.lifecycle?.name
+    );
+  if (hasEffectiveDsl) {
+    return { dsl: { data_retention: template.lifecycle!.data_retention } };
+  }
+
+  if (template.settings.index?.lifecycle?.name) {
+    // if dsl is not enabled and a policy is set, the ilm will be effective
+    // regardless of the prefer_ilm setting
+    return { ilm: { policy: template.settings.index.lifecycle.name } };
+  }
+
+  return { disabled: {} };
 }

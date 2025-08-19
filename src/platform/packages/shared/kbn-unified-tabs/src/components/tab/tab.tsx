@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  MouseEvent,
-  KeyboardEvent,
-  useCallback,
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-} from 'react';
+import type { MouseEvent, KeyboardEvent } from 'react';
+import React, { useCallback, useState, useRef, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import {
@@ -30,6 +23,7 @@ import {
   keys,
   useGeneratedHtmlId,
   EuiProgress,
+  EuiTextTruncate,
 } from '@elastic/eui';
 import { TabMenu } from '../tab_menu';
 import { EditTabLabel, type EditTabLabelProps } from './edit_tab_label';
@@ -81,7 +75,7 @@ export const Tab: React.FC<TabProps> = (props) => {
   const previewData = useMemo(() => getPreviewData(item), [getPreviewData, item]);
 
   const closeButtonLabel = i18n.translate('unifiedTabs.closeTabButton', {
-    defaultMessage: 'Close session',
+    defaultMessage: 'Close tab',
   });
 
   const hidePreview = useCallback(() => setShowPreview(false), [setShowPreview]);
@@ -204,8 +198,19 @@ export const Tab: React.FC<TabProps> = (props) => {
               {previewData.status === TabStatus.RUNNING && (
                 <EuiProgress size="xs" color="accent" position="absolute" />
               )}
-              <EuiText id={tabLabelId} color="inherit" size="s" css={getTabLabelCss(euiTheme)}>
-                {item.label}
+              <EuiText
+                id={tabLabelId}
+                color="inherit"
+                size="s"
+                css={getTabLabelCss(euiTheme)}
+                className="unifiedTabs__tabLabelText"
+              >
+                <EuiTextTruncate
+                  text={item.label}
+                  // Truncation width must be equal to max tab width minus padding
+                  width={tabsSizeConfig.regularTabMaxWidth - euiTheme.base}
+                  truncation="middle"
+                />
               </EuiText>
             </div>
           )}
@@ -303,6 +308,14 @@ function getTabContainerCss(
       .unifiedTabs__tabLabel {
         width: calc(100% - ${euiTheme.size.l} * 2);
       }
+
+      .unifiedTabs__tabLabelText {
+        mask-image: linear-gradient(
+          to right,
+          rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
+          rgba(255, 0, 0, 0.1) 100%
+        );
+      }
     }
 
     ${!isSelected
@@ -342,13 +355,7 @@ function getTabLabelContainerCss(euiTheme: EuiThemeComputed) {
 
 function getTabLabelCss(euiTheme: EuiThemeComputed) {
   return css`
-    padding-right: ${euiTheme.size.s};
     white-space: nowrap;
-    mask-image: linear-gradient(
-      to right,
-      rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
-      rgba(255, 0, 0, 0.1) 100%
-    );
     transform: translateZ(0);
     overflow: hidden;
   `;

@@ -10,9 +10,10 @@ import {
   parse,
   Walker,
   walk,
-  BasicPrettyPrinter,
+  Parser,
   isFunctionExpression,
   isColumn,
+  WrappingPrettyPrinter,
 } from '@kbn/esql-ast';
 
 import type {
@@ -25,7 +26,7 @@ import type {
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
@@ -138,9 +139,9 @@ export const isQueryWrappedByPipes = (query: string): boolean => {
   return numberOfCommands === pipesWithNewLine?.length;
 };
 
-export const prettifyQuery = (query: string, isWrapped: boolean): string => {
-  const { root } = parse(query);
-  return BasicPrettyPrinter.print(root, { multiline: !isWrapped });
+export const prettifyQuery = (src: string): string => {
+  const { root } = Parser.parse(src, { withFormatting: true });
+  return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
@@ -228,6 +229,55 @@ const hasQuestionMarkAtEndOrSecondLastPosition = (queryString: string) => {
   return lastChar === '?' || secondLastChar === '?';
 };
 
+/**
+ * Finds the column closest to the given cursor position within an array of columns.
+ *
+ * @param columns An array of ES|QL columns.
+ * @param cursorPosition The current cursor position.
+ * @returns The column object closest to the cursor, or null if the columns array is empty.
+ */
+export function findClosestColumn(
+  columns: ESQLColumn[],
+  cursorPosition?: monaco.Position
+): ESQLColumn | undefined {
+  if (columns.length === 0) {
+    return undefined;
+  }
+
+  if (!cursorPosition) {
+    return columns[0]; // If no cursor position is provided, return the first column
+  }
+
+  const cursorCol = cursorPosition.column;
+  let closestColumn;
+  let minDistance = Infinity;
+
+  for (const column of columns) {
+    const columnMin = column.location.min;
+    const columnMax = column.location.max;
+
+    // If the cursor is within the column's range, it's the closest
+    if (cursorCol >= columnMin && cursorCol <= columnMax) {
+      return column;
+    }
+
+    // Calculate distance from the cursor to the nearest edge of the column
+    let distance: number;
+    if (cursorCol < columnMin) {
+      distance = columnMin - cursorCol; // Cursor is to the left of the column
+    } else {
+      distance = cursorCol - columnMax; // Cursor is to the right of the column
+    }
+
+    if (distance < minDistance) {
+      minDistance = distance;
+      closestColumn = column;
+    }
+  }
+
+  return closestColumn;
+}
+
 export const getValuesFromQueryField = (queryString: string, cursorPosition?: monaco.Position) => {
   const queryInCursorPosition = getQueryUpToCursor(queryString, cursorPosition);
 
@@ -244,7 +294,7 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
     visitColumn: (node) => columns.push(node),
   });
 
-  const column = Walker.match(lastCommand, { type: 'column' });
+  const column = findClosestColumn(columns, cursorPosition);
 
   if (column && column.name && column.name !== '*') {
     return `${column.name}`;
@@ -326,17 +376,61 @@ export const getCategorizeColumns = (esql: string): string[] => {
   if (!renameCommand) {
     return columns;
   }
-  const renameOptions: ESQLCommandOption[] = [];
+  const renameFunctions: ESQLFunction[] = [];
   walk(renameCommand, {
-    visitCommandOption: (node) => renameOptions.push(node),
+    visitFunction: (node) => renameFunctions.push(node),
   });
 
-  renameOptions.forEach(({ args }) => {
-    const oldColumn = (args[0] as ESQLColumn).name;
-    const newColumn = (args[1] as ESQLColumn).name;
+  renameFunctions.forEach((renameFunction) => {
+    const { original, renamed } = getArgsFromRenameFunction(renameFunction);
+    const oldColumn = original.name;
+    const newColumn = renamed.name;
     if (columns.includes(oldColumn)) {
       columns[columns.indexOf(oldColumn)] = newColumn;
     }
   });
+  return columns;
+};
+
+/**
+ * Extracts the original and renamed columns from a rename function.
+ * RENAME original AS renamed Vs RENAME renamed = original
+ * @param renameFunction
+ */
+export const getArgsFromRenameFunction = (
+  renameFunction: ESQLFunction
+): { original: ESQLColumn; renamed: ESQLColumn } => {
+  if (renameFunction.name === 'as') {
+    return {
+      original: renameFunction.args[0] as ESQLColumn,
+      renamed: renameFunction.args[1] as ESQLColumn,
+    };
+  }
+
+  return {
+    original: renameFunction.args[1] as ESQLColumn,
+    renamed: renameFunction.args[0] as ESQLColumn,
+  };
+};
+
+/**
+ * Extracts the fields used in the CATEGORIZE function from an ESQL query.
+ * @param esql: string - The ESQL query string
+ */
+export const getCategorizeField = (esql: string): string[] => {
+  const { root } = parse(esql);
+  const columns: string[] = [];
+  const functions = Walker.matchAll(root.commands, {
+    type: 'function',
+    name: 'categorize',
+  }) as ESQLFunction[];
+
+  if (functions.length) {
+    functions.forEach((func) => {
+      for (const arg of func.args) if (isColumn(arg)) columns.push(arg.name);
+    });
+    return columns;
+  }
+
   return columns;
 };

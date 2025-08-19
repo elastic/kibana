@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { LogMeta, Logger } from '@kbn/core/server';
 import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   LIST_ENDPOINT_EXCEPTION,
@@ -47,7 +47,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       const log = newTelemetryLogger(logger.get('security_lists'), mdc);
       const trace = taskMetricsService.start(taskType);
 
-      log.l('Running telemetry task');
+      log.debug('Running telemetry task');
 
       const usageCollector = sender.getTelemetryUsageCluster();
       const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
@@ -81,7 +81,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_TRUSTED_APPLICATION
           );
           trustedApplicationsCount = trustedAppsJson.length;
-          log.l('Trusted Apps', { trusted_apps_count: trustedApplicationsCount });
+          log.debug('Trusted Apps', { trusted_apps_count: trustedApplicationsCount } as LogMeta);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -106,7 +106,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EXCEPTION
           );
           endpointExceptionsCount = epExceptionsJson.length;
-          log.l('EP Exceptions', { ep_exceptions_count: endpointExceptionsCount });
+          log.debug('EP Exceptions', { ep_exceptions_count: endpointExceptionsCount } as LogMeta);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -131,7 +131,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EVENT_FILTER
           );
           endpointEventFiltersCount = epFiltersJson.length;
-          log.l('EP Event Filters', { ep_filters_count: endpointEventFiltersCount });
+          log.debug('EP Event Filters', { ep_filters_count: endpointEventFiltersCount } as LogMeta);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),

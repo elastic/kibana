@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
-import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type { UpdateSLOParams, UpdateSLOResponse } from '@kbn/slo-schema';
+import { updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
@@ -23,13 +24,13 @@ import {
 } from '../../common/constants';
 import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
 import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
-import { SLODefinition } from '../domain/models';
+import type { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
 import { retryTransientEsErrors } from '../utils/retry';
-import { SLORepository } from './slo_repository';
+import type { SLORepository } from './slo_repository';
 import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
-import { TransformManager } from './transform_manager';
+import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 
 export class UpdateSLO {
@@ -77,8 +78,13 @@ export class UpdateSLO {
     rollbackOperations.push(() => this.repository.update(originalSlo));
 
     if (!requireRevisionBump) {
-      // we only have to update the summary pipeline to include the non-breaking changes (name, desc, tags, ...) in the summary index
+      // we only have to update the rollup and summary pipelines to include the non-breaking changes (name, desc, tags, ...) in the summary index
       try {
+        await this.createPipeline(getSLIPipelineTemplate(updatedSlo, this.spaceId));
+        rollbackOperations.push(() =>
+          this.deletePipeline(getSLOPipelineId(updatedSlo.id, updatedSlo.revision))
+        );
+
         await this.createPipeline(
           getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
         );

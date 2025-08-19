@@ -819,4 +819,38 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
       })
     );
   });
+
+  it('removes internally managed rule types', async () => {
+    const request: RuleRegistrySearchRequest = {
+      ruleTypeIds: ['.es-query', '.internally-managed', '.not-internally-managed'],
+      trackScores: true,
+    };
+
+    const options = {};
+    const deps = {
+      request: {},
+    };
+
+    getAuthorizedRuleTypesMock.mockResolvedValue([]);
+    getAlertIndicesAliasMock.mockReturnValue(['security-siem']);
+    alerting.listTypes.mockReturnValue(
+      // @ts-expect-error: rule type properties are not needed for the test
+      new Map([
+        ['.es-query', {}],
+        ['.internally-managed', { internallyManaged: true }],
+        ['.not-internally-managed', { internallyManaged: false }],
+      ])
+    );
+
+    const strategy = ruleRegistrySearchStrategyProvider(data, alerting, logger, security, spaces);
+
+    await lastValueFrom(
+      strategy.search(request, options, deps as unknown as SearchStrategyDependencies)
+    );
+
+    expect(authorizationMock.getAllAuthorizedRuleTypesFindOperation).toHaveBeenCalledWith({
+      authorizationEntity: 'alert',
+      ruleTypeIds: ['.es-query', '.not-internally-managed'],
+    });
+  });
 });

@@ -7,14 +7,16 @@
 import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import {
   FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
   VULNERABILITIES_INDEX_DEFAULT_NS,
 } from '@kbn/cloud-security-posture-plugin/common/constants';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { createPackagePolicy } from '../helper';
 
 const currentTimeMinusFourHours = new Date(Date.now() - 21600000).toISOString();
@@ -29,7 +31,10 @@ export default function (providerContext: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const fleetAndAgents = getService('fleetAndAgents');
   const findingsIndex = new EsIndexDataProvider(es, FINDINGS_INDEX_DEFAULT_NS);
-  const latestFindingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const latestFindingsIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+  );
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_INDEX_DEFAULT_NS);
   const cdrVulnerabilitiesIndex = new EsIndexDataProvider(
     es,
@@ -46,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
 
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         const getPkRes = await supertest
           .get(`/api/fleet/epm/packages/fleet_server`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -92,7 +97,9 @@ export default function (providerContext: FtrProviderContext) {
 
       afterEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
 
         await findingsIndex.deleteAll();
         await latestFindingsIndex.deleteAll();

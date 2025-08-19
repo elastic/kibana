@@ -48,7 +48,6 @@ import {
   updateDataProviderType,
   updateDataView,
   updateEqlOptions,
-  updateGraphEventId,
   updateIsFavorite,
   updateItemsPerPage,
   updateItemsPerPageOptions,
@@ -85,7 +84,6 @@ import {
   updateSavedQuery,
   updateTimelineColumns,
   updateTimelineColumnWidth,
-  updateTimelineGraphEventId,
   updateTimelineIsFavorite,
   updateTimelineItemsPerPage,
   updateTimelineKqlMode,
@@ -160,14 +158,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
   .case(showTimeline, (state, { id, show }) => ({
     ...state,
     timelineById: updateTimelineShowTimeline({ id, show, timelineById: state.timelineById }),
-  }))
-  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
-    ...state,
-    timelineById: updateTimelineGraphEventId({
-      id,
-      graphEventId,
-      timelineById: state.timelineById,
-    }),
   }))
   .case(pinEvent, (state, { id, eventId }) => ({
     ...state,

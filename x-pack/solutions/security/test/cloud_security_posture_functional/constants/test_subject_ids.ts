@@ -6,7 +6,7 @@
  */
 
 export const testSubjectIds = {
-  CIS_AWS_OPTION_TEST_ID: 'cisAwsTestId',
+  CIS_AWS_OPTION_TEST_ID: 'cloudSetupAwsTestId',
   AWS_SINGLE_ACCOUNT_TEST_ID: 'awsSingleTestId',
   AWS_MANUAL_TEST_ID: 'aws-manual-setup-option',
   AWS_CREDENTIAL_SELECTOR: 'aws-credentials-type-selector',
@@ -18,7 +18,7 @@ export const testSubjectIds = {
   TEMP_ACCESS_SESSION_TOKEN_TEST_ID: 'awsTemporaryKeysSessionToken',
   SHARED_CREDENTIALS_FILE_TEST_ID: 'awsSharedCredentialFile',
   SHARED_CREDETIALS_PROFILE_NAME_TEST_ID: 'awsCredentialProfileName',
-  CIS_GCP_OPTION_TEST_ID: 'cisGcpTestId',
+  CIS_GCP_OPTION_TEST_ID: 'cloudSetupGcpTestId',
   GCP_ORGANIZATION_TEST_ID: 'gcpOrganizationAccountTestId',
   GCP_SINGLE_ACCOUNT_TEST_ID: 'gcpSingleAccountTestId',
   GCP_CLOUD_SHELL_TEST_ID: 'gcpGoogleCloudShellOptionTestId',
@@ -28,24 +28,27 @@ export const testSubjectIds = {
   CREDENTIALS_TYPE_TEST_ID: 'credentials_type_test_id',
   CREDENTIALS_FILE_TEST_ID: 'credentials_file_test_id',
   CREDENTIALS_JSON_TEST_ID: 'textAreaInput-credentials-json',
-  CIS_AZURE_OPTION_TEST_ID: 'cisAzureTestId',
+  CIS_AZURE_OPTION_TEST_ID: 'cloudSetupAzureTestId',
   CIS_AZURE_SINGLE_SUB_TEST_ID: 'azureSingleAccountTestId',
   AZURE_CREDENTIAL_SELECTOR: 'azure-credentials-type-selector',
   CIS_AZURE_INPUT_FIELDS_TEST_SUBJECTS: {
-    TENANT_ID: 'cisAzureTenantId',
-    CLIENT_ID: 'cisAzureClientId',
+    TENANT_ID: 'cloudSetupAzureTenantId',
+    CLIENT_ID: 'cloudSetupAzureClientId',
     CLIENT_SECRET: 'passwordInput-client-secret',
-    CLIENT_CERTIFICATE_PATH: 'cisAzureClientCertificatePath',
+    CLIENT_CERTIFICATE_PATH: 'cloudSetupAzureClientCertificatePath',
     CLIENT_CERTIFICATE_PASSWORD: 'passwordInput-client-certificate-password',
-    CLIENT_USERNAME: 'cisAzureClientUsername',
-    CLIENT_PASSWORD: 'cisAzureClientPassword',
+    CLIENT_USERNAME: 'cloudSetupAzureClientUsername',
+    CLIENT_PASSWORD: 'cloudSetupAzureClientPassword',
   },
   CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS: {
-    ARM_TEMPLATE: 'cisAzureArmTemplate',
-    MANUAL: 'cisAzureManual',
+    ARM_TEMPLATE: 'cloudSetupAzureArmTemplate',
+    MANUAL: 'cloudSetupAzureManual',
   },
+  PREVIEW_SECTION_TEST_ID: 'previewSection',
+  PREVIEW_SECTION_HEADER_TEST_ID: 'previewSectionBannerText',
   EVENTS_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="events-viewer-panel"] .euiDataGridRow',
   VISUALIZATIONS_SECTION_HEADER_TEST_ID: 'securitySolutionFlyoutVisualizationsHeader',
+  VISUALIZATIONS_SECTION_CONTENT_TEST_ID: 'securitySolutionFlyoutVisualizationsContent',
   GRAPH_PREVIEW_CONTENT_TEST_ID: 'securitySolutionFlyoutGraphPreviewContent',
   GRAPH_PREVIEW_LOADING_TEST_ID: 'securitySolutionFlyoutGraphPreviewLoading',
   GRAPH_PREVIEW_TITLE_LINK_TEST_ID: 'securitySolutionFlyoutGraphPreviewTitleLink',
@@ -58,9 +61,13 @@ export const testSubjectIds = {
     'cloudSecurityGraphGraphInvestigationShowActionsByEntity',
   GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_TEST_ID:
     'cloudSecurityGraphGraphInvestigationShowActionsOnEntity',
+  GRAPH_NODE_POPOVER_SHOW_ENTITY_DETAILS_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowEntityDetails',
   GRAPH_LABEL_EXPAND_POPOVER_TEST_ID: 'cloudSecurityGraphGraphInvestigationGraphLabelExpandPopover',
   GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID:
     'cloudSecurityGraphGraphInvestigationShowEventsWithThisAction',
+  GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID:
+    'cloudSecurityGraphGraphInvestigationShowEventDetails',
   GRAPH_ACTIONS_TOGGLE_SEARCH_ID: 'cloudSecurityGraphGraphInvestigationToggleSearch',
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
@@ -69,4 +76,6 @@ export const testSubjectIds = {
   DIRECT_ACCESS_KEYS: 'direct_access_keys',
   SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
   SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',
+  NAMESPACE_INPUT: 'namespaceInput',
+  ADVANCED_OPTION_ACCORDION: 'advancedOptionsAccordion',
 };

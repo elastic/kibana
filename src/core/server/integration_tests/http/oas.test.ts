@@ -10,14 +10,15 @@
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
-import { createConfigService, createHttpService } from '@kbn/core-http-server-mocks';
+import { createConfigService } from '@kbn/core-http-server-mocks';
 import type {
   InternalContextPreboot,
   InternalContextSetup,
 } from '@kbn/core-http-context-server-internal';
-import { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { IRouter } from '@kbn/core-http-server';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { IRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
+import { createInternalHttpService } from '../utilities';
 
 let prebootDeps: {
   context: jest.Mocked<InternalContextPreboot>;
@@ -37,7 +38,7 @@ beforeEach(async () => {
   };
 });
 
-let httpService: ReturnType<typeof createHttpService>;
+let httpService: ReturnType<typeof createInternalHttpService>;
 type ConfigServiceArgs = Parameters<typeof createConfigService>[0];
 async function startService(
   args: {
@@ -45,7 +46,7 @@ async function startService(
     createRoutes?: (getRouter: (pluginId?: symbol) => IRouter) => void;
   } = {}
 ) {
-  httpService = createHttpService({
+  httpService = createInternalHttpService({
     configService: createConfigService(args.config),
   });
   await httpService.preboot(prebootDeps);

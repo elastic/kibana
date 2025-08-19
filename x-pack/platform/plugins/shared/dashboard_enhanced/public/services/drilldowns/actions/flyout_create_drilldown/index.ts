@@ -6,4 +6,4 @@
  */
 
 export type { OpenFlyoutAddDrilldownParams } from './flyout_create_drilldown';
-export { FlyoutCreateDrilldownAction, OPEN_FLYOUT_ADD_DRILLDOWN } from './flyout_create_drilldown';
+export { flyoutCreateDrilldownAction, OPEN_FLYOUT_ADD_DRILLDOWN } from './flyout_create_drilldown';

@@ -6,7 +6,7 @@
  */
 
 import { PRIVILEGE_MONITORING_INTERNAL_INDICES_PATTERN } from '../constants';
-import { privilegeMonitoringTypeName } from '../saved_object/privilege_monitoring_type';
+import { privilegeMonitoringTypeName } from '../saved_objects';
 
 export const privilegeMonitoringRuntimePrivileges = (sourceIndices: string[]) => ({
   cluster: ['manage_ingest_pipelines', 'manage_index_templates'],

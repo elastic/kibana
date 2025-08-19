@@ -15,5 +15,9 @@
   ],
   "kbn_references": [
     "@kbn/tooling-log",
+    "@kbn/core-http-browser",
+    "@kbn/dev-cli-runner",
+    "@kbn/core",
+    "@kbn/logging",
   ]
 }

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { appContextService, ElasticAssistantAppContext } from './app_context';
+import type { ElasticAssistantAppContext } from './app_context';
+import { appContextService } from './app_context';
 import { loggerMock } from '@kbn/logging-mocks';
-import { AssistantTool } from '../types';
-import { AssistantFeatures, defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type { AssistantTool } from '../types';
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 
 // Mock Logger
 const mockLogger = loggerMock.create();
@@ -32,6 +34,14 @@ describe('AppContextService', () => {
     name: 'ToolTwo',
     description: 'Description 2',
     sourceRegister: 'Source2',
+    isSupported: jest.fn(),
+    getTool: jest.fn(),
+  };
+  const toolThree: AssistantTool = {
+    id: 'tool-three',
+    name: 'ToolThree',
+    description: 'Description 3',
+    sourceRegister: 'Source3',
     isSupported: jest.fn(),
     getTool: jest.fn(),
   };
@@ -97,6 +107,17 @@ describe('AppContextService', () => {
 
       expect(appContextService.getRegisteredTools(pluginName).length).toEqual(1);
     });
+  });
+
+  it('get tools for multiple plugins', () => {
+    const pluginName1 = 'pluginName1';
+    const pluginName2 = 'pluginName2';
+
+    appContextService.start(mockAppContext);
+    appContextService.registerTools(pluginName2, [toolOne, toolThree]);
+    appContextService.registerTools(pluginName1, [toolOne]);
+
+    expect(appContextService.getRegisteredTools([pluginName1, pluginName2]).length).toEqual(2);
   });
 
   describe('registering features', () => {

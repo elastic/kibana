@@ -6,7 +6,7 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
     Array [
       Object {
         "conflicts": "proceed",
-        "index": ".slo-observability.summary-v3.4.temp",
+        "index": ".slo-observability.summary-v3.5.temp",
         "query": Object {
           "bool": Object {
             "minimum_should_match": 1,
@@ -45,7 +45,7 @@ exports[`CleanUpTempSummary deletes the duplicated temp documents 1`] = `
     Array [
       Object {
         "conflicts": "proceed",
-        "index": ".slo-observability.summary-v3.4.temp",
+        "index": ".slo-observability.summary-v3.5.temp",
         "query": Object {
           "bool": Object {
             "minimum_should_match": 1,

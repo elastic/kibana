@@ -127,6 +127,9 @@ Object {
         "minBarHeight": Array [
           1,
         ],
+        "pointVisibility": Array [
+          "auto",
+        ],
         "showTooltip": Array [],
         "valueLabels": Array [
           "hide",

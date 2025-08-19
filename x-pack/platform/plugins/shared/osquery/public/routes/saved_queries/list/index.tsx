@@ -75,7 +75,7 @@ const PlayButtonComponent: React.FC<PlayButtonProps> = ({ disabled = false, save
   );
 
   return (
-    <EuiToolTip position="top" content={playText}>
+    <EuiToolTip position="top" content={playText} disableScreenReaderOutput>
       <EuiButtonIcon
         color="primary"
         iconType="play"
@@ -114,7 +114,7 @@ const EditButtonComponent: React.FC<EditButtonProps> = ({
   );
 
   return (
-    <EuiToolTip position="top" content={editText}>
+    <EuiToolTip position="top" content={editText} disableScreenReaderOutput>
       <EuiButtonIcon
         color="primary"
         {...buttonProps}

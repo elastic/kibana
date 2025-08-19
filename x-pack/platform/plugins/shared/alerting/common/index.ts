@@ -77,6 +77,8 @@ export {
   READ_FLAPPING_SETTINGS_SUB_FEATURE_ID,
   ALL_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
   READ_QUERY_DELAY_SETTINGS_SUB_FEATURE_ID,
+  ALL_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID,
+  READ_ALERT_DELETE_SETTINGS_SUB_FEATURE_ID,
   API_PRIVILEGES,
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,
@@ -118,7 +120,13 @@ export type {
   DefaultActionGroupId,
 } from './builtin_action_groups';
 export { getBuiltinActionGroups, RecoveredActionGroup } from './builtin_action_groups';
-export type { BulkEditSkipReason, BulkActionSkipResult } from './bulk_edit';
+export type {
+  BulkEditSkipReason,
+  BulkGapsFillingSkipReason,
+  BulkEditActionSkipResult,
+  BulkGapsFillingSkipResult,
+  BulkActionSkipResult,
+} from './bulk_action';
 export {
   DisabledActionTypeIdsForActionGroup,
   isActionGroupDisabledForActionTypeId,

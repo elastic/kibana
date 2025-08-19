@@ -6,20 +6,19 @@
  */
 
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import {
+import type {
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsClient,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { SLO_BURN_RATE_RULE_TYPE_ID, DEPRECATED_ALERTING_CONSUMERS } from '@kbn/rule-data-utils';
 import { mapValues } from 'lodash';
 import { LockAcquisitionError, LockManagerService } from '@kbn/lock-manager';
 import { getSloClientWithRequest } from './client';
@@ -27,7 +26,7 @@ import { registerSloUsageCollector } from './lib/collectors/register';
 import { registerBurnRateRule } from './lib/rules/register_burn_rate_rule';
 import { getSloServerRouteRepository } from './routes/get_slo_server_route_repository';
 import { registerServerRoutes } from './routes/register_routes';
-import { SLORoutesDependencies } from './routes/types';
+import type { SLORoutesDependencies } from './routes/types';
 import { SO_SLO_TYPE, slo } from './saved_objects';
 import { SO_SLO_SETTINGS_TYPE, sloSettings } from './saved_objects/slo_settings';
 import {
@@ -81,7 +80,7 @@ export class SLOPlugin
 
     const alertingFeatures = sloRuleTypes.map((ruleTypeId) => ({
       ruleTypeId,
-      consumers: [sloFeatureId, ALERTING_FEATURE_ID],
+      consumers: [sloFeatureId, ALERTING_FEATURE_ID, ...DEPRECATED_ALERTING_CONSUMERS],
     }));
 
     plugins.features.registerKibanaFeature({

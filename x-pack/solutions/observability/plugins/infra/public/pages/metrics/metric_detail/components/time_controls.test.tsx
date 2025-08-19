@@ -19,22 +19,24 @@ jest.mock('../../../../hooks/use_kibana_ui_setting', () => ({
 }));
 
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MetricsTimeControls } from './time_controls';
-import { mount } from 'enzyme';
-import type { MetricsTimeInput } from '../hooks/use_metrics_time';
 
 describe('MetricsTimeControls', () => {
-  it('should set a valid from and to value for Today', () => {
+  it('should set a valid from and to value for Today', async () => {
+    const user = userEvent.setup();
     const currentTimeRange = {
       from: 'now-15m',
       to: 'now',
       interval: '>=1m',
     };
-    const handleTimeChange = jest.fn().mockImplementation((time: MetricsTimeInput) => void 0);
-    const handleRefreshChange = jest.fn().mockImplementation((refreshInterval: number) => void 0);
-    const handleAutoReload = jest.fn().mockImplementation((isAutoReloading: boolean) => void 0);
-    const handleOnRefresh = jest.fn().mockImplementation(() => void 0);
-    const component = mount(
+    const handleTimeChange = jest.fn();
+    const handleRefreshChange = jest.fn();
+    const handleAutoReload = jest.fn();
+    const handleOnRefresh = jest.fn();
+
+    render(
       <MetricsTimeControls
         currentTimeRange={currentTimeRange}
         onChangeTimeRange={handleTimeChange}
@@ -43,17 +45,19 @@ describe('MetricsTimeControls', () => {
         onRefresh={handleOnRefresh}
       />
     );
-    component
-      .find('button[data-test-subj="superDatePickerToggleQuickMenuButton"]')
-      .first()
-      .simulate('click');
-    component
-      .find('button[data-test-subj="superDatePickerCommonlyUsed_Today"]')
-      .last()
-      .simulate('click');
-    expect(handleTimeChange.mock.calls.length).toBe(1);
-    const timeRangeInput = handleTimeChange.mock.calls[0][0];
-    expect(timeRangeInput.from).toBe('now/d');
-    expect(timeRangeInput.to).toBe('now/d');
+
+    const quickMenuButton = screen.getByTestId('superDatePickerToggleQuickMenuButton');
+    await user.click(quickMenuButton);
+
+    const todayButton = screen.getByTestId('superDatePickerCommonlyUsed_Today');
+    await user.click(todayButton);
+
+    expect(handleTimeChange).toHaveBeenCalledTimes(1);
+    expect(handleTimeChange).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'now/d',
+        to: 'now/d',
+      })
+    );
   });
 });

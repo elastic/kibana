@@ -9,10 +9,8 @@
 
 import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import {
-  createUpdateFilterReferencesAction,
-  UpdateFilterReferencesActionContext,
-} from './update_filter_references_action';
+import type { UpdateFilterReferencesActionContext } from './update_filter_references_action';
+import { createUpdateFilterReferencesAction } from './update_filter_references_action';
 import { updateFilterReferencesTrigger } from '../triggers/update_filter_references_trigger';
 import { mockFilter } from '../mocks/get_stub_filter';
 

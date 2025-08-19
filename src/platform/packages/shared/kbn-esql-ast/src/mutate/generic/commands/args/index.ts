@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isOptionNode } from '../../../../ast/util';
-import {
+import { isOptionNode } from '../../../../ast/is';
+import type {
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLProperNode,

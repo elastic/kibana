@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import { EuiAccordion, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -13,7 +14,7 @@ import styled from '@emotion/styled';
 
 const defaultButtonContent = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.processor.optionalFields',
-  { defaultMessage: 'Optional fields' }
+  { defaultMessage: 'Advanced settings' }
 );
 
 const StyledEuiAccordion = styled(EuiAccordion)`

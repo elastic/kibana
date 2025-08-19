@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { BulkPurgeRollupInput, BulkPurgeRollupResponse } from '@kbn/slo-schema';
+import type { BulkPurgeRollupInput, BulkPurgeRollupResponse } from '@kbn/slo-schema';
 import { useMutation } from '@tanstack/react-query';
 
 import { useKibana } from '../../../hooks/use_kibana';
@@ -46,7 +46,7 @@ export function useBulkPurgeRollupData({ onConfirm }: { onConfirm?: () => void }
       onSuccess: (_, { list }) => {
         toasts.addSuccess(
           i18n.translate('xpack.slo.bulkPurge.successNotification', {
-            defaultMessage: 'Bulk purge of rollup data for {count} SLOs scheduled',
+            defaultMessage: 'Bulk purge of rollup data scheduled for {count} SLOs',
             values: { count: list.length },
           })
         );

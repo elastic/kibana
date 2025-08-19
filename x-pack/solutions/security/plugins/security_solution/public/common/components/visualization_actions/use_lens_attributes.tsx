@@ -22,10 +22,11 @@ import {
   getIndexFilters,
   getNetworkDetailsPageFilter,
   fieldNameExistsFilter,
+  getESQLGlobalFilters,
 } from './utils';
-import { buildESQLWithKQLQuery } from '../../utils/esql';
 import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
+import { useGlobalFilterQuery } from '../../hooks/use_global_filter_query';
 
 export const useLensAttributes = ({
   applyGlobalQueriesAndFilters = true,
@@ -47,12 +48,12 @@ export const useLensAttributes = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView } = useDataView(scopeId);
+  const { dataView: experimentalDataView } = useDataView(scopeId);
   const experimentalSelectedPatterns = useSelectedPatterns(scopeId);
 
-  const dataViewId = newDataViewPickerEnabled ? dataView?.id ?? '' : oldDataViewId;
+  const dataViewId = newDataViewPickerEnabled ? experimentalDataView.id ?? '' : oldDataViewId;
   const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
+    ? !!experimentalDataView.matchedIndices?.length
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -92,11 +93,7 @@ export const useLensAttributes = ({
 
     return [];
   }, [detailName, pageName]);
-
-  const esqlQuery = useMemo(
-    () => (esql ? buildESQLWithKQLQuery(esql, globalQuery.query as string) : undefined),
-    [esql, globalQuery.query]
-  );
+  const { filterQuery: globalFilterQuery } = useGlobalFilterQuery();
 
   const attrs: LensAttributes = useMemo(
     () =>
@@ -107,9 +104,9 @@ export const useLensAttributes = ({
           stackByField,
           euiTheme,
           extraOptions,
-          esql: esqlQuery,
+          esql,
         })) as LensAttributes),
-    [euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField, esqlQuery]
+    [esql, euiTheme, extraOptions, getLensAttributes, lensAttributes, stackByField]
   );
 
   const hasAdHocDataViews = Object.values(attrs?.state?.adHocDataViews ?? {}).length > 0;
@@ -123,7 +120,17 @@ export const useLensAttributes = ({
     }
 
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
-    const query = esqlQuery ? { esql: esqlQuery } : globalQuery;
+    const query = esql ? { esql } : globalQuery;
+
+    const queryFilters = (() => {
+      if (!applyGlobalQueriesAndFilters) return [];
+
+      if (esql) {
+        return getESQLGlobalFilters(globalFilterQuery);
+      }
+
+      return filters;
+    })();
 
     return {
       ...attrs,
@@ -136,7 +143,7 @@ export const useLensAttributes = ({
           ...(applyPageAndTabsFilters ? pageFilters : []),
           ...(applyPageAndTabsFilters ? tabsFilters : []),
           ...indexFilters,
-          ...(applyGlobalQueriesAndFilters ? filters : []),
+          ...queryFilters,
         ],
       },
       references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
@@ -150,8 +157,9 @@ export const useLensAttributes = ({
     stackByField,
     hasAdHocDataViews,
     selectedPatterns,
-    esqlQuery,
+    esql,
     globalQuery,
+    globalFilterQuery,
     attrs,
     title,
     applyGlobalQueriesAndFilters,

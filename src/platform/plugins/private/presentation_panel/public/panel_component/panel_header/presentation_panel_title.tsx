@@ -19,11 +19,9 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
-import {
-  CustomizePanelActionApi,
-  isApiCompatibleWithCustomizePanelAction,
-} from '../../panel_actions/customize_panel_action';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { CustomizePanelActionApi } from '../../panel_actions/customize_panel_action';
+import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
 export const PresentationPanelTitle = ({
@@ -137,7 +135,7 @@ export const PresentationPanelTitle = ({
             </h2>
           ) : null}
           <EuiIcon
-            type="iInCircle"
+            type="info"
             color="subdued"
             data-test-subj="embeddablePanelTitleDescriptionIcon"
             tabIndex={0}

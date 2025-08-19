@@ -30,6 +30,10 @@
     "@kbn/scout-reporting",
     "@kbn/apm-synthtrace",
     "@kbn/apm-synthtrace-client",
-    "@kbn/projects-solutions-groups"
+    "@kbn/projects-solutions-groups",
+    "@kbn/zod",
+    "@kbn/core-http-common",
+    "@kbn/streams-schema",
+    "@kbn/streamlang"
   ]
 }

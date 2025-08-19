@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { MetaDataProps } from './result_types';
+import type { MetaDataProps } from './result_types';
 
 interface Props {
   metaData: MetaDataProps;
@@ -52,7 +52,7 @@ const MetadataPopover: React.FC<MetaDataProps> = ({ id, onDocumentDelete }) => {
     <EuiButtonIcon
       display="empty"
       size="xs"
-      iconType="iInCircle"
+      iconType="info"
       color="primary"
       onClick={() => setPopoverIsOpen(!popoverIsOpen)}
       aria-label={i18n.translate(

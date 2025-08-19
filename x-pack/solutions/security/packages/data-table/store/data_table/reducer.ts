@@ -24,7 +24,6 @@ import {
   updateColumnOrder,
   updateColumns,
   updateColumnWidth,
-  updateGraphEventId,
   updateIsLoading,
   updateItemsPerPage,
   updateItemsPerPageOptions,
@@ -46,7 +45,6 @@ import {
   updateDataTableColumnOrder,
   updateDataTableColumnWidth,
   updateTableColumns,
-  updateTableGraphEventId,
   updateTableItemsPerPage,
   updateTablePerPageOptions,
   updateTableSort,
@@ -223,10 +221,6 @@ export const dataTableReducer = reducerWithInitialState(initialDataTableState)
         selectAll,
       },
     },
-  }))
-  .case(updateGraphEventId, (state, { id, graphEventId }) => ({
-    ...state,
-    tableById: updateTableGraphEventId({ id, graphEventId, tableById: state.tableById }),
   }))
   .case(setTableUpdatedAt, (state, { id, updated }) => ({
     ...state,

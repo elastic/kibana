@@ -14,9 +14,9 @@ export default function ({ getService }) {
 
   describe('es_and_kibana_exclusive', () => {
     const archive =
-      'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana_exclusive';
+      'x-pack/platform/test/fixtures/es_archives/monitoring/setup/collection/es_and_kibana_exclusive';
     const archiveMb7 =
-      'x-pack/test/functional/es_archives/monitoring/setup/collection/es_and_kibana_exclusive_mb_7';
+      'x-pack/platform/test/fixtures/es_archives/monitoring/setup/collection/es_and_kibana_exclusive_mb_7';
     const timeRange = {
       min: '2019-04-09T00:00:00.741Z',
       max: '2019-04-09T23:59:59.741Z',

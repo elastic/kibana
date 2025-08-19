@@ -6,10 +6,11 @@
  */
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { PrivateLocationAttributes } from '../../runtime_types/private_locations';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { unzipFile } from '../../common/unzip_project_code';
-import { ConfigKey, MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import type { MonitorFields, SyntheticsMonitor } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 import { validateMonitor } from './monitor_validation';
@@ -39,7 +40,7 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       ...monitor,
     };
 
-    const validationResult = validateMonitor(monitorWithDefaults as MonitorFields);
+    const validationResult = validateMonitor(monitorWithDefaults as MonitorFields, spaceId);
 
     if (!validationResult.valid || !validationResult.decodedMonitor) {
       const { reason: message, details, payload } = validationResult;
@@ -91,14 +92,14 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       }
 
       return response.ok({ body: { result, decodedCode: formatCode(decodedCode) } });
-    } catch (getErr) {
+    } catch (error) {
       server.logger.error(
-        `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`
+        `Unable to inspect Synthetics monitor ${monitorWithDefaults[ConfigKey.NAME]}`,
+        { error }
       );
-      server.logger.error(getErr);
 
       return response.customError({
-        body: { message: getErr.message },
+        body: { message: error.message },
         statusCode: 500,
       });
     }

@@ -1,8 +1,8 @@
 {
   "type": "shared-browser",
   "id": "@kbn/security-solution-connectors",
-   "owner": [
-    "@elastic/security-threat-hunting-explore"
+  "owner": [
+    "@elastic/security-threat-hunting-investigations"
   ],
   "group": "security",
   "visibility": "private"

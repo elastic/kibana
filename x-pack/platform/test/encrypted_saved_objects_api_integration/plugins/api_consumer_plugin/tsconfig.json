@@ -16,5 +16,6 @@
     "@kbn/std",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/spaces-plugin",
+    "@kbn/core-saved-objects-server",
   ]
 }

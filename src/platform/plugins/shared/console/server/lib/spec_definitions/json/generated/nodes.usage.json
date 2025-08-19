@@ -20,7 +20,7 @@
       "_nodes/usage/{metric}",
       "_nodes/{node_id}/usage/{metric}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/cluster-nodes-usage.html",
+    "documentation": "https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-nodes-usage",
     "availability": {
       "stack": true,
       "serverless": false

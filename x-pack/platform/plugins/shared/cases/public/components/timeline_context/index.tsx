@@ -7,8 +7,9 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { useState } from 'react';
-import type { EuiMarkdownEditorUiPlugin, EuiMarkdownAstNodePosition } from '@elastic/eui';
+import type { EuiMarkdownAstNodePosition, EuiMarkdownEditorUiPlugin } from '@elastic/eui';
 import type { Plugin } from 'unified';
+
 /**
  * @description - manage the plugins, hooks, and ui components needed to enable timeline functionality within the cases plugin
  * @TODO - To better encapsulate the timeline logic needed by cases, we are managing it in this top level context.
@@ -17,14 +18,14 @@ import type { Plugin } from 'unified';
 
 // TODO: copied from 'use_insert_timeline' in security_solution till timeline moved into it's own plugin.
 interface UseInsertTimelineReturn {
-  handleOnTimelineChange: (title: string, id: string | null, graphEventId?: string) => void;
+  handleOnTimelineChange: (title: string, id: string | null) => void;
 }
 
 interface TimelineProcessingPluginRendererProps {
   id: string | null;
   title: string;
-  graphEventId?: string;
   type: 'timeline';
+
   [key: string]: string | null | undefined;
 }
 

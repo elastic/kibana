@@ -71,6 +71,7 @@ export const EventRateChart: FC<Props> = ({ eventRateChartData, height, width })
 
         <HistogramBarSeries
           id="event_rate"
+          // Defaults to multi layer time axis as of Elastic Charts v70
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'time'}

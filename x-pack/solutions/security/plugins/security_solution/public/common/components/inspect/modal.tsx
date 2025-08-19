@@ -50,7 +50,7 @@ interface Request {
   index: string[];
   allowNoIndices: boolean;
   ignoreUnavailable: boolean;
-  body: Record<string, unknown>;
+  body?: Record<string, unknown>;
 }
 
 interface Response {
@@ -94,7 +94,15 @@ const parseInspectStrings = function <T>(stringsArray: string[]): T[] {
   }
 };
 
-const manageStringify = (object: Record<string, unknown> | Response): string => {
+const stringifyRequest = (inspectRequest: Request | Record<string, unknown>) => {
+  const { body } = inspectRequest;
+  if (body == null) {
+    return manageStringify(inspectRequest); // No body, the entire request object is the "body"
+  }
+  return isString(body) ? body : manageStringify(body);
+};
+
+const manageStringify = (object: object): string => {
   try {
     return JSON.stringify(object, null, 2);
   } catch {
@@ -166,7 +174,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="index-pattern-title">
             {i18n.INDEX_PATTERN}{' '}
-            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.INDEX_PATTERN_DESC} type="info" />
           </span>
         ),
         description: (
@@ -194,7 +202,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="query-time-title">
             {i18n.QUERY_TIME}{' '}
-            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.QUERY_TIME_DESC} type="info" />
           </span>
         ),
         description: (
@@ -211,7 +219,7 @@ export const ModalInspectQuery = ({
         title: (
           <span data-test-subj="request-timestamp-title">
             {i18n.REQUEST_TIMESTAMP}{' '}
-            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="iInCircle" />
+            <EuiIconTip color="subdued" content={i18n.REQUEST_TIMESTAMP_DESC} type="info" />
           </span>
         ),
         description: (
@@ -258,9 +266,7 @@ export const ModalInspectQuery = ({
                   isVirtualized
                   lineNumbers
                 >
-                  {isString(inspectRequest.body)
-                    ? inspectRequest.body
-                    : manageStringify(inspectRequest.body)}
+                  {stringifyRequest(inspectRequest)}
                 </EuiCodeBlock>
               </Fragment>
             ))

@@ -20,6 +20,7 @@ import { Current } from './current';
 import { EmptyStates } from './empty_states';
 import { showEmptyStates } from './empty_states/helpers/show_empty_states';
 import { History } from './history';
+import type { SettingsOverrideOptions } from './history/types';
 import { useKibanaFeatureFlags } from '../use_kibana_feature_flags';
 
 interface Props {
@@ -36,7 +37,7 @@ interface Props {
   isLoadingPost: boolean;
   localStorageAttackDiscoveryMaxAlerts: string | undefined;
   loadingConnectorId: string | null;
-  onGenerate: () => Promise<void>;
+  onGenerate: (overrideOptions?: SettingsOverrideOptions) => Promise<void>;
   onToggleShowAnonymized: () => void;
   selectedConnectorAttackDiscoveries: AttackDiscovery[];
   selectedConnectorLastUpdated: Date | null;

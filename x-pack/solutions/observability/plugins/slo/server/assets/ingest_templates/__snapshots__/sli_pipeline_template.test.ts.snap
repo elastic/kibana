@@ -6,7 +6,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.4,
+    "version": 3.5,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -31,6 +31,21 @@ Object {
     },
     Object {
       "set": Object {
+        "field": "slo.name",
+        "value": "irrelevant",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.tags",
+        "value": Array [
+          "critical",
+          "k8s",
+        ],
+      },
+    },
+    Object {
+      "set": Object {
         "field": "slo.revision",
         "value": 1,
       },
@@ -50,7 +65,7 @@ Object {
         ],
         "date_rounding": "M",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.4.",
+        "index_name_prefix": ".slo-observability.sli-v3.5.",
       },
     },
     Object {
@@ -85,7 +100,7 @@ Object {
     "description": "Ingest pipeline for SLO rollup data",
     "managed": true,
     "managed_by": "observability",
-    "version": 3.4,
+    "version": 3.5,
   },
   "description": "Ingest pipeline for SLO rollup data [id: irrelevant, revision: 1]",
   "id": ".slo-observability.sli.pipeline-irrelevant-1",
@@ -110,6 +125,21 @@ Object {
     },
     Object {
       "set": Object {
+        "field": "slo.name",
+        "value": "irrelevant",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "slo.tags",
+        "value": Array [
+          "critical",
+          "k8s",
+        ],
+      },
+    },
+    Object {
+      "set": Object {
         "field": "slo.revision",
         "value": 1,
       },
@@ -129,7 +159,7 @@ Object {
         ],
         "date_rounding": "M",
         "field": "@timestamp",
-        "index_name_prefix": ".slo-observability.sli-v3.4.",
+        "index_name_prefix": ".slo-observability.sli-v3.5.",
       },
     },
     Object {

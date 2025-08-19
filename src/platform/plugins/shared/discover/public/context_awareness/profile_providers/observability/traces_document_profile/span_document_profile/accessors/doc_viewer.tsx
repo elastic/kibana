@@ -15,27 +15,25 @@ import type { DocumentProfileProvider } from '../../../../../profiles';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
 export const createGetDocViewer =
-  (transactionIndexPattern: string): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (indexes: {
+    apm: { errors: string; traces: string };
+    logs: string;
+  }): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
-
+    const tabTitle = i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
+      defaultMessage: 'Span overview',
+    });
     return {
       ...prevDocViewer,
       docViewsRegistry: (registry: DocViewsRegistry) => {
         registry.add({
           id: 'doc_view_obs_traces_span_overview',
-          title: i18n.translate('discover.docViews.observability.traces.spanOverview.title', {
-            defaultMessage: 'Span overview',
-          }),
+          title: tabTitle,
           order: 0,
           component: (props) => {
-            return (
-              <UnifiedDocViewerObservabilityTracesSpanOverview
-                {...props}
-                transactionIndexPattern={transactionIndexPattern}
-              />
-            );
+            return <UnifiedDocViewerObservabilityTracesSpanOverview {...props} indexes={indexes} />;
           },
         });
 

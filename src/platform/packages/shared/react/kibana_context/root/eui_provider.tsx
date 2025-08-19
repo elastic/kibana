@@ -8,11 +8,17 @@
  */
 
 import * as Rx from 'rxjs';
-import React, { FC, PropsWithChildren, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import createCache from '@emotion/cache';
 
-import { EuiProvider, EuiProviderProps, euiStylisPrefixer } from '@elastic/eui';
+// We can't use the import directly because the package isn't included in the shared bundle, so below the value is hardcoded.
+// However, we import this directly in the test to ensure our hardcoded selector is correct.
+// import { euiIncludeSelectorInFocusTrap } from '@kbn/core-chrome-layout-constants';
+
+import type { EuiProviderProps } from '@elastic/eui';
+import { EuiProvider, euiStylisPrefixer } from '@elastic/eui';
 import { EUI_STYLES_GLOBAL, EUI_STYLES_UTILS } from '@kbn/core-base-common';
 import {
   getColorMode,
@@ -36,25 +42,33 @@ export interface KibanaEuiProviderProps extends Pick<EuiProviderProps<{}>, 'modi
   globalStyles?: boolean;
 }
 
-// Set up the caches.
-// https://eui.elastic.co/#/utilities/provider#cache-location
-const stylisPlugins = [euiStylisPrefixer]; // https://emotion.sh/docs/@emotion/cache#stylisplugins
+const sharedCacheOptions = {
+  // Set up the caches.
+  // https://eui.elastic.co/docs/utilities/provider/#emotioncache-customization
+  stylisPlugins: [euiStylisPrefixer], // https://emotion.sh/docs/@emotion/cache#stylisplugins
+
+  // Enables Emotion's speedy mode in dev (same as prod).
+  // This uses `insertRule` instead of default injecting <style> tags for better performance (~10x faster).
+  // Historically disabled in dev for easier inspection, but it's no longer the issue: modern dev tools support editing styles.
+  // docs: https://github.com/emotion-js/emotion/blob/main/packages/sheet/README.md#speedy
+  speedy: true, // Enable speedy mode for better performance
+};
 
 const emotionCache = createCache({
+  ...sharedCacheOptions,
   key: 'css',
-  stylisPlugins,
   container: document.querySelector('meta[name="emotion"]') as HTMLElement,
 });
 
 const globalCache = createCache({
+  ...sharedCacheOptions,
   key: EUI_STYLES_GLOBAL,
-  stylisPlugins,
   container: document.querySelector(`meta[name="${EUI_STYLES_GLOBAL}"]`) as HTMLElement,
 });
 
 const utilitiesCache = createCache({
+  ...sharedCacheOptions,
   key: EUI_STYLES_UTILS,
-  stylisPlugins,
   container: document.querySelector(`meta[name="${EUI_STYLES_UTILS}"]`) as HTMLElement,
 });
 
@@ -64,6 +78,12 @@ globalCache.compat = true;
 utilitiesCache.compat = true;
 
 const cache = { default: emotionCache, global: globalCache, utility: utilitiesCache };
+
+const componentDefaults: EuiProviderProps<unknown>['componentDefaults'] = {
+  EuiFlyout: {
+    includeSelectorInFocusTrap: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+  },
+};
 
 /**
  * Prepares and returns a configured `EuiProvider` for use in Kibana roots.  In most cases, this utility context
@@ -122,6 +142,7 @@ export const KibanaEuiProvider: FC<PropsWithChildren<KibanaEuiProviderProps>> = 
         utilityClasses: globalStyles,
         highContrastMode,
         theme: _theme,
+        componentDefaults,
       }}
     >
       {children}

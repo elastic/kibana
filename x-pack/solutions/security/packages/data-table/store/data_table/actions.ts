@@ -6,7 +6,7 @@
  */
 
 import actionCreatorFactory from 'typescript-fsa';
-import { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
 import type { ColumnHeaderOptions, SortColumnTable, ViewSelection } from '../../common/types';
 import type { DataTablePersistInput, InitialyzeDataTableSettings } from './types';
 
@@ -99,10 +99,6 @@ export const initializeDataTableSettings =
 
 export const setDataTableSelectAll = actionCreator<{ id: string; selectAll: boolean }>(
   'SET_DATA_TABLE_SELECT_ALL'
-);
-
-export const updateGraphEventId = actionCreator<{ id: string; graphEventId: string }>(
-  'UPDATE_DATA_TABLE_GRAPH_EVENT_ID'
 );
 
 export const setTableUpdatedAt = actionCreator<{ id: string; updated: number }>(

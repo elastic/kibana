@@ -17,7 +17,7 @@ import type { DataDocuments$ } from './discover_data_state_container';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { fetchDocuments } from '../data_fetching/fetch_documents';
 import { omit } from 'lodash';
-import { internalStateActions } from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 
 jest.mock('../data_fetching/fetch_documents', () => ({
   fetchDocuments: jest.fn().mockResolvedValue({ records: [] }),
@@ -57,8 +57,12 @@ describe('test getDataStateContainer', () => {
 
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
     const resolveDataSourceProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
+      scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
     );
 
@@ -129,8 +133,12 @@ describe('test getDataStateContainer', () => {
 
     const dataState = stateContainer.dataState;
     const unsubscribe = dataState.subscribe();
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
     const resolveDataSourceProfileSpy = jest.spyOn(
-      discoverServiceMock.profilesManager,
+      scopedProfilesManager$.getValue(),
       'resolveDataSourceProfile'
     );
 
@@ -162,7 +170,12 @@ describe('test getDataStateContainer', () => {
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+
+    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
@@ -170,6 +183,7 @@ describe('test getDataStateContainer', () => {
           columns: true,
           rowHeight: true,
           breakdownField: true,
+          hideChart: false,
         },
       })
     );
@@ -187,6 +201,7 @@ describe('test getDataStateContainer', () => {
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
     expect(stateContainer.appState.get().columns).toEqual(['message', 'extension']);
     expect(stateContainer.appState.get().rowHeight).toEqual(3);
@@ -199,7 +214,12 @@ describe('test getDataStateContainer', () => {
     const dataState = stateContainer.dataState;
     const dataUnsub = dataState.subscribe();
     const appUnsub = stateContainer.appState.initAndSync();
-    await discoverServiceMock.profilesManager.resolveDataSourceProfile({});
+    const { scopedProfilesManager$ } = selectTabRuntimeState(
+      stateContainer.runtimeStateManager,
+      stateContainer.getCurrentTab().id
+    );
+
+    await scopedProfilesManager$.getValue().resolveDataSourceProfile({});
     stateContainer.actions.setDataView(dataViewMock);
     stateContainer.internalState.dispatch(
       stateContainer.injectCurrentTab(internalStateActions.setResetDefaultProfileState)({
@@ -207,6 +227,7 @@ describe('test getDataStateContainer', () => {
           columns: false,
           rowHeight: false,
           breakdownField: false,
+          hideChart: false,
         },
       })
     );
@@ -222,6 +243,7 @@ describe('test getDataStateContainer', () => {
       columns: false,
       rowHeight: false,
       breakdownField: false,
+      hideChart: false,
     });
     expect(stateContainer.appState.get().columns).toEqual(['default_column']);
     expect(stateContainer.appState.get().rowHeight).toBeUndefined();

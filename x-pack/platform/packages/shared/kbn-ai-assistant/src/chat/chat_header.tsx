@@ -21,7 +21,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { Conversation, ConversationAccess } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
+  Conversation,
+  ConversationAccess,
+} from '@kbn/observability-ai-assistant-plugin/common';
+import {
+  ElasticLlmTourCallout,
+  getElasticManagedLlmConnector,
+  ElasticLlmCalloutKey,
+  useElasticLlmCalloutDismissed,
+  useObservabilityAIAssistantFlyoutStateContext,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 import { FlyoutPositionMode } from './chat_flyout';
@@ -57,6 +67,7 @@ export function ChatHeader({
   loading,
   title,
   isConversationOwnedByCurrentUser,
+  isConversationApp,
   onDuplicateConversation,
   onSaveTitle,
   onToggleFlyoutPositionMode,
@@ -76,6 +87,7 @@ export function ChatHeader({
   loading: boolean;
   title: string;
   isConversationOwnedByCurrentUser: boolean;
+  isConversationApp: boolean;
   onDuplicateConversation: () => void;
   onSaveTitle: (title: string) => void;
   onToggleFlyoutPositionMode?: (newFlyoutPositionMode: FlyoutPositionMode) => void;
@@ -105,6 +117,14 @@ export function ChatHeader({
       );
     }
   };
+
+  const elasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
+  const [tourCalloutDismissed, setTourCalloutDismissed] = useElasticLlmCalloutDismissed(
+    ElasticLlmCalloutKey.TOUR_CALLOUT,
+    false
+  );
+
+  const { isFlyoutOpen } = useObservabilityAIAssistantFlyoutStateContext();
 
   return (
     <EuiPanel
@@ -267,7 +287,15 @@ export function ChatHeader({
               ) : null}
 
               <EuiFlexItem grow={false}>
-                <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                {!!elasticManagedLlm &&
+                !tourCalloutDismissed &&
+                !(isConversationApp && isFlyoutOpen) ? (
+                  <ElasticLlmTourCallout dismissTour={() => setTourCalloutDismissed(true)}>
+                    <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                  </ElasticLlmTourCallout>
+                ) : (
+                  <ChatActionsMenu connectors={connectors} disabled={licenseInvalid} />
+                )}
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

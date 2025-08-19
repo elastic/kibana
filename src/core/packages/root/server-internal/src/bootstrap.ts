@@ -9,7 +9,8 @@
 
 import chalk from 'chalk';
 import { getPackages } from '@kbn/repo-packages';
-import { CliArgs, Env, RawConfigService } from '@kbn/config';
+import type { CliArgs } from '@kbn/config';
+import { Env, RawConfigService } from '@kbn/config';
 import { CriticalError } from '@kbn/core-base-server-internal';
 import { Root } from './root';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
@@ -129,17 +130,17 @@ export async function bootstrap({ configs, cliArgs, applyConfigOverrides }: Boot
   }
 }
 
-function onRootShutdown(reason?: any) {
-  if (reason !== undefined) {
-    if (reason.code !== MIGRATION_EXCEPTION_CODE) {
+function onRootShutdown(error?: any) {
+  if (error !== undefined) {
+    if (error.code !== MIGRATION_EXCEPTION_CODE) {
       // There is a chance that logger wasn't configured properly and error that
       // that forced root to shut down could go unnoticed. To prevent this we always
       // mirror such fatal errors in standard output with `console.error`.
       // eslint-disable-next-line no-console
-      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${reason}\n`);
+      console.error(`\n${chalk.white.bgRed(' FATAL ')} ${error}\n`);
     }
 
-    process.exit(reason instanceof CriticalError ? reason.processExitCode : 1);
+    process.exit(error instanceof CriticalError ? error.processExitCode : 1);
   }
 
   process.exit(0);

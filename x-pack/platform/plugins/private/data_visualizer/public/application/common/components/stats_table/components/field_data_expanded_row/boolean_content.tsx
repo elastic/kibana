@@ -52,7 +52,7 @@ export const BooleanContent: FC<FieldDataRowProps> = ({ config, onAddFilter }) =
   const chartBaseTheme = useElasticChartsTheme();
   const fieldFormat = 'fieldFormat' in config ? config.fieldFormat : undefined;
   const formattedPercentages = useMemo(() => getTFPercentage(config), [config]);
-  const theme = useDataVizChartTheme();
+  const theme = useDataVizChartTheme({ disableGridLines: true });
   if (!formattedPercentages) return null;
 
   const { count } = formattedPercentages;

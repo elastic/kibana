@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getAnalytics, getI18n, getTheme, getUserProfile } from '../kibana_services';
+import { getRendering } from '../kibana_services';
 
 /**
  * Represents the result of trying to persist the saved object.
@@ -51,12 +52,17 @@ export function showSaveModal(
       const onSave = saveModal.props.onSave;
 
       const onSaveConfirmed: MinimalSaveModalProps['onSave'] = async (...args) => {
-        const response = await onSave(...args);
-        // close modal if we either hit an error or the saved object got an id
-        if (Boolean(isSuccess(response) ? response.id : response.error)) {
+        try {
+          const response = await onSave(...args);
+          // close modal if we either hit an error or the saved object got an id
+          if (Boolean(isSuccess(response) ? response.id : response.error)) {
+            closeModal();
+          }
+          return response;
+        } catch (error) {
           closeModal();
+          return { error };
         }
-        return response;
       };
 
       const augmentedElement = React.cloneElement(saveModal, {
@@ -68,7 +74,7 @@ export function showSaveModal(
         children: augmentedElement,
       });
     }),
-    { analytics: getAnalytics(), theme: getTheme(), i18n: getI18n(), userProfile: getUserProfile() }
+    getRendering()
   );
 
   unmount = mount(document.createElement('div'));

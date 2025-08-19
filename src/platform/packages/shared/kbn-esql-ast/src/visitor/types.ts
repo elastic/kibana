@@ -59,9 +59,7 @@ export type ExpressionVisitorInput<Methods extends VisitorMethods> = AnyToVoid<
       VisitorInput<Methods, 'visitFunctionCallExpression'> &
       VisitorInput<Methods, 'visitLiteralExpression'> &
       VisitorInput<Methods, 'visitListLiteralExpression'> &
-      VisitorInput<Methods, 'visitTimeIntervalLiteralExpression'> &
       VisitorInput<Methods, 'visitInlineCastExpression'> &
-      VisitorInput<Methods, 'visitRenameExpression'> &
       VisitorInput<Methods, 'visitOrderExpression'> &
       VisitorInput<Methods, 'visitIdentifierExpression'> &
       VisitorInput<Methods, 'visitMapExpression'> &
@@ -79,9 +77,7 @@ export type ExpressionVisitorOutput<Methods extends VisitorMethods> =
   | VisitorOutput<Methods, 'visitFunctionCallExpression'>
   | VisitorOutput<Methods, 'visitLiteralExpression'>
   | VisitorOutput<Methods, 'visitListLiteralExpression'>
-  | VisitorOutput<Methods, 'visitTimeIntervalLiteralExpression'>
   | VisitorOutput<Methods, 'visitInlineCastExpression'>
-  | VisitorOutput<Methods, 'visitRenameExpression'>
   | VisitorOutput<Methods, 'visitOrderExpression'>
   | VisitorOutput<Methods, 'visitIdentifierExpression'>
   | VisitorOutput<Methods, 'visitMapExpression'>
@@ -196,7 +192,7 @@ export interface VisitorMethods<
   >;
   visitSampleCommand?: Visitor<contexts.SampleCommandVisitorContext<Visitors, Data>, any, any>;
   visitCommandOption?: Visitor<contexts.CommandOptionVisitorContext<Visitors, Data>, any, any>;
-  visitRrfCommand?: Visitor<contexts.RrfCommandVisitorContext<Visitors, Data>, any, any>;
+  visitFuseCommand?: Visitor<contexts.FuseCommandVisitorContext<Visitors, Data>, any, any>;
   visitExpression?: Visitor<contexts.ExpressionVisitorContext<Visitors, Data>, any, any>;
   visitSourceExpression?: Visitor<
     contexts.SourceExpressionVisitorContext<Visitors, Data>,
@@ -223,18 +219,8 @@ export interface VisitorMethods<
     any,
     any
   >;
-  visitTimeIntervalLiteralExpression?: Visitor<
-    contexts.TimeIntervalLiteralExpressionVisitorContext<Visitors, Data>,
-    any,
-    any
-  >;
   visitInlineCastExpression?: Visitor<
     contexts.InlineCastExpressionVisitorContext<Visitors, Data>,
-    any,
-    any
-  >;
-  visitRenameExpression?: Visitor<
-    contexts.RenameExpressionVisitorContext<Visitors, Data>,
     any,
     any
   >;
@@ -271,8 +257,6 @@ export type AstNodeToVisitorName<Node extends VisitorAstNode> = Node extends ESQ
   ? 'visitLiteralExpression'
   : Node extends ast.ESQLList
   ? 'visitListLiteralExpression'
-  : Node extends ast.ESQLTimeInterval
-  ? 'visitTimeIntervalLiteralExpression'
   : Node extends ast.ESQLInlineCast
   ? 'visitInlineCastExpression'
   : Node extends ast.ESQLIdentifier

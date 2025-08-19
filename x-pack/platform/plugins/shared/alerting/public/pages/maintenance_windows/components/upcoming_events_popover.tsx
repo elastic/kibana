@@ -21,12 +21,12 @@ import {
   formatDate,
 } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { recurringSummary } from '@kbn/response-ops-recurring-schedule-form/utils/recurring_summary';
+import { getPresets } from '@kbn/response-ops-recurring-schedule-form/utils/get_presets';
 import * as i18n from '../translations';
 import type { MaintenanceWindow } from '../../../../common';
 import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { useUiSetting } from '../../../utils/kibana_react';
-import { recurringSummary } from '../helpers/recurring_summary';
-import { getPresets } from '../helpers/get_presets';
 import { convertFromMaintenanceWindowToForm } from '../helpers/convert_from_maintenance_window_to_form';
 
 interface UpcomingEventsPopoverProps {
@@ -87,12 +87,12 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
       >
         <EuiPopoverTitle data-test-subj="upcoming-events-popover-title">
           {i18n.CREATE_FORM_RECURRING_SUMMARY_PREFIX(
-            recurringSummary(startDate, recurringSchedule, presets)
+            recurringSummary({ startDate, recurringSchedule, presets })
           )}
         </EuiPopoverTitle>
         <EuiFlexGroup direction="column" responsive={false} gutterSize="none">
           <EuiFlexItem grow={false}>
-            <EuiText style={{ fontWeight: 700 }} color="subdued" size="s">
+            <EuiText css={{ fontWeight: 700 }} color="subdued" size="s">
               {i18n.UPCOMING}
             </EuiText>
             <EuiSpacer size="m" />
@@ -107,7 +107,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
                 responsive={false}
                 alignItems="center"
                 justifyContent="flexStart"
-                style={{ width: '300px' }}
+                css={{ width: '300px' }}
               >
                 <EuiFlexItem grow={false}>
                   <EuiIcon color="subdued" type="calendar" />
@@ -120,7 +120,7 @@ export const UpcomingEventsPopover: React.FC<UpcomingEventsPopoverProps> = React
               </EuiFlexGroup>
               {index < topEvents.length - 1 ? (
                 <EuiHorizontalRule
-                  style={{ inlineSize: 'unset', marginInline: '-16px' }}
+                  css={{ inlineSize: 'unset', marginInline: '-16px' }}
                   margin="s"
                 />
               ) : null}

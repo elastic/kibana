@@ -14,6 +14,7 @@ import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
+import { useKbnFullScreenBgCss } from '@kbn/css-utils/public/full_screen_bg_css';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ClusterAddressForm } from './cluster_address_form';
@@ -38,6 +39,8 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
     [http]
   );
 
+  const kbnFullScreenBgCss = useKbnFullScreenBgCss();
+
   if (state.loading) {
     return null;
   }
@@ -54,7 +57,7 @@ export const App: FunctionComponent<AppProps> = ({ onSuccess }) => {
   }
 
   return (
-    <div className="interactiveSetup">
+    <div css={kbnFullScreenBgCss}>
       <header className="interactiveSetup__header eui-textCenter">
         <EuiSpacer size="xxl" />
         <span className="interactiveSetup__logo">

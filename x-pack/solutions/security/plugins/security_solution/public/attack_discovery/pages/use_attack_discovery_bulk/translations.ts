@@ -7,12 +7,21 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ATTACK_DISCOVERIES_SUCCESSFULLY_UPDATED = i18n.translate(
-  'xpack.securitySolution.attackDiscovery.useAttackDiscoveryBulk.attackDiscoveriesSuccessfullyUpdatedToast',
-  {
-    defaultMessage: 'Attack discoveries successfully updated',
-  }
-);
+export const MARKED_ATTACK_DISCOVERIES = ({
+  attackDiscoveries,
+  kibanaAlertWorkflowStatus,
+}: {
+  attackDiscoveries: number;
+  kibanaAlertWorkflowStatus: 'open' | 'acknowledged' | 'closed';
+}) =>
+  i18n.translate(
+    'xpack.securitySolution.attackDiscovery.useAttackDiscoveryBulk.markedAttackDiscoveriesToast',
+    {
+      defaultMessage:
+        'Marked {attackDiscoveries, plural, one {attack discovery} other {# attack discoveries}} as {kibanaAlertWorkflowStatus}',
+      values: { attackDiscoveries, kibanaAlertWorkflowStatus },
+    }
+  );
 
 export const ERROR_UPDATING_ATTACK_DISCOVERIES = i18n.translate(
   'xpack.securitySolution.attackDiscovery.useAttackDiscoveryBulk.errorUpdatingAttackDiscoveriesErrorToast',

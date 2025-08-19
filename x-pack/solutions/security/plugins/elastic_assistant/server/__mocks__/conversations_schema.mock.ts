@@ -6,14 +6,15 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   AppendConversationMessageRequestBody,
   PerformBulkActionRequestBody,
   ConversationCreateProps,
   ConversationResponse,
   ConversationUpdateProps,
+  DeleteAllConversationsRequestBody,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   CreateMessageSchema,
   EsConversationSchema,
 } from '../ai_assistant_data_clients/conversations/types';
@@ -86,6 +87,10 @@ export const getCreateConversationSchemaMock = (
   ],
   category: 'assistant',
   ...rest,
+});
+
+export const getDeleteAllConversationsSchemaMock = (): DeleteAllConversationsRequestBody => ({
+  excludedIds: ['conversation-1'],
 });
 
 export const getUpdateConversationSchemaMock = (

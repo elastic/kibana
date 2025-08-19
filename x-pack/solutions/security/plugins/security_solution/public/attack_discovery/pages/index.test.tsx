@@ -8,7 +8,6 @@
 import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_context';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
-import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen } from '@testing-library/react';
@@ -16,7 +15,7 @@ import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
 import { TestProviders } from '../../common/mock';
-import { ATTACK_DISCOVERY_PATH } from '../../../common/constants';
+import { ATTACK_DISCOVERY_PATH, SECURITY_FEATURE_ID } from '../../../common/constants';
 import { mockHistory } from '../../common/utils/route/mocks';
 import { AttackDiscoveryPage } from '.';
 import { mockTimelines } from '../../common/mock/mock_timelines_plugin';
@@ -38,7 +37,27 @@ const mockConnectors: unknown[] = [
   },
 ];
 
-jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
+// Mock feature flags to ensure attackDiscoveryAlertsEnabled is false for legacy code path tests
+jest.mock('./use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => ({ attackDiscoveryAlertsEnabled: false }),
+}));
+
+jest.mock('react-use/lib/useLocalStorage', () =>
+  jest.fn().mockImplementation((key, defaultValue) => {
+    // Return different values based on the localStorage key
+    if (key.includes('START_LOCAL_STORAGE_KEY')) {
+      return ['now-24h', jest.fn()];
+    }
+    if (key.includes('END_LOCAL_STORAGE_KEY')) {
+      return ['now', jest.fn()];
+    }
+    if (key.includes('CONNECTOR_ID_LOCAL_STORAGE_KEY')) {
+      return ['test-id', jest.fn()];
+    }
+    // For other keys, return the default value or 'test-id'
+    return [defaultValue || 'test-id', jest.fn()];
+  })
+);
 jest.mock('react-use/lib/useSessionStorage', () =>
   jest.fn().mockReturnValue([undefined, jest.fn()])
 );
@@ -64,15 +83,18 @@ jest.mock(
   })
 );
 
+const mockSecurityCapabilities = [`${SECURITY_FEATURE_ID}.show`];
+
 jest.mock('../../common/links', () => ({
-  useLinkInfo: jest.fn().mockReturnValue({
-    capabilities: ['siemV2.show'],
-    globalNavPosition: 4,
-    globalSearchKeywords: ['Attack discovery'],
-    id: 'attack_discovery',
-    path: '/attack_discovery',
-    title: 'Attack discovery',
-  }),
+  useLinkInfo: () =>
+    jest.fn().mockReturnValue({
+      capabilities: mockSecurityCapabilities,
+      globalNavPosition: 4,
+      globalSearchKeywords: ['Attack discovery'],
+      id: 'attack_discovery',
+      path: '/attack_discovery',
+      title: 'Attack discovery',
+    }),
 }));
 
 jest.mock('./use_attack_discovery', () => ({
@@ -93,100 +115,91 @@ jest.mock('./use_attack_discovery', () => ({
 
 const mockFilterManager = createFilterManagerMock();
 
-const stubSecurityDataView = createStubDataView({
-  spec: {
-    id: 'security',
-    title: 'security',
-  },
-});
-
-const mockDataViewsService = {
-  ...dataViewPluginMocks.createStartContract(),
-  get: () => Promise.resolve(stubSecurityDataView),
-  clearInstanceCache: () => Promise.resolve(),
-};
+const mockDataViewsService = dataViewPluginMocks.createStartContract();
 
 const mockUpselling = new UpsellingService();
 
+const mockUseKibanaReturnValue = {
+  services: {
+    application: {
+      capabilities: {
+        [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
+      },
+      navigateToUrl: jest.fn(),
+    },
+    cases: {
+      helpers: {
+        canUseCases: jest.fn().mockReturnValue({
+          all: true,
+          connectors: true,
+          create: true,
+          delete: true,
+          push: true,
+          read: true,
+          settings: true,
+          update: true,
+        }),
+      },
+      hooks: {
+        useCasesAddToExistingCase: jest.fn(),
+        useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
+        useCasesAddToNewCaseFlyout: jest.fn(),
+      },
+      ui: { getCasesContext: mockCasesContext },
+    },
+    data: {
+      query: {
+        filterManager: mockFilterManager,
+      },
+    },
+    dataViews: mockDataViewsService,
+    docLinks: {
+      links: {
+        [SECURITY_FEATURE_ID]: {
+          privileges: 'link',
+        },
+      },
+    },
+    featureFlags: {
+      getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
+    },
+    notifications: jest.fn().mockReturnValue({
+      addError: jest.fn(),
+      addSuccess: jest.fn(),
+      addWarning: jest.fn(),
+      remove: jest.fn(),
+    }),
+    sessionView: {
+      getSessionView: jest.fn(() => <div />),
+    },
+    storage: {
+      get: jest.fn(),
+      set: jest.fn(),
+    },
+    theme: {
+      getTheme: jest.fn().mockReturnValue({ darkMode: false }),
+    },
+    timelines: { ...mockTimelines },
+    triggersActionsUi: {
+      alertsTableConfigurationRegistry: {},
+      getAlertsStateTable: () => <></>,
+    },
+    uiSettings: {
+      get: jest.fn(),
+    },
+  },
+};
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
   return {
     ...original,
-    useKibana: () => ({
-      services: {
-        application: {
-          capabilities: {
-            siemV2: { crud_alerts: true, read_alerts: true },
-          },
-          navigateToUrl: jest.fn(),
-        },
-        cases: {
-          helpers: {
-            canUseCases: jest.fn().mockReturnValue({
-              all: true,
-              connectors: true,
-              create: true,
-              delete: true,
-              push: true,
-              read: true,
-              settings: true,
-              update: true,
-            }),
-          },
-          hooks: {
-            useCasesAddToExistingCase: jest.fn(),
-            useCasesAddToExistingCaseModal: jest.fn().mockReturnValue({ open: jest.fn() }),
-            useCasesAddToNewCaseFlyout: jest.fn(),
-          },
-          ui: { getCasesContext: mockCasesContext },
-        },
-        data: {
-          query: {
-            filterManager: mockFilterManager,
-          },
-        },
-        dataViews: mockDataViewsService,
-        docLinks: {
-          links: {
-            siemV2: {
-              privileges: 'link',
-            },
-          },
-        },
-        featureFlags: {
-          getBooleanValue: jest.fn().mockReturnValue(false), // legacy view enabled
-        },
-        notifications: jest.fn().mockReturnValue({
-          addError: jest.fn(),
-          addSuccess: jest.fn(),
-          addWarning: jest.fn(),
-          remove: jest.fn(),
-        }),
-        sessionView: {
-          getSessionView: jest.fn(() => <div />),
-        },
-        storage: {
-          get: jest.fn(),
-          set: jest.fn(),
-        },
-        theme: {
-          getTheme: jest.fn().mockReturnValue({ darkMode: false }),
-        },
-        timelines: { ...mockTimelines },
-        triggersActionsUi: {
-          alertsTableConfigurationRegistry: {},
-          getAlertsStateTable: () => <></>,
-        },
-        uiSettings: {
-          get: jest.fn(),
-        },
-      },
-    }),
+    useKibana: () => mockUseKibanaReturnValue,
     useToasts: jest.fn().mockReturnValue({
       addError: jest.fn(),
       addSuccess: jest.fn(),
       addWarning: jest.fn(),
+      addInfo: jest.fn(),
       remove: jest.fn(),
     }),
     useUiSetting$: jest.fn().mockReturnValue([]),
@@ -211,8 +224,6 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
-
-    (useLocalStorage as jest.Mock).mockReturnValue(['test-id', jest.fn()]);
   });
 
   describe('page layout', () => {
@@ -493,8 +504,10 @@ describe('AttackDiscovery', () => {
       expect(screen.queryByTestId('loadingCallout')).toBeNull();
     });
 
-    it('renders the expected number of attack discoveries', () => {
-      expect(screen.queryAllByTestId('attackDiscovery')).toHaveLength(attackDiscoveries.length);
+    it('renders the expected number of attack discoveries', async () => {
+      const panels = screen.getAllByTestId(/^attackDiscoveryPanel-/);
+
+      expect(panels).toHaveLength(attackDiscoveries.length);
     });
 
     it('does NOT render the empty prompt', () => {
@@ -507,7 +520,27 @@ describe('AttackDiscovery', () => {
   });
 
   describe('Alerts filtering feature', () => {
+    let fetchAttackDiscoveriesMock: jest.Mock;
     beforeEach(() => {
+      fetchAttackDiscoveriesMock = jest.fn();
+      (useAttackDiscovery as jest.Mock).mockReturnValue({
+        ...getMockUseAttackDiscoveriesWithCachedAttackDiscoveries(fetchAttackDiscoveriesMock),
+      });
+
+      // Override the localStorage mock to return proper values for this test
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.includes('attackDiscovery.start')) {
+          return ['now-24h', jest.fn()];
+        }
+        if (key.includes('attackDiscovery.end')) {
+          return ['now', jest.fn()];
+        }
+        if (key.includes('attackDiscovery.connectorId')) {
+          return ['test-id', jest.fn()];
+        }
+        return [undefined, jest.fn()];
+      });
+
       render(
         <TestProviders>
           <Router history={historyMock}>
@@ -524,9 +557,17 @@ describe('AttackDiscovery', () => {
 
       fireEvent.click(generate[0]);
 
-      expect(
-        (useAttackDiscovery as jest.Mock)().fetchAttackDiscoveries as jest.Mock
-      ).toHaveBeenCalledWith({ end: 'test-id', filter: undefined, size: 20, start: 'test-id' });
+      expect(fetchAttackDiscoveriesMock).toHaveBeenCalledWith({
+        end: 'now',
+        filter: undefined,
+        overrideConnectorId: undefined,
+        overrideEnd: undefined,
+        overrideFilter: undefined,
+        overrideSize: undefined,
+        overrideStart: undefined,
+        size: 100,
+        start: 'now-24h',
+      });
     });
   });
 

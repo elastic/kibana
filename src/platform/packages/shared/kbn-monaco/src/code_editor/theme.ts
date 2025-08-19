@@ -8,7 +8,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { monaco } from '../..';
+import type { monaco } from '../..';
 
 export function createTheme(
   { euiTheme }: UseEuiTheme,
@@ -101,6 +101,10 @@ export function createTheme(
       'editor.lineHighlightBorder': euiTheme.colors.lightestShade,
       'editorHoverWidget.foreground': euiTheme.colors.darkestShade,
       'editorHoverWidget.background': euiTheme.colors.backgroundBaseSubdued,
+      'diffEditor.insertedTextBackground': euiTheme.colors.borderBaseSuccess,
+      'diffEditor.removedTextBackground': euiTheme.colors.borderBaseDanger,
+      'diffEditor.insertedLineBackground': euiTheme.colors.backgroundBaseSuccess,
+      'diffEditor.removedLineBackground': euiTheme.colors.backgroundBaseDanger,
     },
   };
 }

@@ -7,15 +7,17 @@
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { coreMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { CoreStart } from '@kbn/core/server';
+import type { CoreStart } from '@kbn/core/server';
 import { SyntheticsService } from './synthetics_service';
 import { loggerMock } from '@kbn/logging-mocks';
-import axios, { AxiosResponse } from 'axios';
+import type { AxiosResponse } from 'axios';
+import axios from 'axios';
 import times from 'lodash/times';
-import { LocationStatus, HeartbeatConfig } from '../../common/runtime_types';
+import type { HeartbeatConfig } from '../../common/runtime_types';
+import { LocationStatus } from '../../common/runtime_types';
 import { mockEncryptedSO } from './utils/mocks';
 import * as apiKeys from './get_api_key';
-import { SyntheticsServerSetup } from '../types';
+import type { SyntheticsServerSetup } from '../types';
 
 jest.mock('axios', () => jest.fn());
 
@@ -145,6 +147,8 @@ describe('SyntheticsService', () => {
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
+    service.getMaintenanceWindows = jest.fn();
+
     return { service, locations };
   };
 
@@ -223,7 +227,7 @@ describe('SyntheticsService', () => {
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -289,7 +293,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -306,7 +310,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.editConfig({ monitor: payload } as any);
+      await service.editConfig({ monitor: payload } as any, true, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -323,7 +327,7 @@ describe('SyntheticsService', () => {
 
       const payload = getFakePayload([locations[0]]);
 
-      await service.addConfigs({ monitor: payload } as any);
+      await service.addConfigs({ monitor: payload } as any, []);
 
       expect(axios).toHaveBeenCalledTimes(1);
       expect(axios).toHaveBeenCalledWith(
@@ -532,6 +536,8 @@ describe('SyntheticsService', () => {
     service.locations = locations;
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
     jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+
+    service.getMaintenanceWindows = jest.fn();
 
     it('paginates the results', async () => {
       serverMock.config = mockConfig;

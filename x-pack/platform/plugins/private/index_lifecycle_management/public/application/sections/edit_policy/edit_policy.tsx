@@ -55,7 +55,7 @@ import {
   getSchema,
 } from './form';
 import { useEditPolicyContext } from './edit_policy_context';
-import { FormInternal } from './types';
+import type { FormInternal } from './types';
 
 const policyNamePath = 'name';
 
@@ -190,7 +190,11 @@ export const EditPolicy: React.FunctionComponent = () => {
         }
         bottomBorder
         rightSideItems={[
-          <EuiButtonEmpty href={docLinks.links.elasticsearch.ilm} target="_blank" iconType="help">
+          <EuiButtonEmpty
+            href={docLinks.links.elasticsearch.ilm}
+            target="_blank"
+            iconType="question"
+          >
             <FormattedMessage
               id="xpack.indexLifecycleMgmt.editPolicy.documentationLinkText"
               defaultMessage="Documentation"

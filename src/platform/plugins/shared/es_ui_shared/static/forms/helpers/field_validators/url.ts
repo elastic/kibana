@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ValidationFunc, ValidationError } from '../../hook_form_lib';
+import type { ValidationFunc, ValidationError } from '../../hook_form_lib';
 import { isUrl } from '../../../validators/string';
-import { ERROR_CODE } from './types';
+import type { ERROR_CODE } from './types';
 
 export const urlField =
-  (message: string) =>
+  (message: string, { requireTld = true }: { requireTld?: boolean } = {}) =>
   (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
     const [{ value }] = args;
 
@@ -26,5 +26,5 @@ export const urlField =
       return error;
     }
 
-    return isUrl(value) ? undefined : error;
+    return isUrl(value, { requireTld }) ? undefined : error;
   };

@@ -8,7 +8,7 @@
  */
 
 import { Builder } from '../../../builder';
-import { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
 import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';
@@ -55,7 +55,7 @@ export const find = (
     if (index !== source.index?.valueUnquoted) {
       return false;
     }
-    if (cluster && typeof cluster === 'string' && cluster !== source.cluster?.valueUnquoted) {
+    if (cluster && typeof cluster === 'string' && cluster !== source.prefix?.valueUnquoted) {
       return false;
     }
 

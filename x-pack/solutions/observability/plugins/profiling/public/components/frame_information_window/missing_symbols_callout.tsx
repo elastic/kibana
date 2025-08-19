@@ -33,7 +33,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
           { defaultMessage: 'Missing symbols' }
         )}
         color="warning"
-        iconType="help"
+        iconType="question"
       >
         <p>
           <FormattedMessage
@@ -78,7 +78,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
         { defaultMessage: 'Missing symbols error' }
       )}
       color="warning"
-      iconType="help"
+      iconType="question"
     >
       <p>
         {i18n.translate('xpack.profiling.frameInformationWindow.missingSymbols.interpreted', {

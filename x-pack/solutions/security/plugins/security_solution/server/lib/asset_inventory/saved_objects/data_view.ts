@@ -27,7 +27,7 @@ export const installDataView = async (
       {
         id: currentSpaceDataViewId,
         title: `${indexPattern}${currentSpaceId}`,
-        name: `${dataViewName} - ${currentSpaceId} `,
+        name: `${dataViewName} - ${currentSpaceId}`,
         namespaces: [currentSpaceId],
         allowNoIndex: true,
         timeFieldName: DATA_VIEW_TIME_FIELD,
@@ -38,5 +38,6 @@ export const installDataView = async (
     );
   } catch (error) {
     logger.error(`Failed to setup data view`, error);
+    throw error;
   }
 };

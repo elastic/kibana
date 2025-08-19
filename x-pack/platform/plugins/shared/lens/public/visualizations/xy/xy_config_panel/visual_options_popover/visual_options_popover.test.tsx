@@ -9,12 +9,13 @@ import React from 'react';
 import { Position } from '@elastic/charts';
 import type { FramePublicAPI } from '../../../../types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../../../mocks';
-import { SeriesType, State } from '../../types';
-import { VisualOptionsPopover, VisualOptionsPopoverProps } from '.';
+import type { SeriesType, State } from '../../types';
+import type { VisualOptionsPopoverProps } from '.';
+import { VisualOptionsPopover } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { XYDataLayerConfig } from '@kbn/visualizations-plugin/common';
+import type { XYDataLayerConfig } from '@kbn/visualizations-plugin/common';
 
 describe('Visual options popover', () => {
   let frame: FramePublicAPI;
@@ -60,13 +61,38 @@ describe('Visual options popover', () => {
     await userEvent.click(screen.getByRole('button', { name: 'Appearance' }));
   };
 
-  it.each<{ seriesType: string; showsMissingValues?: boolean; showsFillOpacity?: boolean }>([
-    { seriesType: 'area_percentage_stacked', showsMissingValues: false, showsFillOpacity: true },
-    { seriesType: 'bar_horizontal', showsMissingValues: false, showsFillOpacity: false },
-    { seriesType: 'line', showsMissingValues: true, showsFillOpacity: false },
+  it.each<{
+    seriesType: string;
+    showsMissingValues?: boolean;
+    showsFillOpacity?: boolean;
+    showsPointVisibility?: boolean;
+  }>([
+    {
+      seriesType: 'area_percentage_stacked',
+      showsMissingValues: false,
+      showsFillOpacity: true,
+      showsPointVisibility: true,
+    },
+    {
+      seriesType: 'bar_horizontal',
+      showsMissingValues: false,
+      showsFillOpacity: false,
+      showsPointVisibility: false,
+    },
+    {
+      seriesType: 'line',
+      showsMissingValues: true,
+      showsFillOpacity: false,
+      showsPointVisibility: true,
+    },
   ])(
     `should show settings for seriesTypes: $seriesType`,
-    async ({ seriesType, showsMissingValues = false, showsFillOpacity = false }) => {
+    async ({
+      seriesType,
+      showsMissingValues = false,
+      showsFillOpacity = false,
+      showsPointVisibility = false,
+    }) => {
       const state = testState();
       (state.layers[0] as XYDataLayerConfig).seriesType = seriesType as SeriesType;
       renderVisualOptionsPopover({ state });
@@ -80,6 +106,11 @@ describe('Visual options popover', () => {
         expect(screen.getAllByTestId('lnsFillOpacity')).toHaveLength(2);
       } else {
         expect(screen.queryAllByTestId('lnsFillOpacity')).toHaveLength(0);
+      }
+      if (showsPointVisibility) {
+        expect(screen.getAllByTestId('lnsPointVisibilityOption')).toHaveLength(1);
+      } else {
+        expect(screen.queryAllByTestId('lnsPointVisibilityOption')).toHaveLength(0);
       }
     }
   );

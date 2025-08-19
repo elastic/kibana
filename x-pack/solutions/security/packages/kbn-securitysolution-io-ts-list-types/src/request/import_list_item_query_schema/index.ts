@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { deserializer } from '../../common/deserializer';
 import { list_id } from '../../common/list_id';
 import { type } from '../../common/type';

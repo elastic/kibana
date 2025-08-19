@@ -45,6 +45,7 @@ export interface SystemRouteDeps {
   cloud: CloudSetup;
   getSpaces?: () => Promise<SpacesPluginStart>;
   resolveMlCapabilities: ResolveMlCapabilities;
+  isServerless: boolean;
 }
 
 export interface SavedObjectsRouteDeps {

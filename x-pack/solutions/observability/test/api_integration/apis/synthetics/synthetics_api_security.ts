@@ -11,7 +11,7 @@ import {
 } from '@kbn/synthetics-plugin/server/routes';
 import expect from '@kbn/expect';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -39,7 +39,10 @@ export default function ({ getService }: FtrProviderContext) {
       let resp;
       const { statusCodes, SPACE_ID, username, password, writeAccess, readUser } = options;
       let tags = !writeAccess ? '[uptime-read]' : options.tags ?? '[uptime-read,uptime-write]';
-      if ((method === 'POST' || method === 'DELETE') && path.includes('private_locations')) {
+      if (
+        (method === 'POST' || method === 'DELETE' || method === 'PUT') &&
+        path.includes('private_locations')
+      ) {
         tags = readUser
           ? '[private-location-write,uptime-write]'
           : '[uptime-read,private-location-write,uptime-write]';

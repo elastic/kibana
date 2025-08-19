@@ -60,7 +60,7 @@ while read -r config; do
   # --trace-warnings to debug
   # Node.js process-warning detected:
   # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings"
+  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
 
   if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
     cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
@@ -113,5 +113,13 @@ fi
 echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"
 echo ""
+
+# Scout reporter
+echo "--- Upload Scout reporter events to AppEx QA's team cluster"
+if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+  node scripts/scout upload-events --dontFailOnError
+else
+  echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
+fi
 
 exit $exitCode

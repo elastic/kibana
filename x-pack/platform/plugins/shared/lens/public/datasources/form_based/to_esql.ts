@@ -12,15 +12,15 @@ import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { partition } from 'lodash';
 import { isColumnOfType } from './operations/definitions/helpers';
-import { ValueFormatConfig } from './operations/definitions/column_types';
+import type { ValueFormatConfig } from './operations/definitions/column_types';
 import { convertToAbsoluteDateRange } from '../../utils';
-import { DateRange, OriginalColumn } from '../../../common/types';
-import { GenericIndexPatternColumn } from './form_based';
+import type { DateRange, OriginalColumn } from '../../../common/types';
+import type { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
-import { DateHistogramIndexPatternColumn } from './operations/definitions';
+import type { DateHistogramIndexPatternColumn } from './operations/definitions';
 import type { IndexPattern } from '../../types';
 import { resolveTimeShift } from './time_shift_utils';
-import { FormBasedLayer } from '../..';
+import type { FormBasedLayer } from '../..';
 
 // esAggs column ID manipulation functions
 export const extractAggId = (id: string) => id.split('.')[0].split('-')[2];
@@ -86,6 +86,10 @@ export function getESQLForLayer(
       col.reducedTimeRange &&
       indexPattern.timeFieldName;
 
+    if (wrapInTimeFilter) {
+      return undefined;
+    }
+
     const esAggsId = window.ELASTIC_LENS_DELAY_SECONDS
       ? `bucket_${index + 1}_${aggId}`
       : `bucket_${index}_${aggId}`;
@@ -143,15 +147,13 @@ export function getESQLForLayer(
 
     metricESQL = `${esAggsId} = ` + metricESQL;
 
-    if (wrapInFilter || wrapInTimeFilter) {
-      if (wrapInFilter) {
-        if (col.filter?.language === 'kquery') {
-          return;
-        }
+    if (wrapInFilter) {
+      if (col.filter?.language === 'kuery') {
+        metricESQL += ` WHERE KQL("""${col.filter.query.replace(/"""/g, '')}""")`;
+      } else if (col.filter?.language === 'lucene') {
+        metricESQL += ` WHERE QSTR("""${col.filter.query.replace(/"""/g, '')}""")`;
+      } else {
         return;
-      }
-      if (wrapInTimeFilter) {
-        return undefined;
       }
     }
 

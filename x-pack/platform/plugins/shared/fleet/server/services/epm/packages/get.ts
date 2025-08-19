@@ -16,7 +16,7 @@ import type {
 import semverGte from 'semver/functions/gte';
 import type { Logger } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
-
+import { errors } from '@elastic/elasticsearch';
 import type { IndicesDataStream, SortResults } from '@elastic/elasticsearch/lib/api/types';
 
 import { nodeBuilder } from '@kbn/es-query';
@@ -39,6 +39,7 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  RegistryPolicyIntegrationTemplate,
 } from '../../../../common/types';
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
@@ -57,6 +58,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageInvalidArchiveError,
+  FleetUnauthorizedError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -70,6 +72,8 @@ import { auditLoggingService } from '../../audit_logging';
 import { getFilteredSearchPackages } from '../filtered_packages';
 import { filterAssetPathForParseAndVerifyArchive } from '../archive/parse';
 import { airGappedUtils } from '../airgapped';
+
+import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
 import {
@@ -141,6 +145,11 @@ export async function getPackages(
               );
               return null;
             }
+            // ignoring errors of type PackageNotFoundError to avoid blocking the UI over a package not found in the registry
+            if (err instanceof PackageNotFoundError) {
+              logger.warn(`Package ${pkg.id} ${pkg.attributes.version} not found in registry`);
+              return null;
+            }
             throw err;
           }
         } else {
@@ -155,7 +164,7 @@ export async function getPackages(
   ).filter((p): p is Installable<any> => p !== null);
 
   const filteredPackages = getFilteredSearchPackages();
-  const packageList = registryItems
+  let packageList = registryItems
     .map((item) =>
       createInstallableFrom(
         item,
@@ -175,6 +184,8 @@ export async function getPackages(
     });
   }
 
+  packageList = filterOutExcludedDataStreamTypes(packageList);
+
   if (!excludeInstallStatus) {
     return packageList;
   }
@@ -193,6 +204,33 @@ export async function getPackages(
   return packageListWithoutStatus as PackageList;
 }
 
+function filterOutExcludedDataStreamTypes(
+  packageList: Array<Installable<any>>
+): Array<Installable<any>> {
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  if (excludeDataStreamTypes.length > 0) {
+    // filter out packages where all data streams have excluded types e.g. metrics
+    return packageList.reduce((acc, pkg) => {
+      const shouldInclude =
+        (pkg.data_streams || [])?.length === 0 ||
+        pkg.data_streams?.some((dataStream: any) => {
+          return !excludeDataStreamTypes.includes(dataStream.type);
+        });
+      if (shouldInclude) {
+        // filter out excluded data stream types
+        const filteredDataStreams =
+          pkg.data_streams?.filter(
+            (dataStream: any) => !excludeDataStreamTypes.includes(dataStream.type)
+          ) ?? [];
+        acc.push({ ...pkg, data_streams: filteredDataStreams });
+      }
+      return acc;
+    }, []);
+  }
+  return packageList;
+}
+
 interface GetInstalledPackagesOptions {
   savedObjectsClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
@@ -207,10 +245,22 @@ export async function getInstalledPackages(options: GetInstalledPackagesOptions)
   const { savedObjectsClient, esClient, showOnlyActiveDataStreams, ...otherOptions } = options;
   const { dataStreamType } = otherOptions;
 
-  const [packageSavedObjects, allFleetDataStreams] = await Promise.all([
-    getInstalledPackageSavedObjects(savedObjectsClient, otherOptions),
-    showOnlyActiveDataStreams ? dataStreamService.getAllFleetDataStreams(esClient) : undefined,
-  ]);
+  const packageSavedObjects = await getInstalledPackageSavedObjects(
+    savedObjectsClient,
+    otherOptions
+  );
+
+  let allFleetDataStreams: IndicesDataStream[] | undefined;
+
+  if (showOnlyActiveDataStreams) {
+    allFleetDataStreams = await dataStreamService.getAllFleetDataStreams(esClient).catch((err) => {
+      const isResponseError = err instanceof errors.ResponseError;
+      if (isResponseError && err?.body?.error?.type === 'security_exception') {
+        throw new FleetUnauthorizedError(`Unauthorized to query fleet datastreams: ${err.message}`);
+      }
+      throw err;
+    });
+  }
 
   const integrations = packageSavedObjects.saved_objects.map((integrationSavedObject) => {
     const {
@@ -520,12 +570,56 @@ export async function getPackageInfo({
     licensePath: Registry.getLicensePath(paths || []),
     keepPoliciesUpToDate: savedObject?.attributes.keep_policies_up_to_date ?? false,
   };
-  const updated = { ...packageInfo, ...additions };
+
+  const { filteredDataStreams, filteredPolicyTemplates } =
+    getFilteredDataStreamsAndPolicyTemplates(packageInfo);
+
+  const updated = {
+    ...packageInfo,
+    ...additions,
+    data_streams: filteredDataStreams,
+    policy_templates: filteredPolicyTemplates,
+  };
 
   const installable = createInstallableFrom(updated, savedObject);
   setPackageInfoCache(pkgName, pkgVersion, installable);
 
   return installable;
+}
+
+function getFilteredDataStreamsAndPolicyTemplates(packageInfo: ArchivePackage | RegistryPackage) {
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  let filteredDataStreams = packageInfo.data_streams;
+  let filteredPolicyTemplates = packageInfo.policy_templates;
+
+  if (excludeDataStreamTypes.length > 0) {
+    filteredDataStreams = packageInfo.data_streams?.filter(
+      (dataStream) => !excludeDataStreamTypes.includes(dataStream.type)
+    );
+    // filter out matching types e.g. nginx/metrics
+    filteredPolicyTemplates = packageInfo.policy_templates?.reduce(
+      (acc: RegistryPolicyTemplate[], policyTemplate: RegistryPolicyTemplate) => {
+        const policyTemplateIntegrationTemplate =
+          policyTemplate as RegistryPolicyIntegrationTemplate;
+        if (policyTemplateIntegrationTemplate.inputs) {
+          const filteredInputs = policyTemplateIntegrationTemplate.inputs.filter((input: any) => {
+            const shouldInclude = !excludeDataStreamTypes.some((excludedType) =>
+              input.type.includes(excludedType)
+            );
+            return shouldInclude;
+          });
+          acc.push({ ...policyTemplate, inputs: filteredInputs ?? [] });
+        } else {
+          acc.push(policyTemplate);
+        }
+        return acc;
+      },
+      []
+    );
+  }
+
+  return { filteredDataStreams, filteredPolicyTemplates };
 }
 
 export const getPackageUsageStats = async ({

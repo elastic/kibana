@@ -20,7 +20,6 @@ export function UXAddData() {
       })}
       href={kibana.services?.application?.getUrlForApp('/apm/tutorial')}
       color="primary"
-      iconType="indexOpen"
     >
       {ADD_DATA_LABEL}
     </EuiHeaderLink>

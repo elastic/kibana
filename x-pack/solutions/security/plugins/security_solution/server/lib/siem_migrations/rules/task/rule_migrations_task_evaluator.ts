@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import type { RunnableConfig } from '@langchain/core/runnables';
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { Run, Example } from 'langsmith/schemas';
 import { evaluate } from 'langsmith/evaluation';
 import { isLangSmithEnabled } from '@kbn/langchain/server/tracers/langsmith';
 import { Client } from 'langsmith';
 import { distance } from 'fastest-levenshtein';
-import type { LangSmithEvaluationSettings } from '../../../../../common/siem_migrations/model/common.gen';
+import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
-import type { MigrateRuleState } from './agent/types';
+import type { MigrateRuleGraphConfig, MigrateRuleState } from './agent/types';
 
 export interface EvaluateParams {
   connectorId: string;
-  langsmithSettings: LangSmithEvaluationSettings;
-  invocationConfig?: RunnableConfig;
+  langsmithOptions: LangSmithEvaluationOptions;
+  invocationConfig?: MigrateRuleGraphConfig;
 }
 
 export type Evaluator = (args: { run: Run; example: Example }) => EvaluationResult;
@@ -27,20 +26,20 @@ type CustomEvaluatorResult = Omit<EvaluationResult, 'key'>;
 export type CustomEvaluator = (args: { run: Run; example: Example }) => CustomEvaluatorResult;
 
 export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
-  public async evaluate({ connectorId, langsmithSettings, invocationConfig = {} }: EvaluateParams) {
+  public async evaluate({ connectorId, langsmithOptions, invocationConfig }: EvaluateParams) {
     if (!isLangSmithEnabled()) {
       throw Error('LangSmith is not enabled');
     }
 
-    const client = new Client({ apiKey: langsmithSettings.api_key });
+    const client = new Client({ apiKey: langsmithOptions.api_key });
 
     // Make sure the dataset exists
     const dataset: Example[] = [];
-    for await (const example of client.listExamples({ datasetName: langsmithSettings.dataset })) {
+    for await (const example of client.listExamples({ datasetName: langsmithOptions.dataset })) {
       dataset.push(example);
     }
     if (dataset.length === 0) {
-      throw Error(`LangSmith dataset not found: ${langsmithSettings.dataset}`);
+      throw Error(`LangSmith dataset not found: ${langsmithOptions.dataset}`);
     }
 
     // Initialize the the task runner first, this may take some time
@@ -60,7 +59,7 @@ export class RuleMigrationTaskEvaluator extends RuleMigrationTaskRunner {
     const evaluators = this.getEvaluators();
 
     evaluate(migrateRuleTask, {
-      data: langsmithSettings.dataset,
+      data: langsmithOptions.dataset,
       experimentPrefix: connector.name,
       evaluators,
       client,

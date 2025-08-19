@@ -10,8 +10,9 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { i18n } from '@kbn/i18n';
-import { WorkflowId } from '@kbn/search-shared-ui';
-import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
+import type { WorkflowId } from '@kbn/search-shared-ui';
+import type { AvailableLanguages } from '../../code_examples';
+import { Languages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { useKibana } from '../../hooks/use_kibana';
@@ -21,8 +22,8 @@ import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
 import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
-import { Workflow } from '../../code_examples/workflows';
-import { CreateIndexCodeExamples } from '../../types';
+import type { Workflow } from '../../code_examples/workflows';
+import type { CreateIndexCodeExamples, CodeSnippetParameters } from '../../types';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
@@ -49,19 +50,20 @@ export const CreateIndexCodeView = ({
   selectedLanguage,
   selectedCodeExamples,
 }: CreateIndexCodeViewProps) => {
-  const { application, share, console: consolePlugin } = useKibana().services;
+  const { application, share, cloud, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
 
-  const codeParams = useMemo(() => {
+  const codeParams: CodeSnippetParameters = useMemo(() => {
     return {
       indexName: indexName || undefined,
       elasticsearchURL: elasticsearchUrl,
       apiKey: apiKey || undefined,
+      isServerless: cloud?.isServerlessEnabled ?? undefined,
     };
-  }, [indexName, elasticsearchUrl, apiKey]);
+  }, [indexName, elasticsearchUrl, apiKey, cloud]);
   const selectedCodeExample = useMemo(() => {
     return selectedCodeExamples[selectedLanguage];
   }, [selectedLanguage, selectedCodeExamples]);

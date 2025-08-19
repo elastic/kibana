@@ -28,9 +28,22 @@ paths:
                     type: array
                     items:
                       type: string
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        status:
+                          type: string
+                      required:
+                        - id
+                        - status
                 required:
                   - datasets
                   - graphs
+                  - results
         "400":
           description: Generic Error
           content:

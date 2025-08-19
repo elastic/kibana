@@ -21,7 +21,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { getLayerWizards, LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
+import type { LayerWizard, LayerWizardWithMeta } from '../../../classes/layers';
+import { getLayerWizards } from '../../../classes/layers';
 import { LAYER_WIZARD_CATEGORY } from '../../../../common/constants';
 import './layer_wizard_select.scss';
 
@@ -176,7 +177,7 @@ export class LayerWizardSelect extends Component<Props, State> {
         );
 
         return (
-          <EuiFlexItem key={layerWizard.title}>
+          <EuiFlexItem key={layerWizard.title} component="li">
             {layerWizard.isDisabled && layerWizard.disabledReason ? (
               <EuiToolTip
                 position="top"
@@ -197,7 +198,7 @@ export class LayerWizardSelect extends Component<Props, State> {
         {this._renderCategoryFacets()}
 
         <EuiSpacer size="s" />
-        <EuiFlexGrid columns={2} gutterSize="m">
+        <EuiFlexGrid columns={2} gutterSize="m" component="ul">
           {wizardCards}
         </EuiFlexGrid>
       </>

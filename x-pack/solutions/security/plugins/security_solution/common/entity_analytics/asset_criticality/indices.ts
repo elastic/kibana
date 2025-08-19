@@ -5,6 +5,7 @@
  * 2.0.
  */
 
-const indexBase = '.asset-criticality.asset-criticality';
+const ASSET_CRITICALITY_INDEX_BASE = '.asset-criticality.asset-criticality';
 
-export const getAssetCriticalityIndex = (namespace: string) => `${indexBase}-${namespace}`;
+export const getAssetCriticalityIndex = (namespace: string) =>
+  `${ASSET_CRITICALITY_INDEX_BASE}-${namespace}`;

@@ -32,3 +32,8 @@ export const ESQL_TRANSITION_MODAL_KEY = 'data.textLangTransitionModal';
 export const APP_STATE_URL_KEY = '_a';
 export const GLOBAL_STATE_URL_KEY = '_g';
 export const TABS_STATE_URL_KEY = '_t';
+
+/**
+ * Product feature IDs
+ */
+export const TRACES_PRODUCT_FEATURE_ID = 'discover:traces';

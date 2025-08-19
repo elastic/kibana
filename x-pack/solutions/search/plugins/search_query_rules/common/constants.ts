@@ -10,6 +10,8 @@ import dedent from 'dedent';
 export const QUERY_RULES_SETS_QUERY_KEY = 'query-rules-sets-fetch';
 export const QUERY_RULES_QUERY_RULESET_FETCH_KEY = 'query-rules-ruleset-fetch';
 export const QUERY_RULES_QUERY_RULE_FETCH_KEY = 'query-rules-query-rule-fetch';
+export const QUERY_RULES_QUERY_RULESET_EXISTS_KEY = 'query-rules-query-ruleset-exists';
+
 export const CREATE_QUERY_RULE_SET_API_SNIPPET = dedent`# Create or update a query ruleset
 PUT /_query_rules/my-ruleset
 {

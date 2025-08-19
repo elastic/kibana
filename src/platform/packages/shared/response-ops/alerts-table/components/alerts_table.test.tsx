@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
@@ -25,13 +26,13 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 import { afterAll } from '@elastic/synthetics';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import {
+import type {
   AlertsDataGridProps,
   AlertsTableProps,
   AdditionalContext,
   RenderContext,
-  AlertsField,
 } from '../types';
+import { AlertsField } from '../types';
 import { AlertsTable } from './alerts_table';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -48,6 +49,7 @@ type BaseAlertsTableProps = AlertsTableProps;
 // Search alerts mock
 jest.mock('@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts');
 const mockSearchAlerts = jest.mocked(searchAlerts);
+
 const columns = [
   {
     id: AlertsField.name,
@@ -827,6 +829,29 @@ describe('AlertsTable', () => {
             .getAttribute('title')
         ).toBe(AlertsField.uuid);
       });
+    });
+
+    it('should remove sort if the sorting field is removed', async () => {
+      const props: BaseAlertsTableProps = {
+        ...tableProps,
+        initialSort: [
+          {
+            [AlertsField.name]: { order: 'asc' },
+          },
+        ],
+      };
+      render(<TestComponent {...props} />);
+
+      expect(
+        await screen.findByTestId(`dataGridHeaderCellSortingIcon-${AlertsField.name}`)
+      ).toBeInTheDocument();
+
+      await userEvent.click(screen.getByTestId('show-field-browser'));
+      const fieldCheckbox = screen.getByTestId(`field-${AlertsField.name}-checkbox`);
+      await userEvent.click(fieldCheckbox);
+      await userEvent.click(screen.getByTestId('close'));
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ sort: [] }));
     });
   });
 

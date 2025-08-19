@@ -34,7 +34,8 @@ export class ConnectorUsageReportingTask {
   private readonly eventLogIndex: string;
   private readonly projectId: string | undefined;
   private readonly caCertificate: string | undefined;
-  private readonly usageApiUrl: string;
+  private readonly usageApiUrl: string | undefined;
+  private readonly enabled: boolean;
 
   constructor({
     logger,
@@ -54,8 +55,9 @@ export class ConnectorUsageReportingTask {
     this.logger = logger;
     this.projectId = projectId;
     this.eventLogIndex = eventLogIndex;
-    this.usageApiUrl = config.url;
-    const caCertificatePath = config.ca?.path;
+    this.usageApiUrl = config?.url;
+    this.enabled = config?.enabled ?? true;
+    const caCertificatePath = config?.ca?.path;
 
     if (caCertificatePath && caCertificatePath.length > 0) {
       try {
@@ -113,6 +115,15 @@ export class ConnectorUsageReportingTask {
   private runTask = async (taskInstance: ConcreteTaskInstance, core: CoreSetup) => {
     const { state } = taskInstance;
 
+    if (!this.enabled) {
+      this.logger.warn(
+        `Usage API is disabled, ${CONNECTOR_USAGE_REPORTING_TASK_TYPE} will be skipped`
+      );
+      return {
+        state,
+      };
+    }
+
     if (!this.projectId) {
       this.logger.warn(
         `Missing required project id while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}, reporting task will be deleted`
@@ -126,6 +137,15 @@ export class ConnectorUsageReportingTask {
     if (!this.caCertificate) {
       this.logger.error(
         `Missing required CA Certificate while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
+      );
+      return {
+        state,
+      };
+    }
+
+    if (!this.usageApiUrl) {
+      this.logger.error(
+        `Missing required Usage API url while running ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
       );
       return {
         state,
@@ -175,7 +195,7 @@ export class ConnectorUsageReportingTask {
 
     try {
       attempts = attempts + 1;
-      await this.pushUsageRecord(record);
+      await this.pushUsageRecord({ url: this.usageApiUrl, record });
       this.logger.info(
         `Connector usage record has been successfully reported, ${record.creation_timestamp}, usage: ${record.usage.quantity}, period:${record.usage.period_seconds}`
       );
@@ -293,12 +313,17 @@ export class ConnectorUsageReportingTask {
     };
   };
 
-  private pushUsageRecord = async (record: ConnectorUsageReport) => {
-    return axios.post(this.usageApiUrl, [record], {
+  private pushUsageRecord = async ({
+    url,
+    record,
+  }: {
+    url: string;
+    record: ConnectorUsageReport;
+  }) => {
+    return axios.post(url, [record], {
       headers: { 'Content-Type': 'application/json' },
       timeout: CONNECTOR_USAGE_REPORTING_TASK_TIMEOUT,
       httpsAgent: new https.Agent({
-        // @ts-expect-error option added to node 20.18.0 but @types/node has not been updated to reflect this
         allowPartialTrustChain: true,
         ca: this.caCertificate,
       }),

@@ -12,8 +12,8 @@ import {
   extractReferences,
   injectReferences,
 } from './loader';
-import { FormBasedPersistedState, FormBasedPrivateState } from './types';
-import { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
+import type { FormBasedPersistedState, FormBasedPrivateState } from './types';
+import type { DateHistogramIndexPatternColumn, TermsIndexPatternColumn } from './operations';
 import { sampleIndexPatterns } from '../../data_views_service/mocks';
 
 const createMockStorage = (lastData?: Record<string, string>) => {
@@ -275,8 +275,8 @@ describe('loader', () => {
     };
 
     it('should create a reference for each layer and for current index pattern', () => {
-      const { savedObjectReferences } = extractReferences(state);
-      expect(savedObjectReferences).toMatchInlineSnapshot(`
+      const { references } = extractReferences(state);
+      expect(references).toMatchInlineSnapshot(`
         Array [
           Object {
             "id": "id-index-pattern-a",
@@ -293,8 +293,8 @@ describe('loader', () => {
     });
 
     it('should restore layers', () => {
-      const { savedObjectReferences, state: persistedState } = extractReferences(state);
-      expect(injectReferences(persistedState, savedObjectReferences).layers).toEqual(state.layers);
+      const { references, state: persistedState } = extractReferences(state);
+      expect(injectReferences(persistedState, references).layers).toEqual(state.layers);
     });
   });
 

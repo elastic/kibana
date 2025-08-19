@@ -165,6 +165,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       // Before we start any test we must wait for cloud_security_posture plugin to complete its initialization
       await findings.waitForPluginInitialized();
+
+      // delete old data
+      await findings.index.remove();
+      await findings.vulnerabilitiesIndex.remove();
     });
 
     afterEach(async () => {

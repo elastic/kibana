@@ -184,8 +184,6 @@ of the generic `visitExpression`:
   literal expression node, say `1h`, `1d`, `1w`.
 - `visitInlineCastExpression` &mdash; Called for every inline cast expression
   node, say `abc::int`, `def::string`.
-- `visitRenameExpression` &mdash; Called for every rename expression node, say
-  `a AS b`.
 - `visitOrderExpression` &mdash; Called for every order expression node, say
   `@timestamp ASC`.
 

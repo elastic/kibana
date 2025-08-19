@@ -235,6 +235,7 @@ export type RuleSnoozeSettings = Pick<
 
 export interface RuleTableItem extends Rule {
   ruleType: RuleType['name'];
+  autoRecoverAlerts?: RuleType['autoRecoverAlerts'];
   index: number;
   actionsCount: number;
   isEditable: boolean;
@@ -353,6 +354,7 @@ export interface RuleDefinitionProps<Params extends RuleTypeParams = RuleTypePar
   onEditRule: () => Promise<void>;
   hideEditButton?: boolean;
   filteredRuleTypes?: string[];
+  navigateToEditRuleForm?: (ruleId: string) => void;
 }
 
 export enum Percentiles {
@@ -399,6 +401,8 @@ export interface SnoozeSchedule {
 
 export interface ConnectorServices {
   validateEmailAddresses: ActionsPublicPluginSetup['validateEmailAddresses'];
+  enabledEmailServices: ActionsPublicPluginSetup['enabledEmailServices'];
+  isWebhookSslWithPfxEnabled?: ActionsPublicPluginSetup['isWebhookSslWithPfxEnabled'];
 }
 
 export interface RulesListFilters {

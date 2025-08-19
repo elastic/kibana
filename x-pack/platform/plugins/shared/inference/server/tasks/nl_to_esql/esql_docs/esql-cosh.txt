@@ -1,25 +1,22 @@
 # COSH
 
-The COSH function calculates the hyperbolic cosine of a given angle.
+Returns the hyperbolic cosine of a number.
 
 ## Syntax
 
-`COSH(angle)`
+`COSH(number)`
 
 ### Parameters
 
-#### angle
+#### number
 
-The angle in radians for which the hyperbolic cosine is to be calculated. If the angle is null, the function will return null.
+Numeric expression. If `null`, the function returns `null`.
 
 ## Examples
 
 ```esql
 ROW a=1.8
-| EVAL cosh=COSH(a)
+| EVAL cosh = COSH(a)
 ```
 
-```esql
-ROW angle=0.5
-| EVAL hyperbolic_cosine = COSH(angle)
-```
+Calculate the hyperbolic cosine of the value `1.8`.

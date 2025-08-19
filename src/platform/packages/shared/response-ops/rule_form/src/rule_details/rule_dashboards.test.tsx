@@ -8,10 +8,12 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { RuleDashboards } from './rule_dashboards';
+import { ALERT_LINK_DASHBOARDS_PLACEHOLDER } from '../translations';
 
 const mockOnChange = jest.fn();
 
@@ -55,8 +57,12 @@ describe('RuleDashboards', () => {
     useRuleFormDispatch.mockReturnValue(mockOnChange);
     useRuleFormState.mockReturnValue({
       formData: {
-        params: {
-          dashboards: [],
+        artifacts: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
         },
       },
     });
@@ -73,15 +79,14 @@ describe('RuleDashboards', () => {
       </IntlProvider>
     );
 
-    expect(screen.getByText('Related dashboards')).toBeInTheDocument();
-    expect(useRuleFormState).toHaveBeenCalledTimes(1);
-    expect(useRuleFormDispatch).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
-    expect(mockDashboardServiceProvider().fetchDashboard).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(screen.getByText('Related dashboards')).toBeInTheDocument();
+      expect(useRuleFormState).toHaveBeenCalled();
+      expect(useRuleFormDispatch).toHaveBeenCalled();
+    });
   });
 
-  it('fetches and displays dashboard titles', async () => {
+  it('fetches and displays selected dashboard titles', async () => {
     useRuleFormState.mockReturnValue({
       formData: {
         artifacts: {
@@ -99,11 +104,9 @@ describe('RuleDashboards', () => {
         <RuleDashboards contentManagement={contentManagement} />
       </IntlProvider>
     );
-
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledTimes(1);
+      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
       expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
   });
@@ -130,7 +133,7 @@ describe('RuleDashboards', () => {
     await waitFor(() => {
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
       expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
-      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
       expect(mockDashboardServiceProvider().fetchDashboard).toHaveBeenCalled();
     });
 
@@ -139,21 +142,83 @@ describe('RuleDashboards', () => {
       .getByTestId('ruleLinkedDashboards')
       .querySelector('.euiComboBox__inputWrap');
     if (inputWrap) {
-      fireEvent.click(inputWrap);
+      await userEvent.click(inputWrap);
     }
-    fireEvent.click(screen.getByText('Dashboard 2'));
+    await userEvent.click(screen.getByText('Dashboard 2'));
 
-    expect(mockOnChange).toHaveBeenCalledWith({
-      type: 'setRuleProperty',
-      payload: {
-        property: 'artifacts',
-        value: { dashboards: [{ id: '1' }, { id: '2' }] },
+    await waitFor(() => {
+      expect(mockOnChange).toHaveBeenCalledWith({
+        type: 'setRuleProperty',
+        payload: {
+          property: 'artifacts',
+          value: { dashboards: [{ id: '1' }, { id: '2' }] },
+        },
+      });
+      expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
+      expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
+    });
+  });
+
+  it('does not fetch dashboard list when combobox is not focused', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+
+    await waitFor(() => {
+      expect(mockDashboardServiceProvider().fetchDashboards).not.toHaveBeenCalled();
+    });
+  });
+
+  it('fetches dashboard list when combobox is focused', async () => {
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+    const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
+    fireEvent.focus(searchInput);
+
+    await waitFor(() => {
+      expect(mockDashboardServiceProvider).toHaveBeenCalled();
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalled();
+    });
+  });
+
+  it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
+    useRuleFormState.mockReturnValue({
+      formData: {
+        artifacts: {
+          dashboards: [
+            {
+              id: '1',
+            },
+          ],
+        },
       },
     });
 
+    render(
+      <IntlProvider locale="en">
+        <RuleDashboards contentManagement={contentManagement} />
+      </IntlProvider>
+    );
+
+    const searchInput = screen.getByPlaceholderText(ALERT_LINK_DASHBOARDS_PLACEHOLDER);
+    await userEvent.type(searchInput, 'Dashboard 1');
+
+    // Assert that fetchDashboards was called with the correct search value
+    // Wait for the next tick to allow state update and effect to run
     await waitFor(() => {
+      expect(searchInput).toHaveValue('Dashboard 1');
+
+      expect(mockDashboardServiceProvider().fetchDashboards).toHaveBeenCalledWith(
+        expect.objectContaining({ limit: 100, text: 'Dashboard 1*' })
+      );
+
       expect(screen.getByText('Dashboard 1')).toBeInTheDocument();
-      expect(screen.getByText('Dashboard 2')).toBeInTheDocument();
+      expect(screen.queryByText('Dashboard 2')).not.toBeInTheDocument();
     });
   });
 });

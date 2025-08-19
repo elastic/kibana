@@ -57,7 +57,7 @@ export const MissingValuesOptions: React.FC<MissingValuesOptionProps> = ({
                   }}
                   position="top"
                   size="s"
-                  type="questionInCircle"
+                  type="question"
                 />
               </>
             }

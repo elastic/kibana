@@ -55,6 +55,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { noop } from 'lodash';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public';
@@ -69,7 +70,7 @@ import type { DiscoverContextAppLocator } from './application/context/services/l
 import type { DiscoverSingleDocLocator } from './application/doc/locator';
 import type { DiscoverAppLocator } from '../common';
 import type { ProfilesManager } from './context_awareness';
-import type { DiscoverEBTManager } from './plugin_imports/discover_ebt_manager';
+import type { DiscoverEBTManager } from './ebt_manager';
 
 /**
  * Location state of internal Discover history instance
@@ -92,6 +93,7 @@ export interface DiscoverServices {
   i18n: I18nStart;
   capabilities: Capabilities;
   chrome: ChromeStart;
+  contentManagement: ContentManagementPublicStart;
   core: CoreStart;
   data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
@@ -182,6 +184,7 @@ export const buildServices = ({
     addBasePath: core.http.basePath.prepend,
     analytics: core.analytics,
     capabilities: core.application.capabilities,
+    contentManagement: plugins.contentManagement,
     chrome: core.chrome,
     core,
     data: plugins.data,

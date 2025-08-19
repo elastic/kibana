@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import {
+import type {
   ToolMessage,
   UserMessage,
   ToolCallsOf,
   ToolChoice,
   AssistantMessageOf,
+  InferenceClient,
 } from '@kbn/inference-common';
-import { InferenceClient } from '@kbn/inference-plugin/server';
-import { Logger } from '@kbn/logging';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import {
+import type { Logger } from '@kbn/logging';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type {
   RCA_END_PROCESS_TOOL_NAME,
   RCA_INVESTIGATE_ENTITY_TOOL_NAME,
   RCA_OBSERVE_TOOL_NAME,
 } from '@kbn/observability-ai-common/root_cause_analysis';
-import { ObservationStepSummary } from './tasks/observe_investigation_results';
-import { EntityInvestigation } from './tasks/investigate_entity';
-import { SignificantEventsTimeline } from './tasks/generate_timeline';
-import { RCA_TOOLS } from './tools';
+import type { ObservationStepSummary } from './tasks/observe_investigation_results';
+import type { EntityInvestigation } from './tasks/investigate_entity';
+import type { SignificantEventsTimeline } from './tasks/generate_timeline';
+import type { RCA_TOOLS } from './tools';
 
 export type EndProcessToolMessage = ToolMessage<
   typeof RCA_END_PROCESS_TOOL_NAME,

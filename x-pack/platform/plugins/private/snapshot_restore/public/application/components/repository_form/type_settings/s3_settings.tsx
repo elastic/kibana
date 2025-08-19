@@ -18,8 +18,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Repository, S3Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { Repository, S3Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
@@ -393,6 +393,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           }
         >
           <EuiFieldText
+            isInvalid={Boolean(hasErrors && settingErrors.bufferSize)}
             defaultValue={bufferSize || ''}
             fullWidth
             onChange={(e) => {
@@ -437,6 +438,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           error={settingErrors.cannedAcl}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.cannedAcl)}
             options={cannedAclOptions}
             value={cannedAcl || cannedAclOptions[0].value}
             onChange={(e) => {
@@ -482,6 +484,7 @@ export const S3Settings: React.FunctionComponent<Props> = ({
           error={settingErrors.storageClass}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.storageClass)}
             options={storageClassOptions}
             value={storageClass || storageClassOptions[0].value}
             onChange={(e) => {

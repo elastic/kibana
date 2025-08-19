@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { UiSettingsParams } from '@kbn/core-ui-settings-common';
+import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
 import { i18n } from '@kbn/i18n';
 import {
   aiAssistantSimulatedFunctionCalling,
@@ -27,16 +27,14 @@ export const uiSettings: Record<string, UiSettingsParams> = {
       'xpack.observabilityAiAssistantManagement.settingsPage.simulatedFunctionCallingDescription',
       {
         defaultMessage:
-          '<em>[technical preview]</em> Simulated function calling does not need API support for functions or tools, but it may decrease performance. It is currently always enabled for connectors that do not have API support for Native function calling, regardless of this setting.',
-        values: {
-          em: (chunks) => `<em>${chunks}</em>`,
-        },
+          'Simulated function calling does not need API support for functions or tools, but it may decrease performance. It is currently always enabled for connectors that do not have API support for Native function calling, regardless of this setting.',
       }
     ),
     schema: schema.boolean(),
     type: 'boolean',
     requiresPageReload: true,
-    solution: 'oblt',
+    solutionViews: ['classic', 'oblt'],
+    technicalPreview: true,
   },
   [aiAssistantSearchConnectorIndexPattern]: {
     category: ['observability'],
@@ -55,6 +53,6 @@ export const uiSettings: Record<string, UiSettingsParams> = {
     schema: schema.string(),
     type: 'string',
     requiresPageReload: true,
-    solution: 'oblt',
+    solutionViews: ['classic', 'oblt'],
   },
 };

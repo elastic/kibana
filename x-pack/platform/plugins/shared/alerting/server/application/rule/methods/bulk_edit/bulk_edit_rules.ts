@@ -19,7 +19,7 @@ import type {
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';
 import type { Rule, RuleAction, RuleSystemAction } from '../../../../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import type { BulkActionSkipResult } from '../../../../../common/bulk_edit';
+import type { BulkEditActionSkipResult } from '../../../../../common/bulk_action';
 import type { RuleTypeRegistry } from '../../../../types';
 import {
   validateRuleTypeParams,
@@ -62,7 +62,7 @@ import type {
   NormalizedAlertActionWithGeneratedValues,
   NormalizedAlertAction,
 } from '../../../../rules_client/types';
-import { migrateLegacyActions } from '../../../../rules_client/lib';
+import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
 import type {
   BulkEditFields,
   BulkEditOperation,
@@ -107,7 +107,7 @@ type RuleType = ReturnType<RuleTypeRegistry['get']>;
 // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
 export interface BulkEditResult<Params extends RuleParams> {
   rules: Array<SanitizedRule<Params>>;
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   total: number;
 }
@@ -284,7 +284,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
   resultSavedObjects: Array<SavedObjectsUpdateResponse<RawRule>>;
   errors: BulkOperationError[];
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
 }> {
   const rulesFinder =
     await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
@@ -297,7 +297,7 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
     );
 
   const rules: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
-  const skipped: BulkActionSkipResult[] = [];
+  const skipped: BulkEditActionSkipResult[] = [];
   const errors: BulkOperationError[] = [];
   const apiKeysMap: ApiKeysMap = new Map();
   const username = await context.getUserName();
@@ -310,6 +310,8 @@ async function bulkEditRulesOcc<Params extends RuleParams>(
       .filter(isValidInterval);
 
     prevInterval.concat(intervals);
+
+    await bulkMigrateLegacyActions({ context, rules: response.saved_objects });
 
     await pMap(
       response.saved_objects,
@@ -442,7 +444,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
   paramsModifier?: ParamsModifier<Params>;
   apiKeysMap: ApiKeysMap;
   rules: Array<SavedObjectsBulkUpdateObject<RawRule>>;
-  skipped: BulkActionSkipResult[];
+  skipped: BulkEditActionSkipResult[];
   errors: BulkOperationError[];
   username: string | null;
   shouldIncrementRevision?: ShouldIncrementRevision<Params>;
@@ -458,20 +460,6 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
     const ruleType = context.ruleTypeRegistry.get(rule.attributes.alertTypeId);
 
     await ensureAuthorizationForBulkUpdate(context, operations, rule);
-
-    // migrate legacy actions only for SIEM rules
-    // TODO (http-versioning) Remove RawRuleAction and RawRule casts
-    const migratedActions = await migrateLegacyActions(context, {
-      ruleId: rule.id,
-      actions: rule.attributes.actions as RawRuleAction[],
-      references: rule.references,
-      attributes: rule.attributes as RawRule,
-    });
-
-    if (migratedActions.hasLegacyActions) {
-      rule.attributes.actions = migratedActions.resultedActions;
-      rule.references = migratedActions.resultedReferences;
-    }
 
     const ruleActions = injectReferencesIntoActions(
       rule.id,

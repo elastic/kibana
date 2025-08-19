@@ -13,7 +13,7 @@ import numeral from '@elastic/numeral';
 import numeralLanguages from '@elastic/numeral/languages';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat } from '../field_format';
-import { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
+import type { HtmlContextTypeConvert, TextContextTypeConvert } from '../types';
 import { FORMATS_UI_SETTINGS } from '../constants/ui_settings';
 import { asPrettyString } from '../utils';
 
@@ -30,10 +30,14 @@ export abstract class NumeralFormat extends FieldFormat {
   abstract title: string;
 
   getParamDefaults = () => ({
-    pattern: this.getConfig!(`format:${this.id}:defaultPattern`),
+    // While this should be always defined, it is not guaranteed in testing that the function is available
+    pattern: this.getConfig?.(`format:${this.id}:defaultPattern`),
+    alwaysShowSign: false,
   });
 
   protected getConvertedValue(val: number | string | object): string {
+    const originalVal = val;
+
     if (val === -Infinity) return '-∞';
     if (val === +Infinity) return '+∞';
     if (typeof val === 'object') {
@@ -43,6 +47,18 @@ export abstract class NumeralFormat extends FieldFormat {
       val = parseFloat(val);
     }
 
+    if (isNaN(val) && typeof originalVal === 'string') {
+      // if the value is a string that cannot be parsed as a number, try to parse it as a JSON object
+      try {
+        const parsedVal = JSON.parse(originalVal);
+        if (typeof parsedVal === 'object' && parsedVal !== null) {
+          return originalVal; // return the original string if it's a JSON object
+        }
+      } catch {
+        // if parsing fails, continue to a next step
+      }
+    }
+
     if (isNaN(val)) return '';
 
     const previousLocale = numeral.language();
@@ -50,7 +66,12 @@ export abstract class NumeralFormat extends FieldFormat {
       (this.getConfig && this.getConfig(FORMATS_UI_SETTINGS.FORMAT_NUMBER_DEFAULT_LOCALE)) || 'en';
     numeral.language(defaultLocale);
 
-    const formatted = numeralInst.set(val).format(this.param('pattern'));
+    let pattern: string = this.param('pattern');
+    if (pattern && this.param('alwaysShowSign')) {
+      pattern = pattern.startsWith('+') || val === 0 ? pattern : `+ ${pattern}`;
+    }
+
+    const formatted = numeralInst.set(val).format(pattern);
 
     numeral.language(previousLocale);
 

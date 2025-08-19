@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import {
   DATA_QUALITY_URL_STATE_KEY,
   datasetQualityDetailsUrlSchemaV1,
@@ -17,10 +17,10 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
 } from '@kbn/dataset-quality-plugin/common/constants';
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import rison from '@kbn/rison';
 import querystring from 'querystring';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 const defaultPageState: datasetQualityUrlSchemaV1.UrlSchema = {
   v: 1,
@@ -77,7 +77,7 @@ type SummaryPanelKPI = Record<
 const texts = {
   noActivityText: 'No activity in the selected timeframe',
   datasetHealthPoor: 'Poor',
-  datasetHealthDegraded: 'Degraded',
+  datasetHealthWarning: 'Warning',
   datasetHealthGood: 'Good',
   activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
@@ -143,6 +143,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityIntegrationsSelectableButton: 'datasetQualityIntegrationsSelectableButton',
     datasetQualityNamespacesSelectable: 'datasetQualityNamespacesSelectable',
     datasetQualityNamespacesSelectableButton: 'datasetQualityNamespacesSelectableButton',
+    datasetQualityTypesSelectable: 'datasetQualityFilterType',
     datasetQualityQualitiesSelectable: 'datasetQualityQualitiesSelectable',
     datasetQualityQualitiesSelectableButton: 'datasetQualityQualitiesSelectableButton',
     datasetQualityDetailsEmptyPrompt: 'datasetQualityDetailsEmptyPrompt',
@@ -155,7 +156,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     datasetQualityInsufficientPrivileges: 'datasetQualityInsufficientPrivileges',
     datasetQualityNoDataEmptyState: 'datasetQualityTableNoData',
     datasetQualityNoPrivilegesEmptyState: 'datasetQualityNoPrivilegesEmptyState',
-
     superDatePickerToggleQuickMenuButton: 'superDatePickerToggleQuickMenuButton',
     superDatePickerApplyTimeButton: 'superDatePickerApplyTimeButton',
     superDatePickerQuickMenu: 'superDatePickerQuickMenu',
@@ -169,6 +169,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       'datasetQualityDetailsDegradedFieldFlyoutIssueDoesNotExist',
     datasetQualityDetailsOverviewDegradedFieldToggleSwitch:
       'datasetQualityDetailsOverviewDegradedFieldToggleSwitch',
+    datasetQualityDetailsActionsDropdown: 'datasetQualityDetailsActionsDropdown',
+    openInDiscover: 'openInDiscover',
   };
 
   return {
@@ -277,7 +279,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
-        { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
+        { title: texts.datasetHealthWarning, key: 'datasetHealthWarning' },
         { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
         { title: texts.activeDatasets, key: 'activeDatasets' },
         { title: texts.estimatedData, key: 'estimatedData' },
@@ -409,6 +411,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     },
 
     async toggleShowFullDatasetNames() {
+      await find.waitForDeletedByCssSelector('.euiToolTipPopover', 5 * 1000);
       return find.clickByCssSelector(selectors.showFullDatasetNamesSwitch);
     },
 
@@ -434,6 +437,14 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
     getDatasetQualityDetailsHeaderButton() {
       return testSubjects.find(testSubjectSelectors.datasetQualityDetailsHeaderButton);
+    },
+
+    openDatasetQualityDetailsActionsButton() {
+      return testSubjects.click(testSubjectSelectors.datasetQualityDetailsActionsDropdown);
+    },
+
+    getOpenInDiscoverButton() {
+      return testSubjects.find(testSubjectSelectors.openInDiscover);
     },
 
     openIntegrationActionsMenu() {
@@ -463,12 +474,16 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       ].filter((item) => !excludeKeys.includes(item.key));
 
       const kpiTexts = await Promise.all(
-        kpiTitleAndKeys.map(async ({ title, key }) => ({
-          key,
-          value: await testSubjects.getVisibleText(
-            `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`
-          ),
-        }))
+        kpiTitleAndKeys.map(async ({ title, key }) => {
+          const selector = `${testSubjectSelectors.datasetQualityDetailsSummaryKpiValue}-${title}`;
+
+          const exists = await testSubjects.exists(selector);
+          if (!exists) {
+            return { key, value: undefined } as { key: string; value: string | undefined };
+          }
+
+          return { key, value: await testSubjects.getVisibleText(selector) };
+        })
       );
 
       return kpiTexts.reduce(
@@ -480,10 +495,6 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       );
     },
 
-    /**
-     * Selects a breakdown field from the unified histogram breakdown selector
-     * @param fieldText The text of the field to select. Use 'No breakdown' to clear the selection
-     */
     async selectBreakdownField(fieldText: string) {
       return euiSelectable.searchAndSelectOption(
         testSubjectSelectors.unifiedHistogramBreakdownSelectorButton,
@@ -522,10 +533,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      // Check if 'title' attribute is "Expand" or "Collapse"
       const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
 
-      // Open if collapsed
       if (isCollapsed) {
         await fieldExpandButton.click();
       }
@@ -553,10 +562,8 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const fieldExpandButton = expandButtons[testDatasetRowIndex];
 
-      // Check if 'title' attribute is "Expand" or "Collapse"
       const isCollapsed = (await fieldExpandButton.getAttribute('title')) === 'Expand';
 
-      // Open if collapsed
       if (isCollapsed) {
         await fieldExpandButton.click();
       }

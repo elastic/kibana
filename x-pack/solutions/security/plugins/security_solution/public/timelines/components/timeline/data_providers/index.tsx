@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { rgba } from 'polished';
 import { useDispatch } from 'react-redux';
 import React, { useCallback, useMemo } from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
@@ -39,15 +38,15 @@ const DropTargetDataProvidersContainer = styled.div`
   position: relative;
 
   .${IS_DRAGGING_CLASS_NAME} & .drop-target-data-providers {
-    background: ${({ theme }) => rgba(theme.eui.euiColorSuccess, 0.1)};
-    border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorSuccess};
+    background: ${({ theme }) => theme.euiTheme.colors.backgroundBaseSuccess};
+    border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderStrongSuccess};
 
     & .timeline-drop-area-empty__text {
-      color: ${({ theme }) => theme.eui.euiColorSuccess};
+      color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
     }
 
     & .euiFormHelpText {
-      color: ${({ theme }) => theme.eui.euiColorSuccess};
+      color: ${({ theme }) => theme.euiTheme.colors.textSuccess};
     }
   }
 `;
@@ -57,15 +56,15 @@ const DropTargetDataProviders = styled.div`
   flex-direction: column;
   justify-content: flex-start;
   position: relative;
-  border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
+  border: 0.2rem dashed ${({ theme }) => theme.euiTheme.colors.borderBaseFormsControl};
   border-radius: 5px;
-  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
+  padding: ${({ theme }) => theme.euiTheme.size.s} 0;
   margin: 0px 0 0px 0;
   max-height: 33vh;
   min-height: 100px;
   overflow: auto;
   resize: vertical;
-  background-color: ${({ theme }) => theme.eui.euiFormBackgroundColor};
+  background-color: ${({ theme }) => theme.euiTheme.components.forms.background};
 `;
 
 DropTargetDataProviders.displayName = 'DropTargetDataProviders';

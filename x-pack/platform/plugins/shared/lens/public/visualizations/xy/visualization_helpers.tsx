@@ -6,17 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { cloneDeep, uniq } from 'lodash';
+import { uniq } from 'lodash';
 import { IconChartBarHorizontal, IconChartBarStacked, IconChartMixedXy } from '@kbn/chart-icons';
 import type { LayerType as XYLayerType } from '@kbn/expression-xy-plugin/common';
-import {
+import type {
   DatasourceLayers,
   FramePublicAPI,
   OperationMetadata,
   UserMessage,
   VisualizationType,
 } from '../../types';
-import {
+import type {
   State,
   XYState,
   XYAnnotationLayerConfig,
@@ -26,9 +26,8 @@ import {
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
   XYByValueAnnotationLayerConfig,
-  visualizationTypes,
-  visualizationSubtypes,
 } from './types';
+import { visualizationTypes, visualizationSubtypes } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
@@ -355,7 +354,7 @@ const newLayerFn = {
         layerType: layerTypes.ANNOTATIONS,
         annotationGroupId,
 
-        annotations: cloneDeep(libraryGroupConfig.annotations),
+        annotations: structuredClone(libraryGroupConfig.annotations),
         indexPatternId: libraryGroupConfig.indexPatternId,
         ignoreGlobalFilters: libraryGroupConfig.ignoreGlobalFilters,
         __lastSaved: libraryGroupConfig,

@@ -105,6 +105,95 @@ describe('getFirstRunAt', () => {
     expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:15:00Z'));
   });
 
+  test('should return the calculated runAt from fixed dtstart when an rrule with fixed time and dtstart is provided', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          dtstart: '2025-06-15T13:01:02Z',
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+          byhour: [12],
+          byminute: [15],
+        },
+      },
+    };
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+    // The next day from 2025-06-15 is 2025-06-16
+    // The time is set to 12:15
+    expect(firstRunAtDate).toEqual(new Date('2025-06-16T12:15:02.000Z'));
+  });
+
+  test('should return the calculated runAt from now if using fixed dtstart calculates runAt in the past', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          dtstart: '2025-03-10T13:01:02Z',
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+          byhour: [12],
+          byminute: [15],
+        },
+      },
+    };
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+    // The next day from 2025-03-10 is 2025-03-11 which is in the past so the first runAt is set
+    // based on now which is fixed to '2025-04-15T13:01:02Z'
+    // The time is set to 12:15
+    expect(firstRunAtDate).toEqual(new Date('2025-04-16T12:15:02Z'));
+  });
+
+  test('should return the dtstart as the calculated runAt when dtstart is provided with no other fields', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          dtstart: '2025-06-15T13:01:02Z',
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+        },
+      },
+    };
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+    expect(firstRunAtDate).toEqual(new Date('2025-06-15T13:01:02.000Z'));
+  });
+
+  test('should return the now as the calculated runAt when dtstart is provided but is in the past', () => {
+    const taskInstance = {
+      id: 'id',
+      params: {},
+      state: {},
+      taskType: 'report',
+      schedule: {
+        rrule: {
+          dtstart: '2025-03-10T13:01:02Z',
+          freq: 3,
+          interval: 1,
+          tzid: 'UTC',
+        },
+      },
+    };
+    const firstRunAt = getFirstRunAt({ taskInstance, logger });
+    const firstRunAtDate = new Date(firstRunAt);
+    expect(firstRunAtDate).toEqual(new Date('2025-04-15T13:01:02.000Z'));
+  });
+
   test('should return the calculated runAt when an rrule with only byhour is provided', () => {
     const taskInstance = {
       id: 'id',
@@ -159,7 +248,7 @@ describe('getFirstRunAt', () => {
           freq: 2, // Weekly
           interval: 1,
           tzid: 'UTC',
-          byweekday: [1], // Monday
+          byweekday: ['1'], // Monday
         },
       },
     };
@@ -182,7 +271,7 @@ describe('getFirstRunAt', () => {
           freq: 2, // Weekly
           interval: 1,
           tzid: 'UTC',
-          byweekday: [1], // Monday
+          byweekday: ['MO'], // Monday
           byhour: [12],
           byminute: [15],
         },
@@ -257,7 +346,7 @@ describe('getFirstRunAt', () => {
           freq: 1, // Monthly
           interval: 1,
           tzid: 'UTC',
-          byweekday: [3], // Wednesday
+          byweekday: ['3'], // Wednesday
           byhour: [12],
           byminute: [17],
         },

@@ -63,6 +63,8 @@ import { useMlApi, useMlKibana } from '../../contexts/kibana';
 import { useMlIndexUtils } from '../../util/index_service';
 
 import { getQueryStringForInfluencers } from './get_query_string_for_influencers';
+import type { FocusTrapProps } from '../../util/create_focus_trap_props';
+import { createFocusTrapProps } from '../../util/create_focus_trap_props';
 
 const LOG_RATE_ANALYSIS_MARGIN_FACTOR = 20;
 const LOG_RATE_ANALYSIS_BASELINE_FACTOR = 15;
@@ -74,7 +76,7 @@ interface LinksMenuProps {
   showViewSeriesLink: boolean;
   isAggregatedData: boolean;
   interval: 'day' | 'hour' | 'second';
-  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord) => void;
+  showRuleEditorFlyout: (anomaly: MlAnomaliesTableRecord, focusTrapProps: FocusTrapProps) => void;
   onItemClick: () => void;
   sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
   selectedJob?: MlJob;
@@ -99,6 +101,12 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   const isCategorizationAnomalyRecord = isCategorizationAnomaly(props.anomaly);
 
   const closePopover = props.onItemClick;
+  const focusTrapProps = useMemo(() => {
+    const triggerElement = document.getElementById(
+      `mlAnomaliesListRowActionsButton-${props.anomaly.rowId}`
+    );
+    return createFocusTrapProps(triggerElement);
+  }, [props.anomaly.rowId]);
 
   const kibana = useMlKibana();
   const {
@@ -156,7 +164,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   );
 
   const getAnomaliesMapsLink = async (anomaly: MlAnomaliesTableRecord) => {
-    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId);
+    const initialLayers = getInitialAnomaliesLayers(anomaly.jobId, euiTheme);
     const anomalyBucketStartMoment = moment(anomaly.source.timestamp).tz(
       getDateFormatTz(uiSettings)
     );
@@ -765,7 +773,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
   };
 
   const { anomaly, showViewSeriesLink } = props;
-  const canUpdateJob = usePermissionCheck('canUpdateJob');
+  const [canUpdateJob, canUseAiops] = usePermissionCheck(['canUpdateJob', 'canUseAiops']);
   const canConfigureRules = isRuleSupported(anomaly.source) && canUpdateJob;
 
   const contextMenuItems = useMemo(() => {
@@ -917,7 +925,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           icon="controlsHorizontal"
           onClick={() => {
             closePopover();
-            props.showRuleEditorFlyout(anomaly);
+            props.showRuleEditorFlyout(anomaly, focusTrapProps);
           }}
           data-test-subj="mlAnomaliesListRowActionConfigureRulesButton"
         >
@@ -929,7 +937,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (openInLogRateAnalysisUrl) {
+    if (openInLogRateAnalysisUrl && canUseAiops) {
       items.push(
         <EuiContextMenuItem
           key="log_rate_analysis"
@@ -945,7 +953,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       );
     }
 
-    if (messageField !== null) {
+    if (messageField !== null && canUseAiops) {
       items.push(
         <EuiContextMenuItem
           key="run_pattern_analysis"
@@ -969,6 +977,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
                     }
                   : {}),
               },
+              focusTrapProps,
             });
           }}
           data-test-subj="mlAnomaliesListRowActionPatternAnalysisButton"
@@ -1017,6 +1026,7 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
         values: { time: formatHumanReadableDateTimeSeconds(props.anomaly.time) },
       })}
       data-test-subj="mlAnomaliesListRowActionsButton"
+      id={`mlAnomaliesListRowActionsButton-${props.anomaly.rowId}`}
     />
   );
 

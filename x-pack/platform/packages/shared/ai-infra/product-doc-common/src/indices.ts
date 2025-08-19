@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { isImpliedDefaultElserInferenceId } from './is_default_inference_endpoint';
 import type { ProductName } from './product';
 
 export const productDocIndexPrefix = '.kibana_ai_product_doc';
 export const productDocIndexPattern = `${productDocIndexPrefix}_*`;
 
-export const getProductDocIndexName = (productName: ProductName): string => {
-  return `${productDocIndexPrefix}_${productName.toLowerCase()}`;
+export const getProductDocIndexName = (productName: ProductName, inferenceId?: string): string => {
+  return `${productDocIndexPrefix}_${productName.toLowerCase()}${
+    !isImpliedDefaultElserInferenceId(inferenceId) ? `-${inferenceId}` : ''
+  }`;
 };

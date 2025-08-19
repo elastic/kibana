@@ -11,8 +11,14 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import { DeletePrivMonUserRequestParams } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
 import type { DeletePrivMonUserResponse } from '../../../../../../common/api/entity_analytics/privilege_monitoring/users/delete.gen';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createPrivilegedUsersCrudService } from '../../users/privileged_users_crud';
 
 export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
@@ -38,9 +44,16 @@ export const deleteUserRoute = (router: EntityAnalyticsRoutesDeps['router'], log
         const siemResponse = buildSiemResponse(response);
 
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
           const secSol = await context.securitySolution;
-          await secSol.getPrivilegeMonitoringDataClient().deleteUser(request.params.id);
-          return response.ok({ body: { aknowledged: true } });
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const crudService = createPrivilegedUsersCrudService(dataClient);
+
+          await crudService.delete(request.params.id);
+          return response.ok({ body: { acknowledged: true } });
         } catch (e) {
           const error = transformError(e);
           logger.error(`Error deleting user: ${error.message}`);

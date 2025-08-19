@@ -6,8 +6,8 @@
  */
 
 import type { MetricsAPIResponse, MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
-import type { ESSearchClient } from '../../../lib/metrics/types';
-import { query } from '../../../lib/metrics';
+import type { ESSearchClient } from '@kbn/metrics-data-access-plugin/server';
+import { fetchMetrics } from '@kbn/metrics-data-access-plugin/server';
 
 const handleResponse =
   (client: ESSearchClient, options: MetricsAPIRequest, previousResponse?: MetricsAPIResponse) =>
@@ -20,7 +20,7 @@ const handleResponse =
         }
       : resp;
     if (resp.info.afterKey) {
-      return query(client, { ...options, afterKey: resp.info.afterKey }).then(
+      return fetchMetrics(client, { ...options, afterKey: resp.info.afterKey }).then(
         handleResponse(client, options, combinedResponse)
       );
     }
@@ -28,5 +28,5 @@ const handleResponse =
   };
 
 export const queryAllData = (client: ESSearchClient, options: MetricsAPIRequest) => {
-  return query(client, options).then(handleResponse(client, options));
+  return fetchMetrics(client, options).then(handleResponse(client, options));
 };

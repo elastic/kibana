@@ -1024,6 +1024,152 @@ paths:
                         },
                         "namespace": "default"
                     }
+    put:
+      summary: Update a private location
+      operationId: put-private-location
+      description: >
+        Update an existing private location's label.
+
+        You must have `all` privileges for the Synthetics and Uptime feature in the Observability section of the Kibana feature privileges.
+
+        When a private location's label is updated, all monitors using this location will also be updated to maintain data consistency.
+      tags:
+        - synthetics
+      parameters:
+        - in: path
+          name: id
+          description: The unique identifier of the private location to be updated.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - label
+              properties:
+                label:
+                  type: string
+                  minLength: 1
+                  description: A new label for the private location. Must be at least 1 character long.
+            examples:
+              putPrivateLocationRequestExample1:
+                description: Update a private location's label.
+                value: |-
+                  {
+                    "label": "Updated Private Location Name"
+                  }
+      responses:
+        '200':
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getPrivateLocation"
+              examples:
+                putPrivateLocationResponseExample1:
+                  value: |-
+                    {
+                      "label": "Updated Private Location Name",
+                      "id": "test-private-location-id",
+                      "agentPolicyId": "test-private-location-id",
+                      "isServiceManaged": false,
+                      "isInvalid": false,
+                      "tags": ["private", "testing", "updated"],
+                      "geo": {
+                        "lat": 37.7749,
+                        "lon": -122.4194
+                      },
+                      "spaces": ["*"]
+                    }
+        '400':
+          description: If the `label` is shorter than 1 character the API will return a 400 Bad Request response with a corresponding error message.
+        '404':
+          description: If the private location with the specified ID does not exist, the API will return a 404 Not Found response.
+  /api/synthetics/monitor/test/{monitorId}:
+    post:
+      summary: Trigger an on-demand test run for a monitor
+      operationId: post-synthetics-monitor-test
+      description: >
+        Trigger an immediate test execution for the specified monitor.
+        The response includes the generated `testRunId`. If the test encounters issues in one or more service locations, an `errors` array is also returned with details about the failures.
+      tags:
+        - synthetics
+      x-state: Generally available; added in 9.2.0
+      parameters:
+        - in: path
+          name: monitorId
+          required: true
+          description: The ID (config_id) of the monitor to test.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Test run triggered successfully.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - testRunId
+                properties:
+                  testRunId:
+                    type: string
+                    description: Unique identifier for the triggered test run.
+                  errors:
+                    type: array
+                    description: >-
+                      Array of errors encountered while triggering the test, one
+                      per service location.
+                    items:
+                      type: object
+                      required:
+                        - locationId
+                        - error
+                      properties:
+                        locationId:
+                          type: string
+                          description: Identifier of the service location where the error occurred.
+                        error:
+                          type: object
+                          required:
+                            - status
+                            - reason
+                            - failed_monitors
+                          properties:
+                            status:
+                              type: integer
+                              description: HTTP status code returned by the agent.
+                            reason:
+                              type: string
+                              description: Human-readable explanation of the failure.
+                            failed_monitors:
+                              description: Optional list of monitors that failed at the location.
+                              nullable: true
+                              type: array
+                              items:
+                                type: object
+              examples:
+                testNowMonitorResponseExample1:
+                  value: |-
+                    {
+                      "testRunId": "2bd506e5-4f9a-4aa6-a019-7988500afba0",
+                      "errors": [
+                        {
+                          "locationId": "us_central_staging",
+                          "error": {
+                            "status": 401,
+                            "reason": "no auth credentials provided",
+                            "failed_monitors": null
+                          }
+                        }
+                      ]
+                    }
+        '404':
+          description: Monitor not found.
 components:
   schemas:
     commonMonitorFields:

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { EuiBasicTableColumn, EuiButtonIcon } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { FETCH_STATUS, TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { isEmpty } from 'lodash';
+import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
-import { useEnablement } from '../../../../hooks';
+import { getMonitorSpaceToAppend, useEnablement } from '../../../../hooks';
 import { useCanEditSynthetics } from '../../../../../../hooks/use_capabilities';
 import {
   isStatusEnabled,
@@ -26,13 +29,13 @@ import { useMonitorAlertEnable } from '../../../../hooks/use_monitor_alert_enabl
 import * as labels from './labels';
 import { MonitorDetailsLink } from './monitor_details_link';
 
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
   SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';
@@ -49,7 +52,7 @@ export function useMonitorListColumns({
   setMonitorPendingDeletion: (configs: string[]) => void;
 }): Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> {
   const history = useHistory();
-  const { http } = useKibana().services;
+  const { http, spaces } = useKibana<ClientPluginsStart>().services;
   const canEditSynthetics = useCanEditSynthetics();
 
   const { isServiceAllowed } = useEnablement();
@@ -69,6 +72,7 @@ export function useMonitorListColumns({
 
     return publicLocations ? Boolean(canUsePublicLocations) : true;
   };
+  const LazySpaceList = spaces?.ui.components.getSpaceList ?? (() => null);
 
   const columns: Array<EuiBasicTableColumn<EncryptedSyntheticsSavedMonitor>> = [
     {
@@ -172,6 +176,21 @@ export function useMonitorListColumns({
       ),
     },
     {
+      name: i18n.translate('xpack.synthetics.management.monitorList.spacesColumnTitle', {
+        defaultMessage: 'Spaces',
+      }),
+      field: 'spaces',
+      sortable: false,
+      render: (monSpaces: string[]) => {
+        return (
+          <LazySpaceList
+            namespaces={monSpaces ?? (space ? [space?.id] : [])}
+            behaviorContext="outside-space"
+          />
+        );
+      },
+    },
+    {
       align: 'right' as const,
       name: i18n.translate('xpack.synthetics.management.monitorList.actions', {
         defaultMessage: 'Actions',
@@ -206,9 +225,10 @@ export function useMonitorListColumns({
             isPublicLocationsAllowed(fields) &&
             isServiceAllowed,
           href: (fields) => {
-            if ('spaceId' in fields && space?.id !== fields.spaceId) {
+            const appendSpaceId = getMonitorSpaceToAppend(space, fields.spaces);
+            if (!isEmpty(appendSpaceId)) {
               return http?.basePath.prepend(
-                `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaceId}`
+                `edit-monitor/${fields[ConfigKey.CONFIG_ID]}?spaceId=${fields.spaces?.[0]}`
               )!;
             }
             return http?.basePath.prepend(`edit-monitor/${fields[ConfigKey.CONFIG_ID]}`)!;

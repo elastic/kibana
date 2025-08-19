@@ -84,7 +84,11 @@ export function ResultLinks({ jobs }) {
         </EuiFlexItem>
       )}
       <EuiFlexItem grow={false}>
-        <EuiToolTip position="bottom" content={openJobsInAnomalyExplorerText}>
+        <EuiToolTip
+          position="bottom"
+          content={openJobsInAnomalyExplorerText}
+          disableScreenReaderOutput
+        >
           <EuiButtonIcon
             href={anomalyExplorerLink}
             iconType="visTable"

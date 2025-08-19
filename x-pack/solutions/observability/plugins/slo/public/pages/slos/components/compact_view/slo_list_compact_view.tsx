@@ -4,28 +4,24 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  DefaultItemAction,
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';
-import { RulesParams } from '@kbn/observability-plugin/public';
+import type { RulesParams } from '@kbn/observability-plugin/public';
 import { RuleFormFlyout } from '@kbn/response-ops-rule-form/flyout';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import { SloStateBadge, SloStatusBadge } from '../../../../components/slo/slo_badges';
 import { SloActiveAlertsBadge } from '../../../../components/slo/slo_badges/slo_active_alerts_badge';
+import { SloTagsBadge } from '../../../../components/slo/slo_badges/slo_tags_badge';
+import { useActionModal } from '../../../../context/action_modal';
 import { sloKeys } from '../../../../hooks/query_key_factory';
 import { useFetchActiveAlerts } from '../../../../hooks/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/use_fetch_historical_summary';
@@ -42,11 +38,10 @@ import {
   createRemoteSloEnableUrl,
   createRemoteSloResetUrl,
 } from '../../../../utils/slo/remote_slo_urls';
-import { useActionModal } from '../../../../context/action_modal';
+import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloRemoteBadge } from '../badges/slo_remote_badge';
 import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SLOGroupings } from '../common/slo_groupings';
-import { SloTagsList } from '../common/slo_tags_list';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
@@ -77,6 +72,13 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
   const { triggerAction } = useActionModal();
+  const { onStateChange } = useUrlSearchState();
+
+  const handleTagClick = (tag: string) => {
+    onStateChange({
+      kqlQuery: `slo.tags: "${tag}"`,
+    });
+  };
 
   const [sloToAddRule, setSloToAddRule] = useState<SLOWithSummaryResponse | undefined>(undefined);
 
@@ -345,7 +347,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'tags',
       name: 'Tags',
-      render: (tags: string[]) => <SloTagsList tags={tags} color="default" />,
+      render: (_, slo: SLOWithSummaryResponse) => (
+        <EuiFlexGroup gutterSize="xs" direction="row" responsive wrap alignItems="center">
+          <SloTagsBadge slo={slo} onClick={handleTagClick} />
+        </EuiFlexGroup>
+      ),
     },
     {
       field: 'instance',

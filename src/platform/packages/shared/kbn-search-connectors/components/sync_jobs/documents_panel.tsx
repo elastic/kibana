@@ -9,7 +9,8 @@
 
 import React from 'react';
 
-import { EuiBasicTable, EuiBasicTableColumn, EuiIcon, EuiToolTip, EuiCode } from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiIcon, EuiToolTip, EuiCode } from '@elastic/eui';
 import { ByteSizeValue } from '@kbn/config-schema/src/byte_size_value'; // importing from file to avoid leaking `joi` to the browser
 import { i18n } from '@kbn/i18n';
 
@@ -40,7 +41,7 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
             {i18n.translate('searchConnectors.index.syncJobs.documents.added', {
               defaultMessage: 'Upserted',
             })}
-            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -61,7 +62,7 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
             {i18n.translate('searchConnectors.index.syncJobs.documents.removed', {
               defaultMessage: 'Deleted',
             })}
-            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),
@@ -82,7 +83,7 @@ export const SyncJobDocumentsPanel: React.FC<SyncJobDocumentsPanelProps> = (sync
             {i18n.translate('searchConnectors.index.syncJobs.documents.volume', {
               defaultMessage: 'Volume',
             })}
-            <EuiIcon size="s" type="questionInCircle" color="subdued" className="eui-alignTop" />
+            <EuiIcon size="s" type="question" color="subdued" className="eui-alignTop" />
           </>
         </EuiToolTip>
       ),

@@ -24,7 +24,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',
@@ -128,7 +128,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               <span>
                 {FIELD_SUMMARIES.fieldStatus.label}{' '}
                 <EuiIconTip
-                  type="iInCircle"
+                  type="info"
                   color="subdued"
                   content={i18n.translate('xpack.streams.fieldSummary.statusTooltip', {
                     defaultMessage:

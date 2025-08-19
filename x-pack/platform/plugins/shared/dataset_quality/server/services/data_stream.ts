@@ -10,7 +10,7 @@ import type {
   IndicesDataStreamsStatsDataStreamsStatsItem,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { reduceAsyncChunks } from '../utils/reduce_async_chunks';
+import { processAsyncInChunks } from '../utils/process_async_in_chunks';
 
 class DataStreamService {
   public async getMatchingDataStreams(
@@ -37,7 +37,7 @@ class DataStreamService {
     dataStreams: string[]
   ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
     try {
-      const { data_streams: dataStreamsStats } = await reduceAsyncChunks(
+      const { data_streams: dataStreamsStats } = await processAsyncInChunks(
         dataStreams,
         (dataStreamsChunk) =>
           esClient.indices.dataStreamsStats({ name: dataStreamsChunk.join(','), human: true })

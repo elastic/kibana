@@ -54,7 +54,7 @@ export class FleetArtifactsClient implements ArtifactsClientInterface {
   /**
    * Creates a `kuery` string using the provided value on input that is bound to the integration package
    * @param kuery
-   * @private
+   * @internal
    */
   private buildFilter(kuery: string): string {
     return `(package_name: "${this.packageName}")${kuery ? ` AND ${kuery}` : ''}`;

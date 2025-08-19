@@ -1746,7 +1746,9 @@
           "section": "def-common.MlEntityField",
           "text": "MlEntityField"
         },
-        "[], aggregationInterval: string, threshold: number, earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
+        "[], aggregationInterval: string, threshold: ",
+        "SeverityThreshold",
+        "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords: number, maxExamples?: number | undefined, influencersFilterQuery?: any, functionDescription?: string | undefined): ",
         "Observable",
         "<",
         "GetAnomaliesTableDataResult",
@@ -1812,7 +1814,9 @@
           "section": "def-common.MlEntityField",
           "text": "MlEntityField"
         },
-        "[], threshold: number, earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
+        "[], threshold: ",
+        "SeverityThreshold",
+        "[], earliestMs: number, latestMs: number, timeBounds: { min?: number | undefined; max?: number | undefined; }, maxResults: number, numberOfPoints: number, influencersFilterQuery?: ",
         "QueryDslQueryContainer",
         " | undefined): ",
         "Observable",
@@ -1986,9 +1990,7 @@
         "InferenceStatsResponse",
         ">; getTrainedModelPipelines(modelId: string | string[]): Promise<",
         "ModelPipelines",
-        "[]>; getAllIngestPipelines(): Promise<",
-        "NodesOverviewResponse",
-        ">; createInferencePipeline(pipelineName: string, pipeline: ",
+        "[]>; getAllIngestPipelines(): Promise<string[]>; createInferencePipeline(pipelineName: string, pipeline: ",
         "IngestPipeline",
         "): Promise<",
         "IngestSimulateResponse",
@@ -2827,7 +2829,9 @@
         "signature": [
           "{ getAnomaliesTableData: (jobIds: string[], criteriaFields: ",
           "CriteriaField",
-          "[], influencers: Influencer[], aggregationInterval: string, threshold: number, earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
+          "[], influencers: Influencer[], aggregationInterval: string, threshold: ",
+          "SeverityThreshold",
+          "[], earliestMs: number, latestMs: number, dateFormatTz: string, maxRecords?: number, maxExamples?: number, influencersFilterQuery?: any, functionDescription?: string | undefined) => Promise<{ anomalies: ",
           {
             "pluginId": "@kbn/ml-anomaly-utils",
             "scope": "common",

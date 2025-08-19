@@ -8,7 +8,7 @@
 import React, { Fragment, useState, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 
 import {
   EuiCodeBlock,
@@ -28,7 +28,8 @@ import {
 } from '@elastic/eui';
 
 import { PAGINATION } from '../../../../../common/constants';
-import { ActionStateBadge, WatchStateBadge, SectionError, Error } from '../../../components';
+import type { Error } from '../../../components';
+import { ActionStateBadge, WatchStateBadge, SectionError } from '../../../components';
 import { useLoadWatchHistory, useLoadWatchHistoryDetail } from '../../../lib/api';
 import { WatchDetailsContext } from '../watch_details_context';
 
@@ -155,7 +156,7 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.stateHeader', {
               defaultMessage: 'State',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -178,7 +179,7 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.metConditionHeader', {
               defaultMessage: 'Condition met',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -211,7 +212,7 @@ export const ExecutionHistoryPanel = () => {
             {i18n.translate('xpack.watcher.sections.watchHistory.watchTable.commentHeader', {
               defaultMessage: 'Comment',
             })}{' '}
-            <EuiIcon size="s" color="subdued" type="questionInCircle" className="eui-alignTop" />
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
           </span>
         </EuiToolTip>
       ),
@@ -290,12 +291,7 @@ export const ExecutionHistoryPanel = () => {
                     defaultMessage: 'State',
                   }
                 )}{' '}
-                <EuiIcon
-                  size="s"
-                  color="subdued"
-                  type="questionInCircle"
-                  className="eui-alignTop"
-                />
+                <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
               </span>
             </EuiToolTip>
           ),

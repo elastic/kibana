@@ -9,4 +9,3 @@
 
 export { Header } from './header';
 export type { HeaderProps } from './header';
-export type { OnIsLockedUpdate, NavType } from './types';

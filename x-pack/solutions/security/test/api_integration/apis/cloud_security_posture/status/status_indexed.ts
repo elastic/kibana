@@ -6,10 +6,13 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import {
+  CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
+} from '@kbn/cloud-security-posture-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { EsIndexDataProvider } from '../../../../cloud_security_posture_api/utils';
 import { createPackagePolicy } from '../helper';
 import { findingsMockData, vulnerabilityMockData } from '../mock_data';
@@ -20,7 +23,10 @@ export default function (providerContext: FtrProviderContext) {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const latestFindingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const latestFindingsIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS
+  );
   const latestVulnerabilitiesIndex = new EsIndexDataProvider(
     es,
     CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
@@ -34,7 +40,7 @@ export default function (providerContext: FtrProviderContext) {
     describe('STATUS = INDEXED TEST', () => {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -57,7 +63,9 @@ export default function (providerContext: FtrProviderContext) {
         await latestVulnerabilitiesIndex.deleteAll();
         await _3pIndex.destroyIndex();
         await kibanaServer.savedObjects.cleanStandardList();
-        await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+        await esArchiver.unload(
+          'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
+        );
       });
 
       it(`Return hasMisconfigurationsFindings true when there are latest findings but no installed integrations`, async () => {
@@ -103,7 +111,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return kspm status indexed when logs-cloud_security_posture.findings_latest-default contains new kspm documents`, async () => {
+      it(`Return kspm status indexed when security_solution-cloud_security_posture.misconfiguration_latest contains new kspm documents`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,
@@ -127,7 +135,7 @@ export default function (providerContext: FtrProviderContext) {
         );
       });
 
-      it(`Return cspm status indexed when logs-cloud_security_posture.findings_latest-default contains new cspm documents`, async () => {
+      it(`Return cspm status indexed when security_solution-cloud_security_posture.misconfiguration_latest contains new cspm documents`, async () => {
         await createPackagePolicy(
           supertest,
           agentPolicyId,

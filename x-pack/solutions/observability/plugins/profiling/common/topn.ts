@@ -92,6 +92,7 @@ export function getTopNAggregationRequest({
             count: {
               sum: {
                 field: ProfilingESField.StacktraceCount,
+                missing: 1,
               },
             },
           },
@@ -99,6 +100,7 @@ export function getTopNAggregationRequest({
         count: {
           sum: {
             field: ProfilingESField.StacktraceCount,
+            missing: 1,
           },
         },
       },
@@ -112,6 +114,7 @@ export function getTopNAggregationRequest({
         count: {
           sum: {
             field: ProfilingESField.StacktraceCount,
+            missing: 1,
           },
         },
       },

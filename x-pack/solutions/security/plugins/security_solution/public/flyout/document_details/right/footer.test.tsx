@@ -38,7 +38,7 @@ const renderPanelFooter = (isPreview: boolean) =>
   render(
     <TestProviders>
       <DocumentDetailsContext.Provider value={mockContextValue}>
-        <PanelFooter isPreview={isPreview} />
+        <PanelFooter isRulePreview={isPreview} />
       </DocumentDetailsContext.Provider>
     </TestProviders>
   );

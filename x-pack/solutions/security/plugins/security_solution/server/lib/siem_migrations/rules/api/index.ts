@@ -28,6 +28,8 @@ import { registerSiemRuleMigrationsCreateRulesRoute } from './rules/create';
 import { registerSiemRuleMigrationsGetRulesRoute } from './rules/get';
 import { registerSiemRuleMigrationsDeleteRoute } from './delete';
 import { registerSiemRuleMigrationsIntegrationsStatsRoute } from './integrations_stats';
+import { registerSiemRuleMigrationsUpdateRoute } from './update';
+import { registerSiemRuleMigrationsUpdateIndexPatternRoute } from './update_index_pattern';
 
 export const registerSiemRuleMigrationsRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -38,6 +40,7 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsCreateRoute(router, logger);
   registerSiemRuleMigrationsGetRoute(router, logger);
   registerSiemRuleMigrationsDeleteRoute(router, logger);
+  registerSiemRuleMigrationsUpdateRoute(router, logger);
   /** *******/
 
   /** Rules */
@@ -53,6 +56,7 @@ export const registerSiemRuleMigrationsRoutes = (
   registerSiemRuleMigrationsStatsRoute(router, logger);
   registerSiemRuleMigrationsTranslationStatsRoute(router, logger);
   registerSiemRuleMigrationsStopRoute(router, logger);
+  registerSiemRuleMigrationsUpdateIndexPatternRoute(router, logger);
   /** *******/
 
   /** Install */

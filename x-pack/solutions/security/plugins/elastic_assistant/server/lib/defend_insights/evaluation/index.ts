@@ -6,22 +6,23 @@
  */
 
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
 import { asyncForEach } from '@kbn/std';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { ActionsClientLlm } from '@kbn/langchain/server';
-import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
+import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts/incompatible_antivirus';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { DefendInsightsCombinedPrompts } from '../graphs/default_defend_insights_graph/prompts/incompatible_antivirus';
 import { runDefendInsightsEvaluations } from './run_evaluations';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from '../../attack_discovery/evaluation/constants';
-import { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
-import { DefendInsightsGraphMetadata } from '../../langchain/graphs';
+import type { DefaultDefendInsightsGraph } from '../graphs/default_defend_insights_graph';
+import type { DefendInsightsGraphMetadata } from '../../langchain/graphs';
 import { getLlmType } from '../../../routes/utils';
+import { createOrUpdateEvaluationResults, EvaluationStatus } from '../../../routes/evaluate/utils';
 
 interface ConnectorWithPrompts extends Connector {
   prompts: DefendInsightsCombinedPrompts;
@@ -35,6 +36,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout,
   datasetName,
   esClient,
+  esClientInternalUser,
   evaluationId,
   evaluatorConnectorId,
   langSmithApiKey,
@@ -50,6 +52,7 @@ export const evaluateDefendInsights = async ({
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
+  esClientInternalUser: ElasticsearchClient;
   evaluationId: string;
   evaluatorConnectorId: string | undefined;
   langSmithApiKey: string | undefined;
@@ -91,6 +94,7 @@ export const evaluateDefendInsights = async ({
         temperature: 0, // zero temperature for defend insights, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,
+        model: connector.config?.defaultModel,
       });
 
       const graph = getDefaultDefendInsightsGraph({
@@ -122,5 +126,11 @@ export const evaluateDefendInsights = async ({
       langSmithApiKey,
       logger,
     });
+  });
+
+  await createOrUpdateEvaluationResults({
+    evaluationResults: [{ id: evaluationId, status: EvaluationStatus.COMPLETE }],
+    esClientInternalUser,
+    logger,
   });
 };

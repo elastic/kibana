@@ -7,8 +7,8 @@
 import moment from 'moment';
 import { isRight } from 'fp-ts/Either';
 import Mustache from 'mustache';
-import { IBasePath } from '@kbn/core/server';
-import {
+import type { IBasePath } from '@kbn/core/server';
+import type {
   ActionGroupIdsOf,
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
@@ -19,30 +19,29 @@ import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
-import {
+import type {
   PublicAlertsClient,
   RecoveredAlertData,
 } from '@kbn/alerting-plugin/server/alerts_client/types';
-import {
+import type {
   SyntheticsMonitorStatusRuleParams as StatusRuleParams,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
-import {
-  MonitorStatusActionGroup,
-  SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-} from '../../common/constants/synthetics_alerts';
-import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../queries/get_index_pattern';
-import { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
-import { SyntheticsEsClient } from '../lib';
+import type { MonitorStatusActionGroup } from '../../common/constants/synthetics_alerts';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
+import type { IndexPatternTitleAndFields } from '../queries/get_index_pattern';
+import { getUptimeIndexPattern } from '../queries/get_index_pattern';
+import type { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
+import type { SyntheticsEsClient } from '../lib';
 import { getMonitorSummary } from './status_rule/message_utils';
-import {
+import type {
   AlertOverviewStatus,
   SyntheticsCommonState,
-  SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';
@@ -142,6 +141,7 @@ export const setRecoveredAlertsContext = ({
   basePath,
   spaceId,
   staleDownConfigs = {},
+  stalePendingConfigs = {},
   upConfigs,
   dateFormat,
   tz,
@@ -158,6 +158,7 @@ export const setRecoveredAlertsContext = ({
   spaceId?: string;
   params?: StatusRuleParams;
   staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  stalePendingConfigs: AlertOverviewStatus['stalePendingConfigs'];
   upConfigs: AlertOverviewStatus['upConfigs'];
   dateFormat: string;
   tz: string;
@@ -212,9 +213,13 @@ export const setRecoveredAlertsContext = ({
       monitorSummary.locationId = formattedLocationIds;
     }
 
-    if (recoveredAlertId && locationIds && staleDownConfigs[recoveredAlertId]) {
+    if (
+      recoveredAlertId &&
+      locationIds &&
+      (staleDownConfigs[recoveredAlertId] || stalePendingConfigs[recoveredAlertId])
+    ) {
       const summary = getDeletedMonitorOrLocationSummary({
-        staleDownConfigs,
+        staleConfigs: staleDownConfigs[recoveredAlertId] ? staleDownConfigs : stalePendingConfigs,
         recoveredAlertId,
         locationIds,
         dateFormat,
@@ -355,7 +360,7 @@ export const getDefaultRecoveredSummary = ({
       ...(hit['error.message'] ? { error: { message: hit['error.message'] } } : {}),
       ...(hit['url.full'] ? { url: { full: hit['url.full'] } } : {}),
     } as unknown as OverviewPing,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId,
     configId,
     dateFormat,
@@ -365,38 +370,40 @@ export const getDefaultRecoveredSummary = ({
 };
 
 export const getDeletedMonitorOrLocationSummary = ({
-  staleDownConfigs,
+  staleConfigs,
   recoveredAlertId,
   locationIds,
   dateFormat,
   tz,
   params,
 }: {
-  staleDownConfigs: AlertOverviewStatus['staleDownConfigs'];
+  staleConfigs:
+    | AlertOverviewStatus['staleDownConfigs']
+    | AlertOverviewStatus['stalePendingConfigs'];
   recoveredAlertId: string;
   locationIds: string[];
   dateFormat: string;
   tz: string;
   params?: StatusRuleParams;
 }) => {
-  const downConfig = staleDownConfigs[recoveredAlertId];
-  const { ping } = downConfig;
+  const config = staleConfigs[recoveredAlertId];
+  const monitorInfo = 'monitorInfo' in config ? config.monitorInfo : config.latestPing;
   const monitorSummary = getMonitorSummary({
-    monitorInfo: ping,
-    statusMessage: RECOVERED_LABEL,
+    monitorInfo,
+    reason: 'recovered',
     locationId: locationIds,
-    configId: downConfig.configId,
+    configId: config.configId,
     dateFormat,
     tz,
     params,
   });
   const lastErrorMessage = monitorSummary.lastErrorMessage;
 
-  if (downConfig.isDeleted) {
+  if (config.isDeleted) {
     return {
       lastErrorMessage,
       monitorSummary,
-      stateId: ping.state?.id,
+      stateId: monitorInfo?.state?.id,
       recoveryStatus: i18n.translate('xpack.synthetics.alerts.monitorStatus.deleteMonitor.status', {
         defaultMessage: `has been deleted`,
       }),
@@ -404,11 +411,11 @@ export const getDeletedMonitorOrLocationSummary = ({
         defaultMessage: `has been deleted`,
       }),
     };
-  } else if (downConfig.isLocationRemoved) {
+  } else if (config.isLocationRemoved) {
     return {
       monitorSummary,
       lastErrorMessage,
-      stateId: ping.state?.id,
+      stateId: monitorInfo?.state?.id,
       recoveryStatus: i18n.translate(
         'xpack.synthetics.alerts.monitorStatus.removedLocation.status',
         {
@@ -454,11 +461,11 @@ export const getUpMonitorRecoverySummary = ({
 
   const upConfig = upConfigs[recoveredAlertId];
   const isUp = Boolean(upConfig) || false;
-  const ping = upConfig.ping;
+  const ping = upConfig.latestPing;
 
   const monitorSummary = getMonitorSummary({
     monitorInfo: ping,
-    statusMessage: RECOVERED_LABEL,
+    reason: 'recovered',
     locationId: locationIds,
     configId,
     dateFormat,
@@ -502,10 +509,6 @@ export const getUpMonitorRecoverySummary = ({
     stateId,
   };
 };
-
-export const RECOVERED_LABEL = i18n.translate('xpack.synthetics.monitorStatus.recoveredLabel', {
-  defaultMessage: 'recovered',
-});
 
 export const formatFilterString = async (
   syntheticsEsClient: SyntheticsEsClient,

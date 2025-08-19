@@ -45,7 +45,7 @@ export interface RawAggregatedIndicatorsResponse {
 }
 
 export interface ChartSeries {
-  x: string;
+  x: number;
   y: number;
   g: string;
 }
@@ -76,7 +76,7 @@ export const convertAggregationToChartSeries = (
     (accumulated: ChartSeries[], current: Aggregation) =>
       accumulated.concat(
         current.events.buckets.map((val: AggregationValue) => ({
-          x: val.key_as_string,
+          x: val.key,
           y: val.doc_count,
           g:
             field.value === 'date'

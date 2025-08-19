@@ -91,6 +91,9 @@ export function createPluginSetupContext<
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
     },
+    injection: {
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
     notifications: deps.notifications,
     uiSettings: deps.uiSettings,
     settings: deps.settings,
@@ -157,6 +160,10 @@ export function createPluginStartContext<
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
     },
+    injection: {
+      fork: () => deps.injection.fork(plugin.opaqueId),
+      getContainer: () => deps.injection.getContainer(plugin.opaqueId),
+    },
     chrome: omit(deps.chrome, 'getComponent'),
     i18n: deps.i18n,
     notifications: deps.notifications,
@@ -175,5 +182,6 @@ export function createPluginStartContext<
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
     rendering: deps.rendering,
+    pricing: deps.pricing,
   };
 }

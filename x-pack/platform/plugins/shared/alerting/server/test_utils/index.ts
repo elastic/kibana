@@ -48,7 +48,7 @@ export function alertsWithAnyUUID(
   return newAlerts;
 }
 
-export function generateAlertingConfig(overwrites = {}): AlertingConfig {
+export function generateAlertingConfig(overwrites: Partial<AlertingConfig> = {}): AlertingConfig {
   return {
     healthCheck: {
       interval: '5m',

@@ -13,6 +13,7 @@
     "server": true,
     "requiredPlugins": [
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "discoverShared",
@@ -30,8 +31,7 @@
       "expressions",
       "unifiedDocViewer",
       "unifiedSearch",
-      "contentManagement",
-      "discoverShared"
+      "contentManagement"
     ],
     "optionalPlugins": [
       "dataVisualizer",

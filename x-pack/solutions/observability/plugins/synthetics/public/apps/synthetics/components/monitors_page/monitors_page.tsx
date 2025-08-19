@@ -9,6 +9,7 @@ import React from 'react';
 import { Redirect } from 'react-router-dom';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { MonitorsMWsCallout } from '../common/mws_callout/monitors_mws_callout';
 import { DisabledCallout } from './management/disabled_callout';
 import { useOverviewStatus } from './hooks/use_overview_status';
 import { GETTING_STARTED_ROUTE } from '../../../../../common/constants';
@@ -54,6 +55,7 @@ export const MonitorManagementPage: React.FC = () => {
         errorBody={labels.ERROR_HEADING_BODY}
       >
         <DisabledCallout total={absoluteTotal} />
+        <MonitorsMWsCallout />
         <MonitorListContainer isEnabled={isEnabled} monitorListProps={monitorListProps} />
       </Loader>
       {showEmptyState && <EnablementEmptyState />}

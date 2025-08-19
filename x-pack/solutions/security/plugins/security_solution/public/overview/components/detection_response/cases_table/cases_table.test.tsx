@@ -25,8 +25,6 @@ jest.mock('../../../../common/lib/kibana/hooks', () => {
   };
 });
 
-jest.mock('../../../../common/components/guided_onboarding_tour/tour_step');
-
 type UseCaseItemsReturn = ReturnType<UseCaseItems>;
 const defaultCaseItemsReturn: UseCaseItemsReturn = {
   items: [],

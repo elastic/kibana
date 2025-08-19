@@ -7,8 +7,11 @@
 
 import semver from 'semver';
 import { chunk, isEmpty, isEqual, keyBy } from 'lodash';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { type Logger, type SavedObjectsClientContract } from '@kbn/core/server';
+import {
+  type Logger,
+  type SavedObjectsClientContract,
+  type ElasticsearchClient,
+} from '@kbn/core/server';
 import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
@@ -39,12 +42,10 @@ import {
   Manifest,
 } from '../../../lib/artifacts';
 
-import type {
-  InternalUnifiedManifestBaseSchema,
-  InternalUnifiedManifestSchema,
-  InternalUnifiedManifestUpdateSchema,
-} from '../../../schemas/artifacts';
 import {
+  type InternalUnifiedManifestBaseSchema,
+  type InternalUnifiedManifestSchema,
+  type InternalUnifiedManifestUpdateSchema,
   internalArtifactCompleteSchema,
   type InternalArtifactCompleteSchema,
   type InternalManifestSchema,
@@ -705,7 +706,7 @@ export class ManifestManager {
             const bulkUpdateResponse = await this.packagePolicyService.bulkUpdate(
               savedObjects.createInternalScopedSoClient({ spaceId, readonly: false }),
               this.esClient,
-              currentBatch
+              spaceUpdates
             );
 
             // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -742,7 +743,13 @@ export class ManifestManager {
 
     for await (const policies of await this.fetchAllPolicies()) {
       for (const packagePolicy of policies) {
-        const { id, name } = packagePolicy;
+        const { id, name, spaceIds = [DEFAULT_SPACE_ID] } = packagePolicy;
+
+        this.logger.debug(
+          `Checking if policy [${id}][${name}] in space(s) [${spaceIds.join(
+            ', '
+          )}] needs to be updated with new artifact manifest`
+        );
 
         if (packagePolicy.inputs.length > 0 && packagePolicy.inputs[0].config !== undefined) {
           const oldManifest = packagePolicy.inputs[0].config.artifact_manifest ?? {

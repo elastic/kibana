@@ -15,10 +15,8 @@
   ],
   "kbn_references": [
     "@kbn/inference-common",
-    "@kbn/observability-utils-common",
     "@kbn/kibana-api-cli",
-    "@kbn/dev-cli-runner",
     "@kbn/inference-cli",
-    "@kbn/tooling-log",
+    "@kbn/zod",
   ],
 }

@@ -14,10 +14,8 @@ import type { DefendInsightsDataClient } from '../../lib/defend_insights/persist
 import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightRequest } from '../../__mocks__/request';
-import {
-  ElasticAssistantRequestHandlerContextMock,
-  requestContextMock,
-} from '../../__mocks__/request_context';
+import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { isDefendInsightsEnabled, updateDefendInsightLastViewedAt } from './helpers';
 import { getDefendInsightRoute } from './get_defend_insight';
@@ -81,12 +79,14 @@ describe('getDefendInsightRoute', () => {
     tools.context.licensing.license = insufficientLicense;
     jest.spyOn(insufficientLicense, 'hasAtLeast').mockReturnValue(false);
 
-    await expect(
-      server.inject(
-        getDefendInsightRequest('insight-id1'),
-        requestContextMock.convertContext(tools.context)
-      )
-    ).rejects.toThrowError('Encountered unexpected call to response.forbidden');
+    const response = await server.inject(
+      getDefendInsightRequest('insight-id1'),
+      requestContextMock.convertContext(tools.context)
+    );
+    expect(response.status).toEqual(403);
+    expect(response.body).toEqual({
+      message: 'Your license does not support Defend Workflows. Please upgrade your license.',
+    });
   });
 
   it('should handle successful request', async () => {

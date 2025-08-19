@@ -11,7 +11,11 @@ import React, { useMemo } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { DOC_HIDE_TIME_COLUMN_SETTING, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import {
+  DOC_HIDE_TIME_COLUMN_SETTING,
+  SORT_DEFAULT_ORDER_SETTING,
+  getSortArray,
+} from '@kbn/discover-utils';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
@@ -22,7 +26,6 @@ import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import useObservable from 'react-use/lib/useObservable';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
-import { getSortForEmbeddable } from '../../utils/sorting';
 import { getAllowedSampleSize, getMaxAllowedSampleSize } from '../../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from '../constants';
 import { isEsqlMode } from '../initialize_fetch';
@@ -91,15 +94,15 @@ export function SearchEmbeddableGridComponent({
 
   // `api.query$` and `api.filters$` are the initial values from the saved search SO (as of now)
   // `fetchContext.query` and `fetchContext.filters` are Dashboard's query and filters
-
   const savedSearchQuery = apiQuery;
   const savedSearchFilters = apiFilters;
 
   const isEsql = useMemo(() => isEsqlMode(savedSearch), [savedSearch]);
 
-  const sort = useMemo(() => {
-    return getSortForEmbeddable(savedSearch.sort, dataView, discoverServices.uiSettings, isEsql);
-  }, [savedSearch.sort, dataView, isEsql, discoverServices.uiSettings]);
+  const sort = useMemo(
+    () => getSortArray(savedSearch.sort ?? [], dataView, isEsql),
+    [dataView, isEsql, savedSearch.sort]
+  );
 
   const originalColumns = useMemo(() => savedSearch.columns ?? [], [savedSearch.columns]);
 
@@ -200,23 +203,19 @@ export function SearchEmbeddableGridComponent({
 
   const defaults = getSearchEmbeddableDefaults(discoverServices.uiSettings);
 
-  const sharedProps = {
-    columns,
-    dataView,
-    interceptedWarnings,
-    onFilter: onAddFilter,
-    rows,
-    rowsPerPageState: savedSearch.rowsPerPage ?? defaults.rowsPerPage,
-    sampleSizeState: fetchedSampleSize,
-    searchDescription: panelDescription || savedSearchDescription,
-    sort,
-    totalHitCount,
-  };
-
   return (
     <DiscoverGridEmbeddableMemoized
-      {...sharedProps}
       {...onStateEditedProps}
+      columns={columns}
+      dataView={dataView}
+      interceptedWarnings={interceptedWarnings}
+      onFilter={onAddFilter}
+      rows={rows}
+      rowsPerPageState={savedSearch.rowsPerPage ?? defaults.rowsPerPage}
+      sampleSizeState={fetchedSampleSize}
+      searchDescription={panelDescription || savedSearchDescription}
+      sort={sort}
+      totalHitCount={totalHitCount}
       settings={savedSearch.grid}
       ariaLabelledBy={'documentsAriaLabel'}
       cellActionsTriggerId={

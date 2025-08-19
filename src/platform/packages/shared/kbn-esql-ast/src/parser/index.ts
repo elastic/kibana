@@ -7,6 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { createParser, parse, parseErrors, type ParseOptions, type ParseResult } from './parser';
+export {
+  createParser,
+  parse,
+  parseErrors,
+  Parser,
+  type ParseOptions,
+  type ParseResult,
+} from './parser';
+
+export { TIME_SPAN_UNITS } from './constants';
 
 export { ESQLErrorListener } from './esql_error_listener';

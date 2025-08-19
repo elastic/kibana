@@ -16,6 +16,7 @@ export enum SourcererScopeName {
   detections = 'detections',
   timeline = 'timeline',
   analyzer = 'analyzer',
+  explore = 'explore',
 }
 
 /**
@@ -106,6 +107,8 @@ export interface SelectedDataView {
 export interface SourcererModel {
   /** default security-solution data view */
   defaultDataView: SourcererDataView & { id: string; error?: unknown };
+  /** default security-solution alert data view */
+  alertDataView: SourcererDataView & { id: string; error?: unknown };
   /** all Kibana data views, including security-solution */
   kibanaDataViews: SourcererDataView[];
   /** security solution signals index name */
@@ -142,6 +145,7 @@ export const initDataView: SourcererDataView & { id: string; error?: unknown } =
 
 export const initialSourcererState: SourcererModel = {
   defaultDataView: initDataView,
+  alertDataView: initDataView,
   kibanaDataViews: [],
   signalIndexName: null,
   signalIndexMappingOutdated: null,
@@ -161,6 +165,10 @@ export const initialSourcererState: SourcererModel = {
     [SourcererScopeName.analyzer]: {
       ...initSourcererScope,
       id: SourcererScopeName.analyzer,
+    },
+    [SourcererScopeName.explore]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.explore,
     },
   },
 };

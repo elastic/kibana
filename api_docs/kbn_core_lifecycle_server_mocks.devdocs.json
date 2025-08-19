@@ -106,6 +106,10 @@
               "SecurityServiceSetup",
               ">; userProfile: jest.Mocked<",
               "UserProfileServiceSetup",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceSetup",
+              ">; injection: jest.MockedObjectDeep<",
+              "InternalCoreDiServiceSetup",
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",
@@ -148,6 +152,10 @@
               "InternalSecurityStartMock",
               "; userProfile: jest.Mocked<",
               "InternalUserProfileServiceStart",
+              ">; pricing: jest.Mocked<",
+              "PricingServiceStart",
+              ">; injection: jest.MockedObjectDeep<",
+              "InternalCoreDiServiceStart",
               ">; }"
             ],
             "path": "src/core/packages/lifecycle/server-mocks/src/index.ts",

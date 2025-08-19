@@ -12,6 +12,7 @@ import type { ObservabilityAIAssistantService } from '../types';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
 import { useKibana } from './use_kibana';
 import { isInferenceEndpointExists } from './inference_endpoint_exists';
+import { INFERENCE_CONNECTOR_ACTION_TYPE_ID } from '../utils/get_elastic_managed_llm_connector';
 
 export interface UseGenAIConnectorsResult {
   connectors?: FindActionResult[];
@@ -57,8 +58,8 @@ export function useGenAIConnectorsWithoutContext(
         return results
           .reduce<Promise<FindActionResult[]>>(async (result, connector) => {
             if (
-              connector.actionTypeId !== '.inference' ||
-              (connector.actionTypeId === '.inference' &&
+              connector.actionTypeId !== INFERENCE_CONNECTOR_ACTION_TYPE_ID ||
+              (connector.actionTypeId === INFERENCE_CONNECTOR_ACTION_TYPE_ID &&
                 (await isInferenceEndpointExists(
                   http,
                   (connector as FindActionResult)?.config?.inferenceId

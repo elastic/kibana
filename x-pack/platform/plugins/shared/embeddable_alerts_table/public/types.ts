@@ -16,7 +16,6 @@ import type {
   SerializedTitles,
 } from '@kbn/presentation-publishing';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
@@ -42,7 +41,6 @@ export interface EmbeddableAlertsTablePublicStartDependencies {
   application: CoreStart['application'];
   licensing: LicensingPluginStart;
   settings: SettingsStart;
-  cases: CasesPublicStart;
 }
 
 export type EmbeddableAlertsTableSerializedState = SerializedTitles &

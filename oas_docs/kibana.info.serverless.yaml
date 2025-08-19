@@ -8,14 +8,14 @@ info:
     and must include all of the necessary information for Kibana to fulfill the
     request. API requests return JSON output, which is a format that is
     machine-readable and works well for automation.
-    
+
     To interact with Kibana APIs, use the following operations:
-    
+
     - GET: Fetches the information.
     - POST: Adds new information.
     - PUT: Updates the existing information.
     - DELETE: Removes the information.
-    
+
     You can prepend any Kibana API endpoint with `kbn:` and run the request in
     **Dev Tools → Console**. For example:
 
@@ -24,14 +24,14 @@ info:
     ```
 
     ## Documentation source and versions
-    
+
     This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
-  version: "1.0.2"
+  version: '' # Leave empty
   x-doc-license:
     name: Attribution-NonCommercial-NoDerivatives 4.0 International
     url: https://creativecommons.org/licenses/by-nc-nd/4.0/
-  contact: 
+  contact:
     name: Kibana Team
   x-feedbackLink:
     label: Feedback

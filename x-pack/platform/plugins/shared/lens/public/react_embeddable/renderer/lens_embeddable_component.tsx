@@ -8,7 +8,7 @@
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import React, { useEffect, useMemo } from 'react';
 import { ExpressionWrapper } from '../expression_wrapper';
-import { LensInternalApi, LensApi } from '../types';
+import type { LensInternalApi, LensApi } from '../types';
 import { UserMessages } from '../user_messages/container';
 import { useMessages, useDispatcher } from './hooks';
 import { getViewMode } from '../helper';
@@ -71,7 +71,7 @@ export function LensEmbeddableComponent({
 
   return (
     <div
-      style={{ width: '100%', height: '100%' }}
+      css={{ width: '100%', height: '100%', position: 'relative' }}
       data-rendering-count={renderCount + 1}
       data-render-complete={hasRendered}
       {...title}

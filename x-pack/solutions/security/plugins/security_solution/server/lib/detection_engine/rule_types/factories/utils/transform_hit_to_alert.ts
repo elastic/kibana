@@ -18,7 +18,7 @@ import { buildAlertFields, isThresholdResult } from './build_alert';
 import { buildRuleNameFromMapping } from '../../utils/mappings/build_rule_name_from_mapping';
 import { buildSeverityFromMapping } from '../../utils/mappings/build_severity_from_mapping';
 import { buildRiskScoreFromMapping } from '../../utils/mappings/build_risk_score_from_mapping';
-import type { BaseFieldsLatest } from '../../../../../../common/api/detection_engine/model/alerts';
+import type { DetectionAlertLatest } from '../../../../../../common/api/detection_engine/model/alerts';
 import { traverseAndMutateDoc } from './traverse_and_mutate_doc';
 import { ALERT_THRESHOLD_RESULT } from '../../../../../../common/field_maps/field_names';
 import { robustGet, robustSet } from '../../utils/source_fields_merging/utils/robust_field_access';
@@ -50,7 +50,7 @@ export const transformHitToAlert = ({
   applyOverrides,
   buildReasonMessage,
   alertUuid,
-}: TransformHitToAlertProps): BaseFieldsLatest => {
+}: TransformHitToAlertProps): DetectionAlertLatest => {
   const mergedDoc = getMergeStrategy(sharedParams.mergeStrategy)({
     doc,
     ignoreFields: sharedParams.ignoreFields,
@@ -128,7 +128,7 @@ export const transformHitToAlert = ({
     if (thresholdResult != null && isThresholdResult(thresholdResult)) {
       validatedSource[ALERT_THRESHOLD_RESULT] = thresholdResult;
     }
-    return validatedSource as BaseFieldsLatest;
+    return validatedSource as DetectionAlertLatest;
   }
 
   throw Error('Error building alert from source document.');

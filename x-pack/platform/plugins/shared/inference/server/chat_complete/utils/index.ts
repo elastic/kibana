@@ -17,6 +17,4 @@ export { handleCancellation } from './handle_cancellation';
 export { mergeChunks } from './merge_chunks';
 export { isNativeFunctionCallingSupported } from './function_calling_support';
 export { convertUpstreamError } from './convert_upstream_error';
-export { retryWithExponentialBackoff } from './retry_with_exponential_backoff';
-export { getRetryFilter } from './error_retry_filter';
 export { handleConnectorResponse } from './handle_connector_response';

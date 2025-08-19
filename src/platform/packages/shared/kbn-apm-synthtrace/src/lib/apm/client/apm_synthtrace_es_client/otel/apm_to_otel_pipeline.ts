@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable, pipeline } from 'stream';
+import type { Readable } from 'stream';
+import { pipeline } from 'stream';
 import { createFilterTransform } from '../../../../utils/stream_utils';
-import { Logger } from '../../../../utils/create_logger';
+import type { Logger } from '../../../../utils/create_logger';
 import { getSerializeTransform } from '../../../../shared/get_serialize_transform';
 import { getIntakeDefaultsTransform } from '../get_intake_defaults_transform';
 import { getApmServerMetadataTransform } from '../get_apm_server_metadata_transform';
@@ -18,15 +19,15 @@ import { getOtelTransforms } from './otel_to_apm_pipeline';
 
 export function apmToOtelPipeline(
   logger: Logger,
-  version: string,
-  includeSerialization: boolean = true
+  includeSerialization: boolean = true,
+  version: string = 'latest'
 ) {
   return (base: Readable) => {
     const serializationTransform = includeSerialization ? [getSerializeTransform()] : [];
 
     return pipeline(
-      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       base,
+      // @ts-expect-error Some weird stuff here with the type definition for pipeline. We have tests!
       ...serializationTransform,
       // the exporter doesn't seem to output this metricset type
       createFilterTransform((chunk) => chunk['metricset.name'] !== 'span_breakdown'),

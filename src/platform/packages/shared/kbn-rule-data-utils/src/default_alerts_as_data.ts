@@ -71,6 +71,15 @@ const ALERT_REASON = `${ALERT_NAMESPACE}.reason` as const;
 // kibana.alert.start - timestamp when the alert is first active
 const ALERT_START = `${ALERT_NAMESPACE}.start` as const;
 
+// kibana.alert.updated_at - timestamp when the alert was last updated
+const ALERT_UPDATED_AT = `${ALERT_NAMESPACE}.updated_at` as const;
+
+// kibana.alert.updated_by.user.id - user id of the user that last updated the alert
+const ALERT_UPDATED_BY_USER_ID = `${ALERT_NAMESPACE}.updated_by.user.id` as const;
+
+// kibana.alert.updated_by.user.name - user name of the user that last updated the alert
+const ALERT_UPDATED_BY_USER_NAME = `${ALERT_NAMESPACE}.updated_by.user.name` as const;
+
 // kibana.alert.status - active/recovered status of alert
 const ALERT_STATUS = `${ALERT_NAMESPACE}.status` as const;
 
@@ -163,6 +172,9 @@ export const fields = {
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ALERT_URL,
@@ -210,6 +222,9 @@ export {
   ALERT_RULE_UUID,
   ALERT_SEVERITY_IMPROVING,
   ALERT_START,
+  ALERT_UPDATED_AT,
+  ALERT_UPDATED_BY_USER_ID,
+  ALERT_UPDATED_BY_USER_NAME,
   ALERT_STATUS,
   ALERT_TIME_RANGE,
   ALERT_URL,

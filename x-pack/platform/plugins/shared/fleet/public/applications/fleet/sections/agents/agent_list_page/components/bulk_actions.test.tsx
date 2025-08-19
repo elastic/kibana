@@ -49,7 +49,9 @@ const defaultProps = {
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({
+      enableAgentMigrations: true,
+    } as any);
     jest.mocked(useAuthz).mockReturnValue({
       fleet: {
         allAgents: true,
@@ -93,6 +95,7 @@ describe('AgentBulkActions', () => {
       expect(
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
+      expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should allow scheduled upgrades if the license allows it', async () => {
@@ -209,6 +212,20 @@ describe('AgentBulkActions', () => {
         }),
         expect.anything()
       );
+    });
+
+    it('should not show the migrate button when agent migrations flag is disabled', async () => {
+      mockedExperimentalFeaturesService.get.mockReturnValue({
+        enableAgentMigrations: false,
+      } as any);
+
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1', tags: ['oldTag'] }, { id: 'agent2' }] as Agent[],
+      });
+
+      const bulkActionsButton = results.queryByTestId('agentBulkActionsBulkMigrate');
+      expect(bulkActionsButton).not.toBeInTheDocument();
     });
   });
 });

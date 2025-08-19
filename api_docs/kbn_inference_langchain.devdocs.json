@@ -90,6 +90,20 @@
           },
           {
             "parentPluginId": "@kbn/inference-langchain",
+            "id": "def-common.InferenceChatModel.maxRetries",
+            "type": "number",
+            "tags": [],
+            "label": "maxRetries",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-langchain",
             "id": "def-common.InferenceChatModel.model",
             "type": "string",
             "tags": [],
@@ -255,31 +269,7 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; temperature?: number | undefined; functionCalling?: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.FunctionCallingMode",
-                "text": "FunctionCallingMode"
-              },
-              " | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteRetryConfiguration",
-                "text": "ChatCompleteRetryConfiguration"
-              },
-              " | undefined; toolChoice?: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolChoice",
-                "text": "ToolChoice"
-              },
-              "<string> | undefined; tools?: Record<string, ",
+              " | undefined; temperature?: number | undefined; tools?: Record<string, ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -287,7 +277,31 @@
                 "section": "def-common.ToolDefinition",
                 "text": "ToolDefinition"
               },
-              "> | undefined; model_name: string | undefined; }"
+              "> | undefined; toolChoice?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string> | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; model_name: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
             "deprecated": false,
@@ -311,31 +325,7 @@
                 "section": "def-common.ChatCompleteMetadata",
                 "text": "ChatCompleteMetadata"
               },
-              " | undefined; temperature?: number | undefined; functionCalling?: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.FunctionCallingMode",
-                "text": "FunctionCallingMode"
-              },
-              " | undefined; modelName?: string | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteRetryConfiguration",
-                "text": "ChatCompleteRetryConfiguration"
-              },
-              " | undefined; toolChoice?: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolChoice",
-                "text": "ToolChoice"
-              },
-              "<string> | undefined; tools?: Record<string, ",
+              " | undefined; temperature?: number | undefined; tools?: Record<string, ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -343,7 +333,31 @@
                 "section": "def-common.ToolDefinition",
                 "text": "ToolDefinition"
               },
-              "> | undefined; model_name: string | undefined; }"
+              "> | undefined; toolChoice?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolChoice",
+                "text": "ToolChoice"
+              },
+              "<string> | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; model_name: string | undefined; }"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
             "deprecated": false,
@@ -504,15 +518,39 @@
             "label": "completionWithRetry",
             "description": [],
             "signature": [
-              "{ (request: ",
+              "<TStream extends boolean | undefined = false>(request: { connectorId: string; system?: string | undefined; messages: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
                 "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteOptions",
-                "text": "ChatCompleteOptions"
+                "section": "def-common.Message",
+                "text": "Message"
               },
-              "<",
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -520,7 +558,7 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string>, false>): Promise<Promise<",
+              "<string> & { stream?: TStream | undefined; }) => Promise<",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -529,22 +567,42 @@
                 "text": "ChatCompleteResponse"
               },
               "<",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>>>>; (request: ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteOptions",
-                "text": "ChatCompleteOptions"
-              },
+              "Overwrite",
               "<",
+              "DefaultChatCompleteOptions",
+              ", { connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -552,7 +610,95 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string>, true>): Promise<",
+              "<string> & { stream?: TStream | undefined; }, ",
+              "Diff",
+              "<",
+              "DefaultChatCompleteOptions",
+              ", { connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string> & { stream?: TStream | undefined; }> & ",
+              "Intersection",
+              "<{ connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string> & { stream?: TStream | undefined; }, ",
+              "DefaultChatCompleteOptions",
+              ">>> | Awaited<true extends (boolean & TStream) | undefined ? ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -561,6 +707,42 @@
                 "text": "ChatCompleteStreamResponse"
               },
               "<",
+              "Overwrite",
+              "<",
+              "DefaultChatCompleteOptions",
+              ", { connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -568,7 +750,95 @@
                 "section": "def-common.ToolOptions",
                 "text": "ToolOptions"
               },
-              "<string>>>; }"
+              "<string> & { stream?: TStream | undefined; }, ",
+              "Diff",
+              "<",
+              "DefaultChatCompleteOptions",
+              ", { connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string> & { stream?: TStream | undefined; }> & ",
+              "Intersection",
+              "<{ connectorId: string; system?: string | undefined; messages: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.Message",
+                "text": "Message"
+              },
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.FunctionCallingMode",
+                "text": "FunctionCallingMode"
+              },
+              " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteMetadata",
+                "text": "ChatCompleteMetadata"
+              },
+              " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ChatCompleteRetryConfiguration",
+                "text": "ChatCompleteRetryConfiguration"
+              },
+              " | undefined; stream?: boolean | undefined; } & ",
+              {
+                "pluginId": "@kbn/inference-common",
+                "scope": "common",
+                "docId": "kibKbnInferenceCommonPluginApi",
+                "section": "def-common.ToolOptions",
+                "text": "ToolOptions"
+              },
+              "<string> & { stream?: TStream | undefined; }, ",
+              "DefaultChatCompleteOptions",
+              ">>> : never>>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
             "deprecated": false,
@@ -582,14 +852,39 @@
                 "label": "request",
                 "description": [],
                 "signature": [
+                  "{ connectorId: string; system?: string | undefined; messages: ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
                     "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.ChatCompleteOptions",
-                    "text": "ChatCompleteOptions"
+                    "section": "def-common.Message",
+                    "text": "Message"
                   },
-                  "<",
+                  "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.FunctionCallingMode",
+                    "text": "FunctionCallingMode"
+                  },
+                  " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteMetadata",
+                    "text": "ChatCompleteMetadata"
+                  },
+                  " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ChatCompleteRetryConfiguration",
+                    "text": "ChatCompleteRetryConfiguration"
+                  },
+                  " | undefined; stream?: boolean | undefined; } & ",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -597,7 +892,7 @@
                     "section": "def-common.ToolOptions",
                     "text": "ToolOptions"
                   },
-                  "<string>, boolean>"
+                  "<string> & { stream?: TStream | undefined; }"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
                 "deprecated": false,
@@ -988,23 +1283,7 @@
             "label": "chatComplete",
             "description": [],
             "signature": [
-              "<TToolOptions extends ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string> = ",
-              {
-                "pluginId": "@kbn/inference-common",
-                "scope": "common",
-                "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ToolOptions",
-                "text": "ToolOptions"
-              },
-              "<string>, TStream extends boolean = false>(options: ",
+              "<TOptions extends ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -1012,15 +1291,15 @@
                 "section": "def-common.ChatCompleteOptions",
                 "text": "ChatCompleteOptions"
               },
-              "<TToolOptions, TStream>) => ",
+              ">(options: TOptions) => ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
                 "docId": "kibKbnInferenceCommonPluginApi",
-                "section": "def-common.ChatCompleteCompositeResponse",
-                "text": "ChatCompleteCompositeResponse"
+                "section": "def-common.ChatCompleteAPIResponse",
+                "text": "ChatCompleteAPIResponse"
               },
-              "<TToolOptions, TStream>"
+              "<TOptions>"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-langchain/src/chat_model/inference_chat_model.ts",
             "deprecated": false,
@@ -1030,44 +1309,12 @@
               {
                 "parentPluginId": "@kbn/inference-langchain",
                 "id": "def-common.InferenceChatModelParams.chatComplete.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "{ connectorId: string; stream?: TStream | undefined; system?: string | undefined; messages: ",
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.Message",
-                    "text": "Message"
-                  },
-                  "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.FunctionCallingMode",
-                    "text": "FunctionCallingMode"
-                  },
-                  " | undefined; abortSignal?: AbortSignal | undefined; metadata?: ",
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.ChatCompleteMetadata",
-                    "text": "ChatCompleteMetadata"
-                  },
-                  " | undefined; maxRetries?: number | undefined; retryConfiguration?: ",
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.ChatCompleteRetryConfiguration",
-                    "text": "ChatCompleteRetryConfiguration"
-                  },
-                  " | undefined; } & TToolOptions"
+                  "TOptions"
                 ],
                 "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/api.ts",
                 "deprecated": false,

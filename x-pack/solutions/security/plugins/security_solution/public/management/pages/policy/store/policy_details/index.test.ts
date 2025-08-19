@@ -300,6 +300,10 @@ describe('policy details: ', () => {
                       supported: false,
                       reputation_service: false,
                     },
+                    device_control: {
+                      enabled: false,
+                      usb_storage: 'audit',
+                    },
                     ransomware: { mode: 'off', supported: false },
                     attack_surface_reduction: {
                       credential_hardening: {
@@ -323,6 +327,10 @@ describe('policy details: ', () => {
                         enabled: false,
                         message: '',
                       },
+                      device_control: {
+                        enabled: false,
+                        message: '',
+                      },
                     },
                     logging: { file: 'info' },
                     antivirus_registration: {
@@ -331,12 +339,16 @@ describe('policy details: ', () => {
                     },
                   },
                   mac: {
-                    events: { process: true, file: true, network: true, security: true },
+                    events: { dns: true, process: true, file: true, network: true, security: true },
                     malware: { mode: 'prevent', blocklist: true, on_write_scan: true },
                     behavior_protection: {
                       mode: 'off',
                       supported: false,
                       reputation_service: false,
+                    },
+                    device_control: {
+                      enabled: false,
+                      usb_storage: 'audit',
                     },
                     memory_protection: { mode: 'off', supported: false },
                     popup: {
@@ -349,6 +361,10 @@ describe('policy details: ', () => {
                         message: '',
                       },
                       memory_protection: {
+                        enabled: false,
+                        message: '',
+                      },
+                      device_control: {
                         enabled: false,
                         message: '',
                       },

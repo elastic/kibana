@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/server';
 import { embeddableFunctionFactory } from './embeddable';
 import { savedLens } from './saved_lens';
 import { savedMap } from './saved_map';

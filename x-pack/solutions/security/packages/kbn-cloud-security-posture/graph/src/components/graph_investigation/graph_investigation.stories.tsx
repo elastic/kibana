@@ -49,12 +49,23 @@ const defaultProps: GraphInvestigationProps = {
 type GraphInvestigationPropsAndCustomArgs = React.ComponentProps<typeof GraphInvestigation> & {
   shouldShowSearchBarTour: boolean;
   isLoading: boolean;
+  supportNodePreviewPopover: boolean;
 };
 
 const meta = {
   title: 'Components/Graph Components/Investigation',
-  render: (props: Partial<GraphInvestigationProps>) => {
-    return <GraphInvestigation {...defaultProps} {...props} />;
+  render: (props: Partial<GraphInvestigationPropsAndCustomArgs>) => {
+    return (
+      <GraphInvestigation
+        {...defaultProps}
+        {...props}
+        {...(props.supportNodePreviewPopover
+          ? {
+              onOpenEventPreview: action('onOpenEventPreview'),
+            }
+          : {})}
+      />
+    );
   },
   argTypes: {
     showToggleSearch: {
@@ -70,12 +81,18 @@ const meta = {
     isLoading: {
       control: { type: 'boolean' },
     },
+    supportNodePreviewPopover: {
+      control: { type: 'boolean' },
+      description:
+        'Enable or disable the support for node preview popover (When disabled `Show event details` list item is not shown)',
+    },
   },
   args: {
     showToggleSearch: false,
     showInvestigateInTimeline: false,
     shouldShowSearchBarTour: true,
     isLoading: false,
+    supportNodePreviewPopover: true,
   },
   decorators: [
     ReactQueryStorybookDecorator,

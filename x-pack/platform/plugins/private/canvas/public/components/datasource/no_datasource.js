@@ -24,7 +24,7 @@ const strings = {
 
 export const NoDatasource = () => (
   <div className="canvasDataSource__section">
-    <EuiCallOut title={strings.getPanelTitle()} iconType="iInCircle">
+    <EuiCallOut title={strings.getPanelTitle()} iconType="info">
       <p>{strings.getPanelDescription()}</p>
     </EuiCallOut>
   </div>

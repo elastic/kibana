@@ -9,7 +9,12 @@
 
 import _ from 'lodash';
 import sinon from 'sinon';
+<<<<<<< HEAD
 import { Filter } from '@kbn/es-query';
+=======
+import type { Filter } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
+>>>>>>> upstream/main
 
 import { Subscription } from 'rxjs';
 import { FilterManager } from './filter_manager';

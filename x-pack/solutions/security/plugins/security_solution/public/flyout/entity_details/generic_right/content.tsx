@@ -7,10 +7,11 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiHorizontalRule, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getFlattenedObject } from '@kbn/std';
 import type { GenericEntityRecord } from '../../../asset_inventory/types/generic_entity_record';
+import { EntityType } from '../../../../common/entity_analytics/types';
 import {
   EntityDetailsLeftPanelTab,
   type EntityDetailsPath,
@@ -23,12 +24,29 @@ import { FieldsTable, usePinnedFields } from './components/fields_table';
 import { ExpandableSection } from '../../document_details/right/components/expandable_section';
 import { FlyoutBody } from '../../shared/components/flyout_body';
 import { ExpandablePanel } from '../../shared/components/expandable_panel';
+import { AssetCriticalityAccordion } from '../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
+
+const defaultPinnedFields = [
+  'entity.name',
+  'entity.id',
+  'entity.category',
+  'entity.type',
+  'asset.criticality',
+  'user.name',
+  'user.email',
+  'host.name',
+  'host.os',
+  'cloud.account.id',
+  'cloud.region',
+  'cloud.account.name',
+];
 
 interface GenericEntityFlyoutContentProps {
   source: GenericEntityRecord;
   openGenericEntityDetailsPanelByPath: (path: EntityDetailsPath) => void;
   insightsField: CloudPostureEntityIdentifier;
   insightsValue: string;
+  onAssetCriticalityChange: () => void;
 }
 
 export const GenericEntityFlyoutContent = ({
@@ -36,6 +54,7 @@ export const GenericEntityFlyoutContent = ({
   openGenericEntityDetailsPanelByPath,
   insightsField,
   insightsValue,
+  onAssetCriticalityChange,
 }: GenericEntityFlyoutContentProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -66,6 +85,17 @@ export const GenericEntityFlyoutContent = ({
 
   return (
     <FlyoutBody>
+      <AssetCriticalityAccordion
+        entity={{ name: insightsValue, type: EntityType.generic }}
+        onChange={onAssetCriticalityChange}
+      />
+      <EntityInsight
+        field={insightsField}
+        value={insightsValue}
+        isPreviewMode={false}
+        isLinkEnabled={true}
+        openDetailsPanel={openGenericEntityDetailsPanelByPath}
+      />
       <ExpandableSection
         title={
           <FormattedMessage
@@ -107,20 +137,12 @@ export const GenericEntityFlyoutContent = ({
         >
           <FieldsTable
             document={filteredDocument}
+            tableStorageKey={GENERIC_FLYOUT_STORAGE_KEYS.OVERVIEW_FIELDS_TABLE_PINS}
             euiInMemoryTableProps={{ search: undefined, pagination: undefined }}
+            defaultPinnedFields={defaultPinnedFields}
           />
         </ExpandablePanel>
       </ExpandableSection>
-
-      <EuiHorizontalRule />
-
-      <EntityInsight
-        field={insightsField}
-        value={insightsValue}
-        isPreviewMode={false}
-        isLinkEnabled={true}
-        openDetailsPanel={openGenericEntityDetailsPanelByPath}
-      />
     </FlyoutBody>
   );
 };

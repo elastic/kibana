@@ -7,15 +7,14 @@
 
 import axios from 'axios';
 import { pick } from 'lodash';
-import { SyntheticsServerSetup } from '../types';
-import {
+import type { SyntheticsServerSetup } from '../types';
+import type {
   ManifestLocation,
   PublicLocation,
   PublicLocations,
   ThrottlingOptions,
-  BandwidthLimitKey,
-  LocationStatus,
 } from '../../common/runtime_types';
+import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
 
 export const getDevLocation = (devUrl: string): PublicLocation[] => [
   {
@@ -77,8 +76,10 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
     ) as ThrottlingOptions;
 
     return { throttling, locations };
-  } catch (e) {
-    server.logger.error(e);
+  } catch (error) {
+    server.logger.error(`Error getting available Synthetics locations, Error: ${error.message}`, {
+      error,
+    });
     return { locations: [] };
   }
 }

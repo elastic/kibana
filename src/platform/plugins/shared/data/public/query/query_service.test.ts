@@ -7,15 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+<<<<<<< HEAD
 import { FilterManager } from './filter_manager';
 import { QueryStringContract } from './query_string';
+=======
+import { FilterStateStore } from '@kbn/es-query';
+import type { FilterManager } from './filter_manager';
+import type { QueryStringContract } from './query_string';
+>>>>>>> upstream/main
 import { getFilter } from './filter_manager/test_helpers/get_stub_filter';
 import { UI_SETTINGS } from '../../common';
 import { coreMock } from '@kbn/core/public/mocks';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import { QueryService, QueryStart } from './query_service';
+import type { QueryStart } from './query_service';
+import { QueryService } from './query_service';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
-import { TimefilterContract } from './timefilter';
+import type { TimefilterContract } from './timefilter';
 import { createNowProviderMock } from '../now_provider/mocks';
 
 const minRefreshIntervalDefault = 1000;

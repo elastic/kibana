@@ -7,47 +7,44 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, useState, useMemo, useEffect, useRef, useCallback } from 'react';
+import type { FC } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { debounce } from 'lodash';
-import {
-  EuiRangeTick,
-  EuiDualRange,
-  EuiDualRangeProps,
-  EuiToken,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
-import { RangeValue } from '../types';
+import type { EuiRangeTick, EuiDualRangeProps } from '@elastic/eui';
+import { EuiDualRange, EuiToken, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import type { RangeValue } from '../types';
 import { MIN_POPOVER_WIDTH } from '../../../constants';
 import { RangeSliderStrings } from '../range_slider_strings';
 import { rangeSliderControlStyles } from './range_slider.styles';
 
-interface Props {
-  fieldFormatter?: (value: string) => string;
+export interface Props {
+  compressed: boolean;
+  controlPanelClassName?: string;
   isInvalid: boolean;
   isLoading: boolean;
+  fieldName: string;
   max: number | undefined;
   min: number | undefined;
-  onChange: (value: RangeValue | undefined) => void;
   step: number;
-  value: RangeValue | undefined;
   uuid: string;
-  controlPanelClassName?: string;
-  compressed: boolean;
+  value: RangeValue | undefined;
+  fieldFormatter?: (value: string) => string;
+  onChange: (value: RangeValue | undefined) => void;
 }
 
 export const RangeSliderControl: FC<Props> = ({
-  fieldFormatter,
+  compressed,
+  controlPanelClassName,
   isInvalid,
   isLoading,
+  fieldName,
   max,
   min,
-  onChange,
   step,
-  value,
   uuid,
-  controlPanelClassName,
-  compressed,
+  value,
+  fieldFormatter,
+  onChange,
 }: Props) => {
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
@@ -141,11 +138,15 @@ export const RangeSliderControl: FC<Props> = ({
       inputValue,
       testSubj,
       placeholder,
+      ariaLabel,
+      id,
     }: {
       inputValue: string;
       testSubj: string;
       placeholder: string;
-    }) => {
+      ariaLabel: string;
+      id: string;
+    }): Partial<EuiDualRangeProps['minInputProps']> => {
       return {
         isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
@@ -155,9 +156,12 @@ export const RangeSliderControl: FC<Props> = ({
           isInvalid ? styles.fieldNumbers.invalid : styles.fieldNumbers.valid,
         ],
         className: 'rangeSliderAnchor__fieldNumber',
-        'data-test-subj': `rangeSlider__${testSubj}`,
-        value: inputValue === placeholder ? '' : inputValue,
+        value: inputValue,
         title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
+        'data-test-subj': `rangeSlider__${testSubj}`,
+        'aria-label': ariaLabel,
+        'aria-labelledby': `control-title-${id}`,
+        id: `controls-range-slider-${id}`,
       };
     },
     [isInvalid, step, styles]
@@ -168,16 +172,20 @@ export const RangeSliderControl: FC<Props> = ({
       inputValue: displayedValue[0],
       testSubj: 'lowerBoundFieldNumber',
       placeholder: String(min ?? -Infinity),
+      ariaLabel: RangeSliderStrings.control.getLowerBoundAriaLabel(fieldName),
+      id: `${uuid}-lowerBound`,
     });
-  }, [getCommonInputProps, min, displayedValue]);
+  }, [getCommonInputProps, displayedValue, min, fieldName, uuid]);
 
   const maxInputProps = useMemo(() => {
     return getCommonInputProps({
       inputValue: displayedValue[1],
       testSubj: 'upperBoundFieldNumber',
       placeholder: String(max ?? Infinity),
+      ariaLabel: RangeSliderStrings.control.getUpperBoundAriaLabel(fieldName),
+      id: `${uuid}-upperBound`,
     });
-  }, [getCommonInputProps, max, displayedValue]);
+  }, [getCommonInputProps, displayedValue, max, fieldName, uuid]);
 
   return (
     <span
@@ -238,7 +246,16 @@ export const RangeSliderControl: FC<Props> = ({
         minInputProps={minInputProps}
         maxInputProps={maxInputProps}
         value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-        onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+        onChange={([minSelection, maxSelection]: [number | string, number | string], _, ev) => {
+          const originatingInputId = ev?.currentTarget.getAttribute('id');
+
+          if (originatingInputId?.includes('lowerBound')) {
+            // preserve original upper bound selection if only lower bound number field changed
+            maxSelection = displayedValue[1];
+          } else if (originatingInputId?.includes('upperBound')) {
+            // preserve original lower bound selection if only upper bound number field changed
+            minSelection = displayedValue[0];
+          }
           setDisplayedValue([String(minSelection), String(maxSelection)]);
           debouncedOnChange([String(minSelection), String(maxSelection)]);
         }}

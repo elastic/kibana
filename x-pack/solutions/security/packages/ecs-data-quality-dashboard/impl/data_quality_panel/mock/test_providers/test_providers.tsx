@@ -8,29 +8,33 @@
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import { AssistantAvailability, AssistantProvider } from '@kbn/elastic-assistant';
+import type { AssistantAvailability } from '@kbn/elastic-assistant';
+import { AssistantProvider } from '@kbn/elastic-assistant';
 import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Theme } from '@elastic/charts';
-import { coreMock } from '@kbn/core/public/mocks';
-import { UserProfileService } from '@kbn/core/public';
+import type { Theme } from '@elastic/charts';
+import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
+import type { UserProfileService } from '@kbn/core/public';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiThemeProvider } from '@elastic/eui';
 
-import { DataQualityProvider, DataQualityProviderProps } from '../../data_quality_context';
+import type { AssistantProviderProps } from '@kbn/elastic-assistant/impl/assistant_context';
+import { useAssistantContextValue } from '@kbn/elastic-assistant/impl/assistant_context';
+import type { DataQualityProviderProps } from '../../data_quality_context';
+import { DataQualityProvider } from '../../data_quality_context';
 import { ResultsRollupContext } from '../../contexts/results_rollup_context';
 import { IndicesCheckContext } from '../../contexts/indices_check_context';
-import { UseIndicesCheckReturnValue } from '../../hooks/use_indices_check/types';
-import { UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/types';
+import type { UseIndicesCheckReturnValue } from '../../hooks/use_indices_check/types';
+import type { UseResultsRollupReturnValue } from '../../hooks/use_results_rollup/types';
 import { getMergeResultsRollupContextProps } from './utils/get_merged_results_rollup_context_props';
 import { getMergedDataQualityContextProps } from './utils/get_merged_data_quality_context_props';
 import { getMergedIndicesCheckContextProps } from './utils/get_merged_indices_check_context_props';
 import { HistoricalResultsContext } from '../../data_quality_details/indices_details/pattern/contexts/historical_results_context';
 import { initialFetchHistoricalResultsReducerState } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results';
-import {
+import type {
   FetchHistoricalResultsReducerState,
   UseHistoricalResultsReturnValue,
 } from '../../data_quality_details/indices_details/pattern/hooks/use_historical_results/types';
@@ -55,6 +59,8 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
     hasUpdateAIAssistantAnonymization: true,
     hasManageGlobalKnowledgeBase: true,
     isAssistantEnabled: true,
+    isAssistantVisible: true,
+    isAssistantManagementEnabled: true,
   };
   const queryClient = new QueryClient({
     defaultOptions: {
@@ -68,35 +74,40 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
       error: () => {},
     },
   });
+
   const chrome = chromeServiceMock.createStartContract();
   chrome.getChromeStyle$.mockReturnValue(of('classic'));
+
+  const docLinks = docLinksServiceMock.createStartContract();
+
+  const assistantProviderProps = {
+    actionTypeRegistry,
+    assistantAvailability: mockAssistantAvailability,
+    augmentMessageCodeBlocks: {
+      mount: jest.fn().mockReturnValue(() => {}),
+    },
+    basePath: 'https://localhost:5601/kbn',
+    docLinks,
+    getComments: mockGetComments,
+    http: mockHttp,
+    navigateToApp: mockNavigateToApp,
+    productDocBase: {
+      installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
+    },
+    currentAppId: 'securitySolutionUI',
+    userProfileService: jest.fn() as unknown as UserProfileService,
+    getUrlForApp: jest.fn(),
+    chrome,
+  };
 
   return (
     <KibanaRenderContextProvider {...coreMock.createStart()}>
       <I18nProvider>
         <EuiThemeProvider>
           <QueryClientProvider client={queryClient}>
-            <AssistantProvider
-              actionTypeRegistry={actionTypeRegistry}
-              assistantAvailability={mockAssistantAvailability}
-              augmentMessageCodeBlocks={jest.fn()}
-              basePath={'https://localhost:5601/kbn'}
-              docLinks={{
-                ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-                DOC_LINK_VERSION: 'current',
-              }}
-              getComments={mockGetComments}
-              http={mockHttp}
-              navigateToApp={mockNavigateToApp}
-              productDocBase={{
-                installation: { getStatus: jest.fn(), install: jest.fn(), uninstall: jest.fn() },
-              }}
-              currentAppId={'securitySolutionUI'}
-              userProfileService={jest.fn() as unknown as UserProfileService}
-              chrome={chrome}
-            >
+            <TestAssistantProvider assistantProviderProps={assistantProviderProps}>
               {children}
-            </AssistantProvider>
+            </TestAssistantProvider>
           </QueryClientProvider>
         </EuiThemeProvider>
       </I18nProvider>
@@ -107,6 +118,18 @@ const TestExternalProvidersComponent: React.FC<TestExternalProvidersProps> = ({ 
 TestExternalProvidersComponent.displayName = 'TestExternalProvidersComponent';
 
 export const TestExternalProviders = React.memo(TestExternalProvidersComponent);
+
+export const TestAssistantProvider = ({
+  assistantProviderProps,
+  children,
+}: {
+  assistantProviderProps: AssistantProviderProps;
+  children: React.ReactNode;
+}) => {
+  const assistantContextValue = useAssistantContextValue(assistantProviderProps);
+
+  return <AssistantProvider value={assistantContextValue}>{children}</AssistantProvider>;
+};
 
 export interface TestDataQualityProvidersProps {
   children: React.ReactNode;

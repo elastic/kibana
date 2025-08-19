@@ -25,12 +25,10 @@ export const SIDEBAR_WIDTH_KEY = 'timeline:sidebarWidth';
 // Should this layout be a shared package or just an accepted dupe since the <ResizeableLayout /> is already shared?
 
 export const TimelineResizableLayoutComponent = ({
-  container,
   sidebarPanel,
   mainPanel,
   unifiedFieldListSidebarContainerApi,
 }: {
-  container: HTMLElement | null;
   sidebarPanel: ReactNode;
   mainPanel: ReactNode;
   unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
@@ -69,7 +67,6 @@ export const TimelineResizableLayoutComponent = ({
         className="timelineUnifiedComponentsBody__contents"
         mode={layoutMode}
         direction={layoutDirection}
-        container={container}
         fixedPanelSize={sidebarWidth ?? defaultSidebarWidth}
         minFixedPanelSize={minSidebarWidth}
         minFlexPanelSize={minMainPanelWidth}

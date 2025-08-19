@@ -9,16 +9,21 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import { Controller, FieldValues, Path, useFormContext } from 'react-hook-form';
+import type { FieldValues, Path } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface SpaceSelectorProps {
   helpText: string;
+  isDisabled?: boolean;
 }
 
-export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelectorProps) => {
+export const SpaceSelector = <T extends FieldValues>({
+  helpText,
+  isDisabled = false,
+}: SpaceSelectorProps) => {
   const NAMESPACES_NAME = 'spaces' as Path<T>;
   const { services } = useKibana<ClientPluginsStart>();
   const [spacesList, setSpacesList] = React.useState<Array<{ id: string; label: string }>>([]);
@@ -34,7 +39,7 @@ export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelector
   const showFieldInvalid = (isSubmitted || isTouched) && !!error;
 
   useEffect(() => {
-    if (data) {
+    if (data?.spacesDataPromise) {
       data.spacesDataPromise.then((spacesData) => {
         setSpacesList([
           allSpacesOption,
@@ -61,6 +66,7 @@ export const SpaceSelector = <T extends FieldValues>({ helpText }: SpaceSelector
         rules={{ required: true }}
         render={({ field }) => (
           <EuiComboBox
+            isDisabled={isDisabled}
             fullWidth
             aria-label={SPACES_LABEL}
             placeholder={SPACES_LABEL}

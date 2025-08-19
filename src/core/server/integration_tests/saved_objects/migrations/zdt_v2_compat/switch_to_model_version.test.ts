@@ -11,7 +11,7 @@ import Path from 'path';
 import fs from 'fs/promises';
 import { range, sortBy } from 'lodash';
 import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
 import '../jest_matchers';
 import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
 import { parseLogFile, createType } from '../test_utils';
@@ -68,7 +68,6 @@ describe('ZDT with v2 compat - type switching from migration to model version', 
         };
       },
     },
-    switchToModelVersionAt: '8.0.0',
     modelVersions: {
       1: {
         changes: [

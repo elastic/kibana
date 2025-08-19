@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import {
+import type {
   SearchSearchRequestBody,
   MsearchMultisearchHeader,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
+import type {
   ElasticsearchClient,
+  ElasticsearchRequestLoggingOptions,
   SavedObjectsClientContract,
   KibanaRequest,
   CoreRequestHandlerContext,
 } from '@kbn/core/server';
-import chalk from 'chalk';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESSearchResponse, InferSearchResponseOf } from '@kbn/es-types';
 import { RequestStatus } from '@kbn/inspector-plugin/common';
-import { InspectResponse } from '@kbn/observability-plugin/typings/common';
+import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/common';
 import { getInspectResponse } from '@kbn/observability-shared-plugin/common';
 import { SYNTHETICS_API_URLS, SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { SyntheticsServerSetup } from './types';
+import type { SyntheticsServerSetup } from './types';
 
 export interface CountResponse {
   result: {
@@ -76,20 +76,26 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
-    const startTime = process.hrtime();
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
     const startTimeNow = Date.now();
 
     let esRequestStatus: RequestStatus = RequestStatus.PENDING;
 
+    const isInspectorEnabled = await this.getInspectEnabled();
+
     try {
-      res = await this.baseESClient.search(esParams, { meta: true });
+      res = await this.baseESClient.search(esParams, {
+        meta: true,
+        context: {
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
+        },
+      });
       esRequestStatus = RequestStatus.OK;
     } catch (e) {
       esError = e;
       esRequestStatus = RequestStatus.ERROR;
     }
-    const isInspectorEnabled = await this.getInspectEnabled();
+
     if ((isInspectorEnabled || this.isDev) && this.request) {
       this.inspectableEsQueries.push(
         getInspectResponse({
@@ -102,16 +108,6 @@ export class SyntheticsEsClient {
           startTime: startTimeNow,
         })
       );
-    }
-
-    if (isInspectorEnabled && this.request) {
-      debugESCall({
-        startTime,
-        request: this.request,
-        esError,
-        operationName: 'search',
-        params: esParams,
-      });
     }
 
     if (esError) {
@@ -156,7 +152,11 @@ export class SyntheticsEsClient {
         this.inspectableEsQueries.push(
           getInspectResponse({
             esError,
-            esRequestParams: { index: SYNTHETICS_INDEX_PATTERN, ...request },
+            esRequestParams: {
+              index: SYNTHETICS_INDEX_PATTERN,
+              ignore_unavailable: true,
+              ...request,
+            },
             esRequestStatus: RequestStatus.OK,
             esResponse: res?.body.responses[index],
             kibanaRequest: this.request!,
@@ -179,25 +179,17 @@ export class SyntheticsEsClient {
     let res: any;
     let esError: any;
 
-    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ...params };
-    const startTime = process.hrtime();
+    const esParams = { index: SYNTHETICS_INDEX_PATTERN, ignore_unavailable: true, ...params };
 
     try {
-      res = await this.baseESClient.count(esParams, { meta: true });
+      res = await this.baseESClient.count(esParams, {
+        meta: true,
+        context: {
+          loggingOptions: getElasticsearchRequestLoggingOptions(),
+        },
+      });
     } catch (e) {
       esError = e;
-    }
-
-    const isInspectorEnabled = await this.getInspectEnabled();
-
-    if (isInspectorEnabled && this.request) {
-      debugESCall({
-        startTime,
-        request: this.request,
-        esError,
-        operationName: 'count',
-        params: esParams,
-      });
     }
 
     if (esError) {
@@ -236,44 +228,12 @@ export function createEsParams<T extends estypes.SearchRequest>(params: T): T {
   return params;
 }
 
-/* eslint-disable no-console */
-
-function formatObj(obj: Record<string, any>) {
-  return JSON.stringify(obj);
-}
-
-export function debugESCall({
-  operationName,
-  params,
-  request,
-  esError,
-  startTime,
-}: {
-  operationName: string;
-  params: Record<string, any>;
-  request: KibanaRequest;
-  esError: any;
-  startTime: [number, number];
-}) {
-  const highlightColor = esError ? 'bgRed' : 'inverse';
-  const diff = process.hrtime(startTime);
-  const duration = `${Math.round(diff[0] * 1000 + diff[1] / 1e6)}ms`;
-  const routeInfo = `${request.route.method.toUpperCase()} ${request.route.path}`;
-
-  console.log(chalk.bold[highlightColor](`=== Debug: ${routeInfo} (${duration}) ===`));
-
-  if (operationName === 'search') {
-    console.log(`GET ${params.index}/_${operationName}`);
-    console.log(formatObj(params.body));
-  } else {
-    console.log(chalk.bold('ES operation:'), operationName);
-
-    console.log(chalk.bold('ES query:'));
-    console.log(formatObj(params));
-  }
-  console.log(`\n`);
-}
-
 export const isTestUser = (server: SyntheticsServerSetup) => {
   return server.config.service?.username === 'localKibanaIntegrationTestsUser';
 };
+
+function getElasticsearchRequestLoggingOptions(): ElasticsearchRequestLoggingOptions {
+  return {
+    loggerName: 'synthetics',
+  };
+}

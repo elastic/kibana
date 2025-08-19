@@ -8,7 +8,7 @@
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { openSans } from '../../../common/lib/fonts';
 import { ViewStrings } from '../../../i18n';
-import { SetupInitializer } from '../../plugin';
+import type { SetupInitializer } from '../../plugin';
 
 const { Metric: strings } = ViewStrings;
 

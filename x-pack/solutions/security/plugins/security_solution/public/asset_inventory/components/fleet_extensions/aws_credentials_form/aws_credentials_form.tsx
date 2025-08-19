@@ -216,7 +216,7 @@ export const AwsCredentialsForm = ({
   newPolicy,
   updatePolicy,
   packageInfo,
-  disabled,
+  disabled = false,
   hasInvalidRequiredVars,
 }: AwsFormProps) => {
   const {
@@ -263,6 +263,7 @@ export const AwsCredentialsForm = ({
         onChange={(selectedSetupFormat: AwsSetupFormat) =>
           selectedSetupFormat !== setupFormat && onSetupFormatChange(selectedSetupFormat)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (
@@ -271,6 +272,7 @@ export const AwsCredentialsForm = ({
       {setupFormat === AWS_SETUP_FORMAT.MANUAL && (
         <>
           <AwsCredentialTypeSelector
+            disabled={disabled}
             label={i18n.translate(
               'xpack.securitySolution.assetInventory.fleetIntegration.awsCredentialTypeSelectorLabel',
               {

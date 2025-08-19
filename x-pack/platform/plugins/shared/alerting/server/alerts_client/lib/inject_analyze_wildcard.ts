@@ -6,25 +6,37 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { MAX_QUERIES } from './constants';
 
 export const injectAnalyzeWildcard = (query: QueryDslQueryContainer): void => {
   if (!query) {
     return;
   }
 
-  if (Array.isArray(query)) {
-    return query.forEach((child) => injectAnalyzeWildcard(child));
-  }
+  let queriesCount = 0;
+  const stack: QueryDslQueryContainer[] = [query];
 
-  if (typeof query === 'object') {
-    Object.entries(query).forEach(([key, value]) => {
-      if (key !== 'query_string') {
-        return injectAnalyzeWildcard(value);
-      }
+  while (stack.length > 0) {
+    queriesCount = queriesCount + 1;
 
-      if (typeof value.query === 'string' && value.query.includes('*')) {
-        value.analyze_wildcard = true;
+    if (queriesCount > MAX_QUERIES) {
+      throw new Error('Query is too deeply nested');
+    }
+
+    const current = stack.pop();
+
+    if (Array.isArray(current)) {
+      for (const child of current) {
+        stack.push(child);
       }
-    });
+    } else if (typeof current === 'object' && current !== null) {
+      for (const [key, value] of Object.entries(current)) {
+        if (key !== 'query_string') {
+          stack.push(value);
+        } else if (typeof value.query === 'string' && value.query.includes('*')) {
+          value.analyze_wildcard = true;
+        }
+      }
+    }
   }
 };

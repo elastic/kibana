@@ -58,7 +58,7 @@ import { useStartTransaction } from '../../../common/lib/apm/use_start_transacti
 import { TIMELINE_ACTIONS } from '../../../common/lib/apm/user_actions';
 import { defaultUdtHeaders } from '../timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../../store/defaults';
-import { useDataViewSpec } from '../../../data_view_manager/hooks/use_data_view_spec';
+import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 
 interface OwnProps<TCache = object> {
   /** Displays open timeline in modal */
@@ -164,12 +164,12 @@ export const StatefulOpenTimelineComponent = React.memo<OpenTimelineOwnProps>(
       useSourcererDataView(SourcererScopeName.timeline);
     const { newDataViewPickerEnabled } = useEnableExperimental();
 
-    const { dataViewSpec: experimentalDataViewSpec } = useDataViewSpec(SourcererScopeName.timeline);
+    const { dataView: experimentalDataView } = useDataView(SourcererScopeName.timeline);
     const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
 
     const dataViewId = useMemo(
-      () => (newDataViewPickerEnabled ? experimentalDataViewSpec?.id || '' : oldDataViewId),
-      [experimentalDataViewSpec?.id, newDataViewPickerEnabled, oldDataViewId]
+      () => (newDataViewPickerEnabled ? experimentalDataView.id || '' : oldDataViewId),
+      [experimentalDataView.id, newDataViewPickerEnabled, oldDataViewId]
     );
     const selectedPatterns = useMemo(
       () => (newDataViewPickerEnabled ? experimentalSelectedPatterns : oldSelectedPatterns),

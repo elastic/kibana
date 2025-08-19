@@ -6,19 +6,20 @@
  */
 
 import moment from 'moment';
-import type { AnalyticsServiceSetup } from '@kbn/core/server';
-import { type Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
+import {
+  type AnalyticsServiceSetup,
+  type Logger,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../../common';
-import { getEntityAnalyticsEntityTypes } from '../../../../../../common/entity_analytics/utils';
-import {
-  EngineComponentResourceEnum,
-  type EntityType,
-} from '../../../../../../common/api/entity_analytics/entity_store';
+import { SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING } from '@kbn/management-settings-ids';
+import { getEnabledEntityTypes } from '../../../../../../common/entity_analytics/utils';
+import type { EntityType } from '../../../../../../common/api/entity_analytics/entity_store';
+import { EngineComponentResourceEnum } from '../../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -36,6 +37,7 @@ import {
 } from '../../../../telemetry/event_based/events';
 import { VERSIONS_BY_ENTITY_TYPE } from '../../entity_definitions/constants';
 import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
+import { getApiKeyManager } from '../../auth/api_key';
 
 const getTaskName = (): string => TYPE;
 
@@ -52,13 +54,11 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
   logger,
   telemetry,
   taskManager,
-  experimentalFeatures,
 }: {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
-  experimentalFeatures: ExperimentalFeatures;
 }): void => {
   if (!taskManager) {
     logger.info(
@@ -91,6 +91,36 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
     return count;
   };
 
+  const getEnabledEntityTypesForNamespace = async (namespace: string) => {
+    const [core, { security, encryptedSavedObjects }] = await getStartServices();
+
+    const apiKeyManager = getApiKeyManager({
+      core,
+      logger,
+      security,
+      encryptedSavedObjects,
+      namespace,
+    });
+
+    const apiKey = await apiKeyManager.getApiKey();
+
+    if (!apiKey) {
+      logger.info(
+        `[Entity Store] No API key found, returning all entity types as enabled in ${namespace} namespace`
+      );
+      return getEnabledEntityTypes(true);
+    }
+
+    const { soClient } = await apiKeyManager.getClientFromApiKey(apiKey);
+
+    const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+    const genericEntityStoreEnabled = await uiSettingsClient.get<boolean>(
+      SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING
+    );
+
+    return getEnabledEntityTypes(genericEntityStoreEnabled);
+  };
+
   taskManager.registerTaskDefinitions({
     [getTaskName()]: {
       title: 'Entity Analytics Entity Store - Execute Enrich Policy Task',
@@ -101,7 +131,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
         telemetry,
         getStoreSize,
         executeEnrichPolicy,
-        experimentalFeatures,
+        getEnabledEntityTypesForNamespace,
       }),
     },
   });
@@ -170,7 +200,7 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
   logger,
   taskInstance,
   telemetry,
-  experimentalFeatures,
+  getEnabledEntityTypesForNamespace,
 }: {
   logger: Logger;
   isCancelled: () => boolean;
@@ -178,7 +208,7 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
   getStoreSize: GetStoreSize;
   taskInstance: ConcreteTaskInstance;
   telemetry: AnalyticsServiceSetup;
-  experimentalFeatures: ExperimentalFeatures;
+  getEnabledEntityTypesForNamespace: (namespace: string) => Promise<EntityType[]>;
 }): Promise<{
   state: EntityStoreFieldRetentionTaskState;
 }> => {
@@ -201,7 +231,7 @@ export const runEntityStoreFieldRetentionEnrichTask = async ({
       return { state: updatedState };
     }
 
-    const entityTypes = getEntityAnalyticsEntityTypes();
+    const entityTypes = await getEnabledEntityTypesForNamespace(state.namespace);
 
     for (const entityType of entityTypes) {
       const start = Date.now();
@@ -251,13 +281,13 @@ const createEntityStoreFieldRetentionEnrichTaskRunnerFactory =
     telemetry,
     executeEnrichPolicy,
     getStoreSize,
-    experimentalFeatures,
+    getEnabledEntityTypesForNamespace,
   }: {
     logger: Logger;
     telemetry: AnalyticsServiceSetup;
     executeEnrichPolicy: ExecuteEnrichPolicy;
     getStoreSize: GetStoreSize;
-    experimentalFeatures: ExperimentalFeatures;
+    getEnabledEntityTypesForNamespace: (namespace: string) => Promise<EntityType[]>;
   }) =>
   ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
     let cancelled = false;
@@ -271,7 +301,7 @@ const createEntityStoreFieldRetentionEnrichTaskRunnerFactory =
           logger,
           taskInstance,
           telemetry,
-          experimentalFeatures,
+          getEnabledEntityTypesForNamespace,
         }),
       cancel: async () => {
         cancelled = true;

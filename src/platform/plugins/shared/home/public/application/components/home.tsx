@@ -189,17 +189,12 @@ export class Home extends Component<HomeProps, State> {
 
   public render() {
     const { isLoading, isWelcomeEnabled, isNewKibanaInstance } = this.state;
-    const { application, guidedOnboardingService } = getServices();
 
     if (isWelcomeEnabled) {
       if (isLoading) {
         return this.renderLoading();
       }
       if (isNewKibanaInstance) {
-        if (guidedOnboardingService?.isEnabled) {
-          application.navigateToUrl('./home#/getting_started');
-          return null;
-        }
         return this.renderWelcome();
       }
     }

@@ -19,10 +19,12 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 
-import { TIKA_PREVIEW_CHARS, type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import { type FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { i18n } from '@kbn/i18n';
-import { FILE_FORMATS } from '../../../../../common/constants';
+
+import { FILE_FORMATS } from '@kbn/file-upload-common';
+import { TIKA_PREVIEW_CHARS } from '@kbn/file-upload-common';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useGrokHighlighter } from './use_text_parser';
 import { LINE_LIMIT } from './grok_highlighter';

@@ -13,7 +13,6 @@ export const apmProgressiveLoading = 'observability:apmProgressiveLoading';
 export const apmServiceGroupMaxNumberOfServices =
   'observability:apmServiceGroupMaxNumberOfServices';
 export const apmEnableTableSearchBar = 'observability:apmEnableTableSearchBar';
-export const entityCentricExperience = 'observability:entityCentricExperience';
 export const apmEnableServiceInventoryTableSearchBar =
   'observability:apmEnableServiceInventoryTableSearchBar';
 export const apmAWSLambdaPriceFactor = 'observability:apmAWSLambdaPriceFactor';
@@ -30,4 +29,4 @@ export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPe
 export const profilingAzureCostDiscountRate = 'observability:profilingAzureCostDiscountRate';
 export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';
 export const searchExcludedDataTiers = 'observability:searchExcludedDataTiers';
-export const apmEnableServiceMapApiV2 = 'observability:apmEnableServiceMapApiV2';
+export const enableDiagnosticMode = 'observability:enableDiagnosticMode';

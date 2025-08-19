@@ -22,7 +22,7 @@ import { MissingPrivilegesCallOut } from '../../../../detections/components/call
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
 import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
 import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
-import { ValueListsFlyout } from '../../../../detections/components/value_lists_management_flyout';
+import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
 import { useListsConfig } from '../../../../detections/containers/detection_engine/lists/use_lists_config';
 import { redirectToDetections } from '../../../common/helpers';

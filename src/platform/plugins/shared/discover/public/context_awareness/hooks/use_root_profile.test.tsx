@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { waitFor, act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { discoverServiceMock } from '../../__mocks__/services';
 import { useRootProfile } from './use_root_profile';
 import { BehaviorSubject } from 'rxjs';
+import { DiscoverTestProvider } from '../../__mocks__/test_provider';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
 const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(
@@ -26,7 +26,7 @@ jest
 const render = () => {
   return renderHook(() => useRootProfile(), {
     wrapper: ({ children }) => (
-      <KibanaContextProvider services={discoverServiceMock}>{children}</KibanaContextProvider>
+      <DiscoverTestProvider services={discoverServiceMock}>{children}</DiscoverTestProvider>
     ),
   });
 };

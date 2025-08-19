@@ -6,6 +6,7 @@
  */
 
 import { omit } from 'lodash';
+import { number } from 'io-ts';
 import { ConnectorTypes, SECURITY_SOLUTION_OWNER } from '../../../common';
 import {
   CaseTransformedAttributesRt,
@@ -52,8 +53,9 @@ describe('case types', () => {
       assignees: [],
       observables: [],
     };
+
     const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
-      (acc, type) => ({ ...acc, ...type.type.props }),
+      (acc, type) => ({ ...acc, ...type.type.props, total_comments: number, total_alerts: number }),
       {}
     );
 
@@ -77,6 +79,18 @@ describe('case types', () => {
       expect(decodedRes._tag).toEqual('Right');
       // @ts-expect-error: the check above ensures that right exists
       expect(decodedRes.right).toEqual({ description: 'test' });
+    });
+
+    it('does not remove the attachment stats', () => {
+      const decodedRes = type.decode({
+        description: 'test',
+        total_alerts: 0,
+        total_comments: 0,
+      });
+
+      expect(decodedRes._tag).toEqual('Right');
+      // @ts-expect-error: the check above ensures that right exists
+      expect(decodedRes.right).toEqual({ description: 'test', total_alerts: 0, total_comments: 0 });
     });
   });
 

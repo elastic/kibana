@@ -54,6 +54,7 @@ export const PolicyTemplateVarsForm = ({
             newPolicy={newPolicy}
             setupTechnology={setupTechnology}
             updatePolicy={updatePolicy}
+            isEditPage={isEditPage}
             packageInfo={packageInfo}
             hasInvalidRequiredVars={hasInvalidRequiredVars}
             input={input}
@@ -150,6 +151,7 @@ export const PolicyTemplateInputSelector = ({
       options={options}
       onChange={(inputType) => setInput(inputType as AssetInput)}
       size="m"
+      name="policyTemplateInput"
     />
   );
 };

@@ -5,6 +5,18 @@
  * 2.0.
  */
 
-export const ONECHAT_FRAMEWORK_FEATURE_ID = 'onechat_framework';
-export const ONECHAT_FRAMEWORK_FEATURE_NAME = 'onechat_framework';
-export const ONECHAT_FRAMEWORK_APP_ID = 'onechat_framework';
+export const ONECHAT_FEATURE_ID = 'onechat';
+export const ONECHAT_FEATURE_NAME = 'onechat';
+export const ONECHAT_APP_ID = 'onechat';
+export const ONECHAT_PATH = '/app/chat';
+export const ONECHAT_TITLE = 'Chat';
+
+export const uiPrivileges = {
+  show: 'show',
+  showManagement: 'showManagement',
+};
+
+export const apiPrivileges = {
+  readOnechat: 'read_onechat',
+  manageOnechat: 'manage_onechat',
+};

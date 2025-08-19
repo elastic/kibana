@@ -11,10 +11,12 @@ import {
   Axis,
   Chart,
   niceTimeFormatByDay,
+  ScaleType,
   Settings,
   timeFormatter,
   Tooltip,
 } from '@elastic/charts';
+import type { EuiToolTipProps } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexGroup,
@@ -25,7 +27,6 @@ import {
   type EuiLinkButtonProps,
   type EuiTextProps,
   EuiToolTip,
-  EuiToolTipProps,
   type CommonProps,
 } from '@elastic/eui';
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
@@ -66,7 +67,7 @@ const CounterButtonLink = ({
     <>
       <EuiText
         size="s"
-        style={{
+        css={{
           fontWeight: euiTheme.font.weight.bold,
           marginBottom: euiTheme.size.xs,
         }}
@@ -88,12 +89,14 @@ const CounterButtonLink = ({
         <EuiText
           color={color}
           css={css`
+            font-weight: ${euiTheme.font.weight.medium};
+            font-size: 18px;
+
             &:hover {
               border-bottom: 2px solid ${color};
               padding-bottom: 4px;
             }
           `}
-          style={{ fontWeight: euiTheme.font.weight.medium, fontSize: '18px' }}
           size="s"
         >
           <CompactFormattedNumber number={count} abbreviateAbove={999} />
@@ -153,7 +156,7 @@ const PercentageLabels = ({
 
   return (
     <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false} style={borderLeftStyles}>
+      <EuiFlexItem grow={false} css={borderLeftStyles}>
         <CounterButtonLink
           text="Passed Findings"
           count={stats.totalPassed}
@@ -162,7 +165,7 @@ const PercentageLabels = ({
           onClick={() => onEvalCounterClick(RULE_PASSED)}
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false} style={borderLeftStyles}>
+      <EuiFlexItem grow={false} css={borderLeftStyles}>
         <CounterButtonLink
           text="Failed Findings"
           count={stats.totalFailed}
@@ -231,7 +234,8 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         // EuiChart is using this id in the tooltip label
         id="Posture Score"
         data={epochTimeTrend}
-        xScaleType="time"
+        // Defaults to multi layer time axis as of Elastic Charts v70
+        xScaleType={ScaleType.Time}
         xAccessor={'timestamp'}
         yAccessors={['postureScore']}
       />
@@ -275,7 +279,7 @@ const CounterLink = ({
         onClick={onClick}
         css={{ display: 'flex' }}
       >
-        <EuiText color={color} style={{ fontWeight: euiTheme.font.weight.medium }} size="s">
+        <EuiText color={color} css={{ fontWeight: euiTheme.font.weight.medium }} size="s">
           <CompactFormattedNumber number={count} abbreviateAbove={999} />
           &nbsp;
         </EuiText>
@@ -297,7 +301,7 @@ export const ComplianceScoreChart = ({
     <EuiFlexGroup
       direction="column"
       justifyContent="spaceBetween"
-      style={{ height: '100%' }}
+      css={{ height: '100%' }}
       gutterSize="none"
     >
       <EuiFlexItem grow={2}>
@@ -310,7 +314,7 @@ export const ComplianceScoreChart = ({
               justifyContent="flexEnd"
               gutterSize="none"
               alignItems="flexStart"
-              style={{ paddingRight: euiTheme.size.xl }}
+              css={{ paddingRight: euiTheme.size.xl }}
             >
               {compact ? (
                 <CompactPercentageLabels

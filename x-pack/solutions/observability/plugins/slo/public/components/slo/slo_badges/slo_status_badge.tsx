@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiBadge, EuiFlexItem, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export interface SloStatusProps {
   slo: SLOWithSummaryResponse;
@@ -77,14 +77,11 @@ export function SloStatusBadge({ slo, isLoading }: SloStatusProps) {
 
       {slo.summary.errorBudget.isEstimated && (
         <EuiFlexItem grow={false}>
-          {/* Prevent badges from growing when inside an EuiFlexGroup by wrapping content with div */}
-          <div>
-            <EuiBadge color="default">
-              {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
-                defaultMessage: 'Forecasted',
-              })}
-            </EuiBadge>
-          </div>
+          <EuiBadge color="default">
+            {i18n.translate('xpack.slo.sloStatusBadge.forecasted', {
+              defaultMessage: 'Forecasted',
+            })}
+          </EuiBadge>
         </EuiFlexItem>
       )}
     </>

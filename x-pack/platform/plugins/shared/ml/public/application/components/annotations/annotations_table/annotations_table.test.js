@@ -7,17 +7,25 @@
 
 import jobConfig from '../../../../../common/types/__mocks__/job_config_farequote.json';
 import mockAnnotations from './__mocks__/mock_annotations.json';
-
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
-import React from 'react';
-
 import { AnnotationsTable } from './annotations_table';
+import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
-jest.mock('../../../services/job_service', () => ({
-  mlJobService: {
+const mockAnnotationUpdatesService = {
+  subscribe: jest.fn(),
+  unsubscribe: jest.fn(),
+};
+
+const mockReact = React;
+
+jest.mock('../../../services/job_service', () => {
+  const mockMlJobService = {
     getJob: jest.fn(),
-  },
-}));
+  };
+  return {
+    mlJobServiceFactory: jest.fn().mockReturnValue(mockMlJobService),
+  };
+});
 
 jest.mock('../../../services/ml_api_service', () => {
   const { of } = require('rxjs');
@@ -31,19 +39,59 @@ jest.mock('../../../services/ml_api_service', () => {
   };
 });
 
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    EuiInMemoryTable: jest.fn().mockImplementation(({ items }) => {
+      return mockReact.createElement(
+        'div',
+        { 'data-test-subj': 'mockEuiInMemoryTable' },
+        `Mocked table with ${items?.length || 0} items`
+      );
+    }),
+  };
+});
+
+const mockKibanaContext = {
+  services: {
+    mlServices: {
+      mlApi: {},
+    },
+  },
+};
+
+// Mock withKibana HOC
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  return {
+    withKibana: (Component) => {
+      const EnhancedComponent = (props) => {
+        return mockReact.createElement(Component, {
+          ...props,
+          kibana: mockKibanaContext,
+          annotationUpdatesService: mockAnnotationUpdatesService,
+        });
+      };
+      return EnhancedComponent;
+    },
+  };
+});
+
 describe('AnnotationsTable', () => {
   test('Minimal initialization without props.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderWithI18n(<AnnotationsTable />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('Initialization with job config prop.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable jobs={[jobConfig]} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderWithI18n(<AnnotationsTable jobs={[jobConfig]} />);
+    expect(container.firstChild).toMatchSnapshot();
   });
 
   test('Initialization with annotations prop.', () => {
-    const wrapper = shallowWithIntl(<AnnotationsTable annotations={mockAnnotations.slice(0, 1)} />);
-    expect(wrapper).toMatchSnapshot();
+    const { container } = renderWithI18n(
+      <AnnotationsTable annotations={mockAnnotations.slice(0, 1)} />
+    );
+    expect(container.firstChild).toMatchSnapshot();
   });
 });

@@ -4,23 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import pMap from 'p-map';
-import { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsBulkResponse } from '@kbn/core-saved-objects-api-server';
 import { v4 as uuidV4 } from 'uuid';
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import { SavedObjectError } from '@kbn/core-saved-objects-common';
-import { SyntheticsServerSetup } from '../../../types';
-import { RouteContext } from '../../types';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+import type { SyntheticsServerSetup } from '../../../types';
+import type { RouteContext } from '../../types';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
   SyntheticsMonitor,
-  type SyntheticsPrivateLocations,
 } from '../../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 
 type MonitorSavedObject = SavedObject<EncryptedSyntheticsMonitorAttributes>;
@@ -39,7 +38,8 @@ export const syncNewMonitorBulk = async ({
   privateLocations: SyntheticsPrivateLocations;
   spaceId: string;
 }) => {
-  const { server, syntheticsMonitorClient, monitorConfigRepository } = routeContext;
+  const { server, syntheticsMonitorClient, monitorConfigRepository, request } = routeContext;
+  const { query } = request;
   let newMonitors: CreatedMonitors | null = null;
 
   const monitorsToCreate = normalizedMonitors.map((monitor) => {
@@ -59,6 +59,7 @@ export const syncNewMonitorBulk = async ({
     const [createdMonitors, [policiesResult, syncErrors]] = await Promise.all([
       monitorConfigRepository.createBulk({
         monitors: monitorsToCreate,
+        savedObjectType: query.savedObjectType,
       }),
       syntheticsMonitorClient.addMonitors(monitorsToCreate, privateLocations, spaceId),
     ]);
@@ -125,9 +126,9 @@ const rollBackNewMonitorBulk = async (
     await deleteMonitorAPI.execute({
       monitorIds: monitorsToCreate.map(({ id }) => id),
     });
-  } catch (e) {
+  } catch (error) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to rollback new monitors, Error: ${error.message}`, { error });
   }
 };
 
@@ -169,6 +170,6 @@ export const deleteMonitorIfCreated = async ({
     }
   } catch (e) {
     // ignore errors here
-    server.logger.error(e);
+    server.logger.error(`Unable to delete monitor with id ${newMonitorId}`, { error: e });
   }
 };

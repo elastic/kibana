@@ -1,36 +1,47 @@
 # MATCH
 
-`MATCH` is a function used to execute a match query on a specified field. It works on various field types including text fields, boolean, dates, and numeric types. It returns 'true' when the provided query matches the row.
+The `MATCH` function performs a match query on the specified field. It is equivalent to the `match` query in the Elasticsearch Query DSL and can be used to search for values in various field types, including text, semantic_text, keyword, boolean, dates, and numeric types.
+
+`MATCH` supports function named parameters to specify additional options for the match query. For a simplified syntax, the match operator `:` can be used instead of `MATCH`. The function returns `true` if the provided query matches the row.
 
 ## Syntax
 
-`MATCH (field, query)`
+`MATCH(field, query, options)`
 
 ### Parameters
 
 #### `field`
 
-This represents the field that the query will target. If the field contains multiple values,
-`MATCH` will process each value.
+The field that the query will target.
 
 #### `query`
 
-This is the value that is being searched in the provided field.
+The value to find in the specified field.
+
+#### `options`
+
+(Optional) Additional match query options provided as function named parameters. Refer to the match query documentation for more details.
 
 ## Examples
 
-In this example, `"Faulkner"` is matched against the `author` field in `books` data. `MATCH` returns true if it finds the provided query, in this case `"Faulkner"` in the author field. The query then keeps the columns `book_no` and `author`, sorts by `book_no` and limits the result to 5.
+Match on a specific field
 
 ```esql
 FROM books
 | WHERE MATCH(author, "Faulkner")
 | KEEP book_no, author
 | SORT book_no
-| LIMIT 5;
+| LIMIT 5
 ```
 
-## Notes
+This example retrieves books where the `author` field matches "Faulkner," keeping only the `book_no` and `author` fields, sorting by `book_no`, and limiting the results to 5 rows.
 
-- Do not use `MATCH` in production -  it is in technical preview and may be changed or removed in a future release
-- `MATCH` relies on Elasticsearch Match query under the hood, and should be used for full-text search only. For more traditional
-  text matching, `LIKE` or `RLIKE` should be used instead.
+Match with additional options
+
+```esql
+FROM books
+| WHERE MATCH(title, "Hobbit Back Again", {"operator": "AND"})
+| KEEP title
+```
+
+This example searches for books where the `title` field matches "Hobbit Back Again" using the `AND` operator, and keeps only the `title` field in the results.

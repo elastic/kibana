@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { useRouteMatch, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText, EuiSpacer } from '@elastic/eui';
@@ -24,8 +24,11 @@ import {
   useStartServices,
   useIntraAppState,
   useUrlParams,
+  sendGetAgentTags,
 } from '../../../hooks';
 import { WithHeaderLayout } from '../../../layouts';
+
+import { TagsAddRemove } from '../agent_list_page/components';
 
 import { AgentRefreshContext } from './hooks';
 import {
@@ -63,6 +66,7 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
 
   const {
     application: { navigateToApp },
+    notifications,
   } = useStartServices();
   const routeState = useIntraAppState<AgentDetailsReassignPolicyAction>();
   const queryParams = new URLSearchParams(useLocation().search);
@@ -116,6 +120,37 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
     [host, agentId, getHref, isInitialRequest, isLoading]
   );
 
+  const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();
+  const [showTagsAddRemove, setShowTagsAddRemove] = useState(false);
+
+  const [allTags, setAllTags] = useState<string[]>();
+
+  useEffect(() => {
+    // Fetch all tags when the component mounts
+    const fetchTags = async () => {
+      try {
+        const agentTagsResponse = await sendGetAgentTags({
+          showInactive: agent?.status === 'inactive',
+        });
+        if (agentTagsResponse.error) {
+          throw agentTagsResponse.error;
+        }
+        const newAllTags = agentTagsResponse?.data?.items ?? [];
+        setAllTags(newAllTags);
+      } catch (err) {
+        notifications.toasts.addError(err, {
+          title: i18n.translate('xpack.fleet.agentList.errorFetchingTagsTitle', {
+            defaultMessage: 'Error fetching tags',
+          }),
+        });
+      }
+    };
+
+    if (agent?.active) {
+      fetchTags();
+    }
+  }, [setAllTags, notifications, agent]);
+
   const headerRightContent = useMemo(
     () =>
       agent ? (
@@ -133,6 +168,10 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
                       ? reassignCancelClickHandler
                       : undefined
                   }
+                  onAddRemoveTagsClick={(button) => {
+                    setTagsPopoverButton(button);
+                    setShowTagsAddRemove(!showTagsAddRemove);
+                  }}
                 />
               </EuiFlexItem>
             )}
@@ -208,7 +247,26 @@ export const AgentDetailsPage: React.FunctionComponent = () => {
             error={error}
           />
         ) : agent ? (
-          <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+          <>
+            <AgentDetailsPageContent agent={agent} agentPolicy={agentPolicyData?.item} />
+            {showTagsAddRemove && (
+              <TagsAddRemove
+                agentId={agent?.id!}
+                allTags={allTags ?? []}
+                selectedTags={agent?.tags ?? []}
+                button={tagsPopoverButton!}
+                onTagsUpdated={(tagsToAdd: string[]) => {
+                  sendAgentRequest();
+                  if (tagsToAdd.length > 0) {
+                    setAllTags([...new Set([...(allTags ?? []), ...tagsToAdd])].sort());
+                  }
+                }}
+                onClosePopover={() => {
+                  setShowTagsAddRemove(false);
+                }}
+              />
+            )}
+          </>
         ) : (
           <Error
             title={

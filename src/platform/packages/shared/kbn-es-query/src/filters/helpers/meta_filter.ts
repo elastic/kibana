@@ -8,7 +8,7 @@
  */
 
 import { omit, get } from 'lodash';
-import { Filter } from '../build_filters';
+import type { Filter } from '../build_filters';
 
 /**
  *

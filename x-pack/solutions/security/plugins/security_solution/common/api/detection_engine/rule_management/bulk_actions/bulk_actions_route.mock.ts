@@ -20,3 +20,13 @@ export const getPerformBulkActionEditSchemaMock = (): PerformRulesBulkActionRequ
   action: BulkActionTypeEnum.edit,
   [BulkActionTypeEnum.edit]: [{ type: BulkActionEditTypeEnum.add_tags, value: ['tag1'] }],
 });
+
+export const getPerformBulkActionEditAlertSuppressionSchemaMock =
+  (): PerformRulesBulkActionRequestBody => ({
+    query: '',
+    ids: undefined,
+    action: BulkActionTypeEnum.edit,
+    [BulkActionTypeEnum.edit]: [
+      { type: BulkActionEditTypeEnum.set_alert_suppression, value: { group_by: ['field1'] } },
+    ],
+  });

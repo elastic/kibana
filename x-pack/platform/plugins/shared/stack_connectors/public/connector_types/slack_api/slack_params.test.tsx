@@ -10,7 +10,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import SlackParamsFields from './slack_params';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import userEvent from '@testing-library/user-event';
 
 interface Result {
@@ -47,7 +47,7 @@ const testBlock = {
 };
 const mockUseSubAction = jest.fn<Result, [UseSubActionParams<unknown>]>(mockUseValidChanelId);
 
-const mockToasts = { danger: jest.fn(), warning: jest.fn() };
+const mockToasts = { addDanger: jest.fn(), addWarning: jest.fn() };
 jest.mock(triggersActionsPath, () => {
   const original = jest.requireActual(triggersActionsPath);
   return {
@@ -55,7 +55,9 @@ jest.mock(triggersActionsPath, () => {
     useSubAction: (params: UseSubActionParams<unknown>) => mockUseSubAction(params),
     useKibana: () => ({
       ...original.useKibana(),
-      notifications: { toasts: mockToasts },
+      services: {
+        notifications: { toasts: mockToasts },
+      },
     }),
   };
 });

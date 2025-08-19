@@ -44,7 +44,7 @@ const LeftoverIntegrationFound: React.FC = () => {
   if (!packagePolicyId) return null;
 
   return (
-    <EuiCallOut title="Leftover integration found" color="warning" iconType="help">
+    <EuiCallOut title="Leftover integration found" color="warning" iconType="question">
       <p>
         <FormattedMessage
           id="xpack.synthetics.leftOver.errors.title"

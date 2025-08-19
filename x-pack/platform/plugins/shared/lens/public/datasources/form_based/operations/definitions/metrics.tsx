@@ -25,7 +25,7 @@ import {
   SUM_NAME,
 } from '@kbn/lens-formula-docs';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
-import { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
+import type { LayerSettingsFeatures, OperationDefinition, ParamEditorProps } from '.';
 import {
   getFormatFromPreviousColumn,
   getInvalidFieldMessage,
@@ -33,7 +33,7 @@ import {
   getFilter,
   isColumnOfType,
 } from './helpers';
-import {
+import type {
   FieldBasedIndexPatternColumn,
   BaseIndexPatternColumn,
   ValueFormatConfig,
@@ -160,7 +160,6 @@ function buildMetricOperation<T extends MetricColumn<string>>({
         operationType: type,
         sourceField: field.name,
         isBucketed: false,
-        scale: 'ratio',
         timeScale: optionalTimeScaling ? previousColumn?.timeScale : undefined,
         filter: getFilter(previousColumn, columnParams),
         timeShift: columnParams?.shift || previousColumn?.timeShift,

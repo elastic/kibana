@@ -6,10 +6,9 @@
  */
 import dedent from 'dedent';
 import { ChatFunctionClient } from '.';
-import { FunctionVisibility } from '../../../common/functions/types';
-import { Logger } from '@kbn/logging';
-import { RegisterInstructionCallback } from '../types';
-import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../functions/get_data_on_screen';
+import type { Logger } from '@kbn/logging';
+import { GET_DATA_ON_SCREEN_FUNCTION_NAME } from '../../../common';
+import type { RegisterInstructionCallback } from '../types';
 
 describe('chatFunctionClient', () => {
   describe('when executing a function with invalid arguments', () => {
@@ -97,7 +96,6 @@ describe('chatFunctionClient', () => {
           description: expect.any(String),
           name: GET_DATA_ON_SCREEN_FUNCTION_NAME,
           parameters: expect.any(Object),
-          visibility: FunctionVisibility.AssistantOnly,
         },
         respond: expect.any(Function),
       });

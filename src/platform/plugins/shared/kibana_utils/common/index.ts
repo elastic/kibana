@@ -38,6 +38,7 @@ export {
   useContainerSelector,
   useContainerState,
   createStateContainer,
+  defaultFreeze,
 } from './state_containers';
 export type { KibanaServerError } from './errors';
 export {

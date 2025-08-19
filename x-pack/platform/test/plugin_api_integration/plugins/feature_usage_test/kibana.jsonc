@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/feature-usage-test-plugin",
   "owner": "@elastic/kibana-security",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "featureUsageTest",
     "server": true,

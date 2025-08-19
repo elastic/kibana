@@ -8,8 +8,9 @@
  */
 
 import React from 'react';
-import SearchBar from './search_bar';
-
+import type { SearchBarProps, SearchBarState } from './search_bar';
+import SearchBar, { SearchBarUI } from './search_bar';
+import { BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -84,9 +85,12 @@ function wrapSearchBarInContext(testProps: any) {
         },
       },
     },
+    chrome: {
+      ...startMock.chrome,
+      getActiveSolutionNavId$: jest.fn().mockReturnValue(new BehaviorSubject('oblt')),
+    },
     uiSettings: startMock.uiSettings,
     settings: startMock.settings,
-    savedObjects: startMock.savedObjects,
     notifications: startMock.notifications,
     http: startMock.http,
     theme: startMock.theme,
@@ -361,5 +365,95 @@ describe('SearchBar', () => {
       // is not equal with props for dateRange which is undefined
       true
     );
+  });
+
+  describe('SearchBarUI.getDerivedStateFromProps', () => {
+    it('should not return the esql query if props.query doesnt change but loading state changes', () => {
+      const nextProps = {
+        query: { esql: 'test' },
+        isLoading: false,
+      } as unknown as SearchBarProps;
+      const prevState = {
+        currentProps: {
+          query: { esql: 'test' },
+        },
+        query: { esql: 'test_edited' },
+        isLoading: true,
+      } as unknown as SearchBarState;
+
+      const result = SearchBarUI.getDerivedStateFromProps(nextProps, prevState);
+      // if the query was returned, it would overwrite the state in the underlying ES|QL editor
+      expect(result).toEqual({
+        currentProps: { isLoading: false, query: { esql: 'test' } },
+      });
+    });
+    it('should return the query if props.query and loading state changes', () => {
+      const nextProps = {
+        query: { esql: 'test_new_props' },
+        isLoading: false,
+      } as unknown as SearchBarProps;
+      const prevState = {
+        currentProps: {
+          query: { esql: 'test' },
+        },
+        query: { esql: 'test_edited' },
+        isLoading: true,
+      } as unknown as SearchBarState;
+
+      const result = SearchBarUI.getDerivedStateFromProps(nextProps, prevState);
+      // here it makes sense to return the query, because the props.query has changed
+      expect(result).toEqual({
+        currentProps: { isLoading: false, query: { esql: 'test_new_props' } },
+        query: {
+          esql: 'test_new_props',
+        },
+      });
+    });
+  });
+
+  describe('draft', () => {
+    it('should prefill with the draft query if provided', () => {
+      const draft = {
+        query: { language: 'kuery', query: 'test_draft' },
+        dateRangeFrom: 'now-30m',
+        dateRangeTo: 'now-10m',
+      };
+      const onDraftChange = jest.fn();
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [stubIndexPattern],
+          query: kqlQuery,
+          dateRangeTo: 'now',
+          dateRangeFrom: 'now-15m',
+          draft,
+          onDraftChange,
+        })
+      );
+
+      expect(onDraftChange).toHaveBeenCalledWith(draft);
+      expect(component.find('textarea').prop('value')).toEqual(draft.query.query);
+    });
+
+    it('should check for query type mismatch', () => {
+      const draft = {
+        query: esqlQuery,
+        dateRangeFrom: 'now-30m',
+        dateRangeTo: 'now-10m',
+      };
+      const onDraftChange = jest.fn();
+      const component = mount(
+        wrapSearchBarInContext({
+          indexPatterns: [stubIndexPattern],
+          query: kqlQuery,
+          dateRangeTo: 'now',
+          dateRangeFrom: 'now-15m',
+          draft,
+          onDraftChange,
+        })
+      );
+
+      expect(onDraftChange).toHaveBeenCalledWith(undefined);
+      expect(component.find('textarea').prop('value')).toEqual(kqlQuery.query);
+    });
   });
 });

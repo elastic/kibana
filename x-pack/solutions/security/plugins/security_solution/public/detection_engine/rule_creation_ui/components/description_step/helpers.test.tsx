@@ -28,6 +28,7 @@ import {
   buildNoteDescription,
   buildRuleTypeDescription,
   buildHighlightedFieldsOverrideDescription,
+  buildThreatMappingDescription,
   getQueryLabel,
 } from './helpers';
 import type { ListItems } from './types';
@@ -563,6 +564,89 @@ describe('helpers', () => {
     test('returns query label for esql rule type', () => {
       const label = getQueryLabel('esql');
       expect(label).toEqual(i18n.ESQL_QUERY_LABEL);
+    });
+  });
+
+  describe('buildThreatMappingDescription', () => {
+    it('returns correct description for single entry, negate undefined', () => {
+      const result = buildThreatMappingDescription('Test Title', [
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result[0].description).toBe('host.name MATCHES threat.indicator.host.name');
+    });
+
+    it('returns correct description for single entry, negate=false', () => {
+      const result = buildThreatMappingDescription('Test Title', [
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result[0].description).toBe('host.name MATCHES threat.indicator.host.name');
+    });
+
+    it('returns correct description for single entry, negate=true', () => {
+      const result = buildThreatMappingDescription('Test Title', [
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: true,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result[0].description).toBe('host.name DOES NOT MATCH threat.indicator.host.name');
+    });
+
+    it('returns correct description for multiple AND and OR entries', () => {
+      const result = buildThreatMappingDescription('Test Title', [
+        {
+          entries: [
+            {
+              field: 'host.name',
+              value: 'threat.indicator.host.name',
+              negate: true,
+              type: 'mapping' as const,
+            },
+            {
+              field: 'user.name',
+              value: 'threat.indicator.user.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+        {
+          entries: [
+            {
+              field: 'process.name',
+              value: 'threat.indicator.process.name',
+              negate: false,
+              type: 'mapping' as const,
+            },
+          ],
+        },
+      ]);
+      expect(result[0].description).toBe(
+        '((host.name DOES NOT MATCH threat.indicator.host.name) AND (user.name MATCHES threat.indicator.user.name)) OR (process.name MATCHES threat.indicator.process.name)'
+      );
     });
   });
 });

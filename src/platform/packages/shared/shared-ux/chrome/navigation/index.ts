@@ -16,4 +16,4 @@ export type { NavigationProps } from './src/ui';
 
 export type { PanelComponentProps, PanelContent } from './src/ui';
 
-export type { NavigationServices, NavigationKibanaDependencies } from './src/types';
+export type { NavigationServices, NavigationChromeDependencies } from './src/types';

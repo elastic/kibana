@@ -103,6 +103,7 @@ const routes = {
                 topNType: t.union([
                   t.literal(TopNType.Containers),
                   t.literal(TopNType.Deployments),
+                  t.literal(TopNType.Executables),
                   t.literal(TopNType.Hosts),
                   t.literal(TopNType.Threads),
                   t.literal(TopNType.Traces),
@@ -124,7 +125,7 @@ const routes = {
             },
           },
           '/stacktraces': {
-            element: <RedirectTo pathname="/stacktraces/threads" />,
+            element: <RedirectTo pathname="/stacktraces/executables" />,
           },
           '/flamegraphs': {
             element: (

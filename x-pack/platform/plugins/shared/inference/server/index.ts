@@ -10,7 +10,8 @@ import type {
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { InferenceConfig, configSchema } from './config';
+import type { InferenceConfig } from './config';
+import { configSchema } from './config';
 import type {
   InferenceServerSetup,
   InferenceServerStart,
@@ -19,14 +20,13 @@ import type {
 } from './types';
 import { InferencePlugin } from './plugin';
 
-export type { InferenceClient, BoundInferenceClient } from './inference_client';
 export type { InferenceServerSetup, InferenceServerStart };
 
-export { withChatCompleteSpan } from './tracing/with_chat_complete_span';
-export { withInferenceSpan } from './tracing/with_inference_span';
-export { withExecuteToolSpan } from './tracing/with_execute_tool_span';
-
-export { naturalLanguageToEsql } from './tasks/nl_to_esql';
+export {
+  naturalLanguageToEsql,
+  EsqlDocumentBase,
+  runAndValidateEsqlQuery,
+} from './tasks/nl_to_esql';
 
 export const plugin: PluginInitializer<
   InferenceServerSetup,

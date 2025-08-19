@@ -13,6 +13,8 @@
     "@kbn/i18n-react",
     "@kbn/react-kibana-context-theme",
     "@kbn/data-plugin",
+    "@kbn/saved-search-plugin",
+    "@kbn/content-management-utils",
   ],
   "exclude": ["target/**/*"]
 }

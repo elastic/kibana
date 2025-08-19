@@ -13,8 +13,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 
 import { evaluateAttackDiscovery } from '.';
-import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
-import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
+import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
+import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { mockExperimentConnector } from './__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../routes/utils';
 
@@ -57,6 +57,7 @@ const langSmithApiKey = 'test-api-key';
 const langSmithProject = 'test-lang-smith-project';
 const logger = loggerMock.create();
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+const mockEsClientInternalUser = elasticsearchServiceMock.createElasticsearchClient();
 const runName = 'test-run-name';
 
 const connectors = [
@@ -133,6 +134,7 @@ describe('evaluateAttackDiscovery', () => {
       connectorTimeout,
       datasetName,
       esClient: mockEsClient,
+      esClientInternalUser: mockEsClientInternalUser,
       evaluationId,
       evaluatorConnectorId,
       langSmithApiKey,

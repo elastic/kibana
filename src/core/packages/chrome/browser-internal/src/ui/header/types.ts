@@ -6,6 +6,3 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
-export type OnIsLockedUpdate = (isLocked: boolean) => void;
-export type NavType = 'modern' | 'legacy';

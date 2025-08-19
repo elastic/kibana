@@ -29,7 +29,7 @@
         "signature": [
           "(minimumMinutes: number) => Zod.ZodEffects<Zod.ZodString, string, string>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
         "signature": [
           "({\n  type,\n  dataset,\n}: AliasPatternOptions<TDataset>) => `entities-${string}-${TDataset}`"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +76,7 @@
             "signature": [
               "AliasPatternOptions<TDataset>"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +95,7 @@
         "signature": [
           "({\n  schemaVersion,\n  dataset,\n  definitionId,\n}: IndexPatternOptions<TDataset>) => `.entities.v${number}.${TDataset}.${string}`"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -109,7 +109,7 @@
             "signature": [
               "IndexPatternOptions<TDataset>"
             ],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -122,87 +122,12 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/entities-schema",
-        "id": "def-common.EntityV2",
-        "type": "Interface",
-        "tags": [],
-        "label": "EntityV2",
-        "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.entity.id",
-            "type": "string",
-            "tags": [],
-            "label": "'entity.id'",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.entity.type",
-            "type": "string",
-            "tags": [],
-            "label": "'entity.type'",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.entity.display_name",
-            "type": "string",
-            "tags": [],
-            "label": "'entity.display_name'",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.entity.last_seen_timestamp",
-            "type": "string",
-            "tags": [],
-            "label": "'entity.last_seen_timestamp'",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/entities-schema",
-            "id": "def-common.EntityV2.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[metadata: string]: any",
-            "description": [],
-            "signature": [
-              "[metadata: string]:  any"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/entities-schema",
         "id": "def-common.MetadataRecord",
         "type": "Interface",
         "tags": [],
         "label": "MetadataRecord",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -223,7 +148,7 @@
                 "text": "MetadataRecord"
               }
             ],
-            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+            "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -239,7 +164,7 @@
         "tags": [],
         "label": "BasicAggregations",
         "description": [],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -256,7 +181,7 @@
         "signature": [
           "\"entities\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -271,7 +196,7 @@
         "signature": [
           "\"history\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -286,7 +211,7 @@
         "signature": [
           "\"latest\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -301,7 +226,7 @@
         "signature": [
           "\"v1\""
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/patterns.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/patterns.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -314,7 +239,7 @@
         "label": "EntityDefinition",
         "description": [],
         "signature": [
-          "{ id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "{ id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -324,7 +249,7 @@
           },
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity_definition.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -345,9 +270,9 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }"
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity_definition.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -360,9 +285,9 @@
         "label": "EntityInstance",
         "description": [],
         "signature": [
-          "{ entity: { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; } & Metadata"
+          "{ entity: { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; } & Metadata"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -377,7 +302,7 @@
         "signature": [
           "Metadata"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -415,7 +340,7 @@
           },
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -430,7 +355,7 @@
         "signature": [
           "{ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -453,7 +378,7 @@
           },
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -470,7 +395,7 @@
         "signature": [
           "Zod.ZodArray<Zod.ZodString, \"many\">"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -493,7 +418,7 @@
           },
           ">"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -532,7 +457,7 @@
           },
           "; filter?: string | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -592,7 +517,7 @@
         "signature": [
           "Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodLiteral<\"doc_count\">; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; aggregation: \"doc_count\"; filter?: string | undefined; }, { name: string; aggregation: \"doc_count\"; filter?: string | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -607,7 +532,7 @@
         "signature": [
           "Zod.ZodString"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -620,9 +545,9 @@
         "label": "entityBaseSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodOptional<Zod.ZodString>; identity_fields: Zod.ZodUnion<[Zod.ZodArray<Zod.ZodString, \"many\">, Zod.ZodString]>; display_name: Zod.ZodString; metrics: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; EngineMetadata: Zod.ZodOptional<Zod.ZodObject<{ Type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { Type: string; }, { Type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }, { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }>"
+          "Zod.ZodObject<{ id: Zod.ZodString; type: Zod.ZodOptional<Zod.ZodString>; identity_fields: Zod.ZodUnion<[Zod.ZodArray<Zod.ZodString, \"many\">, Zod.ZodString]>; display_name: Zod.ZodString; metrics: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; EngineMetadata: Zod.ZodOptional<Zod.ZodObject<{ Type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { Type: string; }, { Type: string; }>>; }, \"strip\", Zod.ZodTypeAny, { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }, { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -675,7 +600,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>, \"many\">>; staticFields: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; managed: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; latest: Zod.ZodObject<{ timestampField: Zod.ZodString; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodString>; docsPerSecond: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; }, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; }, { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }>; installStatus: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodLiteral<\"installing\">, Zod.ZodLiteral<\"upgrading\">, Zod.ZodLiteral<\"installed\">, Zod.ZodLiteral<\"failed\">]>>; installStartedAt: Zod.ZodOptional<Zod.ZodString>; installedComponents: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodUnion<[Zod.ZodLiteral<\"transform\">, Zod.ZodLiteral<\"ingest_pipeline\">, Zod.ZodLiteral<\"template\">]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>, \"many\">>; staticFields: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>; managed: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodBoolean>>; latest: Zod.ZodObject<{ timestampField: Zod.ZodString; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodString>; docsPerSecond: Zod.ZodOptional<Zod.ZodNumber>; maxPageSearchSize: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; }, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }, { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }>; installStatus: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodLiteral<\"installing\">, Zod.ZodLiteral<\"upgrading\">, Zod.ZodLiteral<\"installed\">, Zod.ZodLiteral<\"failed\">]>>; installStartedAt: Zod.ZodOptional<Zod.ZodString>; installedComponents: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodUnion<[Zod.ZodLiteral<\"transform\">, Zod.ZodLiteral<\"ingest_pipeline\">, Zod.ZodLiteral<\"template\">]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; type: string; version: string; name: string; managed: boolean; indexPatterns: string[]; identityFields: ({ field: string; optional: false; } | { field: string; optional: boolean; })[]; displayNameTemplate: string; latest: { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -683,7 +608,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }, { id: string; type: string; version: string; name: string; indexPatterns: string[]; identityFields: (string | { field: string; optional: false; })[]; displayNameTemplate: string; latest: { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }, { id: string; type: string; version: string; name: string; indexPatterns: string[]; identityFields: (string | { field: string; optional: false; })[]; displayNameTemplate: string; latest: { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }; filter?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -693,7 +618,7 @@
           },
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; managed?: boolean | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; staticFields?: Record<string, string> | undefined; installStatus?: \"failed\" | \"installing\" | \"upgrading\" | \"installed\" | undefined; installStartedAt?: string | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity_definition.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -746,7 +671,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>, \"many\">>>; indexPatterns: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; metadata: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodEffects<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodObject<{ source: Zod.ZodString; destination: Zod.ZodOptional<Zod.ZodString>; aggregation: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"terms\">; limit: Zod.ZodDefault<Zod.ZodNumber>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; }, { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"top_value\">; sort: Zod.ZodRecord<Zod.ZodString, Zod.ZodUnion<[Zod.ZodLiteral<\"asc\">, Zod.ZodLiteral<\"desc\">]>>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }>]>>>; }, \"strip\", Zod.ZodTypeAny, { source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; destination?: string | undefined; }, { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, Zod.ZodEffects<Zod.ZodString, { source: string; destination: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string>]>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, \"many\">>>; identityFields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodUnion<[Zod.ZodObject<{ field: Zod.ZodString; optional: Zod.ZodLiteral<false>; }, \"strip\", Zod.ZodTypeAny, { field: string; optional: false; }, { field: string; optional: false; }>, Zod.ZodEffects<Zod.ZodString, { field: string; optional: boolean; }, string>]>, \"many\">>; displayNameTemplate: Zod.ZodOptional<Zod.ZodString>; staticFields: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>>; latest: Zod.ZodOptional<Zod.ZodObject<{ timestampField: Zod.ZodString; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodString>; docsPerSecond: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; }, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; }, { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }>>; installedComponents: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodUnion<[Zod.ZodLiteral<\"transform\">, Zod.ZodLiteral<\"ingest_pipeline\">, Zod.ZodLiteral<\"template\">]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }>, \"many\">>>; }, { latest: Zod.ZodOptional<Zod.ZodObject<{ timestampField: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>>; settings: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodString>; docsPerSecond: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; }, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; }>>>; }, \"strip\", Zod.ZodTypeAny, { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; }, { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; }>>; version: Zod.ZodEffects<Zod.ZodString, string, string>; }>, \"strip\", Zod.ZodTypeAny, { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>, \"many\">>>; indexPatterns: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; metadata: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodEffects<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodObject<{ source: Zod.ZodString; destination: Zod.ZodOptional<Zod.ZodString>; aggregation: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"terms\">; limit: Zod.ZodDefault<Zod.ZodNumber>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; }, { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"top_value\">; sort: Zod.ZodRecord<Zod.ZodString, Zod.ZodUnion<[Zod.ZodLiteral<\"asc\">, Zod.ZodLiteral<\"desc\">]>>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }>]>>>; }, \"strip\", Zod.ZodTypeAny, { source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; destination?: string | undefined; }, { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, Zod.ZodEffects<Zod.ZodString, { source: string; destination: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string>]>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, \"many\">>>; identityFields: Zod.ZodOptional<Zod.ZodArray<Zod.ZodUnion<[Zod.ZodObject<{ field: Zod.ZodString; optional: Zod.ZodLiteral<false>; }, \"strip\", Zod.ZodTypeAny, { field: string; optional: false; }, { field: string; optional: false; }>, Zod.ZodEffects<Zod.ZodString, { field: string; optional: boolean; }, string>]>, \"many\">>; displayNameTemplate: Zod.ZodOptional<Zod.ZodString>; staticFields: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodString>>>; latest: Zod.ZodOptional<Zod.ZodObject<{ timestampField: Zod.ZodString; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; settings: Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodString>; docsPerSecond: Zod.ZodOptional<Zod.ZodNumber>; maxPageSearchSize: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; }, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; }, { timestampField: string; settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; }>>; installedComponents: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ type: Zod.ZodUnion<[Zod.ZodLiteral<\"transform\">, Zod.ZodLiteral<\"ingest_pipeline\">, Zod.ZodLiteral<\"template\">]>; id: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }, { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }>, \"many\">>>; }, { latest: Zod.ZodOptional<Zod.ZodObject<{ timestampField: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodOptional<Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>>; settings: Zod.ZodOptional<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; frequency: Zod.ZodOptional<Zod.ZodString>; timeout: Zod.ZodOptional<Zod.ZodString>; docsPerSecond: Zod.ZodOptional<Zod.ZodNumber>; maxPageSearchSize: Zod.ZodOptional<Zod.ZodNumber>; }, \"strip\", Zod.ZodTypeAny, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; }, { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; }>>>; }, \"strip\", Zod.ZodTypeAny, { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; }, { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; }>>; version: Zod.ZodEffects<Zod.ZodString, string, string>; }>, \"strip\", Zod.ZodTypeAny, { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -754,7 +679,7 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }, { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: ({ destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; })[] | undefined; identityFields?: ({ field: string; optional: false; } | { field: string; optional: boolean; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }, { version: string; type?: string | undefined; filter?: string | undefined; name?: string | undefined; description?: string | undefined; metrics?: { name: string; metrics: ({ name: string; field: string; aggregation: ",
           {
             "pluginId": "@kbn/entities-schema",
             "scope": "common",
@@ -762,9 +687,9 @@
             "section": "def-common.BasicAggregations",
             "text": "BasicAggregations"
           },
-          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: false; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }>"
+          "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }[] | undefined; indexPatterns?: string[] | undefined; metadata?: (string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; })[] | undefined; identityFields?: (string | { field: string; optional: false; })[] | undefined; displayNameTemplate?: string | undefined; staticFields?: Record<string, string> | undefined; latest?: { settings?: { frequency?: string | undefined; timeout?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; docsPerSecond?: number | undefined; maxPageSearchSize?: number | undefined; } | undefined; lookbackPeriod?: string | undefined; timestampField?: string | undefined; } | undefined; installedComponents?: { id: string; type: \"transform\" | \"template\" | \"ingest_pipeline\"; }[] | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity_definition.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity_definition.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -777,9 +702,9 @@
         "label": "entityLatestSchema",
         "description": [],
         "signature": [
-          "Zod.ZodIntersection<Zod.ZodObject<{ entity: Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodOptional<Zod.ZodString>; identity_fields: Zod.ZodUnion<[Zod.ZodArray<Zod.ZodString, \"many\">, Zod.ZodString]>; display_name: Zod.ZodString; metrics: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; EngineMetadata: Zod.ZodOptional<Zod.ZodObject<{ Type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { Type: string; }, { Type: string; }>>; }, { last_seen_timestamp: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }, { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { entity: { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; }, { entity: { id: string; identity_fields: string | string[]; display_name: string; schema_version: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
+          "Zod.ZodIntersection<Zod.ZodObject<{ entity: Zod.ZodObject<Zod.objectUtil.extendShape<{ id: Zod.ZodString; type: Zod.ZodOptional<Zod.ZodString>; identity_fields: Zod.ZodUnion<[Zod.ZodArray<Zod.ZodString, \"many\">, Zod.ZodString]>; display_name: Zod.ZodString; metrics: Zod.ZodOptional<Zod.ZodRecord<Zod.ZodString, Zod.ZodNumber>>; definition_version: Zod.ZodString; schema_version: Zod.ZodString; definition_id: Zod.ZodString; EngineMetadata: Zod.ZodOptional<Zod.ZodObject<{ Type: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { Type: string; }, { Type: string; }>>; }, { last_seen_timestamp: Zod.ZodString; }>, \"strip\", Zod.ZodTypeAny, { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }, { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }>; }, \"strip\", Zod.ZodTypeAny, { entity: { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; }, { entity: { id: string; schema_version: string; identity_fields: string | string[]; display_name: string; definition_version: string; definition_id: string; last_seen_timestamp: string; type?: string | undefined; metrics?: Record<string, number> | undefined; EngineMetadata?: { Type: string; } | undefined; }; }>, Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -794,7 +719,7 @@
         "signature": [
           "Zod.ZodType<Metadata, Zod.ZodTypeDef, Metadata>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/entity.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/entity.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -809,7 +734,7 @@
         "signature": [
           "Zod.ZodOptional<Zod.ZodString>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -839,7 +764,7 @@
         "signature": [
           "Zod.ZodEffects<Zod.ZodOptional<Zod.ZodObject<{ syncField: Zod.ZodOptional<Zod.ZodString>; syncDelay: Zod.ZodOptional<Zod.ZodString>; lookbackPeriod: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; frequency: Zod.ZodOptional<Zod.ZodString>; backfillSyncDelay: Zod.ZodOptional<Zod.ZodString>; backfillLookbackPeriod: Zod.ZodOptional<Zod.ZodString>; backfillFrequency: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; lookbackPeriod?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }>>, { lookbackPeriod: string; frequency?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; }, { frequency?: string | undefined; lookbackPeriod?: string | undefined; syncField?: string | undefined; syncDelay?: string | undefined; backfillSyncDelay?: string | undefined; backfillLookbackPeriod?: string | undefined; backfillFrequency?: string | undefined; } | undefined>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -854,7 +779,7 @@
         "signature": [
           "Zod.ZodUnion<[Zod.ZodObject<{ field: Zod.ZodString; optional: Zod.ZodLiteral<false>; }, \"strip\", Zod.ZodTypeAny, { field: string; optional: false; }, { field: string; optional: false; }>, Zod.ZodEffects<Zod.ZodString, { field: string; optional: boolean; }, string>]>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -909,7 +834,7 @@
           },
           "; filter?: string | undefined; } | { name: string; aggregation: \"doc_count\"; filter?: string | undefined; } | { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; })[]; equation: string; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -924,7 +849,7 @@
         "signature": [
           "Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"terms\">; limit: Zod.ZodDefault<Zod.ZodNumber>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; }, { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"top_value\">; sort: Zod.ZodRecord<Zod.ZodString, Zod.ZodUnion<[Zod.ZodLiteral<\"asc\">, Zod.ZodLiteral<\"desc\">]>>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }>]>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -939,7 +864,7 @@
         "signature": [
           "Zod.ZodEffects<Zod.ZodEffects<Zod.ZodUnion<[Zod.ZodObject<{ source: Zod.ZodString; destination: Zod.ZodOptional<Zod.ZodString>; aggregation: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodObject<{ type: Zod.ZodLiteral<\"terms\">; limit: Zod.ZodDefault<Zod.ZodNumber>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; }, { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; }>, Zod.ZodObject<{ type: Zod.ZodLiteral<\"top_value\">; sort: Zod.ZodRecord<Zod.ZodString, Zod.ZodUnion<[Zod.ZodLiteral<\"asc\">, Zod.ZodLiteral<\"desc\">]>>; lookbackPeriod: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }, { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }>]>>>; }, \"strip\", Zod.ZodTypeAny, { source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; destination?: string | undefined; }, { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, Zod.ZodEffects<Zod.ZodString, { source: string; destination: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string>]>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>, { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; }; } | { destination: string; source: string; aggregation: { type: \"terms\"; limit: number; lookbackPeriod: undefined; }; }, string | { source: string; destination?: string | undefined; aggregation?: { type: \"terms\"; limit?: number | undefined; lookbackPeriod?: string | undefined; } | { type: \"top_value\"; sort: Record<string, \"asc\" | \"desc\">; lookbackPeriod?: string | undefined; } | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -978,7 +903,7 @@
           },
           "; filter?: string | undefined; }>, Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodLiteral<\"doc_count\">; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; aggregation: \"doc_count\"; filter?: string | undefined; }, { name: string; aggregation: \"doc_count\"; filter?: string | undefined; }>, Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodLiteral<\"percentile\">; field: Zod.ZodString; percentile: Zod.ZodNumber; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }>]>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -993,7 +918,7 @@
         "signature": [
           "Zod.ZodObject<{ name: Zod.ZodString; aggregation: Zod.ZodLiteral<\"percentile\">; field: Zod.ZodString; percentile: Zod.ZodNumber; filter: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }, { name: string; field: string; percentile: number; aggregation: \"percentile\"; filter?: string | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1023,7 +948,7 @@
         "signature": [
           "Zod.ZodEffects<Zod.ZodString, string, string>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/common.ts",
+        "path": "x-pack/platform/packages/shared/kbn-entities-schema/src/schema/v1/common.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -27,10 +27,7 @@ export function useImportKnowledgeBaseEntries() {
     ServerError,
     {
       entries: Array<
-        Omit<
-          KnowledgeBaseEntry,
-          '@timestamp' | 'confidence' | 'is_correction' | 'public' | 'labels'
-        > & { title: string }
+        Omit<KnowledgeBaseEntry, '@timestamp' | 'public' | 'labels'> & { title: string }
       >;
     }
   >(
@@ -49,6 +46,7 @@ export function useImportKnowledgeBaseEntries() {
       );
     },
     {
+      networkMode: 'always',
       onSuccess: (_data, { entries }) => {
         toasts.addSuccess(
           i18n.translate(

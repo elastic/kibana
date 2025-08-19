@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTableColumn,
-  EuiText,
-  EuiProgress,
-  EuiToolTip,
-  CENTER_ALIGNMENT,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText, EuiProgress, EuiToolTip, CENTER_ALIGNMENT, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';
 
 import { getDocsCountPercent } from '../../../../../utils/stats';
-import { IndexSummaryTableItem } from '../../../../../types';
+import type { IndexSummaryTableItem } from '../../../../../types';
 import { EMPTY_STAT } from '../../../../../constants';
 import { getIlmPhaseDescription } from '../../../../../utils/get_ilm_phase_description';
 import { INCOMPATIBLE_INDEX_TOOL_TIP } from '../../../../../stat_label/translations';
@@ -124,7 +118,7 @@ export const getSummaryTableColumns = ({
         name: CHECK_NOW,
         render: (item) => {
           return (
-            <EuiToolTip content={CHECK_NOW}>
+            <EuiToolTip content={CHECK_NOW} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="refresh"
@@ -140,7 +134,7 @@ export const getSummaryTableColumns = ({
         name: i18n.VIEW_HISTORY,
         render: (item) => {
           return (
-            <EuiToolTip content={i18n.VIEW_HISTORY}>
+            <EuiToolTip content={i18n.VIEW_HISTORY} disableScreenReaderOutput>
               <EuiButtonIcon
                 color="text"
                 iconType="clockCounter"

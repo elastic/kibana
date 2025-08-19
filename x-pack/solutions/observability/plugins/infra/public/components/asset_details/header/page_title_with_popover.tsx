@@ -25,7 +25,7 @@ export const PageTitleWithPopover = ({ name }: { name: string }) => {
         !metadata?.hasSystemIntegration && (
           <EuiFlexItem grow={false}>
             <Popover
-              icon="questionInCircle"
+              icon="question"
               data-test-subj="assetDetailsTitleHasSystemMetricsPopover"
               aria-label={i18n.translate('xpack.infra.assetDetails.title.tooltip.ariaLabel', {
                 defaultMessage: 'Host detected by APM',

@@ -6,10 +6,16 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import { RuleExecutorOptions, RuleType, RuleTypeState } from '@kbn/alerting-plugin/server';
-import { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
-import { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
-import {
+import type {
+  AlertInstanceContext,
+  RuleExecutorOptions,
+  RuleType,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/server';
+import type { SecurityAttackDiscoveryAlert } from '@kbn/alerts-as-data-utils';
+import type { AttackDiscoveryScheduleParams } from '@kbn/elastic-assistant-common';
+import type { ALERT_WORKFLOW_STATUS_UPDATED_AT } from '@kbn/rule-data-utils';
+import type {
   ALERT_ATTACK_DISCOVERY_API_CONFIG,
   ALERT_ATTACK_DISCOVERY_REPLACEMENTS,
   ALERT_ATTACK_DISCOVERY_USERS,
@@ -51,13 +57,27 @@ export type AttackDiscoveryAlertDocument = Omit<
     id?: string;
     name: string;
   }>;
+  [ALERT_WORKFLOW_STATUS_UPDATED_AT]?: string;
+};
+
+export type AttackDiscoveryScheduleContext = AlertInstanceContext & {
+  attack: {
+    alertIds: string[];
+    detailsMarkdown: string;
+    detailsUrl?: string;
+    entitySummaryMarkdown?: string;
+    mitreAttackTactics?: string[];
+    summaryMarkdown: string;
+    timestamp?: string;
+    title: string;
+  };
 };
 
 export type AttackDiscoveryExecutorOptions = RuleExecutorOptions<
   AttackDiscoveryScheduleParams,
   RuleTypeState,
   {},
-  {},
+  AttackDiscoveryScheduleContext,
   'default',
   AttackDiscoveryAlertDocument
 >;
@@ -67,7 +87,7 @@ export type AttackDiscoveryScheduleType = RuleType<
   never,
   RuleTypeState,
   {},
-  {},
+  AttackDiscoveryScheduleContext,
   'default',
   never,
   AttackDiscoveryAlertDocument

@@ -63,6 +63,10 @@ export {
 } from './interfaces/has_disable_triggers';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export {
+  canOverrideHoverActions,
+  type CanOverrideHoverActions,
+} from './interfaces/can_override_hover_actions';
+export {
   hasReadOnlyCapabilities,
   type HasReadOnlyCapabilities,
 } from './interfaces/has_read_only_capabilities';
@@ -159,3 +163,4 @@ export {
   useStateFromPublishingSubject,
   type PublishingSubject,
 } from './publishing_subject';
+export { SAVED_OBJECT_REF_NAME, findSavedObjectRef } from './saved_object_ref';

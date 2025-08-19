@@ -9,8 +9,13 @@
 
 import { populateStateFromSavedQuery } from './populate_state_from_saved_query';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+<<<<<<< HEAD
 import { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
 
+=======
+import type { DataPublicPluginStart, SavedQuery } from '@kbn/data-plugin/public';
+import { FilterStateStore } from '@kbn/es-query';
+>>>>>>> upstream/main
 import { mockFilter } from '../../mocks/get_stub_filter';
 
 describe('populateStateFromSavedQuery', () => {

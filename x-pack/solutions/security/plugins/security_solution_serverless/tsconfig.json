@@ -48,5 +48,6 @@
     "@kbn/dev-utils",
     "@kbn/inference-common",
     "@kbn/ai-assistant-icon",
+    "@kbn/core-application-browser",
   ]
 }

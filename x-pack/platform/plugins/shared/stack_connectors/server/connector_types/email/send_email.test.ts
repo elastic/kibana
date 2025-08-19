@@ -156,6 +156,70 @@ describe('send_email module', () => {
     `);
   });
 
+  test('handles email with attachments', async () => {
+    const sendEmailOptions = getSendEmailOptions({ transport: { service: 'other' } });
+    const result = await sendEmail(
+      mockLogger,
+      {
+        ...sendEmailOptions,
+        attachments: [
+          {
+            content: 'dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==',
+            contentType: 'test-content-type',
+            encoding: 'base64',
+            filename: 'report.pdf',
+          },
+        ],
+      },
+      connectorTokenClient,
+      connectorUsageCollector
+    );
+    expect(result).toBe(sendMailMockResult);
+    expect(createTransportMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "auth": Object {
+            "pass": "changeme",
+            "user": "elastic",
+          },
+          "host": undefined,
+          "port": undefined,
+          "secure": false,
+          "tls": Object {
+            "rejectUnauthorized": true,
+          },
+        },
+      ]
+    `);
+    expect(sendMailMock.mock.calls[0]).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "attachments": Array [
+            Object {
+              "content": "dGVzdC1vdXRwdXR0ZXN0LW91dHB1dA==",
+              "contentType": "test-content-type",
+              "encoding": "base64",
+              "filename": "report.pdf",
+            },
+          ],
+          "bcc": Array [],
+          "cc": Array [
+            "bob@example.com",
+            "robert@example.com",
+          ],
+          "from": "fred@example.com",
+          "html": "<p>a message</p>
+      ",
+          "subject": "a subject",
+          "text": "a message",
+          "to": Array [
+            "jim@example.com",
+          ],
+        },
+      ]
+    `);
+  });
+
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as jest.Mock;
     const getOAuthClientCredentialsAccessTokenMock =
@@ -197,6 +261,7 @@ describe('send_email module', () => {
     expect(sendEmailGraphApiMock.mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
+          "attachments": Array [],
           "headers": Object {
             "Authorization": "Bearer dfjsdfgdjhfgsjdf",
             "Content-Type": "application/json",

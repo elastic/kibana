@@ -6,7 +6,7 @@
  */
 
 import { parse as parseCookie } from 'tough-cookie';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export const sampleDashboard = {
   contentTypeId: 'dashboard',
@@ -18,7 +18,7 @@ export const sampleDashboard = {
     references: [],
     overwrite: true,
   },
-  version: 2,
+  version: 1,
 };
 
 const roleEditor = 'content_manager_dashboard';

@@ -51,11 +51,11 @@ spec:
           message: Trigger ES forward compatibility tests
           env:
             TRIGGER_PIPELINE_SET: es-forward
-        Trigger ES forward compatibility tests 9.0:
+        Trigger ES forward compatibility tests 9.1:
           cronline: 0 5 * * *
-          message: Trigger ES forward compatibility tests 9.0
+          message: Trigger ES forward compatibility tests 9.1
           env:
-            TRIGGER_PIPELINE_SET: es-forward-9-dot-0
+            TRIGGER_PIPELINE_SET: es-forward-9-dot-1
         Trigger artifact staging builds:
           cronline: 0 7 * * * America/New_York
           message: Trigger artifact staging builds

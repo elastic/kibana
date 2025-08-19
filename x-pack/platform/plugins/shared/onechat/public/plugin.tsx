@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import {
+  type CoreSetup,
+  type CoreStart,
+  type Plugin,
+  type PluginInitializerContext,
+} from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
+import { ONECHAT_UI_SETTING_ID } from '../common/constants';
+import { registerAnalytics, registerApp } from './register';
+import type { OnechatInternalService } from './services';
+import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -25,18 +34,44 @@ export class OnechatPlugin
     >
 {
   logger: Logger;
+  private internalServices?: OnechatInternalService;
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
   }
-  setup(
-    coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
-  ): OnechatPluginSetup {
+  setup(core: CoreSetup<OnechatStartDependencies, OnechatPluginStart>): OnechatPluginSetup {
+    const isOnechatUiEnabled = core.uiSettings.get<boolean>(ONECHAT_UI_SETTING_ID, false);
+
+    if (isOnechatUiEnabled) {
+      registerApp({
+        core,
+        getServices: () => {
+          if (!this.internalServices) {
+            throw new Error('getServices called before plugin start');
+          }
+          return this.internalServices;
+        },
+      });
+
+      registerAnalytics({ analytics: core.analytics });
+    }
+
     return {};
   }
 
-  start(coreStart: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+  start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
+    const agentService = new AgentService({ http });
+    const chatService = new ChatService({ http });
+    const conversationsService = new ConversationsService({ http });
+    const toolsService = new ToolsService({ http });
+
+    this.internalServices = {
+      agentService,
+      chatService,
+      conversationsService,
+      toolsService,
+    };
+
     return {};
   }
 }

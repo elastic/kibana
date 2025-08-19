@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -39,13 +40,14 @@ import * as i18n from './translations';
 
 interface Props {
   readOnly: boolean;
+  isPfxEnabled?: boolean;
 }
 
 const { emptyField } = fieldValidators;
 
 const VERIFICATION_MODE_DEFAULT = 'full';
 
-export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
+export const AuthConfig: FunctionComponent<Props> = ({ readOnly, isPfxEnabled = true }) => {
   const { setFieldValue, getFieldDefaultValue } = useFormContext();
   const [{ config, __internal__ }] = useFormData({
     watch: [
@@ -112,6 +114,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
                   readOnly={readOnly}
                   certTypeDefaultValue={certTypeDefaultValue}
                   certType={certType}
+                  isPfxEnabled={isPfxEnabled}
                 />
               ),
               'data-test-subj': 'authSSL',
@@ -180,7 +183,7 @@ export const AuthConfig: FunctionComponent<Props> = ({ readOnly }) => {
                         onClick={() => removeItem(item.id)}
                         iconType="minusInCircle"
                         aria-label={i18n.DELETE_BUTTON}
-                        style={{ marginTop: '28px' }}
+                        css={{ marginTop: '28px' }}
                       />
                     </EuiFlexItem>
                   </EuiFlexGroup>

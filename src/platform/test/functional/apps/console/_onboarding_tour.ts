@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // The euiTour shows with a small delay, so with 1s we should be safe
 const DELAY_FOR = 1000;
@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
-      await browser.clearLocalStorage();
       await browser.refresh();
     });
 
@@ -48,9 +47,31 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.sleep(DELAY_FOR);
     };
 
+    const runConsoleTour = async () => {
+      await PageObjects.console.clickHelpIcon();
+      await PageObjects.console.clickRunTour();
+      await waitUntilFinishedLoading();
+    };
+
+    it('should open the tour only when the run tour button has been pressed', async () => {
+      await waitUntilFinishedLoading();
+
+      // Verify that tour is hidden
+      await expectAllStepsHidden();
+
+      // Run tour
+      await runConsoleTour();
+
+      // Verify that first tour step is visible
+      expect(await isTourStepOpen('shellTourStep')).to.be(true);
+    });
+
     it('displays all five steps in the tour', async () => {
       const andWaitFor = DELAY_FOR;
       await waitUntilFinishedLoading();
+
+      // Run tour
+      await runConsoleTour();
 
       log.debug('on Shell tour step');
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
@@ -76,21 +97,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // All steps should now be hidden
       await expectAllStepsHidden();
-
-      // Tour should not show after refreshing the browser
-      await browser.refresh();
-      await expectAllStepsHidden();
-
-      // Tour should reset after clearing local storage
-      await browser.clearLocalStorage();
-      await browser.refresh();
-
-      await waitUntilFinishedLoading();
-      expect(await isTourStepOpen('shellTourStep')).to.be(true);
     });
 
     it('skipping the tour hides the tour steps', async () => {
       await waitUntilFinishedLoading();
+
+      // Run tour
+      await runConsoleTour();
 
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
       expect(await testSubjects.exists('consoleSkipTourButton')).to.be(true);
@@ -98,26 +111,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // All steps should now be hidden
       await expectAllStepsHidden();
-
-      // Tour should not show after refreshing the browser
-      await browser.refresh();
-      await expectAllStepsHidden();
     });
 
     it('allows re-running the tour', async () => {
       await waitUntilFinishedLoading();
 
+      // Run tour
+      await runConsoleTour();
+
+      // Verify that first tour step is visible
+      expect(await isTourStepOpen('shellTourStep')).to.be(true);
+
+      // Skip ongoing tour
       await PageObjects.console.skipTourIfExists();
 
       // Verify that tour is hiddern
       await expectAllStepsHidden();
 
       // Re-run tour
-      await PageObjects.console.clickHelpIcon();
-      await PageObjects.console.clickRerunTour();
+      await runConsoleTour();
 
-      // Verify that first tour step is visible
-      await waitUntilFinishedLoading();
+      // Verify again that first tour step is visible
       expect(await isTourStepOpen('shellTourStep')).to.be(true);
     });
   });

@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CodeEditor, CodeEditorProps, monaco } from '@kbn/code-editor';
+import type { CodeEditorProps, monaco } from '@kbn/code-editor';
+import { CodeEditor } from '@kbn/code-editor';
 import React, { useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import type { DraftGrokExpression, GrokCollection } from '../models';
@@ -17,11 +18,13 @@ export const Expression = ({
   draftGrokExpression,
   onChange,
   height = '100px',
+  dataTestSubj,
 }: {
   grokCollection: GrokCollection;
   draftGrokExpression: DraftGrokExpression;
   onChange?: (expression: DraftGrokExpression) => void;
   height?: CodeEditorProps['height'];
+  dataTestSubj?: string;
 }) => {
   const [suggestionProvider] = useState(() => {
     return grokCollection.getSuggestionProvider();
@@ -48,6 +51,7 @@ export const Expression = ({
       editorDidMount={onGrokEditorMount}
       onChange={onGrokEditorChange}
       suggestionProvider={suggestionProvider}
+      dataTestSubj={dataTestSubj}
     />
   );
 };
