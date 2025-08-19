@@ -5,17 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiPopover,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { StreamQueryKql, Streams } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { useKibana } from '../../../../hooks/use_kibana';
@@ -39,22 +31,16 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
   const aiFeatures = useAIFeatures();
   const { generate } = useSignificantEventsApi({ name: definition.name });
 
-  const contextMenuPopoverId = useGeneratedHtmlId();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const closePopover = () => setIsPopoverOpen(false);
-  const onButtonClick = () => setIsPopoverOpen((prev) => !prev);
-
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedQueries, setGeneratedQueries] = useState<StreamQueryKql[]>([]);
   const [selectedQueries, setSelectedQueries] = useState<StreamQueryKql[]>([]);
 
-  const onGenerateClick = (method: 'zero_shot' | 'log_patterns') => {
+  const onGenerateClick = () => {
     setIsGenerating(true);
     setGeneratedQueries([]);
     setSelectedQueries([]);
-    setIsPopoverOpen(false);
 
-    const generation$ = generate(aiFeatures?.genAiConnectors.selectedConnector!, method);
+    const generation$ = generate(aiFeatures?.genAiConnectors.selectedConnector!, 'log_patterns');
 
     generation$.subscribe({
       next: (result) => {
@@ -95,32 +81,6 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
     });
   };
 
-  const panels = [
-    {
-      id: 0,
-      title: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.chooseMethod', {
-        defaultMessage: 'Choose a method',
-      }),
-      items: [
-        {
-          name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.descriptionBased', {
-            defaultMessage: 'Description based',
-          }),
-          icon: 'sparkles',
-          onClick: () => onGenerateClick('zero_shot'),
-          disabled: isEmpty(definition.description),
-        },
-        {
-          name: i18n.translate('xpack.streams.addSignificantEventFlyout.aiFlow.logPatternsBased', {
-            defaultMessage: 'Log patterns based',
-          }),
-          icon: 'securitySignalDetected',
-          onClick: () => onGenerateClick('log_patterns'),
-        },
-      ],
-    },
-  ];
-
   const onSelectionChange = (selectedItems: StreamQueryKql[]) => {
     setSelectedQueries(selectedItems);
     setQueries(selectedItems);
@@ -145,35 +105,24 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
       )}
       {aiFeatures && aiFeatures.enabled && (
         <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
-          <EuiPopover
-            id={contextMenuPopoverId}
-            button={
-              <EuiButton
-                disabled={isGenerating || isSubmitting}
-                isLoading={isGenerating}
-                iconType="arrowDown"
-                iconSide="left"
-                onClick={onButtonClick}
-              >
-                {isGenerating
-                  ? i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                      { defaultMessage: 'Generating...' }
-                    )
-                  : i18n.translate(
-                      'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
-
-                      { defaultMessage: 'Generate' }
-                    )}
-              </EuiButton>
-            }
-            isOpen={isPopoverOpen}
-            closePopover={closePopover}
-            panelPaddingSize="none"
-            anchorPosition="downLeft"
+          <EuiButton
+            disabled={isGenerating || isSubmitting}
+            isLoading={isGenerating}
+            iconType="arrowDown"
+            iconSide="left"
+            onClick={() => onGenerateClick()}
           >
-            <EuiContextMenu initialPanelId={0} panels={panels} />
-          </EuiPopover>
+            {isGenerating
+              ? i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
+                  { defaultMessage: 'Generating...' }
+                )
+              : i18n.translate(
+                  'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
+
+                  { defaultMessage: 'Generate' }
+                )}
+          </EuiButton>
 
           <SignificantEventsGeneratedTable
             isSubmitting={isSubmitting}
