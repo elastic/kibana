@@ -38,13 +38,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await searchSessions.deleteAllSearchSessions();
       });
 
-      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const searchSessionsAnchor = await testSubjects.find('search_sessions');
-        const anchorText = await searchSessionsAnchor.getVisibleText();
-        expect(anchorText).to.be('Search Sessions');
-      });
-
       it('Saves a session and verifies it in the Management app', async () => {
         log.debug('loading the "Not Delayed" dashboard');
         await PageObjects.dashboard.loadSavedDashboard('Not Delayed');
@@ -98,6 +91,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
           return s.length === 0;
         });
+      });
+
+      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
+        await PageObjects.common.navigateToApp('management');
+        const searchSessionsAnchor = await testSubjects.find('search_sessions');
+        const anchorText = await searchSessionsAnchor.getVisibleText();
+        expect(anchorText).to.be('Search Sessions');
       });
     });
   });
