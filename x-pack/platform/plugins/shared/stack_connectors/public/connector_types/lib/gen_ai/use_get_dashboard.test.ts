@@ -72,18 +72,18 @@ describe('useGetDashboard', () => {
             dashboardId: `generative-ai-token-usage-${urlKey}-space`,
           })
         );
-        expect(mockGetRedirectUrl).toHaveBeenCalledWith({
-          query: {
-            language: 'kuery',
-            query: `kibana.saved_objects: { id  : ${connectorId} }`,
-          },
-          dashboardId: `generative-ai-token-usage-${urlKey}-space`,
-        });
-        expect(result.current.isLoading).toBe(false);
-        expect(result.current.dashboardUrl).toBe(
-          `http://localhost:5601/app/dashboards#/view/generative-ai-token-usage-${urlKey}-space`
-        );
       });
+      expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+        query: {
+          language: 'kuery',
+          query: `kibana.saved_objects: { id  : ${connectorId} }`,
+        },
+        dashboardId: `generative-ai-token-usage-${urlKey}-space`,
+      });
+      expect(result.current.isLoading).toBe(false);
+      expect(result.current.dashboardUrl).toBe(
+        `http://localhost:5601/app/dashboards#/view/generative-ai-token-usage-${urlKey}-space`
+      );
     }
   );
 
@@ -97,11 +97,11 @@ describe('useGetDashboard', () => {
           dashboardId: 'generative-ai-token-usage-openai-space',
         })
       );
-      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
-
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.dashboardUrl).toBe(null);
     });
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.dashboardUrl).toBe(null);
   });
 
   it('handles the case where the spaces API is not available.', async () => {
@@ -120,10 +120,10 @@ describe('useGetDashboard', () => {
     const { result } = renderHook(() => useGetDashboard({ ...defaultArgs, connectorId: '' }));
     await waitFor(() => {
       expect(mockDashboard).not.toHaveBeenCalled();
-      expect(mockGetRedirectUrl).not.toHaveBeenCalled();
-      expect(result.current.isLoading).toBe(false);
-      expect(result.current.dashboardUrl).toBe(null);
     });
+    expect(mockGetRedirectUrl).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+    expect(result.current.dashboardUrl).toBe(null);
   });
 
   it('handles the case where the dashboard locator is not available.', async () => {
@@ -131,9 +131,9 @@ describe('useGetDashboard', () => {
       services: { ...mockServices, dashboard: {} },
     });
     const { result } = renderHook(() => useGetDashboard(defaultArgs));
+    expect(result.current.dashboardUrl).toBe(null);
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
-      expect(result.current.dashboardUrl).toBe(null);
     });
   });
 
@@ -142,10 +142,10 @@ describe('useGetDashboard', () => {
     const { result } = renderHook(() => useGetDashboard(defaultArgs));
     await waitFor(() => {
       expect(result.current.isLoading).toBe(false);
-      expect(mockToasts.addDanger).toHaveBeenCalledWith({
-        title: 'Error finding OpenAI Token Usage Dashboard.',
-        text: 'Error fetching dashboard',
-      });
+    });
+    expect(mockToasts.addDanger).toHaveBeenCalledWith({
+      title: 'Error finding OpenAI Token Usage Dashboard.',
+      text: 'Error fetching dashboard',
     });
   });
 });

@@ -208,15 +208,15 @@ describe('XSOARParamsFields renders', () => {
   describe('New connector', () => {
     it('should render empty run form', () => {
       const props = { ...defaultProps, actionParams: {} };
-      const { getByTestId } = render(<XSOARParamsFields {...props} />);
+      render(<XSOARParamsFields {...props} />);
 
-      expect(getByTestId('nameInput')).toBeInTheDocument();
-      expect(getByTestId('xsoar-playbookSelector')).toBeInTheDocument();
-      expect(getByTestId('rule-severity-toggle')).toBeInTheDocument();
-      expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
+      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+      expect(screen.getByTestId('xsoar-playbookSelector')).toBeInTheDocument();
+      expect(screen.getByTestId('rule-severity-toggle')).toBeInTheDocument();
+      expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
-      expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
-      expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
+      expect(screen.getByTestId('rule-severity-toggle')).not.toBeChecked();
+      expect(screen.getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
 
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
       expect(editAction).toHaveBeenCalledWith(
@@ -228,15 +228,15 @@ describe('XSOARParamsFields renders', () => {
 
     it('should render empty test form', () => {
       const props = { ...defaultProps, actionParams: {}, executionMode: ActionConnectorMode.Test };
-      const { getByTestId } = render(<XSOARParamsFields {...props} />);
+      render(<XSOARParamsFields {...props} />);
 
-      expect(getByTestId('nameInput')).toBeInTheDocument();
-      expect(getByTestId('xsoar-playbookSelector')).toBeInTheDocument();
-      expect(getByTestId('severitySelectInput')).toBeInTheDocument();
-      expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
+      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+      expect(screen.getByTestId('xsoar-playbookSelector')).toBeInTheDocument();
+      expect(screen.getByTestId('severitySelectInput')).toBeInTheDocument();
+      expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
-      expect(getByTestId('severitySelectInput')).toHaveValue('0');
-      expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
+      expect(screen.getByTestId('severitySelectInput')).toHaveValue('0');
+      expect(screen.getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
 
       expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
       expect(editAction).toHaveBeenCalledWith(
@@ -264,22 +264,22 @@ describe('XSOARParamsFields renders', () => {
 
       await waitFor(() => {
         expect(editAction).toHaveBeenCalledTimes(3);
-        expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
-        expect(editAction).toHaveBeenCalledWith(
-          'subActionParams',
-          { createInvestigation: false, severity: 0 },
-          0
-        );
-        expect(editAction).toHaveBeenCalledWith(
-          'subActionParams',
-          {
-            createInvestigation: false,
-            playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
-            severity: 0,
-          },
-          0
-        );
       });
+      expect(editAction).toHaveBeenCalledWith('subAction', SUB_ACTION.RUN, 0);
+      expect(editAction).toHaveBeenCalledWith(
+        'subActionParams',
+        { createInvestigation: false, severity: 0 },
+        0
+      );
+      expect(editAction).toHaveBeenCalledWith(
+        'subActionParams',
+        {
+          createInvestigation: false,
+          playbookId: '8db0105c-f674-4d83-8095-f95a9f61e77a',
+          severity: 0,
+        },
+        0
+      );
 
       expect(screen.getByTestId('createInvestigation-toggle')).toBeInTheDocument();
       expect(screen.getByTestId('createInvestigation-toggle')).not.toBeChecked();
@@ -288,33 +288,33 @@ describe('XSOARParamsFields renders', () => {
 
   describe('Edit connector', () => {
     it('all Params fields is rendered', () => {
-      const { getByTestId } = render(<XSOARParamsFields {...defaultProps} />);
+      render(<XSOARParamsFields {...defaultProps} />);
 
       expect(mockUseSubActionPlaybooks).toHaveBeenCalledWith(
         expect.objectContaining({ subAction: 'getPlaybooks' })
       );
 
-      expect(getByTestId('nameInput')).toBeInTheDocument();
-      expect(getByTestId('xsoar-playbookSelector')).toBeInTheDocument();
-      expect(getByTestId('createInvestigation-toggle')).toBeInTheDocument();
-      expect(getByTestId('rule-severity-toggle')).toBeInTheDocument();
-      expect(getByTestId('severitySelectInput')).toBeInTheDocument();
-      expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
+      expect(screen.getByTestId('nameInput')).toBeInTheDocument();
+      expect(screen.getByTestId('xsoar-playbookSelector')).toBeInTheDocument();
+      expect(screen.getByTestId('createInvestigation-toggle')).toBeInTheDocument();
+      expect(screen.getByTestId('rule-severity-toggle')).toBeInTheDocument();
+      expect(screen.getByTestId('severitySelectInput')).toBeInTheDocument();
+      expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
-      expect(getByTestId('nameInput')).toHaveValue('new incident');
-      expect(getByTestId('comboBoxSearchInput')).toHaveProperty('value', 'playbook0');
-      expect(getByTestId('createInvestigation-toggle')).not.toBeChecked();
-      expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
-      expect(getByTestId('severitySelectInput')).toHaveValue('2');
-      expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
+      expect(screen.getByTestId('nameInput')).toHaveValue('new incident');
+      expect(screen.getByTestId('comboBoxSearchInput')).toHaveProperty('value', 'playbook0');
+      expect(screen.getByTestId('createInvestigation-toggle')).not.toBeChecked();
+      expect(screen.getByTestId('rule-severity-toggle')).not.toBeChecked();
+      expect(screen.getByTestId('severitySelectInput')).toHaveValue('2');
+      expect(screen.getByTestId('bodyJsonEditor')).toHaveProperty('value', '');
     });
 
     it('hides the severity select input when rule severity is enabled', () => {
-      const { getByTestId } = render(<XSOARParamsFields {...defaultProps} />);
-      const ruleSeverityToggleEl = getByTestId('rule-severity-toggle');
+      render(<XSOARParamsFields {...defaultProps} />);
+      const ruleSeverityToggleEl = screen.getByTestId('rule-severity-toggle');
 
       fireEvent.click(ruleSeverityToggleEl);
-      expect(getByTestId('rule-severity-toggle')).toBeEnabled();
+      expect(screen.getByTestId('rule-severity-toggle')).toBeEnabled();
       expect(editAction).toHaveBeenCalledWith(
         'subActionParams',
         { ...subActionParams, severity: 2, isRuleSeverity: true },

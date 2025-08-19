@@ -25,14 +25,14 @@ describe('Bedrock - renderParameterTemplates', () => {
   });
   it('should not render body on test action', () => {
     const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
-    const result = renderParameterTemplates(logger, testParams, variables);
-    expect(result).toEqual(testParams);
+    const view = renderParameterTemplates(logger, testParams, variables);
+    expect(view).toEqual(testParams);
   });
 
   it('should rendered body with variables', () => {
-    const result = renderParameterTemplates(logger, params, variables);
+    const view = renderParameterTemplates(logger, params, variables);
 
-    expect(result.subActionParams.body).toEqual(
+    expect(view.subActionParams.body).toEqual(
       JSON.stringify({
         ...variables,
       })
@@ -44,8 +44,8 @@ describe('Bedrock - renderParameterTemplates', () => {
     jest.spyOn(Mustache, 'render').mockImplementation(() => {
       throw new Error(errorMessage);
     });
-    const result = renderParameterTemplates(logger, params, variables);
-    expect(result.subActionParams.body).toEqual(
+    const view = renderParameterTemplates(logger, params, variables);
+    expect(view.subActionParams.body).toEqual(
       'error rendering mustache template "{"domain":"{{domain}}"}": test error'
     );
   });

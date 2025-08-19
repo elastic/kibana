@@ -61,14 +61,14 @@ describe('Tines body render', () => {
   describe('renderParameterTemplates', () => {
     it('should not render body on test action', () => {
       const testParams = { subAction: 'test', subActionParams: { body: 'test_json' } };
-      const result = renderParameterTemplates(logger, testParams, variables);
-      expect(result).toEqual(testParams);
+      const view = renderParameterTemplates(logger, testParams, variables);
+      expect(view).toEqual(testParams);
     });
 
     it('should rendered body from variables with cleaned alerts on run action', () => {
-      const result = renderParameterTemplates(logger, params, variables);
+      const view = renderParameterTemplates(logger, params, variables);
 
-      expect(result.subActionParams.body).toEqual(
+      expect(view.subActionParams.body).toEqual(
         JSON.stringify({
           ...variables,
           context: {
@@ -81,16 +81,16 @@ describe('Tines body render', () => {
 
     it('should rendered body from variables on run action without context.alerts', () => {
       const variablesWithoutAlerts = set('context.alerts', undefined, variables);
-      const result = renderParameterTemplates(logger, params, variablesWithoutAlerts);
+      const view = renderParameterTemplates(logger, params, variablesWithoutAlerts);
 
-      expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutAlerts));
+      expect(view.subActionParams.body).toEqual(JSON.stringify(variablesWithoutAlerts));
     });
 
     it('should rendered body from variables on run action without context', () => {
       const variablesWithoutContext = set('context', undefined, variables);
-      const result = renderParameterTemplates(logger, params, variablesWithoutContext);
+      const view = renderParameterTemplates(logger, params, variablesWithoutContext);
 
-      expect(result.subActionParams.body).toEqual(JSON.stringify(variablesWithoutContext));
+      expect(view.subActionParams.body).toEqual(JSON.stringify(variablesWithoutContext));
     });
 
     it('should render error body', () => {
@@ -98,8 +98,8 @@ describe('Tines body render', () => {
       jest.spyOn(JSON, 'stringify').mockImplementationOnce(() => {
         throw new Error(errorMessage);
       });
-      const result = renderParameterTemplates(logger, params, variables);
-      expect(result.subActionParams.body).toEqual(
+      const view = renderParameterTemplates(logger, params, variables);
+      expect(view.subActionParams.body).toEqual(
         JSON.stringify({ error: { message: errorMessage } })
       );
     });
