@@ -104,11 +104,7 @@ const previewSignificantEventsRoute = createServerRoute({
       request,
     });
     await assertLicenseAndPricingTier(server, licensing);
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
+    await streamsClient.ensureStream(params.path.name);
 
     const {
       body: { query },
