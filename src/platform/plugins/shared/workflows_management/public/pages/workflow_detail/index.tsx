@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSkeletonTitle,
   EuiText,
@@ -31,10 +32,15 @@ import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowAc
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
-import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { WorkflowExecution } from '../../features/workflow_execution_detail/ui/workflow_execution';
+
+const WorkflowYAMLEditor = React.lazy(() =>
+  import('../../widgets/workflow_yaml_editor/ui').then((module) => ({
+    default: module.WorkflowYAMLEditor,
+  }))
+);
 
 // const WorkflowVisualEditor = React.lazy(() =>
 //   import('../../features/workflow_visual_editor/ui').then((module) => ({
@@ -137,12 +143,15 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       <EuiText>Failed to load workflow</EuiText>;
     }
     return (
-      <WorkflowEditor
-        workflowId={workflow?.id ?? ''}
-        value={workflowYaml}
-        onChange={handleChange}
-        hasChanges={hasChanges}
-      />
+      <React.Suspense fallback={<EuiLoadingSpinner />}>
+        <WorkflowYAMLEditor
+          workflowId={workflow?.id ?? 'unknown'}
+          filename={`${workflow?.id ?? 'unknown'}.yaml`}
+          value={workflowYaml}
+          onChange={(v) => handleChange(v ?? '')}
+          hasChanges={hasChanges}
+        />
+      </React.Suspense>
     );
     // {isVisualEditorEnabled && (
     //   <EuiFlexItem>
@@ -229,63 +238,52 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         />
       </EuiPageTemplate>
 
-      <EuiPageTemplate offset={0} minHeight={0} panelled={false}>
-        <EuiPageTemplate.Section
-          restrictWidth={false}
-          paddingSize="none"
-          css={{ flex: 1, height: '100%' }}
-        >
-          <EuiFlexGroup gutterSize="none">
-            {activeTab === 'executions' && (
-              <EuiFlexItem
-                css={{
-                  flexBasis: '275px',
-                  maxWidth: '275px',
-                  flex: 1,
-                  backgroundColor: euiTheme.colors.backgroundBasePlain,
-                }}
-              >
-                {workflow && <WorkflowExecutionList workflow={workflow} />}
-              </EuiFlexItem>
+      <EuiFlexGroup gutterSize="none" css={{ flex: 1, height: '100%', minHeight: 0 }}>
+        {activeTab === 'executions' && (
+          <EuiFlexItem
+            css={{
+              flexBasis: '275px',
+              maxWidth: '275px',
+              flex: 1,
+              backgroundColor: euiTheme.colors.backgroundBasePlain,
+              borderRight: `1px solid ${euiTheme.colors.lightShade}`,
+            }}
+          >
+            {workflow && <WorkflowExecutionList workflow={workflow} />}
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem css={{ flex: 1, overflow: 'hidden' }}>{renderWorkflowEditor()}</EuiFlexItem>
+        {selectedExecutionId && (
+          <EuiFlexItem
+            css={{
+              flexBasis: '275px',
+              maxWidth: '275px',
+              flex: 1,
+              borderLeft: `1px solid ${euiTheme.colors.lightShade}`,
+            }}
+          >
+            {workflow && (
+              <WorkflowExecution
+                workflowExecutionId={selectedExecutionId}
+                workflowYaml={workflow.yaml}
+              />
             )}
-            <EuiFlexItem css={{ flex: 1, overflow: 'hidden' }}>
-              {renderWorkflowEditor()}
-            </EuiFlexItem>
-            {selectedExecutionId && (
-              <EuiFlexItem
-                css={{
-                  flexBasis: '275px',
-                  maxWidth: '275px',
-                  flex: 1,
-                  height: '100%',
-                  overflow: 'auto',
-                  backgroundColor: euiTheme.colors.backgroundBasePlain,
-                }}
-              >
-                {workflow && (
-                  <WorkflowExecution
-                    workflowExecutionId={selectedExecutionId}
-                    workflowYaml={workflow.yaml}
-                  />
-                )}
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        </EuiPageTemplate.Section>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
 
-        {workflowEventModalOpen && (
-          <WorkflowEventModal
-            onClose={() => setWorkflowEventModalOpen(false)}
-            onSubmit={handleRunWorkflow}
-          />
-        )}
-        {testWorkflowModalOpen && (
-          <TestWorkflowModal
-            workflowYaml={workflowYaml}
-            onClose={() => setTestWorkflowModalOpen(false)}
-          />
-        )}
-      </EuiPageTemplate>
+      {workflowEventModalOpen && (
+        <WorkflowEventModal
+          onClose={() => setWorkflowEventModalOpen(false)}
+          onSubmit={handleRunWorkflow}
+        />
+      )}
+      {testWorkflowModalOpen && (
+        <TestWorkflowModal
+          workflowYaml={workflowYaml}
+          onClose={() => setTestWorkflowModalOpen(false)}
+        />
+      )}
     </>
   );
 }

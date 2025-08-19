@@ -34,7 +34,7 @@ const editorStyles = {
   container: ({ euiTheme }: UseEuiTheme) =>
     css({
       height: '100%',
-      minHeight: 0,
+      position: 'relative',
       '.template-variable-valid': {
         backgroundColor: euiTheme.colors.backgroundLightPrimary,
         borderRadius: '2px',
@@ -50,6 +50,7 @@ export const WorkflowYAMLEditor = ({
   workflowId,
   filename = `${workflowId}.yaml`,
   readOnly = false,
+  hasChanges = false,
   onMount,
   onChange,
   onSave,
@@ -141,7 +142,6 @@ export const WorkflowYAMLEditor = ({
       lineNumbers: 'on',
       glyphMargin: true,
       scrollBeyondLastLine: false,
-      automaticLayout: true,
       tabSize: 2,
       lineNumbersMinChars: 2,
       insertSpaces: true,
@@ -193,6 +193,52 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
+      <EuiFlexItem
+        grow={false}
+        css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
+      >
+        {hasChanges ? (
+          <div
+            css={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 6px',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'darkorange',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+              }}
+            />
+            <span>Unsaved changes</span>
+          </div>
+        ) : (
+          <div
+            css={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              alignItems: 'center',
+              gap: '4px',
+              padding: '4px 6px',
+            }}
+          >
+            <div
+              style={{
+                backgroundColor: 'green',
+                width: '12px',
+                height: '12px',
+                borderRadius: '50%',
+              }}
+            />
+            <span>Saved</span>
+          </div>
+        )}
+      </EuiFlexItem>
       <EuiFlexItem css={{ flex: 1, minHeight: 0 }}>
         <YamlEditor
           editorDidMount={handleEditorDidMount}
@@ -204,7 +250,7 @@ export const WorkflowYAMLEditor = ({
           {...props}
         />
       </EuiFlexItem>
-      <EuiFlexItem css={{ flexGrow: 0, minHeight: 0 }}>
+      <EuiFlexItem grow={false}>
         <WorkflowYAMLValidationErrors
           isMounted={isEditorMounted}
           validationErrors={validationErrors}

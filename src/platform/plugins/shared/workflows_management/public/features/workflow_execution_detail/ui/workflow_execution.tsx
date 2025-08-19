@@ -9,30 +9,19 @@
 
 import React, { useEffect, useMemo, useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiDescriptionList,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  EuiBadge,
-} from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 
-import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { ExecutionStatus, WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { useWorkflowExecution } from '../../../entities/workflows/model/useWorkflowExecution';
 import { useWorkflowTraceSearch } from '../../../hooks/use_workflow_trace_search';
 import { StatusBadge } from '../../../shared/ui/status_badge';
-import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui';
-import { WorkflowVisualEditor } from '../../workflow_visual_editor/ui';
+import { WorkflowStepExecutionList } from './workflow_step_execution_list';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { WorkflowStepExecutionFlyout } from './workflow_step_execution_flyout';
 
 export interface WorkflowExecutionProps {
   workflowExecutionId: string;
@@ -219,151 +208,166 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     [traceId, rangeFrom, rangeTo, entryTransactionId]
   );
 
-  if (isLoading) {
-    return (
-      <EuiFlexGroup justifyContent={'center'} alignItems={'center'}>
-        <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText>Loading workflows...</EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  }
+  const { setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
 
-  if (error) {
-    return <EuiText>Error loading workflow execution</EuiText>;
-  }
+  const renderSelectedStepExecutionFlyout = useCallback(() => {
+    if (!workflowExecution?.stepExecutions?.length) {
+      return null;
+    }
+
+    const selectedStepExecutionIndex = workflowExecution.stepExecutions.findIndex(
+      (step) => step.id === selectedStepExecutionId
+    );
+    const selectedStepExecution = workflowExecution.stepExecutions[selectedStepExecutionIndex];
+
+    if (!selectedStepExecution) {
+      return null;
+    }
+
+    const goNext =
+      selectedStepExecutionIndex < workflowExecution.stepExecutions.length - 1
+        ? () => {
+            const nextStepExecutionIndex =
+              (selectedStepExecutionIndex + 1) % workflowExecution.stepExecutions.length;
+            const nextStepExecution = workflowExecution.stepExecutions[nextStepExecutionIndex];
+            setSelectedStepExecution(nextStepExecution.id);
+          }
+        : undefined;
+
+    const goPrevious =
+      selectedStepExecutionIndex > 0
+        ? () => {
+            const previousStepExecutionIndex =
+              (selectedStepExecutionIndex - 1 + workflowExecution.stepExecutions.length) %
+              workflowExecution.stepExecutions.length;
+            const previousStepExecution =
+              workflowExecution.stepExecutions[previousStepExecutionIndex];
+            setSelectedStepExecution(previousStepExecution.id);
+          }
+        : undefined;
+
+    return (
+      <WorkflowStepExecutionFlyout
+        workflowExecutionId={workflowExecutionId}
+        stepExecution={selectedStepExecution}
+        closeFlyout={() => setSelectedStepExecution(null)}
+        goNext={goNext}
+        goPrevious={goPrevious}
+      />
+    );
+  }, [
+    workflowExecution?.stepExecutions,
+    workflowExecutionId,
+    selectedStepExecutionId,
+    setSelectedStepExecution,
+  ]);
 
   return (
-    <div>
-      <EuiTitle size="xs">
-        <h3>Workflow Execution Details</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiDescriptionList type="column" listItems={executionProps} compressed />
-      {isVisualEditorEnabled && workflowYamlObject && (
-        <>
-          <EuiSpacer size="s" />
-          <div css={{ height: '500px' }}>
-            <WorkflowVisualEditor
-              workflow={workflowYamlObject as WorkflowYaml}
-              stepExecutions={workflowExecution?.stepExecutions}
-            />
-          </div>
-          <EuiSpacer size="m" />
-        </>
-      )}
-      <EuiTitle size="xs">
-        <h3>Step Executions</h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <EuiBasicTable
-        columns={columns}
-        items={workflowExecution?.stepExecutions ?? []}
-        responsiveBreakpoint={false}
+    <>
+      {renderSelectedStepExecutionFlyout()}
+      <WorkflowStepExecutionList
+        execution={workflowExecution ?? null}
+        isLoading={isLoading}
+        error={error as Error | null}
+        onStepExecutionClick={(stepExecutionId) => {
+          setSelectedStepExecution(stepExecutionId);
+        }}
+        selectedId={null}
       />
-      <EuiSpacer size="l" />
-
-      <EuiSpacer size="s" />
-      <WorkflowExecutionLogsTable executionId={workflowExecutionId} />
-
-      <EuiSpacer size="l" />
-
-      {/* APM Trace Waterfall Embeddable with Search - only show if APM is available */}
-      {workflowExecution?.startedAt && (
-        <>
-          <EuiFlexGroup alignItems="center" gutterSize="s">
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="xs">
-                <h3>Execution trace</h3>
-              </EuiTitle>
-            </EuiFlexItem>
-            {traceId && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{traceId}</EuiBadge>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-          <EuiSpacer size="s" />
-
-          {/* Show loading state while searching for traces */}
-          {traceSearchLoading && (
-            <>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText size="s" color="subdued">
-                    Searching for execution traces...
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="l" />
-            </>
-          )}
-
-          {/* Show error if trace search failed */}
-          {traceSearchError && !traceSearchLoading && (
-            <>
-              <EuiText size="s" color="danger">
-                Unable to find APM traces for this execution: {traceSearchError.message}
-              </EuiText>
-              <EuiSpacer size="l" />
-            </>
-          )}
-
-          {/* Show embeddable when trace is found */}
-          {hasApmTrace && !traceSearchLoading && traceId && (
-            <>
-              {/* Debug logging for embeddable parameters */}
-              {(() => {
-                // eslint-disable-next-line no-console
-                console.log('🔍 Embeddable parameters:', {
-                  traceId,
-                  rangeFrom,
-                  rangeTo,
-                  entryTransactionId,
-                  workflowExecutionId,
-                  hasApmTrace,
-                });
-                return null;
-              })()}
-              <div
-                style={{
-                  minHeight: '300px', // Minimum height but allows growth
-                  maxHeight: '800px', // Maximum height to prevent excessive growth
-                  border: '1px solid #d3dae6',
-                  borderRadius: '6px',
-                  overflow: 'auto', // Allow scrolling if content exceeds max height
-                  backgroundColor: '#fafbfd',
-                  marginBottom: '24px',
-                  direction: 'ltr', // Force left-to-right layout
-                }}
-              >
-                <EmbeddableRenderer
-                  type="APM_TRACE_WATERFALL_EMBEDDABLE"
-                  maybeId={`workflow-trace-${workflowExecutionId}`}
-                  getParentApi={getParentApi}
-                  hidePanelChrome={true}
-                />
-              </div>
-            </>
-          )}
-
-          {/* Show message when no traces found but search completed */}
-          {!hasApmTrace && !traceSearchLoading && !traceSearchError && (
-            <>
-              <EuiText size="s" color="subdued">
-                No APM traces found for this workflow execution.
-              </EuiText>
-              <EuiSpacer size="l" />
-            </>
-          )}
-        </>
-      )}
-    </div>
+    </>
   );
 };
+
+// {/* APM Trace Waterfall Embeddable with Search - only show if APM is available */}
+//       {/* {workflowExecution?.startedAt && (
+//         <>
+//           <EuiFlexGroup alignItems="center" gutterSize="s">
+//             <EuiFlexItem grow={false}>
+//               <EuiTitle size="xs">
+//                 <h3>Execution trace</h3>
+//               </EuiTitle>
+//             </EuiFlexItem>
+//             {traceId && (
+//               <EuiFlexItem grow={false}>
+//                 <EuiBadge color="hollow">{traceId}</EuiBadge>
+//               </EuiFlexItem>
+//             )}
+//           </EuiFlexGroup>
+//           <EuiSpacer size="s" />
+
+//           {/* Show loading state while searching for traces */}
+//           {traceSearchLoading && (
+//             <>
+//               <EuiFlexGroup alignItems="center" gutterSize="s">
+//                 <EuiFlexItem grow={false}>
+//                   <EuiLoadingSpinner size="m" />
+//                 </EuiFlexItem>
+//                 <EuiFlexItem grow={false}>
+//                   <EuiText size="s" color="subdued">
+//                     Searching for execution traces...
+//                   </EuiText>
+//                 </EuiFlexItem>
+//               </EuiFlexGroup>
+//               <EuiSpacer size="l" />
+//             </>
+//           )}
+
+//           {/* Show error if trace search failed */}
+//           {traceSearchError && !traceSearchLoading && (
+//             <>
+//               <EuiText size="s" color="danger">
+//                 Unable to find APM traces for this execution: {traceSearchError.message}
+//               </EuiText>
+//               <EuiSpacer size="l" />
+//             </>
+//           )}
+
+//           {/* Show embeddable when trace is found */}
+//           {hasApmTrace && !traceSearchLoading && traceId && (
+//             <>
+//               {/* Debug logging for embeddable parameters */}
+//               {(() => {
+//                 // eslint-disable-next-line no-console
+//                 console.log('🔍 Embeddable parameters:', {
+//                   traceId,
+//                   rangeFrom,
+//                   rangeTo,
+//                   entryTransactionId,
+//                   workflowExecutionId,
+//                   hasApmTrace,
+//                 });
+//                 return null;
+//               })()}
+//               <div
+//                 style={{
+//                   minHeight: '300px', // Minimum height but allows growth
+//                   maxHeight: '800px', // Maximum height to prevent excessive growth
+//                   border: '1px solid #d3dae6',
+//                   borderRadius: '6px',
+//                   overflow: 'auto', // Allow scrolling if content exceeds max height
+//                   backgroundColor: '#fafbfd',
+//                   marginBottom: '24px',
+//                   direction: 'ltr', // Force left-to-right layout
+//                 }}
+//               >
+//                 <EmbeddableRenderer
+//                   type="APM_TRACE_WATERFALL_EMBEDDABLE"
+//                   maybeId={`workflow-trace-${workflowExecutionId}`}
+//                   getParentApi={getParentApi}
+//                   hidePanelChrome={true}
+//                 />
+//               </div>
+//             </>
+//           )}
+
+//           {/* Show message when no traces found but search completed */}
+//           {!hasApmTrace && !traceSearchLoading && !traceSearchError && (
+//             <>
+//               <EuiText size="s" color="subdued">
+//                 No APM traces found for this workflow execution.
+//               </EuiText>
+//               <EuiSpacer size="l" />
+//             </>
+//           )}
+//         </>
+//       )} */}

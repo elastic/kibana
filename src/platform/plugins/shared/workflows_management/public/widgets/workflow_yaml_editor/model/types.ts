@@ -23,6 +23,7 @@ export interface BaseWorkflowYAMLEditorProps {
   workflowId?: string;
   filename?: string;
   readOnly?: boolean;
+  hasChanges?: boolean;
   'data-testid'?: string;
   onMount?: (editor: monaco.editor.IStandaloneCodeEditor, monacoInstance: typeof monaco) => void;
   onChange?: (value: string | undefined) => void;

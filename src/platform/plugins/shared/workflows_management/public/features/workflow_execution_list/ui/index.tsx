@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
 import React from 'react';
-import { FormattedRelative } from '@kbn/i18n-react';
 import type { ExecutionStatus, WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowExecutions } from '../../../entities/workflows/model/useWorkflowExecutions';
-import { StatusBadge } from '../../../shared/ui/status_badge';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { WorkflowExecutionList as WorkflowExecutionListComponent } from './workflow_execution_list';
 
 // Add a type for the table items that matches the fields used in the table
 interface WorkflowExecutionTableItem {
@@ -41,63 +31,58 @@ export function WorkflowExecutionList({ workflow }: { workflow: WorkflowDetailDt
 
   const { selectedExecutionId, setSelectedExecution } = useWorkflowUrlState();
 
-  // Find the full execution object for the selected ID, if needed
-  // const selectedExecution = workflowExecutions?.results.find(
-  //   (exec: any) => exec.id === selectedExecutionId
-  // );
-
-  const handleViewWorkflowExecution = (item: WorkflowExecutionTableItem) => {
-    setSelectedExecution(item.id);
+  const handleViewWorkflowExecution = (executionId: string) => {
+    setSelectedExecution(executionId);
   };
 
-  const columns: Array<EuiBasicTableColumn<WorkflowExecutionTableItem>> = [
-    {
-      field: 'id',
-      name: 'ID',
-    },
-    {
-      field: 'status',
-      name: 'Status',
-      render: (value: ExecutionStatus) => <StatusBadge status={value} />,
-    },
-    {
-      field: 'triggeredBy',
-      name: 'Triggered by',
-      render: (value: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1) : ''),
-    },
-    {
-      field: 'startedAt',
-      name: 'Started At',
-      render: (value: Date) => (
-        <EuiToolTip content={value.toLocaleString()}>
-          <span>
-            <FormattedRelative value={value} />
-          </span>
-        </EuiToolTip>
-      ),
-    },
-    {
-      field: 'duration',
-      name: 'Duration',
-      render: (value: number) =>
-        value ? (
-          <EuiText size="s" color="subdued">
-            {value} ms
-          </EuiText>
-        ) : null,
-    },
-    // {
-    //   name: 'Actions',
-    //   actions: [
-    //     {
-    //       type: 'button',
-    //       name: 'View',
-    //       description: 'View',
-    //       onClick: (item) => handleViewWorkflowExecution(item),
-    //     },
-    //   ],
-    // },
-  ];
+  // const columns: Array<EuiBasicTableColumn<WorkflowExecutionTableItem>> = [
+  //   {
+  //     field: 'id',
+  //     name: 'ID',
+  //   },
+  //   {
+  //     field: 'status',
+  //     name: 'Status',
+  //     render: (value: ExecutionStatus) => <StatusBadge status={value} />,
+  //   },
+  //   {
+  //     field: 'triggeredBy',
+  //     name: 'Triggered by',
+  //     render: (value: string) => (value ? value.charAt(0).toUpperCase() + value.slice(1) : ''),
+  //   },
+  //   {
+  //     field: 'startedAt',
+  //     name: 'Started At',
+  //     render: (value: Date) => (
+  //       <EuiToolTip content={value.toLocaleString()}>
+  //         <span>
+  //           <FormattedRelative value={value} />
+  //         </span>
+  //       </EuiToolTip>
+  //     ),
+  //   },
+  //   {
+  //     field: 'duration',
+  //     name: 'Duration',
+  //     render: (value: number) =>
+  //       value ? (
+  //         <EuiText size="s" color="subdued">
+  //           {value} ms
+  //         </EuiText>
+  //       ) : null,
+  //   },
+  //   // {
+  //   //   name: 'Actions',
+  //   //   actions: [
+  //   //     {
+  //   //       type: 'button',
+  //   //       name: 'View',
+  //   //       description: 'View',
+  //   //       onClick: (item) => handleViewWorkflowExecution(item),
+  //   //     },
+  //   //   ],
+  //   // },
+  // ];
 
   // Map API results to table items, converting startedAt to Date
   const tableItems: WorkflowExecutionTableItem[] = (workflowExecutions?.results ?? []).map(
@@ -110,48 +95,50 @@ export function WorkflowExecutionList({ workflow }: { workflow: WorkflowDetailDt
     })
   );
 
-  if (isLoadingWorkflowExecutions) {
-    return <EuiLoadingSpinner />;
-  }
-
-  if (error) {
-    return <EuiText>Error loading workflow executions</EuiText>;
-  }
-
   return (
-    <EuiFlexGroup css={{ height: '100%' }}>
-      <EuiFlexItem>
-        <EuiBasicTable
-          columns={columns}
-          items={tableItems}
-          responsiveBreakpoint={true}
-          // responsiveBreakpoint={false}
-          rowProps={(item) => ({
-            onClick: () => handleViewWorkflowExecution(item),
-            className: item.id === selectedExecutionId ? 'euiTableRow--marked' : undefined,
-          })}
-        />
-      </EuiFlexItem>
-      {/* <EuiFlexItem>
-        {selectedExecutionId ? (
-          <WorkflowExecution
-            workflowExecutionId={selectedExecutionId}
-            workflowYaml={workflow.yaml}
-            fields={['stepId', 'status', 'executionTimeMs']}
-          />
-        ) : (
-          <EuiFlexGroup
-            justifyContent="center"
-            alignItems="center"
-            direction="column"
-            css={{ height: '100%' }}
-          >
-            <EuiFlexItem>
-              <EuiText>Select an execution to view</EuiText>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        )}
-      </EuiFlexItem> */}
-    </EuiFlexGroup>
+    <WorkflowExecutionListComponent
+      executions={workflowExecutions ?? null}
+      onExecutionClick={handleViewWorkflowExecution}
+      selectedId={selectedExecutionId ?? null}
+      isLoading={isLoadingWorkflowExecutions}
+      error={error as Error | null}
+    />
   );
+
+  // return (
+  //   <EuiFlexGroup css={{ height: '100%' }}>
+  //     <EuiFlexItem>
+  //       <EuiBasicTable
+  //         columns={columns}
+  //         items={tableItems}
+  //         responsiveBreakpoint={true}
+  //         // responsiveBreakpoint={false}
+  //         rowProps={(item) => ({
+  //           onClick: () => handleViewWorkflowExecution(item),
+  //           className: item.id === selectedExecutionId ? 'euiTableRow--marked' : undefined,
+  //         })}
+  //       />
+  //     </EuiFlexItem>
+  //     {/* <EuiFlexItem>
+  //       {selectedExecutionId ? (
+  //         <WorkflowExecution
+  //           workflowExecutionId={selectedExecutionId}
+  //           workflowYaml={workflow.yaml}
+  //           fields={['stepId', 'status', 'executionTimeMs']}
+  //         />
+  //       ) : (
+  //         <EuiFlexGroup
+  //           justifyContent="center"
+  //           alignItems="center"
+  //           direction="column"
+  //           css={{ height: '100%' }}
+  //         >
+  //           <EuiFlexItem>
+  //             <EuiText>Select an execution to view</EuiText>
+  //           </EuiFlexItem>
+  //         </EuiFlexGroup>
+  //       )}
+  //     </EuiFlexItem> */}
+  //   </EuiFlexGroup>
+  // );
 }
