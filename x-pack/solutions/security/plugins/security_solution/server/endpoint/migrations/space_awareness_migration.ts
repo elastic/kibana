@@ -112,7 +112,6 @@ const migrateArtifactsToSpaceAware = async (
 
   const exceptionsClient = endpointService.getExceptionListsClient();
   const listIds: string[] = Object.values(ENDPOINT_ARTIFACT_LISTS).map(({ id }) => id);
-  listIds.push(ENDPOINT_LIST_ID);
 
   logger.debug(`artifact list ids to process: ${listIds.join(', ')}`);
 
