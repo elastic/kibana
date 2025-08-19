@@ -17,11 +17,14 @@
       "management",
       "observabilityAIAssistant",
       "ml",
+      "licensing"
     ],
     "optionalPlugins": [
       "home",
       "serverless",
-      "productDocBase"
+      "productDocBase",
+      "spaces",
+      "cloud"
     ],
     "requiredBundles": [
       "kibanaReact",
