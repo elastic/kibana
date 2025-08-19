@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
   EuiLoadingLogo,
   EuiButton,
@@ -17,9 +17,6 @@ import {
   EuiFlexItem,
   EuiImage,
   useEuiTheme,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
-  EuiPopover,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -30,7 +27,6 @@ import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { EmptyStatesIllustrationContainer } from '../empty_states_illustration_container';
-import { useAdd3PIntegrationRoute } from '../../common/api/use_wiz_integration_route';
 import { FullSizeCenteredPage } from '../full_size_centered_page';
 import { useCISIntegrationPoliciesLink } from '../../common/navigation/use_navigate_to_cis_integration_policies';
 import {
@@ -46,6 +42,7 @@ import misconfigurationsVendorsSVG from '../../assets/illustrations/misconfigura
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import { NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS } from '../../common/constants';
 import { cspIntegrationDocsNavigation } from '../../common/navigation/constants';
+import { ThirdPartyIntegrationsPopover } from '../third_party_integration_popover';
 
 const NotDeployed = ({ postureType }: { postureType: PostureTypes }) => {
   const integrationPoliciesLink = useCISIntegrationPoliciesLink({
@@ -188,59 +185,6 @@ const EmptySecurityFindingsPrompt = () => {
 
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.findings_default.path);
 
-  // Pre-fetch all 3rd party integration links upfront
-  const wizLink = useAdd3PIntegrationRoute('wiz');
-  const microsoft365DefenderLink = useAdd3PIntegrationRoute('m365_defender');
-  const awsSecurityHubLink = useAdd3PIntegrationRoute('aws', 'securityhub');
-
-  // Popover state
-  const [isPopoverOpen, setPopoverOpen] = useState(false);
-  const togglePopover = () => setPopoverOpen((open) => !open);
-  const closePopover = () => setPopoverOpen(false);
-
-  const integrationLinks = [
-    { id: 'wiz', label: 'Wiz', href: wizLink },
-    { id: 'aws_security_hub', label: 'AWS Security Hub', href: awsSecurityHubLink },
-    {
-      id: 'microsoft_365_defender',
-      label: 'Microsoft 365 Defender',
-      href: microsoft365DefenderLink,
-    },
-  ];
-
-  // Button that toggles the popover
-  const popoverButton = (
-    <EuiButton
-      iconType="arrowDown"
-      iconSide="right"
-      onClick={togglePopover}
-      aria-expanded={isPopoverOpen}
-      aria-haspopup="true"
-      color="primary"
-      fill
-      data-test-subj="thirdPartyMisconfigurationIntegrationPopoverButton"
-      isDisabled={integrationLinks.length === 0}
-    >
-      <FormattedMessage
-        id="xpack.csp.cloudPosturePage.3pIntegrationsNoFindingsPrompt.AddIntegrationButtonTitle"
-        defaultMessage="Add Integration"
-      />
-    </EuiButton>
-  );
-
-  // Each option inside the popover
-  const panelItems = integrationLinks.map(({ id, label, href }) => (
-    <EuiContextMenuItem
-      key={id}
-      href={href}
-      target="_self"
-      onClick={closePopover}
-      data-test-subj={`integrationOption-${id}`}
-    >
-      {label}
-    </EuiContextMenuItem>
-  ));
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -355,15 +299,12 @@ const EmptySecurityFindingsPrompt = () => {
             actions={
               <EuiFlexGroup justifyContent="center">
                 <EuiFlexItem grow={false}>
-                  <EuiPopover
-                    id="thirdPartyIntegrationPopover"
-                    button={popoverButton}
-                    isOpen={isPopoverOpen}
-                    closePopover={closePopover}
-                    anchorPosition="downCenter"
-                  >
-                    <EuiContextMenuPanel items={panelItems} />
-                  </EuiPopover>
+                  <EuiFlexItem grow={false}>
+                    <ThirdPartyIntegrationsPopover
+                      findingsType="misconfiguration"
+                      buttonTestSubj="thirdPartyMisconfigurationIntegrationPopoverButton"
+                    />
+                  </EuiFlexItem>
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
