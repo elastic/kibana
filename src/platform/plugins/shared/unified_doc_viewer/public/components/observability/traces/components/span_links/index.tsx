@@ -212,7 +212,7 @@ export function SpanLinksComponent({ data }: SpanLinksComponentProps) {
       buttonContent={
         <strong>
           {i18n.translate('unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks', {
-            defaultMessage: 'Span Links',
+            defaultMessage: 'Span links',
           })}
         </strong>
       }
