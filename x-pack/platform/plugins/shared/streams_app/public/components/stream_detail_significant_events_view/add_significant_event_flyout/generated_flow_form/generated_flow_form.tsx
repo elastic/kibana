@@ -108,8 +108,6 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
           <EuiButton
             disabled={isGenerating || isSubmitting}
             isLoading={isGenerating}
-            iconType="arrowDown"
-            iconSide="left"
             onClick={() => onGenerateClick()}
           >
             {isGenerating

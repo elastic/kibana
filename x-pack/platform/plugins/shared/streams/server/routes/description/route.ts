@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { badRequest } from '@hapi/boom';
 import type { IdentifiedSystemGenerateResponse } from '@kbn/streams-schema/src/api/features';
 import { createTracedEsClient } from '@kbn/traced-es-client';
 import { z } from '@kbn/zod';
@@ -51,11 +50,9 @@ const generateDescriptionRoute = createServerRoute({
         request,
       });
     await assertEnterpriseLicense(licensing);
+    await streamsClient.ensureStream(params.path.name);
 
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams are not enabled');
-    }
+    const definition = await streamsClient.getStream(params.path.name);
 
     return fromRxjs(
       identifySystemDescription(
@@ -64,6 +61,7 @@ const generateDescriptionRoute = createServerRoute({
           connectorId: params.query.connectorId,
           currentDate: params.query.currentDate,
           shortLookback: params.query.shortLookback,
+          definition,
         },
         {
           inferenceClient,
