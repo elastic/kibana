@@ -10,7 +10,6 @@
 import { i18n as kbnI18n } from '@kbn/i18n';
 import { BehaviorSubject } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type {
   CoreSetup,
@@ -38,7 +37,6 @@ import {
 import type { ManagementSection } from './utils';
 
 interface ManagementSetupDependencies {
-  home?: HomePublicPluginSetup;
   share: SharePluginSetup;
 }
 
@@ -88,28 +86,11 @@ export class ManagementPlugin
 
   public setup(
     core: CoreSetup<ManagementStartDependencies>,
-    { home, share }: ManagementSetupDependencies
+    { share }: ManagementSetupDependencies
   ) {
     const kibanaVersion = this.initializerContext.env.packageInfo.version;
     const locator = share.url.locators.create(new ManagementAppLocatorDefinition());
     const managementPlugin = this;
-
-    if (home) {
-      home.featureCatalogue.register({
-        id: 'stack-management',
-        title: kbnI18n.translate('management.stackManagement.managementLabel', {
-          defaultMessage: 'Stack Management',
-        }),
-        description: kbnI18n.translate('management.stackManagement.managementDescription', {
-          defaultMessage: 'Your center console for managing the Elastic Stack.',
-        }),
-        icon: 'managementApp',
-        path: '/app/management',
-        showOnHomePage: false,
-        category: 'admin',
-        visible: () => this.hasAnyEnabledApps,
-      });
-    }
 
     core.application.register({
       id: MANAGEMENT_APP_ID,

@@ -21,6 +21,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import type { ConfigSchema } from '../server/config';
@@ -44,6 +46,8 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  savedObjectsTagging: SavedObjectTaggingOssPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -84,8 +88,17 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart },
+          {
+            dataViews,
+            urlForwarding: urlForwardingStart,
+            share: shareStart,
+            cloud: cloudStart,
+            contentManagement,
+            savedObjectsTaggingOss: savedObjectsTagging,
+          },
         ] = await core.getStartServices();
+
+        console.log(await core.getStartServices());
 
         setServices({
           share,
@@ -114,6 +127,8 @@ export class HomePublicPlugin
           theme: core.theme,
           i18nStart: coreStart.i18n,
           shareStart,
+          contentClient: contentManagement.client,
+          savedObjectsTagging,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

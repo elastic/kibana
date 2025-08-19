@@ -26,6 +26,7 @@ import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
 import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_table';
+import { ContentByTagTable } from './personalization/content_by_tag_table';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -132,7 +133,9 @@ export class Home extends Component<HomeProps, State> {
 
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled, recentlyAccessed } = this.props;
-    const { application, trackUiMetric } = getServices();
+    const { application, trackUiMetric, contentClient, savedObjectsTagging, uiSettings } =
+      getServices();
+    console.log(getServices());
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
@@ -153,7 +156,11 @@ export class Home extends Component<HomeProps, State> {
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
         <PersonalizedRecentlyViewed recentlyAccessed={recentlyAccessed} addBasePath={addBasePath} />
-
+        <ContentByTagTable
+          contentClient={contentClient}
+          uiSettings={uiSettings}
+          savedObjectsTagging={savedObjectsTagging}
+        />
         <AddData
           addBasePath={addBasePath}
           application={application}

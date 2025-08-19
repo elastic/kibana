@@ -13,15 +13,18 @@
     "requiredPlugins": [
       "dataViews",
       "share",
-      "urlForwarding"
+      "urlForwarding",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "usageCollection",
       "customIntegrations",
       "cloud",
+      "savedObjectsTaggingOss"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "savedObjectsFinder"
     ]
   }
 }
