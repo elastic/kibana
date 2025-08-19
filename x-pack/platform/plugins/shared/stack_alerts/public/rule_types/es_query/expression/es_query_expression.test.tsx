@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { of, Subject } from 'rxjs';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -158,75 +158,77 @@ describe('EsQueryRuleTypeExpression', () => {
       termField: [],
     };
 
-    return await act(async () =>
-      render(
-        <EsQueryExpression
-          unifiedSearch={unifiedSearchMock}
-          ruleInterval="1m"
-          ruleThrottle="1m"
-          alertNotifyWhen="onThrottleInterval"
-          ruleParams={alertParams}
-          setRuleParams={() => {}}
-          setRuleProperty={() => {}}
-          errors={errors}
-          data={dataMock}
-          dataViews={dataViewMock}
-          defaultActionGroupId=""
-          actionGroups={[]}
-          charts={chartsStartMock}
-          onChangeMetaData={() => {}}
-        />,
-        {
-          wrapper: AppWrapper,
-        }
-      )
+    render(
+      <EsQueryExpression
+        unifiedSearch={unifiedSearchMock}
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={alertParams}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
+        errors={errors}
+        data={dataMock}
+        dataViews={dataViewMock}
+        defaultActionGroupId=""
+        actionGroups={[]}
+        charts={chartsStartMock}
+        onChangeMetaData={() => {}}
+      />,
+      {
+        wrapper: AppWrapper,
+      }
     );
   }
 
   test('should render EsQueryRuleTypeExpression with expected components', async () => {
-    const result = await setup(defaultEsQueryExpressionParams);
-    expect(result.getByTestId('indexSelectPopover')).toBeInTheDocument();
-    expect(result.getByTestId('sizeValueExpression')).toBeInTheDocument();
-    expect(result.getByTestId('queryJsonEditor')).toBeInTheDocument();
-    expect(result.getByTestId('thresholdPopover')).toBeInTheDocument();
-    expect(result.getByTestId('forLastExpression')).toBeInTheDocument();
-    expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
-    expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
+    await setup(defaultEsQueryExpressionParams);
+    expect(screen.getByTestId('indexSelectPopover')).toBeInTheDocument();
+    expect(screen.getByTestId('sizeValueExpression')).toBeInTheDocument();
+    expect(screen.getByTestId('queryJsonEditor')).toBeInTheDocument();
 
-    expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
+    await waitFor(() => {
+      expect(screen.getByTestId('thresholdPopover')).toBeInTheDocument();
+    });
 
-    expect(result.getByTestId('testQuery')).not.toBeDisabled();
+    expect(screen.getByTestId('forLastExpression')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).toBeChecked();
+
+    expect(screen.getByTestId('testQuery')).not.toBeDisabled();
   });
 
   test('should render Test Query button disabled if alert params are invalid', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       timeField: null,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('testQuery')).toBeDisabled();
+    expect(screen.getByTestId('testQuery')).toBeDisabled();
   });
 
   test('should show excludeHitsFromPreviousRun unchecked by default', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       excludeHitsFromPreviousRun: undefined,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeChecked();
+    expect(screen.getByTestId('excludeHitsFromPreviousRunExpression')).not.toBeChecked();
   });
 
   test('should render EsQueryRuleTypeExpression with chosen size field', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       size: 0,
     } as unknown as EsQueryRuleParams<SearchType.esQuery>);
 
-    expect(result.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
+    expect(screen.getByTestId('sizeValueExpression')).toHaveTextContent('Size 0');
   });
 
   test('should render EsQueryRuleTypeExpression with chosen runtime group field', async () => {
-    const result = await setup({
+    await setup({
       ...defaultEsQueryExpressionParams,
       esQuery:
         '{\n    "query":{\n      "match_all" : {}\n    },\n    "runtime_mappings": {\n      "day_of_week": {\n        "type": "keyword",\n        "script": {\n          "source": "emit(doc[\'@timestamp\'].value.dayOfWeekEnum.getDisplayName(TextStyle.FULL, Locale.ENGLISH))"\n        }\n      }\n    }\n  }',
@@ -238,7 +240,7 @@ describe('EsQueryRuleTypeExpression', () => {
     fireEvent.click(screen.getByTestId('groupByExpression'));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
 
-    expect(result.getByTestId('fieldsExpressionSelect')).toHaveTextContent('day_of_week');
+    expect(screen.getByTestId('fieldsExpressionSelect')).toHaveTextContent('day_of_week');
   });
 
   test('should show success message if ungrouped Test Query is successful', async () => {
