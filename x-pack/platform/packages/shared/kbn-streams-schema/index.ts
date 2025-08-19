@@ -69,7 +69,7 @@ export {
   streamQuerySchema,
 } from './src/queries';
 
-export type { IdentifiedSystemGenerateResponse } from './src/api/features';
+export type { IdentifiedSystemGenerateResponse } from './src/api/description';
 
 export { findInheritedLifecycle, findInheritingStreams } from './src/helpers/lifecycle';
 
