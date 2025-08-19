@@ -27,11 +27,11 @@ const defaultEventsText = i18n.translate(
   }
 );
 
-interface LabelNodePopoverProps {
+interface LabelNodeTooltipProps {
   analysis: DocumentAnalysisOutput;
 }
 
-export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => {
+export const LabelNodeTooltipContent = ({ analysis }: LabelNodeTooltipProps) => {
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -45,7 +45,7 @@ export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => 
     >
       {analysis.alertsCount > 0 && (
         <div
-          data-test-subj="label-node-popover-alert-section"
+          data-test-subj="label-node-tooltip-alert-section"
           css={css`
             display: flex;
             align-items: center;
@@ -57,11 +57,11 @@ export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => 
               type="warningFilled"
               color="ghost"
               size="s"
-              data-test-subj="label-node-popover-alert-icon"
+              data-test-subj="label-node-tooltip-alert-icon"
             />
             {analysis.alertsCount > 1 && (
               <EuiText
-                data-test-subj="label-node-popover-alert-count"
+                data-test-subj="label-node-tooltip-alert-count"
                 size="m"
                 css={css`
                   font-weight: ${euiTheme.font.weight.medium};
@@ -74,9 +74,9 @@ export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => 
           </RoundedBadge>
           <EuiText
             size="s"
-            color="default"
             css={css`
               font-weight: ${euiTheme.font.weight.medium};
+              color: ${euiTheme.colors.textInverse};
             `}
           >
             {alertedEventsText}
@@ -85,7 +85,7 @@ export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => 
       )}
       {analysis.eventsCount > 0 && (
         <div
-          data-test-subj="label-node-popover-event-section"
+          data-test-subj="label-node-tooltip-event-section"
           css={css`
             display: flex;
             align-items: center;
@@ -94,7 +94,7 @@ export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => 
         >
           <RoundedBadge euiTheme={euiTheme} bgColor={euiTheme.colors.backgroundBasePlain}>
             <EuiText
-              data-test-subj="label-node-popover-event-count"
+              data-test-subj="label-node-tooltip-event-count"
               size="m"
               css={css`
                 font-weight: ${euiTheme.font.weight.medium};
@@ -106,9 +106,9 @@ export const LabelNodePopoverContent = ({ analysis }: LabelNodePopoverProps) => 
           </RoundedBadge>
           <EuiText
             size="s"
-            color="default"
             css={css`
               font-weight: ${euiTheme.font.weight.medium};
+              color: ${euiTheme.colors.textInverse};
             `}
           >
             {defaultEventsText}
