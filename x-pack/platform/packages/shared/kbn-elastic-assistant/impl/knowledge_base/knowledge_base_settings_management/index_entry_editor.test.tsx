@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { IndexEntryEditor } from './index_entry_editor';
-import { DataViewsContract } from '@kbn/data-views-plugin/public';
-import { IndexEntry } from '@kbn/elastic-assistant-common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
+import type { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useIndexMappings } from './use_index_mappings';

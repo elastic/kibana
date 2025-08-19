@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { CustomCheerio, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function RulesHelper({ getPageObjects, getService }: FtrProviderContext) {
   const find = getService('find');

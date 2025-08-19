@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import {
   getFieldsTopValues,
   generateSearchSchema,
@@ -14,12 +14,8 @@ import {
   type SearchFilter,
 } from '@kbn/wc-integration-utils';
 import { contentRefBuilder, ContentRefSourceType } from '@kbn/wci-common';
-import {
-  createMcpServer as createServer,
-  McpServerTool,
-  toolResultFactory,
-  ToolContentResult,
-} from '@kbn/wci-server';
+import type { McpServerTool, ToolContentResult } from '@kbn/wci-server';
+import { createMcpServer as createServer, toolResultFactory } from '@kbn/wci-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WCIIndexSourceConfiguration } from '../../common/types';
 

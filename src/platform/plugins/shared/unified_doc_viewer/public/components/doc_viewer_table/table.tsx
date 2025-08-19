@@ -10,26 +10,28 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import useWindowSize from 'react-use/lib/useWindowSize';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type {
+  EuiDataGridProps,
+  EuiDataGridCellPopoverElementProps,
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiSelectableMessage,
   EuiDataGrid,
-  EuiDataGridProps,
-  EuiDataGridCellPopoverElementProps,
   EuiI18n,
   EuiText,
   EuiCallOut,
   useResizeObserver,
   EuiSwitch,
-  EuiSwitchEvent,
   type UseEuiTheme,
   euiFontSize,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import {
   SHOW_MULTIFIELDS,
   DOC_HIDE_TIME_COLUMN_SETTING,
@@ -52,12 +54,8 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import {
-  LOCAL_STORAGE_KEY_SEARCH_TERM,
-  TableFilters,
-  TableFiltersProps,
-  useTableFilters,
-} from './table_filters';
+import type { TableFiltersProps } from './table_filters';
+import { LOCAL_STORAGE_KEY_SEARCH_TERM, TableFilters, useTableFilters } from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';
 import { FieldRow } from './field_row';

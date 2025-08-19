@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IScopedClusterClient } from '@kbn/core/server';
-import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 
-import { AnalyticsCollection } from '../../../common/types/analytics';
+import type { AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { isResourceAlreadyExistsException } from '../../utils/identify_exceptions';

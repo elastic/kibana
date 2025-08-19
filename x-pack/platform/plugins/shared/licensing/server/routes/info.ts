@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicensingRouter } from '../types';
+import type { LicensingRouter } from '../types';
 
 export function registerInfoRoute(router: LicensingRouter) {
   router.get(

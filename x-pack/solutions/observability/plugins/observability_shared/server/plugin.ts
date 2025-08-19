@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { PluginInitializerContext, Plugin as PluginType } from '@kbn/core/server';
+import type { PluginInitializerContext, Plugin as PluginType } from '@kbn/core/server';
 
-import { ObservabilitySharedConfig } from '../common/config';
+import type { ObservabilitySharedConfig } from '../common/config';
 
 export type ObservabilitySharedPluginSetup = ReturnType<ObservabilitySharedPlugin['setup']>;
 export type ObservabilitySharedPluginStart = ReturnType<ObservabilitySharedPlugin['start']>;

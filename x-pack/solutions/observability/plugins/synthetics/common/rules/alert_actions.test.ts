@@ -6,7 +6,7 @@
  */
 
 import { populateAlertActions } from './alert_actions';
-import { ActionConnector } from './types';
+import type { ActionConnector } from './types';
 import { MONITOR_STATUS as SYNTHETICS_MONITOR_STATUS } from '../constants/synthetics_alerts';
 import { SyntheticsMonitorStatusTranslations } from './synthetics/translations';
 
