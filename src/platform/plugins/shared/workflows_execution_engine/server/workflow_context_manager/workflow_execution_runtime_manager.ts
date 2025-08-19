@@ -627,6 +627,7 @@ export class WorkflowExecutionRuntimeManager {
     const node = this.workflowExecutionGraph.node(stepId) as any;
     const stepName = node?.name || stepId;
     this.workflowLogger?.logInfo(`Step '${stepName}' started`, {
+      workflow: { step_id: stepId },
       event: { action: 'step-start', category: ['workflow', 'step'] },
       tags: ['workflow', 'step', 'start'],
     });
@@ -638,6 +639,7 @@ export class WorkflowExecutionRuntimeManager {
     const workflowStep = this.stepExecutions.get(stepId);
     const isSuccess = workflowStep?.status === ExecutionStatus.COMPLETED;
     this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
+      workflow: { step_id: stepId },
       event: {
         action: 'step-complete',
         category: ['workflow', 'step'],

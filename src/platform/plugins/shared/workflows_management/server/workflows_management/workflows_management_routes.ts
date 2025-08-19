@@ -412,6 +412,7 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
           workflowExecutionId: schema.string(),
         }),
         query: schema.object({
+          stepId: schema.maybe(schema.string()),
           limit: schema.maybe(schema.number({ min: 1, max: 1000 })),
           offset: schema.maybe(schema.number({ min: 0 })),
           sortField: schema.maybe(schema.string()),
@@ -422,10 +423,11 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const { limit, offset, sortField, sortOrder } = request.query;
+        const { limit, offset, sortField, sortOrder, stepId } = request.query;
 
         const logs = await api.getWorkflowExecutionLogs({
           executionId: workflowExecutionId,
+          stepId,
           limit,
           offset,
           sortField,

@@ -19,6 +19,7 @@ import type {
   WorkflowListDto,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { estypes } from '@elastic/elasticsearch';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
@@ -391,7 +392,9 @@ export class WorkflowsService {
   }
 
   // Direct log search methods - query ES logs index directly
-  private async searchWorkflowLogs(query: any): Promise<LogSearchResult> {
+  private async searchWorkflowLogs(
+    query: estypes.QueryDslQueryContainer
+  ): Promise<LogSearchResult> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -450,7 +453,7 @@ export class WorkflowsService {
           },
           {
             match: {
-              'workflow.step_id': stepId,
+              'workflow.step_id.keyword': stepId,
             },
           },
         ],

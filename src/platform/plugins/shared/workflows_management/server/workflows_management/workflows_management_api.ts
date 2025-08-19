@@ -23,6 +23,7 @@ import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { SchedulerService } from '../scheduler/scheduler_service';
 import type { WorkflowsService } from './workflows_management_service';
+import type { LogSearchResult } from './lib/workflow_logger';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event';
@@ -33,6 +34,7 @@ export interface GetWorkflowsParams {
 
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
+  stepId?: string;
   limit?: number;
   offset?: number;
   sortField?: string;
@@ -141,7 +143,12 @@ export class WorkflowsManagementApi {
   public async getWorkflowExecutionLogs(
     params: GetWorkflowExecutionLogsParams
   ): Promise<WorkflowExecutionLogsDto> {
-    const result = await this.workflowsService.getExecutionLogs(params.executionId);
+    let result: LogSearchResult;
+    if (params.stepId) {
+      result = await this.workflowsService.getStepLogs(params.executionId, params.stepId);
+    } else {
+      result = await this.workflowsService.getExecutionLogs(params.executionId);
+    }
 
     // Transform the logs to match our API format
     return {
