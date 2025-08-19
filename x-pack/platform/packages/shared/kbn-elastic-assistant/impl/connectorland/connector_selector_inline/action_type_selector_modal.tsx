@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import type { ActionType } from '@kbn/actions-plugin/common';
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import * as i18n from '../translations';
 
 interface Props {

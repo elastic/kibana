@@ -13,7 +13,7 @@ import {
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
