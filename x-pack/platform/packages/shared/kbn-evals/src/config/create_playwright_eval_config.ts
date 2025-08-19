@@ -16,6 +16,7 @@ import { ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
+  repetitions: number;
 }
 
 function getLogLevel() {
@@ -32,8 +33,10 @@ function getLogLevel() {
  */
 export function createPlaywrightEvalsConfig({
   testDir,
+  repetitions,
 }: {
   testDir: string;
+  repetitions?: number;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const log = new ToolingLog({
     level: getLogLevel(),
@@ -69,6 +72,10 @@ export function createPlaywrightEvalsConfig({
     );
   }
 
+  // Priority of determining repetition number: env variable, config parameter, default
+  const experimentRepetitions =
+    parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
+
   // get just the 'local' project (for now)
   const nextProjects = connectors.flatMap((connector) => {
     return (
@@ -82,6 +89,7 @@ export function createPlaywrightEvalsConfig({
               ...project.use,
               connector,
               evaluationConnector,
+              repetitions: experimentRepetitions,
             },
           };
         }) ?? []

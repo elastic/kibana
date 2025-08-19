@@ -120,6 +120,35 @@ The helper will spin up one `local` project per available connector so results a
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
 
+### Repeated evaluations
+
+For statistical analysis and reliability testing, you can run the same evaluation examples multiple times.
+
+**Note:** Each repetition creates a separate experiment in Phoenix with the same dataset name. This may change when Phoenix adds in-experiment repetitions in the future (see [issue](https://github.com/Arize-ai/phoenix/issues/3584)).
+
+#### Configuring repetitions in your Playwright config
+
+You can set a default number of repetitions for your entire test suite by adding the `repetitions` parameter to your Playwright configuration:
+
+```ts
+// playwright.config.ts
+import { createPlaywrightEvalsConfig } from '@kbn/evals';
+
+export default createPlaywrightEvalsConfig({
+  testDir: __dirname,
+  repetitions: 3, // Run each example 3 times
+});
+```
+
+#### Overriding repetitions with environment variables
+
+To override the repetitions at runtime without modifying your configuration, use the `EVALUATION_REPETITIONS` environment variable:
+
+```bash
+# Run each example 3 times
+EVALUATION_REPETITIONS=3 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts
+```
+
 ### Running evaluations against your local/development Kibana instance
 
 To run evaluations against your local Kibana instance instead of the Scout server, manually create a Scout configuration file. This approach provides more control over the testing environment (running Kibana in Debug mode, connecting to local/remote test cluster, etc.). Running the Scout server is also not required for this approach.

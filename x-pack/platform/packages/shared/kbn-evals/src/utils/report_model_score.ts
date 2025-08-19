@@ -37,11 +37,13 @@ export async function reportModelScore({
   phoenixClient,
   model,
   experiments,
+  repetitions,
 }: {
   log: SomeDevLog;
   phoenixClient: KibanaPhoenixClient;
   model: Model;
   experiments: RanExperiment[];
+  repetitions: number;
 }): Promise<void> {
   const allDatasetIds = uniq(experiments.flatMap((experiment) => experiment.datasetId));
 
@@ -175,10 +177,19 @@ export async function reportModelScore({
 
   // Create summary table with dataset-level and overall descriptive statistics
   const createSummaryTable = () => {
-    const tableHeaders = ['Dataset', '# Examples', ...evaluatorNames];
+    const repetitionAwareExampleCount = (numExamples: number): string => {
+      return repetitions > 1
+        ? `${repetitions} x ${numExamples / repetitions}`
+        : numExamples.toString();
+    };
+
+    const examplesHeader =
+      repetitions > 1 ? `# Examples\n${chalk.gray('(repetitions x examples)')}` : '# Examples';
+
+    const tableHeaders = ['Dataset', examplesHeader, ...evaluatorNames];
 
     const datasetRows = datasetScores.map((dataset) => {
-      const row = [dataset.name, dataset.numExamples.toString()];
+      const row = [dataset.name, repetitionAwareExampleCount(dataset.numExamples)];
 
       evaluatorNames.forEach((evaluatorName) => {
         const stats = dataset.evaluatorStats.get(evaluatorName);
@@ -202,7 +213,7 @@ export async function reportModelScore({
     });
 
     // Add overall statistics row
-    const overallRow = [chalk.bold.green('Overall'), totalExamples.toString()];
+    const overallRow = [chalk.bold.green('Overall'), repetitionAwareExampleCount(totalExamples)];
     evaluatorNames.forEach((evaluatorName) => {
       const stats = overallEvaluatorStats.get(evaluatorName);
       if (stats && stats.count > 0) {
