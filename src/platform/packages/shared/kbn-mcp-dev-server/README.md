@@ -16,7 +16,7 @@ This starts a [stdio](https://modelcontextprotocol.io/specification/2025-06-18/b
 
 ## MCP configuration example
 
-Add the following snippet to your settings for your AI Coding ide so it will automatically start/attach to the dev server (it assumes you use `nvm`):
+Add the following snippet to your settings for your AI Coding IDE so it will automatically start/attach to the dev server (it assumes you use `nvm`):
 
 ```ts
 {
