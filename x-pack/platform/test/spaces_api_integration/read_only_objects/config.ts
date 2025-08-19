@@ -29,10 +29,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
       ...xPackAPITestsConfig.get('services'),
     },
     servers: xPackAPITestsConfig.get('servers'),
-    esTestCluster: {
-      ...xPackAPITestsConfig.get('esTestCluster'),
-      serverArgs: [...xPackAPITestsConfig.get('esTestCluster.serverArgs')],
-    },
+    esTestCluster: xPackAPITestsConfig.get('esTestCluster'),
 
     kbnTestServer: {
       ...xPackAPITestsConfig.get('kbnTestServer'),
