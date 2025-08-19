@@ -45,11 +45,32 @@ We had previously looked into using daily snapshot telemetry for this problem, b
 
 Since we already have existing alert telemetry in place, it makes sense to build on top of that without having to start from scratch. Given this, we can start to look at how best to include the customized rule fields into the telemetry data. An easy way to add it would be to [enrich the sanitized alerts](https://github.com/elastic/kibana/blob/06f5a860b6a9fdf12352a9c5934ca36a4a3311ea/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/prebuilt_rule_alerts.ts#L93) with a new object listing the customized fields that we can calculate for each alert as fetched. 
 
-However, we immediately run into an issue: the rule diff calculation is an expensive one, already causing multiple performance issues in endpoints that use it. Calling it for each alert in a batch that could contain hundreds if not thousands of alerts would likely prove extremely taxing on performance, possibly even causing timeouts from the telemetry tasks.
+However, we immediately run into an issue: the rule diff calculation is an expensive one, already causing multiple performance issues in endpoints that use it. Calling it for each alert in a batch that could contain upwards of 10k alerts would likely prove extremely taxing on performance, possibly even causing timeouts from the telemetry tasks.
 
 The idea was considered to use an internal cache to store the rule assets themselves so that the most cost-intensive part of the rule diff calculation - fetching the rule assets - could be sped up, but it was determined that the size of this cache could also be prohibitively large. We would potentially have to store multiple versions for every prebuilt rule of a library that is growing every month and already contains 1300+ rules.
 
 Given these constraints, the only likely option left is to have the rule diff information already be on the alert document when fetched. This way, we could simply pass it onto the alert telemetry data like the other fields in the allowlist and filter on the relevant fields in our analytics dashboards.
+
+### An overview of the `calculateRuleDiff` function and its performance issues
+
+[Here is where](https://github.com/elastic/kibana/blob/ad48051a98e3c2faab74d5817156841076bc5303/x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/logic/diff/calculate_rule_diff.ts) the `calculateRuleDiff` function lives just for reference. To begin, we have to fetch both the base version of the rule (from the package itself) and the current implementation of the rule, and then we send these versions into the `calculateRuleDiff` function. 
+
+From there, we convert the rule object to a `DiffableRule` type (similar to the normal rule schema but with certain fields grouped. e.g. `query`, `filters`, and `language` become `kql_query`) and then every field on the rule is compared to determine what, if anything, has changed. There are some more complicated routes taken if we're using this as a true three way diff (what we use when we're upgrading a rule to a new version), but they're not really relevant to what we'd be using this logic for here.
+
+After that we calculate some aggregate stats for the endpoint return value and send back the payload as a `CalculateRuleDiffResult` type containing the full rule diff and rule versions it was derived from.
+
+If we think about this process as two sections, the fetching of rule objects/versions and the diff calculation itself, the more cost intensive one has historically been the fetching of rule objects. When we first built the main routes that currently implement this logic in bulk - the `upgrade/_review` and `upgrade/_perform` endpoints - we didn't have many caps on request size in terms of rules queried. This unbound nature led to a slew of performance and memory issues with both endpoints - a few key ones I've listed below:
+
+- https://github.com/elastic/kibana/issues/208361
+- https://github.com/elastic/security-team/issues/11822
+- https://github.com/elastic/kibana/issues/208355
+
+The descriptions in these go into a lot more detail about the incidents that were taking place, but, to summarize, we were running into OOM errors and crashes in Kibana due to inefficient logic paths and some duplicated requests which led to big scalability problems. There was also an issue with the size of the package being served by fleet, we had originally wanted it to contain all rule versions (not just the past 3), but it was far too large which is why we shrunk it down to its current size. A lot of these problems were mitigated by the team through various means (caching the routes, paginating the requests, etc.) but the underlying issues with memory consumption and speed still exist when working at scale. We still have open issues on how to handle some of them that will hopefully be worked on soon:
+
+ - https://github.com/elastic/kibana/issues/210544
+ - https://github.com/elastic/kibana/issues/199101
+
+Some of these issues are tied with the endpoints themselves, but the core logic for each, and certainly most of the performance issues, are coming from this `calculateRuleDiff` function and its surrounding dependencies (i.e. fetching rule versions). There's a more [in depth ticket](https://github.com/elastic/kibana/issues/187649) about switching away from the fleet package distribution. This would ideally allow for a much less performance intensive fetching of rule versions and way quicker runtimes, but it has yet to be worked on outside of some initial architecture discussion.
 
 ---
 
