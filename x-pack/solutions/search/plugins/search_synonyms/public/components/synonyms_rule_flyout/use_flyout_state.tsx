@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { useState } from 'react';
-import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
+import type { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { synonymToComboBoxOption, synonymsOptionToString } from '../../utils/synonyms_utils';
 import { ERROR_MESSAGES } from './constants';
 

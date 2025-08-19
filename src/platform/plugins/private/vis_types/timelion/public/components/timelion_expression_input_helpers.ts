@@ -17,8 +17,8 @@ import type {
   ExpressionLocation,
 } from '../../common/parser';
 
-import { ArgValueSuggestions } from '../helpers/arg_value_suggestions';
-import { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
+import type { ArgValueSuggestions } from '../helpers/arg_value_suggestions';
+import type { ITimelionFunction, TimelionFunctionArgs } from '../../common/types';
 
 export enum SUGGESTION_TYPE {
   ARGUMENTS = 'arguments',

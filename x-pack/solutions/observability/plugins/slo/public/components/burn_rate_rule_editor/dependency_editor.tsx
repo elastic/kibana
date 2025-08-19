@@ -5,11 +5,11 @@
  * 2.0.
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiForm,
   EuiFormRow,
   EuiPopover,
@@ -18,10 +18,11 @@ import { i18n } from '@kbn/i18n';
 
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { isRight } from 'fp-ts/Either';
-import { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
-import { Dependency, DependencyRT } from '../../../common/types';
+import type { SloRule } from '../../hooks/use_fetch_slos_with_burn_rate_rules';
+import type { Dependency } from '../../../common/types';
+import { DependencyRT } from '../../../common/types';
 import {
   ALERT_ACTION,
   HIGH_PRIORITY_ACTION,

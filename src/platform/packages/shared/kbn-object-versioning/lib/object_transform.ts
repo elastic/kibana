@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ObjectMigrationDefinition, ObjectTransform, Version } from './types';
+import type { ObjectMigrationDefinition, ObjectTransform, Version } from './types';
 import { validateObj, validateVersion } from './utils';
 
 /**
@@ -126,7 +126,7 @@ export const initTransform =
         try {
           if (!migrationDefinition[requestVersion]) {
             return {
-              error: new Error(`Unvalid version to up transform from [${requestVersion}].`),
+              error: new Error(`Invalid version to up transform from [${requestVersion}].`),
               value: null,
             };
           }
@@ -140,9 +140,9 @@ export const initTransform =
 
           const targetVersion = getVersion(to);
 
-          if (!migrationDefinition[targetVersion]) {
+          if (!migrationDefinition[targetVersion] || targetVersion < 1) {
             return {
-              error: new Error(`Unvalid version to up transform to [${to}].`),
+              error: new Error(`Invalid version to up transform to [${to}].`),
               value: null,
             };
           }
@@ -168,9 +168,9 @@ export const initTransform =
         { validate = true }: { validate?: boolean } = {}
       ) => {
         try {
-          if (!migrationDefinition[requestVersion]) {
+          if (!migrationDefinition[requestVersion] || requestVersion < 1) {
             return {
-              error: new Error(`Unvalid version to down transform to [${requestVersion}].`),
+              error: new Error(`Invalid version to down transform to [${requestVersion}].`),
               value: null,
             };
           }
@@ -179,7 +179,7 @@ export const initTransform =
 
           if (!migrationDefinition[fromVersion]) {
             return {
-              error: new Error(`Unvalid version to down transform from [${from}].`),
+              error: new Error(`Invalid version to down transform from [${from}].`),
               value: null,
             };
           }

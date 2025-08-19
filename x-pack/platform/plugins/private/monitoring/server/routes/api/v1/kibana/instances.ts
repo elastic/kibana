@@ -8,7 +8,7 @@
 import { getKibanaClusterStatus } from './_get_kibana_cluster_status';
 import { getKibanas } from '../../../../lib/kibana/get_kibanas';
 import { handleError } from '../../../../lib/errors';
-import { MonitoringCore } from '../../../../types';
+import type { MonitoringCore } from '../../../../types';
 import {
   postKibanaInstancesRequestParamsRT,
   postKibanaInstancesRequestPayloadRT,

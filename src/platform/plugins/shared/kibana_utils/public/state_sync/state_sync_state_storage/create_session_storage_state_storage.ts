@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IStateStorage } from './types';
+import type { IStateStorage } from './types';
 
 /**
  * {@link IStateStorage} for storing state in browser {@link Storage}
