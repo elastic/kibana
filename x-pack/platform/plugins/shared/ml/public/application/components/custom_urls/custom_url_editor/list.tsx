@@ -93,11 +93,8 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
       actionButtons: css`
         max-width: calc(${euiTheme.size.xl} * 3);
       `,
-      panel: css`
-        margin: 0 ${euiTheme.size.s};
-      `,
     }),
-    [euiTheme.size.xl, euiTheme.size.xxxxl, euiTheme.size.s]
+    [euiTheme.size.xl, euiTheme.size.xxxxl]
   );
 
   const onLabelChange = (e: ChangeEvent<HTMLInputElement>, index: number) => {
@@ -239,7 +236,6 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
           data-test-subj={`mlJobEditCustomUrlItem_${index}`}
           role="listitem"
           aria-labelledby={`custom-url-heading-${index}`}
-          css={styles.panel}
         >
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
