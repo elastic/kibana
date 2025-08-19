@@ -22,6 +22,23 @@ export const addDataPathAttributePlugin = (): PluginObj<PluginState> => {
           state,
         });
       },
+      VariableDeclarator(path, state) {
+        const initPath = path.get('init');
+        if (initPath.isJSXElement()) {
+          const openingElementPath = initPath.get('openingElement');
+          if (
+            openingElementPath &&
+            !Array.isArray(openingElementPath) &&
+            openingElementPath.isJSXOpeningElement()
+          ) {
+            plugin({
+              babel,
+              state,
+              nodePath: openingElementPath,
+            });
+          }
+        }
+      },
     },
   };
 };
