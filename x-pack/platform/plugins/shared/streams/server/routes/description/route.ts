@@ -27,8 +27,8 @@ const generateDescriptionRoute = createServerRoute({
   }),
   options: {
     access: 'public',
-    summary: 'identify the system features using LLM',
-    description: 'identify the system features using LLM',
+    summary: 'identify the stream description using LLM',
+    description: 'identify the stream description using LLM',
     availability: {
       since: '9.2.0',
       stability: 'experimental',
