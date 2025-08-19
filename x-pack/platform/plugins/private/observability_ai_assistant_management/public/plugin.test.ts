@@ -26,7 +26,7 @@ describe('Observability AI Assistant Management plugin', () => {
 
   const createManagementMock = () => {
     const apps: any[] = [];
-    const aiSection = {
+    const kibanaSection = {
       registerApp: (args: any) => {
         const app = {
           id: args.id,
@@ -44,7 +44,7 @@ describe('Observability AI Assistant Management plugin', () => {
       getApps: () => apps,
     };
     return {
-      sections: { section: { ai: aiSection } },
+      sections: { section: { kibana: kibanaSection } },
     } as unknown as ManagementSetup;
   };
 
@@ -75,7 +75,7 @@ describe('Observability AI Assistant Management plugin', () => {
         ml: {} as any,
       });
 
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -94,6 +94,41 @@ describe('Observability AI Assistant Management plugin', () => {
 
       // Switch to basic
       license$.next(makeLicense('basic'));
+      expect(app.enabled).toBe(false);
+    });
+
+    it('disables again when downgrading from enterprise to gold', async () => {
+      const plugin = new AiAssistantManagementObservabilityPlugin({
+        config: {
+          get: jest.fn(() => ({
+            logSourcesEnabled: true,
+            spacesEnabled: true,
+            visibilityEnabled: true,
+          })),
+        },
+        env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
+      } as unknown as PluginInitializerContext);
+
+      const management = createManagementMock();
+      const coreSetup = createCoreSetupMock();
+
+      await plugin.setup(coreSetup, {
+        management,
+        observabilityAIAssistant: {} as any,
+        ml: {} as any,
+      });
+
+      const app = (management.sections.section.kibana as any).getApps()[0];
+      expect(app).toBeDefined();
+      expect(app.enabled).toBe(false);
+
+      const license$ = new BehaviorSubject<any>(makeLicense('enterprise'));
+      plugin.start({} as CoreStart, { licensing: { license$ } } as any);
+
+      expect(app.enabled).toBe(true);
+
+      // downgrade license
+      license$.next(makeLicense('gold'));
       expect(app.enabled).toBe(false);
     });
   });
