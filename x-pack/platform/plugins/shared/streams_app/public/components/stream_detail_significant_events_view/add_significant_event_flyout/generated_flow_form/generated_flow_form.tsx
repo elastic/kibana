@@ -16,6 +16,7 @@ import { validateQuery } from '../common/validate_query';
 import { AIFeaturesDisabledCallout } from './ai_features_disabled_callout';
 import { SignificantEventsGeneratedTable } from './significant_events_generated_table';
 import { useAIFeatures } from './use_ai_features';
+import { AIConnectorSelector } from './ai_connector_selector';
 
 interface Props {
   definition: Streams.all.Definition;
@@ -105,22 +106,30 @@ export function GeneratedFlowForm({ setQueries, definition, setCanSave, isSubmit
       )}
       {aiFeatures && aiFeatures.enabled && (
         <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
-          <EuiButton
-            disabled={isGenerating || isSubmitting}
-            isLoading={isGenerating}
-            onClick={() => onGenerateClick()}
-          >
-            {isGenerating
-              ? i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
-                  { defaultMessage: 'Generating...' }
-                )
-              : i18n.translate(
-                  'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
+          <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+            <EuiButton
+              disabled={isGenerating || isSubmitting}
+              isLoading={isGenerating}
+              iconType="sparkles"
+              size="s"
+              onClick={() => onGenerateClick()}
+            >
+              {isGenerating
+                ? i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generatingButtonLabel',
+                    { defaultMessage: 'Generating...' }
+                  )
+                : i18n.translate(
+                    'xpack.streams.addSignificantEventFlyout.aiFlow.generateButtonLabel',
 
-                  { defaultMessage: 'Generate' }
-                )}
-          </EuiButton>
+                    { defaultMessage: 'Generate' }
+                  )}
+            </EuiButton>
+            <AIConnectorSelector
+              genAiConnectors={aiFeatures.genAiConnectors}
+              disabled={isSubmitting || isGenerating}
+            />
+          </EuiFlexGroup>
 
           <SignificantEventsGeneratedTable
             isSubmitting={isSubmitting}
