@@ -20,7 +20,7 @@ export const getComponentData = async ({
   setFlyoutRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
-  const formattedPath = fileInfo.fileName?.split('/kibana')[1];
+  const formattedPath = fileInfo.fileName.split('/kibana')[1];
 
   try {
     const { codeowners }: InspectComponentResponse = await core.http.post(INSPECT_COMPONENT_ROUTE, {
