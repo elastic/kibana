@@ -22,13 +22,6 @@ describe('AccessControlService', () => {
       ? mockAuthenticatedUser({
           username: profileUid,
           profile_uid: profileUid,
-          authentication_realm: { name: '', type: '' },
-          lookup_realm: { name: '', type: '' },
-          authentication_provider: { name: 'basic', type: 'basic' },
-          authentication_type: 'basic',
-          roles: [],
-          enabled: true,
-          elastic_cloud_user: false,
         })
       : null;
 
