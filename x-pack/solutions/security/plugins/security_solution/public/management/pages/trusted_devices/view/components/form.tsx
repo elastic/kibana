@@ -30,6 +30,7 @@ import type {
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
+import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
@@ -301,6 +302,7 @@ const OPERATOR_OPTIONS = [
 export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
   ({ item, onChange, mode = 'create', disabled = false, error: submitError }) => {
     const [hasUserSelectedOs, setHasUserSelectedOs] = useState<boolean>(false);
+    const [hasFormChanged, setHasFormChanged] = useState(false);
 
     const getTestId = useTestIdGenerator('trustedDevices-form');
 
@@ -325,6 +327,13 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       }
       return item;
     }, [item, mode, hasUserSelectedOs]);
+
+    const showAssignmentSection = useCanAssignArtifactPerPolicy(
+      currentItem,
+      mode,
+      hasFormChanged,
+      'enterprise'
+    );
 
     const updateVisitedFields = useCallback((updates: Record<string, boolean>) => {
       setVisitedFields((prev) => ({ ...prev, ...updates }));
@@ -395,6 +404,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         const validation = validateForm(updatedItem);
 
         setValidationResult(validation);
+        setHasFormChanged(true);
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
@@ -428,6 +438,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
 
         // Mark that user has explicitly selected an OS
         setHasUserSelectedOs(true);
+        setHasFormChanged(true);
 
         const updatedItem = {
           ...currentItem,
@@ -464,6 +475,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
         const validation = validateForm(updatedItem);
 
         setValidationResult(validation);
+        setHasFormChanged(true);
 
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
@@ -500,6 +512,7 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
       (updatedItem) => {
         const validation = validateForm(updatedItem);
 
+        setHasFormChanged(true);
         onChange({ item: updatedItem, isValid: validation.isValid });
       },
       [onChange, validateForm]
@@ -563,16 +576,20 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
           validationResult={validationResult}
         />
 
-        <EuiHorizontalRule />
+        {showAssignmentSection ? (
+          <>
+            <EuiHorizontalRule />
 
-        <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
-          <EffectedPolicySelect
-            item={currentItem}
-            description={POLICY_SELECT_DESCRIPTION}
-            data-test-subj={getTestId('effectedPolicies')}
-            onChange={handlePolicyChange}
-          />
-        </EuiFormRow>
+            <EuiFormRow fullWidth data-test-subj={getTestId('policySelection')}>
+              <EffectedPolicySelect
+                item={currentItem}
+                description={POLICY_SELECT_DESCRIPTION}
+                data-test-subj={getTestId('effectedPolicies')}
+                onChange={handlePolicyChange}
+              />
+            </EuiFormRow>
+          </>
+        ) : null}
       </EuiForm>
     );
   }
