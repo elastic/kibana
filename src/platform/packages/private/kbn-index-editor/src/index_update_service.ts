@@ -262,8 +262,6 @@ export class IndexUpdateService {
   // Accumulate actions in a buffer
   private bufferState$: Observable<BulkUpdateOperations> = this._actions$.pipe(
     scan((acc: BulkUpdateOperations, action: Action) => {
-      this._error$.next(null);
-
       switch (action.type) {
         case 'add-doc':
           return [...acc, action];
@@ -667,21 +665,6 @@ export class IndexUpdateService {
     };
   }
 
-  public async processImportedData(indexName: string) {
-    if (this.isIndexCreated()) {
-      // This timeout can be cleaned when https://github.com/elastic/kibana/issues/232225 is resolved
-      setTimeout(async () => {
-        const dataView = await firstValueFrom(this.dataView$);
-        await this.data.dataViews.refreshFields(dataView, false, true);
-        this._fileImported$.next();
-        this.refresh();
-      }, 2000);
-    } else {
-      this.setIndexName(indexName);
-      this.setIndexCreated(true);
-    }
-  }
-
   public refresh() {
     this._isFetching$.next(true);
     this._refreshSubject$.next(Date.now());
@@ -869,6 +852,21 @@ export class IndexUpdateService {
       throw error;
     } finally {
       this._isSaving$.next(false);
+    }
+  }
+
+  public async processImportedData(indexName: string) {
+    if (this.isIndexCreated()) {
+      // This timeout can be cleaned when https://github.com/elastic/kibana/issues/232225 is resolved
+      setTimeout(async () => {
+        const dataView = await firstValueFrom(this.dataView$);
+        await this.data.dataViews.refreshFields(dataView, false, true);
+        this._fileImported$.next();
+        this.refresh();
+      }, 2000);
+    } else {
+      this.setIndexName(indexName);
+      this.setIndexCreated(true);
     }
   }
 
