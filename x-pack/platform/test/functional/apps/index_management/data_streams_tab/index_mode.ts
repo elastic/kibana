@@ -69,9 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await log.debug('Navigating to the data streams tab');
       await security.testUser.setRoles(['index_management_user']);
-      await pageObjects.common.navigateToApp('indexManagement');
-      // Navigate to the data streams tab
-      await pageObjects.indexManagement.changeTabs('data_streamsTab');
+      await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');
       await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
