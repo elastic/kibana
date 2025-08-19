@@ -43,7 +43,7 @@ import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import type { SortOrder } from '@kbn/unified-data-table';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { IndexEditorErrors } from './types';
-import { parsePrimitive, isPlaceholderColumn } from './utils';
+import { parsePrimitive } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
 const BUFFER_TIMEOUT_MS = 5000; // 5 seconds
 
