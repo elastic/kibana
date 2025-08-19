@@ -128,15 +128,17 @@ export interface IDataStreamClient<S extends {}, SRM extends BaseSearchRuntimeMa
 }
 
 // An attempt at getting TS to check mapping properties match the schema
-type ObjectToPropertiesDefinition<O extends Record<string, unknown>> = {
-  [K in keyof O]?: {} extends O[K]
-    ? never
-    : O[K] extends Record<string, unknown>
-    ? Omit<Strict<api.MappingObjectProperty>, 'properties'> & {
-        type: 'object';
-        properties: ObjectToPropertiesDefinition<O[K]>;
-      }
-    : O[K] extends string
-    ? StringMapping
-    : Strict<api.MappingProperty>;
-};
+type ObjectToPropertiesDefinition<O extends Record<string, unknown>> = {} extends O
+  ? never
+  : {
+      [K in keyof O]?: {} extends O[K]
+        ? never
+        : O[K] extends Record<string, unknown>
+        ? Omit<Strict<api.MappingObjectProperty>, 'properties'> & {
+            type: 'object';
+            properties: ObjectToPropertiesDefinition<O[K]>;
+          }
+        : O[K] extends string
+        ? StringMapping
+        : Strict<api.MappingProperty>;
+    };

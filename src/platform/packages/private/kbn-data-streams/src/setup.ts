@@ -18,12 +18,16 @@ const defaultIndexSettings: () => api.IndicesIndexSettings = () => ({
   hidden: true,
 });
 
-// https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
+/**
+ * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
+ *
+ * Endeavour to be idempotent and race-condition safe.
+ */
 export async function setup({
   logger,
   dataStreams,
   elasticsearchClient,
-}: DataStreamClientArgs<{}, {}>) {
+}: DataStreamClientArgs<any>) {
   logger = logger.get('data-streams-setup');
   logger.debug(`Setting up index template for data stream: ${dataStreams.name}`);
 
@@ -45,10 +49,15 @@ export async function setup({
   }
 
   const previousVersions: string[] = [];
-  const settings = defaultsDeep(dataStreams.settings, defaultIndexSettings());
+  const settings: api.IndicesIndexSettings = defaultsDeep(
+    dataStreams.settings,
+    defaultIndexSettings()
+  );
+  const dataStreamSettings = { hidden: true }; // Not configurable for now
   const nextHash = objectHash({
     mappings: dataStreams.mappings ?? {},
     settings,
+    dataStreamSettings,
   });
 
   if (existingIndexTemplate && existingIndexTemplate.index_template?._meta?.version !== nextHash) {
@@ -65,6 +74,7 @@ export async function setup({
     elasticsearchClient.indices.putIndexTemplate({
       name: dataStreams.name,
       index_patterns: [`${dataStreams.name}*`],
+      data_stream: dataStreamSettings,
       template: {
         mappings: dataStreams.mappings,
         settings,
@@ -102,7 +112,7 @@ export async function setup({
       if (
         error instanceof EsErrors.ResponseError &&
         error.statusCode === 400 &&
-        error.body.type === 'resource_already_exists_exception'
+        error.body?.error.type === 'resource_already_exists_exception'
       ) {
         // Data stream already exists, we can ignore this error, probably racing another create call
         logger.debug(`Data stream already exists: ${dataStreams.name}`);

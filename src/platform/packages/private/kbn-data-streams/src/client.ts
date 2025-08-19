@@ -20,9 +20,12 @@ import {
 } from './types';
 import { setup } from './setup';
 
-type AnyDataStream = DataStreamDefinition<{}, {}>;
+type AnyDataStream = DataStreamDefinition<any>;
 
-export interface DataStreamClientArgs<S extends object, SRM extends BaseSearchRuntimeMappings> {
+export interface DataStreamClientArgs<
+  S extends object,
+  SRM extends BaseSearchRuntimeMappings = {}
+> {
   /**
    * @remark For now just one
    */
