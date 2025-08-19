@@ -17,14 +17,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-<<<<<<< HEAD
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
-=======
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
->>>>>>> ecbaee23c92b9a8b9dbb083ecf5db6da72432eac
+import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =

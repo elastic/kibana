@@ -7,7 +7,6 @@
 import { EuiNotificationBadge, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SpanLinks } from '.';
 import type { SpanLinksCount } from '../../app/transaction_details/waterfall_with_summary/waterfall_container/waterfall/waterfall_helpers/waterfall_helpers';
 import { TechnicalPreviewBadge } from '../technical_preview_badge';
@@ -16,10 +15,9 @@ interface Props {
   spanLinksCount: SpanLinksCount;
   traceId: string | undefined;
   spanId: string | undefined;
-  processorEvent: ProcessorEvent;
 }
 
-export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, processorEvent }: Props) {
+export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId }: Props) {
   if ((!spanLinksCount.linkedChildren && !spanLinksCount.linkedParents) || !traceId || !spanId) {
     return undefined;
   }
@@ -43,12 +41,7 @@ export function getSpanLinksTabContent({ spanLinksCount, traceId, spanId, proces
     content: (
       <>
         <EuiSpacer size="m" />
-        <SpanLinks
-          spanLinksCount={spanLinksCount}
-          traceId={traceId}
-          spanId={spanId}
-          processorEvent={processorEvent}
-        />
+        <SpanLinks spanLinksCount={spanLinksCount} traceId={traceId} spanId={spanId} />
       </>
     ),
   };
