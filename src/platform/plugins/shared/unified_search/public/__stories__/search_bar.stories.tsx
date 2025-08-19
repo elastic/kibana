@@ -9,13 +9,14 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { DataViewBase, Query } from '@kbn/es-query';
+import type { DataViewBase, Query } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter } from '@kbn/es-query';
 import { EuiButton, EuiComboBox } from '@elastic/eui';
-import { SearchBar, SearchBarProps } from '../search_bar';
+import type { SearchBarProps } from '../search_bar';
+import { SearchBar } from '../search_bar';
 import { setIndexPatterns } from '../services';
 
 const mockIndexPatterns = [

@@ -9,7 +9,7 @@
 
 import { functionWrapper } from './utils';
 import { variable } from '../var';
-import { ExecutionContext } from '../../../execution/types';
+import type { ExecutionContext } from '../../../execution/types';
 
 describe('expression_functions', () => {
   describe('var', () => {

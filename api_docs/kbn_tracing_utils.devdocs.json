@@ -1,0 +1,440 @@
+{
+  "id": "@kbn/tracing-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.createWithActiveSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "createWithActiveSpan",
+        "description": [
+          "\nFactory function that creates a version of {@link WithActiveSpan} with\ndefault options."
+        ],
+        "signature": [
+          "(defaultOptions: ",
+          {
+            "pluginId": "@kbn/tracing-utils",
+            "scope": "common",
+            "docId": "kibKbnTracingUtilsPluginApi",
+            "section": "def-common.WithActiveSpanOptions",
+            "text": "WithActiveSpanOptions"
+          },
+          ", withActiveSpanWrapper: ",
+          "WithActiveSpanWithContext",
+          " | undefined) => ",
+          "WithActiveSpan"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/create_with_active_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.createWithActiveSpan.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tracing-utils",
+                "scope": "common",
+                "docId": "kibKbnTracingUtilsPluginApi",
+                "section": "def-common.WithActiveSpanOptions",
+                "text": "WithActiveSpanOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/create_with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.createWithActiveSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "withActiveSpanWrapper",
+            "description": [],
+            "signature": [
+              "WithActiveSpanWithContext",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/create_with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.isEntrySpan",
+        "type": "Function",
+        "tags": [],
+        "label": "isEntrySpan",
+        "description": [
+          "\nDetermines whether a Span is an entry span. See:\nhttps://github.com/elastic/apm/blob/main/specs/agents/tracing-api-otel.md#spans-and-transactions"
+        ],
+        "signature": [
+          "(span: ",
+          "ReadableSpan",
+          ") => boolean | undefined"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/is_entry_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.isEntrySpan.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "span",
+            "description": [],
+            "signature": [
+              "ReadableSpan"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/is_entry_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.withActiveSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withActiveSpan",
+        "description": [],
+        "signature": [
+          "(name: string, cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.withActiveSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withActiveSpan",
+        "description": [],
+        "signature": [
+          "(name: string, opts: ",
+          {
+            "pluginId": "@kbn/tracing-utils",
+            "scope": "common",
+            "docId": "kibKbnTracingUtilsPluginApi",
+            "section": "def-common.WithActiveSpanOptions",
+            "text": "WithActiveSpanOptions"
+          },
+          ", cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tracing-utils",
+                "scope": "common",
+                "docId": "kibKbnTracingUtilsPluginApi",
+                "section": "def-common.WithActiveSpanOptions",
+                "text": "WithActiveSpanOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.withActiveSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withActiveSpan",
+        "description": [],
+        "signature": [
+          "(name: string, opts: ",
+          {
+            "pluginId": "@kbn/tracing-utils",
+            "scope": "common",
+            "docId": "kibKbnTracingUtilsPluginApi",
+            "section": "def-common.WithActiveSpanOptions",
+            "text": "WithActiveSpanOptions"
+          },
+          ", ctx: ",
+          "Context",
+          ", cb: (span?: ",
+          "Span",
+          " | undefined) => T) => T"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$1",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "opts",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tracing-utils",
+                "scope": "common",
+                "docId": "kibKbnTracingUtilsPluginApi",
+                "section": "def-common.WithActiveSpanOptions",
+                "text": "WithActiveSpanOptions"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "ctx",
+            "description": [],
+            "signature": [
+              "Context"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$4",
+            "type": "Function",
+            "tags": [],
+            "label": "cb",
+            "description": [],
+            "signature": [
+              "(span?: ",
+              "Span",
+              " | undefined) => T"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.withActiveSpan",
+        "type": "Function",
+        "tags": [],
+        "label": "withActiveSpan",
+        "description": [
+          "\nStarts an active span in the given or currently active context,\nunwraps returned promises and observables, and automatically\nrecords exceptions and sets the status on the span."
+        ],
+        "signature": [
+          "(args: Args) => unknown"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.withActiveSpan.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "args",
+            "description": [],
+            "signature": [
+              "Args"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/tracing-utils",
+        "id": "def-common.WithActiveSpanOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "WithActiveSpanOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/tracing-utils",
+            "scope": "common",
+            "docId": "kibKbnTracingUtilsPluginApi",
+            "section": "def-common.WithActiveSpanOptions",
+            "text": "WithActiveSpanOptions"
+          },
+          " extends ",
+          "SpanOptions"
+        ],
+        "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/tracing-utils",
+            "id": "def-common.WithActiveSpanOptions.tracer",
+            "type": "Object",
+            "tags": [],
+            "label": "tracer",
+            "description": [],
+            "signature": [
+              "Tracer",
+              " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-tracing-utils/src/with_active_span.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
