@@ -83,7 +83,11 @@ export const createToolCallMessages = (toolCall: ToolCallWithResult): [AIMessage
 
   const toolResultMessage = new ToolMessage({
     tool_call_id: toolCall.tool_call_id,
-    content: JSON.stringify(toolCall.results),
+    content: toolCall.results.map((result) => ({
+      type: 'text',
+      source_type: 'text',
+      text: JSON.stringify(result),
+    })),
   });
 
   return [toolCallMessage, toolResultMessage];
