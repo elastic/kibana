@@ -180,7 +180,7 @@ export class GeoUploadForm extends Component<Props, State> {
                 fullWidth
               >
                 <CodeEditor
-                  value={this.props?.indexSettings}
+                  value={this.props.indexSettings}
                   height="300px"
                   languageId="json"
                   languageConfiguration={{
