@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Attributes } from '@opentelemetry/api';
+import type { Attributes } from '@opentelemetry/api';
 import { isArray, isPlainObject } from 'lodash';
 
 /**

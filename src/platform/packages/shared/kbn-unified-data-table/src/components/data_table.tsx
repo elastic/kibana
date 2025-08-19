@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ComponentProps } from 'react';
 import React, {
-  ComponentProps,
   useCallback,
   useEffect,
   useImperativeHandle,
@@ -20,8 +20,16 @@ import classnames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import {
+import type {
   EuiDataGridSorting,
+  EuiDataGridRefProps,
+  EuiDataGridControlColumn,
+  EuiDataGridCustomBodyProps,
+  EuiDataGridStyle,
+  EuiDataGridProps,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+} from '@elastic/eui';
+import {
   EuiDataGrid,
   EuiScreenReaderOnly,
   EuiSpacer,
@@ -29,12 +37,6 @@ import {
   htmlIdGenerator,
   EuiLoadingSpinner,
   EuiIcon,
-  EuiDataGridRefProps,
-  EuiDataGridControlColumn,
-  EuiDataGridCustomBodyProps,
-  EuiDataGridStyle,
-  EuiDataGridProps,
-  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
@@ -46,8 +48,8 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import {
-  RowControlColumn,
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
   getVisibleColumns,
@@ -64,7 +66,7 @@ import {
 import { useThrottleFn } from '@kbn/react-hooks';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import { DATA_GRID_DENSITY_STYLE_MAP, useDataGridDensity } from '../hooks/use_data_grid_density';
-import {
+import type {
   UnifiedDataTableSettings,
   ValueToStringConverter,
   DataTableColumnsMeta,
@@ -83,7 +85,8 @@ import {
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
-import { DataTableContext, UnifiedDataTableContext } from '../table_context';
+import type { DataTableContext } from '../table_context';
+import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
 import { useRowHeightsOptions } from '../hooks/use_row_heights_options';
@@ -97,10 +100,10 @@ import {
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
 import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
-import { useRowHeight } from '../hooks/use_row_height';
+import { useRowHeight, RowHeightType } from '../hooks/use_row_height';
 import { CompareDocuments } from './compare_documents';
 import { useFullScreenWatcher } from '../hooks/use_full_screen_watcher';
-import { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
+import type { UnifiedDataTableRenderCustomToolbar } from './custom_toolbar/render_custom_toolbar';
 import { getCustomCellPopoverRenderer } from '../utils/get_render_cell_popover';
 import { useSelectedDocs } from '../hooks/use_selected_docs';
 import {

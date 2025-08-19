@@ -724,6 +724,10 @@
                 "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
+                "plugin": "indicesMetadata",
+                "path": "x-pack/platform/plugins/private/indices_metadata/server/lib/services/sender.ts"
+              },
+              {
                 "plugin": "intercepts",
                 "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
@@ -849,6 +853,14 @@
               },
               {
                 "plugin": "@kbn/langchain",
+                "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.ts"
+              },
+              {
+                "plugin": "@kbn/langchain",
+                "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
+              },
+              {
+                "plugin": "@kbn/langchain",
                 "path": "x-pack/platform/packages/shared/kbn-langchain/server/tracers/telemetry/telemetry_tracer.test.ts"
               },
               {
@@ -858,6 +870,10 @@
               {
                 "plugin": "observabilityAIAssistant",
                 "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/functions/context/utils/recall_and_score.test.ts"
+              },
+              {
+                "plugin": "observability",
+                "path": "x-pack/solutions/observability/plugins/observability/public/services/telemetry/telemetry_client.ts"
               },
               {
                 "plugin": "observability",
@@ -993,10 +1009,6 @@
               },
               {
                 "plugin": "elasticAssistant",
-                "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/execute_tools.ts"
-              },
-              {
-                "plugin": "elasticAssistant",
                 "path": "x-pack/solutions/security/plugins/elastic_assistant/server/lib/langchain/graphs/default_assistant_graph/nodes/generate_chat_title.ts"
               },
               {
@@ -1118,6 +1130,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/async_sender.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.ts"
               },
               {
                 "plugin": "securitySolutionServerless",
@@ -1730,6 +1746,26 @@
               {
                 "plugin": "actions",
                 "path": "x-pack/platform/plugins/shared/actions/server/lib/action_executor.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/diagnostic/health_diagnostic_service.test.ts"
               },
               {
                 "plugin": "@kbn/core",

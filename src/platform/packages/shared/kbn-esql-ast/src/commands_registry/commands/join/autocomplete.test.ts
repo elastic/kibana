@@ -13,7 +13,7 @@ import {
 } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks, type ICommandContext } from '../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 
