@@ -119,7 +119,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
         await pageObjects.svlCommonPage.loginWithCustomRole();
         await pageObjects.common.navigateToApp('indexManagement');
-        await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
       after(async () => {

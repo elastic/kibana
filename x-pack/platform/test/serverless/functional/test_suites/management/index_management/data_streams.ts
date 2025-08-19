@@ -221,10 +221,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       };
 
       before(async () => {
-        await pageObjects.common.navigateToApp('indexManagement');
-        // Navigate to the indices tab
-        await pageObjects.indexManagement.changeTabs('data_streamsTab');
-        await pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.indexManagement.navigateToIndexManagementTab('data_streams');
       });
 
       afterEach(async () => {
