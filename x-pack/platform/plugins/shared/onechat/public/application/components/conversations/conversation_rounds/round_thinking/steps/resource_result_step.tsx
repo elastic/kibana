@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
-import type { ResourceResult } from '@kbn/onechat-common/tools/tool_result';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiBasicTable, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ResourceResult } from '@kbn/onechat-common/tools/tool_result';
+import React from 'react';
 
 interface ResourceResultStepProps {
   result: ResourceResult;
@@ -56,20 +55,10 @@ const hideTableHeaderStyles = css`
 
 export const ResourceResultStep: React.FC<ResourceResultStepProps> = ({ result }) => {
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.onechat.conversation.thinking.resourceResult.title"
-          defaultMessage="Found document(s)"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiBasicTable
-          css={hideTableHeaderStyles}
-          columns={resourceResultColumns}
-          items={[{ resourceLink: result }]}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiBasicTable
+      css={hideTableHeaderStyles}
+      columns={resourceResultColumns}
+      items={[{ resourceLink: result }]}
+    />
   );
 };

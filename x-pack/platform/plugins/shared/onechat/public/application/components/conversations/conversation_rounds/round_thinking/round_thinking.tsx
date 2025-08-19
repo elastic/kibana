@@ -7,10 +7,8 @@
 
 import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { isToolCallStep } from '@kbn/onechat-common';
 import type { ReactNode } from 'react';
 import React from 'react';
-import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { RoundSteps } from './steps/round_steps';
 
 interface RoundThinkingProps {
@@ -19,22 +17,6 @@ interface RoundThinkingProps {
 }
 
 export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, loadingIndicator }) => {
-  const toolResults = steps
-    .filter(isToolCallStep)
-    .flatMap((step) => step.results)
-    .filter((result) => {
-      // TODO: Should we include other results?
-      // Would just show as a JSON blob
-      if (result.type === ToolResultType.other) {
-        return true;
-      }
-      // Don't include partial resource results
-      if (result.type === ToolResultType.resource && result.data.partial) {
-        return false;
-      }
-      return true;
-    });
-
   if (steps.length === 0) {
     return loadingIndicator ? <div>{loadingIndicator}</div> : null;
   }
@@ -52,7 +34,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, loadingIndi
       }
     >
       <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
-        <RoundSteps toolResults={toolResults} />
+        <RoundSteps steps={steps} />
       </EuiPanel>
     </EuiAccordion>
   );

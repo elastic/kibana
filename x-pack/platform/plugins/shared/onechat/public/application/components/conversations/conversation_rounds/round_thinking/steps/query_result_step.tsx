@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
 import { EuiCodeBlock, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { QueryResult } from '@kbn/onechat-common/tools/tool_result';
-import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 interface QueryResultStepProps {
   result: QueryResult;
@@ -19,26 +18,20 @@ export const QueryResultStep: React.FC<QueryResultStepProps> = ({ result: { data
   const esql = 'esql' in data && data.esql;
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <FormattedMessage
-          id="xpack.onechat.conversation.thinking.queryResult.title"
-          defaultMessage="Query result"
-        />
-      </EuiFlexItem>
-      {esql && (
-        <EuiFlexItem>
+      <EuiFlexItem>
+        {esql && (
           <EuiCodeBlock language="sql" isCopyable paddingSize="none">
             {esql}
           </EuiCodeBlock>
-        </EuiFlexItem>
-      )}
-      {dsl && (
-        <EuiFlexItem>
+        )}
+      </EuiFlexItem>
+      <EuiFlexItem>
+        {dsl && (
           <EuiCodeBlock language="json" isCopyable paddingSize="none">
             {JSON.stringify(dsl, null, 2)}
           </EuiCodeBlock>
-        </EuiFlexItem>
-      )}
+        )}
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

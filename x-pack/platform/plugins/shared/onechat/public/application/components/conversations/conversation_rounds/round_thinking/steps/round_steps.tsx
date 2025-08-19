@@ -5,15 +5,51 @@
  * 2.0.
  */
 
-import { EuiCodeBlock, EuiSteps, useEuiTheme } from '@elastic/eui';
+import { EuiSteps, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import type { ConversationRoundStep } from '@kbn/onechat-common/chat/conversation';
+import { isReasoningStep, isToolCallStep } from '@kbn/onechat-common/chat/conversation';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { conversationRoundsId } from '../../conversation_rounds.styles';
 import { QueryResultStep } from './query_result_step';
 // import { ResourceResultStep } from './resource_result_step';
+import { OtherResultStep } from './other_result_step';
 import { TabularDataResultStep } from './tabular_data_result_step';
+
+const resourceResultTitle = i18n.translate(
+  'xpack.onechat.conversation.thinking.resourceResult.title',
+  {
+    defaultMessage: 'Found document(s)',
+  }
+);
+const tabularResultTitle = i18n.translate(
+  'xpack.onechat.conversation.thinking.tabularResult.title',
+  {
+    defaultMessage: 'Table result',
+  }
+);
+const queryResultTitle = i18n.translate('xpack.onechat.conversation.thinking.queryResult.title', {
+  defaultMessage: 'Query result',
+});
+const otherResultTitle = i18n.translate('xpack.onechat.conversation.thinking.otherResult.title', {
+  defaultMessage: 'Other result',
+});
+
+const getToolResultTitle = (toolResult: ToolResult) => {
+  if (toolResult.type === ToolResultType.resource) {
+    return resourceResultTitle;
+  }
+  if (toolResult.type === ToolResultType.tabularData) {
+    return tabularResultTitle;
+  }
+  if (toolResult.type === ToolResultType.query) {
+    return queryResultTitle;
+  }
+  return otherResultTitle;
+};
 
 interface ToolResultDisplayProps {
   toolResult: ToolResult;
@@ -32,38 +68,22 @@ const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => 
   }
 
   // Other results
-  return (
-    <EuiCodeBlock
-      language="json"
-      fontSize="s"
-      paddingSize="s"
-      isCopyable={false}
-      transparentBackground
-    >
-      {JSON.stringify(toolResult, null, 2)}
-    </EuiCodeBlock>
-  );
+  // Also showing Resource results as Other results for now as JSON blobs
+  return <OtherResultStep result={toolResult} />;
 };
 
 interface RoundStepsProps {
-  toolResults: ToolResult[];
+  steps: ConversationRoundStep[];
 }
 
-export const RoundSteps: React.FC<RoundStepsProps> = ({ toolResults }) => {
+export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
   const { euiTheme } = useEuiTheme();
   const stepsStyles = css`
-    .euiStep {
-      display: flex;
+    .euiTitle {
+      ${useEuiFontSize('s')}
+      font-weight: ${euiTheme.font.weight.regular};
     }
-    .euiStep__titleWrapper {
-      display: block;
-    }
-    .euiStep__content {
-      padding-block: 0;
-      padding-inline: ${euiTheme.size.m};
-      padding-bottom: ${euiTheme.size.m};
-      margin: 0;
-    }
+
     .euiStepNumber,
     /* Using id for higher specificity to override the default border color */
     #${conversationRoundsId} & .euiStep::before {
@@ -75,12 +95,43 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ toolResults }) => {
     <EuiSteps
       css={stepsStyles}
       titleSize="xxs"
-      steps={toolResults.map((toolResult) => {
-        return {
-          title: '',
-          children: <ToolResultDisplay toolResult={toolResult} />,
-          status: 'incomplete',
-        };
+      steps={steps.flatMap((step) => {
+        if (isToolCallStep(step)) {
+          return step.results
+            .filter((result) => {
+              // TODO: Should we include type Other results?
+              // Would just show as a JSON blob
+              if (result.type === ToolResultType.other) {
+                return true;
+              }
+              // Don't include partial resource results
+              if (result.type === ToolResultType.resource && result.data.partial) {
+                return false;
+              }
+              return true;
+            })
+            .map((toolResult) => {
+              return {
+                title: getToolResultTitle(toolResult),
+                children: <ToolResultDisplay toolResult={toolResult} />,
+                status: 'incomplete',
+              };
+            });
+        }
+
+        // Are reasoning steps produced at all right now?
+        if (isReasoningStep(step)) {
+          return [
+            {
+              title: step.reasoning,
+              // For reasoning, the title is the content so render nothing
+              children: <></>,
+              status: 'incomplete',
+            },
+          ];
+        }
+
+        return [];
       })}
     />
   );
