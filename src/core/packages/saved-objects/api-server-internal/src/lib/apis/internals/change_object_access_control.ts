@@ -265,7 +265,8 @@ export const changeObjectAccessControl = async (
       const error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
       return left({ id, type, error });
     }
-    if (authorizationResult.status === 'unauthorized') {
+
+    if (!authorizationResult.typeMap.has(type)) {
       const error = SavedObjectsErrorHelpers.decorateForbiddenError(
         new Error(
           `User is not authorized to ${
