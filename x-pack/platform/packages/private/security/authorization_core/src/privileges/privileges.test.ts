@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SavedObjectTypeRegistry } from '@kbn/core/server';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { ApiOperation } from '@kbn/core-security-server';
 import { KibanaFeature } from '@kbn/features-plugin/server';
@@ -3748,5 +3749,84 @@ describe('#getReplacedByForPrivilege', () => {
     expect(getReplacedByForPrivilege('minimal_all', privilegeWithReplacedBy)).toEqual([
       { feature: 'alpha', privileges: ['minimal_all'] },
     ]);
+  });
+});
+
+describe('#getWithActions', () => {
+  test('global all contains manage access control only for types supporting access control', async () => {
+    const features: KibanaFeature[] = [
+      new KibanaFeature({
+        id: 'foo-feature',
+        name: 'Foo KibanaFeature',
+        app: ['app-1', 'app-2'],
+        category: { id: 'foo', label: 'foo' },
+        catalogue: ['catalogue-1', 'catalogue-2'],
+        management: {
+          foo: ['management-1', 'management-2'],
+        },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+      }),
+    ];
+    const mockFeaturesPlugin = featuresPluginMock.createSetup();
+    mockFeaturesPlugin.getKibanaFeatures.mockReturnValue(features);
+
+    const typeRegistry = new SavedObjectTypeRegistry();
+    typeRegistry.registerType({
+      name: 'typeSupportingAccessControl',
+      hidden: false,
+      namespaceType: 'agnostic',
+      supportsAccessControl: true,
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+      migrations: {},
+    });
+
+    typeRegistry.registerType({
+      name: 'regular_type',
+      hidden: false,
+      namespaceType: 'agnostic',
+      mappings: {
+        properties: {
+          name: { type: 'keyword' },
+        },
+      },
+      migrations: {},
+    });
+
+    const mockedTypeRegistry = () => Promise.resolve(typeRegistry);
+
+    const privileges = privilegesFactory(
+      actions,
+      mockFeaturesPlugin,
+      mockLicenseServiceBasic,
+      mockedTypeRegistry
+    );
+
+    const privilegesWithActions = await privileges.getWithActions();
+
+    expect(privilegesWithActions.global.all).toContain(
+      actions.savedObject.get('typeSupportingAccessControl', 'manage_access_control')
+    );
+    expect(privilegesWithActions.global.all).not.toContain(
+      actions.savedObject.get('regular_type', 'manage_access_control')
+    );
   });
 });

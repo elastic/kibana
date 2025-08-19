@@ -12,6 +12,8 @@ import type {
 } from '@kbn/core-saved-objects-server/src/extensions/security';
 import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
+export const MANAGE_ACCESS_CONTROL_ACTION = 'manage_access_control';
+
 export class AccessControlService {
   private userForOperation: AuthenticatedUser | null = null;
 
@@ -66,7 +68,7 @@ export class AccessControlService {
 
     for (const type of typesRequiringAccessControl) {
       const typeAuth = typeMap.get(type);
-      const accessControlAuth = typeAuth?.['manage_access_control' as A];
+      const accessControlAuth = typeAuth?.[MANAGE_ACCESS_CONTROL_ACTION as A];
       if (!accessControlAuth) {
         unauthorizedTypes.add(type);
       } else {

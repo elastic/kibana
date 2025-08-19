@@ -55,7 +55,7 @@ import type {
   CheckSavedObjectsPrivileges,
 } from '@kbn/security-plugin-types-server';
 
-import { AccessControlService } from './access_control_service';
+import { AccessControlService, MANAGE_ACCESS_CONTROL_ACTION } from './access_control_service';
 import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
 import { savedObjectEvent } from '../audit';
@@ -416,12 +416,15 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       ],
       [
         SecurityAction.CHANGE_OWNERSHIP,
-        { authzAction: 'manage_access_control', auditAction: AuditAction.UPDATE_OBJECTS_OWNER },
+        {
+          authzAction: MANAGE_ACCESS_CONTROL_ACTION,
+          auditAction: AuditAction.UPDATE_OBJECTS_OWNER,
+        },
       ],
       [
         SecurityAction.CHANGE_ACCESS_MODE,
         {
-          authzAction: 'manage_access_control',
+          authzAction: MANAGE_ACCESS_CONTROL_ACTION,
           auditAction: AuditAction.UPDATE_OBJECTS_ACCESS_MODE,
         },
       ],
@@ -501,9 +504,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
 
     if (typesRequiringAccessControl && typesRequiringAccessControl.size > 0) {
       for (const type of typesRequiringAccessControl) {
-        privilegeActionsMap.set(this.actions.savedObject.get(type, 'manage_access_control'), {
+        privilegeActionsMap.set(this.actions.savedObject.get(type, MANAGE_ACCESS_CONTROL_ACTION), {
           type,
-          action: 'manage_access_control' as A,
+          action: MANAGE_ACCESS_CONTROL_ACTION as A,
         });
       }
     }
@@ -641,7 +644,9 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         }
       }
       if (enforceAccessControl?.typesRequiringAccessControl?.has(type)) {
-        if (!isAuthorizedInAllSpaces(type, 'manage_access_control' as A, spacesArray, typeMap)) {
+        if (
+          !isAuthorizedInAllSpaces(type, MANAGE_ACCESS_CONTROL_ACTION as A, spacesArray, typeMap)
+        ) {
           inaccessibleTypes.add(type);
         }
       }
