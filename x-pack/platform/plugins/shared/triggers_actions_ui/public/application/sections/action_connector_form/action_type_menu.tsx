@@ -13,7 +13,7 @@ import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
 import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
-import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
+import { LEGACY_LABEL, TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
@@ -35,6 +35,7 @@ interface RegisteredActionType {
   actionType: ActionType;
   name: string;
   isExperimental: boolean | undefined;
+  isDeprecated?: boolean;
 }
 
 const filterActionTypes = (actionTypes: RegisteredActionType[], searchValue: string) => {
@@ -120,6 +121,7 @@ export const ActionTypeMenu = ({
         actionType,
         name: actionType.name,
         isExperimental: actionTypeModel.isExperimental,
+        isDeprecated: actionTypeModel.isDeprecated,
       };
     });
 
@@ -143,7 +145,7 @@ export const ActionTypeMenu = ({
           titleSize="xs"
           data-test-subj={`${item.actionType.id}-card`}
           icon={<EuiIcon size="xl" type={item.iconClass} />}
-          title={item.name}
+          title={`${item.name}${item.isDeprecated ? ` ${LEGACY_LABEL}` : ''}`}
           description={item.selectMessage}
           isDisabled={!checkEnabledResult.isEnabled}
           onClick={() => {

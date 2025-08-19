@@ -25,6 +25,10 @@ export const TECH_PREVIEW_LABEL = i18n.translate(
   }
 );
 
+export const LEGACY_LABEL = i18n.translate('xpack.triggersActionsUI.legacyTitleLabel', {
+  defaultMessage: '(Legacy)',
+});
+
 export const TECH_PREVIEW_DESCRIPTION = i18n.translate(
   'xpack.triggersActionsUI.technicalPreviewBadgeDescription',
   {
