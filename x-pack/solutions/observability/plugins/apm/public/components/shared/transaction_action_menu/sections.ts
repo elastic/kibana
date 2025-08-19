@@ -23,8 +23,6 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Environment } from '../../../../common/environment_rt';
 import type { Transaction } from '../../../../typings/es_schemas/ui/transaction';
-import { getDiscoverHref } from '../links/discover_links/discover_link';
-import { getDiscoverQuery } from '../links/discover_links/discover_transaction_link';
 import type { SectionRecord, Action } from './sections_helper';
 import { getNonEmptySections } from './sections_helper';
 import { HOST_NAME, TRACE_ID } from '../../../../common/es_fields/apm';
@@ -255,22 +253,6 @@ export const getSections = ({
     },
   ];
 
-  const kibanaActions: Action[] = [
-    {
-      key: 'sampleDocument',
-      label: i18n.translate('xpack.apm.transactionActionMenu.viewSampleDocumentLinkLabel', {
-        defaultMessage: 'View transaction in Discover',
-      }),
-      href: getDiscoverHref({
-        basePath,
-        query: getDiscoverQuery(transaction),
-        location,
-        dataViewId: dataViewId ?? '',
-      }),
-      condition: !!dataViewId,
-    },
-  ];
-
   const serviceMapHref = apmRouter.link('/service-map', {
     query: {
       rangeFrom,
@@ -355,7 +337,6 @@ export const getSections = ({
         actions: serviceMapActions,
       },
     ],
-    kibana: [{ key: 'kibana', actions: kibanaActions }],
   };
 
   // Filter out actions that shouldnt be shown and sections without any actions.

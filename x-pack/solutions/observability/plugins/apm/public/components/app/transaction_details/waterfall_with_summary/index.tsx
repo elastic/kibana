@@ -13,6 +13,7 @@ import {
   EuiSpacer,
   EuiTitle,
   EuiSkeletonText,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
@@ -131,10 +132,7 @@ export function WaterfallWithSummary<TSample extends {}>({
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="flexEnd">
-              <EuiFlexItem grow={false}>
-                <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
-              </EuiFlexItem>
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="m">
               <EuiFlexItem grow={false}>
                 <MaybeViewTraceLink
                   isLoading={isLoading}
@@ -142,6 +140,26 @@ export function WaterfallWithSummary<TSample extends {}>({
                   waterfall={waterfallFetchResult}
                   environment={environment}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  aria-label={i18n.translate(
+                    'xpack.apm.waterfallWithSummary.viewinDiscoverButton.ariaLabel',
+                    { defaultMessage: 'View in Discover' }
+                  )}
+                  data-test-subj="apmWaterfallWithSummaryGoToDiscoverButton"
+                  iconType="discoverApp"
+                  onClick={() => {
+                    // Handle discover button click
+                  }}
+                >
+                  {i18n.translate('xpack.apm.transactionDetails.viewInDiscoverButtonLabel', {
+                    defaultMessage: 'View in Discover',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TransactionActionMenu isLoading={isLoading} transaction={entryTransaction} />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
