@@ -24,6 +24,7 @@ import {
   MANAGEMENT_ROUTING_BLOCKLIST_PATH,
   MANAGEMENT_ROUTING_RESPONSE_ACTIONS_HISTORY_PATH,
   MANAGEMENT_ROUTING_NOTES_PATH,
+  MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH,
 } from '../common/constants';
 import { NotFoundPage } from '../../app/404';
 import { EndpointsContainer } from './endpoint_hosts';
@@ -40,6 +41,7 @@ import { ResponseActionsContainer } from './response_actions';
 import { PrivilegedRoute } from '../components/privileged_route';
 import { SecurityRoutePageWrapper } from '../../common/components/security_route_page_wrapper';
 import { TrustedDevicesContainer } from './trusted_devices';
+import { EndpointExceptionsContainer } from './endpoint_exceptions';
 
 const EndpointTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.endpoints}>
@@ -52,6 +54,13 @@ const PolicyTelemetry = () => (
   <TrackApplicationView viewId={SecurityPageName.policies}>
     <PolicyContainer />
     <SpyRoute pageName={SecurityPageName.policies} />
+  </TrackApplicationView>
+);
+
+const EndpointExceptionsTelemetry = () => (
+  <TrackApplicationView viewId={SecurityPageName.endpointExceptions}>
+    <EndpointExceptionsContainer />
+    <SpyRoute pageName={SecurityPageName.endpointExceptions} />
   </TrackApplicationView>
 );
 
@@ -113,6 +122,7 @@ export const ManagementContainer = memo(() => {
     canReadActionsLogManagement,
     canReadEndpointList,
     canReadHostIsolationExceptions,
+    canReadEndpointExceptions,
   } = useUserPrivileges().endpointPrivileges;
 
   // Lets wait until we can verify permissions
@@ -147,6 +157,11 @@ export const ManagementContainer = memo(() => {
         path={MANAGEMENT_ROUTING_POLICIES_PATH}
         component={PolicyTelemetry}
         hasPrivilege={canReadPolicyManagement}
+      />
+      <PrivilegedRoute
+        path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
+        component={EndpointExceptionsTelemetry}
+        hasPrivilege={canReadEndpointExceptions}
       />
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
