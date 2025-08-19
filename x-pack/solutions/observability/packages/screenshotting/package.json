@@ -1,0 +1,9 @@
+{
+  "name": "@kbn/screenshotting",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0",
+  "dependencies": {
+    "html2canvas": "^1.4.1"
+  }
+}
