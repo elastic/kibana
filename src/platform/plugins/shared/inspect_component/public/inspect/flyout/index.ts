@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/public';
-import { InspectComponentPluginPublic } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) => {
-  return new InspectComponentPluginPublic(initializerContext);
-};
+export { Header } from './header';
+export { CodeownersSection } from './codeowners_section';
+export { LinksSection } from './links_section';
+export { InspectFlyout, flyoutOptions } from './inspect_flyout';

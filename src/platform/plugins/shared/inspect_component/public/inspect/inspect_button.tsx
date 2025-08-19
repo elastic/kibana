@@ -12,8 +12,8 @@ import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import { isMac, isKeyboardShortcut } from './utils';
-import { InspectOverlay } from './overlay/inspect_overlay';
+import { isMac, isKeyboardShortcut } from '../utils';
+import { InspectOverlay } from './overlay';
 
 const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.tooltip', {
   values: { keyboardShortcut: isMac ? "⌘ '" : "Ctrl '" },

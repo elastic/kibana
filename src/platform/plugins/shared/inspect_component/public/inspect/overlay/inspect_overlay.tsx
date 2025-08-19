@@ -13,9 +13,9 @@ import { createPortal } from 'react-dom';
 import { EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { css } from '@emotion/css';
-import { INSPECT_OVERLAY_ID } from '../../common';
+import { INSPECT_OVERLAY_ID } from '../../../common';
 import { InspectHighlight } from './inspect_highlight';
-import { getElementFromPoint, getInspectedElementData } from '../utils';
+import { getElementFromPoint, getInspectedElementData } from '../../utils';
 
 interface Props {
   core: CoreStart;

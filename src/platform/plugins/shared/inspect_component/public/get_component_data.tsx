@@ -10,7 +10,7 @@
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { INSPECT_COMPONENT_ROUTE } from '../common/constants';
-import { InspectFlyout, flyoutOptions } from './inspect_flyout';
+import { InspectFlyout, flyoutOptions } from './inspect';
 import type { InspectComponentResponse } from '../common';
 import type { GetComponentDataOptions } from './types';
 
