@@ -97,7 +97,7 @@ type FilterStateStoreRestResponse = 'appState' | 'globalState';
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type FilterRestResponse = {
   $state?: {
-    store?: FilterStateStoreRestResponse;
+    store: FilterStateStoreRestResponse;
   };
   meta: FilterMetaRestResponse;
   query?: Record<string, any>;
