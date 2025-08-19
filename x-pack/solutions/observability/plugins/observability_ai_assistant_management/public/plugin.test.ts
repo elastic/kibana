@@ -26,7 +26,7 @@ describe('Observability AI Assistant Management plugin', () => {
 
   const createManagementMock = () => {
     const apps: any[] = [];
-    const aiSection = {
+    const kibanaSection = {
       registerApp: (args: any) => {
         const app = {
           id: args.id,
@@ -44,7 +44,7 @@ describe('Observability AI Assistant Management plugin', () => {
       getApps: () => apps,
     };
     return {
-      sections: { section: { ai: aiSection } },
+      sections: { section: { kibana: kibanaSection } },
     } as unknown as ManagementSetup;
   };
 
@@ -75,7 +75,7 @@ describe('Observability AI Assistant Management plugin', () => {
         ml: {} as any,
       });
 
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 

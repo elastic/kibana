@@ -60,7 +60,7 @@ describe('AI Assistant Management Selection Plugin', () => {
   describe('Licensing', () => {
     const createManagementMock = () => {
       const apps: any[] = [];
-      const aiSection = {
+      const kibanaSection = {
         registerApp: (args: any) => {
           const app = {
             id: args.id,
@@ -79,7 +79,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       };
 
       return {
-        sections: { section: { ai: aiSection } },
+        sections: { section: { kibana: kibanaSection } },
       } as unknown as ManagementSetup;
     };
 
@@ -126,7 +126,7 @@ describe('AI Assistant Management Selection Plugin', () => {
       plugin.setup(coreSetup, { management });
 
       // After setup, app is registered and disabled by default
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -163,7 +163,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       plugin.setup(coreSetup, { management });
 
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -193,7 +193,7 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       plugin.setup(coreSetup, { management });
 
-      const app = (management.sections.section.ai as any).getApps()[0];
+      const app = (management.sections.section.kibana as any).getApps()[0];
       expect(app).toBeDefined();
       expect(app.enabled).toBe(false);
 
@@ -222,6 +222,38 @@ describe('AI Assistant Management Selection Plugin', () => {
 
       // Upgrade to enterprise; still should remain disabled because capability is false
       license$.next(makeLicense('enterprise'));
+      expect(app.enabled).toBe(false);
+    });
+
+    it('disables again when downgrading from enterprise to gold', async () => {
+      const plugin = new AIAssistantManagementPlugin({
+        config: { get: jest.fn() },
+        env: { packageInfo: { buildFlavor: 'traditional', branch: 'main' } },
+      } as unknown as PluginInitializerContext);
+
+      const management = createManagementMock();
+      const coreSetup = createCoreSetupMock();
+
+      plugin.setup(coreSetup, { management });
+
+      const app = (management.sections.section.kibana as any).getApps()[0];
+      expect(app).toBeDefined();
+      expect(app.enabled).toBe(false);
+
+      const license$ = new BehaviorSubject<any>(makeLicense('enterprise'));
+      plugin.start(
+        {
+          uiSettings: { get: jest.fn(() => AIAssistantType.Default) },
+          application: {
+            capabilities: { management: { ai: { aiAssistantManagementSelection: true } } },
+          },
+        } as any,
+        { licensing: { license$ } } as any
+      );
+
+      expect(app.enabled).toBe(true);
+
+      license$.next(makeLicense('gold'));
       expect(app.enabled).toBe(false);
     });
   });
