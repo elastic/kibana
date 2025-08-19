@@ -1086,6 +1086,7 @@ x-pack/solutions/observability/packages/kbn-observability-schema @elastic/obs-ux
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/observability-ai/observability-ai-common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability-ai/observability-ai-server @elastic/obs-ai-assistant
+x-pack/solutions/observability/packages/screenshotting @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-ux-management-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
