@@ -107,7 +107,7 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
-import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -305,7 +305,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       request
     );
 
-    const agentPolicies = [];
+    const agentPolicies: AgentPolicy[] = [];
 
     for (const policyId of enrichedPackagePolicy.policy_ids) {
       const agentPolicy = await agentPolicyService.get(soClient, policyId, true);
@@ -329,6 +329,14 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       if (useSpaceAwareness) {
         validateReusableIntegrationsAndSpaceAwareness(enrichedPackagePolicy, agentPolicies);
       }
+
+      validateDeploymentModesForInputs(
+        packagePolicy.inputs,
+        agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+          ? 'agentless'
+          : 'default',
+        basePkgInfo
+      );
     }
 
     // trailing whitespace causes issues creating API keys
@@ -1217,6 +1225,13 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
             'Reusable integration policies cannot be used with agent policies belonging to multiple spaces.'
           );
         }
+        validateDeploymentModesForInputs(
+          packagePolicy.inputs,
+          agentPolicy?.supports_agentless || packagePolicy.supports_agentless
+            ? 'agentless'
+            : 'default',
+          pkgInfo
+        );
       }
     }
 
@@ -1857,7 +1872,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     ];
 
     const hostedAgentPolicies: string[] = [];
-    const agentlessAgentPolicies = [];
+    const agentlessAgentPolicies: string[] = [];
 
     for (const agentPolicyId of uniqueAgentPolicyIds) {
       try {
@@ -2080,18 +2095,15 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               (!input.policy_template || input.policy_template === i.policy_template)
           );
           // disable some inputs in case of agentless integration
-          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
-            ? false
-            : input.enabled;
 
           return {
             ...defaultInput,
-            enabled,
+            enabled: input.enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled,
+              enabled: input.enabled,
             })),
           } as NewPackagePolicyInput;
         });
