@@ -46,10 +46,14 @@ export interface SuggestionType<TPayload extends {} = {}> {
   attachmentId: string;
   /* The owner of the suggestion. Dictates which solutions can use this suggestion */
   owner: SuggestionOwner;
-  // Tools available for fetching, keyed by tool name
-  tools: Record<string, ToolDefinition>;
-  // Handlers. Can be called programmatically or used with tool calling, keyed to match the tool name
-  handlers: Record<string, SuggestionHandler<TPayload>>;
+  // Handlers and tools associated with each handler. Can be called programmatically or used with tool calling
+  handlers: Record<
+    string,
+    {
+      handler: SuggestionHandler<TPayload>;
+      tool: ToolDefinition;
+    }
+  >;
 }
 
 export type SuggestionHandler<TPayload extends {} = {}> = (
