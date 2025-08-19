@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
 import type { Logger } from '@kbn/core/server';
 import { type InferenceClient } from '@kbn/inference-common';
+import type { Streams } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import moment from 'moment';
+import { analyzeDataset } from './helpers/analyze_dataset';
 
 const DEFAULT_SHORT_LOOKBACK = moment.duration(24, 'hours');
 
@@ -18,6 +19,7 @@ interface Params {
   connectorId: string;
   currentDate?: Date;
   shortLookback?: moment.Duration;
+  definition: Streams.all.Definition;
 }
 
 interface Dependencies {
@@ -35,8 +37,9 @@ export async function identifySystemDescription(
     connectorId,
     currentDate = new Date(),
     shortLookback = DEFAULT_SHORT_LOOKBACK,
+    definition,
   } = params;
-  const { inferenceClient, esClient, logger } = dependencies;
+  const { inferenceClient, esClient } = dependencies;
 
   const mend = moment(currentDate);
   const mstart = mend.clone().subtract(shortLookback);
@@ -44,20 +47,12 @@ export async function identifySystemDescription(
   const start = mstart.valueOf();
   const end = mend.valueOf();
 
-  const analysis = await describeDataset({
-    esClient: esClient.client,
-    start,
-    end,
-    index: name,
-  });
+  const { analysis, categorizationField, short } = await analyzeDataset(
+    { start, end, definition },
+    { esClient }
+  );
 
-  const short = sortAndTruncateAnalyzedFields(analysis);
-
-  logger.debug(() => {
-    return `${JSON.stringify(short)}`;
-  });
-
-  const messageField = analysis.fields.find((f) => f.name === 'message' || f.name === 'body.text');
+  const messageField = analysis.fields.find((f) => f.name === categorizationField);
 
   const { content: systemIdentification } = await inferenceClient.output({
     id: 'identify_system',
