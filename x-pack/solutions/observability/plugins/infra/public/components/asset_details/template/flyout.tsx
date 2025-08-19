@@ -6,8 +6,7 @@
  */
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
@@ -32,13 +31,16 @@ export const Flyout = ({
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  useEffectOnce(() => {
-    telemetry.reportAssetDetailsFlyoutViewed({
-      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType: entity.type,
-      tabId: activeTabId,
-    });
-  });
+  useEffect(() => {
+    if (!loading) {
+      telemetry.reportAssetDetailsFlyoutViewed({
+        componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
+        assetType: entity.type,
+        tabId: activeTabId,
+        schema_selected: schema || 'ecs',
+      });
+    }
+  }, [schema, entity.type, activeTabId, telemetry, loading]);
 
   const handleOnClose = useCallback(() => {
     setUrlState(null);

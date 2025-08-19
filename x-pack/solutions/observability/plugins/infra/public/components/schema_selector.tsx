@@ -23,6 +23,7 @@ import {
   DataSchemaFormatEnum,
   type DataSchemaFormat,
 } from '@kbn/metrics-data-access-plugin/common';
+import { useKibanaContextForPlugin } from '../hooks/use_kibana';
 
 const SCHEMA_NOT_AVAILABLE = i18n.translate('xpack.infra.schemaSelector.notAvailable', {
   defaultMessage: 'Selected schema is not available for this query.',
@@ -132,6 +133,9 @@ export const SchemaSelector = ({
   value: DataSchemaFormat | null;
   isLoading: boolean;
 }) => {
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
   const options = useMemo(
     () =>
       schemas.map((schema) => ({
@@ -167,10 +171,23 @@ export const SchemaSelector = ({
     (selectedValue: SelectOptions) => {
       if (selectedValue !== 'unknown') {
         onChange(selectedValue);
+        telemetry.reportSchemaSelectorInteraction({
+          interaction: 'select schema',
+          schema_selected: selectedValue,
+          schemas_available: schemas,
+        });
       }
     },
-    [onChange]
+    [onChange, schemas, telemetry]
   );
+
+  const handleSchemaSelectorClick = useCallback(() => {
+    telemetry.reportSchemaSelectorInteraction({
+      interaction: 'open drop-down',
+      schema_selected: value,
+      schemas_available: schemas,
+    });
+  }, [value, schemas, telemetry]);
 
   return (
     <>
@@ -185,6 +202,7 @@ export const SchemaSelector = ({
                 css={{ minWidth: '356px' }}
               >
                 <EuiSuperSelect
+                  onClickCapture={handleSchemaSelectorClick}
                   data-test-subj="infraSchemaSelect"
                   id={'infraSchemaSelectorSelect'}
                   options={displayOptions}
