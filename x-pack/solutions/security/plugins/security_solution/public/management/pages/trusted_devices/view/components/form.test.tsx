@@ -21,8 +21,21 @@ import { forceHTMLElementOffsetWidth } from '../../../../components/effected_pol
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
 import { INPUT_ERRORS, CONDITION_FIELD_TITLE, OPERATOR_TITLES } from '../translations';
 import { TrustedDevicesForm } from './form';
+import { licenseService } from '../../../../../common/hooks/use_license';
 
 jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../../common/hooks/use_license', () => {
+  const licenseServiceInstance = {
+    isPlatinumPlus: jest.fn(),
+    isEnterprise: jest.fn(),
+  };
+  return {
+    licenseService: licenseServiceInstance,
+    useLicense: () => {
+      return licenseServiceInstance;
+    },
+  };
+});
 
 describe('Trusted devices form', () => {
   const formPrefix = 'trustedDevices-form';
@@ -139,6 +152,8 @@ describe('Trusted devices form', () => {
 
   beforeEach(() => {
     resetHTMLElementOffsetWidth = forceHTMLElementOffsetWidth();
+    (licenseService.isPlatinumPlus as jest.Mock).mockReturnValue(true);
+    (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
     mockedContext = createAppRootMockRenderer();
     latestUpdatedItem = createItem();
 
@@ -333,5 +348,46 @@ describe('Trusted devices form', () => {
       renderResult.queryByTestId(`${formPrefix}-effectedPolicies-policiesSelectable`)
     ).toBeNull();
     expect(renderResult.queryByTestId('policy-id-0')).toBeNull();
+  });
+
+  describe('Assignment section visibility', () => {
+    it('should show assignment section with enterprise license', () => {
+      (licenseService.isEnterprise as jest.Mock).mockReturnValue(true);
+      render();
+
+      expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
+    });
+
+    it('should hide assignment section with non-enterprise license in create mode', () => {
+      (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+      formProps.mode = 'create';
+      render();
+
+      expect(renderResult.queryByTestId(`${formPrefix}-policySelection`)).toBeNull();
+    });
+
+    it('should show assignment section with non-enterprise license in edit mode for by-policy artifacts', () => {
+      (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+      formProps.mode = 'edit';
+      formProps.item = createItem({
+        name: 'existing device',
+        tags: ['policy:some-policy-id'],
+      });
+      render();
+
+      expect(renderResult.getByTestId(`${formPrefix}-policySelection`)).toBeTruthy();
+    });
+
+    it('should hide assignment section with non-enterprise license in edit mode for global artifacts', () => {
+      (licenseService.isEnterprise as jest.Mock).mockReturnValue(false);
+      formProps.mode = 'edit';
+      formProps.item = createItem({
+        name: 'existing device',
+        tags: ['policy:all'],
+      });
+      render();
+
+      expect(renderResult.queryByTestId(`${formPrefix}-policySelection`)).toBeNull();
+    });
   });
 });
