@@ -183,8 +183,6 @@ export class IndexUpdateService {
   public readonly isProcessingImportedFiles$: Observable<boolean> =
     this._isProcessingImportedFiles.asObservable();
 
-  private readonly _fileImported$ = new Subject<void>();
-
   private readonly _exitAttemptWithUnsavedFields$ = new BehaviorSubject<boolean>(false);
   public readonly exitAttemptWithUnsavedFields$ =
     this._exitAttemptWithUnsavedFields$.asObservable();
@@ -429,7 +427,7 @@ export class IndexUpdateService {
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
-    this._fileImported$.pipe(startWith(undefined)),
+    this._refreshSubject$,
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
       const unsavedFields = pendingColumnsToBeSaved
@@ -927,7 +925,6 @@ export class IndexUpdateService {
     this._refreshSubject$.complete();
     this._exitAttemptWithUnsavedChanges$.complete();
     this.data.dataViews.clearCache();
-    this._fileImported$.complete();
     this._indexName$.complete();
 
     this.data.dataViews.clearInstanceCache();
@@ -957,7 +954,6 @@ export class IndexUpdateService {
       setTimeout(async () => {
         const dataView = await firstValueFrom(this.dataView$);
         await this.data.dataViews.refreshFields(dataView, false, true);
-        this._fileImported$.next();
         this.refresh();
       }, 2000);
     } else {
