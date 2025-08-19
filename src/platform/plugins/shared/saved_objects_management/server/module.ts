@@ -7,17 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { ContainerModule } from 'inversify';
+import { CapabilitiesProvider } from '@kbn/core-di-server';
+import { capabilitiesProvider } from './capabilities_provider';
 
-export const plugin = async (context: PluginInitializerContext) => {
-  const { SavedObjectsManagementPlugin } = await import('./plugin');
-  return new SavedObjectsManagementPlugin(context);
-};
-
-export { module } from './module';
-export type {
-  SavedObjectsManagementPluginSetup,
-  SavedObjectsManagementPluginStart,
-  SavedObjectMetadata,
-  SavedObjectWithMetadata,
-} from './types';
+export const module = new ContainerModule(({ bind }) => {
+  bind(CapabilitiesProvider).toConstantValue(capabilitiesProvider);
+});
