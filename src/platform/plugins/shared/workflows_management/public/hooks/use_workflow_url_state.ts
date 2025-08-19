@@ -14,6 +14,7 @@ import { parse, stringify } from 'query-string';
 export interface WorkflowUrlState {
   tab?: 'workflow' | 'executions';
   executionId?: string;
+  stepExecutionId?: string;
 }
 
 export function useWorkflowUrlState() {
@@ -25,6 +26,7 @@ export function useWorkflowUrlState() {
     return {
       tab: (params.tab as 'workflow' | 'executions') || 'workflow',
       executionId: params.executionId as string | undefined,
+      stepExecutionId: params.stepExecutionId as string | undefined,
     };
   }, [location.search]);
 
@@ -75,6 +77,16 @@ export function useWorkflowUrlState() {
       updateUrlState({
         tab: 'executions', // Automatically switch to executions tab
         executionId: executionId || undefined,
+        stepExecutionId: undefined,
+      });
+    },
+    [updateUrlState]
+  );
+
+  const setSelectedStepExecution = useCallback(
+    (stepExecutionId: string | null) => {
+      updateUrlState({
+        stepExecutionId: stepExecutionId || undefined,
       });
     },
     [updateUrlState]
@@ -84,10 +96,12 @@ export function useWorkflowUrlState() {
     // Current state
     activeTab: urlState.tab,
     selectedExecutionId: urlState.executionId,
+    selectedStepExecutionId: urlState.stepExecutionId,
 
     // State setters
     setActiveTab,
     setSelectedExecution,
+    setSelectedStepExecution,
     updateUrlState,
   };
 }

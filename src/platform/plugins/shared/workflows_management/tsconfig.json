@@ -8,8 +8,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
-    "../../../../../typings/**/*",
-    ".storybook/**/*"
+    "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -37,7 +36,8 @@
     "@kbn/css-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerting-plugin",
-    "@kbn/core-ui-settings-server"
+    "@kbn/core-ui-settings-server",
+    "@kbn/storybook"
   ],
   "exclude": ["target/**/*"]
 }

@@ -33,6 +33,7 @@ export const renderApp = (
     i18n: i18nService,
     theme,
     executionContext,
+    settings,
   } = coreStart;
 
   chrome.setBreadcrumbs([
@@ -48,7 +49,7 @@ export const renderApp = (
       theme={theme}
       executionContext={executionContext}
     >
-      <KibanaContextProvider services={{ notifications, http, chrome, application }}>
+      <KibanaContextProvider services={{ notifications, http, chrome, application, settings }}>
         <QueryClientProvider client={queryClient}>
           <WorkflowsRoutes history={history} />
         </QueryClientProvider>
