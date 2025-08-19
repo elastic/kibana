@@ -45,7 +45,7 @@ export function getCommonDefaultAsyncSubmitParams(
     keep_on_completion: BACKGROUND_SEARCH_ENABLED ? undefined : useSearchSessions,
     // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
     // just for debugging purposes!
-    keep_alive: BACKGROUND_SEARCH_ENABLED ? `60m` : keepAlive,
+    keep_alive: keepAlive,
   };
 }
 
