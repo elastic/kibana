@@ -133,13 +133,17 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
                 toolCallId: fakeRequestDocsToolCall.toolCallId,
               },
             ],
-        toolChoice,
+        toolChoice: !functionLimitReached ? toolChoice : 'none',
         tools: {
-          ...tools,
-          request_documentation: {
-            description: 'Request additional ES|QL documentation if needed',
-            schema: requestDocumentationSchema,
-          },
+          ...(!functionLimitReached
+            ? {
+                ...tools,
+                request_documentation: {
+                  description: 'Request additional ES|QL documentation if needed',
+                  schema: requestDocumentationSchema,
+                },
+              }
+            : {}),
         },
       }).pipe(
         withoutTokenCountEvents(),
@@ -168,7 +172,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
                     ', '
                   )} and functions ${functions?.join(
                     ', '
-                  )}. Try to answer the user's question without using currently available information.`,
+                  )}. Try to answer the user's question using currently available information.`,
                 });
               }
 
