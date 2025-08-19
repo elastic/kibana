@@ -210,7 +210,6 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
   const customUrlRows = customUrls.map((customUrl, index) => {
     // Validate the label.
     const label = customUrl.url_name;
-    const effectiveLabel = label || `Custom URL ${index + 1}`;
     const otherUrls = [...customUrls];
     otherUrls.splice(index, 1); // Don't compare label with itself.
     const isInvalidLabel = !isValidLabel(label, otherUrls);
@@ -244,7 +243,13 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
         >
           <EuiFlexGroup responsive={false} justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiFormLabel id={`custom-url-heading-${index}`}>Custom URL {index + 1}</EuiFormLabel>
+              <EuiFormLabel id={`custom-url-heading-${index}`}>
+                <FormattedMessage
+                  id="xpack.ml.customUrlEditorList.customUrlHeading"
+                  defaultMessage="Custom URL {indexCount}"
+                  values={{ indexCount: index + 1 }}
+                />
+              </EuiFormLabel>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup responsive={false} gutterSize="xs" css={styles.actionButtons}>
@@ -388,7 +393,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                     aria-label={i18n.translate('xpack.ml.customUrlEditorList.urlValueAriaLabel', {
                       defaultMessage: 'URL value for {label}',
                       values: {
-                        label: effectiveLabel,
+                        label,
                       },
                     })}
                     data-test-subj={`mlJobEditCustomUrlTextarea_${index}`}
@@ -406,7 +411,7 @@ export const CustomUrlList: FC<CustomUrlListProps> = ({
                       {
                         defaultMessage: 'URL value for {label}. Click to expand for editing.',
                         values: {
-                          label: effectiveLabel,
+                          label,
                         },
                       }
                     )}

@@ -22,8 +22,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           class="euiFormLabel emotion-euiFormLabel"
           id="custom-url-heading-0"
         >
-          Custom URL 
-          1
+          Custom URL 1
         </label>
       </div>
       <div
@@ -240,8 +239,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           class="euiFormLabel emotion-euiFormLabel"
           id="custom-url-heading-1"
         >
-          Custom URL 
-          2
+          Custom URL 2
         </label>
       </div>
       <div
@@ -458,8 +456,7 @@ exports[`CustomUrlList renders a list of custom URLs 1`] = `
           class="euiFormLabel emotion-euiFormLabel"
           id="custom-url-heading-2"
         >
-          Custom URL 
-          3
+          Custom URL 3
         </label>
       </div>
       <div
