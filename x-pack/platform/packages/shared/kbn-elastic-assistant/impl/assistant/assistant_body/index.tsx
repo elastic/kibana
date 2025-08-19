@@ -19,6 +19,7 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import { css } from '@emotion/react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
+import { ConversationSharedState } from '../share_conversation/utils';
 import { SharedConversationOwnerCallout } from '../shared_conversation_callout/owner';
 import { EmptyConvo } from './empty_convo';
 import { WelcomeSetup } from './welcome_setup';
@@ -28,12 +29,12 @@ import * as i18n from '../translations';
 interface Props {
   allSystemPrompts: PromptResponse[];
   comments: JSX.Element;
+  conversationSharedState: ConversationSharedState;
   currentConversation: Conversation | undefined;
   currentSystemPromptId: string | undefined;
   handleOnConversationSelected: ({ cId }: { cId: string }) => Promise<void>;
   isAssistantEnabled: boolean;
   isConversationOwner: boolean;
-  conversationShared: 'not_shared' | 'globally_shared' | 'selected_shared';
   isSettingsModalVisible: boolean;
   isWelcomeSetup: boolean;
   isLoading: boolean;
@@ -46,14 +47,14 @@ interface Props {
 export const AssistantBody: FunctionComponent<Props> = ({
   allSystemPrompts,
   comments,
+  conversationSharedState,
   currentConversation,
   currentSystemPromptId,
   handleOnConversationSelected,
   setCurrentSystemPromptId,
   http,
-  isConversationOwner,
-  conversationShared,
   isAssistantEnabled,
+  isConversationOwner,
   isLoading,
   isSettingsModalVisible,
   isWelcomeSetup,
@@ -143,10 +144,10 @@ export const AssistantBody: FunctionComponent<Props> = ({
         )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        {isConversationOwner && conversationShared !== 'not_shared' && (
+        {isConversationOwner && conversationSharedState !== ConversationSharedState.Private && (
           <SharedConversationOwnerCallout
             id={currentConversation?.id ?? ''}
-            isGloballyShared={conversationShared === 'globally_shared'}
+            isGloballyShared={conversationSharedState === ConversationSharedState.Global}
           />
         )}
       </EuiFlexItem>

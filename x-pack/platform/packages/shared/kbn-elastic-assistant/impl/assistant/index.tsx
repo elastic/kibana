@@ -133,11 +133,13 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
+    conversationSharedState,
     currentConversation,
     currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
+    isConversationOwner,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,
@@ -171,14 +173,6 @@ const AssistantComponent: React.FC<Props> = ({
     isFetchedCurrentUserConversations,
     isFetchedPrompts,
   ]);
-
-  const isConversationOwner = useMemo(() => {
-    return (
-      currentConversation?.id === '' ||
-      currentConversation?.createdBy.id === currentUser?.id ||
-      currentConversation?.createdBy.name === currentUser?.name
-    );
-  }, [currentConversation, currentUser]);
 
   // Welcome setup state
   const isWelcomeSetup = useMemo(
@@ -433,22 +427,6 @@ const AssistantComponent: React.FC<Props> = ({
     [assistantTelemetry, currentConversation?.title]
   );
 
-  const conversationShared = useMemo(() => {
-    if (!currentConversation || currentConversation?.id === '') {
-      // while loading or initializing, conversation is not shared
-      return 'not_shared';
-    }
-    const conversationUsers = currentConversation?.users.length ?? 0;
-    if (conversationUsers === 0) {
-      return 'globally_shared';
-    }
-    if (conversationUsers > 1) {
-      return 'selected_shared';
-    }
-    // length is 1
-    return 'not_shared';
-  }, [currentConversation]);
-
   return (
     <>
       <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
@@ -496,6 +474,7 @@ const AssistantComponent: React.FC<Props> = ({
                     chatHistoryVisible={chatHistoryVisible}
                     conversations={conversations}
                     conversationsLoaded={isFetchedCurrentUserConversations}
+                    conversationSharedState={conversationSharedState}
                     defaultConnector={defaultConnector}
                     isAssistantEnabled={isAssistantEnabled}
                     isAssistantSharingEnabled={isAssistantSharingEnabled}
@@ -555,13 +534,13 @@ const AssistantComponent: React.FC<Props> = ({
                   <AssistantBody
                     allSystemPrompts={allSystemPrompts}
                     comments={comments}
+                    conversationSharedState={conversationSharedState}
                     currentConversation={currentConversation}
                     currentSystemPromptId={currentSystemPrompt?.id}
                     handleOnConversationSelected={handleOnConversationSelected}
                     http={http}
-                    isConversationOwner={isConversationOwner}
-                    conversationShared={conversationShared}
                     isAssistantEnabled={isAssistantEnabled}
+                    isConversationOwner={isConversationOwner}
                     isLoading={isInitialLoad}
                     isSettingsModalVisible={isSettingsModalVisible}
                     isWelcomeSetup={isWelcomeSetup}

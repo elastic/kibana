@@ -7,17 +7,18 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiText,
-  EuiSelectable,
-  EuiPopover,
-  type EuiSelectableOption,
-  EuiBadge,
-  useGeneratedHtmlId,
   EuiIcon,
+  EuiPopover,
+  EuiSelectable,
+  type EuiSelectableOption,
+  EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
+import { ConversationSharedState, getSharedIcon } from './utils';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import { useConversation } from '../use_conversation';
 import { ShareModal } from './share_modal';
@@ -26,6 +27,7 @@ import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 
 interface Props {
+  conversationSharedState: ConversationSharedState;
   selectedConversation: Conversation | undefined;
   isConversationOwner: boolean;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
@@ -36,59 +38,109 @@ interface ShareBadgeOptionData {
   description?: string;
 }
 const ShareBadgeComponent: React.FC<Props> = ({
+  conversationSharedState,
   isConversationOwner,
   refetchCurrentConversation,
   refetchCurrentUserConversations,
   selectedConversation,
 }) => {
   const { updateConversationUsers } = useConversation();
-  const { currentUser } = useAssistantContext();
-  const { isShared, isSharedGlobal } = useMemo(
-    () => ({
-      isShared: selectedConversation?.users.length !== 1,
-      isSharedGlobal: selectedConversation?.users.length === 0,
-    }),
-    [selectedConversation?.users]
-  );
+  const { currentUser, toasts } = useAssistantContext();
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const items = useMemo<Array<EuiSelectableOption<ShareBadgeOptionData>>>(
     () => [
       {
-        checked: !isShared ? 'on' : undefined,
-        key: 'not-shared',
+        checked: conversationSharedState === ConversationSharedState.Private ? 'on' : undefined,
+        key: ConversationSharedState.Private,
         data: {
           description: i18n.ONLY_VISIBLE_TO_YOU,
         },
-        'data-test-subj': 'notShared',
+        'data-test-subj': ConversationSharedState.Private,
         disabled: !isConversationOwner,
-        label: i18n.NOT_SHARED,
+        label: i18n.PRIVATE,
         isGroupLabel: false,
       },
       {
-        checked: isShared ? 'on' : undefined,
-        key: 'shared',
+        checked: conversationSharedState === ConversationSharedState.Global ? 'on' : undefined,
+        key: ConversationSharedState.Global,
         data: {
-          description: isSharedGlobal ? i18n.VISIBLE_GLOBAL : i18n.VISIBLE_SELECTED,
+          description: i18n.VISIBLE_GLOBAL,
         },
-        'data-test-subj': 'shared',
+        'data-test-subj': ConversationSharedState.Global,
+        disabled: !isConversationOwner,
+        label: i18n.GLOBAL,
+        isGroupLabel: false,
+      },
+      {
+        checked: conversationSharedState === ConversationSharedState.Shared ? 'on' : undefined,
+        key: ConversationSharedState.Shared,
+        data: {
+          description: i18n.VISIBLE_SELECTED,
+        },
+        'data-test-subj': ConversationSharedState.Shared,
         disabled: !isConversationOwner,
         label: i18n.SHARED,
         isGroupLabel: false,
       },
     ],
-    [isConversationOwner, isShared, isSharedGlobal]
+    [conversationSharedState, isConversationOwner]
   );
 
   const unshareConversation = useCallback(async () => {
-    if (currentUser && selectedConversation && selectedConversation.id !== '') {
-      await updateConversationUsers({
-        conversationId: selectedConversation.id,
-        updatedUsers: [{ id: currentUser.id, name: currentUser.name }],
+    try {
+      if (currentUser && selectedConversation && selectedConversation.id !== '') {
+        await updateConversationUsers({
+          conversationId: selectedConversation.id,
+          updatedUsers: [{ id: currentUser.id, name: currentUser.name }],
+        });
+        await refetchCurrentUserConversations();
+        refetchCurrentConversation({});
+        toasts?.addSuccess({
+          title: i18n.PRIVATE_SUCCESS,
+        });
+      }
+    } catch (error) {
+      toasts?.addError(error, {
+        title: i18n.PRIVATE_ERROR,
       });
-      refetchCurrentConversation({});
     }
-  }, [currentUser, refetchCurrentConversation, selectedConversation, updateConversationUsers]);
+  }, [
+    currentUser,
+    refetchCurrentConversation,
+    refetchCurrentUserConversations,
+    selectedConversation,
+    toasts,
+    updateConversationUsers,
+  ]);
+
+  const shareConversationGlobal = useCallback(async () => {
+    try {
+      if (selectedConversation && selectedConversation.id !== '') {
+        await updateConversationUsers({
+          conversationId: selectedConversation.id,
+          updatedUsers: [],
+        });
+        await refetchCurrentUserConversations();
+        refetchCurrentConversation({});
+        toasts?.addSuccess({
+          title: i18n.GLOBAL_SUCCESS,
+        });
+      } else {
+        throw new Error('No conversation available to share globally');
+      }
+    } catch (error) {
+      toasts?.addError(error, {
+        title: i18n.GLOBAL_ERROR,
+      });
+    }
+  }, [
+    refetchCurrentConversation,
+    refetchCurrentUserConversations,
+    selectedConversation,
+    toasts,
+    updateConversationUsers,
+  ]);
 
   const onSharedChange = useCallback<
     (
@@ -98,14 +150,22 @@ const ShareBadgeComponent: React.FC<Props> = ({
     ) => void
   >(
     (_options, _event, selectedOption) => {
-      if (selectedOption.key === 'not-shared') {
-        if (isShared) unshareConversation();
+      if (
+        selectedOption.key === ConversationSharedState.Private &&
+        conversationSharedState !== ConversationSharedState.Private
+      ) {
+        unshareConversation();
+      } else if (
+        selectedOption.key === ConversationSharedState.Global &&
+        conversationSharedState !== ConversationSharedState.Global
+      ) {
+        shareConversationGlobal();
       } else {
         setIsModalOpen(true);
       }
       setIsPopoverOpen(false);
     },
-    [isShared, unshareConversation]
+    [conversationSharedState, shareConversationGlobal, unshareConversation]
   );
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -138,7 +198,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         onClickAriaLabel={i18n.SELECT_VISIBILITY_ARIA_LABEL}
       >
         <EuiIcon
-          type={isShared ? 'users' : 'lock'}
+          type={getSharedIcon(conversationSharedState)}
           size="s"
           css={css`
             margin-right: 4px;
@@ -147,7 +207,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         {selectedLabel}
       </EuiBadge>
     ),
-    [isConversationOwner, togglePopover, isShared, selectedLabel]
+    [isConversationOwner, togglePopover, conversationSharedState, selectedLabel]
   );
 
   const renderOption = useCallback(
@@ -216,12 +276,10 @@ const ShareBadgeComponent: React.FC<Props> = ({
       </EuiPopover>
       {isModalOpen && (
         <ShareModal
-          isSharedGlobal={isSharedGlobal}
-          selectedConversation={selectedConversation}
-          isModalOpen={isModalOpen}
-          setIsModalOpen={setIsModalOpen}
-          refetchCurrentUserConversations={refetchCurrentUserConversations}
           refetchCurrentConversation={refetchCurrentConversation}
+          refetchCurrentUserConversations={refetchCurrentUserConversations}
+          selectedConversation={selectedConversation}
+          setIsModalOpen={setIsModalOpen}
         />
       )}
     </>

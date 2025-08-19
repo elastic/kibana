@@ -40,8 +40,12 @@ export const SHARE = i18n.translate('xpack.elasticAssistant.assistant.visibility
   defaultMessage: 'Share',
 });
 
-export const NOT_SHARED = i18n.translate('xpack.elasticAssistant.assistant.visibility.notShared', {
-  defaultMessage: 'Not shared',
+export const PRIVATE = i18n.translate('xpack.elasticAssistant.assistant.visibility.private', {
+  defaultMessage: 'Private',
+});
+
+export const GLOBAL = i18n.translate('xpack.elasticAssistant.assistant.visibility.global', {
+  defaultMessage: 'Global',
 });
 export const SELECT_VISIBILITY_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.selectVisibilityAriaLabel',
@@ -50,34 +54,6 @@ export const SELECT_VISIBILITY_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const EVERYONE = i18n.translate('xpack.elasticAssistant.assistant.visibility.everyone', {
-  defaultMessage: 'All team members in your workspace can view the conversation.',
-});
-
-export const ONLY_SELECTED = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.onlySelected',
-  {
-    defaultMessage: 'Only selected team members can view this conversation.',
-  }
-);
-export const WHO_HAS_ACCESS = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.whoHasAccess',
-  {
-    defaultMessage: 'Who has access',
-  }
-);
-export const WITH_EVERYONE = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.withEveryone',
-  {
-    defaultMessage: 'Everyone',
-  }
-);
-export const WITH_SELECTED = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.withSelected',
-  {
-    defaultMessage: 'Only selected users',
-  }
-);
 export const ERROR_SUGGEST = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.inputPlaceholder',
   {
@@ -90,3 +66,31 @@ export const ADD = i18n.translate('xpack.elasticAssistant.assistant.visibility.a
 export const DONE = i18n.translate('xpack.elasticAssistant.assistant.visibility.done', {
   defaultMessage: 'Done',
 });
+
+export const PRIVATE_SUCCESS = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.privateSuccess',
+  {
+    defaultMessage: 'Successfully set conversation to private',
+  }
+);
+
+export const PRIVATE_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.privateError',
+  {
+    defaultMessage: 'Could not set conversation to private',
+  }
+);
+
+export const GLOBAL_SUCCESS = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.privateSuccess',
+  {
+    defaultMessage: 'Successfully shared conversation globally',
+  }
+);
+
+export const GLOBAL_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.privateError',
+  {
+    defaultMessage: 'Could not share conversation globally',
+  }
+);

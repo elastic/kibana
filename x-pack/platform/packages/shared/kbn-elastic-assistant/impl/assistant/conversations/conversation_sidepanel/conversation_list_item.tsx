@@ -9,6 +9,11 @@ import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import type { EuiListGroupItemExtraActionProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiListGroupItem } from '@elastic/eui';
+import {
+  ConversationSharedState,
+  getConversationSharedState,
+  getSharedIcon,
+} from '../../share_conversation/utils';
 import type { ConversationWithOwner } from '../../api';
 import type { Conversation } from '../../../..';
 import { ConversationSidePanelContextMenu } from './context_menu';
@@ -55,12 +60,29 @@ export const ConversationListItem: React.FC<Props> = ({
     [conversation.id, onConversationSelected]
   );
 
-  const { iconColor, iconTitle } = useMemo(
+  const conversationSharedState = useMemo(
+    () => getConversationSharedState(conversation),
+    [conversation]
+  );
+
+  const shouldShowIcon = useMemo(
+    () => isAssistantSharingEnabled && conversationSharedState !== ConversationSharedState.Private,
+    [isAssistantSharingEnabled, conversationSharedState]
+  );
+  const { iconType, iconColor, iconTitle } = useMemo(
     () =>
       conversation.isConversationOwner
-        ? { iconColor: 'accent', iconTitle: i18n.SHARED_BY_YOU }
-        : { iconColor: 'default', iconTitle: i18n.SHARED_WITH_YOU },
-    [conversation.isConversationOwner]
+        ? {
+            iconType: shouldShowIcon ? getSharedIcon(conversationSharedState) : undefined,
+            iconColor: 'accent',
+            iconTitle: i18n.SHARED_BY_YOU,
+          }
+        : {
+            iconType: shouldShowIcon ? getSharedIcon(conversationSharedState) : undefined,
+            iconColor: 'default',
+            iconTitle: i18n.SHARED_WITH_YOU,
+          },
+    [conversation.isConversationOwner, shouldShowIcon, conversationSharedState]
   );
 
   const actions = useMemo(
@@ -89,11 +111,6 @@ export const ConversationListItem: React.FC<Props> = ({
         : []),
     ],
     [handleCopyUrl, handleDuplicateConversation, setDeleteConversationItem, conversation]
-  );
-
-  const shouldShowIcon = useMemo(
-    () => isAssistantSharingEnabled && conversation.users.length !== 1,
-    [isAssistantSharingEnabled, conversation.users]
   );
 
   const extraAction = useMemo<EuiListGroupItemExtraActionProps | undefined>(
@@ -127,7 +144,7 @@ export const ConversationListItem: React.FC<Props> = ({
             }
           `}
           label={conversation.title}
-          iconType={shouldShowIcon ? 'users' : undefined}
+          iconType={iconType}
           iconProps={{
             'data-test-subj': `conversation-icon-${conversation.title}`,
             size: 's',

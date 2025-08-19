@@ -37,6 +37,7 @@ import { ElasticLLMCostAwarenessTour } from '../../tour/elastic_llm';
 import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '../../tour/const';
 
 interface OwnProps {
+  conversationSharedState: ConversationSharedState;
   selectedConversation: Conversation | undefined;
   defaultConnector?: AIConnector;
   isConversationOwner: boolean;
@@ -82,6 +83,7 @@ export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER_ID = 'aiAssistantSettingsMenuC
  * toggling the display of anonymized values, and accessing the assistant settings.
  */
 export const AssistantHeader: React.FC<Props> = ({
+  conversationSharedState,
   chatHistoryVisible,
   conversations,
   conversationsLoaded,
@@ -208,6 +210,7 @@ export const AssistantHeader: React.FC<Props> = ({
               {!isNewConversation && isAssistantSharingEnabled && (
                 <EuiFlexItem grow={false}>
                   <ShareBadge
+                    conversationSharedState={conversationSharedState}
                     isConversationOwner={isConversationOwner}
                     selectedConversation={selectedConversation}
                     refetchCurrentUserConversations={refetchCurrentUserConversations}

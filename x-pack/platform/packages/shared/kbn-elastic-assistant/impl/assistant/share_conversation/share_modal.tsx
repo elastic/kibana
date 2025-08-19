@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import {
   EuiButton,
-  EuiCallOut,
-  EuiIcon,
   EuiModal,
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiModalFooter,
-  EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
-  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
@@ -32,37 +26,20 @@ import { useAssistantContext } from '../../..';
 import { UserProfilesSearch } from './user_profiles_search';
 
 interface Props {
-  isSharedGlobal: boolean;
-  selectedConversation: Conversation | undefined;
-  isModalOpen: boolean;
-  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
+  refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
+  selectedConversation: Conversation | undefined;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
-const shareOptions = [
-  {
-    value: 'global',
-    inputDisplay: i18n.WITH_EVERYONE,
-    'data-test-subj': 'select-option-global',
-  },
-  {
-    value: 'selected',
-    inputDisplay: i18n.WITH_SELECTED,
-    'data-test-subj': 'select-option-selected',
-  },
-];
+
 const ShareModalComponent: React.FC<Props> = ({
-  isSharedGlobal,
-  isModalOpen,
   refetchCurrentConversation,
   refetchCurrentUserConversations,
-  setIsModalOpen,
   selectedConversation,
+  setIsModalOpen,
 }) => {
   const { copyConversationUrl, updateConversationUsers } = useConversation();
-  const [sharingOption, setSharingOption] = useState<'global' | 'selected'>(
-    isSharedGlobal ? 'global' : 'selected'
-  );
+
   const { currentUser } = useAssistantContext();
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
   useEffect(() => {
@@ -97,19 +74,18 @@ const ShareModalComponent: React.FC<Props> = ({
     if (selectedConversation && selectedConversation?.id !== '') {
       await updateConversationUsers({
         conversationId: selectedConversation.id,
-        updatedUsers:
-          sharingOption === 'global'
-            ? []
-            : [
-                ...nextUsers.map((user) => ({
-                  id: user?.uid ?? '',
-                  name: user?.user?.username ?? '',
-                })),
-                // readd current user
-                ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
-              ],
+        updatedUsers: [
+          ...nextUsers.map((user) => ({
+            id: user?.uid ?? '',
+            name: user?.user?.username ?? '',
+          })),
+          // readd current user
+          ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
+        ],
       });
+      console.log('before refetch');
       await refetchCurrentUserConversations();
+      console.log('after refetch');
       refetchCurrentConversation({});
     }
   }, [
@@ -119,15 +95,10 @@ const ShareModalComponent: React.FC<Props> = ({
     refetchCurrentUserConversations,
     selectedConversation,
     setIsModalOpen,
-    sharingOption,
     updateConversationUsers,
   ]);
-  const selectIcon = useMemo(
-    () => (sharingOption === 'global' ? 'globe' : 'users'),
-    [sharingOption]
-  );
 
-  return isModalOpen ? (
+  return (
     <EuiModal onClose={onCancelShare} maxWidth={600} data-test-subj="shareConversationModal">
       <EuiModalHeader>
         <EuiModalHeaderTitle className="eui-textTruncate">
@@ -136,38 +107,11 @@ const ShareModalComponent: React.FC<Props> = ({
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiPanel hasShadow={false} hasBorder={true}>
-          <EuiText size="s">
-            <strong>{i18n.WHO_HAS_ACCESS}</strong>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiSuperSelect
-            data-test-subj={`shareConversationSelect-${sharingOption}`}
-            hasDividers
-            fullWidth
-            prepend={<EuiIcon type={selectIcon} />}
-            options={shareOptions}
-            valueOfSelected={sharingOption}
-            onChange={(id) => setSharingOption(id as 'global' | 'selected')}
-          />
-        </EuiPanel>
-        <EuiSpacer size="s" />
-
-        {sharingOption === 'selected' && (
-          <>
-            <UserProfilesSearch
-              onUsersSelect={onNextUsersSelect}
-              selectedUsers={nextUsers}
-              forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
-            />
-          </>
-        )}
-
-        {sharingOption === 'global' && (
-          <EuiCallOut size="s" title={i18n.EVERYONE} color="accent" iconType="info" />
-        )}
-
-        <EuiSpacer size="m" />
+        <UserProfilesSearch
+          onUsersSelect={onNextUsersSelect}
+          selectedUsers={nextUsers}
+          forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
+        />
       </EuiModalBody>
 
       <EuiModalFooter>
@@ -189,7 +133,7 @@ const ShareModalComponent: React.FC<Props> = ({
         </EuiFlexGroup>
       </EuiModalFooter>
     </EuiModal>
-  ) : null;
+  );
 };
 
 export const ShareModal = React.memo(ShareModalComponent);
