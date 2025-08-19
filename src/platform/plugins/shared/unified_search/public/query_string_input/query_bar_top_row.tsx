@@ -37,6 +37,7 @@ import {
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
+  EuiFieldSearch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getQueryLog } from '@kbn/data-plugin/public';
@@ -58,6 +59,22 @@ import type {
   SuggestionsAbstraction,
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
+
+function extractQueryFromLLMMessage(text: string): string | null {
+  // This regular expression looks for a code block
+  // (``` followed by an optional language identifier)
+  // and captures the content inside.
+  const regex = /```(?:esql)?\n([\s\S]*?)\n```/;
+  const match = text.match(regex);
+
+  if (match && match[1]) {
+    // Trim leading/trailing whitespace from the captured content
+    return match[1].trim();
+  }
+
+  // Return null if no match is found
+  return null;
+}
 
 export const strings = {
   getNeedsUpdatingLabel: () =>
@@ -168,6 +185,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   filterBar?: React.ReactNode;
   showDatePickerAsBadge?: boolean;
   showSubmitButton?: boolean;
+  isNLToESQLConversionEnabled?: boolean;
   /**
    * Style of the submit button
    * `iconOnly` - use IconButton
@@ -235,6 +253,8 @@ export const QueryBarTopRow = React.memo(
   ) {
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
+    const [nlToesqlIsLoading, setNlToesqlIsLoading] = useState<boolean>(false);
+    const { onTextLangQueryChange } = props;
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
     const submitButtonIconOnly =
@@ -347,6 +367,24 @@ export const QueryBarTopRow = React.memo(
         propsOnSubmit({ query, dateRange });
       },
       [timeHistory, propsOnSubmit]
+    );
+
+    const onNLToESQLHandler = useCallback(
+      async (value: string) => {
+        setNlToesqlIsLoading(true);
+
+        const message: { content: string } = await http.get(`/internal/esql/nl_to_esql/${value}`);
+        if (message && 'content' in message) {
+          const query = extractQueryFromLLMMessage(message.content);
+          if (query) {
+            onTextLangQueryChange({
+              esql: query,
+            });
+          }
+        }
+        setNlToesqlIsLoading(false);
+      },
+      [http, onTextLangQueryChange]
     );
 
     const onClickSubmitButton = useCallback(
@@ -833,6 +871,17 @@ export const QueryBarTopRow = React.memo(
                   adHocDataview={props.indexPatterns?.[0]}
                 />
               )}
+
+              {Boolean(props.isNLToESQLConversionEnabled) && (
+                <EuiFieldSearch
+                  placeholder="Search here..."
+                  onSearch={onNLToESQLHandler}
+                  isClearable={true}
+                  compressed
+                  isLoading={nlToesqlIsLoading}
+                />
+              )}
+
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}

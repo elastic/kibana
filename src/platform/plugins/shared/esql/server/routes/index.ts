@@ -14,9 +14,11 @@ import type { ESQLExtensionsRegistry } from '../extensions_registry';
 import { registerGetJoinIndicesRoute } from './get_join_indices';
 import { registerGetTimeseriesIndicesRoute } from './get_timeseries_indices';
 import { registerESQLExtensionsRoute } from './get_esql_extensions_route';
+import { registerNLtoESQLRoute } from '../nl_to_esql/nl_to_esql_route';
+import type { EsqlServerPluginStart } from '../types';
 
 export const registerRoutes = (
-  setup: CoreSetup,
+  setup: CoreSetup<EsqlServerPluginStart>,
   extensionsRegistry: ESQLExtensionsRegistry,
   initContext: PluginInitializerContext
 ) => {
@@ -26,4 +28,5 @@ export const registerRoutes = (
   registerGetTimeseriesIndicesRoute(router, initContext);
   registerESQLExtensionsRoute(router, extensionsRegistry, initContext);
   registerGetInferenceEndpointsRoute(router, initContext);
+  registerNLtoESQLRoute(router, setup.getStartServices, initContext);
 };

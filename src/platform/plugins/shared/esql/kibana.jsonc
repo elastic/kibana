@@ -19,6 +19,8 @@
       "dataViews",
       "uiActions",
       "contentManagement",
+      "inference",
+      "actions"
     ],
     "requiredBundles": [
       "kibanaReact",
