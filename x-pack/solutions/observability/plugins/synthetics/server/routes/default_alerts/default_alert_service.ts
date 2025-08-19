@@ -28,22 +28,15 @@ import {
   type SyntheticsDefaultRule,
 } from '../../../common/types/default_alerts';
 export class DefaultAlertService {
-  context: UptimeRequestHandlerContext;
-  soClient: SavedObjectsClientContract;
-  server: SyntheticsServerSetup;
-  settings?: DynamicSettingsAttributes;
+  private settings?: DynamicSettingsAttributes;
 
   constructor(
-    context: UptimeRequestHandlerContext,
-    server: SyntheticsServerSetup,
-    soClient: SavedObjectsClientContract
-  ) {
-    this.context = context;
-    this.server = server;
-    this.soClient = soClient;
-  }
+    private readonly context: UptimeRequestHandlerContext,
+    private readonly server: SyntheticsServerSetup,
+    private readonly soClient: SavedObjectsClientContract
+  ) {}
 
-  protected async getSettings() {
+  private async getSettings() {
     if (!this.settings) {
       this.settings = await getSyntheticsDynamicSettings(this.soClient);
     }
@@ -58,7 +51,7 @@ export class DefaultAlertService {
    * @returns The result of the callback function.
    * @throws LockAcquisitionError if the lock cannot be acquired.
    */
-  protected acquireLockOrFail<T>(cb: () => Promise<T>, spaceId: string): Promise<T> {
+  private acquireLockOrFail<T>(cb: () => Promise<T>, spaceId: string): Promise<T> {
     const lockService = new LockManagerService(this.server.coreSetup, this.server.logger);
     return lockService.withLock(`synthetics-default-alerts-lock-${spaceId}`, cb);
   }
@@ -91,7 +84,7 @@ export class DefaultAlertService {
     }, spaceId);
   }
 
-  protected getMinimumRuleInterval() {
+  private getMinimumRuleInterval() {
     const minimumInterval = this.server.alerting.getConfig().minimumScheduleInterval;
     const minimumIntervalInMs = parseDuration(minimumInterval.value);
     const defaultIntervalInMs = parseDuration('1m');
@@ -99,7 +92,7 @@ export class DefaultAlertService {
     return interval;
   }
 
-  protected async setupStatusRule(spaceId: string) {
+  private async setupStatusRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultStatusRuleEnabled === false) {
       return;
@@ -112,7 +105,7 @@ export class DefaultAlertService {
     );
   }
 
-  protected async setupTlsRule(spaceId: string) {
+  private async setupTlsRule(spaceId: string) {
     const minimumRuleInterval = this.getMinimumRuleInterval();
     if (this.settings?.defaultTLSRuleEnabled === false) {
       return;
@@ -145,7 +138,7 @@ export class DefaultAlertService {
     return { ...alert, actions: [...actions, ...systemActions], ruleTypeId: alert.alertTypeId };
   }
 
-  protected async createDefaultRuleIfNotExist(
+  private async createDefaultRuleIfNotExist(
     ruleType: DefaultRuleType,
     name: string,
     interval: string,
@@ -191,7 +184,7 @@ export class DefaultAlertService {
     }, spaceId);
   }
 
-  protected async updateStatusRule(spaceId: string, enabled?: boolean) {
+  private async updateStatusRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
       const minimumRuleInterval = this.getMinimumRuleInterval();
       return this.upsertDefaultAlert(
@@ -208,7 +201,7 @@ export class DefaultAlertService {
     }
   }
 
-  protected async updateTlsRule(spaceId: string, enabled?: boolean) {
+  private async updateTlsRule(spaceId: string, enabled?: boolean) {
     if (enabled) {
       const minimumRuleInterval = this.getMinimumRuleInterval();
       return this.upsertDefaultAlert(
@@ -225,7 +218,7 @@ export class DefaultAlertService {
     }
   }
 
-  protected async upsertDefaultAlert(
+  private async upsertDefaultAlert(
     ruleType: DefaultRuleType,
     name: string,
     interval: string,
@@ -265,7 +258,7 @@ export class DefaultAlertService {
     return this.createDefaultRuleIfNotExist(ruleType, name, interval, spaceId);
   }
 
-  protected async getRuleActions(ruleType: DefaultRuleType) {
+  private async getRuleActions(ruleType: DefaultRuleType) {
     const { actionConnectors, settings } = await this.getActionConnectors();
 
     const defaultActions = (actionConnectors ?? []).filter((act) =>
@@ -300,7 +293,7 @@ export class DefaultAlertService {
     }
   }
 
-  protected async getActionConnectors() {
+  private async getActionConnectors() {
     const actionsClient = (await this.context.actions)?.getActionsClient();
     if (!this.settings) {
       this.settings = await getSyntheticsDynamicSettings(this.soClient);
