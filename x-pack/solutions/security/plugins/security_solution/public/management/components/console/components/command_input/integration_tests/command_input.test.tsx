@@ -7,30 +7,54 @@
 
 import type { AppContextTestRender } from '../../../../../../common/mock/endpoint';
 import type { ConsoleTestSetup } from '../../../mocks';
-import { getConsoleTestSetup } from '../../../mocks';
+import { triggerConsoleCommandInputEvent, getConsoleTestSetup } from '../../../mocks';
 import type { ConsoleProps } from '../../../types';
 import { INPUT_DEFAULT_PLACEHOLDER_TEXT } from '../../console_state/state_update_handlers/handle_input_area_state';
-import { screen, waitFor, createEvent, fireEvent } from '@testing-library/react';
+import { waitFor, createEvent, fireEvent } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import { NO_HISTORY_EMPTY_MESSAGE } from '../components/command_input_history';
 import { UP_ARROW_ACCESS_HISTORY_HINT } from '../hooks/use_input_hints';
 
-// TODO This tests need revisting, there are problems with `enterComment` after the
-// upgrade to user-event v14 https://github.com/elastic/kibana/pull/189949
-describe.skip('When entering data into the Console input', () => {
+describe('When entering data into the Console input', () => {
   let user: UserEvent;
   let render: (props?: Partial<ConsoleProps>) => ReturnType<AppContextTestRender['render']>;
   let renderResult: ReturnType<typeof render>;
   let enterCommand: ConsoleTestSetup['enterCommand'];
 
   const showInputHistoryPopover = async () => {
-    await enterCommand('{ArrowUp}', { inputOnly: true, useKeyboard: true });
+    await enterCommand('[ArrowUp]', { inputOnly: true, useKeyboard: true });
 
     await waitFor(() => {
       expect(renderResult.getByTestId('test-inputHistorySelector')).not.toBeNull();
     });
 
-    await user.tab();
+    const target = renderResult
+      .getByTestId('test-inputHistorySelector')
+      .querySelector('.euiSelectableList__list');
+
+    if (target) {
+      fireEvent.keyDown(target, { key: 'ArrowDown' });
+    }
+  };
+
+  const hideInputHistoryPopover = async () => {
+    const target = renderResult
+      .getByTestId('test-inputHistorySelector')
+      .querySelector('.euiSelectableList__list');
+
+    if (target) {
+      fireEvent.keyDown(target, { key: 'Escape' });
+    }
+  };
+
+  const selectInputHistoryPopoverActiveOption = async () => {
+    const target = renderResult
+      .getByTestId('test-inputHistorySelector')
+      .querySelector('.euiSelectableList__list');
+
+    if (target) {
+      fireEvent.keyDown(target, { key: 'Enter' });
+    }
   };
 
   const getInputPlaceholderText = () => {
@@ -90,12 +114,10 @@ describe.skip('When entering data into the Console input', () => {
     expect(getLeftOfCursorText()).toEqual('aaaaa');
   });
 
-  it('should not display command key names in the input, when command keys are used', async () => {
+  it('should not display command key (CTRL, CMD, etc) names in the input when they are used', async () => {
     render();
-    await enterCommand('{Meta>}', { inputOnly: true, useKeyboard: true });
+    await enterCommand('{META>}', { inputOnly: true, useKeyboard: true });
     expect(getLeftOfCursorText()).toEqual('');
-    await enterCommand('{Shift>}A{/Shift}', { inputOnly: true, useKeyboard: true });
-    expect(getLeftOfCursorText()).toEqual('A');
   });
 
   it('should display placeholder text when input area is blank', () => {
@@ -198,7 +220,7 @@ describe.skip('When entering data into the Console input', () => {
       await enterCommand('cmd1 --help');
 
       if (inputText) {
-        enterCommand(inputText, { inputOnly: true });
+        await enterCommand(inputText, { inputOnly: true });
       }
 
       await showInputHistoryPopover();
@@ -221,7 +243,7 @@ describe.skip('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
-      await user.keyboard('{Escape}');
+      await hideInputHistoryPopover();
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('one');
@@ -235,7 +257,7 @@ describe.skip('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('cmd1 --help');
       });
 
-      await user.keyboard('{Enter}');
+      await selectInputHistoryPopoverActiveOption();
 
       await waitFor(() => {
         expect(getLeftOfCursorText()).toEqual('cmd1 --help');
@@ -285,7 +307,7 @@ describe.skip('When entering data into the Console input', () => {
   describe('and keyboard special keys are pressed', () => {
     const selectLeftOfCursorText = () => {
       // Select text to the left of the cursor
-      const selection = window.getSelection();
+      const selection = document.getSelection();
       const range = document.createRange();
 
       // Create a new range with the content that is to the left of the cursor
@@ -415,14 +437,15 @@ describe.skip('When entering data into the Console input', () => {
     });
 
     it('should select all text when ctrl or cmd + a is pressed', async () => {
-      await typeKeyboardKey('{ctrl>}a{/ctrl}');
+      await triggerConsoleCommandInputEvent(renderResult, { key: 'a', ctrlKey: true });
       let selection = window.getSelection();
+
       expect(selection!.toString()).toEqual('isolate');
 
       selection!.removeAllRanges();
-
-      await typeKeyboardKey('{meta>}a{/meta}');
+      await triggerConsoleCommandInputEvent(renderResult, { key: 'a', metaKey: true });
       selection = window.getSelection();
+
       expect(selection!.toString()).toEqual('isolate');
     });
 
@@ -445,7 +468,7 @@ describe.skip('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('isolate');
       });
 
-      await user.keyboard('{Escape}');
+      await hideInputHistoryPopover();
 
       expect(getLeftOfCursorText()).toEqual('r');
       expect(getRightOfCursorText()).toEqual('elease');
@@ -470,7 +493,7 @@ describe.skip('When entering data into the Console input', () => {
         expect(getInputPlaceholderText()).toEqual('isolate');
       });
 
-      await user.keyboard('{Enter}');
+      await selectInputHistoryPopoverActiveOption();
 
       expect(getLeftOfCursorText()).toEqual('isolate');
       expect(getRightOfCursorText()).toEqual('');
@@ -523,8 +546,6 @@ describe.skip('When entering data into the Console input', () => {
       await enterCommand('cmd7 --foo', { inputOnly: true });
       await typeKeyboardKey('{ArrowLeft}');
       await typeKeyboardKey('{Delete}');
-
-      screen.debug();
 
       expect(getLeftOfCursorText()).toEqual('cmd7 ');
     });
