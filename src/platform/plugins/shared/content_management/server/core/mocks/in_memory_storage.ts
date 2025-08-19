@@ -209,7 +209,7 @@ class InMemoryStorage implements ContentStorage<any> {
               type: 'foo',
               data: { ...hit, options: forwardInResponse },
             }))
-          : hits,
+          : (hits as unknown as Array<GetResult<FooContent>>),
         pagination: {
           total: 0,
           cursor: '',
@@ -224,7 +224,7 @@ class InMemoryStorage implements ContentStorage<any> {
             type: 'foo',
             data: { ...hit, options: forwardInResponse },
           }))
-        : hits,
+        : (hits as unknown as Array<GetResult<FooContent>>),
       pagination: {
         total: hits.length,
         cursor: '',
