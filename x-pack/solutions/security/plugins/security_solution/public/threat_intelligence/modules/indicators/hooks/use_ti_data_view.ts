@@ -54,27 +54,25 @@ export const useTIDataView = (): SelectedDataView => {
   }, [experimentalBrowserFields, newDataViewPickerEnabled, oldDataView.browserFields]);
 
   return useMemo(
-    () => ({
-      ...(newDataViewPickerEnabled
-        ? {
-            sourcererDataView: {
-              fields: dataView.fields.toSpec(),
-              title: dataView.title,
-              id: dataView.id,
-            },
-            loading: status !== 'ready',
-            dataViewId: dataView.id,
-            indicesExist: dataView.hasMatchedIndices(),
-          }
-        : oldDataView),
-      browserFields,
-      selectedPatterns: newDataViewPickerEnabled
-        ? experimentalSelectedPatterns
-        : oldDataView.selectedPatterns,
-      patternList: newDataViewPickerEnabled
-        ? experimentalSelectedPatterns
-        : oldDataView.selectedPatterns,
-    }),
+    () =>
+      ({
+        ...(newDataViewPickerEnabled
+          ? {
+              sourcererDataView: {
+                fields: dataView.fields.toSpec(),
+                title: dataView.title,
+                id: dataView.id,
+              },
+              loading: status !== 'ready',
+              dataViewId: dataView.id,
+              indicesExist: dataView.hasMatchedIndices(),
+            }
+          : oldDataView),
+        browserFields,
+        selectedPatterns: newDataViewPickerEnabled
+          ? experimentalSelectedPatterns
+          : oldDataView.selectedPatterns,
+      } as SelectedDataView),
     [
       browserFields,
       dataView,
