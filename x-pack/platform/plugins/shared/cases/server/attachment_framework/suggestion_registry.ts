@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { flatten } from 'lodash';
-import type { KibanaRequest } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import { AttachmentRegistry } from '../../common/registry';
 import type {
   SuggestionContext,
@@ -35,37 +34,32 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
   public async getAllSuggestionsForOwners(
     owners: SuggestionOwner[],
     context: SuggestionContext,
-    request: KibanaRequest
+    request: KibanaRequest,
+    logger: Logger
   ): Promise<SuggestionResponse> {
-    const allSuggestionDefinitions = this.getAllForOwners(owners);
-    const allSuggestionHandlers = flatten(
-      allSuggestionDefinitions.map((suggestion) => {
-        return Object.values(suggestion.handlers);
-      })
-    );
-    const allSettledResponses = await Promise.allSettled(
-      allSuggestionHandlers.map((handler) => {
-        return handler({
-          request,
-          context,
-        });
-      })
-    );
+    const promises: Array<Promise<SuggestionResponse>> = [];
+    for (const suggestion of this.getAllForOwners(owners)) {
+      for (const handler of Object.values(suggestion.handlers)) {
+        promises.push(
+          handler({
+            request,
+            context,
+          })
+        );
+      }
+    }
+    const allSettledResponses = await Promise.allSettled(promises);
 
-    const fulfilledResponses = allSettledResponses
-      .filter(
-        (result): result is PromiseFulfilledResult<SuggestionResponse> =>
-          result.status === 'fulfilled'
-      )
-      .map((result) => result.value);
-
-    return fulfilledResponses.reduce<SuggestionResponse>(
-      (acc, response) => {
-        return {
-          ...acc,
-          ...response,
-          suggestions: [...(acc.suggestions || []), ...(response.suggestions || [])],
-        };
+    return allSettledResponses.reduce<SuggestionResponse>(
+      (acc, r) => {
+        if (r.status === 'rejected') {
+          logger.error(`Failed to get suggestion: ${r.reason}`);
+        }
+        if (r.status === 'fulfilled') {
+          const items = r.value.suggestions;
+          if (items.length) acc.suggestions.push(...items);
+        }
+        return acc;
       },
       { suggestions: [] }
     );

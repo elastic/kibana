@@ -9,6 +9,7 @@ import { getAllForOwners } from './get';
 import type { SuggestionResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
 import type { GetAllForOwnersArgs } from './types';
+import { loggerMock } from '@kbn/logging-mocks';
 
 describe('getAllForOwners', () => {
   it('calls attachmentSuggestionRegistry.getAllSuggestionsForOwners and returns suggestions', async () => {
@@ -28,6 +29,7 @@ describe('getAllForOwners', () => {
 
     const clientArgs = {
       attachmentSuggestionRegistry,
+      logger: loggerMock.create(),
     } as unknown as CasesClientArgs;
 
     const args: GetAllForOwnersArgs = {
@@ -52,7 +54,8 @@ describe('getAllForOwners', () => {
     expect(attachmentSuggestionRegistry.getAllSuggestionsForOwners).toHaveBeenCalledWith(
       args.owners,
       args.context,
-      args.request
+      args.request,
+      clientArgs.logger
     );
     expect(result).toBe(mockSuggestions);
   });
