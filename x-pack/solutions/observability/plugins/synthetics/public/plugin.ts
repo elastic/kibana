@@ -241,11 +241,11 @@ export class SyntheticsPlugin
     pluginsStart.dashboard.registerDashboardPanelSettings(
       SYNTHETICS_STATS_OVERVIEW_EMBEDDABLE,
       () => {
-        return { panelPlacementSettings: { width: 10, height: 8 } };
+        return { placementSettings: { width: 10, height: 8 } };
       }
     );
     pluginsStart.dashboard.registerDashboardPanelSettings(SYNTHETICS_MONITORS_EMBEDDABLE, () => {
-      return { panelPlacementSettings: { width: 30, height: 12 } };
+      return { placementSettings: { width: 30, height: 12 } };
     });
 
     registerSyntheticsUiActions(coreStart, pluginsStart);

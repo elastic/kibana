@@ -140,13 +140,13 @@ export class SLOPlugin
               serializedState?.rawState?.showAllGroupByInstances ||
               serializedState?.rawState?.groupFilters
             ) {
-              return { panelPlacementSettings: { width: 24, height: 8 } };
+              return { placementSettings: { width: 24, height: 8 } };
             }
-            return { panelPlacementSettings: { width: 12, height: 8 } };
+            return { placementSettings: { width: 12, height: 8 } };
           }
         );
         pluginsStart.dashboard.registerDashboardPanelSettings(SLO_BURN_RATE_EMBEDDABLE_ID, () => {
-          return { panelPlacementSettings: { width: 14, height: 7 } };
+          return { placementSettings: { width: 14, height: 7 } };
         });
 
         plugins.embeddable.registerReactEmbeddableFactory(SLO_OVERVIEW_EMBEDDABLE_ID, async () => {

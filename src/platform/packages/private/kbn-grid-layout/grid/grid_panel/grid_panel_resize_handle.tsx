@@ -66,7 +66,6 @@ export const ResizeHandle = React.memo(
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({
-    // '--dragHandleCursorStyle': 'se-resize',
     right: '0',
     bottom: '0',
     margin: '-2px',

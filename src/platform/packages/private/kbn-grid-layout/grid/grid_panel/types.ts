@@ -11,12 +11,11 @@ interface GridCoordinate {
   column: number;
   row: number;
 }
-export interface PanelSize {
+
+interface GridRect extends GridCoordinate {
   width: number;
   height: number;
 }
-
-export type GridRect = GridCoordinate & PanelSize;
 
 export interface GridPanelData extends GridRect {
   id: string;

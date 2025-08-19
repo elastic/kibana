@@ -78,11 +78,11 @@ export const RegisterEmbeddable = () => {
           possible sizes of the dashboard panel.
         </p>
         <p>
-          Panel placement lets you configure the width, height, and placement strategy when panels
-          get added to a dashboard. In the example below, the Field List embeddable will be added to
-          dashboards as a narrow and tall panel. Panel resize settings let you configure the minimum
-          and maximum dimensions of the panel on the dashboard. In the example below, the Field List
-          embeddbale will have a minimum width of 12 columns.
+          Panel placement lets you configure the width, height, and placement strategy for when
+          panels initially get added to a dashboard. Panel resize settings let you configure the
+          minimum and maximum dimensions of the panel on the dashboard. In the example below, the
+          Field List embeddable will be added to dashboards as a narrow and tall panel with a
+          minimum width of 12 columns and a minumum height of 4 rows.
         </p>
       </EuiText>
       <EuiSpacer size="s" />

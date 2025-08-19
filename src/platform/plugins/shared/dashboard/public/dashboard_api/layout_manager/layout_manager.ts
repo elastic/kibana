@@ -75,7 +75,7 @@ export function initializeLayoutManager(
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
-  const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {}));
+  const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
   const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
     layout$.pipe(
       map(({ panels }) => {
@@ -91,9 +91,10 @@ export function initializeLayoutManager(
         });
         return settingsByPanelType;
       }),
-      startWith({})
+      startWith({}) // do not block rendering by waiting for these settings
     );
 
+  /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
   const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
     ([layout, panelResizeSettings]) => {
       gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));

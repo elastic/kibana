@@ -153,8 +153,8 @@ export class LinksPlugin
       LINKS_EMBEDDABLE_TYPE,
       async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');
-        const panelPlacementSettings = await getPanelPlacement(serializedState);
-        return { panelPlacementSettings };
+        const placementSettings = await getPanelPlacement(serializedState);
+        return { placementSettings };
       }
     );
 

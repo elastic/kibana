@@ -12,15 +12,14 @@ import { PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import { FIELD_LIST_ID } from './constants';
 
 const getPanelSettings = () => ({
-  panelPlacementSettings: {
-    // Consider using the serialized state to determine the width, height, and strategy
+  // Consider using the serialized state to determine the width, height, and strategy
+  placementSettings: {
     width: 12,
     height: 36,
     strategy: PanelPlacementStrategy.placeAtTop,
   },
-  panelResizeSettings: {
+  resizeSettings: {
     minWidth: 12,
-    maxWidth: 24,
     minHeight: 4,
   },
 });

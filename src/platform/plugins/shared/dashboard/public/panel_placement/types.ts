@@ -39,8 +39,8 @@ export interface PanelResizeSettings {
 }
 
 export type PanelSettings = Partial<{
-  panelPlacementSettings: PanelPlacementSettings;
-  panelResizeSettings: PanelResizeSettings;
+  placementSettings: PanelPlacementSettings;
+  resizeSettings: PanelResizeSettings;
 }>;
 
 export type GetPanelSettings<SerializedState extends object = object> = (

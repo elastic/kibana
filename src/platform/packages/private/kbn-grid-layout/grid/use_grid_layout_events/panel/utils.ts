@@ -44,7 +44,6 @@ const getRowCountInPixels = ({
 export const getResizePreviewRect = ({
   activePanel,
   pointerPixel,
-
   runtimeSettings,
   resizeOptions,
 }: {
