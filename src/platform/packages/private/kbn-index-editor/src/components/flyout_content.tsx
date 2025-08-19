@@ -56,13 +56,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     deps.data,
     coreStart.application,
     coreStart.http,
-    coreStart.notifications,
-    // On upload complete callback
-    (res) => {
-      if (res?.files.some((v) => v.docCount > 0)) {
-        deps.indexUpdateService.fileImported(res.index!);
-      }
-    }
+    coreStart.notifications
   );
 
   const columnsWithoutPlaceholders = dataViewColumns?.filter(

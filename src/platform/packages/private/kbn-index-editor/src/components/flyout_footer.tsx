@@ -17,11 +17,11 @@ import {
 } from '@elastic/eui';
 import { STATUS, useFileUploadContext } from '@kbn/file-upload';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { type FC } from 'react';
+import React, { useCallback, type FC } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 
 export interface FlyoutFooterProps {
   onClose: () => void;
@@ -40,6 +40,11 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
   const hasUnsavedChanges = useObservable(indexUpdateService.hasUnsavedChanges$, false);
 
   const { uploadStatus, onImportClick, canImport } = useFileUploadContext();
+
+  const onImport = useCallback(async () => {
+    indexUpdateService.setIsImportingFile(true);
+    await onImportClick();
+  }, [indexUpdateService, onImportClick]);
 
   const onSave = async () => {
     if (isIndexCreated) {
@@ -90,7 +95,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED && canImport ? (
               <EuiFlexItem grow={false}>
-                <EuiButton onClick={onImportClick}>
+                <EuiButton onClick={onImport}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.importButton"
                     defaultMessage="Import"

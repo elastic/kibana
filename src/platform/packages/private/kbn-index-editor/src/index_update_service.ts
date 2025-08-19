@@ -11,12 +11,12 @@ import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/t
 import type { HttpStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord } from '@kbn/discover-utils';
-import { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
   Subscription,
   combineLatest,
@@ -39,7 +39,7 @@ import {
 } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import { Builder, BasicPrettyPrinter } from '@kbn/esql-ast';
-import { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
+import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { IndexEditorErrors } from './types';
 import { parsePrimitive, isPlaceholderColumn } from './utils';
 import { ROW_PLACEHOLDER_PREFIX, COLUMN_PLACEHOLDER_PREFIX } from './constants';
@@ -165,9 +165,9 @@ export class IndexUpdateService {
   public readonly exitAttemptWithUnsavedChanges$ =
     this._exitAttemptWithUnsavedChanges$.asObservable();
 
-  private readonly _isProcessingImprtedFiles = new BehaviorSubject<boolean>(false);
+  private readonly _isProcessingImportedFiles = new BehaviorSubject<boolean>(false);
   public readonly isProcessingImportedFiles$: Observable<boolean> =
-    this._isProcessingImprtedFiles.asObservable();
+    this._isProcessingImportedFiles.asObservable();
 
   private readonly _fileImported$ = new Subject<void>();
 
@@ -587,6 +587,7 @@ export class IndexUpdateService {
             this._rows$.next(resultRows);
             this._totalHits$.next(total ?? 0);
             this._isFetching$.next(false);
+            this.setIsImportingFile(false);
           },
           error: (error) => {
             this._isFetching$.next(false);
@@ -666,27 +667,18 @@ export class IndexUpdateService {
     };
   }
 
-  public async fileImported(indexName: string) {
-    this.setIsImportingFile(true);
-
+  public async processImportedData(indexName: string) {
     if (this.isIndexCreated()) {
-      // tmp fix, shall we do a polling on the index?
-      setTimeout(async () => {
-        this.refresh();
-        const dataView = await firstValueFrom(this.dataView$);
-        await this.data.dataViews.refreshFields(dataView, false, true);
-        this._fileImported$.next();
-        this.setIsImportingFile(false);
-      }, 3000);
+      // We are appending the imported file to existing data, we need to refresh the fields
+      this.refresh();
+      const dataView = await firstValueFrom(this.dataView$);
+      await this.data.dataViews.refreshFields(dataView, false, true);
+      this._fileImported$.next();
     } else {
       this.setIndexName(indexName);
       this.setIndexCreated(true);
 
-      // tmp fix, shall we do a polling on the index?
-      setTimeout(() => {
-        this.refresh();
-        this.setIsImportingFile(false);
-      }, 3000);
+      this.refresh(); // HD needed?
     }
   }
 
@@ -700,7 +692,7 @@ export class IndexUpdateService {
   }
 
   public setIsImportingFile(isImporting: boolean) {
-    this._isProcessingImprtedFiles.next(isImporting);
+    this._isProcessingImportedFiles.next(isImporting);
   }
 
   public setIndexName(indexName: string) {
