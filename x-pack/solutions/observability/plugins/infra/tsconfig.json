@@ -45,7 +45,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/test-jest-helpers",
     "@kbn/controls-plugin",
-    "@kbn/securitysolution-io-ts-types",
     "@kbn/config-schema",
     "@kbn/es-ui-shared-plugin",
     "@kbn/logging",
