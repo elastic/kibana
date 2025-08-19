@@ -13,11 +13,9 @@ import React, { useState } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 
-import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import useMountedState from 'react-use/lib/useMountedState';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
-import { ControlsToolbarButton } from './controls_toolbar_button';
 import { AddPanelButton } from './add_panel_button/components/add_panel_button';
 import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
 import { addFromLibrary } from '../../dashboard_renderer/add_panel_from_library';
@@ -29,7 +27,6 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
   const dashboardApi = useDashboardApi();
   const [isLoading, setIsLoading] = useState(false);
 
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const extraButtons = [
     <AddPanelButton isDisabled={isDisabled} />,
     <AddFromLibraryButton
@@ -38,7 +35,6 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
       data-test-subj="dashboardAddFromLibraryButton"
       isDisabled={isDisabled}
     />,
-    <ControlsToolbarButton isDisabled={isDisabled} controlGroupApi={controlGroupApi} />,
   ];
 
   return (

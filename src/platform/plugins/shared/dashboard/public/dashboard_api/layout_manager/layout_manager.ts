@@ -73,7 +73,7 @@ export function initializeLayoutManager(
 
       const subscription = children$.subscribe((children) => {
         if (Object.keys(children).length === expectedChildCount) {
-          subscription.unsubscribe();
+          subscription?.unsubscribe();
           resolve();
         }
       });

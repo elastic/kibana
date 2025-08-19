@@ -8,14 +8,10 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { EuiPortal, UseEuiTheme } from '@elastic/eui';
-import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
-
-import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 // import { CONTROL_GROUP_EMBEDDABLE_ID } from '../../dashboard_api/control_group_manager';
@@ -31,9 +27,7 @@ export const DashboardViewport = ({
 }) => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
-  const [hasControls, setHasControls] = useState(false);
   const [
-    controlGroupApi,
     dashboardTitle,
     description,
     expandedPanelId,
@@ -42,7 +36,6 @@ export const DashboardViewport = ({
     useMargins,
     fullScreenMode,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.controlGroupApi$,
     dashboardApi.title$,
     dashboardApi.description$,
     dashboardApi.expandedPanelId$,
@@ -73,36 +66,6 @@ export const DashboardViewport = ({
     'dshDashboardViewport--panelExpanded': Boolean(expandedPanelId),
   });
 
-  useEffect(() => {
-    if (!controlGroupApi) {
-      return;
-    }
-    const subscription = controlGroupApi.children$.subscribe((children) => {
-      setHasControls(Object.keys(children).length > 0);
-    });
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [controlGroupApi]);
-
-  // Bug in main where panels are loaded before control filters are ready
-  // Want to migrate to react embeddable controls with same behavior
-  // TODO - do not load panels until control filters are ready
-  /*
-  const [dashboardInitialized, setDashboardInitialized] = useState(false);
-  useEffect(() => {
-    let ignore = false;
-    dashboard.untilContainerInitialized().then(() => {
-      if (!ignore) {
-        setDashboardInitialized(true);
-      }
-    });
-    return () => {
-      ignore = true;
-    };
-  }, [dashboard]);
-  */
-
   const styles = useMemoCss(dashboardViewportStyles);
 
   return (
@@ -113,24 +76,6 @@ export const DashboardViewport = ({
       })}
       css={styles.wrapper}
     >
-      {/* {viewMode !== 'print' ? (
-        <div className={hasControls ? 'dshDashboardViewport-controls' : ''}>
-          <EmbeddableRenderer<object, ControlGroupApi>
-            key={dashboardApi.uuid}
-            hidePanelChrome={true}
-            panelProps={{ hideLoader: true }}
-            type={CONTROLS_GROUP_TYPE}
-            maybeId={CONTROL_GROUP_EMBEDDABLE_ID}
-            getParentApi={() => {
-              return {
-                ...dashboardApi,
-                reload$: dashboardInternalApi.controlGroupReload$,
-              };
-            }}
-            onApiAvailable={(api) => dashboardInternalApi.setControlGroupApi(api)}
-          />
-        </div>
-      ) : null} */}
       {fullScreenMode && (
         <EuiPortal>
           <ExitFullScreenButton onExit={onExit} toggleChrome={!dashboardApi.isEmbeddedExternally} />

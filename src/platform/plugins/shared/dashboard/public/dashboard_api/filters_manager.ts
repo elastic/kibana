@@ -14,12 +14,12 @@ import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeLayoutManager } from './layout_manager';
 
-export const initializeFiltersManager = async (
+export const initializeFiltersManager = (
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>,
   layoutManager: ReturnType<typeof initializeLayoutManager>
 ) => {
   // wait until all child APIs are loaded.
-  await layoutManager.internalApi.untilAllChildrenAreAvailable();
+  // await layoutManager.internalApi.untilAllChildrenAreAvailable();
 
   const childFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const filterManagerSubscription = combineCompatibleChildrenApis<

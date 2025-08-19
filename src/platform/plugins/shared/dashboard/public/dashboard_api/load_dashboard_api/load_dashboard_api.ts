@@ -76,7 +76,7 @@ export async function loadDashboardApi({
   // --------------------------------------------------------------------------------------
   // get dashboard Api
   // --------------------------------------------------------------------------------------
-  const { api, cleanup, internalApi } = await getDashboardApi({
+  const { api, cleanup, internalApi } = getDashboardApi({
     creationOptions,
     incomingEmbeddable,
     initialState: {
