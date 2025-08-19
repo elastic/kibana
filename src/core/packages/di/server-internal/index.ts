@@ -9,3 +9,4 @@
 
 export { http } from './src/modules/http';
 export { capabilities } from './src/modules/capabilities';
+export { savedObjects } from './src/modules/saved_objects';

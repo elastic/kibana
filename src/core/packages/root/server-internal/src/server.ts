@@ -64,6 +64,7 @@ import { CoreInjectionService } from '@kbn/core-di-internal';
 import {
   capabilities as capabilitesModule,
   http as httpModule,
+  savedObjects as savedObjectsModule,
 } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
@@ -411,6 +412,7 @@ export class Server {
     const container = injectionSetup.getContainer();
     container.loadSync(capabilitesModule);
     container.loadSync(httpModule);
+    container.loadSync(savedObjectsModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
