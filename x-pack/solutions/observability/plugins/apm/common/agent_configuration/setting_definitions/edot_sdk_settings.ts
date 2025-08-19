@@ -73,7 +73,7 @@ export const edotSDKSettings: RawSettingDefinition[] = [
     ],
   },
   {
-    key: 'polling_interval',
+    key: 'opamp_polling_interval',
     type: 'duration',
     defaultValue: '30s',
     min: '1s',
