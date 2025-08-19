@@ -16,19 +16,24 @@ import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from 
 
 import type { SimplifiedInputs } from './simplified_package_policy_helper';
 
+// Checks if a package has a policy template that supports agentless
+// Provide a specific integration policy template name to check if it alone supports agentless
 export const isAgentlessIntegration = (
-  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
+  integrationToEnable?: string
 ) => {
-  if (
-    packageInfo?.policy_templates &&
-    packageInfo?.policy_templates.length > 0 &&
-    !!packageInfo?.policy_templates.find(
-      (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
-    )
-  ) {
-    return true;
+  if (integrationToEnable) {
+    return Boolean(
+      packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
+        ?.deployment_modes?.agentless?.enabled === true
+    );
   }
-  return false;
+
+  return Boolean(
+    packageInfo?.policy_templates?.some(
+      (policyTemplate) => policyTemplate?.deployment_modes?.agentless?.enabled === true
+    )
+  );
 };
 
 export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyName: string) => {
@@ -70,39 +75,71 @@ export function inputNotAllowedInAgentless(inputType: string, supportsAgentless?
   return supportsAgentless === true && AGENTLESS_DISABLED_INPUTS.includes(inputType);
 }
 
+export function isInputAllowedForDeploymentMode(
+  input: Pick<NewPackagePolicyInput, 'type' | 'policy_template'>,
+  deploymentMode: 'default' | 'agentless',
+  packageInfo?: PackageInfo
+): boolean {
+  // Always allow system package for monitoring, if this is not excluded it will be blocked
+  // by the following code because it contains `logfile` input which is in the blocklist.
+  if (packageInfo?.name === 'system') {
+    return true;
+  }
+
+  // Check first if policy_template for input supports the deployment type
+  if (
+    packageInfo &&
+    input.policy_template &&
+    !integrationSupportsDeploymentMode(deploymentMode, packageInfo, input.policy_template)
+  ) {
+    return false;
+  }
+
+  // For backward compatibility, if deployment_modes is not specified:
+  // - For agentless mode, check the blocklist
+  // - For default mode, allow all inputs
+  if (deploymentMode === 'agentless') {
+    return !AGENTLESS_DISABLED_INPUTS.includes(input.type);
+  }
+
+  return true; // Allow all inputs for default mode when deployment_modes is not specified
+}
+
+const integrationSupportsDeploymentMode = (
+  deploymentMode: string,
+  packageInfo: PackageInfo,
+  integrationName: string
+) => {
+  if (deploymentMode === 'agentless') {
+    return isAgentlessIntegration(packageInfo, integrationName);
+  }
+
+  const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
+
+  if (integration?.deployment_modes?.default) {
+    return integration.deployment_modes?.default.enabled;
+  }
+
+  return true;
+};
+
 /*
  * Throw error if trying to enabling an input that is not allowed in agentless
  */
-export function validateAgentlessInputs(
-  packagePolicyInputs: NewPackagePolicyInput[] | SimplifiedInputs,
-  supportsAgentless?: boolean | null
+export function validateDeploymentModesForInputs(
+  inputs: Array<Pick<NewPackagePolicyInput, 'type' | 'enabled' | 'policy_template'>>,
+  deploymentMode: 'default' | 'agentless',
+  packageInfo?: PackageInfo
 ) {
-  if (Array.isArray(packagePolicyInputs)) {
-    packagePolicyInputs.forEach((input) => {
-      throwIfInputNotAllowed(input.type, input.enabled, supportsAgentless);
-    });
-  } else {
-    Object.keys(packagePolicyInputs).forEach((inputName) => {
-      const input = packagePolicyInputs[inputName];
-      const match = inputName.match(/\-(\w*)$/);
-      const inputType = match && match.length > 0 ? match[1] : '';
-      throwIfInputNotAllowed(inputType, input?.enabled ?? false, supportsAgentless);
-    });
-  }
-}
-
-function throwIfInputNotAllowed(
-  inputType: string,
-  inputEnabled: boolean,
-  supportsAgentless?: boolean | null
-) {
-  if (inputNotAllowedInAgentless(inputType, supportsAgentless) && inputEnabled === true) {
-    throw new PackagePolicyValidationError(
-      `Input ${inputType} is not allowed: types '${AGENTLESS_DISABLED_INPUTS.map(
-        (name) => name
-      ).join(', ')}' cannot be enabled for an Agentless integration`
-    );
-  }
+  inputs.forEach((input) => {
+    if (input.enabled && !isInputAllowedForDeploymentMode(input, deploymentMode, packageInfo)) {
+      throw new PackagePolicyValidationError(
+        `Input ${input.type}${
+          packageInfo?.name ? ` in ${packageInfo.name}` : ''
+        } is not allowed for deployment mode '${deploymentMode}'`
+      );
+    }
+  });
 }
 
 /**
