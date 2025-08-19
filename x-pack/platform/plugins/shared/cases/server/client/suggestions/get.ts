@@ -23,7 +23,8 @@ export async function getAllForOwners(
   const suggestions = await attachmentSuggestionRegistry.getAllSuggestionsForOwners(
     owners,
     context,
-    request
+    request,
+    clientArgs.logger
   );
 
   return suggestions;
