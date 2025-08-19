@@ -38,7 +38,6 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
         login();
         visitTimeline(timelineId);
       });
-    // goToNotesTab();
   });
 
   it('renders notes UI and basic content and delete it', () => {
@@ -60,7 +59,7 @@ describe('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(`${NOTES_TEXT} em`).last().should('have.text', 'italics');
     cy.get(NOTES_CODE_BLOCK).should('be.visible');
 
-    // link text can differ slightly across environments, assert key parts and href
+    // link
     cy.get(NOTES_LINK)
       .last()
       .should('have.attr', 'href', link)
