@@ -77,6 +77,7 @@ export interface ComponentOpts {
   loadExecutionLogAggregations: (
     props: LoadExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
+  loadGaps: (props: LoadGapsProps) => Promise<{}>;
   loadGlobalExecutionLogAggregations: (
     props: LoadGlobalExecutionLogAggregationsProps
   ) => Promise<IExecutionLogResult>;
