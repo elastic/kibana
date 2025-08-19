@@ -1667,7 +1667,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
 /x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
-/x-pack/test/functional/es_archives/filebeat @elastic/appex-qa
+/x-pack/solutions/security/test/fixtures/es_archives/filebeat @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids @elastic/appex-qa
 /x-pack/test/functional/es_archives/dlstest @elastic/appex-qa # No usages found
