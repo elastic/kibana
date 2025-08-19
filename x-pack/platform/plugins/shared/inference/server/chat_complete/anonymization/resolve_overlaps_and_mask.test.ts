@@ -6,7 +6,7 @@
  */
 
 import type { RegexAnonymizationRule } from '@kbn/inference-common';
-import { processMatches } from './process_matches';
+import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
 import type { AnonymizationState } from './types';
 import { getEntityMask } from './get_entity_mask';
 
@@ -89,7 +89,7 @@ describe('processMatches', () => {
     const state = createInitialState([{ content: 'Email carlos@test.com for help' }]);
     const detectedMatches = [createEmailMatch(0, 'content', 6, 'carlos@test.com')];
 
-    const result = processMatches({ detectedMatches, state, rules: [emailRule] });
+    const result = resolveOverlapsAndMask({ detectedMatches, state, rules: [emailRule] });
 
     const expectedMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
     expect(result.records[0].content).toBe(`Email ${expectedMask} for help`);
@@ -107,7 +107,11 @@ describe('processMatches', () => {
       createPhoneMatch(0, 'content', 30, '555-123-4567'),
     ];
 
-    const result = processMatches({ detectedMatches, state, rules: [emailRule, phoneRule] });
+    const result = resolveOverlapsAndMask({
+      detectedMatches,
+      state,
+      rules: [emailRule, phoneRule],
+    });
 
     const emailMask = getEntityMask({ value: 'carlos@test.com', class_name: 'EMAIL' });
     const phoneMask = getEntityMask({ value: '555-123-4567', class_name: 'PHONE' });
@@ -134,7 +138,11 @@ describe('processMatches', () => {
       createEmailMatch(1, 'content', 8, 'diego@example.org'),
     ];
 
-    const result = processMatches({ detectedMatches, state, rules: [emailRule, phoneRule] });
+    const result = resolveOverlapsAndMask({
+      detectedMatches,
+      state,
+      rules: [emailRule, phoneRule],
+    });
 
     const emailMask = getEntityMask({ value: 'maria@test.com', class_name: 'EMAIL' });
     const phoneMask = getEntityMask({ value: '555-1234', class_name: 'PHONE' });
@@ -164,7 +172,11 @@ describe('processMatches', () => {
       createDomainMatch(0, 'content', 14, 'example.com'),
     ];
 
-    const result = processMatches({ detectedMatches, state, rules: [emailRule, domainRule] });
+    const result = resolveOverlapsAndMask({
+      detectedMatches,
+      state,
+      rules: [emailRule, domainRule],
+    });
 
     const emailMask = getEntityMask({ value: 'sofia@example.com', class_name: 'EMAIL' });
     expect(result.records[0].content).toBe(`Contact ${emailMask} today`);
@@ -191,7 +203,7 @@ describe('processMatches', () => {
     };
     const detectedMatches = [createEmailMatch(0, 'content', 6, 'luis@test.com')];
 
-    const result = processMatches({ detectedMatches, state, rules: [emailRule] });
+    const result = resolveOverlapsAndMask({ detectedMatches, state, rules: [emailRule] });
 
     expect(result.anonymizations).toHaveLength(2);
     expect(result.anonymizations[0]).toEqual({

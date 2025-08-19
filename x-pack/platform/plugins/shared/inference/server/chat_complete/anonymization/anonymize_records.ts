@@ -12,7 +12,7 @@ import type { AnonymizationState } from './types';
 import { executeRegexRules } from './execute_regex_rules';
 import { executeNerRule } from './execute_ner_rule';
 import type { RegexWorkerService } from './regex_worker_service';
-import { processMatches } from './process_matches';
+import { resolveOverlapsAndMask } from './resolve_overlaps_and_mask';
 
 export async function anonymizeRecords<T extends Record<string, string | undefined>>({
   input,
@@ -54,7 +54,7 @@ export async function anonymizeRecords({
   });
 
   // Process detected regex matches to resolve overlaps and apply masks
-  state = processMatches({
+  state = resolveOverlapsAndMask({
     detectedMatches: detectedRegexEntities,
     state,
     rules: regexRules,

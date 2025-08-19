@@ -13,7 +13,7 @@ import { getEntityMask } from './get_entity_mask';
  * Processes detected matches by resolving overlaps and applying masks to records.
  * Returns updated state with masked records and anonymizations.
  */
-export function processMatches({
+export function resolveOverlapsAndMask({
   detectedMatches,
   state,
   rules,

@@ -282,7 +282,7 @@ describe('anonymizeRecords', () => {
     expect(mockEsClient.ml.inferTrainedModel).toHaveBeenCalledTimes(2);
   });
 
-  it('does not nest masks from later regex over earlier mask text', async () => {
+  it('does not nest masks from later regex over earlier masked text', async () => {
     const testUrl = 'http://test.com';
     const input = [{ content: testUrl }];
 
