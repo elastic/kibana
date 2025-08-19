@@ -8,6 +8,13 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { updateIndices, createIndex, createOrUpdateIndex } from './create_or_update_index';
 
+// Mock the reindex module
+jest.mock('./reindex_index', () => ({
+  reindexIndexDocuments: jest.fn(),
+}));
+
+import { reindexIndexDocuments } from './reindex_index';
+
 const logger = loggingSystemMock.createLogger();
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -51,6 +58,29 @@ describe('updateIndices', () => {
     expect(esClient.indices.putMapping).toHaveBeenCalledWith({
       index: indexName,
       ...simulateIndexTemplateResponse.template.mappings,
+    });
+    
+    // Should not call reindex by default
+    expect(reindexIndexDocuments).not.toHaveBeenCalled();
+  });
+
+  it(`should update indices with reindexing enabled`, async () => {
+    const indexName = 'test_index_name-default';
+    esClient.indices.get.mockResolvedValueOnce({ [indexName]: {} });
+
+    await updateIndices({
+      esClient,
+      logger,
+      name,
+      totalFieldsLimit,
+      enableReindexing: true,
+    });
+
+    expect(esClient.indices.putMapping).toHaveBeenCalled();
+    expect(reindexIndexDocuments).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      indexName,
     });
   });
 

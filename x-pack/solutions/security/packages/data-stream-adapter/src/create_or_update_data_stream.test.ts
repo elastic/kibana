@@ -13,6 +13,19 @@ import {
   createOrUpdateDataStream,
 } from './create_or_update_data_stream';
 
+// Mock the rollover and reindex modules
+jest.mock('./rollover_data_stream', () => ({
+  rolloverDataStream: jest.fn(),
+  shouldRolloverDataStream: jest.fn(),
+}));
+
+jest.mock('./reindex_data_stream', () => ({
+  reindexDataStreamDocuments: jest.fn(),
+}));
+
+import { rolloverDataStream, shouldRolloverDataStream } from './rollover_data_stream';
+import { reindexDataStreamDocuments } from './reindex_data_stream';
+
 const logger = loggingSystemMock.createLogger();
 const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
@@ -57,6 +70,105 @@ describe('updateDataStreams', () => {
       index: dataStreamName,
       ...simulateIndexTemplateResponse.template.mappings,
     });
+    
+    // Should not call rollover or reindex by default
+    expect(rolloverDataStream).not.toHaveBeenCalled();
+    expect(reindexDataStreamDocuments).not.toHaveBeenCalled();
+  });
+
+  it(`should update data streams with rollover enabled`, async () => {
+    const dataStreamName = 'test_data_stream-default';
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [{ name: dataStreamName } as IndicesDataStream],
+    });
+
+    await updateDataStreams({
+      esClient,
+      logger,
+      name,
+      totalFieldsLimit,
+      enableRollover: true,
+    });
+
+    expect(esClient.indices.putMapping).toHaveBeenCalled();
+    expect(rolloverDataStream).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      dataStreamName,
+    });
+    expect(reindexDataStreamDocuments).not.toHaveBeenCalled();
+  });
+
+  it(`should update data streams with rollover and reindexing enabled`, async () => {
+    const dataStreamName = 'test_data_stream-default';
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [{ name: dataStreamName } as IndicesDataStream],
+    });
+
+    await updateDataStreams({
+      esClient,
+      logger,
+      name,
+      totalFieldsLimit,
+      enableRollover: true,
+      enableReindexing: true,
+    });
+
+    expect(esClient.indices.putMapping).toHaveBeenCalled();
+    expect(rolloverDataStream).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      dataStreamName,
+    });
+    expect(reindexDataStreamDocuments).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      dataStreamName,
+    });
+  });
+
+  it(`should handle mapping failure with rollover when enabled`, async () => {
+    const dataStreamName = 'test_data_stream-default';
+    const mappingError = {
+      body: {
+        error: {
+          type: 'illegal_argument_exception',
+          reason: 'Mapping conflict',
+        },
+      },
+    };
+
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [{ name: dataStreamName } as IndicesDataStream],
+    });
+
+    esClient.indices.putMapping
+      .mockRejectedValueOnce(mappingError)
+      .mockResolvedValueOnce({ acknowledged: true }); // Second call after rollover
+
+    (shouldRolloverDataStream as jest.Mock).mockReturnValueOnce(true);
+
+    await updateDataStreams({
+      esClient,
+      logger,
+      name,
+      totalFieldsLimit,
+      enableRollover: true,
+      enableReindexing: true,
+    });
+
+    expect(shouldRolloverDataStream).toHaveBeenCalledWith(mappingError);
+    expect(rolloverDataStream).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      dataStreamName,
+    });
+    expect(reindexDataStreamDocuments).toHaveBeenCalledWith({
+      esClient,
+      logger,
+      dataStreamName,
+    });
+    expect(esClient.indices.putMapping).toHaveBeenCalledTimes(2); // Retry after rollover
   });
 
   it(`should update multiple data streams`, async () => {

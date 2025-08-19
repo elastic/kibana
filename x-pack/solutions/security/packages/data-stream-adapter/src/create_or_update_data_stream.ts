@@ -12,6 +12,8 @@ import type {
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
+import { rolloverDataStream, shouldRolloverDataStream } from './rollover_data_stream';
+import { reindexDataStreamDocuments } from './reindex_data_stream';
 
 interface UpdateIndexMappingsOpts {
   logger: Logger;
@@ -19,6 +21,8 @@ interface UpdateIndexMappingsOpts {
   indexNames: string[];
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableRollover?: boolean;
+  enableReindexing?: boolean;
 }
 
 interface UpdateIndexOpts {
@@ -27,6 +31,8 @@ interface UpdateIndexOpts {
   indexName: string;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableRollover?: boolean;
+  enableReindexing?: boolean;
 }
 
 const updateTotalFieldLimitSetting = async ({
@@ -55,7 +61,14 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: UpdateIndexOpts) => {
+const updateMapping = async ({ 
+  logger, 
+  esClient, 
+  indexName, 
+  writeIndexOnly, 
+  enableRollover = false,
+  enableReindexing = false,
+}: UpdateIndexOpts) => {
   logger.debug(`Updating mappings for ${indexName} data stream.`);
 
   let simulatedIndexMapping: IndicesSimulateIndexTemplateResponse;
@@ -88,9 +101,66 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
         }),
       { logger }
     );
+
+    // If rollover is enabled and reindexing is enabled, trigger both after successful mapping update
+    if (enableRollover) {
+      logger.info(`Triggering rollover for ${indexName} after mapping update`);
+      await rolloverDataStream({
+        esClient,
+        logger,
+        dataStreamName: indexName,
+      });
+
+      // Reindex older documents after rollover if enabled
+      if (enableReindexing) {
+        logger.info(`Starting reindex of older documents for ${indexName}`);
+        await reindexDataStreamDocuments({
+          esClient,
+          logger,
+          dataStreamName: indexName,
+        });
+      }
+    }
   } catch (err) {
     logger.error(`Failed to PUT mapping for ${indexName}: ${err.message}`);
-    throw err;
+    
+    // Check if we should rollover due to mapping conflicts
+    if (enableRollover && shouldRolloverDataStream(err)) {
+      logger.info(`Mapping update failed for ${indexName}, triggering rollover due to conflict`);
+      try {
+        await rolloverDataStream({
+          esClient,
+          logger,
+          dataStreamName: indexName,
+        });
+
+        // Retry mapping update after rollover
+        await retryTransientEsErrors(
+          () =>
+            esClient.indices.putMapping({
+              index: indexName,
+              ...simulatedMapping,
+              write_index_only: true, // Only update write index after rollover
+            }),
+          { logger }
+        );
+
+        // Reindex older documents after rollover if enabled
+        if (enableReindexing) {
+          logger.info(`Starting reindex of older documents for ${indexName} after rollover`);
+          await reindexDataStreamDocuments({
+            esClient,
+            logger,
+            dataStreamName: indexName,
+          });
+        }
+      } catch (rolloverErr) {
+        logger.error(`Failed to rollover ${indexName} after mapping failure: ${rolloverErr.message}`);
+        throw rolloverErr;
+      }
+    } else {
+      throw err;
+    }
   }
 };
 /**
@@ -102,6 +172,8 @@ const updateDataStreamMappings = async ({
   totalFieldsLimit,
   indexNames,
   writeIndexOnly,
+  enableRollover = false,
+  enableReindexing = false,
 }: UpdateIndexMappingsOpts) => {
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
@@ -113,7 +185,15 @@ const updateDataStreamMappings = async ({
   // Update mappings of the found indices.
   await Promise.all(
     indexNames.map((indexName) =>
-      updateMapping({ logger, esClient, totalFieldsLimit, indexName, writeIndexOnly })
+      updateMapping({ 
+        logger, 
+        esClient, 
+        totalFieldsLimit, 
+        indexName, 
+        writeIndexOnly, 
+        enableRollover,
+        enableReindexing,
+      })
     )
   );
 };
@@ -124,6 +204,8 @@ export interface CreateOrUpdateDataStreamParams {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableRollover?: boolean;
+  enableReindexing?: boolean;
 }
 
 export async function createOrUpdateDataStream({
@@ -132,6 +214,8 @@ export async function createOrUpdateDataStream({
   name,
   totalFieldsLimit,
   writeIndexOnly,
+  enableRollover = false,
+  enableReindexing = false,
 }: CreateOrUpdateDataStreamParams): Promise<void> {
   logger.info(`Creating data stream - ${name}`);
 
@@ -158,6 +242,8 @@ export async function createOrUpdateDataStream({
       indexNames: [name],
       totalFieldsLimit,
       writeIndexOnly,
+      enableRollover,
+      enableReindexing,
     });
   } else {
     try {
@@ -221,6 +307,8 @@ export interface CreateOrUpdateSpacesDataStreamParams {
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
   writeIndexOnly?: boolean;
+  enableRollover?: boolean;
+  enableReindexing?: boolean;
 }
 
 export async function updateDataStreams({
@@ -229,6 +317,8 @@ export async function updateDataStreams({
   name,
   totalFieldsLimit,
   writeIndexOnly,
+  enableRollover = false,
+  enableReindexing = false,
 }: CreateOrUpdateSpacesDataStreamParams): Promise<void> {
   logger.info(`Updating data streams - ${name}`);
 
@@ -253,6 +343,8 @@ export async function updateDataStreams({
       totalFieldsLimit,
       indexNames: dataStreams.map((dataStream) => dataStream.name),
       writeIndexOnly,
+      enableRollover,
+      enableReindexing,
     });
   }
 }

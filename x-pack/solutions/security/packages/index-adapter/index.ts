@@ -19,3 +19,20 @@ export type {
   InstallParams,
 } from './src/index_adapter';
 export type * from './src/field_maps/types';
+
+// Export new reindexing functionality
+export { 
+  reindexIndexDocuments, 
+  getActiveReindexTasks,
+  type ReindexIndexDocumentsParams,
+  type ReindexTaskStatus,
+} from './src/reindex_index';
+
+export {
+  createOrUpdateIndex,
+  updateIndices,
+  createIndex,
+  type CreateOrUpdateIndexParams,
+  type CreateOrUpdateSpacesIndexParams,
+  type CreateIndexParams,
+} from './src/create_or_update_index';
