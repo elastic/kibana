@@ -4273,8 +4273,8 @@
         "enabled": false,
         "type": "object"
       },
-      "deleted": {
-        "type": "boolean"
+      "deleted_at": {
+        "type": "date"
       },
       "description": {
         "fields": {

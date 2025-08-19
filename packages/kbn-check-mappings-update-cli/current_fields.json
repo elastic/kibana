@@ -1288,7 +1288,7 @@
   "workflow": [
     "createdBy",
     "definition",
-    "deleted",
+    "deleted_at",
     "description",
     "lastUpdatedBy",
     "name",
