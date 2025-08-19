@@ -16,4 +16,10 @@ export {
   type RouteHandler,
   Router,
 } from './src/services/http';
+export {
+  type ISavedObjectsClientFactory,
+  SavedObjectsClient,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+} from './src/services/saved_objects';
 export { CoreSetup, CoreStart, PluginInitializer } from './src/services/lifecycle';
