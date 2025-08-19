@@ -70583,6 +70583,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
