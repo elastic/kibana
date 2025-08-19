@@ -32,10 +32,6 @@
     "@kbn/management-settings-field-definition",
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
-    "@kbn/test-jest-helpers",
-    "@kbn/spaces-plugin",
-    "@kbn/cloud-plugin",
-    "@kbn/inference-common",
     "@kbn/licensing-plugin"
   ],
   "exclude": [
