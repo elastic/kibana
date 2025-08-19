@@ -1,69 +1,39 @@
-## {{kql_guide}}
+## KQL Guide
 
 ### Key Principles
+- Query: `field:value1 or field:value2`
 
 #### 1. Finding Values
-- Find documents where any field matches any of the words/terms listed. The term must appear as it is in the document, e.g. this query `dark light` won’t match documents containing the word "darker".
-- Important Rule: When searching for multiple values in a specific field, you cannot use `field:(value1 or value2)`. Instead, you must write `field:value1 or field:value2`. Each field:value combination must be written separately.
-- Use and/or and parentheses to define that multiple terms need to appear. This query `orange and (dark or light)` would find all documents that have the term "orange" and either "dark" or "light" (or both) in it.
-- To find values only in specific fields you can put the field name before the value e.g. this query `title : our planet or title : dark` will only find document with the term "our" and "planet" in the title field, or document with the term "dark" in the title field.
-- Putting quotes around values makes sure they are found in that specific order (match a phrase) e.g. if you want to make sure to only find documents containing “our planet” and not “planet our” you’d need the following query: `title: "our planet"`
+Find document where the field matches the terms listed.
+The term must appear as it is in the field, e.g. this query `message:dark` will match documents containing the word "dark".
+
+When searching for different values in a specific field, you must repeat the field name and use or/and conditions: `field:dark or field:darker`
+
+Using quotes around values make sure they are found in that specific order (match a phrase).
+If you want to make sure to only find documents containing “our planet” and not “planet our” use the following query: `title: "our planet"`
 
 #### 2. Wildcards
-- Use wildcards * to match just parts of a term/word, e.g. this query `dark*` will find anything beginning with "dark" like "darker", "darkest", "darkness", etc.
+- Use wildcards * to match just parts of a term/word, e.g. this query `message:dark*` will find anything beginning with "dark" like "darker", "darkest", "darkness", etc. in the message field
 - Wildcards can be used anywhere in a term/word. ⚡ Using a wildcard in front of a word can be rather slow and resource intensive for your Elasticsearch — use with care. e.g. d*k *les
 - Wildcards cannot be used when searching for phrases i.e. "our plan*" will not retrieve results containing "our planet".
-- Wildcards can be used for searching over multiple fields in KQL e.g. this query will search "fakestreet" in all fields beginning with "user.address.": `user.address.* : fakestreet`
+- Wildcards can be used for searching over multiple fields e.g. this query will search "fakestreet" in all fields beginning with "user.address.": `user.address.* : fakestreet`
 
 #### 3. Boolean Operators
 - `or`: Combines multiple conditions where at least one must match
-  - `message:"dark cat" or message:"dark dog"` returns documents with either matching phrase
-  - Important: When searching for multiple values in the same field, you must repeat the field name: `field:value1 or field:value2`
+Example: `message:"dark cat" or message:"dark dog"` returns documents that match either condition
 - `and`: Requires all conditions to match
-  - `body.text:"another thing" and message:dark*` returns documents that have both conditions
-- Operators are case-insensitive: `OR`, `or`, `And`, `AND` all work
-- Parentheses Usage: Use parentheses to group different field conditions, NOT to group values for the same field
-  - CORRECT: `(message:"error" or status:"failed") and user:"admin"`
-  - INCORRECT: `message:("error" or "warning" or "critical")`
-
-#### 4. Nested Field Access
-- Use dot notation for nested fields: `body.text:"value"` searches within the `text` field inside the `body` object
-- Can chain multiple levels: `body.metadata.author:"John"`
+Example: `body.text:"another thing" and message:dark*` returns documents that match both condition
 
 ### Query Construction Rules
-1. Always specify the field explicitly when you want to search within a specific field
-2. Use quotes for phrases containing spaces or special characters
-3. Parentheses group conditions: `(message:cat or message:"dark dog") and status:active`
-4. Default behavior without field: Searching just `"dark cat"` searches across all searchable fields
+- Always specify the field explicitly when you want to search within a specific field: `message:error`
+- Use quotes for phrases containing spaces or special characters: `message:"illegal access" or message:"authorization denied"`
+- Parentheses group conditions: `(message:cat or message:"dark dog") and status:active`.
 
-### Examples Explained
-- `message:"dark cat" or message:"dark dog"` → Documents where message field match either phrase
-- `message:"dark"` → Documents where message field contains the word "dark"
-- `body.text:dark*` → Documents where body.text field contains the term starting with "dark", e.g. "darkness", "darker", "dark"
-- `body.text:"another thing" and (dark or darker)` → Documents having "another thing" matching phrase in the body.text field, and dark or darker word in the document.
-
-### Multiple Values for Same Field - Examples
-When searching for multiple possible values in the same field, always write each field:value pair separately:
-
-- Finding any of several error types:
-  - Query: `error.type:"timeout" or error.type:"connection" or error.type:"permission"`
-
-- Finding documents with specific statuses:
-  - Query: `status:"pending" or status:"processing" or status:"queued"`
-
-- Combining multiple field searches:
-  - Query: `(message:"failed" or message:"error") and (severity:"high" or severity:"critical")`
-  - This finds documents where message contains either "failed" or "error" AND severity is either "high" or "critical"
-
-### Common Mistakes to Avoid
-
-#### Incorrect Field Value Grouping
-- WRONG: `message:("unusual pattern" or "anomalous behavior")`
-- CORRECT: `message:"unusual pattern" or message:"anomalous behavior"`
-- Why: You cannot use parentheses to group multiple values for a single field. Each field:value pair must be written separately and connected with boolean operators.
-
-#### More Examples
-- WRONG: `status:("error" or "failed" or "timeout")`
-- CORRECT: `status:"error" or status:"failed" or status:"timeout"`
-- WRONG: `user.name:("john" and "doe")`
-- CORRECT: `user.name:"john" and user.name:"doe"`
+### Examples
+- Query: `message:"dark cat" or message:"dark dog"` → Documents where message field match either phrase
+- Query: `message:"dark"` → Documents where message field contains the word "dark"
+- Query: `body.text:dark*` → Documents where body.text field contains the term starting with "dark", e.g. "darkness", "darker", "dark"
+- Query: `body.text:"another thing" and (message:dark or message:darker)` → Documents having "another thing" matching phrase in the body.text field, and dark or darker word in the message field.
+- Query: `error.type:"timeout" or error.type:"connection" or error.type:"permission"`
+- Query: `status:"pending" or status:"processing" or status:"queued"`
+- Query: `(message:"failed" or message:"error") and (severity:"high" or severity:"critical")` → Combining multiple field searches
