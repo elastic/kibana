@@ -115,7 +115,7 @@ describe('DataStreamClient', () => {
       });
       expect(indexTemplate.index_template.template).toEqual({
         mappings: {
-          dynamic: 'false',
+          dynamic: false,
           properties: {
             '@timestamp': {
               type: 'date',
@@ -208,7 +208,6 @@ describe('DataStreamClient', () => {
         ...testDataStream,
         mappings: {
           ...testDataStream.mappings,
-          dynamic: false,
           properties: {
             ...testDataStream.mappings!.properties,
             newField: mappings.text(),
@@ -237,7 +236,7 @@ describe('DataStreamClient', () => {
       expect(indexTemplate.index_template.template).toEqual({
         mappings: {
           ...nextDefinition.mappings,
-          dynamic: 'false',
+          dynamic: false,
         },
         settings: {
           index: {
