@@ -76,7 +76,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         checked: conversationSharedState === ConversationSharedState.Shared ? 'on' : undefined,
         key: ConversationSharedState.Shared,
         data: {
-          description: i18n.VISIBLE_SELECTED,
+          description: i18n.VISIBLE_SHARED,
         },
         'data-test-subj': ConversationSharedState.Shared,
         disabled: !isConversationOwner,
@@ -160,7 +160,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         conversationSharedState !== ConversationSharedState.Global
       ) {
         shareConversationGlobal();
-      } else {
+      } else if (selectedOption.key === ConversationSharedState.Shared) {
         setIsModalOpen(true);
       }
       setIsPopoverOpen(false);

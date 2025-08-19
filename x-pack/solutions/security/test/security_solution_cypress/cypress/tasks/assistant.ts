@@ -6,7 +6,6 @@
  */
 
 import { closeToast } from './common/toast';
-import { visitGetStartedPage } from './navigation';
 import { CONNECTOR_NAME_INPUT, SAVE_ACTION_CONNECTOR_BTN } from '../screens/common/rule_actions';
 import { azureConnectorAPIPayload } from './api_calls/connectors';
 import { TIMELINE_CHECKBOX } from '../screens/timelines';
@@ -50,9 +49,8 @@ import {
   SECRETS_APIKEY_INPUT,
   SHARE_BADGE_BUTTON,
   SHARE_SELECT,
-  NOT_SHARED_SELECT_OPTION,
+  PRIVATE_SELECT_OPTION,
   SHARED_SELECT_OPTION,
-  OPTION_DESCRIPTION,
   OWNER_SHARED_CALLOUT,
   SHARED_CALLOUT,
   SHARE_MODAL,
@@ -69,6 +67,7 @@ import {
   SHARE_MODAL_COPY_URL,
   DUPLICATE,
   CONVO_CONTEXT_MENU_DUPLICATE,
+  GLOBAL_SELECT_OPTION,
 } from '../screens/ai_assistant';
 import { SUCCESS_TOASTER_HEADER } from '../screens/alerts_detection_rules';
 
@@ -273,28 +272,23 @@ export const openShareMenu = () => {
   cy.get(SHARE_BADGE_BUTTON).click();
   cy.get(SHARE_SELECT).should('be.visible');
 };
-
-export const assertNotSharedMenu = () => {
-  cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', 'Not shared');
-  cy.get(NOT_SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'true');
-  cy.get(SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'false');
-  cy.get(SHARED_SELECT_OPTION)
-    .find(OPTION_DESCRIPTION)
-    .should('have.text', 'Selected team members can view this conversation.');
-};
-
-export const assertSharedMenu = (isGlobal = true) => {
-  cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', 'Shared');
-  cy.get(NOT_SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'false');
-  cy.get(SHARED_SELECT_OPTION).should('have.attr', 'aria-checked', 'true');
-  cy.get(SHARED_SELECT_OPTION)
-    .find(OPTION_DESCRIPTION)
-    .should(
-      'have.text',
-      isGlobal
-        ? 'All team members can view this conversation.'
-        : 'Selected team members can view this conversation.'
-    );
+export const assertShareMenuStatus = (type: 'Private' | 'Global' | 'Shared') => {
+  cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', type);
+  cy.get(PRIVATE_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Private' ? 'true' : 'false'
+  );
+  cy.get(SHARED_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Shared' ? 'true' : 'false'
+  );
+  cy.get(GLOBAL_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Global' ? 'true' : 'false'
+  );
 };
 
 export const shareConversationWithUser = (user: string) => {
@@ -308,28 +302,17 @@ export const shareConversationWithUser = (user: string) => {
     .should('have.attr', 'aria-checked', 'true');
 };
 
-export const selectNotShared = () => {
-  cy.get(NOT_SHARED_SELECT_OPTION).click();
+export const selectPrivate = () => {
+  cy.get(PRIVATE_SELECT_OPTION).click();
+};
+
+export const selectGlobal = () => {
+  cy.get(GLOBAL_SELECT_OPTION).click();
 };
 
 export const selectShareModal = () => {
   cy.get(SHARED_SELECT_OPTION).click();
   cy.get(SHARE_MODAL).should('exist');
-};
-
-export const selectShareType = (shareType: 'global' | 'selected') => {
-  const oppositeShareType = shareType === 'global' ? 'selected' : 'global';
-  cy.get(SHARE_MODAL)
-    .find(`button[data-test-subj="shareConversationSelect-${oppositeShareType}"]`)
-    .click();
-  cy.get(`[data-test-subj="select-option-${shareType}"]`).click();
-  assertShareModalType(shareType);
-};
-
-export const assertShareModalType = (shareType: 'global' | 'selected') => {
-  cy.get(SHARE_MODAL)
-    .find(`button[data-test-subj="shareConversationSelect-${shareType}"]`)
-    .should('exist');
 };
 
 export const assertShareUser = (user: string) => {
@@ -345,26 +328,23 @@ export const submitShareModal = () => {
 export const closeShareModal = () => {
   cy.get(SHARE_MODAL).find(`button.euiModal__closeIcon`).click();
 };
-
-export const assertNotSharedCallout = () => {
-  cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
-  cy.get(SHARED_CALLOUT).should('not.exist');
-  cy.get(USER_PROMPT).should('exist');
-  cy.get(SUBMIT_CHAT).should('exist');
-};
-
-export const assertOwnerSharedCallout = () => {
-  cy.get(OWNER_SHARED_CALLOUT).should('exist');
-  cy.get(SHARED_CALLOUT).should('not.exist');
-  cy.get(USER_PROMPT).should('exist');
-  cy.get(SUBMIT_CHAT).should('exist');
-};
-
-export const assertSharedCallout = () => {
-  cy.get(SHARED_CALLOUT).should('exist');
-  cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
-  cy.get(USER_PROMPT).should('not.exist');
-  cy.get(SUBMIT_CHAT).should('not.exist');
+export const assertCalloutState = (state: 'private' | 'shared-by-me' | 'shared-with-me') => {
+  if (state === 'private') {
+    cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
+    cy.get(SHARED_CALLOUT).should('not.exist');
+    cy.get(USER_PROMPT).should('exist');
+    cy.get(SUBMIT_CHAT).should('exist');
+  } else if (state === 'shared-by-me') {
+    cy.get(OWNER_SHARED_CALLOUT).should('exist');
+    cy.get(SHARED_CALLOUT).should('not.exist');
+    cy.get(USER_PROMPT).should('exist');
+    cy.get(SUBMIT_CHAT).should('exist');
+  } else if (state === 'shared-with-me') {
+    cy.get(SHARED_CALLOUT).should('exist');
+    cy.get(OWNER_SHARED_CALLOUT).should('not.exist');
+    cy.get(USER_PROMPT).should('not.exist');
+    cy.get(SUBMIT_CHAT).should('not.exist');
+  }
 };
 
 export const dismissSharedCallout = () => {
@@ -436,20 +416,18 @@ export const assertNotSharedConversationIcon = (title: string) => {
 
 export const shareConversation = (share: string) => {
   openShareMenu();
-  selectShareModal();
   if (share === 'global') {
-    selectShareType('global');
-    submitShareModal();
-    assertOwnerSharedCallout();
+    selectGlobal();
+    assertCalloutState('shared-by-me');
   } else {
+    selectShareModal();
     shareConversationWithUser(share);
     submitShareModal();
-    assertOwnerSharedCallout();
+    assertCalloutState('shared-by-me');
   }
 };
 
 export const shareConversations = (convos: Array<{ title: string; share: string }>) => {
-  visitGetStartedPage();
   openAssistant();
   convos.forEach(({ title, share }) => {
     selectConversation(title);

@@ -23,6 +23,7 @@ import { css } from '@emotion/react';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
 import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
 import { ShareBadge } from '../share_conversation/share_badge';
+import type { ConversationSharedState } from '../share_conversation/utils';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';

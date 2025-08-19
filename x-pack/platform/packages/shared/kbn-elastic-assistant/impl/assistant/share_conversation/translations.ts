@@ -25,8 +25,8 @@ export const VISIBLE_GLOBAL = i18n.translate(
   }
 );
 
-export const VISIBLE_SELECTED = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.visibleSelected',
+export const VISIBLE_SHARED = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.visibleShared',
   {
     defaultMessage: 'Selected team members can view this conversation.',
   }

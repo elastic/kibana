@@ -7,20 +7,17 @@
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import type { MessageRole } from '@kbn/elastic-assistant-common';
+import { closeToast } from '../../tasks/common/toast';
 import { IS_SERVERLESS } from '../../env_var_names_constants';
 import {
+  assertCalloutState,
   assertConversationTitle,
   assertMessageSent,
   assertMessageUser,
   assertNoSharedCallout,
-  assertNotSharedCallout,
   assertNotSharedConversationIcon,
-  assertNotSharedMenu,
-  assertOwnerSharedCallout,
-  assertSharedCallout,
   assertSharedConversationIcon,
-  assertSharedMenu,
-  assertShareModalType,
+  assertShareMenuStatus,
   assertShareUser,
   closeShareModal,
   copyUrlFromConversationSideContextMenu,
@@ -35,15 +32,15 @@ import {
   openShareMenu,
   selectConnector,
   selectConversation,
-  selectNotShared,
+  selectPrivate,
   selectShareModal,
-  selectShareType,
   shareConversation,
   shareConversations,
   shareConversationWithUser,
   submitShareModal,
   toggleConversationSideMenu,
   typeAndSendMessage,
+  selectGlobal,
 } from '../../tasks/assistant';
 import { deleteConversations, waitForConversation } from '../../tasks/api_calls/assistant';
 import { azureConnectorAPIPayload, createAzureConnector } from '../../tasks/api_calls/connectors';
@@ -107,36 +104,35 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     createAzureConnector();
     waitForConversation(mockConvo1);
     waitForConversation(mockConvo2);
+    visitGetStartedPage();
   });
   it('Share modal works to not share, share globally, and share selected', () => {
-    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
     // Assert that the conversation is not shared
-    assertNotSharedCallout();
+    assertCalloutState('private');
     // Open the share menu and verify not shared state
     openShareMenu();
-    assertNotSharedMenu();
+    assertShareMenuStatus('Private');
     // Selecting 'not shared' should not change sharing settings
-    selectNotShared();
-    assertNotSharedCallout();
+    selectPrivate();
+    assertCalloutState('private');
     openShareMenu();
-    assertNotSharedMenu();
+    assertShareMenuStatus('Private');
     // Opening and closing the share modal should not change sharing settings
     selectShareModal();
-    assertShareModalType('selected');
     closeShareModal();
-    assertNotSharedCallout();
+    assertCalloutState('private');
     openShareMenu();
-    assertNotSharedMenu();
-    // Opening the share menu and selecting global share changes sharing settings
-    selectShareModal();
-    selectShareType('global');
-    submitShareModal();
-    assertOwnerSharedCallout();
+    assertShareMenuStatus('Private');
+    // Slecting global share changes sharing settings
+    selectGlobal();
+    // submitShareModal(); success toast?
+    assertCalloutState('shared-by-me');
+    closeToast();
     openShareMenu();
-    assertSharedMenu();
+    assertShareMenuStatus('Global');
     toggleConversationSideMenu();
     assertSharedConversationIcon(mockConvo1.title);
     assertNotSharedConversationIcon(mockConvo2.title);
@@ -145,27 +141,24 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     selectConversation(mockConvo2.title);
     selectConnector(azureConnectorAPIPayload.name);
     // Assert that the conversation is not shared
-    assertNotSharedCallout();
+    assertCalloutState('private');
     openShareMenu();
-    assertNotSharedMenu();
+    assertShareMenuStatus('Private');
     selectShareModal();
-    assertShareModalType('selected');
     // Press save without selecting users
     submitShareModal();
-    assertNotSharedCallout();
+    assertCalloutState('private');
     openShareMenu();
-    assertNotSharedMenu();
+    assertShareMenuStatus('Private');
     selectShareModal();
-    assertShareModalType('selected');
     // Select secondaryUser to share the conversation
     shareConversationWithUser(isServerless ? 'test_user' : secondaryUser);
     submitShareModal();
-    assertOwnerSharedCallout();
+    assertCalloutState('shared-by-me');
     openShareMenu();
-    assertSharedMenu(false);
+    assertShareMenuStatus('Shared');
     // Opens to selected share since conversation is shared with selected users
     selectShareModal();
-    assertShareModalType('selected');
     assertShareUser(isServerless ? 'test_user' : secondaryUser);
     closeShareModal();
 
@@ -208,7 +201,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
 
     // Verify the first conversation is shared with secondaryUser
     selectConversation(mockConvo1.title);
-    assertSharedCallout();
+    assertCalloutState('shared-with-me');
     // Ensure we can view messages in the shared conversation
     assertMessageSent(mockConvo1.messages[0].content);
 
@@ -229,7 +222,7 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
       toggleConversationSideMenu();
       // Verify the first conversation is shared with secondaryUser
       selectConversation(newConvoTitle);
-      assertSharedCallout();
+      assertCalloutState('shared-with-me');
       // Ensure we can view messages in the shared conversation
       assertMessageSent('hello');
     }
@@ -252,11 +245,11 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     openAssistant();
 
     selectConversation(mockConvo1.title);
-    assertSharedCallout();
+    assertCalloutState('shared-with-me');
     dismissSharedCallout();
 
     selectConversation(mockConvo2.title);
-    assertSharedCallout();
+    assertCalloutState('shared-with-me');
 
     selectConversation(mockConvo1.title);
     assertNoSharedCallout();
@@ -277,28 +270,25 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
 
     selectConversation(mockConvo1.title);
     duplicateConversation(mockConvo1.title);
-    assertNotSharedCallout();
+    assertCalloutState('private');
     typeAndSendMessage('goodbye');
     assertMessageUser(primaryUser, 0);
     assertMessageUser(`${isServerless ? 'test ' : ''}${secondaryUser}`, 2);
   });
 
   it('Duplicate conversation from conversation menu creates a duplicate', () => {
-    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     duplicateFromMenu(mockConvo1.title);
   });
 
   it('Duplicate conversation from conversation side menu creates a duplicate', () => {
-    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     duplicateFromConversationSideContextMenu(mockConvo2.title);
   });
 
   it('Copy URL copies the proper url from conversation menu', () => {
-    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -306,7 +296,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
     // Cypress paste (doc.execCommand('paste')) is flaky, so skipping that assertion
   });
   it('Copy URL copies the proper url from conversation side menu', () => {
-    visitGetStartedPage();
     openAssistant();
     toggleConversationSideMenu();
     copyUrlFromConversationSideContextMenu();
@@ -314,7 +303,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   it('Copy URL copies the proper url from share modal', () => {
-    visitGetStartedPage();
     openAssistant();
     selectConversation(mockConvo1.title);
     selectConnector(azureConnectorAPIPayload.name);
@@ -323,7 +311,6 @@ describe('AI Assistant Conversations', { tags: ['@ess', '@serverless'] }, () => 
   });
 
   it('Visiting a URL with the assistant param opens the assistant to the proper conversation', () => {
-    visitGetStartedPage();
     cy.location('origin').then((origin) => {
       visit(`${origin}/app/security/get_started?assistant=${mockConvo1.id}`);
     });
