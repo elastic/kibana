@@ -40,6 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: 'Test group description',
+                  tags: [],
                   group: {
                     members: ['logs', 'logs.test2', 'logs'],
                   },
@@ -61,6 +62,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: '',
+                  tags: [],
                   group: {
                     members: ['logs.test2'],
                   },
@@ -82,6 +84,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: 'Test group description',
+                  tags: [],
                   group: {
                     members: ['logs', 'non-existent-stream'],
                   },
@@ -102,6 +105,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: '',
+                  tags: [],
                   group: {
                     members: ['logs', 'test-group'],
                   },
@@ -122,6 +126,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: 'Test group description',
+                  tags: [],
                   group: {
                     members: ['logs', 'test-group-too'],
                   },
@@ -209,6 +214,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: '',
+                  tags: [],
                   group: {
                     members: ['logs'],
                   },
@@ -229,6 +235,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               body: {
                 stream: {
                   description: '',
+                  tags: [],
                   group: {
                     members: ['logs'],
                   },

@@ -136,6 +136,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             stream: {
               description: '',
+              tags: [],
               ingest: {
                 lifecycle: {
                   dsl: {},
@@ -177,6 +178,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             stream: {
               description: '',
+              tags: [],
               ingest: {
                 lifecycle: {
                   dsl: {},

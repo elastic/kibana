@@ -32,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [],
         stream: {
           description: 'This is a test stream',
+          tags: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {
@@ -56,6 +57,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [],
         stream: {
           description: 'Updated test stream description',
+          tags: [],
           ingest: {
             lifecycle: { inherit: {} },
             processing: {

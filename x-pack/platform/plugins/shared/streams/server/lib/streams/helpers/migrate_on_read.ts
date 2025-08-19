@@ -67,6 +67,14 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  if (migratedDefinition.tags === undefined) {
+    migratedDefinition = {
+      ...migratedDefinition,
+      tags: [],
+    };
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

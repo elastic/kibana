@@ -38,6 +38,7 @@ const upsertRequest = ({
   queries,
   stream: {
     description: 'Test stream',
+    tags: [],
     ingest: {
       processing: {
         steps: [],
@@ -283,6 +284,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: 'ok',
+                  tags: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -301,6 +303,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: 'a'.repeat(twoMB),
+                  tags: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -458,6 +461,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 request: {
                   stream: {
                     description: '',
+                    tags: [],
                     ingest: {
                       processing: {
                         steps: [],
@@ -552,6 +556,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: '',
+                  tags: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -578,6 +583,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: '',
+                  tags: [],
                   ingest: {
                     processing: {
                       steps: [],
@@ -623,6 +629,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               request: {
                 stream: {
                   description: '',
+                  tags: [],
                   ingest: {
                     processing: {
                       steps: [],

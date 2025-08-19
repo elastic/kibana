@@ -430,6 +430,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -454,6 +455,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ...body,
             stream: {
               description: '',
+              tags: [],
               ingest: {
                 ...body.stream.ingest,
                 wired: {
@@ -477,6 +479,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -602,6 +605,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -617,6 +621,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -651,6 +656,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             queries: [],
             stream: {
               description: '',
+              tags: [],
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: {
@@ -670,6 +676,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: 'Should cause a failure due to invalid ingest pipeline',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -710,6 +717,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {

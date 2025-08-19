@@ -16,6 +16,7 @@ function createMockWiredStream(
   return {
     name,
     description: name,
+    tags: [],
     ingest: {
       lifecycle,
       wired: { fields: {}, routing: [] },

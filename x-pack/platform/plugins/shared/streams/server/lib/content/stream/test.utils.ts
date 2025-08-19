@@ -26,6 +26,7 @@ export const testContentPackEntry = ({
     dashboards: [],
     stream: {
       description: '',
+      tags: [],
       ingest: {
         processing: {
           steps: [],

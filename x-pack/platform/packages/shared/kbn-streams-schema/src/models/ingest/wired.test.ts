@@ -13,6 +13,7 @@ describe('WiredStream', () => {
       {
         name: 'wired-stream',
         description: '',
+        tags: [],
         ingest: {
           lifecycle: {
             inherit: {},
@@ -82,6 +83,7 @@ describe('WiredStream', () => {
         stream: {
           name: 'wired-stream',
           description: '',
+          tags: [],
           ingest: {
             lifecycle: {
               inherit: {},
@@ -155,6 +157,7 @@ describe('WiredStream', () => {
         queries: [],
         stream: {
           description: '',
+          tags: [],
           ingest: {
             lifecycle: {
               inherit: {},

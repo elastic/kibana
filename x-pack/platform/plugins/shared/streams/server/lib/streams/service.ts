@@ -22,6 +22,9 @@ export const streamsStorageSettings = {
     properties: {
       name: types.keyword(),
       description: types.text(),
+      tags: types.keyword({
+        multi_value: true,
+      }),
       ingest: types.object({ enabled: false }),
       group: types.object({ enabled: false }),
     },

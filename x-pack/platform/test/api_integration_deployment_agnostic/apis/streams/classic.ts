@@ -67,6 +67,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             queries: [],
             stream: {
               description: '',
+              tags: [],
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: {
@@ -173,6 +174,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               description: '',
+              tags: [],
               ingest: {
                 lifecycle: { inherit: {} },
                 processing: {
@@ -281,6 +283,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -346,6 +349,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -381,6 +385,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: {
@@ -404,6 +409,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           queries: [],
           stream: {
             description: '',
+            tags: [],
             ingest: {
               lifecycle: { inherit: {} },
               processing: { steps: [] },
@@ -448,6 +454,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               queries: [],
               stream: {
                 description: '',
+                tags: [],
                 ingest: {
                   lifecycle: { inherit: {} },
                   processing: { steps: [] },

@@ -15,6 +15,7 @@ import { createStreamsRepositoryAdminClient } from './helpers/repository_client'
 const rootStreamDefinition: Streams.WiredStream.Definition = {
   name: 'logs',
   description: '',
+  tags: [],
   ingest: {
     lifecycle: { dsl: {} },
     processing: {
@@ -101,6 +102,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [],
         stream: {
           description: '',
+          tags: [],
           ingest: {
             ...rootStreamDefinition.ingest,
             processing: {
@@ -131,6 +133,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [],
         stream: {
           description: '',
+          tags: [],
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {
@@ -159,6 +162,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         queries: [],
         stream: {
           description: '',
+          tags: [],
           ingest: {
             ...rootStreamDefinition.ingest,
             wired: {

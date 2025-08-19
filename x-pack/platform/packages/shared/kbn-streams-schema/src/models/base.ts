@@ -17,6 +17,7 @@ export namespace BaseStream {
   export interface Definition {
     name: string;
     description: string;
+    tags: string[];
   }
 
   export type Source<TDefinition extends Definition = Definition> = TDefinition;
@@ -45,6 +46,7 @@ export const BaseStream: ModelValidation<IModel, BaseStream.Model> = modelValida
   Definition: z.object({
     name: z.string(),
     description: z.string(),
+    tags: z.array(z.string()),
   }),
   Source: z.object({}),
   GetResponse: z.object({

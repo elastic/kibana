@@ -47,6 +47,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     this._definition = {
       name: definition.name,
       description: definition.description,
+      tags: definition.tags,
       group: {
         ...definition.group,
         members: Array.from(new Set(definition.group.members)),

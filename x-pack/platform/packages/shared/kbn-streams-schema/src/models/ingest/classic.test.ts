@@ -13,6 +13,7 @@ describe('ClassicStream', () => {
       {
         name: 'classic-stream',
         description: '',
+        tags: [],
         ingest: {
           lifecycle: {
             inherit: {},
@@ -74,6 +75,7 @@ describe('ClassicStream', () => {
         stream: {
           name: 'classic-stream',
           description: '',
+          tags: [],
           ingest: {
             lifecycle: {
               inherit: {},
@@ -141,6 +143,7 @@ describe('ClassicStream', () => {
         queries: [],
         stream: {
           description: '',
+          tags: [],
           ingest: {
             lifecycle: {
               inherit: {},

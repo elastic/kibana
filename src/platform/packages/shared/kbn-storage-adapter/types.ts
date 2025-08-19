@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingObjectProperty, MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingKeywordProperty,
+  MappingObjectProperty,
+  MappingProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Required } from 'utility-types';
 
 type AllMappingPropertyType = Required<MappingProperty>['type'];
@@ -27,10 +31,14 @@ type StorageMappingPropertyType = AllMappingPropertyType &
   );
 
 type StorageMappingPropertyObjectType = Required<MappingObjectProperty, 'type'>;
+type StorageMappingPropertyKeywordType = MappingKeywordProperty & {
+  multi_value?: boolean;
+};
 
 export type StorageMappingProperty =
-  | Extract<MappingProperty, { type: Exclude<StorageMappingPropertyType, 'object'> }>
-  | StorageMappingPropertyObjectType;
+  | Extract<MappingProperty, { type: Exclude<StorageMappingPropertyType, 'object' | 'keyword'> }>
+  | StorageMappingPropertyObjectType
+  | StorageMappingPropertyKeywordType;
 
 type MappingPropertyOf<TType extends StorageMappingPropertyType> = Extract<
   StorageMappingProperty,
@@ -63,7 +71,7 @@ function createFactory(
 }
 
 const types = {
-  keyword: createFactory('keyword', { ignore_above: 1024 }),
+  keyword: createFactory('keyword', { ignore_above: 1024, multi_value: false }),
   match_only_text: createFactory('match_only_text'),
   text: createFactory('text'),
   double: createFactory('double'),
@@ -78,11 +86,7 @@ const types = {
 };
 
 type PrimitiveOf<TProperty extends StorageMappingProperty> = {
-  keyword: TProperty extends { enum: infer TEnums }
-    ? TEnums extends Array<infer TEnum>
-      ? TEnum
-      : never
-    : string;
+  keyword: TProperty extends { multi_value: true } ? string[] : string;
   match_only_text: string;
   text: string;
   boolean: boolean;
