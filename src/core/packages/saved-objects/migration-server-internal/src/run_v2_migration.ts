@@ -37,11 +37,8 @@ import {
 } from './kibana_migrator_utils';
 import { runResilientMigrator } from './run_resilient_migrator';
 import { migrateRawDocsSafely } from './core/migrate_raw_docs';
-import {
-  IndexDetails,
-  extractVersionFromKibanaIndexAliases,
-  getIndexDetails,
-} from './core/get_index_details';
+import type { IndexDetails } from './core/get_index_details';
+import { extractVersionFromKibanaIndexAliases, getIndexDetails } from './core/get_index_details';
 
 export interface RunV2MigrationOpts {
   /** The current Kibana version */

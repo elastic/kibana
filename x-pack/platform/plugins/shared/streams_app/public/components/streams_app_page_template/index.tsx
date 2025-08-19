@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiPageSectionProps, EuiPageTemplate } from '@elastic/eui';
+import type { EuiPageSectionProps } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 

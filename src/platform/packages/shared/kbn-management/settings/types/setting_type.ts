@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingsType } from '@kbn/core-ui-settings-common';
+import type { UiSettingsType } from '@kbn/core-ui-settings-common';
 
 /**
  * This is a local type equivalent to {@link UiSettingsType} for flexibility.

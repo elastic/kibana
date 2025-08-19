@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Observer } from './fields/observer';
+import type { Observer } from './fields/observer';
 
 // all documents types extend APMBaseDoc and inherit all properties
 export interface APMBaseDoc {

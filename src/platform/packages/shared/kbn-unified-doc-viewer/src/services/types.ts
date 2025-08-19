@@ -10,7 +10,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import { DocViewsRegistry } from './doc_views_registry';
+import type { DocViewsRegistry } from './doc_views_registry';
 
 export interface FieldMapping {
   filterable?: boolean;

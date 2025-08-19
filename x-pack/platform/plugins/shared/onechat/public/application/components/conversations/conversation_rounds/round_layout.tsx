@@ -7,11 +7,13 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 interface RoundLayoutProps {
   input: ReactNode;
+  outputIcon: ReactNode;
   output: ReactNode;
 }
 
@@ -24,7 +26,7 @@ const labels = {
   }),
 };
 
-export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
+export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, outputIcon, output }) => {
   const { euiTheme } = useEuiTheme();
   const inputContainerStyles = css`
     width: 100%;
@@ -47,7 +49,12 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({ input, output }) => {
         </EuiPanel>
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>{output}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="row" gutterSize="m">
+          <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
+          <EuiFlexItem>{output}</EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };

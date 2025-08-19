@@ -9,6 +9,7 @@
 
 import { cleanup, render, screen } from '@testing-library/react';
 import React from 'react';
+import { EuiThemeProvider } from '@elastic/eui';
 import { renderComparisonToolbar } from './comparison_toolbar';
 
 const renderToolbar = ({
@@ -25,16 +26,18 @@ const renderToolbar = ({
     totalFields,
   });
   render(
-    <ComparisonToolbar
-      hasRoomForGridControls={hasRoomForGridControls}
-      keyboardShortcutsControl={
-        <div data-test-subj="keyboardShortcutsControl">keyboardShortcutsControl</div>
-      }
-      fullScreenControl={<div data-test-subj="fullScreenControl">fullScreenControl</div>}
-      columnControl={<div data-test-subj="columnControl">columnControl</div>}
-      columnSortingControl={<div data-test-subj="columnSortingControl">columnSortingControl</div>}
-      displayControl={<div data-test-subj="displayControl">displayControl</div>}
-    />
+    <EuiThemeProvider>
+      <ComparisonToolbar
+        hasRoomForGridControls={hasRoomForGridControls}
+        keyboardShortcutsControl={
+          <div data-test-subj="keyboardShortcutsControl">keyboardShortcutsControl</div>
+        }
+        fullScreenControl={<div data-test-subj="fullScreenControl">fullScreenControl</div>}
+        columnControl={<div data-test-subj="columnControl">columnControl</div>}
+        columnSortingControl={<div data-test-subj="columnSortingControl">columnSortingControl</div>}
+        displayControl={<div data-test-subj="displayControl">displayControl</div>}
+      />
+    </EuiThemeProvider>
   );
   return {
     getAdditionalControls: () => screen.queryByTestId('additionalControls'),

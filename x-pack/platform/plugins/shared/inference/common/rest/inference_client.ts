@@ -6,12 +6,8 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import {
-  BoundOptions,
-  InferenceClient,
-  InferenceConnector,
-  createInferenceRequestError,
-} from '@kbn/inference-common';
+import type { BoundOptions, InferenceClient, InferenceConnector } from '@kbn/inference-common';
+import { createInferenceRequestError } from '@kbn/inference-common';
 import { createChatCompleteRestApi } from './chat_complete';
 import { createPromptRestApi } from './prompt';
 import { createOutputApi } from '../output';

@@ -180,15 +180,16 @@ describe('SampleLogsInput', () => {
 
     describe('when the file is invalid', () => {
       describe.each([
-        ['["test message 1"]', 'The logs sample file contains non-object entries'],
-        ['[]', 'The logs sample file is empty'],
+        ['["test message 1"]', 'The logs sample file contains non-object entries. Having issues? '],
+        ['[]', 'The logs sample file is empty. Having issues? '],
       ])('with logs content %s', (logsSample, errorMessage) => {
         beforeEach(async () => {
           await changeFile(input, new File([logsSample], 'test.json', { type }));
         });
 
-        it('should render error message', () => {
-          expect(result.queryByText(errorMessage)).toBeInTheDocument();
+        it('should render error message', async () => {
+          const errorRegex = new RegExp(errorMessage.trim());
+          expect(await result.findByText(errorRegex)).toBeInTheDocument();
         });
 
         it('should set the integrationSetting correctly', () => {
@@ -243,17 +244,38 @@ describe('SampleLogsInput', () => {
       });
     });
 
+    const AUTOMATIC_IMPORT_DOCUMENTATION_URL =
+      'https://www.elastic.co/docs/solutions/security/get-started/automatic-import';
+
     describe('when the file is invalid', () => {
       describe.each([
-        ['"test message 1"', 'The logs sample file contains non-object entries'],
-        ['', 'The logs sample file is empty'],
-      ])('with logs content %s', (logsSample, errorMessage) => {
+        [
+          '"test message 1"',
+          'The logs sample file contains non-object entries',
+          'Refer to the documentation for supported log formats',
+        ],
+        [
+          '[]',
+          'The logs sample file is empty',
+          'Refer to the documentation for supported log formats',
+        ],
+      ])('with logs content %s', (logsSample, errorMessage, errorDocsLinkText) => {
         beforeEach(async () => {
           await changeFile(input, new File([logsSample], 'test.json', { type }));
         });
 
-        it('should render error message', () => {
-          expect(result.queryByText(errorMessage)).toBeInTheDocument();
+        it('should render error message', async () => {
+          const errorRegex = new RegExp(errorMessage, 'i');
+          expect(await result.findByText(errorRegex)).toBeInTheDocument();
+        });
+
+        it('should render the documentation link', async () => {
+          const docLink = await result.findByRole('link', {
+            name: new RegExp(errorDocsLinkText, 'i'),
+          });
+
+          expect(docLink).toHaveAttribute('href', AUTOMATIC_IMPORT_DOCUMENTATION_URL);
+          expect(docLink).toHaveAttribute('target', '_blank');
         });
 
         it('should set the integrationSetting correctly', () => {
@@ -284,8 +306,10 @@ describe('SampleLogsInput', () => {
       jsonParseSpy.mockRestore();
     });
 
-    it('should raise an appropriate error', () => {
-      expect(result.queryByText('This logs sample file is too large to parse')).toBeInTheDocument();
+    it('should raise an appropriate error', async () => {
+      expect(
+        await result.findByText('This logs sample file is too large to parse', { exact: false })
+      ).toBeInTheDocument();
     });
   });
 
@@ -335,9 +359,11 @@ describe('SampleLogsInput', () => {
       fileReaderSpy.mockRestore();
     });
 
-    it('should set the error message accordingly', () => {
+    it('should set the error message accordingly', async () => {
       expect(
-        result.queryByText(`An error occurred when reading logs sample: ${mockedMessage}`)
+        await result.findByText(`An error occurred when reading logs sample: ${mockedMessage}`, {
+          exact: false,
+        })
       ).toBeInTheDocument();
     });
   });

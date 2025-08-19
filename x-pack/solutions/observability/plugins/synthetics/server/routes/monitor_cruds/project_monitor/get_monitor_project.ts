@@ -6,8 +6,9 @@
  */
 import { schema } from '@kbn/config-schema';
 import { syntheticsMonitorSavedObjectType } from '../../../../common/types/saved_objects';
-import { SyntheticsRestApiRouteFactory } from '../../types';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import type { SyntheticsRestApiRouteFactory } from '../../types';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { MONITOR_SEARCH_FIELDS } from '../../common';
 

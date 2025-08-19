@@ -7,13 +7,14 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
-import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context/context';
-import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import { CONTEXT_FUNCTION_NAME, MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
+import type { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { clearKnowledgeBase } from '../utils/knowledge_base';
-import { LlmProxy, createLlmProxy } from '../utils/create_llm_proxy';
+import type { LlmProxy } from '../utils/create_llm_proxy';
+import { createLlmProxy } from '../utils/create_llm_proxy';
 import { clearConversations, getConversationCreatedEvent } from '../utils/conversation';
 import {
   deployTinyElserAndSetupKb,

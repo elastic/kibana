@@ -18,10 +18,10 @@ import {
   isSortableByColumn,
   getOtherBucketSwitchDefault,
 } from './helpers';
-import { ReferenceBasedIndexPatternColumn } from '../column_types';
+import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
-import { MovingAverageIndexPatternColumn } from '../calculations';
+import type { MovingAverageIndexPatternColumn } from '../calculations';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({

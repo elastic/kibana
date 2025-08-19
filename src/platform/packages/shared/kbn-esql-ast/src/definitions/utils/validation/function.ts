@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { uniqBy } from 'lodash';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import {
+import type { LicenseType } from '@kbn/licensing-types';
+import type {
   ESQLAstItem,
   ESQLCommand,
   ESQLFunction,
@@ -18,22 +18,16 @@ import {
   ESQLParamLiteral,
 } from '../../../types';
 import { isAssignment, isInlineCast } from '../../../ast/is';
-import {
-  UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-  UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-} from '../../constants';
 import { getMessageFromId, errors, getFunctionDefinition, getColumnForASTNode } from '..';
-import {
+import type {
   FunctionParameter,
-  FunctionDefinitionTypes,
   FunctionDefinition,
   FunctionParameterType,
   ReasonTypes,
 } from '../../types';
-import {
-  ICommandCallbacks,
-  getLocationFromCommandOrOptionName,
-} from '../../../commands_registry/types';
+import { FunctionDefinitionTypes } from '../../types';
+import type { ICommandCallbacks } from '../../../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
 import { buildFunctionLookup, printFunctionSignature } from '../functions';
 import {
   getSignaturesWithMatchingArity,
@@ -41,15 +35,10 @@ import {
   getParamAtPosition,
 } from '../expressions';
 import { isArrayType } from '../operators';
-import {
-  compareTypesWithLiterals,
-  doesLiteralMatchParameterType,
-  inKnownTimeInterval,
-} from '../literals';
+import { doesLiteralMatchParameterType } from '../literals';
 import { getQuotedColumnName, getColumnExists } from '../columns';
 import {
   isLiteral,
-  isTimeInterval,
   isFunctionExpression,
   isColumn,
   isList,
@@ -57,7 +46,7 @@ import {
   isParamLiteral,
   isParametrized,
 } from '../../../ast/is';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandContext } from '../../../commands_registry/types';
 
 export function getAllArrayValues(arg: ESQLAstItem) {
   const values: string[] = [];
@@ -69,7 +58,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (isColumn(subArg) || isTimeInterval(subArg)) {
+      if (isColumn(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {
@@ -103,9 +92,6 @@ export function getAllArrayTypes(
           userDefinedColumns: context.userDefinedColumns,
         });
         types.push(hit?.type || 'unsupported');
-      }
-      if (subArg.type === 'timeInterval') {
-        types.push('time_duration');
       }
       if (subArg.type === 'function') {
         if (isSupportedFunction(subArg.name, parentCommand).supported) {
@@ -167,9 +153,6 @@ export function checkFunctionArgMatchesDefinition(
           bothStringTypes(parameterType, signature.returnType)
       );
     }
-  }
-  if (arg.type === 'timeInterval') {
-    return parameterType === 'time_duration' && inKnownTimeInterval(arg.unit);
   }
   if (arg.type === 'column') {
     const hit = getColumnForASTNode(arg, {
@@ -319,8 +302,6 @@ function unwrapArrayOneLevel(type: FunctionParameterType): FunctionParameterType
   return isArrayType(type) ? (type.slice(0, -2) as FunctionParameterType) : type;
 }
 
-const NO_MESSAGE: ESQLMessage[] = [];
-
 /**
  * Performs validation on a function
  */
@@ -333,7 +314,6 @@ export function validateFunction({
   forceConstantOnly = false,
   isNested,
   parentAst,
-  currentCommandIndex,
 }: {
   fn: ESQLFunction;
   parentCommand: string;
@@ -343,7 +323,6 @@ export function validateFunction({
   forceConstantOnly?: boolean;
   isNested?: boolean;
   parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
 }): ESQLMessage[] {
   const messages: ESQLMessage[] = [];
 
@@ -357,20 +336,6 @@ export function validateFunction({
 
   const isFnSupported = isSupportedFunction(fn.name, parentCommand, parentOption);
 
-  if (typeof textSearchFunctionsValidators[fn.name] === 'function') {
-    const validator = textSearchFunctionsValidators[fn.name];
-    messages.push(
-      ...validator({
-        fn,
-        parentCommand,
-        parentOption,
-        context,
-        isNested,
-        parentAst,
-        currentCommandIndex,
-      })
-    );
-  }
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
       messages.push(errors.unknownFunction(fn));
@@ -537,13 +502,7 @@ export function validateFunction({
       }
     }
   }
-  // check if the definition has some specific validation to apply:
-  if (fnDefinition.validate) {
-    const payloads = fnDefinition.validate(fn);
-    if (payloads.length) {
-      messages.push(...payloads);
-    }
-  }
+
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
   let relevantFuncSignatures = matchingSignatures;
@@ -558,9 +517,7 @@ export function validateFunction({
             const arg = enrichedArgs[idx];
 
             if (isLiteral(arg)) {
-              return (
-                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
-              );
+              return dataType === arg.literalType;
             }
             return false; // Non-literal arguments don't match
           })
@@ -686,35 +643,7 @@ function validateFunctionLiteralArg(
       );
     }
   }
-  if (isTimeInterval(argument)) {
-    // check first if it's a valid interval string
-    if (!inKnownTimeInterval(argument.unit)) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownInterval',
-          values: {
-            value: argument.unit,
-          },
-          locations: argument.location,
-        })
-      );
-    } else {
-      if (!checkFunctionArgMatchesDefinition(argument, parameter, context, parentCommand)) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'wrongArgumentType',
-            values: {
-              name: astFunction.name,
-              argType: parameter.type as string,
-              value: argument.name,
-              givenType: 'duration',
-            },
-            locations: argument.location,
-          })
-        );
-      }
-    }
-  }
+
   return messages;
 }
 
@@ -836,19 +765,7 @@ function validateFunctionColumnArg(
   }
 
   if (actualArg.name === '*') {
-    // if function does not support wildcards return a specific error
-    if (!('supportsWildcard' in parameterDefinition) || !parameterDefinition.supportsWildcard) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'noWildcardSupportAsArg',
-          values: {
-            name: astFunction.name,
-          },
-          locations: actualArg.location,
-        })
-      );
-    }
-
+    // special case for COUNT(*)
     return messages;
   }
 
@@ -888,88 +805,6 @@ function removeInlineCasts(arg: ESQLAstItem): ESQLAstItem {
 
 // #region Specific functions
 
-function validateIfHasUnsupportedCommandPrior(
-  fn: ESQLFunction,
-  parentAst: ESQLCommand[] = [],
-  unsupportedCommands: Set<string>,
-  currentCommandIndex?: number
-) {
-  if (currentCommandIndex === undefined) {
-    return NO_MESSAGE;
-  }
-  const unsupportedCommandsPrior = parentAst.filter(
-    (cmd, idx) => idx <= currentCommandIndex && unsupportedCommands.has(cmd.name)
-  );
-
-  if (unsupportedCommandsPrior.length > 0) {
-    return [
-      getMessageFromId({
-        messageId: 'fnUnsupportedAfterCommand',
-        values: {
-          function: fn.name.toUpperCase(),
-          command: unsupportedCommandsPrior[0].name.toUpperCase(),
-        },
-        locations: fn.location,
-      }),
-    ];
-  }
-  return NO_MESSAGE;
-}
-
-const validateMatchFunction: FunctionValidator = ({
-  fn,
-  parentCommand,
-  parentAst,
-  currentCommandIndex,
-}) => {
-  if (fn.name === 'match') {
-    if (parentCommand !== 'where') {
-      return [
-        getMessageFromId({
-          messageId: 'onlyWhereCommandSupported',
-          values: { fn: fn.name },
-          locations: fn.location,
-        }),
-      ];
-    }
-    return validateIfHasUnsupportedCommandPrior(
-      fn,
-      parentAst,
-      UNSUPPORTED_COMMANDS_BEFORE_MATCH,
-      currentCommandIndex
-    );
-  }
-  return NO_MESSAGE;
-};
-
-type FunctionValidator = (args: {
-  fn: ESQLFunction;
-  parentCommand: string;
-  parentOption?: string;
-  context: ICommandContext;
-  forceConstantOnly?: boolean;
-  isNested?: boolean;
-  parentAst?: ESQLCommand[];
-  currentCommandIndex?: number;
-}) => ESQLMessage[];
-
-const validateQSTRFunction: FunctionValidator = ({ fn, parentAst, currentCommandIndex }) => {
-  if (fn.name === 'qstr') {
-    return validateIfHasUnsupportedCommandPrior(
-      fn,
-      parentAst,
-      UNSUPPORTED_COMMANDS_BEFORE_QSTR,
-      currentCommandIndex
-    );
-  }
-  return NO_MESSAGE;
-};
-
-const textSearchFunctionsValidators: Record<string, FunctionValidator> = {
-  match: validateMatchFunction,
-  qstr: validateQSTRFunction,
-};
-
 export function isSupportedFunction(
   name: string,
   parentCommand?: string,
@@ -993,7 +828,7 @@ export function isSupportedFunction(
 
 function validateFunctionLicense(
   fn: ESQLFunction,
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined
 ): ESQLMessage[] {
   const fnDefinition = getFunctionDefinition(fn.name);
 
@@ -1004,7 +839,7 @@ function validateFunctionLicense(
   const { license } = fnDefinition;
 
   if (!!hasMinimumLicenseRequired && license) {
-    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+    if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as LicenseType)) {
       return [
         getMessageFromId({
           messageId: 'licenseRequired',
@@ -1040,7 +875,7 @@ function validateFunctionLicense(
 function validateSignatureLicense(
   fn: ESQLFunction,
   matchingSignatures: FunctionDefinition['signatures'],
-  hasMinimumLicenseRequired: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired: (minimumLicenseRequired: LicenseType) => boolean,
   context: ICommandContext,
   parentCommand: string
 ): ESQLMessage[] {
@@ -1066,7 +901,7 @@ function validateSignatureLicense(
   const hasValidLicense = relevantSignatures.some(
     (signature) =>
       signature.license &&
-      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType)
+      hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType)
   );
 
   if (hasValidLicense) {

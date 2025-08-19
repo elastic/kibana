@@ -35,7 +35,7 @@ import {
 } from './markdown';
 import { mockPartitionedFieldMetadata } from '../mock/partitioned_field_metadata/mock_partitioned_field_metadata';
 import { mockAllowedValues } from '../mock/allowed_values/mock_allowed_values';
-import { UnallowedValueCount } from '../types';
+import type { UnallowedValueCount } from '../types';
 import {
   eventCategory,
   hostNameWithTextMapping,

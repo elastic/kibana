@@ -290,6 +290,7 @@ export class PackageInstaller {
     const { inferenceId } = params;
     const allProducts = Object.values(DocumentationProduct);
     for (const productName of allProducts) {
+      await this.productDocClient.setUninstallationStarted(productName, inferenceId);
       await this.uninstallPackage({ productName, inferenceId });
     }
   }

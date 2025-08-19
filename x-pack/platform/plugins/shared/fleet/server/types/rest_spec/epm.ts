@@ -200,6 +200,7 @@ export const PackageInfoSchema = schema
     discovery: schema.maybe(
       schema.object({
         fields: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
+        datasets: schema.maybe(schema.arrayOf(schema.object({ name: schema.string() }))),
       })
     ),
   })

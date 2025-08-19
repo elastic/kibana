@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Agent } from 'supertest';
-import { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
-import { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
+import type { Agent } from 'supertest';
+import type { EntityDefinition, EntityDefinitionUpdate } from '@kbn/entities-schema';
+import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 
 export interface Auth {
   username: string;

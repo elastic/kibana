@@ -8,9 +8,23 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
-import { LoadingCallout } from '.';
 import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { TestProviders } from '../../../common/mock';
+import { LoadingCallout } from '.';
+
+jest.mock('@kbn/react-kibana-context-theme', () => ({
+  useKibanaIsDarkMode: jest.fn(() => false),
+}));
+
+jest.mock('../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: jest.fn(() => ({ attackDiscoveryAlertsEnabled: true })),
+}));
+
+jest.mock('../use_dismiss_attack_discovery_generations', () => ({
+  useDismissAttackDiscoveryGeneration: jest.fn(() => ({
+    mutateAsync: jest.fn(),
+  })),
+}));
 
 describe('LoadingCallout', () => {
   const connectorIntervals: GenerationInterval[] = [
@@ -70,5 +84,31 @@ describe('LoadingCallout', () => {
     const countdown = screen.getByTestId('countdown');
 
     expect(countdown).toBeInTheDocument();
+  });
+
+  it('renders a terminal state icon for succeeded', () => {
+    render(
+      <TestProviders>
+        <LoadingCallout {...defaultProps} status="succeeded" executionUuid="uuid-123" />
+      </TestProviders>
+    );
+    const icon = screen
+      .getByTestId('loadingCallout')
+      .querySelector('[data-euiicon-type="logoElastic"]');
+
+    expect(icon).not.toBeNull();
+  });
+
+  it('renders terminal state icon for failed', () => {
+    render(
+      <TestProviders>
+        <LoadingCallout {...defaultProps} status="failed" executionUuid="uuid-123" />
+      </TestProviders>
+    );
+    const icon = screen
+      .getByTestId('loadingCallout')
+      .querySelector('[data-euiicon-type="logoElastic"]');
+
+    expect(icon).not.toBeNull();
   });
 });

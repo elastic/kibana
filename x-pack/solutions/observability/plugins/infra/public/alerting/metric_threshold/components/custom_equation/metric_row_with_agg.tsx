@@ -108,7 +108,6 @@ export const MetricRowWithAgg = ({
           >
             <EuiSelect
               data-test-subj="infraMetricRowWithAggSelect"
-              compressed
               options={aggOptions}
               value={aggType}
               isInvalid={isAggInvalid}
@@ -126,7 +125,6 @@ export const MetricRowWithAgg = ({
           >
             <EuiComboBox
               fullWidth
-              compressed
               isInvalid={isFieldInvalid}
               singleSelection={{ asPlainText: true }}
               options={fieldOptions}

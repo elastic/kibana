@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, security } = getPageObjects(['dashboard', 'security']);
@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         disabledFeatures: [],
       });
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/custom_space',
         { space: customSpace }
       );
 
@@ -80,7 +80,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await securityService.role.delete(ROLE);
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/custom_space',
+        'x-pack/platform/test/functional/fixtures/kbn_archives/dashboard/feature_controls/custom_space',
         { space: customSpace }
       );
     });

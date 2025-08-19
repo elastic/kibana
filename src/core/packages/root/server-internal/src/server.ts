@@ -12,9 +12,11 @@ import { firstValueFrom } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { CriticalError } from '@kbn/core-base-server-internal';
-import { ConfigService, Env, RawConfigurationProvider } from '@kbn/config';
+import type { Env, RawConfigurationProvider } from '@kbn/config';
+import { ConfigService } from '@kbn/config';
 import { DocLinksService } from '@kbn/core-doc-links-server-internal';
-import { LoggingService, ILoggingSystem } from '@kbn/core-logging-server-internal';
+import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { LoggingService } from '@kbn/core-logging-server-internal';
 import { ensureValidConfiguration } from '@kbn/core-config-server-internal';
 import { NodeService } from '@kbn/core-node-server-internal';
 import { AnalyticsService } from '@kbn/core-analytics-server-internal';
@@ -52,11 +54,14 @@ import type {
   InternalCoreSetup,
   InternalCoreStart,
 } from '@kbn/core-lifecycle-server-internal';
-import { DiscoveredPlugins, PluginsService } from '@kbn/core-plugins-server-internal';
+import type { DiscoveredPlugins } from '@kbn/core-plugins-server-internal';
+import { PluginsService } from '@kbn/core-plugins-server-internal';
 import { CoreAppsService } from '@kbn/core-apps-server-internal';
 import { SecurityService } from '@kbn/core-security-server-internal';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
 import { PricingService } from '@kbn/core-pricing-server-internal';
+import { CoreInjectionService } from '@kbn/core-di-internal';
+import { http as httpModule } from '@kbn/core-di-server-internal';
 import { registerServiceConfig } from './register_service_config';
 import { MIGRATION_EXCEPTION_CODE } from './constants';
 import { coreConfig, type CoreConfigType } from './core_config';
@@ -98,6 +103,7 @@ export class Server {
   private readonly userSettingsService: UserSettingsService;
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
+  private readonly injection: CoreInjectionService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -123,6 +129,7 @@ export class Server {
 
     const core = { coreId, configService: this.configService, env, logger: this.logger };
     this.analytics = new AnalyticsService(core);
+    this.injection = new CoreInjectionService();
     this.context = new ContextService(core);
     this.featureFlags = new FeatureFlagsService(core);
     this.http = new HttpService(core);
@@ -279,6 +286,8 @@ export class Server {
     const securitySetup = this.security.setup();
     const userProfileSetup = this.userProfile.setup();
 
+    const injectionSetup = this.injection.setup();
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
@@ -393,7 +402,11 @@ export class Server {
       userSettings: userSettingsServiceSetup,
       security: securitySetup,
       userProfile: userProfileSetup,
+      injection: injectionSetup,
     };
+
+    const container = injectionSetup.getContainer();
+    container.loadSync(httpModule);
 
     const pluginsSetup = await this.plugins.setup(coreSetup);
     this.#pluginsInitialized = pluginsSetup.initialized;
@@ -418,6 +431,7 @@ export class Server {
     const startStartUptime = performance.now();
     const startTransaction = apm.startTransaction('server-start', 'kibana-platform');
 
+    const injectionStart = this.injection.start();
     const analyticsStart = this.analytics.start();
     const securityStart = this.security.start();
     const userProfileStart = this.userProfile.start();
@@ -494,6 +508,7 @@ export class Server {
       security: securityStart,
       userProfile: userProfileStart,
       pricing: pricingStart,
+      injection: injectionStart,
     };
 
     this.coreApp.start(this.coreStart);
