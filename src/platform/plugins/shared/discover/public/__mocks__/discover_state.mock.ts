@@ -29,6 +29,7 @@ import { createCustomizationService } from '../customizations/customization_serv
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import { internalStateActions } from '../application/main/state_management/redux';
 import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux/constants';
+import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
@@ -82,11 +83,30 @@ export function getDiscoverStateMock({
       : isTimeBased
       ? savedSearchMockWithTimeField
       : savedSearchMock;
+  const persistedDiscoverSession: DiscoverSession | undefined = finalSavedSearch
+    ? {
+        ...finalSavedSearch,
+        id: finalSavedSearch.id ?? '',
+        title: finalSavedSearch.title ?? '',
+        description: finalSavedSearch.description ?? '',
+        tabs: [
+          fromSavedSearchToSavedObjectTab({
+            tab: {
+              id: finalSavedSearch.id ?? '',
+              label: finalSavedSearch.title ?? '',
+            },
+            savedSearch: finalSavedSearch,
+            services,
+          }),
+        ],
+      }
+    : undefined;
   const mockUserId = 'mockUserId';
   const mockSpaceId = 'mockSpaceId';
   const initialTabsState = tabsStorageManager.loadLocally({
     userId: mockUserId,
     spaceId: mockSpaceId,
+    persistedDiscoverSession,
     defaultTabState: DEFAULT_TAB_STATE,
   });
   internalState.dispatch(internalStateActions.setTabs(initialTabsState));
@@ -95,24 +115,7 @@ export function getDiscoverStateMock({
       {
         userId: mockUserId,
         spaceId: mockSpaceId,
-        persistedDiscoverSession: finalSavedSearch
-          ? {
-              ...finalSavedSearch,
-              id: finalSavedSearch.id ?? '',
-              title: finalSavedSearch.title ?? '',
-              description: finalSavedSearch.description ?? '',
-              tabs: [
-                fromSavedSearchToSavedObjectTab({
-                  tab: {
-                    id: finalSavedSearch.id ?? '',
-                    label: finalSavedSearch.title ?? '',
-                  },
-                  savedSearch: finalSavedSearch,
-                  services,
-                }),
-              ],
-            }
-          : undefined,
+        persistedDiscoverSession,
       },
       'requestId',
       { discoverSessionId: finalSavedSearch?.id }

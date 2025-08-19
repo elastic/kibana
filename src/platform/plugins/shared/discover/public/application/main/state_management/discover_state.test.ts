@@ -9,11 +9,7 @@
 
 import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './discover_state';
-import {
-  fromSavedSearchToSavedObjectTab,
-  internalStateActions,
-  selectTabRuntimeState,
-} from './redux';
+import { internalStateActions, selectTabRuntimeState } from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -66,9 +62,10 @@ async function getState(
       ...spec,
     });
   });
+  savedSearch ??= savedSearchMockWithTimeFieldNew;
   const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateMock({
-    savedSearch: false,
+    savedSearch: copySavedSearch(savedSearch),
     runtimeStateManager,
     history: nextHistory,
     services: mockServices,
@@ -78,44 +75,6 @@ async function getState(
   nextState.internalState.dispatch(
     internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
   );
-  if (savedSearch) {
-    jest.spyOn(mockServices.savedSearch, 'get').mockImplementation(() => {
-      nextState.savedSearchState.set(copySavedSearch(savedSearch));
-      return Promise.resolve(savedSearch);
-    });
-    nextState.internalState.dispatch(
-      internalStateActions.initializeTabs.fulfilled(
-        {
-          userId: '',
-          spaceId: '',
-          persistedDiscoverSession: {
-            ...savedSearch,
-            id: savedSearch.id ?? '',
-            title: savedSearch.title ?? '',
-            description: savedSearch.description ?? '',
-            tabs: [
-              fromSavedSearchToSavedObjectTab({
-                tab: {
-                  id: savedSearch.id ?? '',
-                  label: savedSearch.title ?? '',
-                },
-                savedSearch,
-                services: mockServices,
-              }),
-            ],
-          },
-        },
-        'requestId',
-        { discoverSessionId: savedSearch.id }
-      )
-    );
-  } else {
-    jest.spyOn(mockServices.savedSearch, 'get').mockImplementation(() => {
-      nextState.savedSearchState.set(copySavedSearch(savedSearchMockWithTimeFieldNew));
-      return Promise.resolve(savedSearchMockWithTimeFieldNew);
-    });
-  }
-
   const getCurrentUrl = () => nextHistory.createHref(nextHistory.location);
   return {
     history: nextHistory,
@@ -635,7 +594,7 @@ describe('Discover state', () => {
       await new Promise(process.nextTick);
       expect(newSavedSearch?.id).toBe('the-saved-search-id');
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
+        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       state.actions.stopSyncing();
@@ -659,7 +618,7 @@ describe('Discover state', () => {
       );
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
+        `"/#?_a=(columns:!(message),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:month,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(true);
       state.actions.stopSyncing();
