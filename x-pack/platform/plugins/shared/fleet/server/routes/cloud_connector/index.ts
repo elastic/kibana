@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
-
 import type { FleetAuthzRouter } from '../../services/security';
 
 import { API_VERSIONS, CLOUD_CONNECTOR_API_ROUTES } from '../../../common/constants';
 import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import { genericErrorResponse } from '../schema/errors';
+import {
+  CreateCloudConnectorRequestSchema,
+  CreateCloudConnectorResponseSchema,
+  GetCloudConnectorsRequestSchema,
+  GetCloudConnectorsResponseSchema,
+} from '../../types/rest_spec/cloud_connector';
 
 import { createCloudConnectorHandler, getCloudConnectorsHandler } from './handlers';
 
@@ -26,7 +30,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           requiredPrivileges: [
             {
               anyRequired: [
-                FLEET_API_PRIVILEGES.AGENT_POLICIES.READ,
+                FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
                 FLEET_API_PRIVILEGES.INTEGRATIONS.ALL,
               ],
             },
@@ -42,50 +46,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: {
-            body: schema.object({
-              name: schema.string({
-                minLength: 1,
-                maxLength: 255,
-              }),
-              cloudProvider: schema.oneOf([
-                schema.literal('aws'),
-                schema.literal('azure'),
-                schema.literal('gcp'),
-              ]),
-              vars: schema.recordOf(
-                schema.string({ minLength: 1, maxLength: 100 }),
-                schema.oneOf([
-                  schema.string({ maxLength: 1000 }),
-                  schema.number(),
-                  schema.boolean(),
-                  schema.object({
-                    type: schema.string({ maxLength: 50 }),
-                    value: schema.oneOf([
-                      schema.string({ maxLength: 1000 }),
-                      schema.object({
-                        isSecretRef: schema.boolean(),
-                        id: schema.string({ maxLength: 255 }),
-                      }),
-                    ]),
-                    frozen: schema.maybe(schema.boolean()),
-                  }),
-                ])
-              ),
-            }),
-          },
+          request: CreateCloudConnectorRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.object({
-                  id: schema.string(),
-                  name: schema.string(),
-                  cloudProvider: schema.string(),
-                  vars: schema.recordOf(schema.string(), schema.any()),
-                  packagePolicyCount: schema.number(),
-                  created_at: schema.string(),
-                  updated_at: schema.string(),
-                }),
+              body: () => CreateCloudConnectorResponseSchema,
             },
             400: {
               body: genericErrorResponse,
@@ -121,26 +85,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         validate: {
-          request: {
-            query: schema.object({
-              page: schema.maybe(schema.string()),
-              perPage: schema.maybe(schema.string()),
-            }),
-          },
+          request: GetCloudConnectorsRequestSchema,
           response: {
             200: {
-              body: () =>
-                schema.arrayOf(
-                  schema.object({
-                    id: schema.string(),
-                    name: schema.string(),
-                    cloudProvider: schema.string(),
-                    vars: schema.recordOf(schema.string(), schema.any()),
-                    packagePolicyCount: schema.number(),
-                    created_at: schema.string(),
-                    updated_at: schema.string(),
-                  })
-                ),
+              body: () => GetCloudConnectorsResponseSchema,
             },
             400: {
               body: genericErrorResponse,

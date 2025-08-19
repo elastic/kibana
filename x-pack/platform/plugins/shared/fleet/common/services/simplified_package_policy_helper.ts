@@ -52,6 +52,7 @@ export interface SimplifiedPackagePolicy {
   vars?: SimplifiedVars;
   inputs?: SimplifiedInputs;
   supports_agentless?: boolean | null;
+  supports_cloud_connector?: boolean | null;
   additional_datastreams_permissions?: string[];
 }
 

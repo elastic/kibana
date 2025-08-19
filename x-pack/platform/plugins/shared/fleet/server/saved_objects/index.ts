@@ -671,6 +671,7 @@ export const getSavedObjectTypes = (
           policy_id: { type: 'keyword' },
           policy_ids: { type: 'keyword' },
           output_id: { type: 'keyword' },
+          cloud_connector_id: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -691,6 +692,7 @@ export const getSavedObjectTypes = (
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          supports_cloud_connector: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
@@ -892,6 +894,17 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '20': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                supports_cloud_connector: { type: 'boolean' },
+                cloud_connector_id: { type: 'keyword' },
+              },
+            },
+          ],
+        },
       },
       migrations: {
         '7.10.0': migratePackagePolicyToV7100,
@@ -929,6 +942,7 @@ export const getSavedObjectTypes = (
           policy_id: { type: 'keyword' },
           policy_ids: { type: 'keyword' },
           output_id: { type: 'keyword' },
+          cloud_connector_id: { type: 'keyword' },
           package: {
             properties: {
               name: { type: 'keyword' },
@@ -949,6 +963,7 @@ export const getSavedObjectTypes = (
           secret_references: { properties: { id: { type: 'keyword' } } },
           overrides: { type: 'flattened', index: false },
           supports_agentless: { type: 'boolean' },
+          supports_cloud_connector: { type: 'boolean' },
           revision: { type: 'integer' },
           updated_at: { type: 'date' },
           updated_by: { type: 'keyword' },
@@ -1006,6 +1021,17 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: backfillPackagePolicyLatestRevision,
+            },
+          ],
+        },
+        '6': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                cloud_connector_id: { type: 'keyword' },
+                supports_cloud_connector: { type: 'boolean' },
+              },
             },
           ],
         },

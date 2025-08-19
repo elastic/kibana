@@ -1301,5 +1301,186 @@ export default function (providerContext: FtrProviderContext) {
       // Associated agent policy that was created for agentless deployment should be deleted
       await supertest.get(`/api/fleet/agent_policies/${deletableTestPolicyId}`).expect(404);
     });
+
+    describe('Cloud Connector Integration', () => {
+      let agentPolicyWithCloudConnectors: any;
+      let agentPolicyWithoutCloudConnectors: any;
+
+      before(async () => {
+        // Create agent policies for cloud connector testing
+        const { body: policy1 } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Test policy with cloud connectors ${uuidv4()}`,
+            description: 'Test agent policy with cloud connectors enabled',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: true,
+                target_csp: 'aws',
+              },
+            },
+          });
+
+        const { body: policy2 } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Test policy without cloud connectors ${uuidv4()}`,
+            description: 'Test agent policy without cloud connectors',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: false,
+              },
+            },
+          });
+
+        agentPolicyWithCloudConnectors = policy1.item;
+        agentPolicyWithoutCloudConnectors = policy2.item;
+      });
+
+      after(async () => {
+        // Clean up test agent policies
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: agentPolicyWithCloudConnectors.id });
+        await supertest
+          .post(`/api/fleet/agent_policies/delete`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyId: agentPolicyWithoutCloudConnectors.id });
+      });
+
+      it('should create package policy with cloud connector when conditions are met', async () => {
+        const { body: packagePolicy } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-cspm-package-policy-cloud-connector',
+            description: 'Test CSPM package policy with cloud connector',
+            namespace: 'default',
+            policy_id: agentPolicyWithCloudConnectors.id,
+            enabled: true,
+            inputs: [
+              {
+                type: 'cloudbeat/cis_aws',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'log.findings',
+                    },
+                    vars: {
+                      paths: {
+                        value: ['/tmp/test.log'],
+                        type: 'text',
+                      },
+                      'data_stream.dataset': {
+                        value: 'hello',
+                        type: 'text',
+                      },
+                      'aws.credentials.external_id': {
+                        value: {
+                          id: 'aws-external-id-secret',
+                          isSecretRef: true,
+                        },
+                        type: 'password',
+                      },
+                      'aws.role_arn': {
+                        value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
+                        type: 'text',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'cspm',
+              title: 'Cloud Security Posture Management',
+              version: '1.0.0',
+            },
+          })
+          .expect(200);
+
+        expect(packagePolicy).to.have.property('id');
+        expect(packagePolicy.name).to.equal('test-cspm-package-policy-cloud-connector');
+        expect(packagePolicy.supports_cloud_connector).to.equal(true);
+        expect(packagePolicy).to.have.property('cloud_connector_id');
+        expect(packagePolicy.cloud_connector_id).to.not.be.undefined();
+        expect(packagePolicy.inputs[0].streams[0].vars).to.have.property('aws.role_arn');
+        expect(packagePolicy.inputs[0].streams[0].vars).to.have.property(
+          'aws.credentials.external_id'
+        );
+      });
+
+      it('should not create cloud connector when agent policy has cloud connectors disabled', async () => {
+        const { body: packagePolicy } = await supertest
+          .post(`/api/fleet/package_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-cspm-package-policy-no-connector',
+            description: 'Test CSPM package policy without cloud connector',
+            namespace: 'default',
+            policy_id: agentPolicyWithoutCloudConnectors.id,
+            enabled: true,
+            inputs: [
+              {
+                type: 'cloudbeat/cis_aws',
+                enabled: true,
+                streams: [
+                  {
+                    enabled: true,
+                    data_stream: {
+                      type: 'logs',
+                      dataset: 'log.findings',
+                    },
+                    vars: {
+                      paths: {
+                        value: ['/tmp/test.log'],
+                        type: 'text',
+                      },
+                      'data_stream.dataset': {
+                        value: 'hello',
+                        type: 'text',
+                      },
+                      'aws.credentials.external_id': {
+                        value: {
+                          id: 'aws-external-id-secret',
+                          isSecretRef: true,
+                        },
+                        type: 'password',
+                      },
+                      'aws.role_arn': {
+                        value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
+                        type: 'text',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+            package: {
+              name: 'cspm',
+              title: 'Cloud Security Posture Management',
+              version: '1.0.0',
+            },
+          })
+          .expect(200);
+
+        expect(packagePolicy).to.have.property('id');
+        expect(packagePolicy.name).to.equal('test-cspm-package-policy-no-connector');
+        expect(packagePolicy.supports_cloud_connector).to.equal(false);
+        expect(packagePolicy).to.not.have.property('cloud_connector_id');
+      });
+    });
   });
 }

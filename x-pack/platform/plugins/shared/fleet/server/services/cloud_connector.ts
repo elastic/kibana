@@ -18,6 +18,12 @@ import type {
 import type { CloudConnectorSOAttributes } from '../types/so_attributes';
 import type { CreateCloudConnectorRequest } from '../routes/cloud_connector/handlers';
 import { CLOUD_CONNECTOR_SAVED_OBJECT_TYPE } from '../../common/constants';
+import {
+  AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
+  AWS_ROLE_ARN_VAR_NAME,
+} from '../../common/constants/cloud_connector';
+
+import { CloudConnectorCreateError, CloudConnectorGetListError } from '../errors';
 
 import { appContextService } from './app_context';
 
@@ -36,9 +42,7 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
   private static readonly EXTERNAL_ID_REGEX = /^[a-zA-Z0-9]{20}$/;
 
   protected getLogger(...childContextPaths: string[]): Logger {
-    return appContextService
-      .getLogger()
-      .get('[Cloud Connector API] CloudConnectorService', ...childContextPaths);
+    return appContextService.getLogger().get('CloudConnectorService', ...childContextPaths);
   }
 
   async create(
@@ -46,18 +50,16 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     cloudConnector: CreateCloudConnectorRequest
   ): Promise<CloudConnectorSO> {
     const logger = this.getLogger('create');
-    logger.debug('Creating cloud connector');
 
     try {
       logger.info('Creating cloud connector');
 
-      // Extract cloud variables from package policy
-      const { cloudProvider, vars, name } = this.extractCloudVars(cloudConnector);
+      const { name, cloudProvider, vars } = this.getCloudConnectorInfo(cloudConnector);
 
       if (!vars || Object.keys(vars).length === 0) {
         logger.error(`Package policy must contain ${cloudProvider} input vars`);
-        throw new Error(
-          `[Cloud Connector API] Package policy must contain ${cloudProvider} input vars`
+        throw new CloudConnectorCreateError(
+          `CloudConnectorService Package policy must contain ${cloudProvider} input vars`
         );
       }
 
@@ -89,8 +91,8 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       };
     } catch (error) {
       logger.error('Failed to create cloud connector', error.message);
-      throw new Error(
-        `[Cloud Connector API] Failed to create cloud connector: ${error.message}\n${error.stack}`
+      throw new CloudConnectorCreateError(
+        `CloudConnectorService Failed to create cloud connector: ${error.message}\n${error.stack}`
       );
     }
   }
@@ -124,13 +126,12 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       }));
     } catch (error) {
       logger.error('Failed to get cloud connectors list', error.message);
-      throw new Error(
-        `[Cloud Connector API] Failed to get cloud connectors list: ${error.message}\n${error.stack}`
+      throw new CloudConnectorGetListError(
+        `CloudConnectorService Failed to get cloud connectors list: ${error.message}\n${error.stack}`
       );
     }
   }
-
-  private extractCloudVars(cloudConnector: CreateCloudConnectorRequest): {
+  private getCloudConnectorInfo(cloudConnector: CreateCloudConnectorRequest): {
     cloudProvider: CloudProvider;
     vars: CloudConnectorVars;
     name: string;
@@ -139,57 +140,59 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
     const vars = cloudConnector.vars;
 
     if (cloudConnector.cloudProvider === 'aws') {
-      const roleArn = vars.role_arn?.value || vars['aws.role_arn']?.value;
+      const roleArn = vars.role_arn?.value || vars[AWS_ROLE_ARN_VAR_NAME]?.value;
+      let name = cloudConnector.name;
 
       if (!roleArn) {
         logger.error('AWS package policy must contain role_arn variable');
-        throw new Error('[Cloud Connector API] AWS package policy must contain role_arn variable');
+        throw new Error('CloudConnectorService AWS package policy must contain role_arn variable');
       }
 
       // Check for AWS variables
       if (roleArn) {
         let externalId: CloudConnectorSecretVar | undefined;
+        name = roleArn?.value || roleArn;
 
         // Combined validation for external ID secret
-        const externalIdSecret =
-          vars.external_id?.value?.id || vars.aws?.credentials.external_id?.value?.id;
+        const externalIdSecretReference: string =
+          vars.external_id?.value?.id || vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME].value?.id;
         const isSecretRef =
           vars.external_id?.value?.isSecretRef ||
-          vars.aws?.credentials.external_id?.value?.isSecretRef;
+          vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME].value?.isSecretRef;
 
-        if (externalIdSecret && isSecretRef) {
-          const isValid = CloudConnectorService.EXTERNAL_ID_REGEX.test(externalIdSecret);
+        if (externalIdSecretReference && isSecretRef) {
+          const isValid = CloudConnectorService.EXTERNAL_ID_REGEX.test(externalIdSecretReference);
           if (!isValid) {
-            logger.error('External ID secret must be a 20-character alphanumeric string');
-            throw new Error('[Cloud Connector API] External ID input var is not valid');
+            logger.error('External ID secret reference must be a valid secret reference');
+            throw new Error('CloudConnectorService External ID secret reference is not valid');
           }
 
           externalId = vars.external_id?.value?.isSecretRef
             ? vars.external_id
-            : vars.aws?.credentials.external_id;
+            : vars[AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME];
         }
 
         if (!externalId) {
           logger.error('AWS package policy must contain valid external_id secret input var');
           throw new Error(
-            '[Cloud Connector API] AWS package policy must contain valid external_id secret input var'
+            'CloudConnectorService AWS package policy must contain valid external_id secret input var'
           );
         }
 
         return {
+          name,
           cloudProvider: cloudConnector.cloudProvider,
           vars: {
             role_arn: roleArn,
             external_id: externalId,
           },
-          name: cloudConnector.name,
         };
       }
     }
 
     logger.error(`Unsupported cloud provider: ${cloudConnector.cloudProvider}`);
-    throw new Error(
-      `[Cloud Connector API] Unsupported cloud provider: ${cloudConnector.cloudProvider}`
+    throw new CloudConnectorGetListError(
+      `CloudConnectorService Unsupported cloud provider: ${cloudConnector.cloudProvider}`
     );
   }
 }

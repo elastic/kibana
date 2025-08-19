@@ -76,6 +76,8 @@ import type {
   PolicySecretReference,
   AgentPolicy,
   PackagePolicyAssetsMap,
+  CloudConnectorVarsRecord,
+  CloudProvider,
 } from '../../common/types';
 import {
   FleetError,
@@ -113,6 +115,8 @@ import {
 
 import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
 
+import { SUPPORTED_CLOUD_CONNECTOR_VARS } from '../../common/constants/cloud_connector';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -124,7 +128,7 @@ import { getPackageInfo, ensureInstalledPackage, getInstallationObject } from '.
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
 import { escapeSearchQueryPhrase, normalizeKuery } from './saved_object';
-import { appContextService } from '.';
+import { appContextService, cloudConnectorService } from '.';
 import { removeOldAssets } from './epm/packages/cleanup';
 import type { PackageUpdateEvent, UpdateEventType } from './upgrade_sender';
 import { sendTelemetryEvents } from './upgrade_sender';
@@ -232,6 +236,25 @@ export function _normalizePackagePolicyKuery(savedObjectType: string, kuery: str
     );
   }
 }
+
+const extractCloudVarsFromPackagePolicy = (
+  packagePolicy: NewPackagePolicy
+): CloudConnectorVarsRecord | null => {
+  for (const input of packagePolicy.inputs) {
+    if (input.enabled && input.streams.length > 0) {
+      const vars = input.streams.find((stream) => stream.enabled)?.vars;
+      if (vars) {
+        return Object.entries(vars)
+          .filter(([key, _value]) => SUPPORTED_CLOUD_CONNECTOR_VARS.includes(key))
+          .reduce((acc, [key, value]) => {
+            acc[key] = value;
+            return acc;
+          }, {} as CloudConnectorVarsRecord);
+      }
+    }
+  }
+  return null;
+};
 
 class PackagePolicyClientImpl implements PackagePolicyClient {
   protected getLogger(...childContextPaths: string[]): Logger {
@@ -432,6 +455,28 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         assetsMap,
         { otelcolSuffixId: packagePolicyId }
       );
+
+      const isNewCloudConnectorSetup =
+        enrichedPackagePolicy.supports_cloud_connector &&
+        agentPolicies[0].agentless?.cloud_connectors?.enabled &&
+        !enrichedPackagePolicy?.cloud_connector_id;
+
+      if (isNewCloudConnectorSetup) {
+        const cloudConnectorVars = extractCloudVarsFromPackagePolicy(enrichedPackagePolicy);
+        if (cloudConnectorVars) {
+          try {
+            const cloudConnector = await cloudConnectorService.create(soClient, {
+              name: enrichedPackagePolicy.name,
+              vars: cloudConnectorVars,
+              cloudProvider: agentPolicies[0].agentless?.cloud_connectors
+                ?.target_csp as CloudProvider,
+            });
+            enrichedPackagePolicy.cloud_connector_id = cloudConnector.id;
+          } catch (error) {
+            logger.error(`Error creating cloud connector: ${error}`);
+          }
+        }
+      }
 
       elasticsearchPrivileges = pkgInfo.elasticsearch?.privileges;
 

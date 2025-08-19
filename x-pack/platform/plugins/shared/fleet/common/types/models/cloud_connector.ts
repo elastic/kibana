@@ -20,17 +20,22 @@ export interface CloudConnectorSecretVar {
   frozen?: boolean;
 }
 
-export interface CloudConnectorVars {
+export type CloudConnectorVarsRecord = Record<
+  string,
+  PackagePolicyConfigRecordEntry | string | CloudConnectorSecretVar
+>;
+
+// AWS-specific cloud connector variables
+export interface AwsCloudConnectorVars {
   // AWS Role ARN variables
   'aws.role_arn'?: PackagePolicyConfigRecordEntry | string;
   role_arn?: PackagePolicyConfigRecordEntry | string;
   // AWS credentials variables
   'aws.credentials.external_id'?: CloudConnectorSecretVar;
   external_id?: CloudConnectorSecretVar;
-  // Azure variables
-  client_id?: CloudConnectorSecretVar;
-  tenant_id?: CloudConnectorSecretVar;
 }
+
+export type CloudConnectorVars = AwsCloudConnectorVars;
 
 export interface CloudConnectorSO {
   id: string;

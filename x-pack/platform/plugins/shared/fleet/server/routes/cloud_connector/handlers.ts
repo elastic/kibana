@@ -25,7 +25,7 @@ export const createCloudConnectorHandler: FleetRequestHandler<
   const { internalSoClient } = fleetContext;
   const logger = appContextService
     .getLogger()
-    .get('[Cloud Connector API] createCloudConnectorHandler');
+    .get('CloudConnectorService createCloudConnectorHandler');
 
   try {
     logger.info('Creating cloud connector');
@@ -52,7 +52,7 @@ export const getCloudConnectorsHandler: FleetRequestHandler<
   const { page, perPage } = request.query;
   const logger = appContextService
     .getLogger()
-    .get('[Cloud Connector API] getCloudConnectorsHandler');
+    .get('CloudConnectorService getCloudConnectorsHandler');
 
   try {
     logger.info('Getting cloud connectors list');

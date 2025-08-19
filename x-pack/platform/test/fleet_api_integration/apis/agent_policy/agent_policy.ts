@@ -652,6 +652,81 @@ export default function (providerContext: FtrProviderContext) {
           'Output of type "logstash" is not usable with policy "test-agentless-policy".'
         );
       });
+
+      it('should create agent policy with cloud connectors enabled', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-policy-cloud-connectors',
+            description: 'Test agent policy with cloud connectors enabled',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: true,
+                target_csp: 'aws',
+              },
+            },
+          })
+          .expect(200);
+
+        expect(createdPolicy).to.have.property('id');
+        expect(createdPolicy.name).to.equal('test-agent-policy-cloud-connectors');
+        expect(createdPolicy.supports_agentless).to.equal(true);
+        expect(createdPolicy.agentless).to.have.property('cloud_connectors');
+        expect(createdPolicy.agentless.cloud_connectors.enabled).to.equal(true);
+        expect(createdPolicy.agentless.cloud_connectors.target_csp).to.equal('aws');
+      });
+
+      it('should create agent policy without cloud connectors', async () => {
+        const {
+          body: { item: createdPolicy },
+        } = await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-policy-no-cloud-connectors',
+            description: 'Test agent policy without cloud connectors',
+            namespace: 'default',
+            monitoring_enabled: ['logs', 'metrics'],
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: false,
+              },
+            },
+          })
+          .expect(200);
+
+        expect(createdPolicy).to.have.property('id');
+        expect(createdPolicy.name).to.equal('test-agent-policy-no-cloud-connectors');
+        expect(createdPolicy.supports_agentless).to.equal(true);
+        expect(createdPolicy.agentless).to.have.property('cloud_connectors');
+        expect(createdPolicy.agentless.cloud_connectors.enabled).to.equal(false);
+      });
+
+      it('should validate cloud connector target_csp when enabled', async () => {
+        await supertest
+          .post(`/api/fleet/agent_policies`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-agent-policy-invalid-csp',
+            description: 'Test agent policy with invalid CSP target',
+            namespace: 'default',
+            supports_agentless: true,
+            agentless: {
+              cloud_connectors: {
+                enabled: true,
+                target_csp: 'invalid-csp', // Invalid CSP target
+              },
+            },
+          })
+          .expect(400);
+      });
     });
 
     describe('POST /api/fleet/agent_policies/{agentPolicyId}/copy', () => {

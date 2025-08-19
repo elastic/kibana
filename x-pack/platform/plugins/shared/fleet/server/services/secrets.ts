@@ -281,13 +281,10 @@ export async function extractAndWriteSecrets(opts: {
     packagePolicy
   );
 
-  // cloud connectors secret refs are not created as secrets, but are added to the secretReferences
-  // Todo: Check Package Policy for cloud connector id and add it to the secretReferences
-  const cloudConnectorsSecret = secretPaths
-    .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
-    .map((secretPath) => ({
-      id: secretPath.value.value?.id,
-    }));
+  const cloudConnectorsSecretReferences = getCloudConnectorSecretReferences(
+    packagePolicy,
+    secretPaths
+  );
 
   return {
     packagePolicy: policyWithSecretRefs,
@@ -298,7 +295,7 @@ export async function extractAndWriteSecrets(opts: {
         }
         return [...acc, { id: secret.id }];
       }, []),
-      ...cloudConnectorsSecret,
+      ...cloudConnectorsSecretReferences,
     ],
   };
 }
@@ -696,6 +693,19 @@ function getPolicyWithSecretReferences(
   });
 
   return result;
+}
+
+function getCloudConnectorSecretReferences(
+  packagePolicy: NewPackagePolicy,
+  secretPaths: SecretPath[]
+): PolicySecretReference[] {
+  return packagePolicy?.supports_cloud_connector
+    ? secretPaths
+        .filter((secretPath) => !!secretPath.value.value && secretPath.value.value?.isSecretRef)
+        .map((secretPath) => ({
+          id: secretPath.value.value?.id,
+        }))
+    : [];
 }
 
 /**

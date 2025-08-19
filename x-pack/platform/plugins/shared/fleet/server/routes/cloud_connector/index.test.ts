@@ -364,7 +364,7 @@ describe('Cloud Connector API', () => {
 
     it('should handle service failure with pagination parameters', async () => {
       const mockError = new Error(
-        '[Cloud Connector API] Failed to get cloud connectors list: Invalid pagination parameters'
+        'CloudConnectorService Failed to get cloud connectors list: Invalid pagination parameters'
       );
       mockCloudConnectorService.getList.mockRejectedValue(mockError);
 
@@ -389,7 +389,7 @@ describe('Cloud Connector API', () => {
         statusCode: 400,
         body: {
           message:
-            '[Cloud Connector API] Failed to get cloud connectors list: Invalid pagination parameters',
+            'CloudConnectorService Failed to get cloud connectors list: Invalid pagination parameters',
         },
       });
     });
