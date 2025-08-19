@@ -24,7 +24,7 @@
       "data",
       "inspector",
       "kibanaReact",
-      "kibanaUtils",
+      "kibanaUtils"
     ],
     "extraPublicDirs": [
       "common"
