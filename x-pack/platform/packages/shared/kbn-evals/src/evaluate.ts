@@ -25,7 +25,7 @@ import { createCriteriaEvaluator } from './evaluators/criteria';
 import type { DefaultEvaluators } from './types';
 import { reportModelScore } from './utils/report_model_score';
 import { createConnectorFixture } from './utils/create_connector_fixture';
-import { createCorrectnessAnalysisEvaluator } from './evaluators/corectness';
+import { createCorrectnessAnalysisEvaluator } from './evaluators/correctness';
 
 /**
  * Test type for evaluations. Loads an inference client and a
