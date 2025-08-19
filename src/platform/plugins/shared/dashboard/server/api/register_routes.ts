@@ -15,11 +15,11 @@ import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
+import type { DashboardItem } from '../content_management/v1';
 import {
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
-  DashboardItem,
 } from '../content_management/v1';
 import {
   dashboardAttributesSchemaRequest,
