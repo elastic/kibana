@@ -28,7 +28,6 @@
     "@kbn/es-query",
     "@kbn/zod",
     "@kbn/share-plugin",
-    "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
