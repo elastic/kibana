@@ -68,6 +68,7 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
+  executionIndex: number;
   error?: string | null;
   output?: Record<string, any> | null;
   state?: Record<string, any>;

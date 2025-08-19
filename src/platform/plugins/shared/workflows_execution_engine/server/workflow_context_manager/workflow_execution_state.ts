@@ -22,6 +22,14 @@ export class WorkflowExecutionState {
   private workflowChanges: Map<string, Change> = new Map();
   private stepChanges: Map<string, Change> = new Map();
 
+  /**
+   * Maps step IDs to their execution IDs in chronological order.
+   * This index enables efficient lookup of all executions for a given step,
+   * which is especially important for steps that execute multiple times
+   * (e.g., in loops or retries).
+   */
+  private stepIdExecutionIdIndex = new Map<string, string[]>();
+
   constructor(
     initialWorkflowExecution: EsWorkflowExecution,
     private workflowExecutionRepository: WorkflowExecutionRepository,
@@ -34,9 +42,8 @@ export class WorkflowExecutionState {
     const foundSteps = await this.workflowStepExecutionRepository.searchStepExecutionsByExecutionId(
       this.workflowExecution.id
     );
-    foundSteps.forEach((stepExecution) => {
-      this.stepExecutions.set(stepExecution.id, stepExecution);
-    });
+    foundSteps.forEach((stepExecution) => this.stepExecutions.set(stepExecution.id, stepExecution));
+    this.buildStepIdExecutionIdIndex();
   }
 
   public getWorkflowExecution(): EsWorkflowExecution {
@@ -54,22 +61,30 @@ export class WorkflowExecutionState {
     });
   }
 
-  public getStepExecutionById(id: string): EsWorkflowStepExecution | undefined {
-    return this.stepExecutions.get(id);
-  }
-
+  /**
+   * Retrieves all executions for a specific workflow step in chronological order.
+   * @param stepId The unique identifier of the step
+   * @returns An array of step execution objects or undefined if no executions exist
+   */
   public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] | undefined {
-    return Array.from(this.stepExecutions.values()).filter(
-      (stepExecution) => stepExecution.stepId === stepId
-    );
+    if (!this.stepIdExecutionIdIndex.has(stepId)) {
+      return [];
+    }
+
+    return this.stepIdExecutionIdIndex
+      .get(stepId)
+      ?.map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution);
   }
 
+  /**
+   * Retrieves the latest execution for a specific workflow step.
+   * @param stepId The unique identifier of the step
+   * @returns The latest step execution object or undefined if no executions exist
+   */
   public getLatestStepExecution(stepId: string): EsWorkflowStepExecution | undefined {
-    const allExecutions = Array.from(this.stepExecutions.values()).filter(
-      (stepExecution) => stepExecution.stepId === stepId
-    );
+    const allExecutions = this.getStepExecutionsByStepId(stepId);
 
-    if (allExecutions.length === 0) {
+    if (!allExecutions?.length) {
       return undefined;
     }
 
@@ -82,11 +97,17 @@ export class WorkflowExecutionState {
     }
 
     if (!this.stepExecutions.has(step.id)) {
+      const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
+      if (!stepExecutions.length) {
+        this.stepIdExecutionIdIndex.set(step.stepId as string, []);
+      }
+      this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(step.id as string);
       this.stepExecutions.set(
         step.id as string,
         {
           ...step,
           id: step.id,
+          executionIndex: stepExecutions.length,
           workflowRunId: this.workflowExecution.id,
           workflowId: this.workflowExecution.workflowId,
         } as EsWorkflowStepExecution
@@ -151,5 +172,26 @@ export class WorkflowExecutionState {
 
     this.workflowChanges.clear();
     this.stepChanges.clear();
+  }
+
+  private buildStepIdExecutionIdIndex(): void {
+    this.stepIdExecutionIdIndex.clear();
+    for (const step of this.stepExecutions.values()) {
+      if (!this.stepIdExecutionIdIndex.has(step.stepId)) {
+        this.stepIdExecutionIdIndex.set(step.stepId, []);
+      }
+      this.stepIdExecutionIdIndex.get(step.stepId)!.push(step.id);
+    }
+
+    for (const [stepId, stepExecutionIds] of this.stepIdExecutionIdIndex.entries()) {
+      this.stepIdExecutionIdIndex.set(
+        stepId,
+        stepExecutionIds.sort((a, b) => {
+          const aExecution = this.stepExecutions.get(a);
+          const bExecution = this.stepExecutions.get(b);
+          return (aExecution?.executionIndex ?? 0) - (bExecution?.executionIndex ?? 0);
+        })
+      );
+    }
   }
 }

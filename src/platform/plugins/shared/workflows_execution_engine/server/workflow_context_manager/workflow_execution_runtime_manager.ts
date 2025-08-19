@@ -120,7 +120,7 @@ export class WorkflowExecutionRuntimeManager {
 
   public enterScope(): void {
     const currentStep = this.getCurrentStep();
-    const stack = [...(this.workflowExecutionState.getWorkflowExecution().stack || [])];
+    const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
     stack.push(currentStep.id);
     this.workflowExecutionState.updateWorkflowExecution({
       stack,
@@ -128,7 +128,7 @@ export class WorkflowExecutionRuntimeManager {
   }
 
   public exitScope(): void {
-    const stack = [...(this.workflowExecutionState.getWorkflowExecution().stack || [])];
+    const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
     stack.pop();
     this.workflowExecutionState.updateWorkflowExecution({
       stack,
@@ -452,6 +452,7 @@ export class WorkflowExecutionRuntimeManager {
       status: ExecutionStatus.RUNNING,
       currentNodeId: this.topologicalOrder[this.currentStepIndex],
       startedAt: new Date().toISOString(),
+      stack: [],
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
@@ -539,10 +540,8 @@ export class WorkflowExecutionRuntimeManager {
     const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(
       stepId
     ) as EsWorkflowStepExecution[];
-
-    return this.getWorkflowExecution()
-      .stack.concat([stepId, stepExecutions.length.toString()])
-      .join('__');
+    const stack = this.getWorkflowExecution().stack;
+    return stack.concat([stepId, stepExecutions.length.toString()]).join('__');
   }
 
   private getCurrentStepError(): any | undefined {

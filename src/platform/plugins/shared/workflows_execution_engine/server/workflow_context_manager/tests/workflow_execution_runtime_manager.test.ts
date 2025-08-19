@@ -191,6 +191,15 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(underTest.getCurrentStep()).toEqual({ id: 'node1' });
     });
 
+    it('should set stack to empty array', async () => {
+      await underTest.start();
+      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stack: [],
+        })
+      );
+    });
+
     it('should start the workflow execution and update workflow status in runtime', async () => {
       await underTest.start();
 
