@@ -58,7 +58,7 @@ export const LogEventsResultContent = React.memo<LogEventsResultContentProps>(
             false,
             false,
             'Document Filters',
-            FilterStateStore.APP_STATE
+            'appState'
           )
         ),
       [documentFilters, logsSource.indexName]

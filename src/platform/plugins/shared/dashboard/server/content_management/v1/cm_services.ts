@@ -12,7 +12,6 @@ import { controlsGroupSchema } from '@kbn/controls-schemas';
 import { refreshIntervalSchema } from '@kbn/data-service-server';
 import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-management-utils';
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
-import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
@@ -51,8 +50,8 @@ export const filterSchema = schema.object(
       schema.object({
         store: schema.oneOf(
           [
-            schema.literal(FilterStateStore.APP_STATE),
-            schema.literal(FilterStateStore.GLOBAL_STATE),
+            schema.literal('appState'),
+            schema.literal('globalState'),
           ],
           {
             meta: {
