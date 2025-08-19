@@ -81,7 +81,6 @@ export function AddPageAttachmentToCaseModal({
     >
       <AddToCaseButtonContent
         pageAttachmentState={pageAttachmentState}
-        notifications={notifications}
         cases={cases}
         onCloseModal={onCloseModal}
       />
@@ -93,7 +92,7 @@ function AddToCaseButtonContent({
   pageAttachmentState,
   cases,
   onCloseModal,
-}: AddPageAttachmentToCaseModalProps) {
+}: Omit<AddPageAttachmentToCaseModalProps, 'notifications'>) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
   const [comment, setComment] = useState<string>('');
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
