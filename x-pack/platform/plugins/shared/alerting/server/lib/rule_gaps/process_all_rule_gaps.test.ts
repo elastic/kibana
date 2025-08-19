@@ -37,7 +37,8 @@ const createGap = (ruleId: string, unfilledIntervals: Array<ReturnType<typeof ra
 };
 
 const getProcessGapsBatchImplementation =
-  (processedGapsCount: Record<string, number>) => async (gaps: Gap[], limits: Record<string, number>) => {
+  (processedGapsCount: Record<string, number>) =>
+  async (gaps: Gap[], limits: Record<string, number>) => {
     const groupedGaps = groupBy(gaps, 'ruleId');
     const processedGapsCountCurrentIteration: Record<string, number> = {};
 
