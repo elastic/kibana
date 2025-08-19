@@ -7,6 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
+import { installMockPrebuiltRulesPackage } from '../../../../tasks/api_calls/prebuilt_rules';
 import { resetRulesTableState } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -100,6 +101,10 @@ describe(
   'Rules table: persistent state',
   { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
+    before(() => {
+      installMockPrebuiltRulesPackage();
+    });
+
     beforeEach(() => {
       deleteAlertsAndRules();
       createTestRules();

@@ -20,8 +20,8 @@ import {
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
 } from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import { checkAndInitPrivilegedMonitoringResources } from '../../check_and_init_privileged_monitoring_resources';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createPrivilegedUsersCsvService } from '../../users/csv_upload';
 
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -72,12 +72,13 @@ export const uploadUsersCSVRoute = (
             ENABLE_PRIVILEGED_USER_MONITORING_SETTING
           );
 
-          await checkAndInitPrivilegedMonitoringResources(context, logger);
-
           const secSol = await context.securitySolution;
           const fileStream = request.body.file as HapiReadableStream;
 
-          const body = await secSol.getPrivilegeMonitoringDataClient().uploadUsersCSV(fileStream, {
+          const dataClient = secSol.getPrivilegeMonitoringDataClient();
+          const csvService = createPrivilegedUsersCsvService(dataClient);
+
+          const body = await csvService.bulkUpload(fileStream, {
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,
           });

@@ -26,7 +26,7 @@ import type {
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 

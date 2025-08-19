@@ -21,7 +21,8 @@ import { removeGenArtifacts } from './lib/remove_gen_artifacts';
 import { lint } from './openapi_linter';
 import { getGenerationContext } from './parser/get_generation_context';
 import type { OpenApiDocument, ParsedSource } from './parser/openapi_types';
-import { initTemplateService, TemplateName } from './template_service/template_service';
+import type { TemplateName } from './template_service/template_service';
+import { initTemplateService } from './template_service/template_service';
 
 export interface GeneratorConfig {
   title?: string;
