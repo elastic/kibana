@@ -70,8 +70,11 @@ export interface ControlEditorProps<
 const FieldPicker = withSuspense(LazyFieldPicker, null);
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
 
-const useControlTypeActions = () => {
-  const [controlTypes, setControlTypes] = useState<ControlTypeAction[] | undefined>(undefined);
+interface ControlActionRegistry {
+  [type: string]: ControlTypeAction;
+}
+const useControlActionRegistry = (): ControlActionRegistry => {
+  const [controlActionRegistry, setControlActionRegistry] = useState<ControlActionRegistry>({});
 
   useEffect(() => {
     let cancelled = false;
@@ -80,46 +83,35 @@ const useControlTypeActions = () => {
       .getTriggerActions(CONTROL_MENU_TRIGGER)
       .then((controlTypeActions) => {
         if (!cancelled) {
-          setControlTypes(
-            controlTypeActions.sort(
-              (
-                { order: orderA = 0, getDisplayName: getDisplayNameA },
-                { order: orderB = 0, getDisplayName: getDisplayNameB }
-              ) => {
-                const orderComparison = orderB - orderA; // sort descending by order
-                return orderComparison === 0
-                  ? getDisplayNameA({ trigger: addControlMenuTrigger }).localeCompare(
-                      getDisplayNameB({ trigger: addControlMenuTrigger })
-                    ) // if equal order, compare display names
-                  : orderComparison;
-              }
-            ) as ControlTypeAction[]
+          setControlActionRegistry(
+            controlTypeActions.reduce(
+              (prev, action) => ({ ...prev, [action.type]: action as ControlTypeAction }),
+              {} as ControlActionRegistry
+            )
           );
         }
       })
       .catch(() => {
-        if (!cancelled) setControlTypes([]);
+        if (!cancelled) setControlActionRegistry([]);
       });
 
     return () => {
       cancelled = true;
     };
   }, []);
-
-  return controlTypes;
+  return controlActionRegistry;
 };
 
 const CompatibleControlTypesComponent = ({
   dataViewId,
   fieldName,
-  selectedAction,
-  setSelectedAction,
+  selectedControlType: selectedAction,
+  setSelectedControlType: setSelectedAction,
 }: Partial<DefaultDataControlState> & {
-  selectedAction?: string;
-  setSelectedAction: (type: string) => void;
-  setAvailableActions: (actions: ControlTypeAction[]) => void;
+  selectedControlType?: string;
+  setSelectedControlType: (type: string) => void;
 }) => {
-  const controlTypes = useControlTypeActions();
+  const controlActionRegistry = useControlActionRegistry();
   const [isCompatible, setIsCompatible] = useState<{ [type: string]: boolean }>({});
 
   const controlTypeContext = useMemo(
@@ -131,22 +123,36 @@ const CompatibleControlTypesComponent = ({
     [dataViewId, fieldName]
   );
 
+  const sortedActionArray: ControlTypeAction[] = useMemo(() => {
+    return Object.values(controlActionRegistry ?? {}).sort(
+      (
+        { order: orderA = 0, getDisplayName: getDisplayNameA },
+        { order: orderB = 0, getDisplayName: getDisplayNameB }
+      ) => {
+        const orderComparison = orderB - orderA; // sort descending by order
+        return orderComparison === 0
+          ? getDisplayNameA().localeCompare(getDisplayNameB()) // if equal order, compare display names
+          : orderComparison;
+      }
+    );
+  }, [controlActionRegistry]);
+
   useEffect(() => {
     const asyncGetCompatibility = async () => {
       const compatibilityMap: { [type: string]: boolean } = {};
-      await asyncForEach(controlTypes ?? [], async (action) => {
+      await asyncForEach(Object.values(controlActionRegistry ?? {}), async (action) => {
         const compatible = await action.isCompatible(controlTypeContext);
         compatibilityMap[action.id] = compatible;
       });
       setIsCompatible(compatibilityMap);
     };
     asyncGetCompatibility();
-  }, [controlTypes, controlTypeContext]);
+  }, [controlActionRegistry, controlTypeContext]);
 
   return (
-    <EuiSkeletonRectangle isLoading={controlTypes === undefined} width="100px" height="100px">
+    <EuiSkeletonRectangle isLoading={!sortedActionArray.length} width="100px" height="100px">
       <EuiKeyPadMenu data-test-subj={`controlTypeMenu`} aria-label={'type'}>
-        {(controlTypes ?? []).map((action) => {
+        {(sortedActionArray ?? []).map((action) => {
           const disabled = !isCompatible[action.id];
           const keyPadMenuItem = (
             <EuiKeyPadMenuItem
@@ -156,7 +162,7 @@ const CompatibleControlTypesComponent = ({
               data-test-subj={`create__${action.type}`}
               isSelected={action.type === selectedAction}
               disabled={disabled}
-              onClick={() => setSelectedAction(action)}
+              onClick={() => setSelectedAction(action.type)}
               label={action.getDisplayName(controlTypeContext)}
             >
               <EuiIcon
@@ -190,22 +196,21 @@ const CompatibleControlTypesComponent = ({
 export const DataControlEditor = <State extends DefaultDataControlState = DefaultDataControlState>({
   initialState,
   controlId,
-  controlType,
+  controlType, // initial control type
   initialDefaultPanelTitle,
   onSave,
   onCancel,
   parentApi,
   ariaLabelledBy,
 }: ControlEditorProps<State>) => {
-  const actions = useRef<ControlTypeAction[]>([]);
-  const controlTypes = useControlTypeActions();
+  const controlActionRegistry = useControlActionRegistry();
 
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
     initialDefaultPanelTitle ?? initialState.fieldName ?? ''
   );
   const [panelTitle, setPanelTitle] = useState<string>(initialState.title ?? defaultPanelTitle);
-  const [selectedAction, setSelectedAction] = useState<string | undefined>(controlType);
+  const [selectedControlType, setSelectedControlType] = useState<string | undefined>(controlType);
   const [controlOptionsValid, setControlOptionsValid] = useState<boolean>(true);
 
   // TODO get editor config from parent?
@@ -241,7 +246,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   }, [editorState.dataViewId]);
 
   const CustomSettingsComponent = useMemo(() => {
-    const CustomSettings = actions.current?.[selectedAction]?.extension?.CustomOptionsComponent;
+    if (!selectedControlType) return;
+    const CustomSettings =
+      controlActionRegistry[selectedControlType]?.extension?.CustomOptionsComponent;
     if (!CustomSettings || !selectedDataView || !editorState.fieldName) return;
 
     const field = editorState.fieldName
@@ -260,7 +267,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
         />
       </div>
     );
-  }, [selectedDataView, selectedAction, initialState, editorState]);
+  }, [selectedDataView, initialState, editorState, controlActionRegistry, selectedControlType]);
 
   return (
     <>
@@ -293,7 +300,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 selectedDataViewId={editorState.dataViewId}
                 onChangeDataViewId={(newDataViewId) => {
                   setEditorState({ ...editorState, dataViewId: newDataViewId });
-                  setSelectedAction(undefined);
+                  setSelectedControlType(undefined);
                 }}
                 trigger={{
                   label:
@@ -319,8 +326,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 filterPredicate={(field: DataViewField) => {
                   const customPredicate = editorConfig?.fieldFilterPredicate?.(field) ?? true;
                   return (
-                    (controlTypes ?? []).some((action) =>
-                      action.extension.isFieldCompatible(field)
+                    (Object.values(controlActionRegistry) ?? []).some((action) =>
+                      action.extension?.isFieldCompatible(field)
                     ) && customPredicate
                   );
                 }}
@@ -334,16 +341,18 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                    * reset the selected control type to the **first** compatible control type
                    */
                   if (
-                    !selectedAction ||
-                    !controlTypes[selectedAction]?.extension.isFieldCompatible(field)
+                    !selectedControlType ||
+                    !controlActionRegistry[selectedControlType!]?.extension?.isFieldCompatible(
+                      field
+                    )
                   ) {
                     const firstCompatible = (() => {
-                      for (const action of controlTypes ?? []) {
-                        if (action.extension.isFieldCompatible(field)) return action;
+                      for (const action of Object.values(controlActionRegistry)) {
+                        if (action.extension?.isFieldCompatible(field)) return action;
                       }
                       return undefined;
                     })();
-                    setSelectedAction(firstCompatible.type);
+                    if (firstCompatible) setSelectedControlType(firstCompatible.type);
                   }
 
                   /**
@@ -370,11 +379,8 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
               <CompatibleControlTypesComponent
                 dataViewId={editorState.dataViewId}
                 fieldName={editorState.fieldName}
-                selectedAction={selectedAction}
-                setSelectedAction={setSelectedAction}
-                setAvailableActions={(availableActions) => {
-                  actions.current = availableActions;
-                }}
+                selectedControlType={selectedControlType}
+                setSelectedControlType={setSelectedControlType}
               />
             </div>
           </EuiFormRow>
@@ -463,9 +469,9 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
                 data-test-subj="control-editor-save"
                 fill
                 color="primary"
-                disabled={!(controlOptionsValid && Boolean(selectedAction))}
+                disabled={!(controlOptionsValid && Boolean(selectedControlType))}
                 onClick={() => {
-                  actions.current?.[selectedAction]?.execute({
+                  controlActionRegistry[selectedControlType!]?.execute({
                     trigger: addControlMenuTrigger,
                     embeddable: parentApi,
                     state: editorState,

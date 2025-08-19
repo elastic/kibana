@@ -22,7 +22,9 @@ export type ControlTypeAction<State extends DefaultDataControlState = DefaultDat
       CustomOptionsComponent?: React.FC<CustomOptionsComponentProps<State>>;
       isFieldCompatible: (field: DataViewField) => boolean;
     }
-  >;
+  > & {
+    getDisplayName: () => string; // remove context from `getDisplayName`
+  };
 
 export const CONTROL_MENU_TRIGGER = 'CONTROL_MENU_TRIGGER';
 
