@@ -68,6 +68,8 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
           }
           if (
+            // if no createdBy, skip check. This is a legacy conversation, and the update script will assign the conversation.user[0] to the createdBy
+            existingConversation.createdBy &&
             existingConversation.createdBy.name !== authenticatedUser?.username &&
             existingConversation.createdBy.id !== authenticatedUser?.profile_uid
           ) {

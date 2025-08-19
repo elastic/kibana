@@ -312,8 +312,11 @@ export const useCurrentConversation = ({
   const isConversationOwner = useMemo(() => {
     return (
       currentConversation?.id === '' ||
-      currentConversation?.createdBy.id === currentUser?.id ||
-      currentConversation?.createdBy.name === currentUser?.name
+      (currentConversation?.createdBy && currentConversation?.createdBy?.id === currentUser?.id) ||
+      currentConversation?.createdBy?.name === currentUser?.name ||
+      (currentConversation?.users.length === 1 &&
+        (currentConversation?.users[0].id === currentUser?.id ||
+          currentConversation?.users[0].name === currentUser?.name))
     );
   }, [currentConversation, currentUser]);
 

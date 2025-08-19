@@ -17,6 +17,17 @@ export const getUpdateScript = ({
   return {
     script: {
       source: `
+    if (ctx._source.created_by == null && ctx._source.users != null && ctx._source.users.length == 1) {
+      ctx._source.created_by = ctx._source.users[0];
+      ctx._source.created_by = ctx._source.users[0];
+      if (ctx._source.messages != null) {
+        for (msg in ctx._source.messages) {
+          if (msg.role == 'user' && msg.user == null) {
+            msg.user = ctx._source.users[0];
+          }
+        }
+      }
+    }
     if (params.assignEmpty == true || params.containsKey('api_config')) {
       if (ctx._source.api_config != null) {
         if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
