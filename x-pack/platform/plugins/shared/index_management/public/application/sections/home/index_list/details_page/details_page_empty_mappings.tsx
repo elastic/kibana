@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiButtonProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -12,7 +13,6 @@ import {
   EuiLink,
   EuiText,
   EuiHorizontalRule,
-  EuiButtonProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';

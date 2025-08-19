@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiButtonProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,
@@ -24,7 +25,6 @@ import {
   useGeneratedHtmlId,
   useEuiBreakpoint,
   EuiToolTip,
-  EuiButtonProps,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
