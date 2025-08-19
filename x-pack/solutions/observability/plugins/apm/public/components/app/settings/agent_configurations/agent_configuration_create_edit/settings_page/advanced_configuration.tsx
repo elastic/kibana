@@ -25,16 +25,20 @@ import { AdvancedConfigValueInput } from './advanced_config_value_input';
 export function AdvancedConfiguration({
   newConfig,
   settingsDefinitions,
+  revalidate,
   onChange,
   onDelete,
+  addNewRow,
   addValidationError,
   removeValidationError,
 }: {
   newConfig: AgentConfigurationIntake;
   settingsDefinitions: SettingDefinition[];
+  revalidate: boolean;
   onChange: ({ key, value, oldKey }: { key: string; value?: string; oldKey?: string }) => void;
   onDelete: (key: string, index: number) => void;
-  addValidationError: (key: string) => void;
+  addNewRow: () => void;
+  addValidationError: (key: string, active: boolean) => void;
   removeValidationError: (key: string) => void;
 }) {
   const agentLanguage = newConfig.agent_name?.split('/')[1] || '';
@@ -103,7 +107,7 @@ export function AdvancedConfiguration({
               <EuiButton
                 data-test-subj="apmSettingsAddAdvancedConfigurationButton"
                 iconType="plusInCircle"
-                onClick={() => onChange({ key: '', value: '' })}
+                onClick={addNewRow}
               >
                 {i18n.translate('xpack.apm.settingsPage.addCustomSettingButton', {
                   defaultMessage: 'Add custom setting',
@@ -124,6 +128,7 @@ export function AdvancedConfiguration({
                 configKey={configKey}
                 id={index}
                 showLabel={index === 0}
+                revalidate={revalidate}
                 onChange={onChange}
                 checkIfAdvancedConfigKeyExists={checkIfAdvancedConfigKeyExists}
                 checkIfPredefinedConfigKeyExists={checkIfPredefinedConfigKeyExists}
@@ -137,6 +142,7 @@ export function AdvancedConfiguration({
                 configKey={configKey}
                 id={index}
                 showLabel={index === 0}
+                revalidate={revalidate}
                 onChange={onChange}
                 onDelete={onDelete}
                 addValidationError={addValidationError}

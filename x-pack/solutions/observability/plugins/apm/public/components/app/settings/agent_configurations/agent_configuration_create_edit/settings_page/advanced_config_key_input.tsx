@@ -7,7 +7,7 @@
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { useEffect, useState } from 'react';
 
 enum ErrorType {
@@ -21,6 +21,7 @@ export function AdvancedConfigKeyInput({
   configKey,
   id,
   showLabel,
+  revalidate,
   onChange,
   checkIfAdvancedConfigKeyExists,
   checkIfPredefinedConfigKeyExists,
@@ -30,31 +31,39 @@ export function AdvancedConfigKeyInput({
   configKey: string;
   id: number;
   showLabel: boolean;
+  revalidate: boolean;
   onChange: ({ key, oldKey }: { key: string; oldKey: string }) => void;
   checkIfAdvancedConfigKeyExists: (key: string) => boolean;
   checkIfPredefinedConfigKeyExists: (key: string) => boolean;
-  addValidationError: (key: string) => void;
+  addValidationError: (key: string, active: boolean) => void;
   removeValidationError: (key: string) => void;
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
+  const [errorType, setErrorType] = useState<ErrorType>(ErrorType.None);
+  const [isFormInvalid, setIsFormInvalid] = useState(false);
 
   useEffect(() => {
     setLocalKey(configKey);
   }, [configKey]);
 
-  const errorType = useMemo(() => {
-    if (localKey === '') {
-      return ErrorType.Empty;
-    }
-    if (checkIfPredefinedConfigKeyExists(localKey)) {
-      return ErrorType.AlreadyPredefined;
-    }
-    if (checkIfAdvancedConfigKeyExists(localKey)) {
-      return ErrorType.Duplicated;
-    }
-    return ErrorType.None;
-  }, [localKey, checkIfPredefinedConfigKeyExists, checkIfAdvancedConfigKeyExists]);
+  const touched = useCallback((key: string) => key !== configKey, [configKey]);
+
+  const getErrorType = useCallback(
+    (key: string) => {
+      if (key === '') {
+        return ErrorType.Empty;
+      }
+      if (checkIfPredefinedConfigKeyExists(key)) {
+        return ErrorType.AlreadyPredefined;
+      }
+      if (touched(key) && checkIfAdvancedConfigKeyExists(key)) {
+        return ErrorType.Duplicated;
+      }
+      return ErrorType.None;
+    },
+    [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, touched]
+  );
 
   const errorMsg = useMemo(() => {
     switch (errorType) {
@@ -75,35 +84,33 @@ export function AdvancedConfigKeyInput({
     }
   }, [errorType]);
 
-  const isKeyChanged = useMemo(() => localKey !== configKey, [localKey, configKey]);
-
-  const isFormInvalid = useMemo(
-    () => isKeyChanged && errorType !== ErrorType.None,
-    [isKeyChanged, errorType]
-  );
-
   useEffect(() => {
     const errorId = `key${id}`;
+    const isTouched = touched(localKey);
+    const newErrorType = getErrorType(localKey);
+    const hasValidationErrors = newErrorType !== ErrorType.None;
 
-    if (isFormInvalid) {
-      addValidationError(errorId);
+    setErrorType(newErrorType);
+    setIsFormInvalid((isTouched || revalidate) && hasValidationErrors);
+
+    if (hasValidationErrors) {
+      addValidationError(errorId, isTouched);
     } else {
       removeValidationError(errorId);
-
-      if (isKeyChanged) {
-        onChange({ key: localKey, oldKey: configKey });
-      }
     }
-  }, [
-    id,
-    addValidationError,
-    removeValidationError,
-    localKey,
-    configKey,
-    onChange,
-    isFormInvalid,
-    isKeyChanged,
-  ]);
+  }, [id, addValidationError, removeValidationError, touched, localKey, revalidate, getErrorType]);
+
+  const handleKeyChange = (key: string) => {
+    const newErrorType = getErrorType(key);
+    const noValidationErrors = newErrorType === ErrorType.None;
+
+    setLocalKey(key);
+    setErrorType(newErrorType);
+
+    if (noValidationErrors) {
+      onChange({ key, oldKey: configKey });
+    }
+  };
 
   return (
     <EuiFormRow
@@ -124,7 +131,7 @@ export function AdvancedConfigKeyInput({
         fullWidth
         value={localKey}
         isInvalid={isFormInvalid}
-        onChange={(e) => setLocalKey(e.target.value)}
+        onChange={(e) => handleKeyChange(e.target.value)}
       />
     </EuiFormRow>
   );

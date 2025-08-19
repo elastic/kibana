@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useState } from 'react';
 
 export function AdvancedConfigValueInput({
@@ -15,6 +15,7 @@ export function AdvancedConfigValueInput({
   configKey,
   id,
   showLabel,
+  revalidate,
   onChange,
   onDelete,
   addValidationError,
@@ -24,9 +25,10 @@ export function AdvancedConfigValueInput({
   configKey: string;
   id: number;
   showLabel: boolean;
+  revalidate: boolean;
   onChange: ({ key, value }: { key: string; value: string }) => void;
   onDelete: (key: string, index: number) => void;
-  addValidationError: (key: string) => void;
+  addValidationError: (key: string, active: boolean) => void;
   removeValidationError: (key: string) => void;
 }) {
   const [touched, setTouched] = useState(false);
@@ -35,18 +37,24 @@ export function AdvancedConfigValueInput({
     return value === '';
   };
 
-  const handleValueChange = (value: string) => {
-    const errorId = `value${id}`;
+  const isFormInvalid = useMemo(() => {
+    return (touched || revalidate) && isInvalidInput(configValue);
+  }, [touched, configValue, revalidate]);
 
+  const handleValueChange = (value: string) => {
     setTouched(true);
     onChange({ key: configKey, value });
+  };
 
-    if (isInvalidInput(value)) {
-      addValidationError(errorId);
+  useEffect(() => {
+    const errorId = `value${id}`;
+
+    if (isInvalidInput(configValue)) {
+      addValidationError(errorId, touched);
     } else {
       removeValidationError(errorId);
     }
-  };
+  }, [configValue, id, touched, addValidationError, removeValidationError]);
 
   return (
     <EuiFormRow
@@ -60,11 +68,11 @@ export function AdvancedConfigValueInput({
       error={i18n.translate('xpack.apm.agentConfig.settingsPage.valueEmptyError', {
         defaultMessage: 'Value cannot be empty',
       })}
-      isInvalid={touched && isInvalidInput(configValue)}
+      isInvalid={isFormInvalid}
       fullWidth
     >
       <EuiFieldText
-        isInvalid={touched && isInvalidInput(configValue)}
+        isInvalid={isFormInvalid}
         data-test-subj="apmSettingsAdvancedConfigurationValueField"
         aria-label={i18n.translate('xpack.apm.agentConfig.settingsPage.valueAriaLabel', {
           defaultMessage: 'Advanced configuration value',

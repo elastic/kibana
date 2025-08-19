@@ -68,25 +68,29 @@ export function SettingsPage({
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
   const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
-  const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set<string>());
+  const [validationErrors, setValidationErrors] = useState<Map<string, boolean>>(
+    new Map<string, boolean>()
+  );
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
   const status = initialConfig?.status;
   const isLoading = status === FETCH_STATUS.LOADING;
   const isAdvancedConfigSupported =
     newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
-  const isAdvancedConfigInvalid = validationErrors.size > 0;
+  const hasActiveValidationErrors = [...validationErrors.values()].includes(true);
+  const hasInactiveValidationErrors = [...validationErrors.values()].includes(false);
+  const [revalidate, setRevalidate] = useState(false);
 
-  const addValidationError = useCallback((key: string) => {
+  const addValidationError = useCallback((key: string, active: boolean) => {
     setValidationErrors((prev) => {
-      prev.add(key);
-      return new Set(prev);
+      prev.set(key, active);
+      return new Map(prev);
     });
   }, []);
 
   const removeValidationError = useCallback((key: string) => {
     setValidationErrors((prev) => {
       prev.delete(key);
-      return new Set(prev);
+      return new Map(prev);
     });
   }, []);
 
@@ -113,6 +117,11 @@ export function SettingsPage({
   }, [newConfig.settings]);
 
   const handleSubmitEvent = async () => {
+    if (hasInactiveValidationErrors) {
+      setRevalidate(true);
+      return;
+    }
+
     trackApmEvent({ metric: 'save_agent_configuration' });
     const config = { ...newConfig, settings: removeEmpty(newConfig.settings) };
 
@@ -191,6 +200,11 @@ export function SettingsPage({
       </EuiCallOut>
     );
   }
+
+  const handleNewRow = () => {
+    handleChange({ key: '', value: '' });
+    setRevalidate(false);
+  };
 
   return (
     <>
@@ -282,8 +296,10 @@ export function SettingsPage({
                   <AdvancedConfiguration
                     newConfig={newConfig}
                     settingsDefinitions={settingsDefinitionsByAgent}
+                    revalidate={revalidate}
                     onChange={handleChange}
                     onDelete={handleDelete}
+                    addNewRow={handleNewRow}
                     addValidationError={addValidationError}
                     removeValidationError={removeValidationError}
                   />
@@ -309,7 +325,7 @@ export function SettingsPage({
           })}
           unsavedChangesCount={unsavedChangesCount + removedConfigCount}
           appTestSubj="apm"
-          areChangesInvalid={isAdvancedConfigInvalid || !isFormValid}
+          areChangesInvalid={hasActiveValidationErrors || !isFormValid}
         />
       )}
     </>
