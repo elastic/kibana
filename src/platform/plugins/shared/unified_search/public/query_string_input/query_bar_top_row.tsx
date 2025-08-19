@@ -856,7 +856,6 @@ export const QueryBarTopRow = React.memo(
                   : 0};
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
-              wrap
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
@@ -873,13 +872,20 @@ export const QueryBarTopRow = React.memo(
               )}
 
               {Boolean(props.isNLToESQLConversionEnabled) && (
-                <EuiFieldSearch
-                  placeholder="Search here..."
-                  onSearch={onNLToESQLHandler}
-                  isClearable={true}
-                  compressed
-                  isLoading={nlToesqlIsLoading}
-                />
+                <div
+                  css={css`
+                    width: 500px;
+                  `}
+                >
+                  <EuiFieldSearch
+                    placeholder="Describe your data in plain English and get an ES|QL query..."
+                    onSearch={onNLToESQLHandler}
+                    isClearable={true}
+                    compressed
+                    isLoading={nlToesqlIsLoading}
+                    fullWidth
+                  />
+                </div>
               )}
 
               {renderQueryInput()}
