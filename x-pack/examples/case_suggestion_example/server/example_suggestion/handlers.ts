@@ -7,9 +7,10 @@
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { TimeRange } from '@kbn/es-query';
-import { SuggestionResponse, AttachmentType } from '@kbn/cases-plugin/common';
+import type { SuggestionResponse } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/common';
 import type { SyntheticsMonitorSuggestion } from '../../common/types';
 
 export const getExampleByServiceName = async ({

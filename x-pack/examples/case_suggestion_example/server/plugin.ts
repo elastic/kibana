@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
+import type { Plugin, CoreSetup, CoreStart } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/server';
 import { getExampleByServiceName } from './example_suggestion/case_suggestion_definition';
 
 export interface SetupDependencies {

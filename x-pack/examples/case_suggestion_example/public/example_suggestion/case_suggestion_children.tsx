@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
-import { SuggestionChildrenProps } from '@kbn/cases-plugin/public';
-import { SyntheticsMonitorSuggestion } from '../../common/types';
+import type { SuggestionChildrenProps } from '@kbn/cases-plugin/public';
+import type { SyntheticsMonitorSuggestion } from '../../common/types';
 
 export const CaseSuggestionChildren: React.FC<
   SuggestionChildrenProps<SyntheticsMonitorSuggestion>

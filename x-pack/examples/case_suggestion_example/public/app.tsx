@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import {
   EuiPage,
   EuiPageBody,
@@ -17,11 +17,11 @@ import {
   EuiLoadingSpinner,
   EuiSpacer,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SuggestionResponse, SuggestionItem } from '@kbn/cases-plugin/common';
-import { StartDependencies } from './plugin';
-import { SyntheticsMonitorSuggestion } from '../common/types';
+import type { SuggestionResponse, SuggestionItem } from '@kbn/cases-plugin/common';
+import type { StartDependencies } from './plugin';
+import type { SyntheticsMonitorSuggestion } from '../common/types';
 
 /* This is a simplified example of how Cases will use your registered
  * child component to render the suggestion.
