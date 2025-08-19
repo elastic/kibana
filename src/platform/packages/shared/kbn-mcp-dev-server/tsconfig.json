@@ -16,7 +16,6 @@
   "kbn_references": [
     "@kbn/dev-cli-runner",
     "@kbn/zod",
-    "@kbn/projects-solutions-groups",
     "@kbn/repo-info",
     "@kbn/repo-packages",
     "@kbn/std",
