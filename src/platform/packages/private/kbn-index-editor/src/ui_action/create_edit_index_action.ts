@@ -50,7 +50,7 @@ export function createEditLookupIndexContentAction(
         { index: { mode: 'lookup' } },
         // On index searchable
         (index) => {
-          indexUpdateService.processImportedData(index);
+          indexUpdateService.onFileUploadFinished(index);
         }
       );
 

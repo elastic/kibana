@@ -939,7 +939,7 @@ export class IndexUpdateService {
     }
   }
 
-  public async processImportedData(indexName: string) {
+  public async onFileUploadFinished(indexName: string) {
     if (this.isIndexCreated()) {
       // This timeout can be cleaned when https://github.com/elastic/kibana/issues/232225 is resolved
       setTimeout(async () => {
