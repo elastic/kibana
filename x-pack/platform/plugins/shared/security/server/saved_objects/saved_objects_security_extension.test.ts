@@ -25,6 +25,7 @@ import type {
   CheckSavedObjectsPrivileges,
 } from '@kbn/security-plugin-types-server';
 
+import { MANAGE_ACCESS_CONTROL_ACTION } from './access_control_service';
 import {
   AuditAction,
   SavedObjectsSecurityExtension,
@@ -6534,7 +6535,12 @@ describe('access control', () => {
       };
       const { securityExtension, checkPrivileges } = setup();
       getCurrentUser.mockReturnValue(currentUser);
-      setupSimpleCheckPrivsMockResolve(checkPrivileges, 'dashboard', 'manage_access_control', true);
+      setupSimpleCheckPrivsMockResolve(
+        checkPrivileges,
+        'dashboard',
+        MANAGE_ACCESS_CONTROL_ACTION,
+        true
+      );
 
       expect(
         await securityExtension.authorizeChangeAccessControl(
@@ -6560,7 +6566,7 @@ describe('access control', () => {
       setupSimpleCheckPrivsMockResolve(
         checkPrivileges,
         'dashboard',
-        'manage_access_control',
+        MANAGE_ACCESS_CONTROL_ACTION,
         false
       );
 
