@@ -47,7 +47,7 @@ import {
   startTaskTimerWithEventLoopMonitoring,
   TaskPersistence,
 } from '../task_events';
-import { intervalFromDate } from '../lib/intervals';
+import { intervalFromDate, parseIntervalAsMillisecond } from '../lib/intervals';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 import type {
   CancelFunction,
@@ -55,7 +55,9 @@ import type {
   ConcreteTaskInstance,
   FailedRunResult,
   FailedTaskResult,
+  IntervalSchedule,
   PartialConcreteTaskInstance,
+  RruleSchedule,
   SuccessfulRunResult,
   TaskDefinition,
 } from '../task';
@@ -609,6 +611,18 @@ export class TaskManagerRunner implements TaskRunner {
     return this.instance.task.attempts < this.getMaxAttempts();
   }
 
+  private shouldUpdateExpiredTask(): boolean {
+    if (!this.instance.task.schedule || !this.instance.task.schedule.interval) {
+      // if the task does not have a schedule interval, we will not update it on timeout
+      return false;
+    }
+
+    const timeoutDuration = parseIntervalAsMillisecond(this.timeout);
+    const scheduleDuration = parseIntervalAsMillisecond(this.instance.task.schedule.interval);
+
+    return scheduleDuration > timeoutDuration;
+  }
+
   private rescheduleFailedRun = (
     failureResult: FailedRunResult
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
@@ -618,19 +632,20 @@ export class TaskManagerRunner implements TaskRunner {
     if (this.shouldTryToScheduleRetry() && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
 
-      const reschedule = failureResult.runAt
-        ? { runAt: failureResult.runAt }
-        : failureResult.schedule
-        ? { schedule: failureResult.schedule }
-        : schedule
-        ? { schedule }
-        : // when result.error is truthy, then we're retrying because it failed
-          {
-            runAt: getRetryDate({
-              attempts,
-              error,
-            }),
-          };
+      let reschedule:
+        | { runAt?: Date; schedule?: never }
+        | { schedule?: IntervalSchedule | RruleSchedule; runAt?: never } = {};
+
+      if (failureResult.runAt) {
+        reschedule = { runAt: failureResult.runAt };
+      } else if (failureResult.schedule) {
+        reschedule = { schedule: failureResult.schedule };
+      } else if (schedule) {
+        reschedule = { schedule };
+      } else {
+        // when result.error is truthy, then we're retrying because it failed
+        reschedule = { runAt: getRetryDate({ attempts, error }) };
+      }
 
       if (reschedule.runAt || reschedule.schedule) {
         return asOk({
@@ -689,13 +704,7 @@ export class TaskManagerRunner implements TaskRunner {
       unwrap
     )(result);
 
-    if (this.isExpired) {
-      this.usageCounter?.incrementCounter({
-        counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
-        counterType: 'taskManagerTaskRunner',
-        incrementBy: 1,
-      });
-    } else if (
+    if (
       fieldUpdates.status === TaskStatus.Failed ||
       fieldUpdates.status === TaskStatus.ShouldDelete
     ) {
@@ -705,22 +714,54 @@ export class TaskManagerRunner implements TaskRunner {
     } else {
       const { shouldValidate = true } = unwrap(result);
 
-      const partialTask = {
-        ...fieldUpdates,
-        // reset fields that track the lifecycle of the concluded `task run`
-        startedAt: null,
-        retryAt: null,
-        ownerId: null,
+      let shouldUpdateTask: boolean = false;
+      let partialTask: PartialConcreteTaskInstance = {
         id: this.instance.task.id,
         version: this.instance.task.version,
       };
 
-      this.instance = asRan(
-        await this.bufferedTaskStore.partialUpdate(partialTask, {
-          validate: shouldValidate,
-          doc: this.instance.task,
-        })
-      );
+      if (this.isExpired) {
+        this.usageCounter?.incrementCounter({
+          counterName: `taskManagerUpdateSkippedDueToTaskExpiration`,
+          counterType: 'taskManagerTaskRunner',
+          incrementBy: 1,
+        });
+
+        if (this.shouldUpdateExpiredTask()) {
+          shouldUpdateTask = true;
+
+          partialTask = {
+            ...partialTask,
+            // excluding updated task state from the update
+            // because the execution ended in failure due to timeout, we do not update the state
+            status: TaskStatus.Idle,
+            runAt: fieldUpdates.runAt,
+            // reset fields that track the lifecycle of the concluded `task run`
+            startedAt: null,
+            retryAt: null,
+            ownerId: null,
+          };
+        }
+      } else {
+        shouldUpdateTask = true;
+        partialTask = {
+          ...partialTask,
+          ...fieldUpdates,
+          // reset fields that track the lifecycle of the concluded `task run`
+          startedAt: null,
+          retryAt: null,
+          ownerId: null,
+        };
+      }
+
+      if (shouldUpdateTask) {
+        this.instance = asRan(
+          await this.bufferedTaskStore.partialUpdate(partialTask, {
+            validate: shouldValidate,
+            doc: this.instance.task,
+          })
+        );
+      }
     }
 
     return fieldUpdates.status === TaskStatus.Failed
@@ -819,7 +860,7 @@ export class TaskManagerRunner implements TaskRunner {
               task,
               persistence: task.schedule ? TaskPersistence.Recurring : TaskPersistence.NonRecurring,
               result: await this.processResultForRecurringTask(result),
-              isExpired: this.isExpired,
+              isExpired: taskHasExpired,
               error,
             }),
             taskTiming
