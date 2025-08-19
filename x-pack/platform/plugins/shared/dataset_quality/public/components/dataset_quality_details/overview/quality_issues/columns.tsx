@@ -24,17 +24,10 @@ import {
 import type { QualityIssueType } from '../../../../state_machines/dataset_quality_details_controller';
 import { SparkPlot } from '../../../common/spark_plot';
 
-const inspectDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssuesTable.inspect',
+const expandDatasetAriaLabel = i18n.translate(
+  'xpack.datasetQuality.details.qualityIssuesTable.expand',
   {
-    defaultMessage: 'Inspect',
-  }
-);
-
-const openInDiscoverDatasetAriaLabel = i18n.translate(
-  'xpack.datasetQuality.details.qualityIssuesTable.openInDiscover',
-  {
-    defaultMessage: 'Open in Discover',
+    defaultMessage: 'Expand',
   }
 );
 
@@ -42,13 +35,38 @@ export const getQualityIssuesColumns = ({
   dateFormatter,
   isLoading,
   openQualityIssueFlyout,
-  getRedirectLinkProps,
 }: {
   dateFormatter: FieldFormat;
   isLoading: boolean;
   openQualityIssueFlyout: (name: string, type: QualityIssueType) => void;
-  getRedirectLinkProps: (name: string, type: QualityIssueType) => { linkProps: any };
 }): Array<EuiBasicTableColumn<QualityIssue>> => [
+  {
+    name: '',
+    field: 'name',
+    render: (_, { name, type }) => {
+      const onExpandClick = () => {
+        openQualityIssueFlyout(name, type);
+      };
+
+      return (
+        <EuiButtonIcon
+          data-test-subj="datasetQualityDetailsQualityIssuesExpandButton"
+          size="xs"
+          color="text"
+          onClick={onExpandClick}
+          iconType={'expand'}
+          title={expandDatasetAriaLabel}
+          aria-label={expandDatasetAriaLabel}
+        />
+      );
+    },
+    width: '40px',
+    css: css`
+      &.euiTableCellContent {
+        padding: 0;
+      }
+    `,
+  },
   {
     name: fieldColumnName,
     field: 'name',
@@ -89,57 +107,5 @@ export const getQualityIssuesColumns = ({
     render: (lastOccurrence: number) => {
       return dateFormatter.convert(lastOccurrence);
     },
-  },
-  {
-    name: '',
-    field: 'name',
-    render: (_, { name, type }) => {
-      const redirectLinkProps = getRedirectLinkProps(name, type);
-
-      return (
-        <EuiButtonIcon
-          data-test-subj="datasetQualityDetailsOpenInDiscoverButton"
-          size="xs"
-          color="text"
-          iconType={'discoverApp'}
-          title={openInDiscoverDatasetAriaLabel}
-          aria-label={openInDiscoverDatasetAriaLabel}
-          {...redirectLinkProps.linkProps}
-        />
-      );
-    },
-    width: '40px',
-    css: css`
-      &.euiTableCellContent {
-        padding: 0;
-      }
-    `,
-  },
-  {
-    name: '',
-    field: 'name',
-    render: (_, { name, type }) => {
-      const onExpandClick = () => {
-        openQualityIssueFlyout(name, type);
-      };
-
-      return (
-        <EuiButtonIcon
-          data-test-subj="datasetQualityDetailsQualityIssuesExpandButton"
-          size="xs"
-          color="text"
-          onClick={onExpandClick}
-          iconType={'inspect'}
-          title={inspectDatasetAriaLabel}
-          aria-label={inspectDatasetAriaLabel}
-        />
-      );
-    },
-    width: '40px',
-    css: css`
-      &.euiTableCellContent {
-        padding: 0;
-      }
-    `,
   },
 ];

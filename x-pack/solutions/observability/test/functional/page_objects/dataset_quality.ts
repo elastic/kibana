@@ -381,11 +381,11 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
       return this.parseTable(table, [
+        '0', // Expand button column
         texts.datasetFieldColumn,
         texts.datasetIssueColumn,
         texts.datasetDocsCountColumn,
         texts.datasetLastOccurrenceColumn,
-        '6', // Expand button column
       ]);
     },
 
@@ -550,7 +550,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 
-      const expandColumn = cols['6'];
+      const expandColumn = cols['0'];
       const expandButtons = await expandColumn.getCellChildren(
         `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
       );
@@ -575,7 +575,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       expect(testDatasetRowIndex).to.be.greaterThan(-1);
 
-      const expandColumn = cols['6'];
+      const expandColumn = cols['0'];
       const expandButtons = await expandColumn.getCellChildren(
         `[data-test-subj=${testSubjectSelectors.datasetQualityDetailsDegradedFieldsExpandButton}]`
       );

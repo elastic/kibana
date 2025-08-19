@@ -56,21 +56,13 @@ export function useQualityIssues() {
   } = failedDocsErrorsTable;
 
   const filteredItems = useMemo(() => {
-    if (!data) {
-      return [];
-    }
+    if (!data) return [];
 
-    let filtered = data;
-
-    if (selectedIssueTypes.length > 0) {
-      filtered = filtered.filter((item) => selectedIssueTypes.includes(item.type));
-    }
-
-    if (selectedFields.length > 0) {
-      filtered = filtered.filter((item) => selectedFields.includes(item.name));
-    }
-
-    return filtered;
+    return data.filter(
+      (item) =>
+        (selectedIssueTypes.length === 0 || selectedIssueTypes.includes(item.type)) &&
+        (selectedFields.length === 0 || selectedFields.includes(item.name))
+    );
   }, [data, selectedIssueTypes, selectedFields]);
 
   const totalItemCount = filteredItems?.length ?? 0;
