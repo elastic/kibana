@@ -1175,6 +1175,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       });
 
     if (typesRequiringAccessControl.size > 0) {
+      /**
+       * AccessControl operations do not fall under the regular authorization actions for
+       * Saved Objects, but still require authorization. Hence, we pass an empty actions list to the base
+       * authorization checks.
+       */
       const authorizationResult = await this.checkAuthorization({
         types: new Set(typesRequiringAccessControl),
         spaces: spacesToAuthorize,
