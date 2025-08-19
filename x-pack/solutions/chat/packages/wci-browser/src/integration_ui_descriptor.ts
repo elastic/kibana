@@ -7,7 +7,7 @@
 
 import type React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
-import { IntegrationType, Integration, ToolCall } from '@kbn/wci-common';
+import type { IntegrationType, Integration, ToolCall } from '@kbn/wci-common';
 
 export interface IntegrationComponentDescriptor {
   getType: () => IntegrationType;

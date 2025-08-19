@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
 import type { Logger, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
-import { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
+import type { ReferencedPanelAttributes, ReferencedPanelAttributesWithReferences } from './helpers';
 
 /**
  * The ReferencedPanelManager class manages the relationship between dashboard panels and their references.

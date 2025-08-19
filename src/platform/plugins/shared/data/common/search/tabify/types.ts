@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Moment } from 'moment';
-import { RangeFilterParams } from '@kbn/es-query';
-import { IAggConfig } from '../aggs';
+import type { Moment } from 'moment';
+import type { RangeFilterParams } from '@kbn/es-query';
+import type { IAggConfig } from '../aggs';
 
 /** @internal **/
 export interface TabbedRangeFilterParams extends RangeFilterParams {

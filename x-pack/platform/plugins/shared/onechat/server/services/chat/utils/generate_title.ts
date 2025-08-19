@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { defer, shareReplay, switchMap, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { defer, shareReplay, switchMap } from 'rxjs';
 import { z } from '@kbn/zod';
-import { BaseMessageLike } from '@langchain/core/messages';
+import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';

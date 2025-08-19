@@ -7,7 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import { setupValidationTestBed, ValidationTestBed } from './validation.helpers';
+import type { ValidationTestBed } from './validation.helpers';
+import { setupValidationTestBed } from './validation.helpers';
 
 describe('<EditPolicy /> error indicators', () => {
   let testBed: ValidationTestBed;

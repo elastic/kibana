@@ -15,12 +15,10 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   fields as TECHNICAL_ALERT_FIELDS,
 } from '@kbn/rule-data-utils';
-import { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
-import { DataViewSpec } from '@kbn/response-ops-rule-params/common';
-import {
-  isSuggestedDashboardsValidRuleTypeId,
-  SuggestedDashboardsValidRuleTypeIds,
-} from './helpers';
+import type { CustomThresholdParams } from '@kbn/response-ops-rule-params/custom_threshold';
+import type { DataViewSpec } from '@kbn/response-ops-rule-params/common';
+import type { SuggestedDashboardsValidRuleTypeIds } from './helpers';
+import { isSuggestedDashboardsValidRuleTypeId } from './helpers';
 
 // TODO: This is is missing many fields most likely, add more during review
 const SCORING_EXCLUDED_FIELDS = new Set<string>([
