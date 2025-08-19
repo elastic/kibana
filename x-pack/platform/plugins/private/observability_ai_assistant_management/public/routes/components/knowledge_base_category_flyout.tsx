@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiFlyout,
   EuiFlyoutBody,
   EuiFlyoutHeader,
@@ -22,7 +22,7 @@ import { capitalize } from 'lodash';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
-import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import type { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 import { useKibana } from '../../hooks/use_kibana';
 
 const CATEGORY_MAP = {

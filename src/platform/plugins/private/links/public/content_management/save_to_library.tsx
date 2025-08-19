@@ -9,12 +9,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  showSaveModal,
-  OnSaveProps,
-  SavedObjectSaveModal,
-  SaveResult,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal, SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { LINKS_EMBEDDABLE_TYPE, CONTENT_ID } from '../../common';
 import { checkForDuplicateTitle } from './duplicate_title_check';
 import { linksClient } from './links_content_management_client';

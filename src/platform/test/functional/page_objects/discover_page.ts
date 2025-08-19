@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -227,20 +227,14 @@ export class DiscoverPageObject extends FtrService {
 
     await (
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
+    ).type(field, { charByChar: true });
 
     const optionValue = value ?? field;
-    let option;
 
-    await this.retry.try(async () => {
-      option = await this.find.byCssSelector(
-        `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
-      );
+    await this.find.clickDisplayedByCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
+    );
 
-      return Boolean(option);
-    });
-
-    await option!.click();
     await this.retry.waitFor('the value to be selected', async () => {
       const breakdownButton = await this.testSubjects.find(
         'unifiedHistogramBreakdownSelectorButton'

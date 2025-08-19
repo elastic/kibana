@@ -9,7 +9,8 @@
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks, Location } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
 import { getFunctionSuggestions } from '../../../definitions/utils';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
@@ -72,26 +73,71 @@ describe('COMPLETION Autocomplete', () => {
   });
 
   it('suggests WITH after the user writes a colum name that already exists', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the user writes a param as prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH ']);
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH { $0 }']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH { $0 }']);
   });
 
-  it('suggests inference endpoints after WITH', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['`inference_1` ']);
+  it('suggests inference_id parameter within the named parameters map', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH {`, [
+      '"inference_id": "$0"',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { `, [
+      '"inference_id": "$0"',
+    ]);
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH {
+      `,
+      ['"inference_id": "$0"']
+    );
+  });
+
+  it('suggests inference endpoints as the values for inference_id', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "`, [
+      'inference_1',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "i/`, [
+      'inference_1',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "inf/`, [
+      'inference_1',
+    ]);
+  });
+
+  it('does not suggest anything if all the parameters are already provided', async () => {
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1", `,
+      []
+    );
+  });
+
+  it('does not suggest anything if the parameter name is unsupported', async () => {
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH { "unsupported_param": "`,
+      []
+    );
   });
 
   it('suggests pipe after complete command', async () => {
     await completionExpectSuggestions(
-      `FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`,
+      `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1" }`,
       ['| ']
     );
+  });
+
+  it('suggests pipe after incomplete but enclosed map expression', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" }`, [
+      '| ',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" } `, [
+      '| ',
+    ]);
   });
 });

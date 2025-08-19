@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import { createQuery } from './create_query';
 import { mapToList } from './get_high_level_stats';
@@ -16,9 +16,7 @@ import {
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATE,
   INDEX_PATTERN_LOGSTASH_STACK_MONITORING_STATS,
 } from '../../common/constants';
-import {
-  HITS_SIZE,
-  getLogstashBaseStats,
+import type {
   Counter,
   LogstashMonitoring,
   LogstashProcessOptions,
@@ -26,6 +24,7 @@ import {
   LogstashStats,
   LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
+import { HITS_SIZE, getLogstashBaseStats } from './logstash_monitoring';
 
 export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
   private indexPattern: { [key: string]: string } = {

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
+import React, { useMemo, useRef } from 'react';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
@@ -20,6 +20,7 @@ import {
   TRANSACTION_ID_FIELD,
 } from '@kbn/discover-utils';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
+import { css } from '@emotion/react';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields, allTransactionFields } from './resources/fields';
@@ -31,6 +32,10 @@ import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
+import {
+  DEFAULT_MARGIN_BOTTOM,
+  getTabContentAvailableHeight,
+} from '../../../doc_viewer_source/get_height';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -55,7 +60,9 @@ export function TransactionOverview({
   showActions = true,
   dataView,
   columnsMeta,
+  decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: TransactionOverviewProps) {
+  const containerRef = useRef<HTMLElement>(null);
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
@@ -77,6 +84,10 @@ export function TransactionOverview({
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
+  const containerHeight = containerRef.current
+    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
+    : 0;
+
   return (
     <DataSourcesProvider indexes={indexes}>
       <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
@@ -86,42 +97,57 @@ export function TransactionOverview({
           onAddColumn={onAddColumn}
           onRemoveColumn={onRemoveColumn}
         >
-          <EuiPanel color="transparent" hasShadow={false} paddingSize="none">
-            <EuiSpacer size="m" />
-            <EuiFlexGroup direction="column" gutterSize="m">
-              <EuiFlexItem>
-                <TransactionSummaryTitle
-                  serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
-                  transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
-                  formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                  id={transactionId}
-                  formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            ref={containerRef}
+            css={
+              containerHeight
+                ? css`
+                    height: ${containerHeight}px;
+                    overflow: auto;
+                  `
+                : css`
+                    display: block;
+                  `
+            }
+          >
+            <EuiFlexItem>
+              <EuiSpacer size="m" />
+              <TransactionSummaryTitle
+                serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
+                transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
+                formattedTransactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                id={transactionId}
+                formattedId={formattedDoc[TRANSACTION_ID_FIELD]}
+                showActions={showActions}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              {transactionFields.map((fieldId) => (
+                <TransactionSummaryField
+                  key={fieldId}
+                  fieldId={fieldId}
+                  fieldMapping={dataViewFields[fieldId]}
+                  fieldConfiguration={fieldConfigurations[fieldId]}
                   showActions={showActions}
                 />
-              </EuiFlexItem>
+              ))}
+            </EuiFlexItem>
+            {transactionDuration !== undefined && (
               <EuiFlexItem>
-                {transactionFields.map((fieldId) => (
-                  <TransactionSummaryField
-                    key={fieldId}
-                    fieldId={fieldId}
-                    fieldMapping={dataViewFields[fieldId]}
-                    fieldConfiguration={fieldConfigurations[fieldId]}
-                    showActions={showActions}
-                  />
-                ))}
+                <TransactionDurationSummary
+                  transactionDuration={transactionDuration}
+                  transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
+                  transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
+                  serviceName={formattedDoc[SERVICE_NAME_FIELD]}
+                />
               </EuiFlexItem>
-              {transactionDuration !== undefined && (
-                <EuiFlexItem>
-                  <TransactionDurationSummary
-                    transactionDuration={transactionDuration}
-                    transactionName={formattedDoc[TRANSACTION_NAME_FIELD]}
-                    transactionType={formattedDoc[TRANSACTION_TYPE_FIELD]}
-                    serviceName={formattedDoc[SERVICE_NAME_FIELD]}
-                  />
-                </EuiFlexItem>
-              )}
-              <EuiFlexItem>
-                {traceId && transactionId && (
+            )}
+            <EuiFlexItem>
+              {traceId && transactionId && (
+                <>
+                  <EuiSpacer size="m" />
                   <Trace
                     fields={fieldConfigurations}
                     fieldMappings={dataViewFields}
@@ -133,10 +159,10 @@ export function TransactionOverview({
                     showWaterfall={showWaterfall}
                     showActions={showActions}
                   />
-                )}
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </FieldActionsProvider>
       </RootTransactionProvider>
     </DataSourcesProvider>

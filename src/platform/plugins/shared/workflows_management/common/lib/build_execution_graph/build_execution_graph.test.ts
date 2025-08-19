@@ -7,21 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  IfStep,
-  ForEachStep,
-  EnterIfNode,
-  ExitIfNode,
-  EnterForeachNode,
-  ExitForeachNode,
-  WorkflowSchema,
-  EnterConditionBranchNode,
-  ExitConditionBranchNode,
-  ConnectorStep,
+import { graphlib } from '@dagrejs/dagre';
+import type {
   AtomicGraphNode,
+  ConnectorStep,
+  EnterConditionBranchNode,
+  EnterForeachNode,
+  EnterIfNode,
+  ExitConditionBranchNode,
+  ExitForeachNode,
+  ExitIfNode,
+  ForEachStep,
+  IfStep,
+  WaitGraphNode,
+  WaitStep,
+  WorkflowYaml,
 } from '@kbn/workflows';
 import { convertToWorkflowGraph } from './build_execution_graph';
-import { graphlib } from '@dagrejs/dagre';
 
 describe('convertToWorkflowGraph', () => {
   describe('atomic steps', () => {
@@ -44,7 +46,7 @@ describe('convertToWorkflowGraph', () => {
           },
         } as ConnectorStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should return nodes for atomic step in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
@@ -72,6 +74,66 @@ describe('convertToWorkflowGraph', () => {
           with: { message: 'Hello from atomic step 1' },
         },
       } as AtomicGraphNode);
+    });
+  });
+
+  describe('wait step', () => {
+    const workflowDefinition = {
+      steps: [
+        {
+          name: 'testAtomicStep1',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 1',
+          },
+        } as ConnectorStep,
+        {
+          name: 'testWaitStep',
+          type: 'wait',
+          with: {
+            duration: '1s',
+          },
+        } as WaitStep,
+        {
+          name: 'testAtomicStep2',
+          type: 'slack',
+          connectorId: 'slack',
+          with: {
+            message: 'Hello from atomic step 2',
+          },
+        } as ConnectorStep,
+      ],
+    } as Partial<WorkflowYaml>;
+
+    it('should return nodes for wait step in correct topological order', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const topSort = graphlib.alg.topsort(executionGraph);
+      expect(topSort).toHaveLength(3);
+      expect(topSort).toEqual(['testAtomicStep1', 'testWaitStep', 'testAtomicStep2']);
+    });
+
+    it('should return correct edges for wait step graph', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual([
+        { v: 'testAtomicStep1', w: 'testWaitStep' },
+        { v: 'testWaitStep', w: 'testAtomicStep2' },
+      ]);
+    });
+
+    it('should configure the wait step correctly', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const node = executionGraph.node('testWaitStep');
+      expect(node).toEqual({
+        id: 'testWaitStep',
+        type: 'wait',
+        configuration: {
+          name: 'testWaitStep',
+          type: 'wait',
+          with: { duration: '1s' },
+        },
+      } as WaitGraphNode);
     });
   });
 
@@ -112,7 +174,7 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as IfStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should return nodes for if condition in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
@@ -234,7 +296,7 @@ describe('convertToWorkflowGraph', () => {
             ],
           } as IfStep,
         ],
-      } as Partial<WorkflowSchema>;
+      } as Partial<WorkflowYaml>;
 
       it('should handle if step without else branch correctly', () => {
         const executionGraph = convertToWorkflowGraph(workflowDefinitionWithoutElse as any);
@@ -278,7 +340,7 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as ForEachStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should return nodes for foreach step in correct topological order', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
@@ -311,6 +373,7 @@ describe('convertToWorkflowGraph', () => {
       expect(enterForeachNode).toEqual({
         id: 'testForeachStep',
         type: 'enter-foreach',
+        exitNodeId: 'exitForeach(testForeachStep)',
         itemNodeIds: ['firstTestForeachConnectorStep', 'secondTestForeachConnectorStep'],
         configuration: {
           foreach: '["item1", "item2", "item3"]',
@@ -356,7 +419,7 @@ describe('convertToWorkflowGraph', () => {
             ],
           } as ForEachStep,
         ],
-      } as Partial<WorkflowSchema>;
+      } as Partial<WorkflowYaml>;
 
       it('should handle nested foreach steps correctly', () => {
         const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
@@ -425,7 +488,7 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as ForEachStep,
       ],
-    } as Partial<WorkflowSchema>;
+    } as Partial<WorkflowYaml>;
 
     it('should have correctly structured graph for complex nodes', () => {
       const executionGraph = convertToWorkflowGraph(workflowDefinition as any);

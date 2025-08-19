@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Faker, faker } from '@faker-js/faker';
+import type { Faker } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 
 export type LogMessageGenerator = (f: Faker) => string[];
 

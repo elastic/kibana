@@ -9,11 +9,12 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 
 import { SideNavFooter } from './footer';
 import { SideNavFooterItem } from './footer_item';
-import { SideNavLogo } from './logo';
+import { SideNavLogoComponent } from './logo';
 import { SideNavPanel } from './panel';
 import { SideNavPopover } from '../popover';
 import { SideNavPrimaryMenu } from './primary_menu';
@@ -25,7 +26,7 @@ export interface SideNavProps {
 }
 
 interface SideNavComponent extends FC<SideNavProps> {
-  Logo: typeof SideNavLogo;
+  Logo: typeof SideNavLogoComponent;
   PrimaryMenu: typeof SideNavPrimaryMenu;
   PrimaryMenuItem: typeof SideNavPrimaryMenuItem;
   Popover: typeof SideNavPopover;
@@ -42,7 +43,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
       className="side-nav"
       css={css`
         background-color: ${euiTheme.colors.backgroundBasePlain};
-        border-right: 1px solid ${euiTheme.colors.borderBaseSubdued};
+        border-right: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
         display: flex;
         flex-direction: column;
         gap: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
@@ -56,7 +57,7 @@ export const SideNav: SideNavComponent = ({ children, isCollapsed }) => {
   );
 };
 
-SideNav.Logo = SideNavLogo;
+SideNav.Logo = SideNavLogoComponent;
 SideNav.PrimaryMenu = SideNavPrimaryMenu;
 SideNav.PrimaryMenuItem = SideNavPrimaryMenuItem;
 SideNav.Popover = SideNavPopover;
