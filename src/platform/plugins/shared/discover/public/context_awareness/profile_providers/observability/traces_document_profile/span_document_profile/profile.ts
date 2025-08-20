@@ -8,7 +8,12 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { getFieldValue, PROCESSOR_EVENT_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
+import {
+  getFieldValue,
+  PROCESSOR_EVENT_FIELD,
+  SPAN_ID_FIELD,
+  TRANSACTION_NAME_FIELD,
+} from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
 import type { DataSourceContext, DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
@@ -70,9 +75,10 @@ const resolveSpanRecord = ({
 const isSpanDocument = (record: DataTableRecord) => {
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
   const transactionName = getFieldValue(record, TRANSACTION_NAME_FIELD);
+  const spanId = getFieldValue(record, SPAN_ID_FIELD);
 
   const isApmSpan = processorEvent === 'span';
   const isOtelSpan = processorEvent == null;
 
-  return !transactionName && (isApmSpan || isOtelSpan);
+  return !transactionName && (isApmSpan || isOtelSpan || !!spanId);
 };
