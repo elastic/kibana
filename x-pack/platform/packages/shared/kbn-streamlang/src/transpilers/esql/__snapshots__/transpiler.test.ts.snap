@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`transpile (Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used`] = `
+exports[`transpile (Streamlang DSL to ES|QL) should warn when manual_ingest_pipeline is used 1`] = `
 // WARNING: Manual Ingest Pipeline is not supported fro Query-Time streams
 `;
 
