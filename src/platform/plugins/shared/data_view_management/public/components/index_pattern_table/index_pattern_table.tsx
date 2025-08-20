@@ -26,10 +26,11 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 
+import type { SavedObjectRelation } from '@kbn/saved-objects-management-plugin/common';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
 import { NoDataViewsPromptComponent, useOnTryESQL } from '@kbn/shared-ux-prompt-no-data-views';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { DATA_VIEW_SAVED_OBJECT_TYPE, DataViewType } from '@kbn/data-views-plugin/public';
 import { RollupDeprecationTooltip } from '@kbn/rollup';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 
@@ -44,6 +45,7 @@ import {
 import { deleteModalMsg } from './delete_modal_msg';
 import { NoData } from './no_data';
 import { SpacesList } from './spaces_list';
+import { MAX_DISPLAYED_RELATIONSHIPS } from '../../constants';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 25, 50];
 
@@ -85,8 +87,11 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     overlays,
     docLinks,
     noDataPage,
+    dataViewMgmtService,
+    savedObjectsManagement,
     ...startServices
   } = useKibana<IndexPatternManagmentContext>().services;
+
   const [query, setQuery] = useState('');
   const [selectedItems, setSelectedItems] = useState<IndexPatternTableItem[]>([]);
   const [dataViewController] = useState(
@@ -127,6 +132,33 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
     }
   };
 
+  const getRelationshipsForSelections = async (selectedViews: RemoveDataViewProps[]) => {
+    const allowedTypes = (await savedObjectsManagement.getAllowedTypes()).map((type) => type.name);
+
+    const relationships: Record<string, unknown> = {};
+
+    const relationshipsArray = await Promise.all(
+      selectedViews.map(async (view) => ({
+        id: view.id,
+        relations: await (
+          await savedObjectsManagement.getRelationships(
+            DATA_VIEW_SAVED_OBJECT_TYPE,
+            view.id,
+            allowedTypes,
+            MAX_DISPLAYED_RELATIONSHIPS
+          )
+        ).relations,
+      }))
+    );
+
+    // Reduce the array to a relationships object keyed by id
+    relationshipsArray.forEach(({ id, relations }) => {
+      relationships[id] = relations;
+    });
+
+    return relationships;
+  };
+
   const renderDeleteButton = () => {
     const clickHandler = removeDataView({
       dataViews,
@@ -146,7 +178,21 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         color="danger"
         iconType="trash"
         data-test-subj="delete-data-views-button"
-        onClick={() => clickHandler(selectedItems, deleteModalMsg(selectedItems, !!spaces))}
+        onClick={async () => {
+          const relationships =
+            ((await getRelationshipsForSelections(selectedItems)) as Record<
+              string,
+              SavedObjectRelation[]
+            >) || {};
+          clickHandler(
+            selectedItems,
+            deleteModalMsg({
+              views: selectedItems,
+              hasSpaces: !!spaces,
+              relationships,
+            })
+          );
+        }}
       >
         <FormattedMessage
           id="indexPatternManagement.dataViewTable.deleteButtonLabel"
@@ -209,8 +255,20 @@ export const IndexPatternTable = ({ history, canSave, setShowCreateDialog, title
         icon: 'trash',
         color: 'danger',
         type: 'icon',
-        onClick: (dataView: RemoveDataViewProps) =>
-          removeHandler([dataView], deleteModalMsg([dataView], !!spaces)),
+        onClick: async (dataView: RemoveDataViewProps) => {
+          const relationships = (await getRelationshipsForSelections([dataView])) as Record<
+            string,
+            SavedObjectRelation[]
+          >;
+          return removeHandler(
+            [dataView],
+            deleteModalMsg({
+              views: [dataView],
+              hasSpaces: !!spaces,
+              relationships,
+            })
+          );
+        },
         isPrimary: true,
         'data-test-subj': 'action-delete',
       },

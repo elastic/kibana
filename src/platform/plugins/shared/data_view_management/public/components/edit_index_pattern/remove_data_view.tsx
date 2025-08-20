@@ -12,6 +12,7 @@ import type { IUiSettingsClient, OverlayStart } from '@kbn/core/public';
 import { asyncForEach } from '@kbn/std';
 import type { EuiConfirmModalProps } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { ReactNode } from 'react';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { StartServices } from '../../types';
 
@@ -43,7 +44,7 @@ interface RemoveDataViewDeps {
 
 export const removeDataView =
   ({ dataViews, overlays, onDelete, startServices }: RemoveDataViewDeps) =>
-  (dataViewArray: RemoveDataViewProps[], msg: JSX.Element) => {
+  (dataViewArray: RemoveDataViewProps[], msg: ReactNode) => {
     overlays
       .openConfirm(toMountPoint(msg, startServices), confirmModalOptionsDelete)
       .then(async (isConfirmed) => {
