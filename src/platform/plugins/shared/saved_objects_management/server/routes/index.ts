@@ -12,7 +12,6 @@ import type { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerRelationshipsRoute } from './relationships';
-import { registerGetAllowedTypesRoute } from './get_allowed_types';
 
 // Maximum allowed saved object types in API requests. Currently 149 types registered
 // (see SAVED_OBJECT_TYPES_COUNT in src/core/packages/saved-objects/server-internal/src/object_types/index.ts).
@@ -29,8 +28,8 @@ export function registerRoutes({ http, managementServicePromise }: RegisterRoute
   registerFindRoute(router, managementServicePromise);
   registerBulkGetRoute(router, managementServicePromise);
   registerRelationshipsRoute(router, managementServicePromise);
-  registerGetAllowedTypesRoute(router);
 }
 
 export { BulkDeleteRoute } from './bulk_delete';
+export { GetAllowedTypesRoute } from './get_allowed_types';
 export { ScrollCountRoute } from './scroll_count';
