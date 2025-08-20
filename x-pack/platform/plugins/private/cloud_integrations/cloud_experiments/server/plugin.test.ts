@@ -162,6 +162,10 @@ describe('Cloud Experiments server plugin', () => {
           kibana: expect.objectContaining({
             has_data: true,
           }),
+          organization: expect.objectContaining({
+            experience_level: expect.any(String),
+            trial_intent: expect.any(String),
+          }),
         })
       );
     });
