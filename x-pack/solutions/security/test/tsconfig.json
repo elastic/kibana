@@ -24,7 +24,7 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
     "@kbn/test",
@@ -69,6 +69,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/openapi-common",
     "@kbn/spaces-plugin",
-    "@kbn/management-settings-ids"
+    "@kbn/management-settings-ids",
+    "@kbn/cloud-security-posture"
   ]
 }
