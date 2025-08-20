@@ -24,13 +24,7 @@ function isRetryableEsClientError(e: Error): boolean {
     e instanceof EsErrors.NoLivingConnectionsError ||
     e instanceof EsErrors.ConnectionError ||
     e instanceof EsErrors.TimeoutError ||
-    (e instanceof EsErrors.ResponseError &&
-      (retryResponseStatuses.includes(e?.statusCode!) ||
-        // ES returns a 400 Bad Request when trying to close or delete an
-        // index while snapshots are in progress. This should have been a 503
-        // so once https://github.com/elastic/elasticsearch/issues/65883 is
-        // fixed we can remove this.
-        e?.body?.error?.type === 'snapshot_in_progress_exception'))
+    (e instanceof EsErrors.ResponseError && retryResponseStatuses.includes(e?.statusCode!))
   ) {
     return true;
   }

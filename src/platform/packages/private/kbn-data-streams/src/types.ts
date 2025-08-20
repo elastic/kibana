@@ -106,6 +106,13 @@ export interface DataStreamDefinition<
      * @remark "hidden" defaults to true for the data stream and the backing indices
      */
     settings?: api.IndicesIndexSettings;
+
+    /**
+     * @remark Stick to defining and sharing mappings as plain JavaScript objects.
+     * @remark Use component templates if you would like to allow end users to define mappings. You will have to ensure
+     *         that updated mappings are applied to existing indices.
+     */
+    composedOf?: string[];
   };
 
   // https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request
@@ -171,3 +178,5 @@ type ObjectToPropertiesDefinition<O extends Record<string, unknown>> = {} extend
         ? StringMapping
         : Strict<api.MappingProperty>;
     };
+
+export type AnyDataStreamDefinition = DataStreamDefinition<any, any>;

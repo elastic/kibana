@@ -18,7 +18,7 @@ import type {
   SearchRequestImproved,
   ClientHelpers,
 } from './types';
-import { setup } from './setup';
+import { initialize } from './initialize';
 
 type AnyDataStream = DataStreamDefinition<any>;
 
@@ -66,7 +66,7 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
    * An idempotent setup method that should be called before any other methods.
    */
   public async setup() {
-    await setup({
+    await initialize({
       dataStreams: this.dataStreams,
       elasticsearchClient: this.client,
       logger: this.logger,
@@ -104,7 +104,7 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
   public static async initialize<S extends object, SRM extends BaseSearchRuntimeMappings>(
     args: DataStreamClientArgs<S, SRM>
   ): Promise<DataStreamClient<S, SRM>> {
-    await setup(args);
+    await initialize(args);
     return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.logger, args.dataStreams);
   }
 

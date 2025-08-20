@@ -8,27 +8,25 @@
  */
 
 import objectHash from 'object-hash';
+import pLimit from 'p-limit';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
 import { retryEs } from './retry_es';
 import type { DataStreamClientArgs } from './client';
-import type { StrictMappingTypeMapping } from './types';
+import type { AnyDataStreamDefinition } from './types';
+import { defaultDataStreamDefinition } from './constants';
 
-const defaultIndexSettings: () => api.IndicesIndexSettings = () => ({
-  hidden: true,
-});
-
-const defaultMappings: () => StrictMappingTypeMapping = () => ({
-  dynamic: false,
-});
+function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefinition {
+  return defaultsDeep(def, defaultDataStreamDefinition());
+}
 
 /**
  * https://www.elastic.co/docs/manage-data/data-store/data-streams/set-up-data-stream
  *
  * Endeavour to be idempotent and race-condition safe.
  */
-export async function setup({
+export async function initialize({
   logger,
   dataStreams,
   elasticsearchClient,
@@ -54,17 +52,8 @@ export async function setup({
   }
 
   const previousVersions: string[] = [];
-  const settings: api.IndicesIndexSettings = defaultsDeep(
-    dataStreams.settings,
-    defaultIndexSettings()
-  );
-  const mappings: api.MappingTypeMapping = defaultsDeep(dataStreams.mappings, defaultMappings());
-  const dataStreamSettings = { hidden: true }; // Not configurable for now
-  const nextHash = objectHash({
-    mappings,
-    settings,
-    dataStreamSettings,
-  });
+  dataStreams = applyDefaults(dataStreams);
+  const nextHash = objectHash(dataStreams);
 
   if (existingIndexTemplate && existingIndexTemplate.index_template?._meta?.version !== nextHash) {
     if (existingIndexTemplate.index_template?._meta?.version) {
@@ -79,16 +68,19 @@ export async function setup({
   await retryEs(() =>
     elasticsearchClient.indices.putIndexTemplate({
       name: dataStreams.name,
+      priority: dataStreams.priority,
       index_patterns: [`${dataStreams.name}*`],
-      data_stream: dataStreamSettings,
+      composed_of: dataStreams.template.composedOf,
+      data_stream: {
+        hidden: dataStreams.hidden,
+      },
       template: {
-        mappings,
-        settings,
+        ...dataStreams.template,
       },
       _meta: {
-        version: objectHash(dataStreams.mappings ?? {}),
+        ...dataStreams._meta,
+        version: nextHash,
         previousVersions,
-        userAgent: '@kbn/data-streams',
       },
     })
   );
@@ -137,10 +129,15 @@ export async function setup({
     const writeIndex = indices[indices.length - 1];
     if (!writeIndex) {
       logger.debug(
-        `Data stream ${dataStreams.name} has no write index yet, cannot apply mappings.`
+        `Data stream ${dataStreams.name} has no write index yet, cannot apply mappings or settings.`
       );
       return;
     } else {
+      const {
+        template: { mappings, settings },
+      } = await retryEs(() =>
+        elasticsearchClient.indices.simulateIndexTemplate({ name: dataStreams.name })
+      );
       logger.debug(`Applying new mappings to write index: ${writeIndex}`);
       await retryEs(() =>
         elasticsearchClient.indices.putMapping({
@@ -148,6 +145,33 @@ export async function setup({
           ...mappings,
         })
       );
+
+      const limit = pLimit(5);
+      const promises: Promise<void>[] = [];
+
+      for (const index of indices)
+        promises.push(
+          limit(async () => {
+            await retryEs(() =>
+              elasticsearchClient.indices.putSettings({
+                index: index.index_name,
+                settings,
+              })
+            );
+          })
+        );
+
+      const result = await Promise.allSettled(promises);
+
+      const updateErrors: string[] = [];
+      for (const res of result) {
+        if (res.status === 'rejected') {
+          updateErrors.push(res.reason.message);
+        }
+      }
+      if (updateErrors.length) {
+        throw new Error(updateErrors.join('\n'));
+      }
     }
   }
 }

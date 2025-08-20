@@ -72,7 +72,7 @@ describe('DataStreamClient', () => {
       });
     });
 
-    it('basic index and search', async () => {
+    test('basic index and search', async () => {
       const response = await client.index({
         document: { '@timestamp': new Date().toISOString(), mappedField: 'test-value' },
         refresh: true,
@@ -97,7 +97,7 @@ describe('DataStreamClient', () => {
     // TODO: Add more thorough tests, for ex. for search runtime mappings
   });
 
-  describe('setup', () => {
+  describe('initialize', () => {
     async function assertStateOfIndexTemplate() {
       const esClient = esServer.getClient();
       const {
@@ -110,7 +110,8 @@ describe('DataStreamClient', () => {
       expect(indexTemplate.index_template._meta).toEqual({
         previousVersions: [],
         userAgent: '@kbn/data-streams',
-        version: 'a13f161660c3a282f79f86a1d7429fce206dc249',
+        version: '29549ae1226515eae53ce62ba6aaae0cf920c3db',
+        managed: true,
       });
       expect(indexTemplate.index_template.data_stream).toEqual({
         allow_custom_routing: false,
@@ -180,7 +181,7 @@ describe('DataStreamClient', () => {
       await assertStateOfIndexTemplate();
     });
 
-    it('updates mappings as expected', async () => {
+    test('(basic) updates mappings and settings as expected', async () => {
       const elasticsearchClient = esServer.getClient();
       await DataStreamClient.initialize({
         logger,
@@ -233,9 +234,10 @@ describe('DataStreamClient', () => {
       });
 
       expect(indexTemplate.index_template._meta).toEqual({
-        previousVersions: ['a13f161660c3a282f79f86a1d7429fce206dc249'],
+        previousVersions: ['29549ae1226515eae53ce62ba6aaae0cf920c3db'],
         userAgent: '@kbn/data-streams',
-        version: 'e9c2064c34299e4324db009d5a4da5482ae3ec43',
+        version: 'a90f59afc64f48c6870f2e0562539d952b786e42',
+        managed: true,
       });
 
       expect(indexTemplate.index_template.template).toEqual({
