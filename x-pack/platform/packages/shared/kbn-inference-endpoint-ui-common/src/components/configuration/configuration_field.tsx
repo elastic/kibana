@@ -130,6 +130,7 @@ export const ConfigNumberField: React.FC<ConfigInputFieldProps> = ({
   }, [defaultValue, value]);
   return (
     <EuiFormControlLayout
+      isDisabled={isLoading || (isEdit && !updatable) || isPreconfigured}
       fullWidth
       clear={{
         onClick: (e) => {
