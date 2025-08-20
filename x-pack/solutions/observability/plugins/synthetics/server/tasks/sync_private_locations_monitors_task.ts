@@ -222,9 +222,7 @@ export class SyncPrivateLocationMonitorsTask {
           maintenanceWindows
         );
       } else {
-        this.debugLog(
-          `No privateConfigs to sync for spaceId: ${spaceId}`
-        );
+        this.debugLog(`No privateConfigs to sync for spaceId: ${spaceId}`);
       }
     }
   }
