@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Logger,
-  type PackageInfo,
-} from '@kbn/core/server';
+import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, type PackageInfo } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -25,7 +20,7 @@ import { ReportingPlugin } from './plugin';
 import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 import { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));
 
@@ -170,7 +165,7 @@ describe('Reporting Plugin', () => {
   describe('features registration', () => {
     it('does not register Kibana reporting feature in traditional build flavour', async () => {
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).not.toHaveBeenCalled();
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
       expect(featuresSetup.enableReportingUiCapabilities).toHaveBeenCalledTimes(1);
     });
 

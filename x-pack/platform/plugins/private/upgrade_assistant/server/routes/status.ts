@@ -99,6 +99,8 @@ export function registerUpgradeStatusRoute({
           upgradeTypeBasedReadyForUpgrade = totalCriticalHealthIssues === 0;
         }
 
+        console.log({ totalCriticalHealthIssues, totalCriticalDeprecations, kibanaTotalCriticalDeps, systemIndicesMigrationStatus });
+
         const readyForUpgrade = upgradeType && upgradeTypeBasedReadyForUpgrade;
 
         const getStatusMessage = () => {

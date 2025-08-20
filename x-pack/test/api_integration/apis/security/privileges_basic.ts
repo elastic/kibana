@@ -82,7 +82,14 @@ export default function ({ getService }: FtrProviderContext) {
           },
           global: ['all', 'read'],
           space: ['all', 'read'],
-          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: [
+            'fleet-setup',
+            'ml_user',
+            'ml_admin',
+            'ml_apm_user',
+            'monitoring',
+            'reporting_user',
+          ],
         };
 
         await supertest
@@ -383,7 +390,14 @@ export default function ({ getService }: FtrProviderContext) {
             inventory: ['all', 'read', 'minimal_all', 'minimal_read'],
             entityManager: ['all', 'read', 'minimal_all', 'minimal_read'],
           },
-          reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+          reserved: [
+            'fleet-setup',
+            'ml_user',
+            'ml_admin',
+            'ml_apm_user',
+            'monitoring',
+            'reporting_user',
+          ],
         };
 
         await supertest
