@@ -22,8 +22,8 @@ const MAX_ICONS = 2;
 
 export type ThirdPartyIntegrationId =
   | 'Wiz'
-  | 'aws_security_hub'
-  | 'aws_inspector'
+  | 'AWS Security Hub'
+  | 'Amazon Inspector'
   | 'Microsoft'
   | 'Google Security Command Center'
   | 'Tenable'
@@ -33,8 +33,8 @@ export type ThirdPartyIntegrationId =
 
 const INTEGRATION_LABELS: Record<ThirdPartyIntegrationId, string> = {
   Wiz: 'Wiz',
-  aws_security_hub: 'AWS Security Hub',
-  aws_inspector: 'AWS Inspector',
+  'AWS Security Hub': 'AWS Security Hub',
+  'Amazon Inspector': 'AWS Inspector',
   Microsoft: 'Microsoft 365 Defender',
   'Google Security Command Center': 'Google Security Command Center',
   Tenable: 'Tenable',
@@ -54,9 +54,9 @@ const getThirdPartyIconType = (type: ThirdPartyIntegrationId): string | undefine
   switch (type) {
     case 'Wiz':
       return wiz; // Replace with actual icon reference
-    case 'aws_security_hub':
+    case 'AWS Security Hub':
       return awsSecurityHub;
-    case 'aws_inspector':
+    case 'Amazon Inspector':
       return awsInspector;
     case 'Microsoft':
       return defender;
