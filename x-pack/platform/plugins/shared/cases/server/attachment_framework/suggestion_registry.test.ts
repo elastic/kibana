@@ -9,6 +9,7 @@ import { AttachmentSuggestionRegistry } from './suggestion_registry';
 import type { SuggestionType, SuggestionHandler } from './types';
 import type { SuggestionContext } from '../../common/types/domain';
 import type { KibanaRequest } from '@kbn/core/server';
+import { loggerMock } from '@kbn/logging-mocks';
 
 describe('AttachmentSuggestionRegistry', () => {
   let registry: AttachmentSuggestionRegistry;
@@ -23,13 +24,13 @@ describe('AttachmentSuggestionRegistry', () => {
         id: 'test-suggestion',
         owner: 'observability',
         attachmentId: 'attachment-1',
-        tools: {
-          testHandler: {
-            description: 'Tool 1 for test suggestion',
-          },
-        },
         handlers: {
-          testHandler: jest.fn(),
+          testHandler: {
+            handler: jest.fn(),
+            tool: {
+              description: 'Handler 1 for test suggestion',
+            },
+          },
         },
       };
 
@@ -47,15 +48,13 @@ describe('AttachmentSuggestionRegistry', () => {
         id: 'suggestion-1',
         attachmentId: 'attachment-1',
         owner: 'observability',
-        tools: {},
         handlers: {},
       };
 
       const suggestionType2: SuggestionType = {
         id: 'suggestion-2',
         attachmentId: 'attachment-2',
-        owner: 'security',
-        tools: {},
+        owner: 'securitySolution',
         handlers: {},
       };
 
@@ -94,17 +93,19 @@ describe('AttachmentSuggestionRegistry', () => {
         id: 'test-suggestion',
         owner: 'observability',
         attachmentId: 'attachment-1',
-        tools: {
+        handlers: {
           handler1: {
-            description: 'Handler 1 for test suggestion',
+            handler: mockHandler1,
+            tool: {
+              description: 'Handler 1 for test suggestion',
+            },
           },
           handler2: {
-            description: 'Handler 2 for test suggestion',
+            handler: mockHandler2,
+            tool: {
+              description: 'Handler 2 for test suggestion',
+            },
           },
-        },
-        handlers: {
-          handler1: mockHandler1,
-          handler2: mockHandler2,
         },
       };
 
@@ -123,7 +124,8 @@ describe('AttachmentSuggestionRegistry', () => {
       const response = await registry.getAllSuggestionsForOwners(
         ['observability'],
         context,
-        request
+        request,
+        loggerMock.create()
       );
 
       expect(response.suggestions).toHaveLength(2);
@@ -153,17 +155,19 @@ describe('AttachmentSuggestionRegistry', () => {
         id: 'test-suggestion',
         attachmentId: 'attachment-1',
         owner: 'observability',
-        tools: {
+        handlers: {
           handler1: {
-            description: 'Handler 1 for test suggestion',
+            handler: mockHandler1,
+            tool: {
+              description: 'Handler 1 for test suggestion',
+            },
           },
           handler2: {
-            description: 'Handler 2 for test suggestion',
+            handler: mockHandler2,
+            tool: {
+              description: 'Handler 2 for test suggestion',
+            },
           },
-        },
-        handlers: {
-          handler1: mockHandler1,
-          handler2: mockHandler2,
         },
       };
 
@@ -182,7 +186,8 @@ describe('AttachmentSuggestionRegistry', () => {
       const response = await registry.getAllSuggestionsForOwners(
         ['observability'],
         context,
-        request
+        request,
+        loggerMock.create()
       );
 
       expect(response.suggestions).toHaveLength(1);
@@ -197,7 +202,6 @@ describe('AttachmentSuggestionRegistry', () => {
         id: 'duplicate-suggestion',
         owner: 'observability',
         attachmentId: 'attachment-1',
-        tools: {},
         handlers: {},
       };
 
@@ -206,6 +210,46 @@ describe('AttachmentSuggestionRegistry', () => {
       expect(() => registry.register(suggestionType)).toThrow(
         `Item "duplicate-suggestion" is already registered on registry AttachmentSuggestionRegistry`
       );
+    });
+
+    it('logs error when handler fails', async () => {
+      const mockLogger = loggerMock.create();
+      const mockHandler: SuggestionHandler = jest.fn(async () => {
+        throw new Error('Handler failed');
+      });
+
+      const suggestionType: SuggestionType = {
+        id: 'test-suggestion',
+        owner: 'observability',
+        attachmentId: 'attachment-1',
+        handlers: {
+          handler1: {
+            handler: mockHandler,
+            tool: {
+              description: 'Handler 1 for test suggestion',
+            },
+          },
+        },
+      };
+
+      registry.register(suggestionType);
+
+      const context: SuggestionContext = {
+        'service.name': 'test-service',
+        timeRange: {
+          from: '2023-01-01T00:00:00Z',
+          to: '2023-01-02T00:00:00Z',
+        },
+      };
+
+      const request = {} as KibanaRequest;
+
+      await registry.getAllSuggestionsForOwners(['observability'], context, request, mockLogger);
+
+      expect(mockHandler).toHaveBeenCalledWith({ request, context });
+      expect(mockLogger.error).toHaveBeenCalledWith('Failed to get suggestion.', {
+        error: expect.any(Error),
+      });
     });
   });
 });

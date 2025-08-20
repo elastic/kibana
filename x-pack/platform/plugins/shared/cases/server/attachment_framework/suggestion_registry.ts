@@ -39,9 +39,9 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
   ): Promise<SuggestionResponse> {
     const promises: Array<Promise<SuggestionResponse>> = [];
     for (const suggestion of this.getAllForOwners(owners)) {
-      for (const handler of Object.values(suggestion.handlers)) {
+      for (const handlerDefinition of Object.values(suggestion.handlers)) {
         promises.push(
-          handler({
+          handlerDefinition.handler({
             request,
             context,
           })
@@ -53,7 +53,7 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
     return allSettledResponses.reduce<SuggestionResponse>(
       (acc, r) => {
         if (r.status === 'rejected') {
-          logger.error(`Failed to get suggestion: ${r.reason}`);
+          logger.error('Failed to get suggestion.', { error: r.reason });
         }
         if (r.status === 'fulfilled') {
           const items = r.value.suggestions;
