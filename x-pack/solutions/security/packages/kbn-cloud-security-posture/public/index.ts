@@ -37,3 +37,4 @@ export {
 } from './src/utils/vulnerability_reference';
 export { getVulnerabilitiesQuery } from './src/utils/findings_query_builders';
 export { getGroupPanelTitle } from './src/utils/get_group_panel_title';
+export { ThirdPartyIcon, renderThirdPartyIcons } from './src/components/third_party_icon';
