@@ -8,12 +8,12 @@
  */
 
 import { monaco } from '@kbn/monaco';
+import type { Node } from 'yaml';
 import type {
   WorkflowYAMLEditorDiffProps,
   WorkflowYAMLEditorProps,
   YamlValidationErrorSeverity,
 } from '../model/types';
-import { Node } from 'yaml';
 
 // Copied from monaco-editor/esm/vs/editor/editor.api.d.ts because we can't import with turbopack
 export enum MarkerSeverity {
