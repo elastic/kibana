@@ -36,9 +36,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
 
   const DATA_ANALYST_USERNAME = 'data_analyst';
   const DATA_ANALYST_PASSWORD = 'data_analyst-password';
+  const DATA_ANALYST_ROLE = 'data_analyst';
   const REPORTING_USER_USERNAME = 'reporting_user';
   const REPORTING_USER_PASSWORD = 'reporting_user-password';
   const REPORTING_ROLE = 'test_reporting_user';
+  const REPORTING_ROLE_BUILT_IN = 'reporting_user';
 
   const logTaskManagerHealth = async () => {
     // Check task manager health for analyzing test failures. See https://github.com/elastic/kibana/issues/114946
@@ -79,8 +81,16 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
   };
 
+  /**
+   * Creates a role for a data analyst user with read access to the ecommerce
+   * index and minimal Kibana privileges to Kibana applications like Discover,
+   * Dashboard, Canvas, and Visualize in the default space.
+
+   *
+   * Does not have permissions to generate reports.
+   */
   const createDataAnalystRole = async () => {
-    await security.role.create('data_analyst', {
+    await security.role.create(DATA_ANALYST_ROLE, {
       metadata: {},
       elasticsearch: {
         cluster: [],
@@ -93,10 +103,26 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
         ],
         run_as: [],
       },
-      kibana: [{ base: ['read'], feature: {}, spaces: ['*'] }],
+      kibana: [
+        {
+          base: [],
+          feature: {
+            discover: ['minimal_read'],
+            dashboard: ['minimal_read'],
+            canvas: ['minimal_read'],
+            visualize: ['minimal_read'],
+          },
+          spaces: ['default'],
+        },
+      ],
     });
   };
 
+  /**
+   * Creates a role for a reporting user with read access to the ecommerce
+   * index and permissions to generate reports in Kibana applications like
+   * Discover, Dashboard, Canvas, and Visualize in the default space.
+   */
   const createTestReportingUserRole = async () => {
     await security.role.create(REPORTING_ROLE, {
       metadata: {},
@@ -120,16 +146,20 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
             canvas: ['minimal_read', 'generate_report'],
             visualize: ['minimal_read', 'generate_report'],
           },
-          spaces: ['*'],
+          spaces: ['default'],
         },
       ],
     });
   };
 
+  /**
+   * Methods for creating users with specific roles for testing purposes.
+   */
+
   const createDataAnalyst = async () => {
-    await security.user.create('data_analyst', {
-      password: 'data_analyst-password',
-      roles: ['data_analyst'],
+    await security.user.create(DATA_ANALYST_USERNAME, {
+      password: DATA_ANALYST_PASSWORD,
+      roles: [DATA_ANALYST_ROLE],
       full_name: 'Data Analyst User',
     });
   };
@@ -142,18 +172,34 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     });
   };
 
-  const generatePdf = async (username: string, password: string, job: JobParamsPDFV2) => {
+  /**
+   * Methods for generating and scheduling reports.
+   */
+
+  const generatePdf = async (
+    username: string,
+    password: string,
+    job: JobParamsPDFV2,
+    spaceId: string = 'default'
+  ) => {
     const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/printablePdfV2`)
+      .post(`${spacePrefix}/api/reporting/generate/printablePdfV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
   };
-  const generatePng = async (username: string, password: string, job: JobParamsPNGV2) => {
+  const generatePng = async (
+    username: string,
+    password: string,
+    job: JobParamsPNGV2,
+    spaceId: string = 'default'
+  ) => {
     const jobParams = rison.encode(job);
+    const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
     return await supertestWithoutAuth
-      .post(`/api/reporting/generate/pngV2`)
+      .post(`${spacePrefix}/api/reporting/generate/pngV2`)
       .auth(username, password)
       .set('kbn-xsrf', 'xxx')
       .send({ jobParams });
@@ -271,9 +317,11 @@ export function createScenarios({ getService }: Pick<FtrProviderContext, 'getSer
     teardownLogs,
     DATA_ANALYST_USERNAME,
     DATA_ANALYST_PASSWORD,
+    DATA_ANALYST_ROLE,
     REPORTING_USER_USERNAME,
     REPORTING_USER_PASSWORD,
     REPORTING_ROLE,
+    REPORTING_ROLE_BUILT_IN,
     createDataAnalystRole,
     createDataAnalyst,
     createTestReportingUserRole,
