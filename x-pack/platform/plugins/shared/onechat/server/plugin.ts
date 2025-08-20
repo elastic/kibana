@@ -102,7 +102,7 @@ export class OnechatPlugin
         },
       },
       data: {
-        getRegistry: ({ request }) => data.getRegistry({ request }),
+        getRegistry: () => data.getRegistry(),
       },
     };
   }

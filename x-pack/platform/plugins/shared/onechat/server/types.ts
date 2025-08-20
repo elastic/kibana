@@ -71,7 +71,7 @@ export interface DataSetup {
 }
 
 export interface DataStart {
-  getRegistry: (opts: { request: KibanaRequest }) => Promise<DataTypeRegistry>;
+  getRegistry: () => Promise<DataTypeRegistry>;
 }
 
 /**

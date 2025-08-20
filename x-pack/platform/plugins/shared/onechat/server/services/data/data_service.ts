@@ -6,8 +6,6 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { KibanaRequest } from '@kbn/core-http-server';
-import type { Runner } from '@kbn/onechat-server';
 import {
   createDataTypeRegistry,
   type DataTypeRegistry,
@@ -18,16 +16,15 @@ export interface DataServiceSetupDeps {
   logger: Logger;
 }
 
-export interface DataServiceStartDeps {
-  getRunner: () => Runner;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface DataServiceStartDeps {}
 
 export interface DataServiceSetup {
   register(dataType: DataTypeDefinition): void;
 }
 
 export interface DataServiceStart {
-  getRegistry(opts: { request: KibanaRequest }): Promise<DataTypeRegistry>;
+  getRegistry(): Promise<DataTypeRegistry>;
 }
 
 export class DataService {
@@ -53,7 +50,7 @@ export class DataService {
     const { logger } = this.setupDeps!;
     logger.info('Starting the OneChat data service...');
 
-    const getRegistry: DataServiceStart['getRegistry'] = async ({ request }) => {
+    const getRegistry: DataServiceStart['getRegistry'] = async () => {
       return this.dataTypeRegistry;
     };
 

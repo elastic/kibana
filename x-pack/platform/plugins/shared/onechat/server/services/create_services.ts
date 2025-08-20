@@ -88,7 +88,6 @@ export class ServiceManager {
       inference,
       toolsService: tools,
       agentsService: agents,
-      dataService: data,
     });
     runner = runnerFactory.getRunner();
 
