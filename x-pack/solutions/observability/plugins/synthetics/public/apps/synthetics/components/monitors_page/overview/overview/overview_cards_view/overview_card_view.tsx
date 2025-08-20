@@ -66,7 +66,7 @@ export const OverviewCardView = ({
       acc.push(monitorsSortedByStatus.slice(i, i + rowCount));
     }
     return acc;
-  }, [monitorsSortedByStatus]);
+  }, [monitorsSortedByStatus, rowCount]);
 
   return (
     <>
