@@ -42,7 +42,7 @@ describe('Suggestion Schemas and Types', () => {
   describe('suggestionRequestRt', () => {
     it('should validate a valid request', () => {
       const validRequest = {
-        owners: ['observability', 'security'],
+        owners: ['observability', 'securitySolution'],
         context: {
           'service.name': 'my-service',
           timeRange: {
@@ -68,7 +68,7 @@ describe('Suggestion Schemas and Types', () => {
 
     it('should allow optional context fields to be omitted', () => {
       const validRequest = {
-        owners: ['stack'],
+        owners: ['cases'],
         context: {},
       };
 
