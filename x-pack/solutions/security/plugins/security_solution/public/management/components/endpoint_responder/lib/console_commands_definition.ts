@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isActionSupportedByAgentType } from '../../../../../common/endpoint/service/response_actions/is_response_action_supported';
 import type { SupportedHostOsType } from '../../../../../common/endpoint/constants';
 import type { EndpointCommandDefinitionMeta } from '../types';
 import type { CustomScriptSelectorState } from '../../console_argument_selectors/custom_scripts_selector/custom_script_selector';
@@ -467,11 +468,10 @@ export const getEndpointConsoleCommands = ({
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 9,
-      helpDisabled: !doesEndpointSupportCommand('runscript'),
-      helpHidden: !getRbacControl({
-        commandName: 'runscript',
-        privileges: endpointPrivileges,
-      }),
+      helpDisabled: !isActionSupportedByAgentType(agentType, 'runscript', 'manual'),
+      helpHidden:
+        !getRbacControl({ commandName: 'runscript', privileges: endpointPrivileges }) ||
+        (agentType === 'endpoint' && !doesEndpointSupportCommand('runscript')),
     },
   ];
 
@@ -560,6 +560,7 @@ const adjustCommandsForSentinelOne = ({
   const featureFlags = ExperimentalFeaturesService.get();
   const isKillProcessEnabled = featureFlags.responseActionsSentinelOneKillProcessEnabled;
   const isProcessesEnabled = featureFlags.responseActionsSentinelOneProcessesEnabled;
+  const isRunscriptEnabled = featureFlags.responseActionsSentinelOneRunScriptEnabled;
 
   return commandList.map((command) => {
     // Kill-Process: adjust command to accept only `processName`
@@ -612,7 +613,7 @@ const adjustCommandsForSentinelOne = ({
         command.validate = () => {
           return message;
         };
-      } else if (command.name === 'runscript') {
+      } else if (command.name === 'runscript' && isRunscriptEnabled) {
         command.helpDisabled = false;
         command.mustHaveArgs = true;
         command.exampleUsage = (

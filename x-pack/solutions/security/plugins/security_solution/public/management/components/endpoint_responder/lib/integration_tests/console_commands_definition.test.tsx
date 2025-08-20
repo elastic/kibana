@@ -95,6 +95,7 @@ describe('When displaying Endpoint Response Actions', () => {
         responseActionsSentinelOneGetFileEnabled: true,
         responseActionsSentinelOneKillProcessEnabled: true,
         responseActionsSentinelOneProcessesEnabled: true,
+        responseActionsSentinelOneRunScriptEnabled: true,
       });
 
       commands = getEndpointConsoleCommands({
@@ -129,6 +130,7 @@ describe('When displaying Endpoint Response Actions', () => {
         'processes',
         'kill-process --processName',
         'get-file --path',
+        'runscript --script',
       ]);
       expect(queryByTestId('sentineloneProcessesWindowsWarningTooltip')).toBeNull();
     });
