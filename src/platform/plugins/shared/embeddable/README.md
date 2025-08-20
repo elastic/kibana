@@ -43,12 +43,12 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
-| HasEditCapabilities | Interface for editing embeddable | ACTION_EDIT_PANEL | 
+| HasEditCapabilities | Interface for editing embeddable state | ACTION_EDIT_PANEL | 
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
 | HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS |
-| PublishesDataViews | Interface for accessing embeddable data views | ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
+| PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
 | PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
 
