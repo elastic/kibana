@@ -47,7 +47,7 @@ export const SettingsContextProvider = ({ children }: { children: React.ReactNod
 };
 
 function combineErrors(errors: Error[]): Error {
-  const message = errors.map(err => err.message || String(err)).join("; ");
+  const message = errors.map((err) => err.message || String(err)).join('; ');
   return new Error(message);
 }
 

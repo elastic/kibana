@@ -95,7 +95,7 @@ const getOptionsByValues = (
 export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
   const [options, setOptions] = useState<EuiComboBoxOptionOption<string>[]>(getOptions(connectors));
   const { handleFieldChange, fields, unsavedChanges } = useSettingsContext();
-    const { services } = useKibana();
+  const { services } = useKibana();
   const { notifications } = services;
 
   useEffect(() => {
@@ -106,12 +106,18 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
     const values = selectedOptions.map((option) => option.value);
     if (values.length > 1) {
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.title', {
-          defaultMessage: 'An error occurred while changing the setting',
-        }),
-        text: i18n.translate('xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.text', {
-          defaultMessage: 'Only one default AI connector can be selected',
-        }),
+        title: i18n.translate(
+          'xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.title',
+          {
+            defaultMessage: 'An error occurred while changing the setting',
+          }
+        ),
+        text: i18n.translate(
+          'xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.text',
+          {
+            defaultMessage: 'Only one default AI connector can be selected',
+          }
+        ),
       });
       throw new Error('Only one default AI connector can be selected');
     }
@@ -170,7 +176,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
 
       <EuiFormRow>
         <EuiCheckbox
-          id='defaultAiConnectorCheckbox'
+          id="defaultAiConnectorCheckbox"
           data-test-subj="defaultAiConnectorCheckbox"
           disabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
           label={
