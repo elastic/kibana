@@ -30,6 +30,7 @@ export const ReactRouterHelperForEui: React.FC<IEuiReactRouterProps> = ({ to, ch
   const onClick = (event: React.MouseEvent) => {
     if (letBrowserHandleEvent(event)) return;
 
+    console.log('event prevent default', event.preventDefault);
     // Prevent regular link behavior, which causes a browser refresh.
     event.preventDefault();
 
@@ -50,7 +51,7 @@ type TEuiReactRouterButtonEmptyProps = EuiButtonEmptyProps & IEuiReactRouterProp
 
 export const ReactRouterEuiLink: React.FC<TEuiReactRouterLinkProps> = ({ to, ...rest }) => (
   <ReactRouterHelperForEui to={to}>
-    <EuiLink data-test-subj="syntheticsReactRouterEuiLinkLink" {...rest} />
+    <EuiLink data-test-subj="syntheticsReactRouterEuiLink" {...rest} />
   </ReactRouterHelperForEui>
 );
 
