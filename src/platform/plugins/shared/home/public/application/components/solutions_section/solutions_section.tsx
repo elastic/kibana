@@ -30,11 +30,7 @@ export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
     solutions = solutions.sort(sortByOrder);
 
     return (
-      <KibanaPageTemplate.Section
-        bottomBorder
-        paddingSize="xl"
-        aria-labelledby="homeSolutions__title"
-      >
+      <KibanaPageTemplate.Section bottomBorder aria-labelledby="homeSolutions__title" grow={false}>
         <EuiScreenReaderOnly>
           <h2 id="homeSolutions__title">
             <FormattedMessage
