@@ -14,7 +14,7 @@ import type {
   ReactFiberNode,
 } from './types';
 import { getComponentData } from './get_component_data';
-import { EUI_DATA_ICON_TYPE, INSPECT_OVERLAY_ID } from '../common';
+import { EUI_DATA_ICON_TYPE } from '../common';
 
 const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileData | null => {
   if (!fiberNode) return null;
@@ -26,12 +26,13 @@ const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): F
 
 export const getElementFromPoint = ({
   event,
+  overlayId,
 }: GetElementFromPointOptions): HTMLElement | SVGElement | undefined => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
   for (const el of elements) {
     const isSvg = el instanceof SVGElement;
-    const isOverlay = el.id === INSPECT_OVERLAY_ID;
+    const isOverlay = el.id === overlayId;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
     const isNotInspectable = !(el instanceof HTMLElement) && !isSvg; // the !isSvg check is done because there is some weird edge case with SVG elements and elementsFromPoint
 
@@ -55,6 +56,7 @@ export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.u
 export const getInspectedElementData = async ({
   event,
   core,
+  overlayId,
   setFlyoutRef,
   setIsInspecting,
 }: GetInspectedElementOptions) => {
@@ -63,7 +65,7 @@ export const getInspectedElementData = async ({
 
   let fileData: FileData | null = null;
 
-  const target = getElementFromPoint({ event });
+  const target = getElementFromPoint({ event, overlayId });
 
   if (!target) {
     setIsInspecting(false);
@@ -92,7 +94,7 @@ export const getInspectedElementData = async ({
     return;
   }
 
-  const icon =
+  const iconType =
     target instanceof SVGElement
       ? target.getAttribute(EUI_DATA_ICON_TYPE)
       : target.querySelector('svg')?.getAttribute(EUI_DATA_ICON_TYPE);
@@ -100,7 +102,7 @@ export const getInspectedElementData = async ({
   await getComponentData({
     core,
     fileData,
-    icon: icon || undefined,
+    iconType: iconType || undefined,
     setFlyoutRef,
     setIsInspecting,
   });

@@ -17,7 +17,7 @@ import { INSPECT_COMPONENT_ROUTE } from '../common/constants';
 export const getComponentData = async ({
   core,
   fileData,
-  icon,
+  iconType,
   setFlyoutRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
@@ -31,7 +31,7 @@ export const getComponentData = async ({
 
     const componentData = {
       ...fileData,
-      icon,
+      iconType,
       relativePath,
     };
 

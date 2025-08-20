@@ -39,9 +39,9 @@ export const InspectFlyout = ({ codeowners, componentData }: Props) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="l">
           {/* TODO: Improve styling */}
-          {componentData.icon && (
+          {componentData.iconType && (
             <EuiText size="s" color="subdued">
-              Icon: {componentData.icon}
+              Icon: {componentData.iconType}
             </EuiText>
           )}
           <CodeownersSection codeowners={codeowners} />

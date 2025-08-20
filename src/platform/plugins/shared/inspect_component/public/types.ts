@@ -12,6 +12,7 @@ import type { Dispatch, SetStateAction } from 'react';
 
 export interface GetElementFromPointOptions {
   event: PointerEvent;
+  overlayId: string;
 }
 
 export interface FileData {
@@ -21,7 +22,7 @@ export interface FileData {
 }
 
 export interface ComponentData extends FileData {
-  icon?: string;
+  iconType?: string;
   relativePath?: string;
 }
 
@@ -33,7 +34,7 @@ export interface ReactFiberNode {
 export interface GetComponentDataOptions {
   core: CoreStart;
   fileData: FileData;
-  icon?: string;
+  iconType?: string;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
@@ -41,6 +42,7 @@ export interface GetComponentDataOptions {
 export interface GetInspectedElementOptions {
   event: PointerEvent;
   core: CoreStart;
+  overlayId: string;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }

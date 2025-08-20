@@ -8,5 +8,4 @@
  */
 
 export const INSPECT_COMPONENT_ROUTE = '/internal/inspect_component/inspect';
-export const INSPECT_OVERLAY_ID = 'inspectOverlay';
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';

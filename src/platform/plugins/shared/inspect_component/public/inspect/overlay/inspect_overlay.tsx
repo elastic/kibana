@@ -12,10 +12,9 @@ import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import React, { useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/css';
-import { EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiWindowEvent, transparentize, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { getElementFromPoint, getInspectedElementData } from '../../utils';
 import { InspectHighlight } from './inspect_highlight';
-import { INSPECT_OVERLAY_ID } from '../../../common';
 
 interface Props {
   core: CoreStart;
@@ -25,6 +24,9 @@ interface Props {
 
 export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) => {
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
+  const overlayId = useGeneratedHtmlId({
+    prefix: 'inspectOverlay',
+  });
 
   const { euiTheme } = useEuiTheme();
 
@@ -40,13 +42,14 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
     await getInspectedElementData({
       event,
       core,
+      overlayId,
       setFlyoutRef,
       setIsInspecting,
     });
   };
 
   const handlePointerMove = (event: PointerEvent) => {
-    const target = getElementFromPoint({ event });
+    const target = getElementFromPoint({ event, overlayId });
 
     if (!target) return;
 
@@ -60,7 +63,7 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
   };
 
   return createPortal(
-    <div className={overlayCss} id={INSPECT_OVERLAY_ID}>
+    <div className={overlayCss} id={overlayId}>
       <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
       <EuiWindowEvent event="pointerdown" handler={handleClick} />
       <InspectHighlight currentPosition={highlightPosition} />
