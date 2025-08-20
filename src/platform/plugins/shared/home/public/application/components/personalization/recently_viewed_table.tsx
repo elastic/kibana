@@ -32,22 +32,20 @@ export const PersonalizedRecentlyViewed = ({
 }: RecentlyAccessedTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+
   const items: ChromeRecentlyAccessedHistoryItem[] =
-    recentlyAccessed?.map((dashboard: ChromeRecentlyAccessedHistoryItem) => {
-      return {
-        id: dashboard.id,
-        label: dashboard.label,
-        link: dashboard.link,
-        lastAccessed: dashboard.lastAccessed,
-      };
-    }) ?? [];
+    recentlyAccessed?.map((dashboard: ChromeRecentlyAccessedHistoryItem) => ({
+      id: dashboard.id,
+      label: dashboard.label,
+      link: dashboard.link,
+      lastAccessed: dashboard.lastAccessed,
+    })) ?? [];
 
   const columns: Array<EuiBasicTableColumn<ChromeRecentlyAccessedHistoryItem>> = [
     {
       field: 'label',
       name: 'Name',
       'data-test-subj': 'nameCell',
-
       render: (label, item) => <EuiLink href={addBasePath(item.link)}>{label}</EuiLink>,
     },
     {
@@ -58,68 +56,34 @@ export const PersonalizedRecentlyViewed = ({
         if (!lastAccessed) return '-';
         return formatDate(lastAccessed, 'D MMM YYYY');
       },
-      sortable: true, // how does it work?
     },
   ];
 
-  const getRowProps = (personalDashboards: ChromeRecentlyAccessedHistoryItem) => {
-    const { id } = personalDashboards;
-    return {
-      'data-test-subj': `row-${id}`,
-      className: 'customRowClass',
-      onClick: () => {},
-    };
-  };
+  const getRowProps = (personalDashboards: ChromeRecentlyAccessedHistoryItem) => ({
+    'data-test-subj': `row-${personalDashboards.id}`,
+    className: 'customRowClass',
+    onClick: () => {},
+  });
 
   const getCellProps = (
     personalDashboards: ChromeRecentlyAccessedHistoryItem,
     column: EuiTableFieldDataColumnType<ChromeRecentlyAccessedHistoryItem>
-  ) => {
-    const { id } = personalDashboards;
-    const { field } = column;
-    return {
-      className: 'customCellClass',
-      'data-test-subj': `cell-${id}-${String(field)}`,
-      textOnly: true,
-    };
-  };
+  ) => ({
+    className: 'customCellClass',
+    'data-test-subj': `cell-${personalDashboards.id}-${String(column.field)}`,
+    textOnly: true,
+  });
+
   const pageSizeOptions = [2, 5, 10, 20, 50];
 
   const onTableChange = ({ page }: { page: { index: number; size: number } }) => {
     if (page) {
-      const { index, size } = page;
-      setPageIndex(index);
-      setPageSize(size);
+      setPageIndex(page.index);
+      setPageSize(page.size);
     }
   };
 
-  // Manually handle pagination of data
-  const findRecentlyViewed = (
-    dashboard: ChromeRecentlyAccessedHistoryItem[],
-    index: number,
-    size: number
-  ) => {
-    let pageOfItems;
-
-    if (!index && !size) {
-      pageOfItems = dashboard;
-    } else {
-      const startIndex = index * size;
-      pageOfItems = dashboard.slice(startIndex, Math.min(startIndex + size, dashboard.length));
-    }
-
-    return {
-      pageOfItems,
-      totalItemCount: dashboard.length,
-    };
-  };
-  const { pageOfItems, totalItemCount } = findRecentlyViewed(items, pageIndex, pageSize);
-  const pagination = {
-    pageIndex,
-    pageSize,
-    totalItemCount,
-    pageSizeOptions,
-  };
+  const totalItemCount = items.length;
   const isLastPage = pageSize * (pageIndex + 1) >= totalItemCount;
   const resultsCount =
     totalItemCount < pageSize && pageSize ? (
@@ -133,6 +97,14 @@ export const PersonalizedRecentlyViewed = ({
         of {totalItemCount}
       </>
     );
+
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount,
+    pageSizeOptions,
+  };
+
   return (
     <KibanaPageTemplate.Section
       bottomBorder

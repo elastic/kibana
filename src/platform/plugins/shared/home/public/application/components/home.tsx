@@ -9,13 +9,18 @@
 
 import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
-import { EuiTabs, EuiTab, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
+import {
+  FavoritesClient,
+  FavoritesContextProvider,
+} from '@kbn/content-management-favorites-public';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
   FeatureCatalogueEntry,
@@ -30,6 +35,7 @@ import { Welcome } from './welcome';
 import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_table';
 import { ContentByTagTable } from './personalization/content_by_tag_table';
 import { PersonalizedDashboardsCreatedByUser } from './personalization/created_by_user';
+import { HomeFavoriteDashboards } from './personalization/favorite_dashboards';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -152,7 +158,7 @@ export class Home extends Component<HomeProps, State> {
   private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
     const { selectedTabId } = this.state;
     return (
-      <EuiPanel paddingSize="none" hasShadow={false}>
+      <KibanaPageTemplate.Section>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiTabs
@@ -182,7 +188,7 @@ export class Home extends Component<HomeProps, State> {
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+      </KibanaPageTemplate.Section>
     );
   }
 
@@ -190,14 +196,23 @@ export class Home extends Component<HomeProps, State> {
     const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
       this.props;
 
-    const { application, trackUiMetric, contentClient, savedObjectsTagging, uiSettings } =
-      getServices();
+    const { application, trackUiMetric, http, userProfile } = getServices();
+    const dashboardFavoritesClient = new FavoritesClient('dashboards', 'dashboard', {
+      http,
+      userProfile,
+    });
     // console.log(getServices());
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
     const dashboardsCreatedByUser = this.getDashboardsByUser(dashboards ?? [], userId);
-
+    const dashboardQueryClient = new QueryClient({
+      defaultOptions: {
+        queries: {
+          retry: false,
+        },
+      },
+    });
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {
       manageDataFeatures.push(devTools);
@@ -213,6 +228,19 @@ export class Home extends Component<HomeProps, State> {
             recentlyAccessed={recentlyAccessed}
             addBasePath={addBasePath}
           />
+        ),
+      },
+      {
+        id: 'favoriteDashboards',
+        name: i18n.translate('home.tabs.favorites', {
+          defaultMessage: 'Favorites',
+        }),
+        content: (
+          <QueryClientProvider client={dashboardQueryClient}>
+            <FavoritesContextProvider favoritesClient={dashboardFavoritesClient}>
+              <HomeFavoriteDashboards dashboards={dashboards ?? []} addBasePath={addBasePath} />
+            </FavoritesContextProvider>
+          </QueryClientProvider>
         ),
       },
       {

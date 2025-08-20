@@ -10,20 +10,21 @@ import React, { useState } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiText, EuiInMemoryTable, EuiLink } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
+import { useFavorites } from '@kbn/content-management-favorites-public';
 
-interface DashboardsCreatedByUserProps {
+interface FavoriteDashboards {
   dashboards: any[];
   addBasePath: (path: string) => string;
 }
 
-export const PersonalizedDashboardsCreatedByUser = ({
-  dashboards,
-  addBasePath,
-}: DashboardsCreatedByUserProps) => {
+export const HomeFavoriteDashboards = ({ dashboards, addBasePath }: FavoriteDashboards) => {
+  const { data } = useFavorites();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
+  const favoriteIds: string[] = data?.favoriteIds ?? [];
+  const favoriteDashboards = dashboards.filter((dashboard) => favoriteIds.includes(dashboard.id));
 
-  const items = dashboards.map((dashboard) => ({
+  const items = favoriteDashboards.map((dashboard) => ({
     id: dashboard.id,
     title: dashboard.attributes.title,
     description: dashboard.attributes.description,
@@ -88,16 +89,16 @@ export const PersonalizedDashboardsCreatedByUser = ({
       <EuiPanel>
         <EuiTitle size="s">
           <h3>
-            {i18n.translate('home.dashboardsCreatedByMe.title', {
-              defaultMessage: 'Dashboards created by me',
+            {i18n.translate('home.favoriteDashboards.title', {
+              defaultMessage: 'Favorite Dashboards',
             })}
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText size="xs">Showing {resultsCount}</EuiText>
         <EuiInMemoryTable
-          tableCaption={i18n.translate('home.dashboardsCreatedByMe.caption', {
-            defaultMessage: 'Dashboards created by me',
+          tableCaption={i18n.translate('home.favoriteDashboards.caption', {
+            defaultMessage: 'Favorite Dashboards',
           })}
           responsiveBreakpoint={false}
           items={items}

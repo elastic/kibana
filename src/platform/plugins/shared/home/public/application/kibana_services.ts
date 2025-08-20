@@ -17,15 +17,18 @@ import type {
   ApplicationStart,
   ThemeServiceStart,
   I18nStart,
+  UserProfileServiceStart,
 } from '@kbn/core/public';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import type { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { ContentClient } from '@kbn/content-management-plugin/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { TutorialService } from '../services/tutorials';
 import type { AddDataService } from '../services/add_data';
 import type { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -63,6 +66,7 @@ export interface HomeKibanaServices {
   contentClient: ContentClient;
   savedObjectsTagging: SavedObjectTaggingOssPluginStart;
   contentManagement: ContentManagementPublicStart;
+  userProfile: UserProfileServiceStart;
 }
 
 let services: HomeKibanaServices | null = null;
