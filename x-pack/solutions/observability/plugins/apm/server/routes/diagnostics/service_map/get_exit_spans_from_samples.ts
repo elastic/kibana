@@ -222,12 +222,12 @@ export async function getDestinationParentIds({
             ...termQuery(SERVICE_NAME, destinationNode),
           ],
         },
-        aggs: {
-          sample_docs: {
-            top_hits: {
-              size: 5,
-              fields: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
-            },
+      },
+      aggs: {
+        sample_docs: {
+          top_hits: {
+            size: 5,
+            fields: [PARENT_ID, SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE],
           },
         },
       },
