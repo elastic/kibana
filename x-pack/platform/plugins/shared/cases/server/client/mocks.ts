@@ -78,6 +78,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     addObservable: jest.fn(),
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
+    getMetadata: jest.fn(),
   };
 };
 
