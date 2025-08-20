@@ -156,6 +156,7 @@ export function SpanOverview({
                 </EuiFlexItem>
               )}
               <EuiFlexItem>
+                <EuiSpacer size="m" />
                 <Trace
                   fields={fieldConfigurations}
                   fieldMappings={dataViewFields}
