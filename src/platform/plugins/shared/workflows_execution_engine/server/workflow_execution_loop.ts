@@ -27,15 +27,8 @@ export async function workflowExecutionLoop(
     } catch (error) {
       workflowRuntime.setWorkflowError(error);
     } finally {
-      try {
-        await catchError(workflowRuntime, workflowLogger, nodesFactory);
-        await workflowRuntime.saveState(); // Ensure state is updated after each step
-      } catch (error) {
-        workflowLogger.logError(
-          `Error saving state after step ${currentNode.id} (${currentNode.name}): ${error.message}`
-        );
-      }
-
+      await catchError(workflowRuntime, workflowLogger, nodesFactory);
+      await workflowRuntime.saveState(); // Ensure state is updated after each step
       await workflowLogger.flushEvents();
     }
   }
