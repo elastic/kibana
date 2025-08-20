@@ -8,7 +8,7 @@
  */
 
 import { type PayloadAction, createSlice } from '@reduxjs/toolkit';
-import { RootState } from './color_mapping';
+import type { RootState } from './color_mapping';
 
 const initialState: RootState['ui'] = {
   colorPicker: {

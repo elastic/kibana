@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 
 /**
  * A simple utility function that returns an `AbortSignal` corresponding to an `AbortController`

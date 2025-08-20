@@ -9,7 +9,7 @@ import React, { useEffect, useState, useRef } from 'react';
 
 import { EuiToolTip, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SeriesUrl, BuilderItem } from '../types';
+import type { SeriesUrl, BuilderItem } from '../types';
 import { getSeriesToEdit } from '../series_editor/series_editor';
 import { NEW_SERIES_KEY, useSeriesStorage } from '../hooks/use_series_storage';
 import { useAppDataViewContext } from '../hooks/use_app_data_view';

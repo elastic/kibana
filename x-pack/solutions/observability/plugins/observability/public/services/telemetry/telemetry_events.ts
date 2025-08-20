@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TelemetryEvent, TelemetryEventTypes } from './types';
+import type { TelemetryEvent } from './types';
+import { TelemetryEventTypes } from './types';
 
 const relatedAlertsLoaded: TelemetryEvent = {
   eventType: TelemetryEventTypes.RELATED_ALERTS_LOADED,

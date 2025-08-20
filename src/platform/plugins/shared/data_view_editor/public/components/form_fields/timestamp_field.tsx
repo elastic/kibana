@@ -10,18 +10,15 @@
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
-import { Observable } from 'rxjs';
-import { EuiFormRow, EuiComboBox, EuiFormHelpText, EuiComboBoxOptionOption } from '@elastic/eui';
+import type { Observable } from 'rxjs';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import {
-  UseField,
-  FieldConfig,
-  ValidationConfig,
-  getFieldValidityAndErrorMessage,
-} from '../../shared_imports';
+import type { FieldConfig, ValidationConfig } from '../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
 
-import { TimestampOption, MatchedIndicesSet } from '../../types';
+import type { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';
 
 interface Props {
