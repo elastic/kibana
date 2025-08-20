@@ -6,4 +6,3 @@
  */
 
 export { migrateCspPackagePolicyToV8110 } from './to_v8_11_0';
-export { migrateCspPackagePolicyToV920 } from './to_v9_2_0';
