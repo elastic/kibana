@@ -6,9 +6,9 @@
  */
 
 import moment from 'moment';
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { UserRowData } from './types';
-import type { VisualizationStackByOption } from '../esql_dashboard_panel/esql_dashboard_panel';
-
 export const PAGE_SIZE = 10;
 export const CURRENT_TIME = moment();
 
@@ -71,21 +71,41 @@ export const GRANTED_RIGHTS_DATA: UserRowData[] = [
   },
 ];
 
-export const GRANTED_RIGHTS_STACK_BY_OPTIONS: VisualizationStackByOption[] = [
+export const GRANTED_RIGHTS_STACK_BY_OPTIONS = [
   {
-    text: 'Privileged User',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.privilegedUser"
+        defaultMessage="Privileged user"
+      />
+    ),
     value: 'privileged_user',
   },
   {
-    text: 'Target user',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.targetUser"
+        defaultMessage="Target user"
+      />
+    ),
     value: 'target_user',
   },
   {
-    text: 'Granted right',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.grantedRight"
+        defaultMessage="Granted right"
+      />
+    ),
     value: 'right',
   },
   {
-    text: 'Source IP',
+    inputDisplay: (
+      <FormattedMessage
+        id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.sampleDashBoard.stackBy.sourceIp"
+        defaultMessage="Source IP"
+      />
+    ),
     value: 'ip',
   },
 ];
