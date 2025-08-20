@@ -5,11 +5,18 @@
  * 2.0.
  */
 
+import type { RruleSchedule } from '@kbn/task-manager-plugin/server/task';
+
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_store:snapshot';
 export const VERSION = '1.0.0';
-export const DEFAULT_INTERVAL = '24h';
 export const TIMEOUT = '1h';
 export const MAX_ATTEMPTS = 5;
 export const MAX_CONCURRENCY = 1;
-export const SCHEDULE = {}
+export const SCHEDULE = {
+  freq: Frequency.DAILY,
+  tzid: 'UTC',
+  interval: 1,
+  byhour: [00],
+  byminute: [01],
+} as RruleSchedule

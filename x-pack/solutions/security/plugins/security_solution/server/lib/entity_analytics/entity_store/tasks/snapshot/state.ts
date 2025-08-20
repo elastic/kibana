@@ -20,13 +20,13 @@ export const stateSchemaByVersion = {
       lastExecutionTimestamp: state.lastExecutionTimestamp || undefined,
       runs: state.runs || 0,
       namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
-      scoresWritten: typeof state.scoresWritten === 'number' ? state.scoresWritten : undefined,
+      entityType: state.entityType || undefined,
     }),
     schema: schema.object({
       lastExecutionTimestamp: schema.maybe(schema.string()),
-      namespace: schema.string(),
       runs: schema.number(),
-      scoresWritten: schema.maybe(schema.number()),
+      namespace: schema.string(),
+      entityType: schema.maybe(schema.string()),
     }),
   },
 };
@@ -37,6 +37,6 @@ export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 export const defaultState: LatestTaskStateSchema = {
   lastExecutionTimestamp: undefined,
   namespace: 'default',
+  entityType: undefined,
   runs: 0,
-  scoresWritten: undefined,
 };
