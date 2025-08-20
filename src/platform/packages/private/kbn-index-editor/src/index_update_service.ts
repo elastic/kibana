@@ -799,7 +799,7 @@ export class IndexUpdateService {
   }
 
   /**
-   * Sends bulk update request to an index.
+   * Sends a bulk update request to an index.
    * @param updates
    */
   public bulkUpdate(updates: BulkUpdateOperations): Promise<BulkResponse> {
