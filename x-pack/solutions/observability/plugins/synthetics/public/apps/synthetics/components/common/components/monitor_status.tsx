@@ -7,7 +7,7 @@
 import React from 'react';
 import { EuiBadge, EuiDescriptionList, EuiSkeletonText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitor } from '../../../../../../common/runtime_types';
 import { useScreenContext } from '../../../hooks/use_screen_context';
 
 export const BadgeStatus = ({

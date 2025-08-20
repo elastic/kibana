@@ -7,7 +7,7 @@
 
 import { type LoghubSystem } from './read_loghub_system_files';
 import { getQueriesFilename } from './utils';
-import { LoghubQuery } from './validate_queries';
+import type { LoghubQuery } from './validate_queries';
 
 export async function getQueries(system: LoghubSystem): Promise<LoghubQuery[]> {
   const fileName = getQueriesFilename(system);

@@ -12,7 +12,7 @@ import { type TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { AddPageAttachmentToCaseModal } from '@kbn/observability-shared-plugin/public';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 import { useGetUrlParams, useMonitorDetailLocator } from '../../hooks';
 
@@ -26,10 +26,13 @@ export function AddToCaseContextItem() {
 
   const { monitor } = useSelectedMonitor();
   const { dateRangeEnd, dateRangeStart, locationId } = useGetUrlParams();
-  const timeRange: TimeRange = {
-    from: dateRangeStart,
-    to: dateRangeEnd,
-  };
+  const timeRange: TimeRange = useMemo(
+    () => ({
+      from: dateRangeStart,
+      to: dateRangeEnd,
+    }),
+    [dateRangeStart, dateRangeEnd]
+  );
 
   const casesPermissions: CasesPermissions = useMemo(() => {
     if (!canUseCases) {
@@ -49,8 +52,10 @@ export function AddToCaseContextItem() {
     }
     return canUseCases();
   }, [canUseCases]);
-  const hasCasesPermissions =
-    casesPermissions.read && casesPermissions.update && casesPermissions.push;
+
+  const hasCasesPermissions = useMemo(() => {
+    return casesPermissions.read && casesPermissions.update && casesPermissions.push;
+  }, [casesPermissions.read, casesPermissions.update, casesPermissions.push]);
 
   const redirectUrl = useMonitorDetailLocator({
     configId: monitor?.config_id ?? '',
@@ -77,7 +82,27 @@ export function AddToCaseContextItem() {
     setIsAddToCaseModalOpen(false);
   }, [setIsAddToCaseModalOpen]);
 
-  if (!monitor || !redirectUrl || !cases || !hasCasesPermissions) {
+  const pageState = useMemo(() => {
+    if (!redirectUrl || !monitor?.name) {
+      return null;
+    }
+    return {
+      type: 'synthetics_monitor',
+      url: {
+        pathAndQuery: redirectUrl,
+        label: monitor.name,
+        actionLabel: i18n.translate(
+          'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryLinkLabel',
+          {
+            defaultMessage: 'Go to Monitor History',
+          }
+        ),
+        iconType: 'uptimeApp',
+      },
+    };
+  }, [monitor, redirectUrl]);
+
+  if (!monitor || !redirectUrl || !cases || !hasCasesPermissions || !pageState) {
     return null; // Ensure monitor and redirectUrl are available before rendering
   }
 
@@ -95,24 +120,11 @@ export function AddToCaseContextItem() {
       </EuiContextMenuItem>
       {isAddToCaseModalOpen && (
         <AddPageAttachmentToCaseModal
-          pageAttachmentState={{
-            type: 'synthetics_monitor',
-            url: {
-              pathAndQuery: redirectUrl,
-              label: monitor.name,
-              actionLabel: i18n.translate(
-                'xpack.synthetics.cases.addToCaseModal.goToMonitorHistoryLinkLabel',
-                {
-                  defaultMessage: 'Go to Monitor History',
-                }
-              ),
-              iconType: 'uptimeApp',
-            },
-          }}
+          pageAttachmentState={pageState}
           cases={cases}
-          observabilityAIAssistant={observabilityAIAssistant}
           onCloseModal={onCloseModal}
           notifications={notifications}
+          observabilityAIAssistant={observabilityAIAssistant}
         />
       )}
     </>

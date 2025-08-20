@@ -6,8 +6,9 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useRequestErrorHandler } from './use_request_error_handler';
-import { EnableAlertResponse, showAlertsToast } from '../../alerts/lib/alerts_toast';
-import { MonitoringStartServices } from '../../types';
+import type { EnableAlertResponse } from '../../alerts/lib/alerts_toast';
+import { showAlertsToast } from '../../alerts/lib/alerts_toast';
+import type { MonitoringStartServices } from '../../types';
 
 export const useAlertsModal = () => {
   const { services } = useKibana<MonitoringStartServices>();

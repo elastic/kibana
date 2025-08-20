@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense } from 'react';
+import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { AddPageAttachmentToCaseModalProps } from './add_page_attachment_to_case_modal';
+import { dynamic } from '@kbn/shared-ux-utility';
 
-const AddPageAttachmentToCaseModalLazy = lazy(() => import('./add_page_attachment_to_case_modal'));
-
-export function AddPageAttachmentToCaseModal(props: AddPageAttachmentToCaseModalProps) {
-  return (
-    <Suspense fallback={<EuiLoadingSpinner />}>
-      <AddPageAttachmentToCaseModalLazy {...props} />
-    </Suspense>
-  );
-}
+export const AddPageAttachmentToCaseModal = dynamic(
+  () => import('./add_page_attachment_to_case_modal'),
+  {
+    fallback: <EuiLoadingSpinner />,
+  }
+);

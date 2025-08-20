@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  AggConfigs,
+import type {
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
   AggsCommonStart,
-  getCalculateAutoTimeExpression,
 } from '../../../common';
+import { AggConfigs, getCalculateAutoTimeExpression } from '../../../common';
 
-import { AggsSetup, AggsStart } from './types';
+import type { AggsSetup, AggsStart } from './types';
 
 import { mockAggTypesRegistry } from '../../../common/search/aggs/test_helpers';
 

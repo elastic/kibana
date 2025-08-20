@@ -12,7 +12,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { type TimeRange } from '@kbn/es-query';
 import { getMonitorSpaceToAppend } from './use_edit_monitor_locator';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export interface MonitorDetailLocatorParams {
   configId: string;
@@ -42,12 +42,12 @@ export function useMonitorDetailLocator({
     const url = locator?.getRedirectUrl({
       configId,
       locationId,
-      timeRange: useAbsoluteDate && timeRange ? convertToAbsoluteTimeRange(timeRange) : timeRange,
+      timeRange: useAbsoluteDate ? convertToAbsoluteTimeRange(timeRange) : timeRange,
       tabId,
       ...getMonitorSpaceToAppend(space, spaces),
     });
     setMonitorUrl(url);
-  }, [locator, configId, locationId, spaces, space?.id, space, timeRange, tabId, useAbsoluteDate]);
+  }, [locator, configId, locationId, spaces, space, timeRange, tabId, useAbsoluteDate]);
 
   return monitorUrl;
 }

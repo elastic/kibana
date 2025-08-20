@@ -8,37 +8,18 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { MaintenanceWindowStatus, KibanaServices } from './types';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
+import type { KibanaServices } from './types';
+import { MaintenanceWindowStatus } from './types';
 import { useFetchActiveMaintenanceWindows } from './use_fetch_active_maintenance_windows';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import {
   MAINTENANCE_WINDOW_NO_CATEGORY_TITLE,
   MAINTENANCE_WINDOW_RUNNING_DESCRIPTION,
+  MAINTENANCE_WINDOW_PAGE_LINK_TEXT,
 } from './translations';
 
-const maintenanceWindowTwoCategoryNames = (names: string[]) =>
-  i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowTwoCategoryNames', {
-    defaultMessage: '{first} and {second}',
-    values: { first: names[0], second: names[1] },
-  });
-const maintenanceWindowMultipleCategoryNames = (names: string[]) =>
-  i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowMultipleCategoryNames', {
-    defaultMessage: '{commaSeparatedList}, and {last}', // Oxford comma, e.g. "First, second, and third"
-    values: { commaSeparatedList: names.slice(0, -1).join(', '), last: names.slice(-1).join('') },
-  });
-
-const APP_CATEGORIES = {
-  ...DEFAULT_APP_CATEGORIES,
-  management: {
-    ...DEFAULT_APP_CATEGORIES.management,
-    label: i18n.translate('alertsUIShared.maintenanceWindowCallout.managementCategoryLabel', {
-      defaultMessage: 'Stack',
-    }),
-  },
-};
+export const MAINTENANCE_WINDOWS_PAGE = '/app/management/insightsAndAlerting/maintenanceWindows';
 
 export function MaintenanceWindowCallout({
   kibanaServices,
@@ -49,6 +30,7 @@ export function MaintenanceWindowCallout({
 }): JSX.Element | null {
   const {
     application: { capabilities },
+    http,
   } = kibanaServices;
 
   const isMaintenanceWindowDisabled =
@@ -82,33 +64,6 @@ export function MaintenanceWindowCallout({
     });
   }, [categories, activeMaintenanceWindows]);
 
-  const categoryNames = useMemo(() => {
-    const activeCategoryIds = Array.from(
-      new Set(
-        activeMaintenanceWindows
-          .map(({ categoryIds }) =>
-            // If the categories array is provided, only display category names that are included in it
-            categoryIds?.filter((categoryId) => !categories || categories.includes(categoryId))
-          )
-          .flat()
-      )
-    );
-
-    const activeCategories = activeCategoryIds
-      .map(
-        (categoryId) =>
-          Object.values(APP_CATEGORIES).find((c) => c.id === categoryId)?.label ?? categoryId
-      )
-      .filter(Boolean) as string[];
-    return activeCategories.length === 0
-      ? null
-      : activeCategories.length === 1
-      ? `${activeCategories}`
-      : activeCategories.length === 2
-      ? maintenanceWindowTwoCategoryNames(activeCategories)
-      : maintenanceWindowMultipleCategoryNames(activeCategories);
-  }, [activeMaintenanceWindows, categories]);
-
   if (isMaintenanceWindowDisabled) {
     return null;
   }
@@ -117,25 +72,23 @@ export function MaintenanceWindowCallout({
     return null;
   }
 
+  const maintenanceWindowPageLink = (
+    <EuiLink
+      href={http.basePath.prepend(MAINTENANCE_WINDOWS_PAGE)}
+      data-test-subj="maintenanceWindowPageLink"
+    >
+      {MAINTENANCE_WINDOW_PAGE_LINK_TEXT}
+    </EuiLink>
+  );
+
   return (
     <EuiCallOut
-      title={
-        !categoryNames
-          ? MAINTENANCE_WINDOW_NO_CATEGORY_TITLE
-          : i18n.translate('alertsUIShared.maintenanceWindowCallout.maintenanceWindowActive', {
-              defaultMessage:
-                '{activeWindowCount, plural, one {A maintenance window is} other {Maintenance windows are}} running for {categories} rules',
-              values: {
-                categories: categoryNames,
-                activeWindowCount: activeMaintenanceWindows.length,
-              },
-            })
-      }
+      title={MAINTENANCE_WINDOW_NO_CATEGORY_TITLE}
       color="warning"
       iconType="info"
       data-test-subj="maintenanceWindowCallout"
     >
-      {MAINTENANCE_WINDOW_RUNNING_DESCRIPTION}
+      {MAINTENANCE_WINDOW_RUNNING_DESCRIPTION} {maintenanceWindowPageLink}
     </EuiCallOut>
   );
 }

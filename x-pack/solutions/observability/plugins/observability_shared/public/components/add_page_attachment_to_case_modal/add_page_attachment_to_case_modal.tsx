@@ -6,16 +6,19 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { EuiConfirmModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
-import { type CasesPermissions } from '@kbn/cases-plugin/common';
+import { AttachmentType } from '@kbn/cases-plugin/common';
 import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { NotificationsStart } from '@kbn/core/public';
+import {
+  type PageAttachmentPersistedState,
+  PAGE_ATTACHMENT_TYPE,
+} from '@kbn/page-attachment-schema';
 import { useChatService } from '../../hooks/use_chat_service';
 import { usePageSummary } from '../../hooks/use_page_summary';
+import { type CasesPermissions } from '@kbn/cases-plugin/common';
+import type { NotificationsStart } from '@kbn/core/public';
 import { AddToCaseComment } from '../add_to_case_comment';
 
 export interface AddPageAttachmentToCaseModalProps {
@@ -33,8 +36,8 @@ export function AddPageAttachmentToCaseModal({
   notifications,
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
-  const getCasesContext = cases?.ui.getCasesContext;
-  const canUseCases = cases?.helpers.canUseCases;
+  const getCasesContext = cases.ui.getCasesContext;
+  const canUseCases = cases.helpers.canUseCases;
   const { ObservabilityAIAssistantChatServiceContext, chatService } = useChatService({
     observabilityAIAssistant,
   });
@@ -58,14 +61,11 @@ export function AddPageAttachmentToCaseModal({
     return canUseCases();
   }, [canUseCases]);
 
-  const hasCasesPermissions =
-    casesPermissions.read && casesPermissions.update && casesPermissions.push;
-  const CasesContext = useMemo(() => {
-    if (!getCasesContext) {
-      return React.Fragment;
-    }
-    return getCasesContext();
-  }, [getCasesContext]);
+  const hasCasesPermissions = useMemo(() => {
+    return casesPermissions.read && casesPermissions.update && casesPermissions.push;
+  }, [casesPermissions]);
+
+  const CasesContext = getCasesContext();
 
   useEffect(() => {
     if (!hasCasesPermissions) {
@@ -82,7 +82,11 @@ export function AddPageAttachmentToCaseModal({
   }, [hasCasesPermissions, notifications.toasts]);
 
   return hasCasesPermissions ? (
-    <CasesContext permissions={casesPermissions} owner={['observability']}>
+    <CasesContext
+      permissions={casesPermissions}
+      owner={['observability']}
+      features={{ alerts: { sync: false } }}
+    >
       {ObservabilityAIAssistantChatServiceContext && chatService ? (
         <ObservabilityAIAssistantChatServiceContext.Provider value={chatService}>
           <AddToCaseButtonContent
@@ -113,81 +117,80 @@ function AddToCaseButtonContent({
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
-  const [isCommentLoading, setIsCommentLoading] = useState(true);
+  const [isCommentLoading, setIsLoading] = useState(true);
   const [comment, setComment] = useState<string>('');
+  const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
   const { screenContexts } = usePageSummary({
     observabilityAIAssistant,
   });
-  const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
-  const casesModal = useCasesAddToExistingCaseModal();
+  const casesModal = useCasesAddToExistingCaseModal({
+    onClose: onCloseModal,
+  });
+
+  const handleCloseModal = useCallback(() => {
+    setIsCommentModalOpen(true);
+    onCloseModal();
+  }, [onCloseModal]);
 
   const onCommentAdded = useCallback(() => {
     setIsCommentModalOpen(false);
     casesModal.open({
-      getAttachments: () => {
-        return [
-          {
-            persistableStateAttachmentState: {
-              ...pageAttachmentState,
-              summary: comment,
-              screenContext: screenContexts,
-            },
-            persistableStateAttachmentTypeId: '.page',
-            type: 'persistableState',
+      getAttachments: () => [
+        {
+          persistableStateAttachmentState: {
+            ...pageAttachmentState,
+            summary: comment,
+            screenContext: screenContexts || [],
           },
-        ] as CaseAttachmentsWithoutOwner;
-      },
+          persistableStateAttachmentTypeId: PAGE_ATTACHMENT_TYPE,
+          type: AttachmentType.persistableState,
+        },
+      ],
     });
   }, [casesModal, comment, pageAttachmentState, screenContexts]);
 
-  return (
-    <>
-      {isCommentModalOpen && (
-        <EuiConfirmModal
-          onCancel={onCloseModal}
-          aria-label={i18n.translate(
-            'xpack.observabilityShared.cases.addToCaseModal.confirmAriaLabel',
-            {
-              defaultMessage: 'Confirm comment',
-            }
-          )}
-          onConfirm={onCommentAdded}
-          data-test-subj="syntheticsAddToCaseCommentModal"
-          style={{ width: 800 }}
-          confirmButtonText={i18n.translate(
-            'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.confirmButtonText',
-            {
-              defaultMessage: 'Confirm',
-            }
-          )}
-          cancelButtonText={i18n.translate(
-            'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.cancelButtonText',
-            {
-              defaultMessage: 'Cancel',
-            }
-          )}
-          isLoading={isCommentLoading}
-        >
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>
-              {i18n.translate('xpack.observabilityShared.cases.addToCaseModal.title', {
-                defaultMessage: 'Add page to case',
-              })}
-            </EuiModalHeaderTitle>
-          </EuiModalHeader>
-          <EuiModalBody>
-            <AddToCaseComment
-              onCommentChange={setComment}
-              comment={comment}
-              setIsLoading={setIsCommentLoading}
-              observabilityAIAssistant={observabilityAIAssistant}
-              notifications={notifications}
-            />
-          </EuiModalBody>
-        </EuiConfirmModal>
+  return isCommentModalOpen ? (
+    <EuiConfirmModal
+      onCancel={handleCloseModal}
+      aria-label={i18n.translate(
+        'xpack.observabilityShared.cases.addToCaseModal.confirmAriaLabel',
+        {
+          defaultMessage: 'Confirm comment',
+        }
       )}
-    </>
-  );
+      onConfirm={onCommentAdded}
+      data-test-subj="syntheticsAddToCaseCommentModal"
+      style={{ width: 800 }}
+      isLoading={isCommentLoading}
+      confirmButtonText={i18n.translate(
+        'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.confirmButtonText',
+        {
+          defaultMessage: 'Confirm',
+        }
+      )}
+      cancelButtonText={i18n.translate(
+        'xpack.observabilityShared.cases.addToPageAttachmentToCaseModal.cancelButtonText',
+        {
+          defaultMessage: 'Cancel',
+        }
+      )}
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>
+          {i18n.translate('xpack.observabilityShared.cases.addToCaseModal.title', {
+            defaultMessage: 'Add page to case',
+          })}
+        </EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <AddToCaseComment
+          onCommentChange={(change) => setComment(change)}
+          comment={comment}
+          setIsCommentLoading={setIsLoading}
+        />
+      </EuiModalBody>
+    </EuiConfirmModal>
+  ) : null;
 }
 
 // eslint-disable-next-line import/no-default-export

@@ -10793,6 +10793,12 @@
             "description": "Non-default value of setting."
           }
         },
+        "onechat:a2a:enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
         "onechat:ui:enabled": {
           "type": "boolean",
           "_meta": {
@@ -10800,6 +10806,12 @@
           }
         },
         "onechat:api:enabled": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Non-default value of setting."
+          }
+        },
+        "workflows:ui:enabled": {
           "type": "boolean",
           "_meta": {
             "description": "Non-default value of setting."
@@ -11040,6 +11052,12 @@
           "type": "boolean",
           "_meta": {
             "description": "Enable significant events in streams."
+          }
+        },
+        "observability:enableDiagnosticMode": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Enable diagnostic mode"
           }
         }
       }

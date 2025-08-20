@@ -29,7 +29,9 @@ jest.mock('react-redux', () => ({
 }));
 
 jest.mock('./hooks/use_selected_monitor', () => ({
-  useSelectedMonitor: jest.fn().mockReturnValue({ monitor: { config_id: 'test-config-id' } }),
+  useSelectedMonitor: jest
+    .fn()
+    .mockReturnValue({ monitor: { config_id: 'test-config-id', name: 'Test Monitor' } }),
 }));
 
 jest.mock('../../hooks', () => ({

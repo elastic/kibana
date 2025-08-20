@@ -9,8 +9,8 @@ import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiTextArea, EuiFormRow, EuiSkeletonText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
-import { NotificationsStart } from '@kbn/core/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import { usePageSummary } from '../../hooks/use_page_summary';
 
 interface AddToCaseCommentProps {

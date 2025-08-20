@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiModal,
   EuiModalHeader,
@@ -22,11 +23,10 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiLoadingSpinner,
-  EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 
 interface Alert {

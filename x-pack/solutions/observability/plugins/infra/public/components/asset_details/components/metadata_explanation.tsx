@@ -8,16 +8,21 @@
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
 import { FormattedDate, FormattedMessage, FormattedTime } from '@kbn/i18n-react';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import {
+  findInventoryFields,
+  type DataSchemaFormat,
+  type InventoryItemType,
+} from '@kbn/metrics-data-access-plugin/common';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { Popover } from '../tabs/common/popover';
 import { useMetadataStateContext } from '../hooks/use_metadata_state';
 
-const HOSTNAME_DOCS_LINK =
-  'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name';
-
-const CONTAINER_ID_DOCS_LINK =
-  'https://www.elastic.co/guide/en/ecs/current/ecs-container.html#field-container-id';
+const DOCS_LINKS = {
+  ecs_host: 'https://www.elastic.co/guide/en/ecs/current/ecs-host.html#field-host-name',
+  ecs_container:
+    'https://www.elastic.co/guide/en/ecs/current/ecs-container.html#field-container-id',
+  semconv_host: 'https://opentelemetry.io/docs/specs/semconv/registry/attributes/host/#host-name',
+};
 
 const MetadataExplanationTooltipContent = React.memo(
   ({ docsLink, metadataField }: { docsLink: string; metadataField: string }) => {
@@ -59,10 +64,21 @@ const MetadataExplanationTooltipContent = React.memo(
   }
 );
 
-export const MetadataExplanationMessage = ({ entityType }: { entityType: InventoryItemType }) => {
+export const MetadataExplanationMessage = ({
+  entityType,
+  schema,
+}: {
+  entityType: InventoryItemType;
+  schema: DataSchemaFormat | null;
+}) => {
   const { metadata, loading } = useMetadataStateContext();
-  const docsLink = entityType === 'host' ? HOSTNAME_DOCS_LINK : CONTAINER_ID_DOCS_LINK;
-  const metadataField = entityType === 'host' ? 'host.name' : 'container.id';
+  const docsLink =
+    entityType === 'host'
+      ? schema === 'semconv'
+        ? DOCS_LINKS.semconv_host
+        : DOCS_LINKS.ecs_host
+      : DOCS_LINKS.ecs_container;
+  const metadataField = findInventoryFields(entityType).id;
 
   return loading && !metadata ? (
     <EuiLoadingSpinner />

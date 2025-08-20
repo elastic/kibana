@@ -7,15 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 
-import { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type { WorkflowsManagementConfig } from './config';
+import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import {
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
 } from '../common';
+import type { WorkflowsManagementConfig } from './config';
 import { workflowSavedObjectType } from './saved_objects/workflow';
 import { SchedulerService } from './scheduler/scheduler_service';
 import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
@@ -29,7 +36,13 @@ import type {
 import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 import { defineRoutes } from './workflows_management/workflows_management_routes';
 import { WorkflowsService } from './workflows_management/workflows_management_service';
+// Import the workflows connector
+import {
+  getWorkflowsConnectorAdapter,
+  getConnectorType as getWorkflowsConnectorType,
+} from './connectors/workflows';
 import { registerFeatures } from './features';
+import { registerUISettings } from './ui_settings';
 
 export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPluginStart> {
   private readonly logger: Logger;
@@ -48,6 +61,38 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
   public setup(core: CoreSetup, plugins: WorkflowsManagementPluginServerDependenciesSetup) {
     this.logger.debug('Workflows Management: Setup');
+
+    registerUISettings({ uiSettings: core.uiSettings });
+
+    // Register workflows connector if actions plugin is available
+    if (plugins.actions) {
+      // Create workflows service function for the connector
+      const getWorkflowsService = async (request: KibanaRequest) => {
+        // Return a function that will be called by the connector
+        return async (workflowId: string, inputs: Record<string, unknown>) => {
+          if (!this.api) {
+            throw new Error('Workflows management API not initialized');
+          }
+
+          // Get the workflow first
+          const workflow = await this.api.getWorkflow(workflowId);
+          if (!workflow) {
+            throw new Error(`Workflow not found: ${workflowId}`);
+          }
+
+          // Run the workflow, @tb: maybe switch to scheduler?
+          return await this.api.runWorkflow(workflow, inputs);
+        };
+      };
+
+      // Register the workflows connector
+      plugins.actions.registerType(getWorkflowsConnectorType({ getWorkflowsService }));
+
+      // Register connector adapter for alerting if available
+      if (plugins.alerting) {
+        plugins.alerting.registerConnectorAdapter(getWorkflowsConnectorAdapter());
+      }
+    }
 
     // Register workflow task definition
     if (plugins.taskManager) {
@@ -160,9 +205,12 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
 
-    // Set task scheduler in workflows service
+    // Set task scheduler and security service in workflows service
     if (this.workflowsService) {
       this.workflowsService.setTaskScheduler(this.workflowTaskScheduler);
+      if (plugins.security) {
+        this.workflowsService.setSecurityService(core.security);
+      }
     }
 
     const actionsTypes = plugins.actions.getAllTypes();
@@ -172,7 +220,6 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     this.schedulerService = new SchedulerService(
       this.logger,
       this.workflowsService!,
-      this.unsecureActionsClient!,
       plugins.taskManager
     );
     this.api!.setSchedulerService(this.schedulerService!);
