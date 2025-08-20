@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Frequency } from '@kbn/rrule';
 import type { RruleSchedule } from '@kbn/task-manager-plugin/server/task';
 
 export const SCOPE = ['securitySolution'];
@@ -14,9 +15,11 @@ export const TIMEOUT = '1h';
 export const MAX_ATTEMPTS = 5;
 export const MAX_CONCURRENCY = 1;
 export const SCHEDULE = {
-  freq: Frequency.DAILY,
-  tzid: 'UTC',
-  interval: 1,
-  byhour: [00],
-  byminute: [01],
-} as RruleSchedule
+  rrule: {
+    freq: Frequency.DAILY,
+    tzid: 'UTC',
+    interval: 1,
+    byhour: [0],
+    byminute: [1],
+  },
+} as RruleSchedule;
