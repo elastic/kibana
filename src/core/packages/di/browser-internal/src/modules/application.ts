@@ -23,7 +23,7 @@ export const application = new ContainerModule(({ bind, onActivation }) => {
         const scope = get(CoreStart('injection')).fork();
         scope.bind(ApplicationParameters).toConstantValue(params);
         scope.bind(Global).toConstantValue(ApplicationParameters);
-        const unmount = scope.get(definition).mount();
+        const unmount = scope.get(definition, { autobind: true }).mount();
         const wrap = (callback: AppUnmount) => () => {
           try {
             return callback();

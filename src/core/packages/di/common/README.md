@@ -266,7 +266,6 @@ class HelloWorldApplication {
 }
 
 export const module = new ContainerModule(({ bind }) => {
-  bind(HelloWorldApplication).toSelf().inRequestScope();
   bind(Application).toConstantValue(HelloWorldApplication);
 });
 ```
