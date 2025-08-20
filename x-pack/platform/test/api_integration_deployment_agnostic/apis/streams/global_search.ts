@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { isEqual } from 'lodash';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -49,14 +50,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         })
         .expect(200);
 
-      expect(response.body.results).to.contain({
-        id: 'logs',
-        score: 100,
-        title: 'logs',
-        type: 'Wired stream',
-        url: '/app/streams/logs/management/lifecycle',
-        icon: 'logsApp',
-      });
+      expect(
+        response.body.results.some((result: any) =>
+          isEqual(result, {
+            id: 'logs',
+            score: 100,
+            title: 'logs',
+            type: 'Wired stream',
+            url: '/app/streams/logs/management/lifecycle',
+            icon: 'logsApp',
+          })
+        )
+      ).to.be(true);
     });
   });
 }

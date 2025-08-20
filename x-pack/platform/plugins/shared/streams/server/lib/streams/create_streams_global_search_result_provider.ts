@@ -54,10 +54,6 @@ async function findStreams({
   maxResults: number;
   storageClient: StreamsStorageClient;
 }) {
-  // If we had the stream type as an indexed property we could search on that as well
-  // The search options also provide tags, once it is possible to add tags to all Streams
-  // We should extend this to use tags when searching
-  // (the value is the Kibana tag ID, so we need to resolve the string value first)
   // This does NOT included unmanaged Classic streams
   const searchResponse = await storageClient.search({
     size: maxResults,
@@ -139,5 +135,6 @@ function calculateTermScore(name: string, searchTerm: string) {
   } else if (name.includes(searchTerm)) {
     return 75;
   }
-  return 0;
+
+  return 50;
 }
