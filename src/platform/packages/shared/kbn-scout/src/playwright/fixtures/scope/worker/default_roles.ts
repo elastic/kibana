@@ -12,7 +12,7 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
-import { ElasticsearchRoleDescriptor } from '../../../../common';
+import type { ElasticsearchRoleDescriptor } from '../../../../common';
 import { coreWorkerFixtures } from './core_fixtures';
 
 export type DefaultRolesFixture = Map<string, ElasticsearchRoleDescriptor>;

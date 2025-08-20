@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
 
 export const EMBEDDABLE_EDITOR_STATE_KEY = 'embeddable_editor_state';
 

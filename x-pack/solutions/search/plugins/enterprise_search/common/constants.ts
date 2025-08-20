@@ -19,9 +19,9 @@ import {
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
-import { IngestPipelineParams } from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 
-import { ProductFeatures } from './types';
+import type { ProductFeatures } from './types';
 
 export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search.productName', {
   defaultMessage: 'Elasticsearch',
@@ -194,9 +194,9 @@ export const CRAWLER = {
 // TODO remove this once the connector service types are no longer in "example" state
 export const EXAMPLE_CONNECTOR_SERVICE_TYPES = ['opentext_documentum'];
 
-export const SEARCH_APPS_BREADCRUMB = i18n.translate(
-  'xpack.enterpriseSearch.searchApplications.breadcrumb',
+export const SEARCH_APPS_TITLE = i18n.translate(
+  'xpack.enterpriseSearch.titles.searchApplications',
   {
-    defaultMessage: 'Search Applications',
+    defaultMessage: 'Search applications',
   }
 );

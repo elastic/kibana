@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { HttpHandler } from '@kbn/core/public';
-import { AgentMode, oneChatDefaultAgentId } from '@kbn/onechat-common';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { HttpHandler } from '@kbn/core/public';
+import { oneChatDefaultAgentId } from '@kbn/onechat-common';
 
 type StringOrMessageList = string;
 
 interface Options {
   agentId?: string;
-  mode?: AgentMode;
 }
 
 interface ConverseFunctionParams {
@@ -38,7 +37,7 @@ export class OnechatEvaluationChatClient {
   converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
     this.log.info('Calling converse');
 
-    const { agentId = oneChatDefaultAgentId, mode = AgentMode.normal } = options;
+    const { agentId = oneChatDefaultAgentId } = options;
 
     try {
       // Use the non-async OneChat API endpoint
@@ -47,7 +46,6 @@ export class OnechatEvaluationChatClient {
         version: '2023-10-31',
         body: JSON.stringify({
           agent_id: agentId,
-          mode,
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages,

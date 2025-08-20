@@ -8,7 +8,7 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
-import {
+import type {
   BaseStep,
   IfStep,
   ForEachStep,
@@ -19,7 +19,9 @@ import {
   EnterConditionBranchNode,
   ExitConditionBranchNode,
   AtomicGraphNode,
+  WaitGraphNode,
   WorkflowYaml,
+  WaitStep,
 } from '@kbn/workflows';
 import { omit } from 'lodash';
 
@@ -30,15 +32,37 @@ function getNodeId(node: BaseStep): string {
 }
 
 function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
-  if (currentStep.type === 'if') {
-    return visitIfStep(graph, previousStep, currentStep);
+  const modifiedCurrentStep = handleStepLevelOperations(currentStep);
+  if ((modifiedCurrentStep as IfStep).type === 'if') {
+    return visitIfStep(graph, previousStep, modifiedCurrentStep);
   }
 
-  if (currentStep.type === 'foreach') {
-    return visitForeachStep(graph, previousStep, currentStep);
+  if ((modifiedCurrentStep as ForEachStep).type === 'foreach') {
+    return visitForeachStep(graph, previousStep, modifiedCurrentStep);
   }
 
-  return visitAtomicStep(graph, previousStep, currentStep);
+  if ((modifiedCurrentStep as WaitStep).type === 'wait') {
+    return visitWaitStep(graph, previousStep, modifiedCurrentStep);
+  }
+
+  return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
+}
+
+export function visitWaitStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const waitNode: WaitGraphNode = {
+    id: getNodeId(currentStep),
+    type: 'wait',
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(waitNode.id, waitNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), waitNode.id);
+  }
+
+  return waitNode;
 }
 
 export function visitAtomicStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
@@ -176,12 +200,55 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   return exitForeachNode;
 }
 
+/**
+ * Processes step-level operations for a given workflow step.
+ *
+ * This function handles conditional step-level operations (if, foreach, etc)
+ * that are defined at the step level by wrapping the original step in appropriate
+ * control flow steps.
+ *
+ * @param currentStep - The workflow step to process
+ * @returns A potentially wrapped version of the input step that incorporates
+ *          any step-level control flow operations (if/foreach)
+ */
+function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
+  /** !IMPORTANT!
+   * The order of operations is important here.
+   * The order affects what context will be available in the step if/foreach/etc operation.
+   */
+
+  // currentStep.type !== 'foreach' is needed to avoid double wrapping in foreach
+  // when the step is already a foreach step
+  if (currentStep.if) {
+    const modifiedStep = omit(currentStep, ['if']);
+    return {
+      name: `if_${getNodeId(currentStep)}`,
+      type: 'if',
+      condition: currentStep.if,
+      steps: [handleStepLevelOperations(modifiedStep)],
+    } as IfStep;
+  }
+
+  if (currentStep.foreach && (currentStep as ForEachStep).type !== 'foreach') {
+    const modifiedStep = omit(currentStep, ['foreach']);
+    return {
+      name: `foreach_${getNodeId(currentStep)}`,
+      type: 'foreach',
+      foreach: currentStep.foreach,
+      steps: [handleStepLevelOperations(modifiedStep)],
+    } as ForEachStep;
+  }
+
+  return currentStep;
+}
+
 export function convertToWorkflowGraph(workflowSchema: WorkflowYaml): graphlib.Graph {
   const graph = new graphlib.Graph({ directed: true });
   let previousNode: any | null = null;
 
   workflowSchema.steps.forEach((currentStep, index) => {
-    const currentNode = visitAbstractStep(graph, previousNode, currentStep);
+    const transformedStep = handleStepLevelOperations(currentStep);
+    const currentNode = visitAbstractStep(graph, previousNode, transformedStep);
     previousNode = currentNode;
   });
 
