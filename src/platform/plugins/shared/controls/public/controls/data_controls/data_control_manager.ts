@@ -15,7 +15,6 @@ import {
 } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
 import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -168,7 +167,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
     const initialDataView = await initialDataViewPromise;
     initialFilter = getInitialFilter(initialDataView);
   }
-  const filters$ = new BehaviorSubject<Filter[] | undefined>(
+  const appliedFilters$ = new BehaviorSubject<Filter[] | undefined>(
     initialFilter ? [initialFilter] : undefined
   );
 
@@ -183,7 +182,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       field$,
       fieldFormatter,
       onEdit,
-      filters$,
+      appliedFilters$,
       defaultTitle$,
       getTypeDisplayName: () => typeDisplayName,
       isEditingEnabled: () => true,
@@ -204,7 +203,7 @@ export const initializeDataControlManager = async <EditorState extends object = 
       },
       onSelectionChange: () => {},
       setOutputFilter: (newFilter: Filter | undefined) => {
-        filters$.next(newFilter ? [newFilter] : undefined);
+        appliedFilters$.next(newFilter ? [newFilter] : undefined);
       },
     },
     anyStateChange$: dataControlStateManager.anyStateChange$,

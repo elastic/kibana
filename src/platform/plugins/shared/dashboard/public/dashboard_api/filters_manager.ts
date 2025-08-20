@@ -9,7 +9,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import { apiPublishesFilters, PublishesFilters } from '@kbn/presentation-publishing';
+import { apiAppliesFilters, AppliesFilters } from '@kbn/presentation-publishing';
 import { BehaviorSubject, combineLatestWith, map } from 'rxjs';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeLayoutManager } from './layout_manager';
@@ -23,14 +23,20 @@ export const initializeFiltersManager = (
 
   const childFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const filterManagerSubscription = combineCompatibleChildrenApis<
-    PublishesFilters,
+    AppliesFilters,
     Filter[] | undefined
-  >({ children$: layoutManager.api.children$ }, 'filters$', apiPublishesFilters, [], (values) => {
-    const allOutputFilters = values.filter(
-      (childOutputFilters) => childOutputFilters && childOutputFilters.length > 0
-    ) as Filter[][];
-    return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
-  }).subscribe((allChildFilters) => childFilters$.next(allChildFilters));
+  >(
+    { children$: layoutManager.api.children$ },
+    'appliedFilters$',
+    apiAppliesFilters,
+    [],
+    (values) => {
+      const allOutputFilters = values.filter(
+        (childOutputFilters) => childOutputFilters && childOutputFilters.length > 0
+      ) as Filter[][];
+      return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
+    }
+  ).subscribe((allChildFilters) => childFilters$.next(allChildFilters));
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   filterManagerSubscription.add(
