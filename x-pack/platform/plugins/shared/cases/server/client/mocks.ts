@@ -201,7 +201,7 @@ type AttachmentSuggestionsSubClientMock = jest.Mocked<AttachmentSuggestionsSubCl
 
 export const createAttachmentSuggestionsSubClientMock = (): AttachmentSuggestionsSubClientMock => {
   return {
-    getAllForOwners: jest.fn(),
+    getAllForOwner: jest.fn(),
   };
 };
 

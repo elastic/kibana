@@ -5,14 +5,14 @@
  * 2.0.
  */
 import type { KibanaRequest } from '@kbn/core/server';
-import { getAllForOwners } from './get';
+import { getAllForOwner } from './get';
 import type { SuggestionResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
-import type { GetAllForOwnersArgs } from './types';
+import type { GetAllForOwnerArgs } from './types';
 import { loggerMock } from '@kbn/logging-mocks';
 
-describe('getAllForOwners', () => {
-  it('calls attachmentSuggestionRegistry.getAllSuggestionsForOwners and returns suggestions', async () => {
+describe('getAllForOwner', () => {
+  it('calls attachmentSuggestionRegistry.getAllSuggestionsForOwner and returns suggestions', async () => {
     const mockSuggestions: SuggestionResponse = {
       suggestions: [
         {
@@ -24,7 +24,7 @@ describe('getAllForOwners', () => {
     };
 
     const attachmentSuggestionRegistry = {
-      getAllSuggestionsForOwners: jest.fn().mockResolvedValue(mockSuggestions),
+      getAllSuggestionsForOwner: jest.fn().mockResolvedValue(mockSuggestions),
     };
 
     const clientArgs = {
@@ -32,8 +32,8 @@ describe('getAllForOwners', () => {
       logger: loggerMock.create(),
     } as unknown as CasesClientArgs;
 
-    const args: GetAllForOwnersArgs = {
-      owners: ['observability'],
+    const args: GetAllForOwnerArgs = {
+      owner: 'observability',
       context: {
         'service.name': ['my-service'],
         timeRange: {
@@ -49,10 +49,10 @@ describe('getAllForOwners', () => {
       } as KibanaRequest,
     };
 
-    const result = await getAllForOwners(args, clientArgs);
+    const result = await getAllForOwner(args, clientArgs);
 
-    expect(attachmentSuggestionRegistry.getAllSuggestionsForOwners).toHaveBeenCalledWith(
-      args.owners,
+    expect(attachmentSuggestionRegistry.getAllSuggestionsForOwner).toHaveBeenCalledWith(
+      args.owner,
       args.context,
       args.request,
       clientArgs.logger

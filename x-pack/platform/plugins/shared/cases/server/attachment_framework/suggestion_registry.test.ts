@@ -61,13 +61,13 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType1);
       registry.register(suggestionType2);
 
-      const observabilitySuggestions = registry.getAllForOwners(['observability']);
+      const observabilitySuggestions = registry.getAllForOwner('observability');
       expect(observabilitySuggestions).toHaveLength(1);
       expect(observabilitySuggestions[0].id).toBe('suggestion-1');
     });
   });
 
-  describe('getAllSuggestionsForOwners', () => {
+  describe('getAllSuggestionsForOwner', () => {
     it('should execute all handlers for the specified owners and return combined suggestions', async () => {
       const mockHandler1: SuggestionHandler = jest.fn(async () => ({
         suggestions: [
@@ -121,8 +121,8 @@ describe('AttachmentSuggestionRegistry', () => {
 
       const request = {} as KibanaRequest;
 
-      const response = await registry.getAllSuggestionsForOwners(
-        ['observability'],
+      const response = await registry.getAllSuggestionsForOwner(
+        'observability',
         context,
         request,
         loggerMock.create()
@@ -183,8 +183,8 @@ describe('AttachmentSuggestionRegistry', () => {
 
       const request = {} as KibanaRequest;
 
-      const response = await registry.getAllSuggestionsForOwners(
-        ['observability'],
+      const response = await registry.getAllSuggestionsForOwner(
+        'observability',
         context,
         request,
         loggerMock.create()
@@ -244,7 +244,7 @@ describe('AttachmentSuggestionRegistry', () => {
 
       const request = {} as KibanaRequest;
 
-      await registry.getAllSuggestionsForOwners(['observability'], context, request, mockLogger);
+      await registry.getAllSuggestionsForOwner('observability', context, request, mockLogger);
 
       expect(mockHandler).toHaveBeenCalledWith({ request, context });
       expect(mockLogger.error).toHaveBeenCalledWith('Failed to get suggestion.', {

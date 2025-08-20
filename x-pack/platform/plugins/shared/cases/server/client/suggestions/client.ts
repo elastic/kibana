@@ -7,14 +7,14 @@
 
 import type { SuggestionResponse } from '../../../common/types/domain';
 import type { CasesClientArgs } from '../types';
-import type { GetAllForOwnersArgs } from './types';
-import { getAllForOwners } from './get';
+import type { GetAllForOwnerArgs } from './types';
+import { getAllForOwner } from './get';
 
 /**
  * API for interacting with attachment suggestions.
  */
 export interface AttachmentSuggestionsSubClient {
-  getAllForOwners(getAllForOwnersArgs: GetAllForOwnersArgs): Promise<SuggestionResponse>;
+  getAllForOwner(getAllForOwnerArgs: GetAllForOwnerArgs): Promise<SuggestionResponse>;
 }
 
 /**
@@ -26,7 +26,7 @@ export const createAttachmentSuggestionsSubClient = (
   clientArgs: CasesClientArgs
 ): AttachmentSuggestionsSubClient => {
   const suggestionsSubClient: AttachmentSuggestionsSubClient = {
-    getAllForOwners: (params: GetAllForOwnersArgs) => getAllForOwners(params, clientArgs),
+    getAllForOwner: (params: GetAllForOwnerArgs) => getAllForOwner(params, clientArgs),
   };
 
   return Object.freeze(suggestionsSubClient);

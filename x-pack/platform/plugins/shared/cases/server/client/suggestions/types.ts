@@ -7,11 +7,11 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SuggestionOwner, SuggestionContext } from '../../../common/types/domain';
 
-export interface GetAllForOwnersArgs {
+export interface GetAllForOwnerArgs {
   /**
-   * The suggestion owners to retrieve suggestions for
+   * The suggestion owner to retrieve suggestions for
    */
-  owners: SuggestionOwner[];
+  owner: SuggestionOwner;
   context: SuggestionContext;
   request: KibanaRequest;
 }

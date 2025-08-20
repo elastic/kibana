@@ -19,26 +19,18 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
     super('AttachmentSuggestionRegistry');
   }
 
-  public register(suggestionType: SuggestionType): void {
-    super.register(suggestionType);
+  public getAllForOwner(owner: SuggestionOwner): SuggestionType[] {
+    return this.list().filter((suggestion) => suggestion.owner === owner);
   }
 
-  public getAll(): SuggestionType[] {
-    return super.list();
-  }
-
-  public getAllForOwners(owners: SuggestionOwner[]): SuggestionType[] {
-    return this.list().filter((suggestion) => owners.includes(suggestion.owner));
-  }
-
-  public async getAllSuggestionsForOwners(
-    owners: SuggestionOwner[],
+  public async getAllSuggestionsForOwner(
+    owner: SuggestionOwner,
     context: SuggestionContext,
     request: KibanaRequest,
     logger: Logger
   ): Promise<SuggestionResponse> {
     const promises: Array<Promise<SuggestionResponse>> = [];
-    for (const suggestion of this.getAllForOwners(owners)) {
+    for (const suggestion of this.getAllForOwner(owner)) {
       for (const handlerDefinition of Object.values(suggestion.handlers)) {
         promises.push(
           handlerDefinition.handler({
