@@ -21,6 +21,7 @@ import type {
 } from '../../../common/runtime_types/alert_rules/common';
 import { SyntheticsEsClient } from '../../lib';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
@@ -905,6 +906,73 @@ describe('StatusRuleExecutor', () => {
         // Verify scheduleAlert was not called
         expect(scheduleAlertSpy).not.toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('scheduleAlert', () => {
+    const alertsClientMock = {
+      report: jest.fn().mockReturnValue({ uuid: 'uuid-1', start: undefined }),
+      setAlertData: jest.fn(),
+      getRecoveredAlerts: jest.fn(),
+    };
+
+    beforeAll(async () => {
+      // Wire the mocked alerts client into the executor
+      (statusRule as any).options.services.alertsClient = alertsClientMock as any;
+      (serverMock as any).basePath = { publicBaseUrl: 'http://localhost:5601' };
+      (statusRule as any).options.spaceId = 'default';
+      (statusRule as any).options.startedAt = new Date('2024-05-13T12:33:37.000Z');
+    });
+
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('adds grouping to both context and alert document when only one location', async () => {
+      statusRule.scheduleAlert({
+        idWithLocation: 'config1-loc1',
+        alertId: 'alert-1',
+        monitorSummary: {
+          configId: 'config1',
+          monitorId: 'mon-1',
+          monitorName: 'Test monitor',
+          monitorType: 'browser',
+          monitorUrl: 'https://example.com',
+          monitorUrlLabel: 'URL',
+          locationId: 'loc1',
+          locationName: 'US Central QA',
+          locationNames: 'US Central QA',
+          hostName: 'host',
+          reason: 'down',
+          status: 'down',
+          downThreshold: 1,
+          timestamp: '2024-05-13T12:33:37.000Z',
+          serviceName: 'service1',
+        } as any,
+        locationNames: ['US Central QA'],
+        locationIds: ['loc1'],
+        statusConfig: {
+          configId: 'config1',
+          locationId: 'loc1',
+          ping: {} as any,
+          checks: { downWithinXChecks: 1, down: 1 },
+          status: 'down',
+        } as any,
+        downThreshold: 1,
+      });
+
+      const expectedGrouping = {
+        location: { id: 'loc1' },
+        monitor: { id: 'mon-1', config_id: 'config1' },
+        service: { name: 'service1' },
+      };
+
+      // Verify grouping is present in context
+      const [{ context, payload }] = alertsClientMock.setAlertData.mock.calls.map(([args]) => args);
+      expect(context.grouping).toEqual(expectedGrouping);
+
+      // Verify grouping is present in the alert document produced
+      expect(payload[ALERT_GROUPING]).toEqual(expectedGrouping);
     });
   });
 });

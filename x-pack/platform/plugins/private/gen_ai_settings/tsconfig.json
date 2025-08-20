@@ -26,7 +26,8 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/management-settings-field-definition",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/licensing-plugin"
   ],
   "exclude": ["target/**/*"]
 }
