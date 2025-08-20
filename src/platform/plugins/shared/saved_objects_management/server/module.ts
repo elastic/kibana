@@ -8,9 +8,11 @@
  */
 
 import { ContainerModule } from 'inversify';
-import { CapabilitiesProvider } from '@kbn/core-di-server';
+import { CapabilitiesProvider, Route } from '@kbn/core-di-server';
 import { capabilitiesProvider } from './capabilities_provider';
+import { BulkDeleteRoute } from './routes';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(CapabilitiesProvider).toConstantValue(capabilitiesProvider);
+  bind(Route).toConstantValue(BulkDeleteRoute);
 });
