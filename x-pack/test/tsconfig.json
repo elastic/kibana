@@ -42,7 +42,6 @@
     "@kbn/rule-data-utils",
     "@kbn/test-subj-selector",
     "@kbn/rison",
-    "@kbn/kubernetes-security-plugin",
     "@kbn/es-query",
     "@kbn/stdio-dev-helpers",
     "@kbn/core-http-common",
