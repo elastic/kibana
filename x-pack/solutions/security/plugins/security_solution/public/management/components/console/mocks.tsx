@@ -152,7 +152,6 @@ export const enterConsoleCommand = async (
   }
 
   if (useKeyboard) {
-    await user.click(keyCaptureInput);
     await user.keyboard(cmd);
   } else {
     await user.type(keyCaptureInput, cmd);
@@ -163,8 +162,32 @@ export const enterConsoleCommand = async (
     // so this uses fireEvent instead for the time being.
     // See here for a related discussion: https://github.com/testing-library/user-event/discussions/1164
     // await user.keyboard('[Enter]');
-    fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13 });
+    fireEvent.keyDown(keyCaptureInput, { key: 'enter', keyCode: 13, code: 'Enter' });
   }
+};
+
+/**
+ * Triggers a keyboard event on the console command input for testing purposes. Used mostly
+ * when needing to test combination of keys - like `CTRL+a`, etc.
+ *
+ * @param renderResult - The result from rendering the component using testing-library
+ * @param event - The keyboard event object to trigger
+ * @param options
+ * @param options.dataTestSubj - Optional test subject identifier prefix, defaults to 'test'
+ */
+export const triggerConsoleCommandInputEvent = async (
+  renderResult: ReturnType<AppContextTestRender['render']>,
+  event: object,
+  { dataTestSubj = 'test' }: Partial<{ dataTestSubj: string }> = {}
+): Promise<void> => {
+  const keyCaptureInputTestId = `${dataTestSubj}-keyCapture-input`;
+  const keyCaptureInput = renderResult.getByTestId(keyCaptureInputTestId);
+
+  if (keyCaptureInput === null) {
+    throw new Error(`No input found with test-subj: ${keyCaptureInputTestId}`);
+  }
+
+  fireEvent.keyDown(keyCaptureInput, event);
 };
 
 export const getConsoleTestSetup = (): ConsoleTestSetup => {
