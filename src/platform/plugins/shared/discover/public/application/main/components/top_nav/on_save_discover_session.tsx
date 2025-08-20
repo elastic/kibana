@@ -133,7 +133,7 @@ export const onSaveDiscoverSession = async ({
   };
 
   const saveModal = (
-    <SaveSearchObjectModal
+    <DiscoverSessionSaveModal
       isTimeBased={isTimeBased}
       services={services}
       title={persistedDiscoverSession?.title ?? ''}
@@ -151,7 +151,7 @@ export const onSaveDiscoverSession = async ({
   showSaveModal(saveModal);
 };
 
-const SaveSearchObjectModal: React.FC<{
+const DiscoverSessionSaveModal: React.FC<{
   isTimeBased: boolean;
   services: DiscoverServices;
   title: string;
