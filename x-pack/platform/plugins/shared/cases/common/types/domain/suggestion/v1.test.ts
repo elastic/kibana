@@ -42,7 +42,7 @@ describe('Suggestion Schemas and Types', () => {
   describe('suggestionRequestRt', () => {
     it('should validate a valid request', () => {
       const validRequest = {
-        owners: ['observability', 'security'],
+        owners: ['observability', 'securitySolution'],
         context: {
           'service.name': 'my-service',
           timeRange: {
