@@ -35,7 +35,7 @@ export const getCaseSummaryRoute = createCasesRoute({
       const inferenceClient = await caseContext.getInferenceClient();
       const caseId = request.params.case_id;
       const connectorId = (request.query as { connectorId: string }).connectorId;
-      const caseData = await casesClient.cases.get({ id: caseId });
+      const caseData = await casesClient.cases.get({ id: caseId, includeComments: true });
       const prompt = getCaseSummaryPrompt(caseData);
 
       const chatResponse = await inferenceClient?.chatComplete({
