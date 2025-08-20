@@ -325,6 +325,10 @@ export class SyntheticsPrivateLocation {
       }
     }
 
+    this.server.logger.debug(
+      `[editingMonitors] Creating ${policiesToCreate.length} policies, updating ${policiesToUpdate.length} policies, and deleting ${policiesToDelete.length} policies`
+    );
+
     const [_createResponse, failedUpdatesRes, _deleteResponse] = await Promise.all([
       this.createPolicyBulk(policiesToCreate),
       this.updatePolicyBulk(policiesToUpdate),
