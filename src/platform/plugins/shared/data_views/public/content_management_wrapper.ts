@@ -42,7 +42,6 @@ export class ContentMagementWrapper implements PersistenceAPI {
         fields: options.fields,
       },
     });
-    console.log('ContentMagementWrapper find results:', JSON.stringify(results, null, 2));
 
     const response = results.hits.map((hit) => {
       const {
@@ -85,7 +84,6 @@ export class ContentMagementWrapper implements PersistenceAPI {
       throw new DataViewSavedObjectConflictError(id);
     }
 
-    console.log('ContentMagementWrapper------', JSON.stringify(response, null, 2));
     const {
       data: soAttributes,
       id: savedObjectId,
@@ -115,7 +113,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
       data: attributes,
       options,
     });
-    console.log('ContentMagementWrapper update response:', JSON.stringify(response, null, 2));
+
     const {
       data: soAttributes,
       id: savedObjectId,

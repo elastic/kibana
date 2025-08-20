@@ -21,7 +21,7 @@ import type { StorageContext } from '@kbn/content-management-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
 import type { SavedObjectReference } from '@kbn/core/server';
 import type { ITagsClient, Tag } from '@kbn/saved-objects-tagging-oss-plugin/common';
-import { TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';
 import type { DashboardSavedObjectAttributes } from '../dashboard_saved_object';
@@ -36,7 +36,7 @@ import type {
   DashboardUpdateOut,
   DashboardSearchOptions,
 } from './latest';
-import {
+import type {
   dashboardAttributesSchemaResponse,
   dashboardResponseMetaSchema,
   dashboardGetResultSchema,
@@ -343,14 +343,12 @@ export class DashboardStorage {
     const soClient = await savedObjectClientFromRequest(ctx);
     const tagsClient = this.savedObjectsTagging?.createTagClient({ client: soClient });
     const allTags = (await tagsClient?.getAll()) ?? [];
-    console.log('DashboardStorage update data:', data);
     // Validate input (data & options) & UP transform them to the latest version
     const { value: dataToLatest, error: dataError } = transforms.update.in.data.up<
       DashboardAttributes,
       DashboardAttributes
     >(data);
     if (dataError) {
-      console.error('dashboard_storage Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
@@ -467,7 +465,6 @@ export class DashboardStorage {
         total: soResponse.total,
       },
     };
-    console.log('search dashboard storage result---', JSON.stringify(response, null, 2));
     const validationError = transforms.search.out.result.validate(response);
     if (validationError) {
       if (this.throwOnResultValidationError) {

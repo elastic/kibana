@@ -51,6 +51,7 @@ export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
       data: schema.object(
         {
           title: schema.string(),
+          description: schema.string(),
           timeFieldName: schema.maybe(schema.string()),
           allowNoIndex: schema.maybe(schema.boolean()),
           fields: schema.maybe(schema.arrayOf(schema.string())),
@@ -58,7 +59,7 @@ export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
           sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
           fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
         },
-        { unknowns: 'allow' }
+        { unknowns: 'ignore' }
       ),
       type: schema.string(),
       id: schema.string(),
@@ -142,7 +143,10 @@ export const updateOptionsSchema = {
 export const createResultSchema = (soSchema: ObjectType<any>) =>
   schema.object(
     {
-      item: soSchema,
+      id: schema.string(),
+      type: schema.string(),
+      meta: schema.object({}),
+      data: soSchema,
     },
     { unknowns: 'forbid' }
   );

@@ -335,9 +335,9 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       createOptions
     );
 
-    const result = {
-      item: savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false),
-    };
+    const item = savedObjectToItem(savedObject, this.allowedSavedObjectAttributes, false);
+    const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
+    const result = { id: savedObjectId, type, data: savedObjectData, meta };
 
     const validationError = transforms.create.out.result.validate(result);
     if (validationError) {
@@ -402,10 +402,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
 
     const item = savedObjectToItem(partialSavedObject, this.allowedSavedObjectAttributes, true);
     const { id: savedObjectId, type, attributes: savedObjectData, ...meta } = item;
-    const result = {
-      item: { id: savedObjectId, type, data: savedObjectData, meta },
-    };
-
+    const result = { id: savedObjectId, type, data: savedObjectData, meta };
     const validationError = transforms.update.out.result.validate(result);
     if (validationError) {
       if (this.throwOnResultValidationError) {
@@ -420,7 +417,7 @@ export abstract class SOContentStorage<Types extends CMCrudTypes>
       Types['UpdateOut'],
       Types['UpdateOut']
     >(
-      result.item,
+      result,
       undefined, // do not override version
       { validate: false } // validation is done above
     );
