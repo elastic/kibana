@@ -17,6 +17,7 @@ import { updateFilterReferences } from '@kbn/es-query';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { cloneDeep, isObject } from 'lodash';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import { createInternalStateAsyncThunk } from '../utils';
 import { selectTabRuntimeState } from '../runtime_state';
@@ -100,7 +101,8 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
 
         const dataViewSpec = updatedTab.serializedSearchSource.index;
 
-        if (isObject(dataViewSpec) && dataViewSpec.id) {
+        // If the data view is a non-ES|QL ad hoc data view, it may need to be cloned
+        if (isObject(dataViewSpec) && dataViewSpec.id && dataViewSpec.type !== ESQL_TYPE) {
           let action: AdHocDataViewAction | undefined;
 
           if (state.defaultProfileAdHocDataViewIds.includes(dataViewSpec.id)) {
