@@ -69,6 +69,7 @@ export const QueryBar = () => {
           <EuiSearchBar
             defaultQuery={''}
             box={{
+              'data-test-subj': 'indexEditorQueryBar',
               disabled: !isIndexCreated,
               compressed: true,
             }}

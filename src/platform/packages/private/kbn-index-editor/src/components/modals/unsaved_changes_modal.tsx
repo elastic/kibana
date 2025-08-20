@@ -46,6 +46,7 @@ export const UnsavedChangesModal: React.FC<UnsavedChangesModal> = ({ onClose }) 
 
   return (
     <EuiConfirmModal
+      data-test-subj="indexEditorUnsavedChangesModal"
       aria-labelledby={modalTitleId}
       titleProps={{ id: modalTitleId }}
       title={

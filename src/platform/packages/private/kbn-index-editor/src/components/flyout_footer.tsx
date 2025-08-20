@@ -72,7 +72,12 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
     <EuiFlyoutFooter>
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
+          <EuiButtonEmpty
+            data-test-subj="indexEditorCloseButton"
+            iconType="cross"
+            onClick={onClose}
+            flush="left"
+          >
             <FormattedMessage
               id="xpack.dataVisualizer.file.uploadView.closeButton"
               defaultMessage="Close"
@@ -95,7 +100,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED && canImport ? (
               <EuiFlexItem grow={false}>
-                <EuiButton data-test-subj="indexEditorImportButton" onClick={onImpor}>
+                <EuiButton data-test-subj="indexEditorImportButton" onClick={onImport}>
                   <FormattedMessage
                     id="indexEditor.flyout.footer.importButton"
                     defaultMessage="Import"

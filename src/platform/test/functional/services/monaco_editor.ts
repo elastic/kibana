@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { Key } from 'selenium-webdriver';
 import { FtrService } from '../ftr_provider_context';
 
 export class MonacoEditorService extends FtrService {
@@ -49,6 +50,15 @@ export class MonacoEditorService extends FtrService {
     await textarea.type(value);
   }
 
+  public async pressCtrlSpace(testSubjId: string) {
+    const editor = await this.testSubjects.find(testSubjId);
+    const textarea = await editor.findByCssSelector('textarea');
+    await textarea.pressKeys([
+      Key[process.platform === 'darwin' ? 'COMMAND' : 'CONTROL'],
+      Key.SPACE,
+    ]);
+  }
+
   public async setCodeEditorValue(value: string, nthIndex?: number) {
     await this.retry.try(async () => {
       await this.browser.execute(
@@ -81,15 +91,48 @@ export class MonacoEditorService extends FtrService {
     );
   }
 
-  public async selectSuggestionByIndex(index: number) {
-    const suggestions = await this.findService.allByCssSelector(
-      '.monaco-editor .suggest-widget .monaco-list-row'
-    );
+  public async selectSuggestionByLabel(label: string) {
+    await this.retry.try(async () => {
+      const suggestions = await this.findService.allByCssSelector(
+        '.monaco-editor .suggest-widget .monaco-list-row'
+      );
 
-    if (index < 0 || index >= suggestions.length) {
-      throw new Error(`Index ${index} is out of bounds for suggestions list.`);
-    }
+      let suggestionToSelect;
+      for (const suggestion of suggestions) {
+        if ((await suggestion.getVisibleText()).includes(label)) {
+          suggestionToSelect = suggestion;
+          break;
+        }
+      }
 
-    await suggestions[index].click();
+      if (!suggestionToSelect) {
+        throw new Error(`Suggestion with label "${label}" not found.`);
+      }
+
+      await suggestionToSelect.click();
+    });
+  }
+
+  public async selectBadgeHoverOption(badgeClassName: string, optionText: string) {
+    await this.retry.try(async () => {
+      const badge = await this.findService.byCssSelector(`.${badgeClassName}`);
+      await badge.moveMouseTo();
+
+      const options = await this.findService.allByCssSelector(`.monaco-hover .hover-row`);
+      let optionToSelect;
+      for (const option of options) {
+        if ((await option.getVisibleText()).includes(optionText)) {
+          optionToSelect = option;
+          break;
+        }
+      }
+
+      if (!optionToSelect) {
+        throw new Error(`Option with text "${optionText}" not found in badge hover.`);
+      }
+
+      await optionToSelect.click();
+      return true;
+    });
   }
 }

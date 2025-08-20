@@ -8,14 +8,13 @@
  */
 
 import expect from '@kbn/expect';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class IndexEditorObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
-  private readonly find = this.ctx.getService('find');
   private readonly common = this.ctx.getPageObject('common');
-  private readonly browser = this.ctx.getService('browser');
   private readonly dataGrid = this.ctx.getService('dataGrid');
   private readonly es = this.ctx.getService('es');
 
@@ -65,9 +64,19 @@ export class IndexEditorObject extends FtrService {
     await this.testSubjects.click('addRowButton');
   }
 
+  public async deleteRow(rowIndex: number): Promise<void> {
+    await this.dataGrid.selectRow(rowIndex);
+    await this.dataGrid.openSelectedRowsMenu();
+    await this.testSubjects.click('indexEditorDeleteDocs');
+  }
+
   public async saveChanges(): Promise<void> {
     await this.testSubjects.click('indexEditorSaveChangesButton');
     await this.testSubjects.waitForDeleted('lookupIndexFlyout');
+  }
+
+  public async closeIndexEditor(): Promise<void> {
+    await this.testSubjects.click('indexEditorCloseButton');
   }
 
   public async verifyIndexContent(
@@ -87,5 +96,16 @@ export class IndexEditorObject extends FtrService {
   public async uploadFile(filePath: string): Promise<void> {
     const fileInput = await this.testSubjects.find('indexEditorFileInput');
     await fileInput.type(filePath);
+  }
+
+  public async getSearchBarInput(): Promise<WebElementWrapper> {
+    return await this.testSubjects.find('indexEditorQueryBar');
+  }
+
+  public async search(query: string): Promise<void> {
+    const searchBar = await this.getSearchBarInput();
+    await searchBar.clearValue();
+    await searchBar.type(query);
+    await this.common.pressEnterKey();
   }
 }
