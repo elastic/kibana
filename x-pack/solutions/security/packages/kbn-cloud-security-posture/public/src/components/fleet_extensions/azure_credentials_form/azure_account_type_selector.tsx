@@ -31,7 +31,7 @@ const getAzureAccountTypeOptions = (
   {
     id: AZURE_ORGANIZATION_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.azureAccountType.azureOrganizationLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.azureOrganizationLabel',
       {
         defaultMessage: 'Azure Organization',
       }
@@ -40,7 +40,7 @@ const getAzureAccountTypeOptions = (
     disabled: isAzureOrganizationDisabled,
     tooltip: isAzureOrganizationDisabled
       ? i18n.translate(
-          'securitySolutionPackages.fleetIntegration.azureAccountType.azureOrganizationDisabledTooltip',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.azureOrganizationDisabledTooltip',
           {
             defaultMessage: 'Coming Soon',
           }
@@ -50,7 +50,7 @@ const getAzureAccountTypeOptions = (
   {
     id: AZURE_SINGLE_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.azureAccountType.singleAccountLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.singleAccountLabel',
       {
         defaultMessage: 'Single Subscription',
       }
@@ -103,7 +103,7 @@ export const AzureAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.azureAccountTypeDescriptionLabel"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azureAccountTypeDescriptionLabel"
           defaultMessage="Select between onboarding an Azure Organization (tenant root group) or a single Azure subscription, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
@@ -130,7 +130,7 @@ export const AzureAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.azureAccountType.azureOrganizationDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.organizationDescription"
               defaultMessage="Connect Elastic to every Azure Subscription (current and future) in your environment by providing Elastic with read-only (configuration) access to your Azure Organization (tenant root group)."
             />
           </EuiText>
@@ -141,7 +141,7 @@ export const AzureAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.azureAccountType.singleAccountDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.accountType.singleDescription"
               defaultMessage="Deploying to a single subscription is suitable for an initial POC. To ensure compete coverage, it is strongly recommended to deploy {shortName} at the organization (tenant root group) level, which automatically connects all subscriptions (both current and future)."
               values={{ shortName }}
             />

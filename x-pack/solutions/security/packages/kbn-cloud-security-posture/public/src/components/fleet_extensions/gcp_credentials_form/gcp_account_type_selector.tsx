@@ -22,7 +22,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   {
     id: GCP_ORGANIZATION_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpAccountType.gcpOrganizationLabel',
       {
         defaultMessage: 'GCP Organization',
       }
@@ -30,7 +30,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
     disabled: isGcpOrgDisabled,
     tooltip: isGcpOrgDisabled
       ? i18n.translate(
-          'securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationDisabledTooltip',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpAccountType.gcpOrganizationDisabledTooltip',
           {
             defaultMessage: 'Supported from integration version 1.6.0 and above',
           }
@@ -41,7 +41,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
   {
     id: GCP_SINGLE_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.gcpAccountType.gcpSingleAccountLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpAccountType.gcpSingleAccountLabel',
       {
         defaultMessage: 'Single Project',
       }
@@ -133,7 +133,7 @@ export const GcpAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.gcpAccountTypeDescriptionLabel"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.descriptionLabel"
           defaultMessage="Select between single project or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
@@ -142,7 +142,7 @@ export const GcpAccountTypeSelect = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationNotSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.organizationNotSupportedMessage"
               defaultMessage="GCP Organization not supported in current integration version. Please upgrade to the latest version to enable GCP Organizations integration."
             />
           </EuiCallOut>
@@ -164,7 +164,7 @@ export const GcpAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpOrganizationDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.organizationDescription"
               defaultMessage="Connect Elastic to every GCP Project (current and future) in your environment by providing Elastic with read-only (configuration) access to your GCP organization"
             />
           </EuiText>
@@ -175,7 +175,7 @@ export const GcpAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.gcpAccountType.gcpSingleAccountDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.accountType.singleDescription"
               defaultMessage="Deploying to a single project is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy {shortName} at the organization-level, which automatically connects all projects (both current and future)."
               values={{ shortName }}
             />

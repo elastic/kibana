@@ -26,7 +26,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
   {
     id: AWS_ORGANIZATION_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.organizationLabel',
       {
         defaultMessage: 'AWS Organization',
       }
@@ -34,7 +34,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
     disabled: isAwsOrgDisabled,
     tooltip: isAwsOrgDisabled
       ? i18n.translate(
-          'securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDisabledTooltip',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.organizationDisabledTooltip',
           {
             defaultMessage: 'Supported from integration version 1.5.0 and above',
           }
@@ -45,7 +45,7 @@ const getAwsAccountTypeOptions = (isAwsOrgDisabled: boolean): CspRadioGroupProps
   {
     id: AWS_SINGLE_ACCOUNT,
     label: i18n.translate(
-      'securitySolutionPackages.fleetIntegration.awsAccountType.singleAccountLabel',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.singleAccountLabel',
       {
         defaultMessage: 'Single Account',
       }
@@ -98,7 +98,7 @@ export const AwsAccountTypeSelect = ({
     <>
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.awsAccountTypeDescriptionLabel"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.descriptionLabel"
           defaultMessage="Select between single account or organization, and then fill in the name and description to help identify this integration."
         />
       </EuiText>
@@ -107,7 +107,7 @@ export const AwsAccountTypeSelect = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationNotSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationNotSupportedMessage"
               defaultMessage="AWS Organization not supported in current integration version. Please upgrade to the latest version to enable AWS Organizations integration."
             />
           </EuiCallOut>
@@ -136,7 +136,7 @@ export const AwsAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationDescription"
               defaultMessage="Connect Elastic to every AWS Account (current and future) in your environment by providing Elastic with read-only (configuration) access to your AWS organization."
             />
           </EuiText>
@@ -147,7 +147,7 @@ export const AwsAccountTypeSelect = ({
           <EuiSpacer size="l" />
           <EuiText color="subdued" size="s">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.awsAccountType.singleAccountDescription"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.singleAccountDescription"
               defaultMessage="Deploying to a single account is suitable for an initial POC. To ensure complete coverage, it is strongly recommended to deploy {shortName} at the organization-level, which automatically connects all accounts (both current and future)."
               values={{ shortName }}
             />

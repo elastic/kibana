@@ -24,16 +24,22 @@ import type { GcpFields, GcpInputFields } from '../types';
 
 const credentialOptionsList = [
   {
-    text: i18n.translate('securitySolutionPackages.gcpIntegration.credentialsFileOption', {
-      defaultMessage: 'Credentials File',
-    }),
+    text: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.credentialsFileOption',
+      {
+        defaultMessage: 'Credentials File',
+      }
+    ),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
     'data-test-subj': 'credentials_file_option_test_id',
   },
   {
-    text: i18n.translate('securitySolutionPackages.gcpIntegration.credentialsJsonOption', {
-      defaultMessage: 'Credentials JSON',
-    }),
+    text: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.credentialsJsonOption',
+      {
+        defaultMessage: 'Credentials JSON',
+      }
+    ),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
     'data-test-subj': 'credentials_json_option_test_id',
   },
@@ -73,7 +79,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialFilesError = i18n.translate(
-    'securitySolutionPackages.integration.fieldRequired',
+    'securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -90,12 +96,15 @@ export const GcpInputVarFields = ({
     credentialJSONFields?.value,
     hasInvalidRequiredVars
   );
-  const credentialJSONError = i18n.translate('securitySolutionPackages.integration.fieldRequired', {
-    defaultMessage: '{field} is required',
-    values: {
-      field: credentialJSONFields?.label,
-    },
-  });
+  const credentialJSONError = i18n.translate(
+    'securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.',
+    {
+      defaultMessage: '{field} is required',
+      values: {
+        field: credentialJSONFields?.label,
+      },
+    }
+  );
 
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;

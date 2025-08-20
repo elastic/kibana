@@ -76,27 +76,27 @@ const GoogleCloudShellSetup = ({
         >
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.hostRequirement"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.login"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.login"
               defaultMessage="Log into your Google Cloud Console"
             />
           </li>
           {accountType === GCP_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.gcpIntegration.organizationCloudShellSetupStep.save"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationCloudShellSetupStep.save"
                 defaultMessage="Note down the GCP organization ID of the organization you wish to monitor and project ID where you want to provision resources for monitoring purposes and provide them in the input boxes below"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.save"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.save"
                 defaultMessage="Note down the GCP project ID of the project you wish to monitor"
               />
             </li>
@@ -104,7 +104,7 @@ const GoogleCloudShellSetup = ({
 
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.gcpIntegration.cloudShellSetupStep.launch"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.cloudShellSetupStep.launch"
               defaultMessage='Click "Save and Continue" at the bottom right of the page. Then, on the pop-up modal, click "Launch Google Cloud Shell"'
             />
           </li>
@@ -158,7 +158,7 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: GCP_SETUP_ACCESS.CLOUD_SHELL,
     label: i18n.translate(
-      'securitySolutionPackages.gcpIntegration.setupFormatOptions.googleCloudShell',
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.setupFormatOptions.googleCloudShell',
       {
         defaultMessage: 'Google Cloud Shell',
       }
@@ -168,9 +168,12 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
   {
     id: GCP_SETUP_ACCESS.MANUAL,
-    label: i18n.translate('securitySolutionPackages.gcpIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
     disabled: false,
     testId: GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL,
   },
@@ -342,7 +345,7 @@ export const GcpCredentialsForm = ({
         <EuiSpacer size="l" />
         <EuiCallOut color="warning">
           <FormattedMessage
-            id="securitySolutionPackages.gcpIntegration.gcpNotSupportedMessage"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.gcpNotSupportedMessage"
             defaultMessage="CIS GCP is not supported on the current Integration version, please upgrade your integration to the latest version to use CIS GCP"
           />
         </EuiCallOut>

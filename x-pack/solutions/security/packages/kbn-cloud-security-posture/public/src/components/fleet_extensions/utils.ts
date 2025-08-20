@@ -238,15 +238,21 @@ export const getDefaultCloudCredentialsType = (
 export const gcpField: GcpInputFields = {
   fields: {
     'gcp.organization_id': {
-      label: i18n.translate('securitySolutionPackages.gcpIntegration.organizationIdFieldLabel', {
-        defaultMessage: 'Organization ID',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.organizationIdFieldLabel',
+        {
+          defaultMessage: 'Organization ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.project_id': {
-      label: i18n.translate('securitySolutionPackages.gcpIntegration.projectidFieldLabel', {
-        defaultMessage: 'Project ID',
-      }),
+      label: i18n.translate(
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.projectidFieldLabel',
+        {
+          defaultMessage: 'Project ID',
+        }
+      ),
       type: 'text',
     },
     'gcp.credentials.file': {

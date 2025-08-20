@@ -33,9 +33,12 @@ const getSetupFormatOptions = (): CspRadioOption[] => [
   },
   {
     id: AWS_SETUP_FORMAT.MANUAL,
-    label: i18n.translate('securitySolutionPackages.awsIntegration.setupFormatOptions.manual', {
-      defaultMessage: 'Manual',
-    }),
+    label: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.setupFormatOptions.manual',
+      {
+        defaultMessage: 'Manual',
+      }
+    ),
     testId: AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL,
   },
 ];
@@ -61,7 +64,7 @@ const CloudFormationSetup = ({
     return (
       <EuiCallOut color="warning">
         <FormattedMessage
-          id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.notSupported"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.notSupported"
           defaultMessage="CloudFormation is not supported on the current Integration version, please upgrade your integration to the latest version to use CloudFormation"
         />
       </EuiCallOut>
@@ -80,34 +83,34 @@ const CloudFormationSetup = ({
         >
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.hostRequirement"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.hostRequirement"
               defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
             />
           </li>
           {accountType === AWS_ORGANIZATION_ACCOUNT ? (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.organizationLogin"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.organizationLogin"
                 defaultMessage="Log in as an admin in your organization's AWS management account"
               />
             </li>
           ) : (
             <li>
               <FormattedMessage
-                id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.login"
+                id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.login"
                 defaultMessage="Log in as an admin to the AWS Account you want to onboard"
               />
             </li>
           )}
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.save"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.save"
               defaultMessage="Click the Save and continue button on the bottom right of this page"
             />
           </li>
           <li>
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.cloudFormationSetupStep.launch"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormationSetupStep.launch"
               defaultMessage="On the subsequent pop-up modal, click the Launch CloudFormation button."
             />
           </li>
@@ -153,14 +156,14 @@ export const AwsCredentialsForm = ({
       <AWSSetupInfoContent
         info={
           <FormattedMessage
-            id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContent"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContent"
             defaultMessage="Utilize AWS CloudFormation (a built-in AWS tool) or a series of manual steps to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
             values={{
               shortName,
               gettingStartedLink: (
                 <EuiLink href={elasticDocLink} target="_blank">
                   <FormattedMessage
-                    id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.gettingStartedLink"
                     defaultMessage="Getting Started"
                   />
                 </EuiLink>
@@ -189,7 +192,7 @@ export const AwsCredentialsForm = ({
           <AwsCredentialTypeSelector
             disabled={disabled}
             label={i18n.translate(
-              'securitySolutionPackages.awsIntegration.awsCredentialTypeSelectorLabel',
+              'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.awsCredentialTypeSelectorLabel',
               {
                 defaultMessage: 'Preferred manual method',
               }
