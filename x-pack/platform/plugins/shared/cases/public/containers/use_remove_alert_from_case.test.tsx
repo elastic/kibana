@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { act, waitFor, renderHook } from '@testing-library/react';
+import type { AlertAttachment } from '../../common/types/domain';
 import { alertCommentPatch } from './mock';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import { casesQueriesKeys } from './constants';
 import { TestProviders, createTestQueryClient } from '../common/mock';
 import { useRemoveAlertFromCase } from './use_remove_alert_from_case';
-import type { AlertAttachmentUI } from './types';
 
 jest.mock('./api');
 jest.mock('../common/lib/kibana');
@@ -30,12 +30,12 @@ describe('useRemoveAlertFromCase', () => {
   const sampleUpdate: {
     caseId: string;
     alertId: string;
-    alertAttachment: AlertAttachmentUI;
+    alertAttachment: AlertAttachment;
     successToasterTitle: string;
   } = {
     caseId: 'test-id',
     alertId: 'test-alert-id',
-    alertAttachment: alertCommentPatch as AlertAttachmentUI,
+    alertAttachment: alertCommentPatch as AlertAttachment,
     successToasterTitle: 'Done!',
   };
 

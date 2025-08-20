@@ -12,7 +12,7 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import type { CasesService } from '@kbn/response-ops-alerts-table/types';
-import type { AlertAttachmentUI } from '@kbn/cases-plugin/common/ui';
+import type { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({
@@ -31,7 +31,7 @@ export const useCaseActions = ({
     cases?: CasesService;
   };
   caseId?: string;
-  alertAttachment?: AlertAttachmentUI;
+  alertAttachment?: AlertAttachment;
 }) => {
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);

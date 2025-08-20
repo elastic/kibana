@@ -46,7 +46,7 @@ import type {
   CasePatchRequest,
   AttachmentRequest,
 } from '../../../common/types/api';
-import type { AlertAttachmentResponse } from '../../../common/types/domain';
+import type { AlertAttachment } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
@@ -142,10 +142,10 @@ export const patchComment = async (
 export const patchAlertComment = async (
   caseId: string,
   commentId: string,
-  commentUpdate: AlertAttachmentResponse,
+  commentUpdate: AlertAttachment,
   version: string,
   signal: AbortSignal
-): Promise<AlertAttachmentResponse> => Promise.resolve(alertCommentPatch);
+): Promise<AlertAttachment> => Promise.resolve(alertCommentPatch);
 
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<boolean> =>
   Promise.resolve(true);

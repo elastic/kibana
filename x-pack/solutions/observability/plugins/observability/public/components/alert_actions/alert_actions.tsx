@@ -21,13 +21,13 @@ import {
   RELATED_ALERTS_TABLE_ID,
   SLO_ALERTS_TABLE_ID,
 } from '@kbn/observability-shared-plugin/common';
+import type { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
   useDeletePropertyAction,
   DeleteAttachmentConfirmationModal,
 } from '@kbn/cases-plugin/public';
-import type { AlertAttachmentUI } from '@kbn/cases-plugin/common/ui';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -125,7 +125,7 @@ export function AlertActions({
       cases,
     },
     caseId: caseData?.id,
-    alertAttachment: alertAttachment as AlertAttachmentUI,
+    alertAttachment: alertAttachment as unknown as AlertAttachment,
   });
 
   const closeActionsPopover = useCallback(() => {
