@@ -34,7 +34,7 @@ import type { DiscoverAppState } from '../../discover_app_state_container';
 import { createInternalStateAsyncThunk, createTabItem } from '../utils';
 import { setBreadcrumbs } from '../../../../../utils/breadcrumbs';
 import { DEFAULT_TAB_STATE } from '../constants';
-import { TABS_ENABLED } from '../../../../../constants';
+import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../../constants';
 
 export const setTabs: InternalStateThunkActionCreator<
   [Parameters<typeof internalStateSlice.actions.setTabs>[0]]
@@ -212,7 +212,12 @@ export const initializeTabs = createInternalStateAsyncThunk(
     }: { discoverSessionId: string | undefined; shouldClearAllTabs?: boolean },
     { dispatch, getState, extra: { services, tabsStorageManager, customizationContext } }
   ) => {
-    if (TABS_ENABLED && shouldClearAllTabs) {
+    const tabsEnabled = services.core.featureFlags.getBooleanValue(
+      TABS_ENABLED_FEATURE_FLAG_KEY,
+      false
+    );
+
+    if (tabsEnabled && shouldClearAllTabs) {
       dispatch(clearAllTabs());
     }
 
