@@ -75,6 +75,23 @@ exports[`EnabledFeatures renders as expected 1`] = `
                 "security",
               ],
             },
+            Object {
+              "app": Array [],
+              "category": Object {
+                "euiIconType": "logoKibana",
+                "id": "kibana",
+                "label": "Analytics",
+                "order": 1000,
+              },
+              "hidden": true,
+              "id": "feature-3",
+              "name": "Feature 3 (hidden)",
+              "privileges": null,
+              "scope": Array [
+                "spaces",
+                "security",
+              ],
+            },
           ]
         }
         onChange={[MockFunction]}
