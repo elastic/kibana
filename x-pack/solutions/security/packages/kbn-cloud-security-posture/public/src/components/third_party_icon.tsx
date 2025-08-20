@@ -20,58 +20,79 @@ import googleScc from '../assets/icons/third_party_icons/google_scc.svg';
 
 const MAX_ICONS = 2;
 
-export type ThirdPartyIntegrationId =
-  | 'Wiz'
-  | 'AWS Security Hub'
-  | 'Amazon Inspector'
-  | 'Microsoft'
-  | 'Google Security Command Center'
-  | 'Tenable'
-  | 'Qualys VMDR'
-  | 'Rapid7'
-  | 'Elastic';
-
-const INTEGRATION_LABELS: Record<ThirdPartyIntegrationId, string> = {
-  Wiz: 'Wiz',
-  'AWS Security Hub': 'AWS Security Hub',
-  'Amazon Inspector': 'AWS Inspector',
-  Microsoft: 'Microsoft 365 Defender',
-  'Google Security Command Center': 'Google Security Command Center',
-  Tenable: 'Tenable',
-  'Qualys VMDR': 'Qualys',
-  Rapid7: 'Rapid7',
-  Elastic: 'Elastic Security',
-};
-
+export enum DatasetPrefix {
+  Wiz = 'wiz',
+  AWSSecurityHub = 'aws.securityhub',
+  AWSInspector = 'aws.inspector',
+  MicrosoftDefenderEndpoint = 'microsoft_defender_endpoint',
+  MicrosoftDefenderCloud = 'microsoft_defender_cloud',
+  M365Defender = 'm365_defender',
+  GoogleSCC = 'google_scc',
+  Tenable = 'tenable_io',
+  QualysVMDR = 'qualys_vmdr',
+  Rapid7InsightVM = 'rapid7_insightvm',
+  ElasticCSP = 'cloud_security_posture',
+}
 interface Props {
-  type: ThirdPartyIntegrationId;
+  type: string;
   name?: string;
   style?: CSSInterpolation;
   size?: IconSize;
 }
 
-const getThirdPartyIconType = (type: ThirdPartyIntegrationId): string | undefined => {
-  switch (type) {
-    case 'Wiz':
-      return wiz; // Replace with actual icon reference
-    case 'AWS Security Hub':
-      return awsSecurityHub;
-    case 'Amazon Inspector':
-      return awsInspector;
-    case 'Microsoft':
-      return defender;
-    case 'Google Security Command Center':
-      return googleScc; // Or a reference like googleCloudLogo
-    case 'Tenable':
-      return tenable;
-    case 'Qualys VMDR':
-      return qualys;
-    case 'Rapid7':
-      return rapid7;
-    case 'Elastic':
-      return 'logoSecurity';
-    default:
-      return undefined;
+const getThirdPartyIconType = (type: string): string | undefined => {
+  if (type.startsWith(DatasetPrefix.Wiz)) {
+    return wiz;
+  } else if (type.startsWith(DatasetPrefix.AWSSecurityHub)) {
+    return awsSecurityHub;
+  } else if (type.startsWith(DatasetPrefix.AWSInspector)) {
+    return awsInspector;
+  } else if (
+    type.startsWith(DatasetPrefix.MicrosoftDefenderEndpoint) ||
+    type.startsWith(DatasetPrefix.M365Defender) ||
+    type.startsWith(DatasetPrefix.MicrosoftDefenderCloud)
+  ) {
+    return defender;
+  } else if (type.startsWith(DatasetPrefix.GoogleSCC)) {
+    return googleScc;
+  } else if (type.startsWith(DatasetPrefix.Tenable)) {
+    return tenable;
+  } else if (type.startsWith(DatasetPrefix.QualysVMDR)) {
+    return qualys;
+  } else if (type.startsWith(DatasetPrefix.Rapid7InsightVM)) {
+    return rapid7;
+  } else if (type.startsWith(DatasetPrefix.ElasticCSP)) {
+    return 'logoSecurity';
+  } else {
+    return undefined;
+  }
+};
+
+const getThirdPartyIntegrationLabel = (type: string): string | undefined => {
+  if (type.startsWith(DatasetPrefix.Wiz)) {
+    return 'Wiz';
+  } else if (type.startsWith(DatasetPrefix.AWSSecurityHub)) {
+    return 'AWS Security Hub';
+  } else if (type.startsWith(DatasetPrefix.AWSInspector)) {
+    return 'AWS Inspector';
+  } else if (type.startsWith(DatasetPrefix.M365Defender)) {
+    return 'Microsoft 365 Defender';
+  } else if (type.startsWith(DatasetPrefix.MicrosoftDefenderEndpoint)) {
+    return 'Microsoft Defender for Endpoint';
+  } else if (type.startsWith(DatasetPrefix.MicrosoftDefenderCloud)) {
+    return 'Microsoft Defender for Cloud';
+  } else if (type.startsWith(DatasetPrefix.GoogleSCC)) {
+    return 'Google Security Command Center';
+  } else if (type.startsWith(DatasetPrefix.Tenable)) {
+    return 'Tenable';
+  } else if (type.startsWith(DatasetPrefix.QualysVMDR)) {
+    return 'Qualys';
+  } else if (type.startsWith(DatasetPrefix.Rapid7InsightVM)) {
+    return 'Rapid7';
+  } else if (type.startsWith(DatasetPrefix.ElasticCSP)) {
+    return 'Elastic Security';
+  } else {
+    return undefined;
   }
 };
 
@@ -86,24 +107,21 @@ export const ThirdPartyIcon = (props: Props) => {
   );
 };
 
-export const renderThirdPartyIcons = (
-  integrations: ThirdPartyIntegrationId[],
-  size: 's' | 'm' | 'l' = 'l'
-) => {
+export const renderThirdPartyIcons = (integrations: string[], size: 's' | 'm' | 'l' = 'l') => {
   const visibleIcons = integrations.slice(0, MAX_ICONS);
   const hiddenIcons = integrations.slice(MAX_ICONS);
   const hiddenCount = hiddenIcons.length;
 
   const items = visibleIcons.map((integration) => (
     <EuiFlexItem key={integration} grow={false}>
-      <EuiToolTip content={INTEGRATION_LABELS[integration] || integration}>
+      <EuiToolTip content={getThirdPartyIntegrationLabel(integration)}>
         <ThirdPartyIcon type={integration} size={size} />
       </EuiToolTip>
     </EuiFlexItem>
   ));
 
   if (integrations.length > MAX_ICONS) {
-    const sortedHiddenLabels = hiddenIcons.map((id) => INTEGRATION_LABELS[id] || id).sort();
+    const sortedHiddenLabels = hiddenIcons.map((id) => getThirdPartyIntegrationLabel(id)).sort();
 
     const tooltipContent = (
       <>

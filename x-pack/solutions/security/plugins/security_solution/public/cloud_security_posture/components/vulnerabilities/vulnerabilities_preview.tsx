@@ -16,7 +16,11 @@ import {
   buildGenericEntityFlyoutPreviewQuery,
   getAbbreviatedNumber,
 } from '@kbn/cloud-security-posture-common';
-import { getVulnerabilityStats, hasVulnerabilitiesData } from '@kbn/cloud-security-posture';
+import {
+  getVulnerabilityStats,
+  hasVulnerabilitiesData,
+  renderThirdPartyIcons,
+} from '@kbn/cloud-security-posture';
 import {
   ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW,
   uiMetricService,
@@ -136,9 +140,18 @@ export const VulnerabilitiesPreview = ({
     getSeverityStatusColor
   );
 
+  const vendorList = data?.vendor || [];
+
   return (
     <ExpandablePanel
       header={{
+        headerContent: (
+          <>
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              {renderThirdPartyIcons(vendorList)}
+            </EuiFlexGroup>
+          </>
+        ),
         iconType: !isPreviewMode && hasVulnerabilitiesFindings ? 'arrowStart' : '',
         title: (
           <EuiTitle

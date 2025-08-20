@@ -47,9 +47,9 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
       },
     },
   },
-  by_observer_vendor: {
+  by_datastream_dataset: {
     terms: {
-      field: 'observer.vendor',
+      field: 'data_stream.dataset',
       size: 10,
     },
   },
@@ -186,6 +186,12 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
           },
         },
       },
+    },
+  },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 10,
     },
   },
 });

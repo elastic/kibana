@@ -83,7 +83,7 @@ export type LatestFindingsResponse = IKibanaSearchResponse<
 
 export interface FindingsAggs {
   count: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
-  by_observer_vendor?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
+  by_datastream_dataset?: estypes.AggregationsMultiBucketAggregateBase<estypes.AggregationsStringRareTermsBucketKeys>;
 }
 
 interface BaseMisconfigurationFlyoutProps {
