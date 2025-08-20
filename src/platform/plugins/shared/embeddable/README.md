@@ -24,10 +24,6 @@ An embeddable API shares state via a publishing subject, a read only RxJS Observ
 ### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
-<details>
-
-<summary>Expand to view available publishing packages</summary>
-
 Interface implemenations provided by EmbeddableRenderer React component. An embeddable does not need to implement these interfaces as they are provided by EmbeddableRenderer.
 
 | Interface | Description |
@@ -51,13 +47,10 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
-| HasVisualizeConfig | Interface for accessing Visualize embeddable configuration | ACTION_EDIT_IN_LENS |
+| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS |
 | PublishesDataViews | Interface for accessing embeddable data views | ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
-| PublishesSavedSearch | Interface for accessing Discover session embeddable configuration | generateCsvReport | 
+| PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
-| 
-
-</details>
 
 ### Embeddable panel
 The EmbeddableRenderer React component wraps embeddable components in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
@@ -73,17 +66,13 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
-<details>
-
-<summary>Expand to view available UiActions</summary>
-
-| UiAction | Description | interfaces |
+| UiAction | Description | Optional interfaces required by action |
 | ---------| ----------- | ---------- |
 | ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | HasLibraryTransforms |
 | ACTION_CLONE_PANEL | Clones panel in page | |
 | ACTION_COPY_TO_DASHBOARD | Opens copy to dashboard modal | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | PublishesDataViews, PublishesTitle |
-| ACTION_EDIT_IN_LENS | Opens legacy visualization configuration in lens editor | HasVisualizeConfig |
+| ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | HasVisualizeConfig |
 | ACTION_EDIT_PANEL | Opens embeddable configuration editor | ACTION_EDIT_PANEL |
 | ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | |
 | ACTION_EXPLORE_DATA | Explore embeddable data request in in Discover | PublishesDataViews |
@@ -93,8 +82,6 @@ The embeddable panel passes the embeddable API to UiActions. Each UiAction uses 
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | HasReadOnlyCapabilities |
 | ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | HasLibraryTransforms |
 | generateCsvReport | Starts CSV report job for discover session | PublishesSavedSearch, PublishesTitle |
-
-</details>
 
 ### Best practices
 
