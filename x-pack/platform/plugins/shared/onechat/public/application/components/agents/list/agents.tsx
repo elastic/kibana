@@ -8,12 +8,18 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { AgentsList } from './agents_list';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 
 export const OnechatAgents = () => {
+  const { euiTheme } = useEuiTheme();
+  const headerStyles = css`
+    background-color: ${euiTheme.colors.backgroundBasePlain};
+    border: none;
+  `;
   const { createOnechatUrl } = useNavigation();
   const headerButtons = [
     <EuiButton
@@ -31,6 +37,7 @@ export const OnechatAgents = () => {
   return (
     <KibanaPageTemplate>
       <KibanaPageTemplate.Header
+        css={headerStyles}
         pageTitle={i18n.translate('xpack.onechat.agents.title', {
           defaultMessage: 'Agents',
         })}
