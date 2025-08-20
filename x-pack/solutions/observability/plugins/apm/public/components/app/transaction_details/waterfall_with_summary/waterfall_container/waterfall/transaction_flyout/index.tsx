@@ -125,7 +125,6 @@ function TransactionFlyoutBody({
     spanLinksCount,
     traceId: transaction.trace?.id,
     spanId: transaction.transaction?.id,
-    processorEvent: ProcessorEvent.transaction,
   });
 
   const tabs = [
