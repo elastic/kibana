@@ -56,5 +56,6 @@
     "@kbn/session-view-plugin",
     "@kbn/repo-info",
     "@kbn/es-archiver",
+    "@kbn/kubernetes-security-plugin",
   ]
 }

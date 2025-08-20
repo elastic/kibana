@@ -133,3 +133,4 @@ enabled:
   - x-pack/solutions/security/test/session_view/basic/config.ts
   - x-pack/solutions/security/test/plugin_functional/config.ts
   - x-pack/solutions/security/test/accessibility/config.ts
+  - x-pack/solutions/security/test/kubernetes_security/basic/config.ts
