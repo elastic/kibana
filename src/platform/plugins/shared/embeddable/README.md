@@ -2,6 +2,7 @@
 
 - [Guiding principles](#guiding-principles)
 - [Publishing packages](#publishing-packages)
+- [Embeddable panel](#embeddable-panel)
 - [Best practices](#best-practices)
 - [Examples](#examples)
 
@@ -23,16 +24,59 @@ An embeddable API shares state via a publishing subject, a read only RxJS Observ
 ### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
-For example, the [has_edit_capabilites](https://github.com/elastic/kibana/tree/main/src/platform/packages/shared/presentation/presentation_publishing/interfaces/has_edit_capabilities.ts) publishing package defines the `HasEditCapabilities` interface and the `apiHasEditCapabilities` type guard. The [edit panal action](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private/presentation_panel/public/panel_actions/edit_panel_action/edit_panel_action.ts) defines the "Edit" panel context menu action. The action's `isCompatible` check uses the `apiHasEditCapabilities` type guard to check that an embeddable API implements the `HasEditCapabilities` interface. When an embeddable API implements the interface and all other conditions of `isCompatible` check are true, the "Edit" action is availabe in the panel context menu. When an embeddable API does not implement the interface, the "Edit" action is not available in the panel context menu.
+<details>
+
+<summary>Expand to view available publishing packages</summary>
+
+Use EmbeddableRenderer React component to render embeddables. 
+EmbeddableRenderer extends an embeddable API with the interfaces listed in the table below.
+An embeddable does not need to implement these interfaces as the implemenation is provided by EmbeddableRenderer.
+
+| Interface | Description |
+| ----------| ----------- |
+| HasType | Interface for accessing embeddable type |
+| PublishesPhaseEvents | Interface for accessing embeddable phase such as loaded, rendered, or error |
+| HasUniqueId | Interface for accessing embeddable uuid |
+| CanLockHoverActions | Interface for locking hover actions for an embeddable |
+
+Required publishing package interfaces. An embeddable must implement these interfaces.
+
+| Interface | Description |
+| ----------| ----------- |
+| HasSerializableState | Interface for serializing embeddable state |
+
+Optional publishing package interfaces. Embeddables may implement these interfaces. Embeddables without interface implemenations will not show UiActions that require an interface.
+
+| Interface | Description | UiActions |
+| ----------- | ----------- | ----------- |
+| HasUniqueId | Provides uuid | ACTION_REMOVE_PANEL |
+| CanAccessViewMode | ACTION_REMOVE_PANEL |
+
+</details>
+
+### Embeddable panel
+The EmbeddableRenderer React component wraps embeddable components in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
+
+The embeddable panel uses UiActions and Triggers to customize embeddable interactions.
+
+| Trigger | Description |
+| ----------| ----------- |
+| CONTEXT_MENU_TRIGGER | trigger to add an action to a panel's context menu |
+| PANEL_HOVER_TRIGGER | trigger to add an action to a panel's hover menu |
+| PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
+| PANEL_NOTIFICATION_TRIGGER | trigger to add a notification to the top-right corner of a panel |
+
+The embeddable panel passes the embeddable API to all UiActions for a trigger. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required presentation packages.
+
+For example, the [edit panal action](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private/presentation_panel/public/panel_actions/edit_panel_action/edit_panel_action.ts) defines the "Edit" panel context menu action. The action's `isCompatible` check uses the `apiHasEditCapabilities` type guard to check that an embeddable API implements the `HasEditCapabilities` interface. When an embeddable API implements the interface and all other conditions of `isCompatible` check are true, the "Edit" action is availabe in the panel context menu. When an embeddable API does not implement the interface, the "Edit" action is not available in the panel context menu.
 
 <details>
 
-<summary>Shared interfaces</summary>
+<summary>Expand to view available UiActions</summary>
 
-| Interface      | Usage |
-| ----------- | ----------- |
-| HasUniqueId      | ACTION_REMOVE_PANEL |
-| CanAccessViewMode   | ACTION_REMOVE_PANEL |
+| UiAction | Description | Required publishing packages |
+| ---------| ----------- | ---------------------------- |
+| ACTION_REMOVE_PANEL |  |  |
 
 </details>
 
