@@ -8,7 +8,6 @@
 import type { Case } from '../../../../../../common';
 import type { Attachments } from '../../../../../../common/types/domain';
 import { AttachmentType } from '../../../../../../common/types/domain';
-import { buildBaseCaseSummaryPrompt } from '../base/base_prompt';
 import { PageAttachmentType, PersistableAttachmentType } from '../types';
 
 export function buildObsCaseSummaryPrompt(caseData: Case): string {
@@ -16,7 +15,6 @@ export function buildObsCaseSummaryPrompt(caseData: Case): string {
 
   let prompt = '';
 
-  prompt += buildBaseCaseSummaryPrompt(caseData);
   prompt += buildCaseActivitySummary(comments);
   prompt += getAnalysisInstructions();
 
@@ -37,12 +35,12 @@ function getAnalysisInstructions() {
 }
 
 function buildCaseActivitySummary(comments: Attachments) {
-  const alertRules = getAlertRulesFromComments(comments);
+  const { totalAlerts, alertRules } = getAlertRulesFromComments(comments);
   const slos: Record<string, string> = getSLOsFromComments(comments);
   const syntheticsMonitors: Record<string, string> = getSyntheticsMonitorsFromComments(comments);
   const userComments = getUserComments(comments);
 
-  const alertRulesSummary = getAlertRulesSummary(alertRules);
+  const alertRulesSummary = getAlertRulesSummary(totalAlerts, alertRules);
   const sloSummary = getSLOSummary(slos);
   const syntheticsMonitorsSummary = getSyntheticsMonitorsSummary(syntheticsMonitors);
   const userCommentsSummary = getUserCommentsSummary(userComments);
@@ -60,11 +58,11 @@ function getCaseActivitySummary(summary: string[]) {
   return `## Activity Summary\n${activitySummary}\n`;
 }
 
-function getAlertRulesSummary(alertRules: Set<string>) {
+function getAlertRulesSummary(totalAlerts: number, alertRules: Set<string>) {
   let alertRulesSummary = '';
 
   if (alertRules.size > 0) {
-    alertRulesSummary += `- **Total Alerts**: ${alertRules.size}\n`;
+    alertRulesSummary += `- **Total Alerts**: ${totalAlerts}\n`;
     alertRulesSummary += `- **Alert Rules**: ${Array.from(alertRules).join(', ')}\n`;
   }
 
@@ -111,15 +109,18 @@ function getUserCommentsSummary(userComments: Set<string>) {
   return userCommentsSummary;
 }
 
-function getAlertRulesFromComments(comments: Attachments): Set<string> {
+function getAlertRulesFromComments(comments: Attachments) {
   const alertRules = new Set<string>();
+  let totalAlerts = 0;
 
   comments.forEach((comment) => {
     if (comment.type === AttachmentType.alert && comment.rule?.name) {
+      totalAlerts += comment.alertId.length;
       alertRules.add(comment.rule.name);
     }
   });
-  return alertRules;
+
+  return { totalAlerts, alertRules };
 }
 
 function getSLOsFromComments(comments: Attachments): Record<string, string> {
