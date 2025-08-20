@@ -33,6 +33,7 @@ export interface EsWorkflowExecution {
   /** Serialized graphlib.Graph */
   executionGraph?: any;
   currentNodeId?: string; // The node currently being executed
+  stack: string[];
   createdAt: string;
   error: string | null;
   createdBy: string;

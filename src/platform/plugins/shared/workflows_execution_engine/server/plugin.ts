@@ -41,6 +41,7 @@ import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logg
 import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
 import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import type { StepErrorCatcher } from './step/step_base';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -247,18 +248,10 @@ async function workflowExecutionLoop(
     try {
       await step.run();
     } catch (error) {
-      // If an unhandled error occurs in a step, the workflow execution is terminated
-      workflowLogger.logError(
-        `Error executing step ${currentNode.id} (${currentNode.name}): ${error.message}`
-      );
-      await workflowRuntime.setStepResult({
-        output: null,
-        error: String(error),
-      });
-      await workflowRuntime.finishStep(currentNode.id);
-      break;
+      workflowRuntime.setWorkflowError(error);
     } finally {
       try {
+        await catchError(workflowRuntime, workflowLogger, nodesFactory);
         await workflowRuntime.saveState(); // Ensure state is updated after each step
       } catch (error) {
         workflowLogger.logError(
@@ -268,5 +261,34 @@ async function workflowExecutionLoop(
 
       await workflowLogger.flushEvents();
     }
+  }
+}
+
+async function catchError(
+  workflowRuntime: WorkflowExecutionRuntimeManager,
+  workflowLogger: WorkflowEventLogger,
+  nodesFactory: StepFactory
+) {
+  try {
+    const stack = [...workflowRuntime.getWorkflowExecution().stack];
+
+    while (workflowRuntime.getWorkflowExecution().error && stack.length > 0) {
+      const nodeId = stack.pop()!;
+      const node = workflowRuntime.getNode(nodeId);
+      const stepImplementation = nodesFactory.create(node as any);
+
+      if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
+        await (stepImplementation as unknown as StepErrorCatcher).catchError();
+      }
+
+      if (workflowRuntime.getWorkflowExecution().error) {
+        workflowRuntime.failStep(nodeId, workflowRuntime.getWorkflowExecution().error!);
+      }
+    }
+  } catch (error) {
+    workflowRuntime.setWorkflowError(error);
+    workflowLogger.logError(
+      `Error in catchError: ${error.message}. Workflow execution may be in an inconsistent state.`
+    );
   }
 }

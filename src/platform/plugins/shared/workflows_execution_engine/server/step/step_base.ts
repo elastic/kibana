@@ -34,6 +34,10 @@ export interface StepImplementation {
   run(): Promise<void>;
 }
 
+export interface StepErrorCatcher {
+  catchError(): Promise<void>;
+}
+
 export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
