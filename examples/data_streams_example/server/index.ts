@@ -17,11 +17,13 @@ interface MyDocument {
 
 const dataStream: DataStreamDefinition<MyDocument> = {
   name: '.kibana-my-data-stream',
-  mappings: {
-    dynamic: false,
-    properties: {
-      '@timestamp': mappings.date(),
-      description: mappings.text(),
+  template: {
+    mappings: {
+      dynamic: false,
+      properties: {
+        '@timestamp': mappings.date(),
+        description: mappings.text(),
+      },
     },
   },
 };

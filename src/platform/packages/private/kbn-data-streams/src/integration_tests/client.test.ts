@@ -25,10 +25,12 @@ describe('DataStreamClient', () => {
   }
   const testDataStream: DataStreamDefinition<MyTestDoc> = {
     name: 'test-data-stream',
-    mappings: {
-      properties: {
-        '@timestamp': mappings.date(),
-        mappedField: mappings.keyword(),
+    template: {
+      mappings: {
+        properties: {
+          '@timestamp': mappings.date(),
+          mappedField: mappings.keyword(),
+        },
       },
     },
   };
@@ -201,17 +203,19 @@ describe('DataStreamClient', () => {
         _data_stream_timestamp: {
           enabled: true,
         },
-        ...testDataStream.mappings,
+        ...testDataStream.template.mappings,
         dynamic: 'false',
       });
 
       const nextDefinition: DataStreamDefinition<MyTestDoc & { newField: string }> = {
         ...testDataStream,
-        mappings: {
-          ...testDataStream.mappings,
-          properties: {
-            ...testDataStream.mappings!.properties,
-            newField: mappings.text(),
+        template: {
+          mappings: {
+            ...testDataStream.template.mappings,
+            properties: {
+              ...testDataStream.template.mappings!.properties,
+              newField: mappings.text(),
+            },
           },
         },
       };
@@ -236,7 +240,7 @@ describe('DataStreamClient', () => {
 
       expect(indexTemplate.index_template.template).toEqual({
         mappings: {
-          ...nextDefinition.mappings,
+          ...nextDefinition.template.mappings,
           dynamic: false,
         },
         settings: {
@@ -259,7 +263,7 @@ describe('DataStreamClient', () => {
         _data_stream_timestamp: {
           enabled: true,
         },
-        ...nextDefinition.mappings,
+        ...nextDefinition.template.mappings,
         dynamic: 'false',
       });
     });
