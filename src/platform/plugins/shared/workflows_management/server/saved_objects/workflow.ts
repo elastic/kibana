@@ -100,5 +100,21 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
         },
       ],
     },
+    3: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            enabled: {
+              type: 'boolean',
+            },
+          },
+        },
+        {
+          type: 'mappings_deprecation',
+          deprecatedMappings: ['status'],
+        },
+      ],
+    },
   },
 };
