@@ -66,6 +66,8 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
+The table below lists the UiActions registered to embeddable panel triggers.
+
 | UiAction | Description | Trigger | Optional interfaces required by action |
 | ---------| ----------- | ---------- | ---------- |
 | ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
