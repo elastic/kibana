@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { suggestionContextRt, suggestionRequestRt } from './v1';
+import { suggestionContextRt } from './v1';
 
 describe('Suggestion Schemas and Types', () => {
   describe('suggestionContextRt', () => {
