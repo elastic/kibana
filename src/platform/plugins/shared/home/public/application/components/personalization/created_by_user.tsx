@@ -107,7 +107,7 @@ export const PersonalizedDashboardsCreatedByUser = ({
         <EuiTitle size="s">
           <h3>
             {i18n.translate('home.dashboardsCreatedByMe.title', {
-              defaultMessage: 'Dashboards created by me logged in user',
+              defaultMessage: 'Dashboards created by me',
             })}
           </h3>
         </EuiTitle>
