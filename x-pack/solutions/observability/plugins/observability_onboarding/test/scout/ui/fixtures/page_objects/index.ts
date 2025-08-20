@@ -13,7 +13,10 @@ export interface OnboardingPageObjects extends ObltPageObjects {
   onboarding: OnboardingApp;
 }
 
-export function extendPageObjects(pageObjects: ObltPageObjects, page: ScoutPage): OnboardingPageObjects {
+export function extendPageObjects(
+  pageObjects: ObltPageObjects,
+  page: ScoutPage
+): OnboardingPageObjects {
   return {
     ...pageObjects,
     onboarding: createLazyPageObject(OnboardingApp, page),

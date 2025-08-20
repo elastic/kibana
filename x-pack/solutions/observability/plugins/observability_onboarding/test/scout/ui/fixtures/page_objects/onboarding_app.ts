@@ -13,7 +13,9 @@ export class OnboardingApp {
   async goto() {
     await this.page.gotoApp('observabilityOnboarding');
     await this.page.waitForLoadState('networkidle');
-    await this.page.getByText('What do you want to monitor?').waitFor({ state: 'visible', timeout: 30000 });
+    await this.page
+      .getByText('What do you want to monitor?')
+      .waitFor({ state: 'visible', timeout: 30000 });
   }
 
   get hostUseCaseTile() {
@@ -126,16 +128,16 @@ export class OnboardingApp {
       '.euiText--small',
       '.euiTextColor--subdued',
       'p',
-      '[data-test-subj*="description"]'
+      '[data-test-subj*="description"]',
     ];
-    
+
     for (const selector of possibleSelectors) {
       const description = tile.locator(selector);
-      if (await description.count() > 0) {
+      if ((await description.count()) > 0) {
         return await description.first().textContent();
       }
     }
-    
+
     const allText = await tile.textContent();
     return allText;
   }
@@ -146,9 +148,9 @@ export class OnboardingApp {
   }
 
   async waitForIntegrationCards() {
-    await this.page.waitForSelector('[data-test-subj^="integration-card:"]', { 
+    await this.page.waitForSelector('[data-test-subj^="integration-card:"]', {
       state: 'visible',
-      timeout: 10000
+      timeout: 10000,
     });
   }
 }
