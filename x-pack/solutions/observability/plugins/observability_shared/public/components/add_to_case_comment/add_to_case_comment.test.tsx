@@ -8,12 +8,9 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AddToCaseComment } from '.';
-<<<<<<< HEAD
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import * as usePageSummaryHook from '../../hooks/use_page_summary';
-=======
->>>>>>> bf5ec4e2c6a656792612af422e30c79967a5c379
 
 // Mock i18n
 jest.mock('@kbn/i18n-react', () => ({
@@ -25,7 +22,6 @@ jest.mock('@kbn/i18n-react', () => ({
   }),
 }));
 
-<<<<<<< HEAD
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
 describe('AddToCaseComment', () => {
@@ -63,16 +59,10 @@ describe('AddToCaseComment', () => {
     );
 
     expect(screen.getByPlaceholderText('Add a comment (optional)')).toBeInTheDocument();
-=======
-describe('AddToCaseComment', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
->>>>>>> bf5ec4e2c6a656792612af422e30c79967a5c379
   });
 
   it('updates the comment when text is entered', () => {
     const onCommentChangeMock = jest.fn();
-<<<<<<< HEAD
     render(
       <AddToCaseComment
         comment=""
@@ -84,17 +74,11 @@ describe('AddToCaseComment', () => {
     );
 
     fireEvent.change(screen.getByPlaceholderText('Add a comment (optional)'), {
-=======
-    render(<AddToCaseComment comment="" onCommentChange={onCommentChangeMock} />);
-
-    fireEvent.change(screen.getByLabelText('Add a comment (optional)'), {
->>>>>>> bf5ec4e2c6a656792612af422e30c79967a5c379
       target: { value: 'New comment' },
     });
 
     expect(onCommentChangeMock).toHaveBeenCalledWith('New comment');
   });
-<<<<<<< HEAD
 
   it('shows skeleton loader when AI assistant is enabled and loading', () => {
     jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
@@ -279,6 +263,4 @@ describe('AddToCaseComment', () => {
       title: 'Could not initialize AI-generated summary',
     });
   });
-=======
->>>>>>> bf5ec4e2c6a656792612af422e30c79967a5c379
 });
