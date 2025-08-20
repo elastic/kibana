@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { log, timerange } from '@kbn/apm-synthtrace-client';

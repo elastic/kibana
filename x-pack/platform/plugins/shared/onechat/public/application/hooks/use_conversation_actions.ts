@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ConversationRound, ToolCallStep, isToolCallStep } from '@kbn/onechat-common';
+import type { ConversationRound, ToolCallStep } from '@kbn/onechat-common';
+import { isToolCallStep } from '@kbn/onechat-common';
 
-import { Conversation } from '@kbn/onechat-common';
+import type { Conversation } from '@kbn/onechat-common';
 import { useQueryClient } from '@tanstack/react-query';
 import produce from 'immer';
 import { useEffect, useRef } from 'react';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import { useConversationId } from './use_conversation_id';
 import { createNewConversation, newConversationId } from '../utils/new_conversation';
 import { queryKeys } from '../query_keys';

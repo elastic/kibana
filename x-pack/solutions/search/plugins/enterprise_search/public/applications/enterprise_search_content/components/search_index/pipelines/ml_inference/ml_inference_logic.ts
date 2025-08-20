@@ -5,76 +5,65 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 
+import type { FieldMapping } from '../../../../../../../common/ml_inference_pipeline';
 import {
-  FieldMapping,
   formatPipelineName,
   generateMlInferencePipelineBody,
   getMlInferencePrefixedFieldName,
   ML_INFERENCE_PREFIX,
 } from '../../../../../../../common/ml_inference_pipeline';
 import { Status } from '../../../../../../../common/types/api';
-import { MlModel } from '../../../../../../../common/types/ml';
-import { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
-import { Actions } from '../../../../../shared/api_logic/create_api_logic';
+import type { MlModel } from '../../../../../../../common/types/ml';
+import type { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
+import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 
-import {
-  CachedFetchIndexApiLogic,
-  CachedFetchIndexApiLogicValues,
-} from '../../../../api/index/cached_fetch_index_api_logic';
-import {
-  GetMappingsArgs,
-  GetMappingsResponse,
-  MappingsApiLogic,
-} from '../../../../api/mappings/mappings_logic';
-import {
-  CachedFetchModelsApiLogic,
+import type { CachedFetchIndexApiLogicValues } from '../../../../api/index/cached_fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../../api/index/cached_fetch_index_api_logic';
+import type { GetMappingsArgs, GetMappingsResponse } from '../../../../api/mappings/mappings_logic';
+import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
+import type {
   CachedFetchModlesApiLogicActions,
   FetchModelsApiResponse,
 } from '../../../../api/ml_models/cached_fetch_models_api_logic';
-import {
-  StartTextExpansionModelApiLogic,
-  StartTextExpansionModelApiLogicActions,
-} from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
-import {
-  AttachMlInferencePipelineApiLogic,
+import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
+import type { StartTextExpansionModelApiLogicActions } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import type {
   AttachMlInferencePipelineApiLogicArgs,
   AttachMlInferencePipelineResponse,
 } from '../../../../api/pipelines/attach_ml_inference_pipeline';
-import {
-  CreateMlInferencePipelineApiLogic,
+import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
+import type {
   CreateMlInferencePipelineApiLogicArgs,
   CreateMlInferencePipelineResponse,
 } from '../../../../api/pipelines/create_ml_inference_pipeline';
-import {
-  FetchMlInferencePipelineProcessorsApiLogic,
-  FetchMlInferencePipelineProcessorsResponse,
-} from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
-import {
-  FetchMlInferencePipelinesApiLogic,
+import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
+import type { FetchMlInferencePipelineProcessorsResponse } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
+import { FetchMlInferencePipelineProcessorsApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipeline_processors';
+import type {
   FetchMlInferencePipelinesArgs,
   FetchMlInferencePipelinesResponse,
 } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
-import {
-  FetchPipelineApiLogic,
+import { FetchMlInferencePipelinesApiLogic } from '../../../../api/pipelines/fetch_ml_inference_pipelines';
+import type {
   FetchPipelineResponse,
   FetchPipelineApiLogicActions,
 } from '../../../../api/pipelines/fetch_pipeline';
+import { FetchPipelineApiLogic } from '../../../../api/pipelines/fetch_pipeline';
 
 import { isConnectorIndex } from '../../../../utils/indices';
 import { sortSourceFields } from '../../../shared/ml_inference/utils';
 import { PipelinesLogic } from '../pipelines_logic';
 
-import {
-  AddInferencePipelineFormErrors,
-  AddInferencePipelineSteps,
-  InferencePipelineConfiguration,
-} from './types';
+import type { AddInferencePipelineFormErrors, InferencePipelineConfiguration } from './types';
+import { AddInferencePipelineSteps } from './types';
 
 import {
   validateInferencePipelineConfiguration,

@@ -8,15 +8,15 @@
  */
 
 import React from 'react';
-import { History } from 'history';
+import type { History } from 'history';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import ReactDOM from 'react-dom';
 
-import { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart, ToastsSetup } from '@kbn/core/public';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import type { UserProfileService } from '@kbn/core-user-profile-browser';
-import { SavedObjectNotFound } from '..';
+import type { SavedObjectNotFound } from '..';
 import { KibanaThemeProvider } from '../theme';
 
 const ReactMarkdown = React.lazy(() => import('react-markdown'));

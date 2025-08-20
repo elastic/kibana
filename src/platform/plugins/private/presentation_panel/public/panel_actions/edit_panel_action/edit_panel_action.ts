@@ -9,20 +9,19 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
-  hasEditCapabilities,
+import type {
   HasEditCapabilities,
   EmbeddableApiContext,
   CanAccessViewMode,
+} from '@kbn/presentation-publishing';
+import {
+  hasEditCapabilities,
   apiCanAccessViewMode,
   getInheritedViewMode,
   getViewModeSubject,
 } from '@kbn/presentation-publishing';
-import {
-  Action,
-  FrequentCompatibilityChangeAction,
-  IncompatibleActionError,
-} from '@kbn/ui-actions-plugin/public';
+import type { Action, FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { map } from 'rxjs';
 import { ACTION_EDIT_PANEL } from './constants';
 

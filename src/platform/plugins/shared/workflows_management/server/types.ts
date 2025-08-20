@@ -11,13 +11,13 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import {
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
