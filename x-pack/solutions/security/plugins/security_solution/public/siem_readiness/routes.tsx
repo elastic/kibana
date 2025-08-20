@@ -17,16 +17,7 @@ import { withSecurityRoutePageWrapper } from '../common/components/security_rout
 
 const SiemReadinessDashboardLazy = lazy(() => import('./pages'));
 
-// Initializing react-query
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      refetchOnMount: false,
-      refetchOnReconnect: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 export const SiemReadinessRoutes = () => {
   return (
