@@ -234,12 +234,9 @@ export const EditPackagePolicyForm = memo<{
   >(
     ({ isValid, updatedPolicy }) => {
       updatePackagePolicy(updatedPolicy);
-      setFormState((prevState) => {
-        if (prevState === 'VALID' && !isValid) {
-          return 'INVALID';
-        }
-        return prevState;
-      });
+      if (isValid !== undefined) {
+        setFormState(isValid ? 'VALID' : 'INVALID');
+      }
     },
     [updatePackagePolicy, setFormState]
   );
