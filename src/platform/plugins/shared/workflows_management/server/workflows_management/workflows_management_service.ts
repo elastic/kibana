@@ -118,12 +118,11 @@ export class WorkflowsService {
     const savedObjectsClient = await this.getSavedObjectsClient();
     const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
       type: WORKFLOW_SAVED_OBJECT_TYPE,
-      filter: `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.spaceId: "${spaceId}"`,
+      // Exclude deleted workflows (by checking for null/undefined deleted_at) and workflows from other spaces
+      filter: `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.spaceId: "${spaceId}" AND not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
       perPage: 100,
       sortField: 'updated_at',
       sortOrder: 'desc',
-      // Exclude deleted workflows by checking for null/undefined deleted_at
-      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
     });
 
     // Get workflow IDs to fetch execution history
