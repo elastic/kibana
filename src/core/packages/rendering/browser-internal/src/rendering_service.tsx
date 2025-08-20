@@ -25,16 +25,12 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import type { RenderingService as IRenderingService } from '@kbn/core-rendering-browser';
-import type {
-  LayoutService,
-  LayoutFeatureFlag,
-  LayoutProjectSideNavVersion,
-} from '@kbn/core-chrome-layout';
+import type { LayoutService } from '@kbn/core-chrome-layout';
 import {
-  LAYOUT_FEATURE_FLAG_KEY,
-  LAYOUT_DEBUG_FEATURE_FLAG_KEY,
-  LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-} from '@kbn/core-chrome-layout';
+  getSideNavVersion,
+  getLayoutVersion,
+  getLayoutDebugFlag,
+} from '@kbn/core-chrome-layout-feature-flags';
 import { GridLayout } from '@kbn/core-chrome-layout/layouts/grid';
 import { LegacyFixedLayout } from '@kbn/core-chrome-layout/layouts/legacy-fixed';
 
@@ -92,15 +88,9 @@ export class RenderingService implements IRenderingService {
     targetDomElement: HTMLDivElement
   ) {
     const { chrome, featureFlags } = renderCoreDeps;
-    const layoutType = featureFlags.getStringValue<LayoutFeatureFlag>(
-      LAYOUT_FEATURE_FLAG_KEY,
-      'legacy-fixed'
-    );
-    const debugLayout = featureFlags.getBooleanValue(LAYOUT_DEBUG_FEATURE_FLAG_KEY, false);
-    const projectSideNavVersion = featureFlags.getStringValue<LayoutProjectSideNavVersion>(
-      LAYOUT_PROJECT_SIDENAV_FEATURE_FLAG_KEY,
-      'v1'
-    );
+    const layoutType = getLayoutVersion(featureFlags);
+    const debugLayout = getLayoutDebugFlag(featureFlags);
+    const projectSideNavVersion = getSideNavVersion(featureFlags);
 
     const startServices = this.contextDeps.getValue()!;
 

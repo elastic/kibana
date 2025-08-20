@@ -9,6 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Capabilities } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ShareContext } from '@kbn/share-plugin/public';
 import React from 'react';
@@ -77,6 +78,13 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
     objectType,
     title: sharingData.title,
   };
+};
+
+const hasCapabilityByKey = (capabilities: Capabilities, capabilityKey: keyof Capabilities) => {
+  return (
+    capabilities[capabilityKey]?.generateScreenshot === true ||
+    capabilities.reportingLegacy?.generateReport === true
+  );
 };
 
 export const reportingPDFExportProvider = ({
@@ -217,24 +225,18 @@ export const reportingPDFExportProvider = ({
         license.check('reporting', 'gold')
       );
 
-      const capabilityHasDashboardScreenshotReporting =
-        capabilities.dashboard_v2?.generateScreenshot === true;
-      const capabilityHasVisualizeScreenshotReporting =
-        capabilities.visualize_v2?.generateScreenshot === true;
+      const capabilityHasDashboardReporting = hasCapabilityByKey(capabilities, 'dashboard_v2');
+      const capabilityHasVisualizeReporting = hasCapabilityByKey(capabilities, 'visualize_v2');
 
       if (!licenseHasScreenshotReporting) {
         return false;
       }
 
-      if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+      if (objectType === 'dashboard' && !capabilityHasDashboardReporting) {
         return false;
       }
 
-      if (
-        isSupportedType &&
-        !capabilityHasVisualizeScreenshotReporting &&
-        !capabilityHasDashboardScreenshotReporting
-      ) {
+      if (isSupportedType && !capabilityHasVisualizeReporting && !capabilityHasDashboardReporting) {
         return false;
       }
 
@@ -380,24 +382,18 @@ export const reportingPNGExportProvider = ({
       const { showLinks } = checkLicense(license.check('reporting', 'gold'));
       const licenseHasScreenshotReporting = showLinks;
 
-      const capabilityHasDashboardScreenshotReporting =
-        capabilities.dashboard_v2?.generateScreenshot === true;
-      const capabilityHasVisualizeScreenshotReporting =
-        capabilities.visualize_v2?.generateScreenshot === true;
+      const capabilityHasDashboardReporting = hasCapabilityByKey(capabilities, 'dashboard_v2');
+      const capabilityHasVisualizeReporting = hasCapabilityByKey(capabilities, 'visualize_v2');
 
       if (!licenseHasScreenshotReporting) {
         return false;
       }
 
-      if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+      if (objectType === 'dashboard' && !capabilityHasDashboardReporting) {
         return false;
       }
 
-      if (
-        isSupportedType &&
-        !capabilityHasVisualizeScreenshotReporting &&
-        !capabilityHasDashboardScreenshotReporting
-      ) {
+      if (isSupportedType && !capabilityHasVisualizeReporting && !capabilityHasDashboardReporting) {
         return false;
       }
 

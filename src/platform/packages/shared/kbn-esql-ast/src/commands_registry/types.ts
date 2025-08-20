@@ -235,6 +235,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
+  inlinestats: Location.STATS,
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
