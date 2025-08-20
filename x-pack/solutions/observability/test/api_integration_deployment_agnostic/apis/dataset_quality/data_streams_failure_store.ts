@@ -48,6 +48,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         index_patterns: [enabledDs],
         composed_of: [
           'logs-failure-enabled@mappings',
+        ],
+        priority: 500,
+        allow_auto_create: true,
+        data_stream: { hidden: false },
+      });
+
+      await es.indices.putIndexTemplate({
+        name: disabledDs,
+        index_patterns: [disabledDs],
+        composed_of: [
           'logs@mappings',
           'logs@settings',
           'ecs@mappings',
