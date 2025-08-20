@@ -20,6 +20,12 @@ const StateAnnotation = Annotation.Root({
     reducer: messagesStateReducer,
     default: () => [],
   }),
+  // track how many tool calls have been executed so far
+  toolCallCount: Annotation<number>({
+    reducer: (a?: number, b?: number) =>
+      (typeof a === 'number' ? a : 0) + (typeof b === 'number' ? b : 0),
+    default: () => 0,
+  }),
   // outputs
   addedMessages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
@@ -35,12 +41,14 @@ export const createAgentGraph = ({
   customInstructions,
   noPrompt,
   logger,
+  toolCallLimit,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
   customInstructions?: string;
   noPrompt?: boolean;
   logger: Logger;
+  toolCallLimit?: number;
 }) => {
   const toolNode = new ToolNode<typeof StateAnnotation.State.addedMessages>(tools);
 
@@ -55,6 +63,8 @@ export const createAgentGraph = ({
         : getActPrompt({
             customInstructions,
             messages: [...state.initialMessages, ...state.addedMessages],
+            currentToolCallCount: state.toolCallCount,
+            toolCallLimit,
           })
     );
     return {
@@ -73,9 +83,16 @@ export const createAgentGraph = ({
 
   const toolHandler = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.addedMessages);
+    // Increment by the number of tool calls issued in the last AI message
+    const lastMessage = state.addedMessages[state.addedMessages.length - 1] as
+      | AIMessage
+      | undefined;
+    const increment = lastMessage?.tool_calls?.length ?? 1;
 
     return {
       addedMessages: [...toolNodeResult],
+      // increment tool call counter by the number of tool calls just executed
+      toolCallCount: increment,
     };
   };
 

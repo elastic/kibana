@@ -64,11 +64,16 @@ export const runChatAgent: RunChatAgentFn = async (
     previousRounds: conversation,
   });
 
+  // keep recursionLimit in a single variable to pass to both graph (as toolCallLimit) and engine
+  const recursionLimit = 25;
+
   const agentGraph = createAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
     customInstructions,
+    // pass recursionLimit as toolCallLimit for prompting and state context
+    toolCallLimit: recursionLimit,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
@@ -84,7 +89,7 @@ export const runChatAgent: RunChatAgentFn = async (
         agentId,
         runId,
       },
-      recursionLimit: 25,
+      recursionLimit,
       callbacks: [],
     }
   );

@@ -46,7 +46,7 @@ export interface SearchFulltextResponse {
 export const relevanceSearchTool = (): BuiltinToolDefinition<typeof relevanceSearchSchema> => {
   return {
     id: builtinToolIds.relevanceSearch,
-    description: `Find relevant documents in an index based on a simple fulltext search.
+    description: `Performs a semantic or keyword-based or hybrid search to find relevant documents or information within unstructured text. This is the primary tool for answering questions that require finding explanations, descriptions, factual information or procedural guidance from a knowledge base.
 
     - The 'index' parameter can be used to specify which index to search against. If not provided, the tool will use the index explorer to find the best index to use.
     - The 'fields' parameter can be used to specify which fields to search on. If not provided, the tool will use all searchable fields.
