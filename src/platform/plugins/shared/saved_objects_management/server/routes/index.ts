@@ -10,7 +10,6 @@
 import type { HttpServiceSetup } from '@kbn/core/server';
 import type { ISavedObjectsManagement } from '../services';
 import { registerFindRoute } from './find';
-import { registerBulkDeleteRoute } from './bulk_delete';
 import { registerBulkGetRoute } from './bulk_get';
 import { registerScrollForCountRoute } from './scroll_count';
 import { registerRelationshipsRoute } from './relationships';
@@ -24,9 +23,10 @@ interface RegisterRouteOptions {
 export function registerRoutes({ http, managementServicePromise }: RegisterRouteOptions) {
   const router = http.createRouter();
   registerFindRoute(router, managementServicePromise);
-  registerBulkDeleteRoute(router);
   registerBulkGetRoute(router, managementServicePromise);
   registerScrollForCountRoute(router);
   registerRelationshipsRoute(router, managementServicePromise);
   registerGetAllowedTypesRoute(router);
 }
+
+export { BulkDeleteRoute } from './bulk_delete';
