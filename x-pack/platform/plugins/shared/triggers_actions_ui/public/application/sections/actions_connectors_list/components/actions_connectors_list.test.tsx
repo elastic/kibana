@@ -345,9 +345,7 @@ describe('actions_connectors_list', () => {
 
       await user.click(deleteButtons[0]);
 
-      await waitFor(() => {
-        expect(screen.getByTestId('deleteIdsConfirmation')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('deleteIdsConfirmation')).toBeInTheDocument();
 
       const confirmation = screen.getByTestId('deleteIdsConfirmation');
       expect(confirmation).toHaveTextContent(/this connector is currently in use/i);

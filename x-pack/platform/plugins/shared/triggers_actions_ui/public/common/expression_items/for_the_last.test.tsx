@@ -35,13 +35,10 @@ describe('for the last expression', () => {
       />
     );
 
-    // Check that the button shows the correct value
     expect(screen.getByTestId('forLastExpression')).toHaveTextContent('5 minutes');
 
-    // Open the popover to access the form inputs
     await user.click(screen.getByTestId('forLastExpression'));
 
-    // Now check for the form inputs
     expect(screen.getByTestId('timeWindowSizeNumber')).toBeInTheDocument();
     expect(screen.getByTestId('timeWindowUnitSelect')).toBeInTheDocument();
   });
@@ -59,16 +56,12 @@ describe('for the last expression', () => {
       />
     );
 
-    // Check that the button shows the default value with question mark
     expect(screen.getByTestId('forLastExpression')).toHaveTextContent('? seconds');
 
-    // Open the popover to access the form inputs
     await user.click(screen.getByTestId('forLastExpression'));
 
-    // Check for the formatted message text in the popover
     expect(screen.getByText('For the last')).toBeInTheDocument();
 
-    // Check for the form inputs with default values
     const numberInput = screen.getByTestId('timeWindowSizeNumber') as HTMLInputElement;
     const selectInput = screen.getByTestId('timeWindowUnitSelect') as HTMLSelectElement;
 
