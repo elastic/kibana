@@ -6,9 +6,11 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { estypes } from '@elastic/elasticsearch';
 
 import type { KnowledgeBaseItem } from '../../../../common/types';
 import { appContextService } from '../../app_context';
+import { retryTransientEsErrors } from '../elasticsearch/retry';
 
 export const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 export const DEFAULT_SIZE = 1000; // Set a reasonable default size for search results
@@ -32,7 +34,7 @@ export async function saveKnowledgeBaseContentToIndex({
   await deletePackageKnowledgeBase(esClient, pkgName, pkgVersion);
 
   // Index each knowledge base file as a separate document
-  const operations = [];
+  const operations: estypes.BulkRequest['operations'] = [];
   const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
@@ -51,16 +53,18 @@ export async function saveKnowledgeBaseContentToIndex({
   }
 
   if (operations.length > 0) {
-    await esClient
-      .bulk({
-        operations,
-        refresh: 'wait_for',
-      })
-      .catch((error) => {
-        const logger = appContextService.getLogger();
-        logger.error('Bulk index operation failed', error);
-        throw error;
-      });
+    await retryTransientEsErrors(
+      async () =>
+        esClient.bulk({
+          operations,
+          refresh: 'wait_for',
+        }),
+      { logger: appContextService.getLogger() }
+    ).catch((error) => {
+      const logger = appContextService.getLogger();
+      logger.error('Bulk index operation failed', error);
+      throw error;
+    });
   }
 }
 
@@ -159,7 +163,7 @@ export async function updatePackageKnowledgeBaseVersion({
   await deletePackageKnowledgeBase(esClient, pkgName);
 
   // Index the new knowledge base content with the new version
-  const operations = [];
+  const operations: estypes.BulkRequest['operations'] = [];
   const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
@@ -178,9 +182,13 @@ export async function updatePackageKnowledgeBaseVersion({
   }
 
   if (operations.length > 0) {
-    await esClient.bulk({
-      operations,
-      refresh: 'wait_for',
-    });
+    await retryTransientEsErrors(
+      async () =>
+        esClient.bulk({
+          operations,
+          refresh: 'wait_for',
+        }),
+      { logger: appContextService.getLogger() }
+    );
   }
 }
