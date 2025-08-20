@@ -32,7 +32,8 @@
     "@kbn/management-settings-types",
     "@kbn/management-settings-utilities",
     "@kbn/test-jest-helpers",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/licensing-plugin"
   ],
   "exclude": [
     "target/**/*"
