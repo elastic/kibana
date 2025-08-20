@@ -2355,6 +2355,15 @@ describe('SentinelOneActionsClient class', () => {
               'Input instructions: --terminate --processes <processes-name-templates> [-f|--force]',
             id: '1466645476786791838',
             name: 'Terminate Processes (Linux/macOS)',
+            meta: {
+              id: '1466645476786791838',
+              inputExample: '--terminate --processes ping,chrome --force',
+              inputInstructions: '--terminate --processes <processes-name-templates> [-f|--force]',
+              inputRequired: true,
+              osTypes: ['macos', 'linux'],
+              scriptDescription: null,
+              shortFileName: 'multi-operations-script-bash.sh',
+            },
           },
         ],
       });
