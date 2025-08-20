@@ -23,7 +23,7 @@ export const LinksSection = ({ componentData }: Props) => {
 
   const CURSOR_LINK = `cursor://file/${fileName}:${lineNumber}:${columnNumber}`;
   const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
-  const GITHUB_VSCODE_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
+  const GITHUB_DEV_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
   const VSCODE_LINK = `vscode://file/${fileName}:${lineNumber}:${columnNumber}`;
   const WEBSTORM_LINK = `webstorm://open?file=/${fileName}&line=${lineNumber}&column=${columnNumber}`;
 
@@ -49,10 +49,10 @@ export const LinksSection = ({ componentData }: Props) => {
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButton href={GITHUB_VSCODE_LINK} target="_blank" size="s" iconType="logoGithub">
+            <EuiButton href={GITHUB_DEV_LINK} target="_blank" size="s" iconType="logoGithub">
               <FormattedMessage
                 id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubVSCodeButtonText"
-                defaultMessage="Open in GitHub Dev"
+                defaultMessage="Open on GitHub.dev"
               />
             </EuiButton>
           </EuiFlexItem>
