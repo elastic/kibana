@@ -4,33 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 
-import { EuiBasicTable, EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import { UnifiedDataTable } from '@kbn/unified-data-table';
+import { DataView } from '@kbn/data-views-plugin/public';
 
+import { CellActionsProvider } from '@kbn/cell-actions';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecordList } from '@kbn/discover-utils';
+import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
 import { AttachmentType, type EventAttachment } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui';
 import * as i18n from './translations';
-const getColumns = (caseData: CaseUI): Array<EuiBasicTableColumn<EventAttachment>> => [
-  {
-    name: i18n.DATE_ADDED,
-    field: 'createdAt',
-    'data-test-subj': 'cases-events-table-date-added',
-    dataType: 'date',
-  },
-  {
-    name: 'index',
-    field: 'index',
-    'data-test-subj': 'cases-events-table-value',
-  },
-  {
-    name: '_id',
-    field: 'eventId',
-    'data-test-subj': 'cases-events-table-value',
-  },
-];
+import { useKibana } from '../../common/lib/kibana';
+import { useGetEvents } from '../../containers/use_get_events';
+
+const EmptyComponent = () => <></>;
+EmptyComponent.displayName = 'EmptyComponent';
 
 const EmptyEventsTable = ({ caseData }: { caseData: CaseUI }) => (
   <EuiEmptyPrompt
@@ -44,18 +36,16 @@ EmptyEventsTable.displayName = 'EmptyEventsTable';
 
 export interface EventsTableProps {
   caseData: CaseUI;
-  isLoading: boolean;
 }
 
-export const EventsTable = ({ caseData, isLoading }: EventsTableProps) => {
+const columns = ['_id', 'event.kind', 'host.name'];
+export const EventsTable = ({ caseData }: EventsTableProps) => {
   const filesTableRowProps = useCallback(
     (event: EventAttachment) => ({
       'data-test-subj': `cases-events-table-row-${event.eventId}`,
     }),
     []
   );
-
-  const columns = useMemo(() => getColumns(caseData), [caseData]);
 
   const events = useMemo(
     () =>
@@ -65,9 +55,52 @@ export const EventsTable = ({ caseData, isLoading }: EventsTableProps) => {
     [caseData.comments]
   );
 
-  console.log(events);
+  const { services } = useKibana();
 
-  return isLoading ? (
+  const dataView = useMemo(() => {
+    const title = events.map((event) => event.index).join(',');
+
+    return new DataView({
+      fieldFormats: services.fieldFormats,
+      spec: {
+        title,
+        id: 'adhoc_case_events',
+      },
+    });
+  }, [events, services.fieldFormats]);
+
+  const eventsResponse = useGetEvents(
+    caseData.id,
+    dataView.getIndexPattern().split(','),
+    columns,
+    events.flatMap((event) => event.eventId)
+  );
+
+  const rows = buildDataTableRecordList({
+    records: eventsResponse.data?.rawResponse?.hits?.hits ?? [],
+    dataView,
+  });
+
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord>();
+
+  const handleRenderDocumentView = useCallback(() => {
+    if (!expandedDoc) {
+      return <></>;
+    }
+
+    return (
+      <UnifiedDocViewerFlyout
+        onClose={() => setExpandedDoc(undefined)}
+        columns={[]}
+        dataView={dataView}
+        isEsqlQuery={false}
+        hit={expandedDoc}
+        services={services}
+      />
+    );
+  }, [dataView, expandedDoc, services]);
+
+  return eventsResponse.isFetching ? (
     <>
       <EuiSpacer size="l" />
       <EuiSkeletonText data-test-subj="cases-events-table-loading" lines={10} />
@@ -83,15 +116,23 @@ export const EventsTable = ({ caseData, isLoading }: EventsTableProps) => {
         </>
       )}
       <EuiSpacer size="s" />
-      <EuiBasicTable
-        tableCaption={i18n.EVENTS_TABLE}
-        items={events}
-        rowHeader="id"
-        columns={columns}
-        data-test-subj="cases-events-table"
-        noItemsMessage={<EmptyEventsTable caseData={caseData} />}
-        rowProps={filesTableRowProps}
-      />
+      <CellActionsProvider
+        getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
+      >
+        <UnifiedDataTable
+          visibleCellActions={3}
+          dataView={dataView}
+          columns={columns}
+          sort={[]}
+          isSortEnabled={false}
+          isPaginationEnabled={false}
+          services={services}
+          setExpandedDoc={setExpandedDoc}
+          expandedDoc={expandedDoc}
+          renderDocumentView={handleRenderDocumentView}
+          rows={rows}
+        />
+      </CellActionsProvider>
     </>
   );
 };
