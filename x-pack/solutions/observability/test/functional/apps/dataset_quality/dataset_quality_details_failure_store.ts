@@ -29,10 +29,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   const synthtrace = getService('logSynthtraceEsClient');
   const to = '2024-01-01T12:00:00.000Z';
 
-  const regularDatasetName = datasetNames[0];
-  const regularDataStreamName = `logs-${regularDatasetName}-${defaultNamespace}`;
-  const failedDatasetName = datasetNames[1];
-  const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
+  const failureStoreDatasetName = datasetNames[0];
+  const failureStoreDataStreamName = `logs-${failureStoreDatasetName}-${defaultNamespace}`;
+  const nofailureStoreDatasetName = datasetNames[1];
+  const nofailureStoreDataStreamName = `logs-${nofailureStoreDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality details failure store', function () {
     // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
@@ -46,7 +46,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         name: 'synth.2@custom',
         dataStreamOptions: {
           failure_store: {
-            enabled: true,
+            enabled: false,
           },
         },
       });
@@ -58,12 +58,12 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         createFailedLogRecord({
           to: new Date().toISOString(),
           count: 2,
-          dataset: failedDatasetName,
+          dataset: nofailureStoreDatasetName,
         }),
         getLogsForDataset({
           to: new Date().toISOString(),
           count: 4,
-          dataset: failedDatasetName,
+          dataset: nofailureStoreDatasetName,
         }),
       ]);
     });
@@ -78,8 +78,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('should show "No failure store" card when failure store is disabled', async () => {
       const { datasetQualityDetailsSummaryCardNoFailureStore } =
         PageObjects.datasetQuality.testSubjectSelectors;
+
       await PageObjects.datasetQuality.navigateToDetails({
-        dataStream: regularDataStreamName,
+        dataStream: nofailureStoreDataStreamName,
       });
 
       await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
@@ -100,7 +101,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       } = PageObjects.datasetQuality.testSubjectSelectors;
 
       await PageObjects.datasetQuality.navigateToDetails({
-        dataStream: regularDataStreamName,
+        dataStream: nofailureStoreDataStreamName,
       });
 
       await testSubjects.existOrFail(datasetQualityDetailsSummaryCardNoFailureStore);
@@ -132,7 +133,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     it('should show failed docs count when failure store is enabled', async () => {
-      await PageObjects.datasetQuality.navigateToDetails({ dataStream: failedDataStreamName });
+      await PageObjects.datasetQuality.navigateToDetails({
+        dataStream: failureStoreDataStreamName,
+      });
 
       await testSubjects.existOrFail(
         PageObjects.datasetQuality.testSubjectSelectors
