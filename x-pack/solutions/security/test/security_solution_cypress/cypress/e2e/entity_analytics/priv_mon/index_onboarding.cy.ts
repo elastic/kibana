@@ -23,7 +23,7 @@ import {
 } from '../../../tasks/privileged_user_monitoring';
 import { ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL } from '../../../urls/navigation';
 
-const indexName = 'test_index';
+const sourceIndexName = 'test_index';
 
 describe(
   'Privileged User Monitoring - Index onboarding',
@@ -35,7 +35,7 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'linux_process' });
       deletePrivMonEngine(); // Just in case another test left it behind
 
-      createIndex(indexName, {
+      createIndex(sourceIndexName, {
         user: {
           properties: {
             name: {
@@ -45,7 +45,7 @@ describe(
         },
       });
 
-      createDocument(indexName, {
+      createDocument(sourceIndexName, {
         user: {
           name: 'testUser',
         },
@@ -64,7 +64,7 @@ describe(
 
     after(() => {
       cy.task('esArchiverUnload', { archiveName: 'linux_process' });
-      deleteIndex(indexName);
+      deleteIndex(sourceIndexName);
     });
 
     it('starts the engine with an index containing a valid user', () => {
@@ -72,13 +72,13 @@ describe(
 
       openIndexPicker();
       expandIndexPickerOptions();
-      selectIndexPickerOption(indexName);
+      selectIndexPickerOption(sourceIndexName);
       clickFileUploaderUpdateButton();
 
       cy.get(ONBOARDING_CALLOUT).should('contain.text', 'Privileged user monitoring set up');
     });
 
-    it('creates a new index and start the engine', () => {
+    it('creates a new index and starts the engine', () => {
       const newIndex = 'new_index';
       visit(ENTITY_ANALYTICS_PRIVILEGED_USER_MONITORING_URL);
 

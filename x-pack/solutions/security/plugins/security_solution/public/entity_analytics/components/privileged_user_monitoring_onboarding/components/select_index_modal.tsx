@@ -183,7 +183,7 @@ export const IndexSelectorModal = ({
             <EuiButtonEmpty
               iconType="plusInCircle"
               onClick={showCreateIndexModal}
-              data-test-subj="createIndexButton"
+              data-test-subj="create-index-button"
             >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"

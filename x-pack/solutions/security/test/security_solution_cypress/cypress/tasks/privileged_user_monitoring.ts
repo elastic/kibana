@@ -35,7 +35,7 @@ export const openIndexPicker = () => {
 };
 
 export const openCreateIndexModal = () => {
-  cy.get(`${getDataTestSubjectSelector('createIndexButton')}`)
+  cy.get(`${getDataTestSubjectSelector('create-index-button')}`)
     .should('exist')
     .click();
 };
