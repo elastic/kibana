@@ -8,14 +8,7 @@
  */
 
 import React from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ComponentData } from '../../types';
 
@@ -28,8 +21,11 @@ export const LinksSection = ({ componentData }: Props) => {
 
   const { fileName, lineNumber, columnNumber, relativePath } = componentData;
 
+  const CURSOR_LINK = `cursor://file/${fileName}:${lineNumber}:${columnNumber}`;
   const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
+  const GITHUB_VSCODE_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
   const VSCODE_LINK = `vscode://file/${fileName}:${lineNumber}:${columnNumber}`;
+  const WEBSTORM_LINK = `webstorm://open?file=/${fileName}&line=${lineNumber}&column=${columnNumber}`;
 
   return (
     <EuiFlexItem grow={false}>
@@ -45,26 +41,44 @@ export const LinksSection = ({ componentData }: Props) => {
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty href={GITHUB_LINK} target="_blank" size="s" flush="left">
+            <EuiButton href={GITHUB_LINK} target="_blank" size="s" iconType="logoGithub" fill>
               <FormattedMessage
                 id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubButtonText"
                 defaultMessage="Open on GitHub"
               />
-            </EuiButtonEmpty>
+            </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              href={VSCODE_LINK}
-              target="_blank"
-              size="s"
-              iconType="code"
-              flush="left"
-            >
+            <EuiButton href={GITHUB_VSCODE_LINK} target="_blank" size="s" iconType="logoGithub">
+              <FormattedMessage
+                id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubVSCodeButtonText"
+                defaultMessage="Open in GitHub Dev"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton href={VSCODE_LINK} target="_blank" size="s" iconType="code" fill>
               <FormattedMessage
                 id="kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText"
                 defaultMessage="Open in VSCode"
               />
-            </EuiButtonEmpty>
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton href={WEBSTORM_LINK} target="_blank" size="s" iconType="code">
+              <FormattedMessage
+                id="kbnInspectComponent.inspectFlyout.linksSection.openInWebStormButtonText"
+                defaultMessage="Open in WebStorm"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton href={CURSOR_LINK} target="_blank" size="s" iconType="code">
+              <FormattedMessage
+                id="kbnInspectComponent.inspectFlyout.linksSection.openInCursorButtonText"
+                defaultMessage="Open in Cursor"
+              />
+            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
