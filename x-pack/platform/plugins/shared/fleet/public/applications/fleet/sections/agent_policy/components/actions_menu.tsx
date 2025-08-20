@@ -106,11 +106,21 @@ export const AgentPolicyActionMenu = memo<{
             </EuiContextMenuItem>
           );
 
+          const isAuthorizedForAutoUpgradeAgents =
+            authz.fleet.allAgentPolicies && authz.fleet.allAgents;
           const manageAutoUpgradeAgentsItem = (
             <EuiContextMenuItem
               data-test-subj="agentPolicyActionMenuManageAutoUpgradeAgentsButton"
               icon="gear"
-              disabled={!authz.fleet.allAgentPolicies || !authz.fleet.allAgents}
+              disabled={!isAuthorizedForAutoUpgradeAgents}
+              toolTipContent={
+                !isAuthorizedForAutoUpgradeAgents && (
+                  <FormattedMessage
+                    id="xpack.fleet.agentPolicyActionMenu.manageAutoUpgradeAgentsDisabledTooltip"
+                    defaultMessage="Agent policies and Agents 'All' privileges are required to auto-upgrade agents."
+                  />
+                )
+              }
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsManageAutoUpgradeAgentsModalOpen(!isManageAutoUpgradeAgentsModalOpen);
