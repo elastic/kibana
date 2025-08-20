@@ -97,26 +97,13 @@ export const RoundSteps: React.FC<RoundStepsProps> = ({ steps }) => {
       titleSize="xxs"
       steps={steps.flatMap((step) => {
         if (isToolCallStep(step)) {
-          return step.results
-            .filter((result) => {
-              // TODO: Should we include type Other results?
-              // Would just show as a JSON blob
-              if (result.type === ToolResultType.other) {
-                return true;
-              }
-              // Don't include partial resource results
-              if (result.type === ToolResultType.resource && result.data.partial) {
-                return false;
-              }
-              return true;
-            })
-            .map((toolResult) => {
-              return {
-                title: getToolResultTitle(toolResult),
-                children: <ToolResultDisplay toolResult={toolResult} />,
-                status: 'incomplete',
-              };
-            });
+          return step.results.map((toolResult) => {
+            return {
+              title: getToolResultTitle(toolResult),
+              children: <ToolResultDisplay toolResult={toolResult} />,
+              status: 'incomplete',
+            };
+          });
         }
 
         // Are reasoning steps produced at all right now?

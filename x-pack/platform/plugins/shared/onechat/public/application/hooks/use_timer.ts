@@ -11,11 +11,21 @@ interface UseTimerOptions {
   isLoading: boolean;
 }
 
-export const useTimer = ({
-  isLoading,
-}: UseTimerOptions):
-  | { showTimer: false; elapsedTime: undefined; isStopped: undefined }
-  | { showTimer: true; elapsedTime: number; isStopped: boolean } => {
+interface UninitializedTimer {
+  showTimer: false;
+  elapsedTime: undefined;
+  isStopped: undefined;
+}
+
+interface InitializedTimer {
+  showTimer: true;
+  elapsedTime: number;
+  isStopped: boolean;
+}
+
+export type Timer = UninitializedTimer | InitializedTimer;
+
+export const useTimer = ({ isLoading }: UseTimerOptions): Timer => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const hasStartedRef = useRef(false);
   const [isStopped, setIsStopped] = useState(false);

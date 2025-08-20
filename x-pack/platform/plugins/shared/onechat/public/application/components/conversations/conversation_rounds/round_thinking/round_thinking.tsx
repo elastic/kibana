@@ -5,32 +5,63 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
-import type { ReactNode } from 'react';
 import React from 'react';
+import type { Timer } from '../../../../hooks/use_timer';
+import { RoundTimer } from './round_timer';
 import { RoundSteps } from './steps/round_steps';
 
 interface RoundThinkingProps {
   steps: ConversationRoundStep[];
-  loadingIndicator: ReactNode;
+  isLoading: boolean;
+  timer: Timer;
 }
 
-export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, loadingIndicator }) => {
+const fullWidthStyles = css`
+  width: 100%;
+`;
+
+const thinkingLabel = i18n.translate('xpack.onechat.conversation.thinking.label', {
+  defaultMessage: 'Thinking...',
+});
+const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinking.completed', {
+  defaultMessage: 'Thinking completed',
+});
+
+export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, timer }) => {
+  const { euiTheme } = useEuiTheme();
   if (steps.length === 0) {
-    return loadingIndicator ? <div>{loadingIndicator}</div> : null;
+    return timer.showTimer ? (
+      <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexItem grow={false}>
+          <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
   }
+
+  const accordionStyles = css`
+    .euiAccordion__children {
+      padding: ${euiTheme.size.s} 0;
+    }
+  `;
 
   return (
     <EuiAccordion
       id="round-thinking"
       arrowDisplay="left"
-      buttonContent={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {loadingIndicator && <EuiFlexItem grow={false}>{loadingIndicator}</EuiFlexItem>}
-          {/* TODO: Add thinking label that describes what steps were taken */}
-          {/* <EuiFlexItem grow={false}>Completed 1 search. Found 3 context docs.</EuiFlexItem> */}
-        </EuiFlexGroup>
+      css={accordionStyles}
+      buttonProps={{
+        css: fullWidthStyles,
+      }}
+      buttonContent={isLoading ? thinkingLabel : thinkingCompletedLabel}
+      extraAction={
+        timer.showTimer ? (
+          <RoundTimer elapsedTime={timer.elapsedTime} isStopped={timer.isStopped} />
+        ) : undefined
       }
     >
       <EuiPanel paddingSize="l" hasShadow={false} hasBorder={false} color="subdued">
