@@ -24,7 +24,7 @@ An embeddable API shares state via a publishing subject, a read only RxJS Observ
 ### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
-Interface implemenations provided by EmbeddableRenderer React component. An embeddable does not need to implement these interfaces as they are provided by EmbeddableRenderer.
+Interface implemenations provided by `EmbeddableRenderer` React component. An embeddable does not need to implement these interfaces as they are already provided.
 
 | Interface | Description |
 | ----------| ----------- |
@@ -53,7 +53,7 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
 
 ### Embeddable panel
-The EmbeddableRenderer React component wraps embeddable components in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
+The `EmbeddableRenderer` React component wraps the embeddable component in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
 
 The embeddable panel uses UiActions and Triggers registry to make the embeddable UI extensible. The table below lists the trigger events used by the embeddable panel.
 
@@ -66,22 +66,22 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 
 The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
-| UiAction | Description | Optional interfaces required by action |
-| ---------| ----------- | ---------- |
-| ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | HasLibraryTransforms |
+| UiAction | Description | Trigger | Optional interfaces required by action |
+| ---------| ----------- | ---------- | ---------- |
+| ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
 | ACTION_CLONE_PANEL | Clones panel in page | |
-| ACTION_COPY_TO_DASHBOARD | Opens copy to dashboard modal | |
-| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | PublishesDataViews, PublishesTitle |
-| ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | HasVisualizeConfig |
-| ACTION_EDIT_PANEL | Opens embeddable editor | ACTION_EDIT_PANEL |
-| ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | |
-| ACTION_EXPLORE_DATA | Opens Discover application with  Lens embeddable data request context | PublishesDataViews |
-| ACTION_EXPORT_CSV | Exports raw data table to CSV | HasInspectorAdapters |
-| ACTION_INSPECT_PANEL | Opens inspector flyout | HasInspectorAdapters |
-| ACTION_REMOVE_PANEL | Removes embeddable from page |  |
-| ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | HasReadOnlyCapabilities |
-| ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | HasLibraryTransforms |
-| generateCsvReport | Starts CSV reporting job for Discover session | PublishesSavedSearch, PublishesTitle |
+| ACTION_COPY_TO_DASHBOARD | Opens copy to dashboard modal | CONTEXT_MENU_TRIGGER | |
+| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesTitle |
+| ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
+| ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | ACTION_EDIT_PANEL |
+| ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
+| ACTION_EXPLORE_DATA | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | PublishesDataViews |
+| ACTION_EXPORT_CSV | Exports raw data table to CSV | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
+| ACTION_INSPECT_PANEL | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
+| ACTION_REMOVE_PANEL | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
+| ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
+| ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |
 
 ### Best practices
 
