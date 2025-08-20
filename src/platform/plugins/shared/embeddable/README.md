@@ -73,15 +73,15 @@ The embeddable panel passes the embeddable API to UiActions. Each UiAction uses 
 | ACTION_COPY_TO_DASHBOARD | Opens copy to dashboard modal | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | PublishesDataViews, PublishesTitle |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | HasVisualizeConfig |
-| ACTION_EDIT_PANEL | Opens embeddable configuration editor | ACTION_EDIT_PANEL |
+| ACTION_EDIT_PANEL | Opens embeddable editor | ACTION_EDIT_PANEL |
 | ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | |
-| ACTION_EXPLORE_DATA | Explore embeddable data request in in Discover | PublishesDataViews |
+| ACTION_EXPLORE_DATA | Opens Discover application with  Lens embeddable data request context | PublishesDataViews |
 | ACTION_EXPORT_CSV | Exports raw data table to CSV | HasInspectorAdapters |
 | ACTION_INSPECT_PANEL | Opens inspector flyout | HasInspectorAdapters |
 | ACTION_REMOVE_PANEL | Removes embeddable from page |  |
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | HasReadOnlyCapabilities |
 | ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | HasLibraryTransforms |
-| generateCsvReport | Starts CSV report job for discover session | PublishesSavedSearch, PublishesTitle |
+| generateCsvReport | Starts CSV reporting job for Discover session | PublishesSavedSearch, PublishesTitle |
 
 ### Best practices
 
