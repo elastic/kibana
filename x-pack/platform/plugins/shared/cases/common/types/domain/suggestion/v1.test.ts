@@ -68,7 +68,7 @@ describe('Suggestion Schemas and Types', () => {
 
     it('should allow optional context fields to be omitted', () => {
       const validRequest = {
-        owners: ['stack'],
+        owners: ['cases'],
         context: {},
       };
 
