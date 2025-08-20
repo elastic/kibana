@@ -1151,8 +1151,7 @@ describe('Fleet integrations', () => {
       const callback = getPackagePolicyUpdateCallback(
         endpointAppContextServiceMock,
         cloudService,
-        productFeaturesService,
-        experimentalFeatures
+        productFeaturesService
       );
       const policyConfig = generator.generatePolicyPackagePolicy();
 
