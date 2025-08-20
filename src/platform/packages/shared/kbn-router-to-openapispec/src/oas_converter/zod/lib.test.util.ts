@@ -18,7 +18,7 @@ export function createLargeSchema() {
     booleanFromString: BooleanFromString.default(false).describe(
       'boolean or string "true" or "false"'
     ),
-    ipType: z.string().ip({ version: 'v4' }),
+    ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     neverType: z.never(),
     map: z.map(z.string(), z.string()),

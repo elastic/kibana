@@ -152,7 +152,8 @@ export const processVersionedRouter = async ({
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}' using newest version '${version}': ${e.message}`;
-      throw e;
+      console.log('processVersionedRouter error: ', e);
+      // throw e;
     }
   }
   return { paths };

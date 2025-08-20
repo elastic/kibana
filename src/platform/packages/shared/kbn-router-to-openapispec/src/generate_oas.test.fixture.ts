@@ -413,7 +413,7 @@ export function createSharedZodSchema() {
     string: z.string().max(10).min(1),
     maybeNumber: z.number().max(1000).min(1).optional(),
     booleanDefault: z.boolean({ description: 'defaults to to true' }).default(true),
-    ipType: z.string().ip({ version: 'v4' }),
+    ipType: z.ipv4(),
     literalType: z.literal('literallythis'),
     record: z.record(z.string(), z.string()),
     union: z.union([
