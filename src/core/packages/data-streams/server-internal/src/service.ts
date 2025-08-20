@@ -8,21 +8,21 @@
  */
 
 import pLimit from 'p-limit';
-import type { ElasticsearchServiceStart } from '@kbn/core/server';
-
-import type { Logger } from '@kbn/logging';
-import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
   type DataStreamDefinition,
   type IDataStreamClient,
   DataStreamClient,
 } from '@kbn/data-streams';
+import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
+import type { Logger } from '@kbn/logging';
+import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
+import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 
 interface StartDeps {
-  elasticsearch: ElasticsearchServiceStart;
+  elasticsearch: InternalElasticsearchServiceStart;
 }
 
+/** @internal */
 export class DataStreamsService implements CoreService<DataStreamsSetup, DataStreamsStart> {
   private readonly logger: Logger;
   private readonly dataStreams: Map<
