@@ -17,8 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/react-kibana-mount",
-    "@kbn/core/public",
-    "@kbn/core/server",
+    "@kbn/core",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/config-schema",
