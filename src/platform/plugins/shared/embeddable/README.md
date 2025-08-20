@@ -49,7 +49,10 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
-| HasInspectorAdapters | Interface for accessing inspector adaptors | ACTION_INSPECT_PANEL |
+| HasEditCapabilities | Interface for editing embeddable | ACTION_EDIT_PANEL | 
+| HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL |
+| PublishesDataViews | Interface for accessing embeddable data views | ACTION_CUSTOMIZE_PANEL |
+| PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
 
 </details>
 
@@ -65,9 +68,7 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 | PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
 | PANEL_NOTIFICATION_TRIGGER | trigger to add a notification to the top-right corner of a panel |
 
-The embeddable panel passes the embeddable API to all UiActions for a trigger. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
-
-For example, the [edit panal action](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private/presentation_panel/public/panel_actions/edit_panel_action/edit_panel_action.ts) defines the "Edit" panel context menu action. The action's `isCompatible` check uses the `apiHasEditCapabilities` type guard to check that an embeddable API implements the `HasEditCapabilities` interface. When an embeddable API implements the interface and all other conditions of `isCompatible` check are true, the "Edit" action is availabe in the panel context menu. When an embeddable API does not implement the interface, the "Edit" action is not available in the panel context menu.
+The embeddable panel passes the embeddable API to UiActions. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
 <details>
 
@@ -75,8 +76,10 @@ For example, the [edit panal action](https://github.com/elastic/kibana/tree/main
 
 | UiAction | Description | interfaces |
 | ---------| ----------- | ---------- |
-| ACTION_REMOVE_PANEL | Removes embeddable from page |  |
+| ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | PublishesDataViews PublishesTitle |
+| ACTION_EDIT_PANEL | Opens embeddable configuration editor | ACTION_EDIT_PANEL |
 | ACTION_INSPECT_PANEL | Opens inspector flyout | HasInspectorAdapters |
+| ACTION_REMOVE_PANEL | Removes embeddable from page |  |
 
 </details>
 
