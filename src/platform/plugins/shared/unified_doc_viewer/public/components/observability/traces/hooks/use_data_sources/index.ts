@@ -11,14 +11,16 @@ import createContainer from 'constate';
 
 type UseDataSourcesParams = DataSources;
 
-export interface DataSources {
-  indexes: {
-    logs: string;
-    apm: {
-      errors: string;
-      traces: string;
-    };
+export interface TraceIndexes {
+  logs?: string;
+  apm: {
+    errors?: string;
+    traces?: string;
   };
+}
+
+export interface DataSources {
+  indexes: TraceIndexes;
 }
 
 const useDataSources = ({ indexes }: UseDataSourcesParams) => {

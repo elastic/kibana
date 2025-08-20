@@ -33,7 +33,6 @@ export interface FullScreenWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
-  tracesIndexPattern: string;
   onExitFullScreen: () => void;
 }
 
@@ -42,7 +41,6 @@ export const FullScreenWaterfall = ({
   rangeFrom,
   rangeTo,
   dataView,
-  tracesIndexPattern,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
   const { transaction } = useRootTransactionContext();
@@ -67,7 +65,7 @@ export const FullScreenWaterfall = ({
 
   const generateRelatedErrorsDiscoverUrl = useCallback(
     (docId: string) => {
-      if (!discoverLocator) {
+      if (!discoverLocator || !indexes.apm.errors || !indexes.logs) {
         return null;
       }
 
@@ -161,7 +159,6 @@ export const FullScreenWaterfall = ({
       {isFlyoutVisible && spanId && (
         <EuiFocusTrap>
           <SpanFlyout
-            tracesIndexPattern={tracesIndexPattern}
             spanId={spanId}
             dataView={dataView}
             onCloseFlyout={() => {

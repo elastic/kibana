@@ -31,6 +31,7 @@ import { RootTransactionProvider } from './hooks/use_root_transaction';
 import { Trace } from '../components/trace';
 import { TransactionSummaryTitle } from './sub_components/transaction_summary_title';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
+import type { TraceIndexes } from '../hooks/use_data_sources';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import {
   DEFAULT_MARGIN_BOTTOM,
@@ -39,13 +40,7 @@ import {
 import { SpanLinks } from '../components/span_links';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
-  indexes: {
-    apm: {
-      traces: string;
-      errors: string;
-    };
-    logs: string;
-  };
+  indexes: TraceIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -91,7 +86,7 @@ export function TransactionOverview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
+      <RootTransactionProvider traceId={traceId}>
         <FieldActionsProvider
           columns={columns}
           filter={filter}
@@ -154,7 +149,6 @@ export function TransactionOverview({
                   docId={transactionId}
                   displayType="transaction"
                   dataView={dataView}
-                  tracesIndexPattern={indexes.apm.traces}
                   showWaterfall={showWaterfall}
                   showActions={showActions}
                 />

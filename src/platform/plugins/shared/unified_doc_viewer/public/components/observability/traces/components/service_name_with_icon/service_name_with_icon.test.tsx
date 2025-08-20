@@ -23,28 +23,14 @@ describe('ServiceNameWithIcon', () => {
     jest.resetAllMocks();
   });
 
-  it('renders service name as string without truncation', () => {
-    const { getByText, queryByTestId } = render(<ServiceNameWithIcon serviceName="MyService" />);
-    expect(getByText('MyService')).toBeInTheDocument();
-    expect(queryByTestId('truncatedServiceName')).not.toBeInTheDocument();
-  });
-
-  it('renders service name as string with truncation', () => {
-    const { getByTestId } = render(
-      <ServiceNameWithIcon
-        serviceName="A very long service name that needs to be truncated"
-        truncate
-      />
-    );
-    expect(getByTestId('truncatedServiceName')).toBeInTheDocument();
+  it('renders service name as string', () => {
+    const { getByText } = render(<ServiceNameWithIcon serviceName="NodeService" />);
+    expect(getByText('NodeService')).toBeInTheDocument();
   });
 
   it('renders service name as React node', () => {
-    const { getByText, queryByTestId } = render(
-      <ServiceNameWithIcon serviceName={<span>NodeService</span>} />
-    );
+    const { getByText } = render(<ServiceNameWithIcon serviceName={<span>NodeService</span>} />);
     expect(getByText('NodeService')).toBeInTheDocument();
-    expect(queryByTestId('truncatedServiceName')).not.toBeInTheDocument();
   });
 
   it('renders AgentIcon when agentName is provided', () => {

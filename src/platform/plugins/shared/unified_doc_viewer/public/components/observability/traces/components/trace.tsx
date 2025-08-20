@@ -28,7 +28,6 @@ export interface TraceProps {
   displayType: 'span' | 'transaction';
   docId: string;
   dataView: DocViewRenderProps['dataView'];
-  tracesIndexPattern: string;
   showWaterfall?: boolean;
   showActions?: boolean;
 }
@@ -40,7 +39,6 @@ export const Trace = ({
   displayType,
   docId,
   dataView,
-  tracesIndexPattern,
   showWaterfall = true,
   showActions = true,
 }: TraceProps) => {
@@ -92,7 +90,6 @@ export const Trace = ({
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           dataView={dataView}
-          tracesIndexPattern={tracesIndexPattern}
           onExitFullScreen={() => {
             setShowFullScreenWaterfall(false);
           }}

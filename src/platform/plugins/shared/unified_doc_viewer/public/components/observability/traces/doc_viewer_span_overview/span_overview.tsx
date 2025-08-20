@@ -28,6 +28,7 @@ import { getUnifiedDocViewerServices } from '../../../../plugin';
 import { SpanLinks } from '../components/span_links';
 import { Trace } from '../components/trace';
 import { RootTransactionProvider } from '../doc_viewer_transaction_overview/hooks/use_root_transaction';
+import type { TraceIndexes } from '../hooks/use_data_sources';
 import { DataSourcesProvider } from '../hooks/use_data_sources';
 import { RootSpanProvider } from './hooks/use_root_span';
 import { allSpanFields, spanFields } from './resources/fields';
@@ -41,13 +42,7 @@ import {
 } from '../../../doc_viewer_source/get_height';
 
 export type SpanOverviewProps = DocViewRenderProps & {
-  indexes: {
-    apm: {
-      traces: string;
-      errors: string;
-    };
-    logs: string;
-  };
+  indexes: TraceIndexes;
   showWaterfall?: boolean;
   showActions?: boolean;
 };
@@ -97,12 +92,8 @@ export function SpanOverview({
 
   return (
     <DataSourcesProvider indexes={indexes}>
-      <RootTransactionProvider traceId={traceId} indexPattern={indexes.apm.traces}>
-        <RootSpanProvider
-          traceId={traceId}
-          transactionId={transactionId}
-          indexPattern={indexes.apm.traces}
-        >
+      <RootTransactionProvider traceId={traceId}>
+        <RootSpanProvider traceId={traceId} transactionId={transactionId}>
           <FieldActionsProvider
             columns={columns}
             filter={filter}
@@ -165,7 +156,6 @@ export function SpanOverview({
                   docId={flattenedDoc[SPAN_ID_FIELD]}
                   displayType="span"
                   dataView={dataView}
-                  tracesIndexPattern={indexes.apm.traces}
                   showWaterfall={showWaterfall}
                   showActions={showActions}
                 />
