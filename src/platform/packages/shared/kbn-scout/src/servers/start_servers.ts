@@ -38,7 +38,6 @@ export async function startServers(log: ToolingLog, options: StartServerOptions)
       procs,
       config,
       installDir: options.installDir,
-      kibanaConfig: options.kibanaConfig,
       extraKbnOpts: getExtraKbnOpts(
         options.installDir,
         config.get('serverless'),

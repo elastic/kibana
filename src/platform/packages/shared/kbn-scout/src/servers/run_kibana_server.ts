@@ -19,7 +19,6 @@ export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
   installDir?: string;
-  kibanaConfig?: string;
   extraKbnOpts?: string[];
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
