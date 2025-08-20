@@ -34,4 +34,16 @@ describe('mergeEntityStoreIndices', () => {
     const result = mergeEntityStoreIndices(indices, indexPattern);
     expect(result).toEqual([]);
   });
+
+  it('returns correct index patterns for snapshots #1', () => {
+    const snapshotDate: Date = new Date('2025-08-20T00:00:01Z');
+    const result = getEntitiesSnapshotIndexName('generic', snapshotDate, 'default');
+    expect(result).toEqual('.entities.v1.2025-08-20.security_generic_default');
+  });
+
+  it('returns correct index patterns for snapshots #2', () => {
+    const snapshotDate: Date = new Date('2025-09-21T00:00:01Z');
+    const result = getEntitiesSnapshotIndexName('host', snapshotDate, 'custom');
+    expect(result).toEqual('.entities.v1.2025-09-21.security_host_custom');
+  });
 });
