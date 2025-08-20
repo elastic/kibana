@@ -56,10 +56,11 @@ export const getConversationWithNewMessage = async (params: Params) => {
         }),
         role,
         user:
-          existingConversation.createdBy ?? existingConversation.users.length === 1
+          existingConversation.createdBy ??
+          (existingConversation.users?.length === 1
             ? // no createdBy indicates legacy conversation, assign the sole user in the user list
               existingConversation.users?.[0]
-            : undefined,
+            : undefined),
         timestamp: new Date().toISOString(),
       };
     }),

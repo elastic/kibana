@@ -16,6 +16,7 @@ import {
 import { authenticatedUser } from '../../__mocks__/user';
 import { updateConversationRoute } from './update_route';
 import expect from 'expect';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
@@ -61,6 +62,24 @@ describe('Update conversation route', () => {
       expect(response.body).toEqual({
         message: 'conversation id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd" not found',
         status_code: 404,
+      });
+    });
+
+    test('returns 403 when updating a conversation that user does not own', async () => {
+      context.elasticAssistant.getCurrentUser.mockResolvedValue({
+        username: 'noone',
+        profile_uid: 'noone',
+      } as AuthenticatedUser);
+      const response = await server.inject(
+        getUpdateConversationRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(403);
+      expect(response.body).toEqual({
+        message:
+          'conversation id: "04128c15-0d1b-4716-a4c5-46997ac7f3bd". Updating a conversation is only allowed for the owner of the conversation.',
+        status_code: 403,
       });
     });
 

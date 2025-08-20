@@ -41,6 +41,16 @@ describe('Find user conversations route', () => {
       );
       expect(response.status).toEqual(200);
     });
+    test('calls with correct filter', async () => {
+      await server.inject(getCurrentUserFindRequest(), requestContextMock.convertContext(context));
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: 'users:{ name: "elastic" } OR users: "" OR NOT users: { name: * }',
+        })
+      );
+    });
 
     test('catches error if search throws error', async () => {
       clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments.mockImplementation(

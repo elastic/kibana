@@ -73,6 +73,7 @@ export const suggestUsersRoute = (router: ElasticAssistantPluginRouter, logger: 
               },
             },
           });
+
           return response.ok({
             body: result,
           });

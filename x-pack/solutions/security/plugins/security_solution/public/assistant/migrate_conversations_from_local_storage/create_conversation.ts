@@ -44,7 +44,7 @@ export const createConversations = async (
       const timestamp = parse(m.timestamp ?? '')?.toISOString();
       return {
         ...m,
-        user: m.user ?? currentUser ?? {},
+        ...(m.role === 'user' ? { user: m.user ?? currentUser ?? {} } : {}),
         // message from local storage WILL have content, this is just a fallback
         content: m.content ?? '',
         timestamp: timestamp == null ? new Date().toISOString() : timestamp,

@@ -72,7 +72,7 @@ export const appendConversationMessages = async ({
                 if (message.user != null) {
                   newMessage.user = message.user;
                 }
-                if (message.user == null && newMessage.role == 'user' && ctx._source.created_by != null) {
+                if (newMessage.user == null && newMessage.role == 'user' && ctx._source.created_by != null) {
                   newMessage.user = ctx._source.created_by;
                 }
                 if (message.trace_data != null) {
