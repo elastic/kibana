@@ -162,12 +162,12 @@ export async function initialize({
           })
         );
 
-      const result = await Promise.allSettled(promises);
+      const results = await Promise.allSettled(promises);
 
       const updateErrors: unknown[] = [];
-      for (const res of result) {
-        if (res.status === 'rejected') {
-          updateErrors.push(res.reason);
+      for (const result of results) {
+        if (result.status === 'rejected') {
+          updateErrors.push(result.reason);
         }
       }
       if (updateErrors.length) {
