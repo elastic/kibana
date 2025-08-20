@@ -51,7 +51,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
         limit(async () => {
           this.dataStreams.set(
             dataStreamDefinition,
-            await DataStreamClient.setup({
+            await DataStreamClient.initialize({
               dataStreams: dataStreamDefinition,
               elasticsearchClient: elasticsearch.client.asInternalUser,
               logger: this.logger,

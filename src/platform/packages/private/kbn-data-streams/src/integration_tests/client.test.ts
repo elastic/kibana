@@ -65,7 +65,7 @@ describe('DataStreamClient', () => {
     let client: DataStreamClient<MyTestDoc, {}>;
     beforeEach(async () => {
       const elasticsearchClient = esServer.getClient();
-      client = await DataStreamClient.setup({
+      client = await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
         dataStreams: testDataStream,
@@ -144,7 +144,7 @@ describe('DataStreamClient', () => {
       ).toBe(false);
       expect(await elasticsearchClient.indices.exists({ index: testDataStream.name })).toBe(false);
 
-      const client = await DataStreamClient.setup({
+      const client = await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
         dataStreams: testDataStream,
@@ -163,7 +163,7 @@ describe('DataStreamClient', () => {
       const ps: Promise<DataStreamClient<any, any>>[] = [];
       for (const _ of [1, 2, 3])
         ps.push(
-          DataStreamClient.setup({
+          DataStreamClient.initialize({
             logger,
             elasticsearchClient,
             dataStreams: testDataStream,
@@ -182,7 +182,7 @@ describe('DataStreamClient', () => {
 
     it('updates mappings as expected', async () => {
       const elasticsearchClient = esServer.getClient();
-      await DataStreamClient.setup({
+      await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
         dataStreams: testDataStream,
@@ -220,7 +220,7 @@ describe('DataStreamClient', () => {
         },
       };
 
-      await DataStreamClient.setup({
+      await DataStreamClient.initialize({
         logger,
         elasticsearchClient,
         dataStreams: nextDefinition,

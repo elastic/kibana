@@ -101,10 +101,12 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
    * @remark This function should execute early in the application lifecycle and preferably once per
    *         data stream. However, it should be idempotent.
    */
-  public static async setup<S extends object, SRM extends BaseSearchRuntimeMappings>(
+  public static async initialize<S extends object, SRM extends BaseSearchRuntimeMappings>(
     args: DataStreamClientArgs<S, SRM>
   ): Promise<DataStreamClient<S, SRM>> {
     await setup(args);
     return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.logger, args.dataStreams);
   }
+
+  // TODO: expose a create function that skips initialization
 }
