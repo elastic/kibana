@@ -15,14 +15,14 @@ import { castArray } from 'lodash';
 import Mocha from 'mocha';
 import Path from 'path';
 import * as table from 'table';
-import { TableUserConfig } from 'table';
+import type { TableUserConfig } from 'table';
 
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { EvaluateWith, options } from './cli';
 import { getServiceUrls } from './get_service_urls';
 import { KibanaClient } from './kibana_client';
 import { initServices } from './services';
-import { EvaluationResult } from './types';
+import type { EvaluationResult } from './types';
 import { selectConnector } from './select_connector';
 
 function runEvaluations() {

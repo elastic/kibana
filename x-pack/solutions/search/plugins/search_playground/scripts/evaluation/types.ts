@@ -6,11 +6,9 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-import {
-  type Message,
-  ChatCompletionErrorEvent,
-} from '@kbn/observability-ai-assistant-plugin/common';
-import { KibanaClient } from './kibana_client';
+import type { ChatCompletionErrorEvent } from '@kbn/observability-ai-assistant-plugin/common';
+import { type Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type { KibanaClient } from './kibana_client';
 
 export interface ScenarioOptions {
   esClient: Client;
