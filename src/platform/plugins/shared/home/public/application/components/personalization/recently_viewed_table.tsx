@@ -16,6 +16,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiInMemoryTable,
+  EuiButton,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
@@ -105,6 +107,8 @@ export const PersonalizedRecentlyViewed = ({
     pageSizeOptions,
   };
 
+  const showEmptyState = items.length === 0;
+
   return (
     <KibanaPageTemplate.Section
       bottomBorder
@@ -112,27 +116,71 @@ export const PersonalizedRecentlyViewed = ({
       aria-labelledby="homeSolutions__title"
     >
       <EuiPanel>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('home.recentlyViewedTable.title', {
-              defaultMessage: 'Recently viewed',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText size="xs">Showing {resultsCount}</EuiText>
-        <EuiInMemoryTable
-          tableCaption={i18n.translate('home.recentlyViewedTable.caption', {
-            defaultMessage: 'Recently viewed dashboards',
-          })}
-          responsiveBreakpoint={false}
-          items={items}
-          columns={columns}
-          rowProps={getRowProps}
-          cellProps={getCellProps}
-          pagination={pagination}
-          onChange={onTableChange}
-        />
+        {showEmptyState ? (
+          <div style={{ textAlign: 'center' }}>
+            <EuiTitle size="xs">
+              <h4>
+                {i18n.translate('home.recentlyViewedTable.emptyTitle', {
+                  defaultMessage: 'No items viewed',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                {i18n.translate('home.recentlyViewedTable.emptyDescription', {
+                  defaultMessage: 'To get started, view data from existing indices in Discover.',
+                })}
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiButton
+              iconType="plusInCircle"
+              fill
+              href={addBasePath('/app/dashboards#/create')}
+              data-test-subj="createDashboardButton"
+            >
+              {i18n.translate('home.recentlyViewedTable.createDashboardButton', {
+                defaultMessage: 'Create a dashboard',
+              })}
+            </EuiButton>
+            <EuiSpacer size="s" />
+            <EuiButtonEmpty
+              iconType="search"
+              href={addBasePath('/app/discover')}
+              data-test-subj="searchDataInDiscoverButton"
+            >
+              {i18n.translate('home.recentlyViewedTable.searchDataInDiscoverButton', {
+                defaultMessage: 'Search data in Discover',
+              })}
+            </EuiButtonEmpty>
+          </div>
+        ) : (
+          <>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('home.recentlyViewedTable.title', {
+                  defaultMessage: 'Recently viewed',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="xs">Showing {resultsCount}</EuiText>
+            <EuiInMemoryTable
+              tableCaption={i18n.translate('home.recentlyViewedTable.caption', {
+                defaultMessage: 'Recently viewed dashboards',
+              })}
+              responsiveBreakpoint={false}
+              items={items}
+              columns={columns}
+              rowHeader="label"
+              rowProps={getRowProps}
+              cellProps={getCellProps}
+              pagination={pagination}
+              onChange={onTableChange}
+            />
+          </>
+        )}
       </EuiPanel>
     </KibanaPageTemplate.Section>
   );

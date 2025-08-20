@@ -7,7 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React, { useState } from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer, EuiText, EuiInMemoryTable, EuiLink } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiText,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiButton,
+} from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 
@@ -79,6 +87,8 @@ export const PersonalizedDashboardsCreatedByUser = ({
     pageSizeOptions,
   };
 
+  const showEmptyState = items.length === 0;
+
   return (
     <KibanaPageTemplate.Section
       bottomBorder
@@ -86,26 +96,59 @@ export const PersonalizedDashboardsCreatedByUser = ({
       aria-labelledby="homeDashboardsCreatedByMe__title"
     >
       <EuiPanel>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('home.dashboardsCreatedByMe.title', {
-              defaultMessage: 'Dashboards created by me',
-            })}
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <EuiText size="xs">Showing {resultsCount}</EuiText>
-        <EuiInMemoryTable
-          tableCaption={i18n.translate('home.dashboardsCreatedByMe.caption', {
-            defaultMessage: 'Dashboards created by me',
-          })}
-          responsiveBreakpoint={false}
-          items={items}
-          columns={columns}
-          rowHeader="title"
-          pagination={pagination}
-          onChange={onTableChange}
-        />
+        {showEmptyState ? (
+          <div style={{ textAlign: 'center' }}>
+            <EuiTitle size="xs">
+              <h4>
+                {i18n.translate('home.dashboardsCreatedByMe.emptyTitle', {
+                  defaultMessage: "You haven't created any dashboards yet",
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s">
+              <p>
+                {i18n.translate('home.dashboardsCreatedByMe.emptyDescription', {
+                  defaultMessage: 'To get started, create a new dashboard to visualize your data.',
+                })}
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <EuiButton
+              iconType="plusInCircle"
+              fill
+              href={addBasePath('/app/dashboards#/create')}
+              data-test-subj="createDashboardButton"
+            >
+              {i18n.translate('home.dashboardsCreatedByMe.createDashboardButton', {
+                defaultMessage: 'Create a dashboard',
+              })}
+            </EuiButton>
+          </div>
+        ) : (
+          <>
+            <EuiTitle size="s">
+              <h3>
+                {i18n.translate('home.dashboardsCreatedByMe.title', {
+                  defaultMessage: 'Dashboards created by me',
+                })}
+              </h3>
+            </EuiTitle>
+            <EuiSpacer size="m" />
+            <EuiText size="xs">Showing {resultsCount}</EuiText>
+            <EuiInMemoryTable
+              tableCaption={i18n.translate('home.dashboardsCreatedByMe.caption', {
+                defaultMessage: 'Dashboards created by me',
+              })}
+              responsiveBreakpoint={false}
+              items={items}
+              columns={columns}
+              rowHeader="title"
+              pagination={pagination}
+              onChange={onTableChange}
+            />
+          </>
+        )}
       </EuiPanel>
     </KibanaPageTemplate.Section>
   );

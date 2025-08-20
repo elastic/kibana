@@ -8,13 +8,12 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
-import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
+import type { AuthenticatedUser, ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
 import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
@@ -28,7 +27,6 @@ import type {
   FeatureCatalogueCategory,
 } from '../../services';
 import { getServices } from '../kibana_services';
-import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
@@ -36,8 +34,12 @@ import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_ta
 import { ContentByTagTable } from './personalization/content_by_tag_table';
 import { PersonalizedDashboardsCreatedByUser } from './personalization/created_by_user';
 import { HomeFavoriteDashboards } from './personalization/favorite_dashboards';
+import { createAppNavigationHandler } from './app_navigation_handler';
+import { HomeHeaderActions } from './home_header_actions';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
+
+const SOLUTIONS_SECTION_HIDE_KEY = 'home:solutionsSection:hidden';
 
 export interface HomeProps {
   addBasePath: (url: string) => string;
@@ -48,7 +50,7 @@ export interface HomeProps {
   hasUserDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
   recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
-  userId?: string;
+  currentUser?: AuthenticatedUser | null;
   dashboards?: any[];
 }
 interface State {
@@ -56,6 +58,7 @@ interface State {
   isNewKibanaInstance: boolean;
   isWelcomeEnabled: boolean;
   selectedTabId: string;
+  hideSolutionsSection: boolean;
 }
 
 export class Home extends Component<HomeProps, State> {
@@ -69,6 +72,9 @@ export class Home extends Component<HomeProps, State> {
       getServices().application.capabilities.navLinks.integrations &&
       props.localStorage.getItem(KEY_ENABLE_WELCOME) !== 'false';
 
+    const hideSolutionsSection =
+      JSON.parse(localStorage.getItem(SOLUTIONS_SECTION_HIDE_KEY) || 'false') === true;
+
     const body = document.querySelector('body')!;
     body.classList.add('isHomPage');
 
@@ -81,6 +87,7 @@ export class Home extends Component<HomeProps, State> {
       isNewKibanaInstance: false,
       isWelcomeEnabled,
       selectedTabId: 'recentlyViewed', // <-- default tab id
+      hideSolutionsSection,
     };
   }
 
@@ -155,10 +162,15 @@ export class Home extends Component<HomeProps, State> {
     this.setState({ selectedTabId: id });
   };
 
+  private handleHideSolutionsSection = (hide: boolean) => {
+    localStorage.setItem(SOLUTIONS_SECTION_HIDE_KEY, JSON.stringify(hide));
+    this.setState({ hideSolutionsSection: hide });
+  };
+
   private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
     const { selectedTabId } = this.state;
     return (
-      <KibanaPageTemplate.Section>
+      <KibanaPageTemplate.Section grow={false}>
         <EuiFlexGroup gutterSize="none">
           <EuiFlexItem>
             <EuiTabs
@@ -189,9 +201,8 @@ export class Home extends Component<HomeProps, State> {
   }
 
   private renderNormal() {
-    const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
+    const { addBasePath, solutions, isCloudEnabled, currentUser, dashboards, recentlyAccessed } =
       this.props;
-
     const { application, trackUiMetric, http, userProfile } = getServices();
     const dashboardFavoritesClient = new FavoritesClient('dashboards', 'dashboard', {
       http,
@@ -201,7 +212,10 @@ export class Home extends Component<HomeProps, State> {
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
-    const dashboardsCreatedByUser = this.getDashboardsByUser(dashboards ?? [], userId);
+    const dashboardsCreatedByUser = this.getDashboardsByUser(
+      dashboards ?? [],
+      currentUser?.profile_uid
+    );
     const dashboardQueryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -255,19 +269,31 @@ export class Home extends Component<HomeProps, State> {
     return (
       <KibanaPageTemplate
         data-test-subj="homeApp"
-        pageHeader={{
-          bottomBorder: false,
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
-        }}
+        // pageHeader={{
+        //   bottomBorder: false,
+        //   pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
+        // }}
         panelled={false}
       >
-        <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
+        <KibanaPageTemplate.Section bottomBorder grow={false}>
+          <HomeHeaderActions
+            addBasePath={addBasePath}
+            application={application}
+            isCloudEnabled={isCloudEnabled}
+            isDarkMode={isDarkMode}
+            trackUiMetric={trackUiMetric}
+            createAppNavigationHandler={createAppNavigationHandler}
+            currentUserName={currentUser?.full_name ?? currentUser?.username}
+          />
+        </KibanaPageTemplate.Section>
+
         {this.renderTabs(tabs)}
-        <AddData
+
+        <SolutionsSection
           addBasePath={addBasePath}
-          application={application}
-          isDarkMode={isDarkMode}
-          isCloudEnabled={isCloudEnabled}
+          solutions={solutions}
+          hideSolutionsSection={this.state.hideSolutionsSection}
+          onHideSolutionsSection={this.handleHideSolutionsSection}
         />
 
         <ManageData
@@ -285,6 +311,8 @@ export class Home extends Component<HomeProps, State> {
           onChangeDefaultRoute={() => {
             trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
           }}
+          hideSolutionsSection={this.state.hideSolutionsSection}
+          onHideSolutionsSection={this.handleHideSolutionsSection}
         />
       </KibanaPageTemplate>
     );

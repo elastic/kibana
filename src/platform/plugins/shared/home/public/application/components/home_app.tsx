@@ -123,7 +123,7 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
               urlBasePath={getBasePath()}
               hasUserDataView={() => dataViewsService.hasUserDataView()}
               isCloudEnabled={isCloudEnabled}
-              userId={currentUser?.profile_uid}
+              currentUser={currentUser}
               dashboards={dashboards}
             />
           </Route>
