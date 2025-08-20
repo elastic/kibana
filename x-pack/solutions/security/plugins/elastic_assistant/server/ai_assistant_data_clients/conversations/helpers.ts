@@ -58,6 +58,7 @@ export const getUpdateScript = ({
       for (message in params.messages) {
         def newMessage = [:];
         newMessage['@timestamp'] = message['@timestamp'];
+        newMessage.id = message.id;
         newMessage.content = message.content;
         newMessage.is_error = message.is_error;
         newMessage.reader = message.reader;

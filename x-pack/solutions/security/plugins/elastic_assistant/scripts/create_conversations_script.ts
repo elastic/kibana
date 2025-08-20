@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { v4 as uuidv4 } from 'uuid';
 import { randomBytes } from 'node:crypto';
 import yargs from 'yargs/yargs';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -168,8 +169,8 @@ const getMockConversationContent = (): {
     updated_at: timestamp,
     '@timestamp': timestamp,
     messages: [
-      { content: 'Hello robot', role: 'user', '@timestamp': timestamp },
-      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp },
+      { content: 'Hello robot', role: 'user', '@timestamp': timestamp, id: uuidv4() },
+      { content: 'Hello human', role: 'assistant', '@timestamp': timestamp, id: uuidv4() },
     ],
   };
 };
