@@ -660,7 +660,9 @@ export class ManifestManager {
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),
-      this.buildTrustedDevicesArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
     ]);
 
     // Clear cache as the ManifestManager instance is reused on every run.
