@@ -19,13 +19,16 @@ export interface ListIndexInfo {
 
 export const listIndices = async ({
   pattern = '*',
+  includeHidden = false,
   esClient,
 }: {
   pattern?: string;
+  includeHidden?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<ListIndexInfo[]> => {
   const response = await esClient.cat.indices({
     index: pattern,
+    expand_wildcards: includeHidden ? ['open', 'hidden'] : ['open'],
     format: 'json',
   });
 

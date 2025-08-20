@@ -26,7 +26,11 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
     description: 'List the indices in the Elasticsearch cluster the current user has access to.',
     schema: listIndicesSchema,
     handler: async ({ pattern = '*' }, { esClient }) => {
-      const result = await listIndices({ pattern, esClient: esClient.asCurrentUser });
+      const result = await listIndices({
+        pattern,
+        includeHidden: false,
+        esClient: esClient.asCurrentUser,
+      });
 
       return {
         results: [
@@ -34,7 +38,6 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
             type: ToolResultType.other,
             data: {
               indices: result,
-              pattern,
             },
           },
         ],
