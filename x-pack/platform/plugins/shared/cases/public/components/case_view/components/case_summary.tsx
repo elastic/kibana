@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { EuiCallOut, EuiFlexItem, EuiMarkdownFormat, EuiProgress } from '@elastic/eui';
+import { EuiCallOut, EuiFlexItem, EuiMarkdownFormat, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { useGetCaseSummary } from '../hooks/use_get_case_summary';
 
 interface CaseSummaryProps {
@@ -32,6 +32,7 @@ export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseId }) => {
         {isLoading && <EuiProgress size="xs" color="primary" />}
         <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
       </EuiCallOut>
+      <EuiSpacer size="m" />
     </EuiFlexItem>
   );
 };

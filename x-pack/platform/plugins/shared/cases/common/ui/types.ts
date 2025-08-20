@@ -72,6 +72,9 @@ export interface CasesUiConfigType {
   stack: {
     enabled: boolean;
   };
+  unsafe?: {
+    enableCaseSummary: boolean;
+  };
 }
 
 export const UserActionTypeAll = 'all' as const;

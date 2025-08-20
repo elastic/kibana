@@ -54,6 +54,7 @@ import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
 import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 import { CaseSummary } from './case_summary';
+import { KibanaServices } from '../../../common/lib/kibana';
 
 const LOCALSTORAGE_SORT_ORDER_KEY = 'cases.userActivity.sortOrder';
 
@@ -213,8 +214,9 @@ export const CaseViewActivity = ({
         `}
       >
         <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ACTIVITY} />
-        <CaseSummary caseId={caseData.id} />
-        <EuiSpacer size="m" />
+        {KibanaServices.getConfig()?.unsafe?.enableCaseSummary && (
+          <CaseSummary caseId={caseData.id} />
+        )}
         <Description
           isLoadingDescription={isLoadingDescription}
           caseData={caseData}
