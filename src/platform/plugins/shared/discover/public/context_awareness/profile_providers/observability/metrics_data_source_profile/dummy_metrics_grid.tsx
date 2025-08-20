@@ -12,16 +12,13 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import type {
-  SelectableEntry,
-  ToolbarSelectorProps,
-} from '@kbn/unified-histogram/components/chart/toolbar_selector';
-import {
-  EMPTY_OPTION,
-  ToolbarSelector,
-} from '@kbn/unified-histogram/components/chart/toolbar_selector';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { ChartSectionTemplate } from '@kbn/unified-histogram';
+import {
+  ChartSectionTemplate,
+  ToolbarSelector,
+  type ToolbarSelectorProps,
+  type SelectableEntry,
+} from '@kbn/unified-histogram';
 
 // Dummy component to demonstrate how the actual metrics experience grid will hook into discover state and event handlers
 export const DummyMetricsGrid = ({
@@ -73,18 +70,6 @@ export const DummyMetricsGrid = ({
             : undefined,
       }))
       .sort((a, b) => a.label.toLowerCase().localeCompare(b.label.toLowerCase()));
-
-    options.unshift({
-      key: EMPTY_OPTION,
-      value: EMPTY_OPTION,
-      label: i18n.translate(
-        'discover.metricsExperience.breakdownFieldSelector.noBreakdownButtonLabel',
-        {
-          defaultMessage: 'No breakdown',
-        }
-      ),
-      checked: !breakdownField ? ('on' as EuiSelectableOption['checked']) : undefined,
-    });
 
     return options;
   }, [fields, breakdownField]);
