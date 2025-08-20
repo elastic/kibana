@@ -7,7 +7,6 @@
 
 // note these should be sorted alphabetically as we sort the URL params on the browser side
 // before making the request, else the cache key will be different and that would invoke a new request
-
 export const DEFAULT_METRIC_TYPES = ['ingest_rate', 'storage_retained'] as const;
 export const METRIC_TYPE_VALUES = [
   ...DEFAULT_METRIC_TYPES,
