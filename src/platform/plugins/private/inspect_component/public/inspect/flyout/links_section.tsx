@@ -51,7 +51,7 @@ export const LinksSection = ({ componentData }: Props) => {
           <EuiFlexItem grow={false}>
             <EuiButton href={GITHUB_DEV_LINK} target="_blank" size="s" iconType="logoGithub">
               <FormattedMessage
-                id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubVSCodeButtonText"
+                id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubDevButtonText"
                 defaultMessage="Open on GitHub.dev"
               />
             </EuiButton>
