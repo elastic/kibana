@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { ThreatIndicatorPath } from '../../../../../../common/api/detection_engine';
-import type { ThreatListItem } from './types';
+import type {
+  ThreatIndicatorPath,
+  ThreatMapping,
+} from '../../../../../../common/api/detection_engine';
 import type { SignalSourceHit } from '../../types';
 import { enrichSignalThreatMatchesFromSignalsMap } from './enrich_signal_threat_matches';
 import { type SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
@@ -14,19 +16,19 @@ import { type SignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_que
 interface ThreatEnrichmentFactoryOptions {
   threatIndicatorPath: ThreatIndicatorPath;
   signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap;
-  matchedThreats: ThreatListItem[];
+  threatMappings: ThreatMapping;
 }
 
 export const threatEnrichmentFactory = ({
   signalIdToMatchedQueriesMap,
   threatIndicatorPath,
-  matchedThreats,
+  threatMappings,
 }: ThreatEnrichmentFactoryOptions) => {
   return (signals: SignalSourceHit[]) =>
     enrichSignalThreatMatchesFromSignalsMap(
       signals,
-      matchedThreats,
       threatIndicatorPath,
-      signalIdToMatchedQueriesMap
+      signalIdToMatchedQueriesMap,
+      threatMappings
     );
 };

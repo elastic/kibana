@@ -13,8 +13,7 @@ export const getNamedQueryMock = (
 ): ThreatMatchNamedQuery => ({
   id: 'id',
   index: 'index',
-  field: 'field',
-  value: 'value',
+  threatMappingIndex: 0,
   queryType: 'mq',
   ...overrides,
 });

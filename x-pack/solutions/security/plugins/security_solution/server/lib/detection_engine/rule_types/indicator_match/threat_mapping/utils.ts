@@ -156,7 +156,7 @@ const separator = '__SEP__';
 export const encodeThreatMatchNamedQuery = (
   query: ThreatMatchNamedQuery | ThreatTermNamedQuery
 ): string => {
-  const { field, value, queryType, negate } = query;
+  const { threatMappingIndex, queryType } = query;
   let id;
   let index;
   if ('id' in query) {
@@ -164,20 +164,26 @@ export const encodeThreatMatchNamedQuery = (
     index = query.index;
   }
 
-  return [id, index, field, value, queryType, ...(negate ? ['negate'] : [])].join(separator);
+  return [id, index, threatMappingIndex, queryType].join(separator);
 };
 
 export const decodeThreatMatchNamedQuery = (encoded: string): DecodedThreatNamedQuery => {
   const queryValues = encoded.split(separator);
-  const [id, index, field, value, queryType, negate] = queryValues;
-  const query = { id, index, field, value, queryType, negate: negate === 'negate' || undefined };
+  const [id, index, threatMappingIndexString, queryType] = queryValues;
+  const threatMappingIndex = parseInt(threatMappingIndexString, 10);
+  if (isNaN(threatMappingIndex)) {
+    throw new Error(
+      `Decoded threat mapping index is invalid. Decoded value: ${threatMappingIndexString}`
+    );
+  }
+  const query = { id, index, threatMappingIndex, queryType };
   let isValidQuery = false;
   if (queryType === ThreatMatchQueryType.match) {
-    const filterQueryValues = queryValues.filter((v) => v !== 'negate');
-    isValidQuery = filterQueryValues.length === 5 && filterQueryValues.every(Boolean);
+    isValidQuery = queryValues.length === 4 && queryValues.every(Boolean);
   }
   if (queryType === ThreatMatchQueryType.term) {
-    isValidQuery = Boolean(field && value);
+    // We checked if threatMappingIndex is a number above already, so at this point a decoded term query is valid
+    isValidQuery = true;
   }
   if (!isValidQuery) {
     const queryString = JSON.stringify(query);

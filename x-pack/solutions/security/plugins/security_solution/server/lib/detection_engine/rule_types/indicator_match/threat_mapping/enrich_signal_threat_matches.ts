@@ -9,75 +9,52 @@ import { get, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../../common/cti/constants';
 
 import type { SignalSourceHit } from '../../types';
-import type { ThreatEnrichment, ThreatListItem, ThreatMatchNamedQuery } from './types';
+import type { ThreatEnrichment } from './types';
+import type {
+  MatchedHitAndQuery,
+  SignalIdToMatchedQueriesMap,
+} from './get_signal_id_to_matched_queries_map';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
-// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-const getSignalId = (signal: SignalSourceHit): string => signal._id!;
-
-export const groupAndMergeSignalMatches = (signalHits: SignalSourceHit[]): SignalSourceHit[] => {
-  const dedupedHitsMap = signalHits.reduce<Record<string, SignalSourceHit>>((acc, signalHit) => {
-    const signalId = getSignalId(signalHit);
-    const existingSignalHit = acc[signalId];
-
-    if (existingSignalHit == null) {
-      acc[signalId] = signalHit;
-    } else {
-      const existingQueries = Array.isArray(existingSignalHit?.matched_queries)
-        ? existingSignalHit.matched_queries
-        : [];
-      const newQueries = Array.isArray(signalHit.matched_queries) ? signalHit.matched_queries : [];
-      existingSignalHit.matched_queries = [...existingQueries, ...newQueries];
-
-      acc[signalId] = existingSignalHit;
-    }
-
-    return acc;
-  }, {});
-  const dedupedHits = Object.values(dedupedHitsMap);
-  return dedupedHits;
-};
-
 export const buildEnrichments = ({
-  queries,
-  threats,
+  hitsAndQueries,
   indicatorPath,
+  threatMappings,
 }: {
-  queries: ThreatMatchNamedQuery[];
-  threats: ThreatListItem[];
+  hitsAndQueries: MatchedHitAndQuery[];
   indicatorPath: string;
+  threatMappings: ThreatMapping;
 }): ThreatEnrichment[] =>
-  queries
-    .filter((q) => !q.negate)
-    .map((query) => {
-      const matchedThreat = threats.find((threat) => threat._id === query.id);
-      const indicatorValue = get(matchedThreat?._source, indicatorPath) as unknown;
-      const feedName = (get(matchedThreat?._source, FEED_NAME_PATH) ?? '') as string;
-      const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
-      if (!isObject(indicator)) {
-        throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
-      }
-      const feed: { name?: string } = {};
-      if (feedName) {
-        feed.name = feedName;
-      }
-      return {
-        indicator,
-        feed,
-        matched: {
-          atomic: undefined,
-          field: query.field,
-          id: query.id,
-          index: query.index,
-          type: ENRICHMENT_TYPES.IndicatorMatchRule,
-        },
-      };
-    });
+  hitsAndQueries.flatMap((hitAndQuery) => {
+    const { threatHit, query } = hitAndQuery;
+    const indicatorValue = get(threatHit?._source, indicatorPath) as unknown;
+    const feedName = (get(threatHit?._source, FEED_NAME_PATH) ?? '') as string;
+    const indicator = ([indicatorValue].flat()[0] ?? {}) as Record<string, unknown>;
+    if (!isObject(indicator)) {
+      throw new Error(`Expected indicator field to be an object, but found: ${indicator}`);
+    }
+    const feed: { name?: string } = {};
+    if (feedName) {
+      feed.name = feedName;
+    }
+    return threatMappings[query.threatMappingIndex].entries.map((entry) => ({
+      indicator,
+      feed,
+      matched: {
+        atomic: undefined,
+        field: entry.field,
+        id: query.id,
+        index: query.index,
+        type: ENRICHMENT_TYPES.IndicatorMatchRule,
+      },
+    }));
+  });
 
 const enrichSignalWithThreatMatches = (
   signalHit: SignalSourceHit,
-  enrichmentsWithoutAtomic: { [key: string]: ThreatEnrichment[] }
+  enrichmentsWithoutAtomic: ThreatEnrichment[]
 ) => {
   const threat = get(signalHit._source, 'threat') ?? {};
   if (!isObject(threat)) {
@@ -89,9 +66,7 @@ const enrichSignalWithThreatMatches = (
   // new issues.
   const existingEnrichmentValue = get(signalHit._source, 'threat.enrichments') ?? [];
   const existingEnrichments = [existingEnrichmentValue].flat(); // ensure enrichments is an array
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const newEnrichmentsWithoutAtomic = enrichmentsWithoutAtomic[signalHit._id!] ?? [];
-  const newEnrichments = newEnrichmentsWithoutAtomic.map((enrichment) => ({
+  const newEnrichments = enrichmentsWithoutAtomic.map((enrichment) => ({
     ...enrichment,
     matched: {
       ...enrichment.matched,
@@ -116,31 +91,23 @@ const enrichSignalWithThreatMatches = (
  */
 export const enrichSignalThreatMatchesFromSignalsMap = async (
   signals: SignalSourceHit[],
-  matchedThreats: ThreatListItem[],
   indicatorPath: string,
-  signalIdToMatchedQueriesMap: Map<string, ThreatMatchNamedQuery[]>
+  signalIdToMatchedQueriesMap: SignalIdToMatchedQueriesMap,
+  threatMappings: ThreatMapping
 ): Promise<SignalSourceHit[]> => {
   if (signals.length === 0) {
     return [];
   }
 
-  const uniqueHits = groupAndMergeSignalMatches(signals);
-
-  const enrichmentsWithoutAtomic: Record<string, ThreatEnrichment[]> = {};
-
-  uniqueHits.forEach((hit) => {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    enrichmentsWithoutAtomic[hit._id!] = buildEnrichments({
+  const enrichedSignals: SignalSourceHit[] = signals.map((signal) => {
+    const enrichmentsForSignal = buildEnrichments({
       indicatorPath,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      queries: signalIdToMatchedQueriesMap.get(hit._id!) ?? [],
-      threats: matchedThreats,
+      hitsAndQueries: signalIdToMatchedQueriesMap.get(signal._id!) ?? [],
+      threatMappings,
     });
+    return enrichSignalWithThreatMatches(signal, enrichmentsForSignal);
   });
-
-  const enrichedSignals: SignalSourceHit[] = uniqueHits.map((signalHit) =>
-    enrichSignalWithThreatMatches(signalHit, enrichmentsWithoutAtomic)
-  );
 
   return enrichedSignals;
 };
