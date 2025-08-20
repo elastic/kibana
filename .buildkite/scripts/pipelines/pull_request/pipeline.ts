@@ -16,9 +16,11 @@
         ] */
 
 import fs from 'fs';
+import yaml from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import {
   areChangesSkippable,
+  doAllChangesMatch,
   doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
@@ -63,6 +65,34 @@ const getPipeline = (filename: string, removeSteps = true) => {
     }
 
     pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
+
+    const solutions = ['chat', 'observability', 'search', 'security'];
+    let limitSolutions: string | undefined;
+    for (const solution of solutions) {
+      if (await doAllChangesMatch(new RegExp(`^x-pack/solutions/${solution}`))) {
+        limitSolutions = solution;
+        break;
+      }
+    }
+
+    const pickTestGroups = yaml.load(
+      getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml')
+    ) as Array<{ env?: Record<string, string> }>;
+    if (limitSolutions) {
+      pickTestGroups.forEach((step) => {
+        step.env = {
+          ...step.env,
+          LIMIT_SOLUTIONS: limitSolutions,
+        };
+      });
+    }
+    pipeline.push(
+      yaml
+        .dump(pickTestGroups)
+        .split('\n')
+        .map((line) => (line ? `  ${line}` : line))
+        .join('\n')
+    );
 
     if (await doAnyChangesMatch([/^src\/platform\/packages\/private\/kbn-handlebars/])) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/kbn_handlebars.yml'));

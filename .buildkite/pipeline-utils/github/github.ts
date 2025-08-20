@@ -79,6 +79,25 @@ export const areChangesSkippable = async (
   return !someFilesNotSkippable;
 };
 
+export const doAllChangesMatch = async (
+  path: RegExp,
+  changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
+) => {
+  const prChanges = changes || (await getPrChangesCached());
+
+  if (prChanges.length >= 3000) {
+    return false;
+  }
+
+  const allChangesMatch = prChanges.every(
+    (change) =>
+      change.filename.match(path) &&
+      (!change.previous_filename || change.previous_filename.match(path))
+  );
+
+  return allChangesMatch;
+};
+
 export const doAnyChangesMatch = async (
   requiredPaths: RegExp[],
   changes: null | RestEndpointMethodTypes['pulls']['listFiles']['response']['data'] = null
