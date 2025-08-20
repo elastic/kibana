@@ -127,11 +127,7 @@ const unifiedTracesByIdRoute = createApmServerRoute({
     path: t.type({
       traceId: t.string,
     }),
-    query: t.intersection([
-      rangeRt,
-      t.type({ entryTransactionId: t.string }),
-      t.partial({ maxTraceItems: toNumberRt }),
-    ]),
+    query: t.intersection([rangeRt, t.partial({ maxTraceItems: toNumberRt })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (

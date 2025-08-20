@@ -143,18 +143,26 @@ export function SpanLinks({ docId, traceId }: Props) {
         ),
         sortable: (item) => item.details?.spanName || '',
         render: (_, item) => {
+          const content = (
+            <EuiTextTruncate
+              data-test-subj={`${type}-spanName-${item.spanId}`}
+              text={item.details?.spanName || 'N/A'}
+            />
+          );
           return (
-            <EuiLink
-              href={generateDiscoverLink(`WHERE span.id == "${item.spanId}"`)}
+            <span
               css={css`
                 width: 100%;
               `}
             >
-              <EuiTextTruncate
-                data-test-subj={`${type}-spanName-${item.spanId}`}
-                text={item.details?.spanName || 'N/A'}
-              />
-            </EuiLink>
+              {indexes.apm.traces ? (
+                <EuiLink href={generateDiscoverLink(`WHERE span.id == "${item.spanId}"`)}>
+                  {content}
+                </EuiLink>
+              ) : (
+                content
+              )}
+            </span>
           );
         },
       },
@@ -178,27 +186,35 @@ export function SpanLinks({ docId, traceId }: Props) {
         sortable: (item) => item.details?.serviceName || 'N/A',
         render: (_, item) => {
           const serviceName = item.details?.serviceName || 'N/A';
-          return (
-            <ServiceNameWithIcon
-              agentName={item.details?.agentName}
-              serviceName={
-                <EuiLink
-                  href={generateDiscoverLink(
-                    item.details?.serviceName
-                      ? `WHERE service.name == "${item.details.serviceName}"`
-                      : undefined
-                  )}
-                  css={css`
-                    width: 100%;
-                  `}
-                >
-                  <EuiTextTruncate
-                    data-test-subj={`${type}-serviceName-${serviceName}`}
-                    text={serviceName}
-                  />
-                </EuiLink>
-              }
+          const content = (
+            <EuiTextTruncate
+              data-test-subj={`${type}-serviceName-${serviceName}`}
+              text={serviceName}
             />
+          );
+          return (
+            <span
+              css={css`
+                width: 100%;
+              `}
+            >
+              <ServiceNameWithIcon
+                agentName={item.details?.agentName}
+                serviceName={
+                  indexes.apm.traces && item.details?.serviceName ? (
+                    <EuiLink
+                      href={generateDiscoverLink(
+                        `WHERE service.name == "${item.details!.serviceName}"`
+                      )}
+                    >
+                      {content}
+                    </EuiLink>
+                  ) : (
+                    content
+                  )
+                }
+              />
+            </span>
           );
         },
       },
@@ -210,23 +226,31 @@ export function SpanLinks({ docId, traceId }: Props) {
         ),
         sortable: (item) => item.traceId,
         render: (_, item) => {
+          const content = (
+            <EuiTextTruncate
+              data-test-subj={`${type}-traceId-${item.traceId}`}
+              text={item.traceId}
+            />
+          );
           return (
-            <EuiLink
-              href={generateDiscoverLink(`WHERE trace.id == "${item.traceId}"`)}
+            <span
               css={css`
                 width: 100%;
               `}
             >
-              <EuiTextTruncate
-                data-test-subj={`${type}-traceId-${item.traceId}`}
-                text={item.traceId}
-              />
-            </EuiLink>
+              {indexes.apm.traces ? (
+                <EuiLink href={generateDiscoverLink(`WHERE trace.id == "${item.traceId}"`)}>
+                  {content}
+                </EuiLink>
+              ) : (
+                content
+              )}
+            </span>
           );
         },
       },
     ],
-    [generateDiscoverLink, type]
+    [generateDiscoverLink, indexes.apm.traces, type]
   );
 
   if (

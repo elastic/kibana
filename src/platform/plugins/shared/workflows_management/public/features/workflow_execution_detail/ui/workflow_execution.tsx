@@ -148,7 +148,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   // Search for actual APM traces using stored trace ID
   const {
     traceId: foundTraceId,
-    entryTransactionId: foundEntryTransactionId,
     loading: traceSearchLoading,
     error: traceSearchError,
   } = useWorkflowTraceSearch({
@@ -156,7 +155,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
   });
 
   // APM Trace Waterfall properties - NOW USES STORED TRACE ID
-  const { traceId, rangeFrom, rangeTo, entryTransactionId, hasApmTrace } = useMemo(() => {
+  const { traceId, rangeFrom, rangeTo, hasApmTrace } = useMemo(() => {
     if (!workflowExecution?.startedAt || !foundTraceId) {
       return {
         traceId: null,
@@ -193,13 +192,9 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
       traceId: foundTraceId,
       rangeFrom: expandedStartTime.toISOString(),
       rangeTo: expandedEndTime.toISOString(),
-      entryTransactionId:
-        foundEntryTransactionId ||
-        workflowExecution.stepExecutions?.[0]?.id ||
-        workflowExecution.id,
       hasApmTrace: true,
     };
-  }, [workflowExecution, foundTraceId, foundEntryTransactionId]);
+  }, [workflowExecution, foundTraceId]);
 
   // Create stable parent API for embeddable - following unified_doc_viewer pattern
   const getParentApi = useCallback(
@@ -209,11 +204,10 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
           traceId,
           rangeFrom,
           rangeTo,
-          entryTransactionId,
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, entryTransactionId]
+    [traceId, rangeFrom, rangeTo]
   );
 
   if (isLoading) {
@@ -322,7 +316,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
                   traceId,
                   rangeFrom,
                   rangeTo,
-                  entryTransactionId,
                   workflowExecutionId,
                   hasApmTrace,
                 });

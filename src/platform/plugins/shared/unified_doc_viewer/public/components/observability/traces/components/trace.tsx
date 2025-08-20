@@ -13,6 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonIcon } from '@
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
+import { SERVICE_NAME_FIELD } from '@kbn/discover-utils';
 import { spanTraceFields } from '../doc_viewer_span_overview/resources/fields';
 import { transactionTraceFields } from '../doc_viewer_transaction_overview/resources/fields';
 import { SpanSummaryField } from '../doc_viewer_span_overview/sub_components/span_summary_field';
@@ -42,6 +43,7 @@ export const Trace = ({
   showWaterfall = true,
   showActions = true,
 }: TraceProps) => {
+  const serviceName = fields[SERVICE_NAME_FIELD].value as string;
   const { data } = getUnifiedDocViewerServices();
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
 
@@ -90,6 +92,7 @@ export const Trace = ({
           rangeFrom={rangeFrom}
           rangeTo={rangeTo}
           dataView={dataView}
+          serviceName={serviceName}
           onExitFullScreen={() => {
             setShowFullScreenWaterfall(false);
           }}

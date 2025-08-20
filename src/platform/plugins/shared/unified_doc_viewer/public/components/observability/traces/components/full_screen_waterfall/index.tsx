@@ -19,12 +19,10 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
-import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
-import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { ExitFullScreenButton } from './exit_full_screen_button';
 
@@ -33,6 +31,7 @@ export interface FullScreenWaterfallProps {
   rangeFrom: string;
   rangeTo: string;
   dataView: DocViewRenderProps['dataView'];
+  serviceName: string;
   onExitFullScreen: () => void;
 }
 
@@ -41,9 +40,9 @@ export const FullScreenWaterfall = ({
   rangeFrom,
   rangeTo,
   dataView,
+  serviceName,
   onExitFullScreen,
 }: FullScreenWaterfallProps) => {
-  const { transaction } = useRootTransactionContext();
   const [spanId, setSpanId] = useState<string | null>(null);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
@@ -90,8 +89,7 @@ export const FullScreenWaterfall = ({
           traceId,
           rangeFrom,
           rangeTo,
-          serviceName: transaction?.[SERVICE_NAME_FIELD],
-          entryTransactionId: transaction?.[TRANSACTION_ID_FIELD] || transaction?.[SPAN_ID_FIELD],
+          serviceName,
           scrollElement: overlayMaskRef.current,
           getRelatedErrorsHref: generateRelatedErrorsDiscoverUrl,
           onNodeClick: (nodeSpanId: string) => {
@@ -101,7 +99,7 @@ export const FullScreenWaterfall = ({
         },
       }),
     }),
-    [traceId, rangeFrom, rangeTo, transaction, generateRelatedErrorsDiscoverUrl]
+    [traceId, rangeFrom, rangeTo, serviceName, generateRelatedErrorsDiscoverUrl]
   );
 
   return (
