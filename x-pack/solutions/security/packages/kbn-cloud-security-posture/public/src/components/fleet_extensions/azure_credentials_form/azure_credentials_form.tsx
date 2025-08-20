@@ -7,43 +7,37 @@
 import React, { useRef } from 'react';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSelect, EuiSpacer, EuiText } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import semverValid from 'semver/functions/valid';
-import semverCoerce from 'semver/functions/coerce';
-import semverLt from 'semver/functions/lt';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 import { useAzureCredentialsForm } from './azure_hooks';
-import { getPosturePolicy } from '../utils';
-import { CspRadioOption, RadioGroup } from '../csp_boxed_radio_group';
+import { updatePolicyWithInputs } from '../utils';
+import type { CspRadioOption } from '../../csp_boxed_radio_group';
+import { RadioGroup } from '../../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
 import {
-  CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
 } from './azure_test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
-import {
-  AzureCredentialsType,
-  AzureSetupFormat,
-  NewPackagePolicyPostureInput,
-  UpdatePolicy,
-} from '../types';
+import type { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';
+import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getSetupFormatOptions = (): CspRadioOption[] => [
   {
     id: AZURE_SETUP_FORMAT.ARM_TEMPLATE,
     label: 'ARM Template',
-    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
+    testId: AZURE_SETUP_FORMAT_TEST_SUBJECTS.ARM_TEMPLATE,
   },
   {
     id: AZURE_SETUP_FORMAT.MANUAL,
     label: i18n.translate('securitySolutionPackages.azureIntegration.setupFormatOptions.manual', {
       defaultMessage: 'Manual',
     }),
-    testId: CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
+    testId: AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL,
   },
 ];
 
@@ -196,12 +190,9 @@ const TemporaryManualSetup = ({ documentationLink }: { documentationLink: string
   );
 };
 
-const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
-const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
-
 interface AzureCredentialsFormProps {
   newPolicy: NewPackagePolicy;
-  input: Extract<NewPackagePolicyPostureInput, { type: 'cloudbeat/cis_azure' }>;
+  input: NewPackagePolicyInput;
   updatePolicy: UpdatePolicy;
   packageInfo: PackageInfo;
   disabled: boolean;
@@ -234,33 +225,24 @@ export const AzureCredentialsForm = ({
     updatePolicy,
     isValid,
   });
+  const { azurePolicyType, azureEnabled, azureManualFieldsEnabled } = useCloudSetup();
 
   if (!setupFormat) {
     onSetupFormatChange(AZURE_SETUP_FORMAT.ARM_TEMPLATE);
   }
 
-  const packageSemanticVersion = semverValid(packageInfo.version);
-  const cleanPackageVersion = semverCoerce(packageSemanticVersion) || '';
-  const isPackageVersionValidForAzure = !semverLt(
-    cleanPackageVersion,
-    AZURE_MINIMUM_PACKAGE_VERSION
-  );
-  const isPackageVersionValidForManualFields = !semverLt(
-    cleanPackageVersion,
-    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
-  );
-
+  // This sets the Fleet wrapper's isValid to false if Azure is not enabled for this version of the integration
   if (
     isValidAzureRef.current &&
     isValid &&
-    !isPackageVersionValidForAzure &&
-    setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
+    !azureEnabled // &&
+    // setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE
   ) {
     isValidAzureRef.current = false;
     updatePolicy({ updatedPolicy: newPolicy, isValid: false });
   }
 
-  if (!isPackageVersionValidForAzure) {
+  if (!azureEnabled) {
     return (
       <>
         <EuiSpacer size="l" />
@@ -292,16 +274,16 @@ export const AzureCredentialsForm = ({
       {setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && !azureManualFieldsEnabled && (
         <TemporaryManualSetup documentationLink={documentationLink} />
       )}
-      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && isPackageVersionValidForManualFields && (
+      {setupFormat === AZURE_SETUP_FORMAT.MANUAL && azureManualFieldsEnabled && (
         <>
           <AzureCredentialTypeSelector
             type={azureCredentialsType}
             onChange={(optionId) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+                updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
                   'azure.credentials.type': { value: optionId },
                 }),
               });
@@ -313,7 +295,9 @@ export const AzureCredentialsForm = ({
             packageInfo={packageInfo}
             onChange={(key, value) => {
               updatePolicy({
-                updatedPolicy: getPosturePolicy(newPolicy, input.type, { [key]: { value } }),
+                updatedPolicy: updatePolicyWithInputs(newPolicy, azurePolicyType, {
+                  [key]: { value },
+                }),
               });
             }}
             hasInvalidRequiredVars={hasInvalidRequiredVars}

@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import {
+import type {
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
-import { Query } from '@kbn/es-query';
-import { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { Query } from '@kbn/es-query';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { EmbeddablePublicPlugin } from '../plugin';
 import type { EmbeddableSetup, EmbeddableStart } from '../types';

@@ -7,7 +7,7 @@
 
 import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { SampleDataIngestPluginStart, SampleDataIngestPluginSetup } from './types';
+import type { SampleDataIngestPluginStart, SampleDataIngestPluginSetup } from './types';
 import { InstallationService } from './services/installation';
 import { isSampleIndex } from './services/utils';
 

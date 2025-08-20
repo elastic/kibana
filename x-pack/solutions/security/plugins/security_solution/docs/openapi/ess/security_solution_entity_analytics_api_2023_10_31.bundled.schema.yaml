@@ -1394,6 +1394,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
@@ -1795,7 +1796,7 @@ components:
         labels:
           type: object
           properties:
-            source_indices:
+            source_ids:
               items:
                 type: string
               type: array

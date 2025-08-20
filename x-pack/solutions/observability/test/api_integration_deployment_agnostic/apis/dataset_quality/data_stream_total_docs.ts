@@ -8,11 +8,11 @@
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 
-import { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
+import type { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
 import { closeDataStream, rolloverDataStream } from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

@@ -8,7 +8,8 @@
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
-import { FailureStoreFormProps, FailureStoreModal } from './failure_store_modal';
+import type { FailureStoreFormProps } from './failure_store_modal';
+import { FailureStoreModal } from './failure_store_modal';
 
 const defaultProps = {
   onCloseModal: jest.fn(),

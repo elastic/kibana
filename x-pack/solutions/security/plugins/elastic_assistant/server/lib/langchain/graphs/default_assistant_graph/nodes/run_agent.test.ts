@@ -7,10 +7,11 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { runAgent } from './run_agent';
-import { AIMessage, AIMessageChunk, HumanMessage, SystemMessage } from '@langchain/core/messages';
-import { BaseLanguageModelInput } from '@langchain/core/language_models/base';
-import { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
-import { Runnable } from '@langchain/core/runnables';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
+import type { Runnable } from '@langchain/core/runnables';
 
 class ModelForTesting {
   private result: string;
