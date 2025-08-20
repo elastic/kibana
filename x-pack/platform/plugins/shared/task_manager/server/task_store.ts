@@ -844,7 +844,11 @@ export class TaskStore {
     );
   }
 
-  async awaitTaskRunResult(taskId: string) {
+  async deleteTaskRunResult(id: string) {
+    await this.savedObjectsRepository.delete('task_result', id, { refresh: false });
+  }
+
+  async awaitTaskRunResult<T>(taskId: string) {
     const timeout = 30000;
     const start = Date.now();
     const index = '.kibana_task_results';
@@ -864,18 +868,15 @@ export class TaskStore {
         timeout: '30s',
       });
 
-      const res = await this.esClient.search<{ task_result: { result: unknown } }>({
-        index,
-        query: {
-          term: {
-            'task_result.taskId': taskId,
-          },
-        },
+      const searchResp = await this.savedObjectsRepository.find<{ result: T }>({
+        type: 'task_result',
+        filter: `task_result.attributes.taskId: ${taskId}`,
       });
-      if (res.hits.hits.length > 0) {
-        const hit = res.hits.hits[0];
-        const taskResult = hit?._source?.task_result;
-        return taskResult?.result;
+      if (searchResp.saved_objects.length > 0) {
+        return {
+          id: searchResp.saved_objects[0].id,
+          result: searchResp.saved_objects[0].attributes?.result,
+        };
       }
     }
 

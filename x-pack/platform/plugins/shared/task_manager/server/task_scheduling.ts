@@ -123,15 +123,26 @@ export class TaskScheduling {
         state: {},
         storeResult: true,
       },
-      options?.request
-        ? {
-            request: options?.request,
-            refresh: true,
-          }
-        : { refresh: true }
+      {
+        refresh: true,
+        ...(options?.request ? { request: options?.request } : {}),
+      }
     );
 
-    return (await this.store.awaitTaskRunResult(task.id)) as unknown as Result;
+    const resp = await this.store.awaitTaskRunResult<Result>(task.id);
+
+    // Don't wait for task to be deleted before resolving the promise
+    (async () => {
+      try {
+        await this.store.deleteTaskRunResult(resp.id);
+      } catch (e) {
+        this.logger.error(`Failed to clean up task run result document: ${e.message}`, {
+          error: { stack_trace: e.stack },
+        });
+      }
+    })();
+
+    return resp.result;
   }
 
   /**
