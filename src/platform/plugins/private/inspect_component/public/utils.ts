@@ -73,7 +73,7 @@ export const getInspectedElementData = async ({
   }
 
   const reactFiberKey = Object.keys(target).find((key) => key.startsWith('__reactFiber$'));
-  const targetReactFiber = reactFiberKey ? target[reactFiberKey] : null;
+  const targetReactFiber = reactFiberKey ? (target as any)?.[reactFiberKey] : null;
 
   if (targetReactFiber) {
     if (targetReactFiber._debugSource) {

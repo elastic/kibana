@@ -13,17 +13,23 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { InspectButton } from './inspect';
 
 export class InspectComponentPluginPublic implements Plugin {
-  constructor(_initializerContext: PluginInitializerContext) {}
+  private readonly isDevMode: boolean;
+
+  constructor(initializerContext: PluginInitializerContext) {
+    this.isDevMode = initializerContext.env.mode.dev;
+  }
 
   public setup(_core: CoreSetup) {
     return {};
   }
 
   public start(core: CoreStart) {
-    core.chrome.navControls.registerRight({
-      order: 1002,
-      mount: toMountPoint(<InspectButton core={core} />, core.rendering),
-    });
+    if (this.isDevMode) {
+      core.chrome.navControls.registerRight({
+        order: 1002,
+        mount: toMountPoint(<InspectButton core={core} />, core.rendering),
+      });
+    }
     return {};
   }
 

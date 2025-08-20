@@ -10,5 +10,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/src/platform/plugins/shared/inspect_component'],
+  roots: ['<rootDir>/src/platform/plugins/private/inspect_component'],
 };
