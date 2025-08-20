@@ -91,6 +91,7 @@ export class WorkflowsManagementApi {
 
   public async cloneWorkflow(
     workflow: WorkflowDetailDto,
+    spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
     const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
@@ -98,7 +99,7 @@ export class WorkflowsManagementApi {
         defaultMessage: 'Copy',
       })}`,
     });
-    return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, request);
+    return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
   public async updateWorkflow(
@@ -107,11 +108,17 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto | null> {
-    const originalWorkflow = await this.workflowsService.getWorkflow(id);
+    const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
     if (!originalWorkflow) {
       throw new Error(`Workflow with id ${id} not found`);
     }
-    return await this.workflowsService.updateWorkflow(id, workflow, originalWorkflow, spaceId, request);
+    return await this.workflowsService.updateWorkflow(
+      id,
+      workflow,
+      originalWorkflow,
+      spaceId,
+      request
+    );
   }
 
   public async deleteWorkflows(

@@ -403,11 +403,12 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        const workflow = await api.getWorkflow(id);
+        const spaceId = spaces.getSpaceId(request);
+        const workflow = await api.getWorkflow(id, spaceId);
         if (!workflow) {
           return response.notFound();
         }
-        const createdWorkflow = await api.cloneWorkflow(workflow, request);
+        const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({
