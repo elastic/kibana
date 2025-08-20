@@ -58,6 +58,7 @@ export interface DiscoverSessionViewProps {
   urlStateStorage: IKbnUrlStateStorage;
   internalState: InternalStateStore;
   runtimeStateManager: RuntimeStateManager;
+  enableEsqlByDefault?: boolean;
 }
 
 interface SessionInitializationState {
@@ -76,6 +77,7 @@ export const DiscoverSessionView = ({
   urlStateStorage,
   internalState,
   runtimeStateManager,
+  enableEsqlByDefault,
 }: DiscoverSessionViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
@@ -115,6 +117,7 @@ export const DiscoverSessionView = ({
             dataViewSpec,
             defaultUrlState,
             shouldClearAllTabs,
+            enableEsqlByDefault,
           },
         })
       );

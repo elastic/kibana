@@ -31,6 +31,7 @@ export interface DiscoverContainerInternalProps {
   scopedHistory: ScopedHistory;
   customizationCallbacks: CustomizationCallback[];
   stateStorageContainer?: IKbnUrlStateStorage;
+  enableEsqlByDefault?: boolean;
   isLoading?: boolean;
 }
 
@@ -53,6 +54,7 @@ export const DiscoverContainerInternal = ({
   customizationCallbacks,
   getDiscoverServices,
   stateStorageContainer,
+  enableEsqlByDefault = false,
   isLoading = false,
 }: DiscoverContainerInternalProps) => {
   const { value: discoverServices } = useAsync(getDiscoverServices, [getDiscoverServices]);
@@ -91,6 +93,7 @@ export const DiscoverContainerInternal = ({
             customizationCallbacks={customizationCallbacks}
             customizationContext={customizationContext}
             stateStorageContainer={stateStorageContainer}
+            enableEsqlByDefault={enableEsqlByDefault}
           />
         </KibanaContextProvider>
       </EuiFlexItem>

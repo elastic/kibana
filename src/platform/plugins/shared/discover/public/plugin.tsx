@@ -75,6 +75,7 @@ export class DiscoverPlugin
   });
   private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
   private readonly experimentalFeatures: ExperimentalFeatures;
+  private readonly enableEsqlByDefault: boolean;
 
   private scopedHistory?: ScopedHistory<unknown>;
   private urlTracker?: UrlTracker;
@@ -84,8 +85,9 @@ export class DiscoverPlugin
   private singleDocLocator?: DiscoverSingleDocLocator;
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
-    const experimental = this.initializerContext.config.get().experimental;
+    const { experimental, enableEsqlByDefault } = this.initializerContext.config.get();
 
+    this.enableEsqlByDefault = enableEsqlByDefault;
     this.experimentalFeatures = {
       ruleFormV2Enabled: experimental?.ruleFormV2Enabled ?? false,
       enabledProfiles: experimental?.enabledProfiles ?? [],
@@ -212,6 +214,7 @@ export class DiscoverPlugin
           onAppLeave: params.onAppLeave,
           services,
           customizationContext: defaultCustomizationContext,
+          enableEsqlByDefault: this.enableEsqlByDefault,
         });
 
         return () => {
@@ -270,7 +273,11 @@ export class DiscoverPlugin
     return {
       locator: this.locator,
       DiscoverContainer: (props: DiscoverContainerProps) => (
-        <DiscoverContainerInternal getDiscoverServices={getDiscoverServicesInternal} {...props} />
+        <DiscoverContainerInternal
+          getDiscoverServices={getDiscoverServicesInternal}
+          enableEsqlByDefault={this.enableEsqlByDefault}
+          {...props}
+        />
       ),
     };
   }
