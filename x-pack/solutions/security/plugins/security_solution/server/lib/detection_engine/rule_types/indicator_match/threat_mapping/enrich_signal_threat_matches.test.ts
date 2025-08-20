@@ -246,6 +246,110 @@ describe('buildEnrichments', () => {
     ]);
   });
 
+  it('does not duplicate enrichments if there are duplicate threat mapping entries', () => {
+    const localThreatMappings = [
+      {
+        entries: [
+          {
+            field: 'event.field',
+            type: 'mapping' as const,
+            value: 'threat.indicator.domain',
+          },
+          {
+            field: 'event.field',
+            type: 'mapping' as const,
+            value: 'threat.indicator.domain',
+          },
+        ],
+      },
+    ];
+
+    const enrichments = buildEnrichments({
+      hitsAndQueries,
+      threatMappings: localThreatMappings,
+      indicatorPath,
+    });
+
+    expect(enrichments).toEqual([
+      {
+        feed: {},
+        indicator: {
+          domain: 'domain_1',
+          other: 'other_1',
+          reference: 'https://test.com',
+          type: 'type_1',
+        },
+        matched: {
+          atomic: undefined,
+          id: '123',
+          index: 'threat-index',
+          field: 'event.field',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
+        },
+      },
+    ]);
+  });
+
+  it('adds a second enrichment if threat mapping entries are not duplicates', () => {
+    const localThreatMappings = [
+      {
+        entries: [
+          {
+            field: 'event.field',
+            type: 'mapping' as const,
+            value: 'threat.indicator.domain',
+          },
+          {
+            field: 'event.other',
+            type: 'mapping' as const,
+            value: 'threat.indicator.other',
+          },
+        ],
+      },
+    ];
+
+    const enrichments = buildEnrichments({
+      hitsAndQueries,
+      threatMappings: localThreatMappings,
+      indicatorPath,
+    });
+
+    expect(enrichments).toEqual([
+      {
+        feed: {},
+        indicator: {
+          domain: 'domain_1',
+          other: 'other_1',
+          reference: 'https://test.com',
+          type: 'type_1',
+        },
+        matched: {
+          atomic: undefined,
+          id: '123',
+          index: 'threat-index',
+          field: 'event.field',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
+        },
+      },
+      {
+        feed: {},
+        indicator: {
+          domain: 'domain_1',
+          other: 'other_1',
+          reference: 'https://test.com',
+          type: 'type_1',
+        },
+        matched: {
+          atomic: undefined,
+          id: '123',
+          index: 'threat-index',
+          field: 'event.other',
+          type: ENRICHMENT_TYPES.IndicatorMatchRule,
+        },
+      },
+    ]);
+  });
+
   it('returns only the match data if indicator field is absent', () => {
     hitsAndQueries = [
       {

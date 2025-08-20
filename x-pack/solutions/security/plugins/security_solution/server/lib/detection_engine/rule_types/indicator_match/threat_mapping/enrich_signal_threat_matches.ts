@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get, isObject } from 'lodash';
+import { get, isEqual, isObject } from 'lodash';
 import { ENRICHMENT_TYPES, FEED_NAME_PATH } from '../../../../../../common/cti/constants';
 
 import type { SignalSourceHit } from '../../types';
@@ -14,7 +14,10 @@ import type {
   MatchedHitAndQuery,
   SignalIdToMatchedQueriesMap,
 } from './get_signal_id_to_matched_queries_map';
-import type { ThreatMapping } from '../../../../../../common/api/detection_engine';
+import type {
+  ThreatMapping,
+  ThreatMappingEntry,
+} from '../../../../../../common/api/detection_engine';
 
 export const MAX_NUMBER_OF_SIGNAL_MATCHES = 200;
 
@@ -39,7 +42,16 @@ export const buildEnrichments = ({
     if (feedName) {
       feed.name = feedName;
     }
-    return threatMappings[query.threatMappingIndex].entries.map((entry) => ({
+
+    const dedupedThreatMappingEntries = threatMappings[query.threatMappingIndex].entries.reduce<
+      ThreatMappingEntry[]
+    >((accum, entry) => {
+      if (!accum.some((addedEntry) => isEqual(addedEntry, entry))) {
+        accum.push(entry);
+      }
+      return accum;
+    }, []);
+    return dedupedThreatMappingEntries.map((entry) => ({
       indicator,
       feed,
       matched: {
