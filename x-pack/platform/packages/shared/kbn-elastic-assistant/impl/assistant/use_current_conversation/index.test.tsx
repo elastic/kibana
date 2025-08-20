@@ -451,4 +451,37 @@ describe('useCurrentConversation', () => {
 
     expect(mockUseConversation.getConversation).toHaveBeenCalledTimes(7); // initial set + refetch call + 5 retries
   });
+
+  it('should set isConversationOwner={true}', async () => {
+    const conversationTitle = 'Test Conversation';
+    const conversation = {
+      ...mockData.welcome_id,
+      id: 'test-id',
+      title: conversationTitle,
+      messages: [],
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, 'test-id': conversation },
+    });
+    expect(result.current.isConversationOwner).toEqual(true);
+  });
+
+  it.only('should set isConversationOwner={false}', async () => {
+    const anotherUser = { name: 'another-user' };
+    const conversation = {
+      ...mockData.welcome_id,
+      users: [anotherUser],
+      createdBy: anotherUser,
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, welcome_id: conversation },
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(conversation);
+    });
+
+    await waitFor(() => expect(result.current.isConversationOwner).toEqual(false));
+  });
 });

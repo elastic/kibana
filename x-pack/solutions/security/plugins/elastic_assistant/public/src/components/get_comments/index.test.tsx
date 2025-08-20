@@ -84,4 +84,55 @@ describe('getComments', () => {
       `at: ${new Date('2024-03-19T18:59:18.174Z').toLocaleString()}`
     );
   });
+
+  it('Displays controls on last comment when isConversationOwner', () => {
+    const newTestProps = {
+      ...testProps,
+      currentConversation: {
+        ...currentConversation,
+        messages: [
+          {
+            role: user,
+            content: 'Hello {name}',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+          {
+            role: 'assistant' as MessageRole,
+            content: 'Hello elastic',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+        ],
+      },
+    };
+    const result = getComments({ CommentActions: () => null })(newTestProps);
+    expect((result[1].children as React.ReactElement)?.props.isControlsEnabled).toEqual(true);
+  });
+
+  it('Hides controls on last comment when isConversationOwner=false', () => {
+    const newTestProps = {
+      ...testProps,
+      isConversationOwner: false,
+      currentConversation: {
+        ...currentConversation,
+        messages: [
+          {
+            role: user,
+            content: 'Hello {name}',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+          {
+            role: 'assistant' as MessageRole,
+            content: 'Hello elastic',
+            timestamp: '2024-03-19T18:59:18.174Z',
+            isError: false,
+          },
+        ],
+      },
+    };
+    const result = getComments({ CommentActions: () => null })(newTestProps);
+    expect((result[1].children as React.ReactElement)?.props.isControlsEnabled).toEqual(false);
+  });
 });
