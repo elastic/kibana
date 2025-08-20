@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets } from '../../../../../../utils';
-import { deleteAllRules } from '../../../../../../../../../common/utils/security_solution';
+import { deleteAllRules } from '../../../../../../../../config/services/detections_response';
 import { nameField } from './name';
 import { descriptionField } from './description';
 import { tagsField } from './tags';

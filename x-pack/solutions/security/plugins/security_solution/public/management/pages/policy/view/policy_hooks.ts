@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import {
+  ENDPOINT_ARTIFACT_LISTS,
   ENDPOINT_BLOCKLISTS_LIST_ID,
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
@@ -24,6 +25,7 @@ import {
   getPolicyDetailsArtifactsListPath,
   getPolicyEventFiltersPath,
   getPolicyHostIsolationExceptionsPath,
+  getPolicyTrustedDevicesPath,
 } from '../../../common/routing';
 import { getCurrentArtifactsLocation, policyIdFromParams } from '../store/policy_details/selectors';
 import { POLICIES_PATH } from '../../../../../common/constants';
@@ -53,6 +55,11 @@ export function usePolicyDetailsArtifactsNavigateCallback(listId: string) {
     (args: Partial<PolicyDetailsArtifactsPageLocation>) => {
       if (listId === ENDPOINT_TRUSTED_APPS_LIST_ID) {
         return getPolicyDetailsArtifactsListPath(policyId, {
+          ...location,
+          ...args,
+        });
+      } else if (listId === ENDPOINT_ARTIFACT_LISTS.trustedDevices.id) {
+        return getPolicyTrustedDevicesPath(policyId, {
           ...location,
           ...args,
         });

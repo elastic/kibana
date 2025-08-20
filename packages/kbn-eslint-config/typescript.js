@@ -220,7 +220,7 @@ module.exports = {
           'no-unsafe-finally': 'error',
           'no-unsanitized/property': 'error',
           'no-unused-expressions': 'off',
-          '@typescript-eslint/no-unused-expressions': 'error',
+          '@typescript-eslint/no-unused-expressions': ["error", { "allowTaggedTemplates": true }],
           'no-unused-labels': 'error',
           'no-var': 'error',
           'object-shorthand': 'error',
