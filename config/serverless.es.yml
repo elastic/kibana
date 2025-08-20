@@ -122,3 +122,5 @@ xpack.actions.preconfigured:
       inferenceId: ".rainbow-sprinkles-elastic"
       providerConfig:
         model_id: "rainbow-sprinkles"
+
+discover.enableEsqlByDefault: true
