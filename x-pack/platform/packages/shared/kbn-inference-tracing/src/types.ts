@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Context, Span } from '@opentelemetry/api';
+import type { Context, Span } from '@opentelemetry/api';
 
 export enum GenAISemanticConventions {
   GenAIUsageCost = 'gen_ai.usage.cost',

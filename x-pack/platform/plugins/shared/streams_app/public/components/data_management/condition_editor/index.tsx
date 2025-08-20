@@ -7,6 +7,7 @@
 
 import React, { useMemo } from 'react';
 import useToggle from 'react-use/lib/useToggle';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFieldText,
@@ -15,18 +16,15 @@ import {
   EuiFormRow,
   EuiIconTip,
   EuiSelect,
-  EuiSelectOption,
   EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
+import type { Condition, FilterCondition, OperatorKeys } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
-  Condition,
-  FilterCondition,
   NEVER_CONDITION,
-  OperatorKeys,
   getDefaultFormValueForOperator,
   getFilterOperator,
   getFilterValue,

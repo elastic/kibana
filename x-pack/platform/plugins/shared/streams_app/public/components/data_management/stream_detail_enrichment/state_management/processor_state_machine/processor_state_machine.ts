@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, assign, forwardTo, sendTo, setup, SnapshotFrom } from 'xstate5';
-import { StreamlangProcessorDefinition } from '@kbn/streamlang';
-import { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorResources } from './types';
+import type { ActorRefFrom, SnapshotFrom } from 'xstate5';
+import { assign, forwardTo, sendTo, setup } from 'xstate5';
+import type { StreamlangProcessorDefinition } from '@kbn/streamlang';
+import type { ProcessorInput, ProcessorContext, ProcessorEvent, ProcessorResources } from './types';
 
 export type ProcessorActorRef = ActorRefFrom<typeof processorMachine>;
 export type ProcessorActorSnapshot = SnapshotFrom<typeof processorMachine>;

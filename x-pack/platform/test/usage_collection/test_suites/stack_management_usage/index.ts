@@ -7,7 +7,7 @@
 
 import _ from 'lodash';
 import { stackManagementSchema } from '@kbn/kibana-usage-collection-plugin/server/collectors/management/schema';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Stack Management', function () {

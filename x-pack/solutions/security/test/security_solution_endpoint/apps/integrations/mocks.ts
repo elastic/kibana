@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { FullAgentPolicy } from '@kbn/fleet-plugin/common/types';
-import { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services/artifacts/types';
+import type { FullAgentPolicy } from '@kbn/fleet-plugin/common/types';
+import type { ArtifactElasticsearchProperties } from '@kbn/fleet-plugin/server/services/artifacts/types';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import { InternalUnifiedManifestBaseSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
-import { TranslatedExceptionListItem } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts/lists';
-import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { InternalUnifiedManifestBaseSchema } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts';
+import type { TranslatedExceptionListItem } from '@kbn/security-solution-plugin/server/endpoint/schemas/artifacts/lists';
+import type { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export interface AgentPolicyResponseType {

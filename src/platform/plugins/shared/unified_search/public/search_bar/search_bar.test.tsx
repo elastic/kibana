@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import SearchBar, { SearchBarProps, SearchBarState, SearchBarUI } from './search_bar';
+import type { SearchBarProps, SearchBarState } from './search_bar';
+import SearchBar, { SearchBarUI } from './search_bar';
 import { BehaviorSubject } from 'rxjs';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';

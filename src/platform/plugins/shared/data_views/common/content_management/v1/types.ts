@@ -13,8 +13,8 @@ import type {
   SavedObjectSearchOptions,
   SavedObjectUpdateOptions,
 } from '@kbn/content-management-utils';
-import { DataViewAttributes } from '../../types';
-import { DataViewContentType } from './constants';
+import type { DataViewAttributes } from '../../types';
+import type { DataViewContentType } from './constants';
 
 interface DataViewCreateOptions {
   id?: SavedObjectCreateOptions['id'];

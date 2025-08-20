@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getLogGroups, sortByProbability, getVariedSamples, LogGroup } from './get_log_groups';
+import type { LogGroup } from './get_log_groups';
+import { getLogGroups, sortByProbability, getVariedSamples } from './get_log_groups';
 import cloneDeep from 'lodash/cloneDeep';
 
 const sampleMessages = [

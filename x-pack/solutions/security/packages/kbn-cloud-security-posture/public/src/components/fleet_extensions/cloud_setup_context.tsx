@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { createContext } from 'react';
-import { CloudSetupConfig } from './types';
+import type { CloudSetupConfig } from './types';
 
 interface CloudSetupContextValue {
   config: CloudSetupConfig;

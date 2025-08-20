@@ -12,7 +12,7 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 
-import { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
+import type { ExceptionMetricsSchema } from '@kbn/security-solution-plugin/server/usage/exceptions/types';
 import { getStatsUrl } from './get_stats_url';
 import { getExceptionMetricsFromBody } from './get_exception_metrics_from_body';
 

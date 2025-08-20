@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { DraftGrokExpression } from '@kbn/grok-ui';
-import {
+import type { DraftGrokExpression } from '@kbn/grok-ui';
+import type {
   DateProcessor,
   DissectProcessor,
   GrokProcessor,
   ManualIngestPipelineProcessor,
   SetProcessor,
 } from '@kbn/streamlang';
-import { EnrichmentDataSource } from '../../../../common/url_schema';
-import { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
+import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ConfigDrivenProcessorFormState } from './processors/config_driven/types';
 
 /**
  * Processors' types

@@ -8,7 +8,8 @@
  */
 
 import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 
 import { useNestedMenu } from './use_nested_menu';
