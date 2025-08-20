@@ -637,7 +637,7 @@ export class WorkflowsService {
       return {
         workflows: {
           enabled: workflowStatusStats.enabled,
-          disabled: workflowStatusStats.enabled,
+          disabled: workflowStatusStats.disabled,
         },
         executions: workflowExecutionStatusStats,
       };
@@ -682,7 +682,7 @@ export class WorkflowsService {
             let label: string;
             if (typeName === 'ZodBoolean') {
               label = key ? 'Enabled' : 'Disabled';
-              key = key !== 0;
+              key = Boolean(key);
             } else if (typeName === 'ZodNumber') {
               label = key.toString();
             } else {
