@@ -49,7 +49,7 @@ describe('FilterActivity ', () => {
   });
 
   it('renders filters correctly with deletions', () => {
-    renderWithTestingProviders(
+    appMockRender.render(
       <FilterActivity
         type="all"
         onFilterChange={onFilterActivityChange}
