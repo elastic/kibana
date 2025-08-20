@@ -86,8 +86,8 @@ export function initializeLayoutManager(
         const settingsByPanelType: { [panelType: string]: PanelResizeSettings } = {};
         await asyncForEach(panelTypes, async (type) => {
           const panelSettings = await getPanelSettings(type);
-          if (panelSettings?.panelResizeSettings)
-            settingsByPanelType[type] = panelSettings.panelResizeSettings;
+          if (panelSettings?.resizeSettings)
+            settingsByPanelType[type] = panelSettings.resizeSettings;
         });
         return settingsByPanelType;
       }),
@@ -159,7 +159,7 @@ export function initializeLayoutManager(
       strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
       height: DEFAULT_PANEL_HEIGHT,
       width: DEFAULT_PANEL_WIDTH,
-      ...panelSettings?.panelPlacementSettings,
+      ...panelSettings?.placementSettings,
     };
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
       panelPlacementSettings?.strategy,
