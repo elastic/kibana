@@ -206,3 +206,18 @@ Here's a breakdown of why it worked so well for this "chain of investigation":
 3.  **It Provided Contextual Clues:** Even the other search results that I didn't use directly were valuable. They showed me related test files and type definitions, confirming that `@kbn/server-route-repository` was indeed the central package for this functionality.
 
 Without the `code_search` tool, I would have had to rely on file-based searches (`grep` or `find`), which would have been much slower and less precise. I would have gotten many irrelevant results and would have had to manually read through numerous files to find the same information. The semantic search cut through the noise and took me straight to the most relevant information.
+
+## Running the Server with `code_search`
+
+To use the `code_search` tool, you need to configure the MCP Dev Server to connect to your Elasticsearch instance. This is done by setting the following environment variables:
+
+| Variable | Description | Default |
+| --- | --- | --- |
+| `ELASTICSEARCH_ENDPOINT` | The URL of your Elasticsearch instance. | `http://localhost:9200` |
+| `ELASTICSEARCH_USERNAME` | The username for Elasticsearch authentication. | `elastic` |
+| `ELASTICSEARCH_PASSWORD` | The password for Elasticsearch authentication. | `changeme` |
+| `ELASTICSEARCH_API_KEY` | An API key for Elasticsearch authentication. | |
+| `ELASTICSEARCH_INDEX` | The name of the Elasticsearch index to use. | `semantic-code-search` |
+| `ELASTICSEARCH_INFERENCE_ID` | The ID of the ELSER model to use. | `.elser_model_2` |
+
+You can set these variables in your shell, or by creating a `.env` file in the root of the Kibana project.

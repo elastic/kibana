@@ -8,8 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
+import { Client } from '@elastic/elasticsearch';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { ToolDefinition } from '../types';
 
@@ -19,6 +19,7 @@ const {
   ELASTICSEARCH_ENDPOINT = 'http://localhost:9200',
   ELASTICSEARCH_INDEX = 'semantic-code-search',
   ELASTICSEARCH_INFERENCE_ID = '.elser_model_2',
+  ELASTICSEARCH_API_KEY,
 } = process.env;
 
 interface CodeChunk {
@@ -43,10 +44,12 @@ const codeSearchInputSchema = z.object({
 
 export const client = new Client({
   node: ELASTICSEARCH_ENDPOINT,
-  auth: {
-    username: ELASTICSEARCH_USERNAME,
-    password: ELASTICSEARCH_PASSWORD,
-  },
+  auth: ELASTICSEARCH_API_KEY
+    ? { apiKey: ELASTICSEARCH_API_KEY }
+    : {
+        username: ELASTICSEARCH_USERNAME,
+        password: ELASTICSEARCH_PASSWORD,
+      },
 });
 
 async function codeSearchHandler(input: z.infer<typeof codeSearchInputSchema>) {
