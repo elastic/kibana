@@ -179,6 +179,21 @@ describe('When using runscript action from response console', () => {
       );
     });
 
+    it('should show usage example provided for the script (if any)', async () => {
+      await render();
+      await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
+      await waitFor(() =>
+        user.click(renderResult.getAllByTestId('scriptSelector-runscript-script')[0])
+      );
+      await waitFor(() => {
+        expect(renderResult.queryByTestId('scriptSelector-runscript-popupPanel')).toBeNull();
+      });
+
+      expect(renderResult.getByTestId('test-footer')).toHaveTextContent(
+        `Script 1 script input: --option some_value [--option2]`
+      );
+    });
+
     it('should call runscript api with expected payload', async () => {
       await render();
       await enterConsoleCommand(renderResult, user, 'runscript --script', { inputOnly: true });
