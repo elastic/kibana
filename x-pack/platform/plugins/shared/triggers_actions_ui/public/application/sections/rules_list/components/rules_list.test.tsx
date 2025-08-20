@@ -12,7 +12,6 @@ import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  cleanup,
   fireEvent,
   render,
   screen,
@@ -213,7 +212,6 @@ describe('Update Api Key', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('Have the option to update API key', async () => {
@@ -225,7 +223,7 @@ describe('Update Api Key', () => {
     fireEvent.click((await screen.findAllByTestId('selectActionButton'))[1]);
     expect(screen.getByTestId('collapsedActionPanel')).toBeInTheDocument();
 
-    expect(screen.queryByText('Update API key')).toBeInTheDocument();
+    expect(screen.getByText('Update API key')).toBeInTheDocument();
   });
 });
 
@@ -277,7 +275,6 @@ describe('rules_list component empty', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('renders empty list', async () => {
@@ -363,7 +360,6 @@ describe('rules_list ', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('can filter by rule states', async () => {
@@ -406,7 +402,7 @@ describe('rules_list ', () => {
         ruleLastRunOutcomesFilter: ['failed', 'succeeded'],
       })
     );
-    await waitFor(() => screen.getByTestId('ruleLastRunOutcomeFilterButton'));
+    await screen.findByTestId('ruleLastRunOutcomeFilterButton');
     fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomeFilterButton')[0]);
     fireEvent.click(screen.getAllByTestId('ruleLastRunOutcomefailedFilterOption')[0]);
     expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
@@ -608,15 +604,12 @@ describe('rules_list ', () => {
 
       expect(await screen.findByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined();
 
-      let percentiles: HTMLElement[] = [];
-      await waitFor(() => {
-        percentiles = Array.from(
-          document.body.querySelectorAll(
-            '[data-test-subj="rulesTableCell-ruleExecutionPercentile"] span[data-test-subj="rule-duration-format-value"]'
-          )
-        );
-        return expect(percentiles.length).toBeGreaterThan(0);
-      });
+      const cells = await screen.findAllByTestId('rulesTableCell-ruleExecutionPercentile');
+      const percentiles: HTMLElement[] = cells.map((cell) =>
+        within(cell).getByTestId('rule-duration-format-value')
+      );
+
+      expect(percentiles.length).toBeGreaterThan(0);
 
       fireEvent.mouseOver(percentiles[0]);
       expect(percentiles[0]).toHaveTextContent('03:20');
@@ -687,10 +680,9 @@ describe('rules_list ', () => {
         screen.queryAllByTestId(`rulesTable-${Percentiles.P95}ColumnName`).length
       ).toBeGreaterThan(0);
 
-      const percentiles: HTMLElement[] = Array.from(
-        document.body.querySelectorAll(
-          '[data-test-subj="rulesTableCell-ruleExecutionPercentile"] [data-test-subj="rule-duration-format-value"]'
-        )
+      const cells = await screen.findAllByTestId('rulesTableCell-ruleExecutionPercentile');
+      const percentiles: HTMLElement[] = cells.map((cell) =>
+        within(cell).getByTestId('rule-duration-format-value')
       );
 
       mockedRulesData.forEach((rule, index) => {
@@ -740,7 +732,7 @@ describe('rules_list ', () => {
     it('renders license errors and manage license modal on click', async () => {
       global.open = jest.fn();
       renderWithProviders(<RulesList />);
-      await waitFor(() => screen.getByTestId('ruleStatus-error-license-fix'));
+      await screen.findByTestId('ruleStatus-error-license-fix');
       fireEvent.click(screen.getByTestId('ruleStatus-error-license-fix'));
 
       expect(screen.queryAllByTestId('manageLicenseModal').length).toBeGreaterThan(0);
@@ -753,9 +745,8 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
 
       const nameColumnTableHeaderEl = await screen.findByTestId('tableHeaderCell_name_1');
-      const el = nameColumnTableHeaderEl.querySelector(
-        '[data-test-subj="tableHeaderCell_name_1"] .euiTableHeaderButton'
-      ) as HTMLElement;
+
+      const el = within(nameColumnTableHeaderEl).getByRole('button');
 
       fireEvent.click(el);
 
@@ -773,9 +764,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
 
       const enabledColumnTableHeaderEl = await screen.findByTestId('tableHeaderCell_enabled_10');
-      const el = enabledColumnTableHeaderEl.querySelector(
-        '[data-test-subj="tableHeaderCell_enabled_10"] .euiTableHeaderButton'
-      ) as HTMLElement;
+      const el = within(enabledColumnTableHeaderEl).getByRole('button');
 
       fireEvent.click(el);
 
@@ -841,7 +830,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(screen.queryByTestId('ruleStatusFilter')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleStatusFilter')).toBeInTheDocument();
     });
 
     it('does not render the tag filter is the feature flag is off', async () => {
@@ -856,7 +845,7 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(screen.queryByTestId('ruleTagFilter')).toBeInTheDocument();
+      expect(screen.getByTestId('ruleTagFilter')).toBeInTheDocument();
     });
 
     it('rule list items with actions are editable if canExecuteAction is true', async () => {
@@ -1098,7 +1087,6 @@ describe('rule list with different rule types', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   describe('filteredRuleTypes prop', () => {
@@ -1141,7 +1129,6 @@ describe('rules_list with show only capability', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   describe('rules_list with enabled items', () => {
@@ -1382,7 +1369,6 @@ describe('MaintenanceWindowsMock', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   it('renders MaintenanceWindowCallout if one exists', async () => {

@@ -1825,6 +1825,8 @@ module.exports = {
         'x-pack/platform/plugins/shared/rule_registry/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/plugins/shared/stack_alerts/**/*.{test,mock,test_helper}.{ts,tsx}',
         'x-pack/platform/plugins/shared/stack_connectors/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       extends: ['plugin:testing-library/react'],
     },

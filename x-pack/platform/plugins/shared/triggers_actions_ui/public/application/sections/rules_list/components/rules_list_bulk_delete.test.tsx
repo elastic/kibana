@@ -8,14 +8,7 @@ import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import {
-  act,
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  waitForElementToBeRemoved,
-} from '@testing-library/react';
+import { fireEvent, render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import * as React from 'react';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -164,10 +157,10 @@ describe.skip('Rules list Bulk Delete', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   beforeEach(async () => {
+    // eslint-disable-next-line testing-library/no-render-in-lifecycle
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -180,9 +173,8 @@ describe.skip('Rules list Bulk Delete', () => {
   it('should Bulk Delete', async () => {
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    });
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     const filter = bulkDeleteRules.mock.calls[0][0].filter;
 
@@ -202,9 +194,9 @@ describe.skip('Rules list Bulk Delete', () => {
   it('should cancel Bulk Delete', async () => {
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
-    });
+
+    fireEvent.click(screen.getByTestId('confirmModalCancelButton'));
+
     expect(bulkDeleteRules).not.toBeCalled();
   });
 
@@ -224,9 +216,8 @@ describe.skip('Rules list Bulk Delete', () => {
 
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    });
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
     expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
@@ -252,9 +243,8 @@ describe.skip('Rules list Bulk Delete', () => {
 
     fireEvent.click(screen.getByTestId('bulkDelete'));
     expect(screen.getByTestId('rulesDeleteConfirmation')).toBeInTheDocument();
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
-    });
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
     expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(

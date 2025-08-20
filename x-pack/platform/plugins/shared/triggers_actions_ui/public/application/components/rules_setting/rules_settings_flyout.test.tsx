@@ -8,7 +8,7 @@
 import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { IToasts } from '@kbn/core/public';
@@ -118,10 +118,10 @@ const waitForFlyoutLoad = async (options?: {
 
   await waitFor(() => {
     if (flappingSection) {
-      expect(screen.queryByTestId('rulesSettingsFlappingSection')).toBeInTheDocument();
+      expect(screen.getByTestId('rulesSettingsFlappingSection')).toBeInTheDocument();
     }
     if (queryDelaySection) {
-      expect(screen.queryByTestId('rulesSettingsQueryDelaySection')).toBeInTheDocument();
+      expect(screen.getByTestId('rulesSettingsQueryDelaySection')).toBeInTheDocument();
     }
   });
 };
@@ -165,31 +165,28 @@ describe('rules_settings_flyout', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   test('renders flapping settings correctly', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     await waitForFlyoutLoad();
     expect(
-      result.getByTestId('rulesSettingsFlappingEnableSwitch').getAttribute('aria-checked')
+      screen.getByTestId('rulesSettingsFlappingEnableSwitch').getAttribute('aria-checked')
     ).toBe('true');
-    expect(result.getByTestId('lookBackWindowRangeInput').getAttribute('value')).toBe('10');
-    expect(result.getByTestId('statusChangeThresholdRangeInput').getAttribute('value')).toBe('10');
+    expect(screen.getByTestId('lookBackWindowRangeInput').getAttribute('value')).toBe('10');
+    expect(screen.getByTestId('statusChangeThresholdRangeInput').getAttribute('value')).toBe('10');
 
-    expect(result.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
-    expect(
-      result.getByTestId('rulesSettingsFlyoutSaveButton').getAttribute('disabled')
-    ).toBeFalsy();
+    expect(screen.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
+    expect(screen.getByTestId('rulesSettingsFlyoutSaveButton')).not.toBeDisabled();
   });
 
   test('can save flapping settings', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad();
 
-    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
-    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+    const lookBackWindowInput = screen.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = screen.getByTestId('statusChangeThresholdRangeInput');
 
     fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
     fireEvent.change(statusChangeThresholdInput, { target: { value: 5 } });
@@ -198,7 +195,7 @@ describe('rules_settings_flyout', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
+    await userEvent.click(screen.getByTestId('rulesSettingsFlyoutSaveButton'));
 
     await waitFor(() => {
       expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -219,13 +216,13 @@ describe('rules_settings_flyout', () => {
   });
 
   test('reset flapping settings to initial state on cancel without triggering another server reload', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     expect(fetchFlappingSettingsMock).toHaveBeenCalledTimes(1);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
     await waitForFlyoutLoad();
 
-    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
-    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+    const lookBackWindowInput = screen.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = screen.getByTestId('statusChangeThresholdRangeInput');
 
     fireEvent.change(lookBackWindowInput, { target: { value: 15 } });
     fireEvent.change(statusChangeThresholdInput, { target: { value: 3 } });
@@ -234,7 +231,7 @@ describe('rules_settings_flyout', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('3');
 
     // Try cancelling
-    await userEvent.click(result.getByTestId('rulesSettingsFlyoutCancelButton'));
+    await userEvent.click(screen.getByTestId('rulesSettingsFlyoutCancelButton'));
 
     expect(flyoutProps.onClose).toHaveBeenCalledTimes(1);
     expect(updateFlappingSettingsMock).not.toHaveBeenCalled();
@@ -249,11 +246,11 @@ describe('rules_settings_flyout', () => {
   });
 
   test('should prevent statusChangeThreshold from being greater than lookBackWindow', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad();
 
-    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
-    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+    const lookBackWindowInput = screen.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = screen.getByTestId('statusChangeThresholdRangeInput');
 
     // Change lookBackWindow to a smaller value
     fireEvent.change(lookBackWindowInput, { target: { value: 5 } });
@@ -272,11 +269,11 @@ describe('rules_settings_flyout', () => {
   test('handles errors when saving settings', async () => {
     updateFlappingSettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad();
 
-    const lookBackWindowInput = result.getByTestId('lookBackWindowRangeInput');
-    const statusChangeThresholdInput = result.getByTestId('statusChangeThresholdRangeInput');
+    const lookBackWindowInput = screen.getByTestId('lookBackWindowRangeInput');
+    const statusChangeThresholdInput = screen.getByTestId('statusChangeThresholdRangeInput');
 
     fireEvent.change(lookBackWindowInput, { target: { value: 20 } });
     fireEvent.change(statusChangeThresholdInput, { target: { value: 5 } });
@@ -285,7 +282,7 @@ describe('rules_settings_flyout', () => {
     expect(statusChangeThresholdInput.getAttribute('value')).toBe('5');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
+    await userEvent.click(screen.getByTestId('rulesSettingsFlyoutSaveButton'));
     await waitFor(() => {
       expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
@@ -296,12 +293,12 @@ describe('rules_settings_flyout', () => {
   });
 
   test('displays flapping detection off prompt when flapping is disabled', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad();
 
-    expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
-    await userEvent.click(result.getByTestId('rulesSettingsFlappingEnableSwitch'));
-    expect(result.queryByTestId('rulesSettingsFlappingOffPrompt')).not.toBe(null);
+    expect(screen.queryByTestId('rulesSettingsFlappingOffPrompt')).toBe(null);
+    await userEvent.click(screen.getByTestId('rulesSettingsFlappingEnableSwitch'));
+    expect(screen.queryByTestId('rulesSettingsFlappingOffPrompt')).not.toBe(null);
   });
 
   test('form elements are disabled when provided with insufficient write permissions', async () => {
@@ -319,13 +316,13 @@ describe('rules_settings_flyout', () => {
         readFlappingSettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ queryDelaySection: false });
 
-    expect(result.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeDisabled();
-    expect(result.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
-    expect(result.getByTestId('statusChangeThresholdRangeInput')).toBeDisabled();
-    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('rulesSettingsFlappingEnableSwitch')).toBeDisabled();
+    expect(screen.getByTestId('lookBackWindowRangeInput')).toBeDisabled();
+    expect(screen.getByTestId('statusChangeThresholdRangeInput')).toBeDisabled();
+    expect(screen.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
   });
 
   test('form elements are not visible when provided with insufficient read permissions', async () => {
@@ -344,34 +341,33 @@ describe('rules_settings_flyout', () => {
       },
     };
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ flappingSection: false, queryDelaySection: false });
 
-    expect(result.queryByTestId('rulesSettingsFlappingSection')).toBe(null);
+    expect(screen.queryByTestId('rulesSettingsFlappingSection')).toBe(null);
   });
 
   test('renders query delay settings correctly', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     expect(getQueryDelaySettingsMock).toHaveBeenCalledTimes(1);
     await waitForFlyoutLoad();
-    expect(result.getByTestId('queryDelayRangeInput').getAttribute('value')).toBe('10');
+    expect(screen.getByTestId('queryDelayRangeInput').getAttribute('value')).toBe('10');
 
-    expect(result.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
-    expect(
-      result.getByTestId('rulesSettingsFlyoutSaveButton').getAttribute('disabled')
-    ).toBeFalsy();
+    expect(screen.getByTestId('rulesSettingsFlyoutCancelButton')).toBeInTheDocument();
+
+    expect(screen.getByTestId('rulesSettingsFlyoutSaveButton')).not.toBeDisabled();
   });
 
   test('can save query delay settings', async () => {
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad();
 
-    const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
+    const queryDelayRangeInput = screen.getByTestId('queryDelayRangeInput');
     fireEvent.change(queryDelayRangeInput, { target: { value: 20 } });
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
+    await userEvent.click(screen.getByTestId('rulesSettingsFlyoutSaveButton'));
 
     await waitFor(() => {
       expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
@@ -392,15 +388,15 @@ describe('rules_settings_flyout', () => {
   test('handles errors when saving query delay settings', async () => {
     updateQueryDelaySettingsMock.mockRejectedValue('failed!');
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad();
 
-    const queryDelayRangeInput = result.getByTestId('queryDelayRangeInput');
+    const queryDelayRangeInput = screen.getByTestId('queryDelayRangeInput');
     fireEvent.change(queryDelayRangeInput, { target: { value: 20 } });
     expect(queryDelayRangeInput.getAttribute('value')).toBe('20');
 
     // Try saving
-    await userEvent.click(result.getByTestId('rulesSettingsFlyoutSaveButton'));
+    await userEvent.click(screen.getByTestId('rulesSettingsFlyoutSaveButton'));
     await waitFor(() => {
       expect(flyoutProps.setUpdatingRulesSettings).toHaveBeenCalledWith(true);
     });
@@ -425,11 +421,11 @@ describe('rules_settings_flyout', () => {
         readQueryDelaySettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ flappingSection: false });
 
-    expect(result.getByTestId('queryDelayRangeInput')).toBeDisabled();
-    expect(result.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
+    expect(screen.getByTestId('queryDelayRangeInput')).toBeDisabled();
+    expect(screen.getByTestId('rulesSettingsFlyoutSaveButton')).toBeDisabled();
   });
 
   test('query delay form elements are not visible when provided with insufficient read permissions', async () => {
@@ -448,17 +444,17 @@ describe('rules_settings_flyout', () => {
       },
     };
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ flappingSection: false, queryDelaySection: false });
 
-    expect(result.queryByTestId('rulesSettingsQueryDelaySection')).toBe(null);
+    expect(screen.queryByTestId('rulesSettingsQueryDelaySection')).toBe(null);
   });
 
   test('hides query delay settings when not serverless', async () => {
     useKibanaMock().services.isServerless = false;
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitForFlyoutLoad({ queryDelaySection: false });
-    expect(result.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('rulesSettingsQueryDelaySection')).not.toBeInTheDocument();
   });
 
   test('alert delete is disabled when provided with insufficient write permissions', async () => {
@@ -478,12 +474,12 @@ describe('rules_settings_flyout', () => {
         readAlertDeleteSettingsUI: true,
       },
     };
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitFor(() => {
       expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
     });
 
-    expect(result.getByTestId('alert-delete-open-modal-button')).toBeDisabled();
+    expect(screen.getByTestId('alert-delete-open-modal-button')).toBeDisabled();
   });
 
   test('alert delete not visible when provided with insufficient read permissions', async () => {
@@ -502,11 +498,11 @@ describe('rules_settings_flyout', () => {
       },
     };
 
-    const result = render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
+    render(<RulesSettingsFlyoutWithProviders {...flyoutProps} />);
     await waitFor(() => {
       expect(screen.queryByTestId('rulesSettingsFlyout')).not.toBe(null);
     });
 
-    expect(result.queryByTestId('alert-delete-open-modal-button')).toBe(null);
+    expect(screen.queryByTestId('alert-delete-open-modal-button')).toBe(null);
   });
 });

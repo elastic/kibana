@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -113,7 +113,6 @@ describe('rule_event_log_list', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    cleanup();
   });
 
   it('shows rule summary and execution duration chart', async () => {
@@ -132,11 +131,11 @@ describe('rule_event_log_list', () => {
 
     await waitFor(() => {
       expect(avgExecutionDurationPanel.textContent).toEqual('Average duration00:00:00.100');
-      expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
-      expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
-      expect(screen.getByTestId('avgExecutionDurationPanel')).toBeInTheDocument();
-      expect(screen.getByTestId('ruleEventLogListAvgDuration').textContent).toEqual('00:00:00.100');
     });
+    expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
+    expect(screen.getByTestId('executionDurationChartPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('avgExecutionDurationPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleEventLogListAvgDuration').textContent).toEqual('00:00:00.100');
   });
 
   it('renders average execution duration', async () => {
@@ -161,8 +160,8 @@ describe('rule_event_log_list', () => {
 
     await waitFor(() => {
       expect(avgExecutionDurationPanel.textContent).toEqual('Average duration00:01:00.284');
-      expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
     });
+    expect(screen.queryByTestId('ruleDurationWarning')).not.toBeInTheDocument();
   });
 
   it('renders warning when average execution duration exceeds rule timeout', async () => {
@@ -194,7 +193,7 @@ describe('rule_event_log_list', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('ruleEventLogListAvgDuration').textContent).toEqual('16:44:44.345');
-      expect(screen.getByTestId('ruleDurationWarning')).toBeInTheDocument();
     });
+    expect(screen.getByTestId('ruleDurationWarning')).toBeInTheDocument();
   });
 });
