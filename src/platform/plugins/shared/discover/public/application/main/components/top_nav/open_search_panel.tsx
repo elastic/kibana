@@ -291,6 +291,40 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
         } catch (_e) {
           // ignore parse errors
         }
+
+        // Extract tabs metadata (if present)
+        const tabsRaw: any[] = Array.isArray(so.attributes?.tabs) ? so.attributes.tabs : [];
+        const tabs = tabsRaw.map((t) => {
+          let tabEsql: string | undefined;
+          let tabRawSS: string | undefined;
+          try {
+            const ss = t?.attributes?.kibanaSavedObjectMeta?.searchSourceJSON;
+            if (ss) {
+              tabRawSS = ss;
+              const parsed = JSON.parse(ss);
+              const q = parsed?.query;
+              if (q) {
+                if (q.language === 'esql' && typeof q.query === 'string') {
+                  tabEsql = q.query;
+                } else if (q.esql && typeof q.esql.query === 'string') {
+                  tabEsql = q.esql.query;
+                } else if (typeof q.esql === 'string') {
+                  tabEsql = q.esql;
+                }
+              }
+              if (!tabEsql && typeof (parsed as any)?.esql === 'string') {
+                tabEsql = (parsed as any).esql;
+              }
+            }
+          } catch (_e) {}
+          return {
+            id: t?.id,
+            label: t?.label || 'Untitled',
+            isTextBasedQuery: Boolean(t?.attributes?.isTextBasedQuery) || Boolean(tabEsql),
+            esqlQuery: tabEsql,
+            rawSearchSource: tabRawSS,
+          } as const;
+        });
         setSelectedMeta({
           id,
           title: so.attributes?.title,
@@ -302,6 +336,7 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
           isTextBasedQuery: so.attributes?.isTextBasedQuery,
           esqlQuery,
           rawSearchSource,
+          tabs,
         });
       } catch (e) {
         // eslint-disable-next-line no-console
@@ -438,6 +473,32 @@ export function OpenSearchPanel(props: OpenSearchPanelProps) {
                               </EuiCodeBlock>
                             </>
                           )}
+                        </EuiPanel>
+                        <EuiSpacer size="s" />
+                      </>
+                    )}
+                    {!!selectedMeta.tabs?.length && (
+                      <>
+                        <EuiPanel hasBorder paddingSize="s">
+                          <EuiText size="xs">
+                            <strong>
+                              {i18n.translate('discover.openSession.tabsLabel', { defaultMessage: 'Tabs' })}
+                            </strong>{' '}
+                            <EuiBadge color="hollow">{selectedMeta.tabs.length}</EuiBadge>
+                          </EuiText>
+                          <EuiSpacer size="xs" />
+                          {selectedMeta.tabs.map((t: any) => (
+                            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} key={t.id || t.label}>
+                              <EuiFlexItem grow={false}>
+                                <EuiText size="s">{t.label}</EuiText>
+                              </EuiFlexItem>
+                              {t.isTextBasedQuery && (
+                                <EuiFlexItem grow={false}>
+                                  <EuiBadge color="success">esql</EuiBadge>
+                                </EuiFlexItem>
+                              )}
+                            </EuiFlexGroup>
+                          ))}
                         </EuiPanel>
                         <EuiSpacer size="s" />
                       </>
