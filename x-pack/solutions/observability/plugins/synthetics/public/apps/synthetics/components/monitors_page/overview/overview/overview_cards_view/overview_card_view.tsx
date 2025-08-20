@@ -13,17 +13,17 @@ import { useSelector } from 'react-redux';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
 import { useOverviewStatus } from '../../../hooks/use_overview_status';
-import { MetricItem } from '../metric_item/metric_item';
+import { METRIC_ITEM_HEIGHT, MetricItem } from '../metric_item/metric_item';
 import { OverviewLoader } from '../overview_loader';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
 import { selectOverviewState, selectOverviewTrends } from '../../../../../state';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 
-const ITEM_HEIGHT = 182;
-export const OVERVIEW_ROW_COUNT = 4;
+const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
 const MIN_BATCH_SIZE = 20;
 const LIST_THRESHOLD = 12;
+const MIN_CARD_WIDTH = 400;
 
 interface ListItem {
   configId: string;
@@ -47,6 +47,7 @@ export const OverviewCardView = ({
   const isUnGrouped = groupField === 'none';
   const trendData = useSelector(selectOverviewTrends);
   const { view } = useSelector(selectOverviewState);
+  const [rowCount, setRowCount] = useState(5);
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -55,14 +56,14 @@ export const OverviewCardView = ({
   });
 
   const listHeight = Math.min(
-    ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / OVERVIEW_ROW_COUNT),
+    ITEM_HEIGHT * Math.ceil(monitorsSortedByStatus.length / rowCount),
     MAX_LIST_HEIGHT
   );
 
   const listItems: ListItem[][] = useMemo(() => {
     const acc: ListItem[][] = [];
-    for (let i = 0; i < monitorsSortedByStatus.length; i += OVERVIEW_ROW_COUNT) {
-      acc.push(monitorsSortedByStatus.slice(i, i + OVERVIEW_ROW_COUNT));
+    for (let i = 0; i < monitorsSortedByStatus.length; i += rowCount) {
+      acc.push(monitorsSortedByStatus.slice(i, i + rowCount));
     }
     return acc;
   }, [monitorsSortedByStatus]);
@@ -84,6 +85,10 @@ export const OverviewCardView = ({
                   threshold={LIST_THRESHOLD}
                 >
                   {({ onItemsRendered, ref }) => {
+                    // set min row count to based on width to ensure cards are not too small
+                    // min is 1 and max is 5
+                    setRowCount(Math.max(1, Math.min(5, Math.floor(width / MIN_CARD_WIDTH))));
+
                     return (
                       <FixedSizeList
                         // pad computed height to avoid clipping last row's drop shadow
@@ -110,20 +115,18 @@ export const OverviewCardView = ({
                               {listData[listIndex].map((_, idx) => (
                                 <EuiFlexItem
                                   data-test-subj="syntheticsOverviewGridItem"
-                                  key={listIndex * OVERVIEW_ROW_COUNT + idx}
+                                  key={listIndex * rowCount + idx}
                                 >
                                   <MetricItem
-                                    monitor={
-                                      monitorsSortedByStatus[listIndex * OVERVIEW_ROW_COUNT + idx]
-                                    }
+                                    monitor={monitorsSortedByStatus[listIndex * rowCount + idx]}
                                     onClick={setFlyoutConfigCallback}
                                   />
                                 </EuiFlexItem>
                               ))}
-                              {listData[listIndex].length % OVERVIEW_ROW_COUNT !== 0 &&
+                              {listData[listIndex].length % rowCount !== 0 &&
                                 // Adds empty items to fill out row
                                 Array.from({
-                                  length: OVERVIEW_ROW_COUNT - listData[listIndex].length,
+                                  length: rowCount - listData[listIndex].length,
                                 }).map((_, idx) => <EuiFlexItem key={idx} />)}
                             </EuiFlexGroup>
                           );
