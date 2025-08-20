@@ -8,18 +8,13 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { dynamic } from '@kbn/shared-ux-utility';
-import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
+import { UnifiedHistogramMetricsExperienceGrid } from '@kbn/metrics-experience-plugin/public';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
-const METRICS_DATA_SOURCE_PROFILE_ID = 'observability-metrics-data-source-profile';
-
-const LazyMetricsGridSection = dynamic(() => import('./dummy_metrics_grid'));
-
+const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
@@ -29,8 +24,8 @@ export const createMetricsDataSourceProfileProvider = (
   profile: {
     getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
-      Component: LazyMetricsGridSection,
-      replaceDefaultChart: true,
+      Component: UnifiedHistogramMetricsExperienceGrid,
+      replaceDefaultHistogram: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
     }),
   },

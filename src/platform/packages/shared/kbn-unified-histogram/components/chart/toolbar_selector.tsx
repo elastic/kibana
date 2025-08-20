@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import { debounce } from 'lodash';
-import type { EuiSelectableProps, EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableProps, EuiSelectableOption, EuiPopoverProps } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -29,27 +29,42 @@ export const EMPTY_OPTION = '__EMPTY_SELECTOR_OPTION__';
 
 export type SelectableEntry = EuiSelectableOption<{ value: string }>;
 
-export interface ToolbarSelectorProps {
+export interface BaseToolbarProps {
   'data-test-subj': string;
-  'data-selected-value'?: string; // currently selected value
+  'data-selected-value'?: string | string[];
   buttonLabel: ReactElement | string;
-  popoverTitle: string;
+  popoverTitle?: string;
   options: SelectableEntry[];
   searchable: boolean;
-  onChange?: (chosenOption: SelectableEntry | undefined) => void;
+  anchorPosition?: EuiPopoverProps['anchorPosition'];
   optionMatcher?: EuiSelectableProps['optionMatcher'];
 }
 
-export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
+export interface ToolbarSingleSelectorProps {
+  singleSelection?: true;
+  onChange?: (c: SelectableEntry | undefined) => void;
+}
+
+export interface ToolbarMultiSelectorProps {
+  singleSelection: false;
+  onChange?: (c: SelectableEntry[] | undefined) => void;
+}
+
+export type ToolbarSelectorProps = BaseToolbarProps &
+  (ToolbarSingleSelectorProps | ToolbarMultiSelectorProps);
+
+export const ToolbarSelector = ({
   'data-test-subj': dataTestSubj,
   'data-selected-value': dataSelectedValue,
   buttonLabel,
   popoverTitle,
   options,
   searchable,
-  onChange,
   optionMatcher,
-}) => {
+  onChange,
+  singleSelection,
+  anchorPosition = 'downLeft',
+}: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [labelPopoverDisabled, setLabelPopoverDisabled] = useState(false);
@@ -112,15 +127,18 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
     NonNullable<EuiSelectableProps<SelectableEntry>['onChange']>
   >(
     (newOptions) => {
-      const chosenOption = newOptions.find(({ checked }) => checked === 'on');
-
-      onChange?.(
-        chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
-      );
-      closePopover();
-      disableLabelPopover();
+      if (singleSelection === false) {
+        onChange?.(newOptions.filter(({ checked }) => checked === 'on'));
+      } else {
+        const chosenOption = newOptions.find(({ checked }) => checked === 'on');
+        onChange?.(
+          chosenOption?.value && chosenOption?.value !== EMPTY_OPTION ? chosenOption : undefined
+        );
+        closePopover();
+        disableLabelPopover();
+      }
     },
-    [disableLabelPopover, onChange, closePopover]
+    [closePopover, disableLabelPopover, onChange, singleSelection]
   );
 
   const searchProps: EuiSelectableProps['searchProps'] = useMemo(
@@ -186,12 +204,12 @@ export const ToolbarSelector: React.FC<ToolbarSelectorProps> = ({
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      anchorPosition="downLeft"
+      anchorPosition={anchorPosition}
     >
-      <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>
+      {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
       <EuiSelectable<SelectableEntry>
         id={`${dataTestSubj}Selectable`}
-        singleSelection
+        singleSelection={singleSelection}
         aria-label={popoverTitle}
         data-test-subj={`${dataTestSubj}Selectable`}
         isPreFiltered={searchable}
