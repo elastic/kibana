@@ -44,7 +44,7 @@ export const ASSIGNEES = i18n.translate('xpack.cases.userProfile.assigneesTitle'
   defaultMessage: 'Assignees',
 });
 
-export const CASE_SUMMARY = i18n.translate('xpack.cases.userProfile.caseSummary', {
+export const CASE_SUMMARY = i18n.translate('xpack.cases.caseSummary', {
   defaultMessage: 'Case summary',
 });
 

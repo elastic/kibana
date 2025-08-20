@@ -6,8 +6,8 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CASES_INTERNAL_URL } from '../../../../common/constants';
+import { useKibana } from '../../../common/lib/kibana';
 
 interface UseGetCaseSummaryApiOptions {
   caseId: string;
@@ -26,7 +26,7 @@ export function useGetCaseSummary() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await http?.get(apiPath, {
+        const response = await http.get(apiPath, {
           query: {
             connectorId,
           },

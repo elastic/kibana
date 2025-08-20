@@ -17,11 +17,12 @@ export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseId }) => {
   const { isLoading, summary, error, getCaseSummary } = useGetCaseSummary();
 
   useEffect(() => {
+    // TODO: update connectorId
     getCaseSummary({ caseId, connectorId: 'azure-gpt4o' });
   }, [getCaseSummary, caseId]);
 
   return (
-    <EuiFlexItem grow={false} data-test-subj="case-view-assignees">
+    <EuiFlexItem grow={false} data-test-subj="case-summary">
       <EuiCallOut
         css={{
           maxHeight: '300px',
