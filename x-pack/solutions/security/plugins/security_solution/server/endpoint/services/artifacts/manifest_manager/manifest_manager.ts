@@ -657,12 +657,10 @@ export class ManifestManager {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(allPolicyIds),
       this.buildTrustedAppsArtifacts(allPolicyIds),
-      ...(this.experimentalFeatures.trustedDevices
-        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
-        : []),
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),
+      this.buildTrustedDevicesArtifacts(allPolicyIds),
     ]);
 
     // Clear cache as the ManifestManager instance is reused on every run.
