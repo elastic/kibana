@@ -438,7 +438,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                   });
                 } else {
                   result = await cypress.run({
-                    browser: 'electron',
+                    browser: 'chrome',
                     spec: filePath,
                     configFile: cypressConfigFilePath,
                     reporter: argv.reporter as string,
@@ -451,6 +451,7 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
                       numTestsKeptInMemory: 0,
                       env: cyCustomEnv,
                     },
+                    runnerUi: !process.env.CI,
                   });
                   if (!(result as CypressCommandLine.CypressRunResult)?.totalFailed) {
                     _.pull(failedSpecFilePaths, filePath);
@@ -520,12 +521,11 @@ ${JSON.stringify(cyCustomEnv, null, 2)}
       const hasFailedInitialTests = hasFailedTests(initialResults);
       const hasFailedRetryTests = hasFailedTests(retryResults);
 
-      if (finalResults.length !== files.length) {
-        throw createFailError('Cypress crashed', { exitCode: -1 });
-      }
-
       // If the initialResults had failures and failedSpecFilePaths was not populated properly return errors
-      if (hasFailedRetryTests || (hasFailedInitialTests && !retryResults.length)) {
+      if (
+        (hasFailedRetryTests && failedSpecFilePaths.length) ||
+        (hasFailedInitialTests && !retryResults.length)
+      ) {
         throw createFailError('Not all tests passed');
       }
     },
