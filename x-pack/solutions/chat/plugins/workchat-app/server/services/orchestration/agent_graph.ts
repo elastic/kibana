@@ -6,12 +6,12 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import { BaseMessage, AIMessage } from '@langchain/core/messages';
+import type { BaseMessage, AIMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { Logger } from '@kbn/core/server';
 import type { ContentRef } from '@kbn/wci-common';
-import { InferenceChatModel } from '@kbn/inference-langchain';
+import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { type McpGatewaySession, ToolsProvider } from './mcp_gateway';
 import type { Agent } from '../../../common/agents';
 import { withSystemPrompt } from './prompts';

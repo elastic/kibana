@@ -6,10 +6,11 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
-import { ConfigType } from '@kbn/screenshotting-server';
+import type { ConfigType } from '@kbn/screenshotting-server';
 import moment from 'moment';
-import { Actions, EventLogger, ScreenshottingAction, Transactions } from '.';
-import { ElementPosition } from '../get_element_position_data';
+import type { ScreenshottingAction } from '.';
+import { Actions, EventLogger, Transactions } from '.';
+import type { ElementPosition } from '../get_element_position_data';
 
 jest.mock('uuid', () => ({
   v4: () => 'NEW_UUID',

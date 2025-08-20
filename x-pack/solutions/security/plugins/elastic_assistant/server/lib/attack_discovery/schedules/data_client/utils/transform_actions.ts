@@ -6,8 +6,8 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
-import {
+import type { Logger } from '@kbn/core/server';
+import type {
   AttackDiscoveryScheduleAction,
   AttackDiscoveryScheduleActionGroup,
 } from '@kbn/elastic-assistant-common';

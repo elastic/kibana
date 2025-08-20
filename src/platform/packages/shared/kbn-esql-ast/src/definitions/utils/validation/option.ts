@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand, ESQLCommandOption, ESQLMessage } from '../../../types';
-import { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
+import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
 import { isColumn, isFunctionExpression } from '../../../ast/is';
 import { validateColumnForCommand } from './column';
 import { validateFunction } from './function';

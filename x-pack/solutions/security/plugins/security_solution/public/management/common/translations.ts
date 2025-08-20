@@ -40,6 +40,13 @@ export const OS_TITLES: Readonly<{ [K in OperatingSystem]: string }> = {
   }),
 };
 
+export const OPERATING_SYSTEM_WINDOWS_AND_MAC = i18n.translate(
+  'xpack.securitySolution.administration.os.windowsAndMac',
+  {
+    defaultMessage: 'Windows and Mac',
+  }
+);
+
 export const getLoadPoliciesError = (error: Error) => {
   return i18n.translate('xpack.securitySolution.exceptions.failedLoadPolicies', {
     defaultMessage: 'There was an error loading policies: "{error}"',

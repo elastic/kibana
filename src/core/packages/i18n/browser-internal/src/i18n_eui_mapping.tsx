@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { EuiTokensObject } from '@elastic/eui';
+import type { EuiTokensObject } from '@elastic/eui';
 
 interface EuiValues {
   [key: string]: any;
@@ -556,6 +556,12 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiDataGridCell.focusTrapExitPrompt': i18n.translate(
       'core.euiDataGridCell.focusTrapExitPrompt',
       { defaultMessage: 'Exited cell content.' }
+    ),
+    'euiDataGridCell.focusTrapEnteredExitPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapEnteredExitPrompt',
+      {
+        defaultMessage: 'Press the Escape key to exit the cell.',
+      }
     ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
