@@ -12,7 +12,11 @@ import { getMigrations } from './migrations';
 import type { TaskManagerConfig } from '../config';
 import { getOldestIdleActionTask } from '../queries/oldest_idle_action_task';
 import { TASK_MANAGER_INDEX } from '../constants';
-import { backgroundTaskNodeModelVersions, taskModelVersions } from './model_versions';
+import {
+  backgroundTaskNodeModelVersions,
+  taskModelVersions,
+  taskResultModelVersions,
+} from './model_versions';
 
 export { scheduleRruleSchemaV1, scheduleRruleSchemaV2 } from './schemas/rrule';
 
@@ -23,6 +27,22 @@ export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
   config: TaskManagerConfig
 ) {
+  savedObjects.registerType({
+    name: 'task_result',
+    namespaceType: 'agnostic',
+    hidden: true,
+    mappings: {
+      dynamic: false,
+      properties: {
+        taskId: {
+          type: 'keyword',
+        },
+      },
+    },
+    indexPattern: '.kibana_task_results',
+    modelVersions: taskResultModelVersions,
+  });
+
   savedObjects.registerType({
     name: TASK_SO_NAME,
     namespaceType: 'agnostic',

@@ -86,6 +86,7 @@ export type TaskManagerStartContract = Pick<
   | 'bulkDisable'
   | 'bulkSchedule'
   | 'bulkUpdateState'
+  | 'runAdHoc'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
@@ -298,6 +299,7 @@ export class TaskManagerPlugin
     const savedObjectsRepository = savedObjects.createInternalRepository([
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
+      'task_result',
     ]);
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
@@ -435,6 +437,7 @@ export class TaskManagerPlugin
       registerEncryptedSavedObjectsClient: (client: EncryptedSavedObjectsClient) => {
         taskStore.registerEncryptedSavedObjectsClient(client);
       },
+      runAdHoc: (...args) => taskScheduling.runAdHoc(...args),
     };
   }
 

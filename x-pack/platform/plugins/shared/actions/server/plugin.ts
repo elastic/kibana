@@ -495,6 +495,7 @@ export class ActionsPlugin
         async getEventLogClient() {
           return plugins.eventLog.getClient(request);
         },
+        taskManager: plugins.taskManager,
       });
     };
 
@@ -780,6 +781,7 @@ export class ActionsPlugin
             async getEventLogClient() {
               return eventLog.getClient(request);
             },
+            taskManager,
           });
         },
         listTypes: actionTypeRegistry!.list.bind(actionTypeRegistry!),

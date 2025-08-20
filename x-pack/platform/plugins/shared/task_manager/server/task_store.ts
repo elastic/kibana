@@ -306,7 +306,7 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: ApiKeyOptions & { refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -336,7 +336,7 @@ export class TaskStore {
           ...(apiKey ? { apiKey } : {}),
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
-        { id, refresh: false }
+        { id, refresh: options?.refresh || false }
       );
       if (
         get(taskInstance, 'schedule.interval', null) == null &&
@@ -834,6 +834,52 @@ export class TaskStore {
       }
       throw err;
     }
+  }
+
+  async storeTaskRunResult(taskId: string, success: boolean, result: unknown) {
+    await this.savedObjectsRepository.create(
+      'task_result',
+      { taskId, success, result },
+      { refresh: true }
+    );
+  }
+
+  async awaitTaskRunResult(taskId: string) {
+    const timeout = 30000;
+    const start = Date.now();
+    const index = '.kibana_task_results';
+
+    let startCp = (
+      await this.esClient.fleet.globalCheckpoints({
+        index,
+        wait_for_advance: false,
+      })
+    ).global_checkpoints[0];
+
+    while (Date.now() < start + timeout) {
+      await this.esClient.fleet.globalCheckpoints({
+        index,
+        checkpoints: [startCp++],
+        wait_for_advance: true,
+        timeout: '30s',
+      });
+
+      const res = await this.esClient.search<{ task_result: { result: unknown } }>({
+        index,
+        query: {
+          term: {
+            'task_result.taskId': taskId,
+          },
+        },
+      });
+      if (res.hits.hits.length > 0) {
+        const hit = res.hits.hits[0];
+        const taskResult = hit?._source?.task_result;
+        return taskResult?.result;
+      }
+    }
+
+    throw new Error('Document not found after checkpoint advanced');
   }
 
   // like search(), only runs multiple searches in parallel returning the combined results

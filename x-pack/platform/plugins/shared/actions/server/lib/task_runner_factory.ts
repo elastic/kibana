@@ -168,6 +168,8 @@ export class TaskRunnerFactory {
             executorResult.retry as boolean | Date
           );
         }
+
+        return { data: executorResult };
       },
       cancel: async () => {
         // Write event log entry

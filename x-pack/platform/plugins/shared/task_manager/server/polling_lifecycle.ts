@@ -255,6 +255,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
 
   private createTaskRunnerForTask = (instance: ConcreteTaskInstance) => {
     return new TaskManagerRunner({
+      originalStore: this.store,
       basePathService: this.basePathService,
       logger: this.logger,
       instance,

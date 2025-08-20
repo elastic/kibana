@@ -106,6 +106,34 @@ export class TaskScheduling {
     );
   }
 
+  public async runAdHoc<Result>(
+    taskInstance: Pick<TaskInstanceWithDeprecatedFields, 'taskType' | 'params'>,
+    options?: ScheduleOptions
+  ): Promise<Result> {
+    const traceparent =
+      agent.currentTransaction && agent.currentTransaction.type !== 'request'
+        ? agent.currentTraceparent
+        : '';
+
+    const task = await this.store.schedule(
+      {
+        ...taskInstance,
+        traceparent: traceparent || '',
+        enabled: true,
+        state: {},
+        storeResult: true,
+      },
+      options?.request
+        ? {
+            request: options?.request,
+            refresh: true,
+          }
+        : { refresh: true }
+    );
+
+    return (await this.store.awaitTaskRunResult(task.id)) as unknown as Result;
+  }
+
   /**
    * Bulk schedules a task.
    *
