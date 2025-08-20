@@ -49,7 +49,7 @@ export const MonitoredUserDoc = z.object({
   labels: z
     .object({
       sources: z.array(z.unknown()).optional(),
-      source_indices: z.array(z.string()).optional(),
+      source_ids: z.array(z.string()).optional(),
       source_integrations: z.array(z.string()).optional(),
     })
     .optional(),

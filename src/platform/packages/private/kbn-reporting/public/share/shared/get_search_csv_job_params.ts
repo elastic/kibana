@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  CSV_JOB_TYPE_V2,
-  CSV_JOB_TYPE,
-  JobAppParamsCSV,
-  JobAppParamsCsvV2,
-} from '@kbn/reporting-export-types-csv-common';
+import type { JobAppParamsCSV, JobAppParamsCsvV2 } from '@kbn/reporting-export-types-csv-common';
+import { CSV_JOB_TYPE_V2, CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
-import { LocatorParams, BaseParams } from '@kbn/reporting-common/types';
+import type { LocatorParams, BaseParams } from '@kbn/reporting-common/types';
 import type { ReportingAPIClient } from '../../reporting_api_client';
 
 export type CsvSearchModeParams =

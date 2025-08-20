@@ -6,11 +6,13 @@
  */
 
 import { once } from 'lodash';
-import { Observable, from, switchMap } from 'rxjs';
-import { Message, MessageRole, ToolOptions } from '@kbn/inference-common';
+import type { Observable } from 'rxjs';
+import { from, switchMap } from 'rxjs';
+import type { Message, ToolOptions } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { EsqlDocumentBase } from './doc_base';
 import { requestDocumentation, generateEsqlTask } from './actions';
-import { NlToEsqlTaskParams, NlToEsqlTaskEvent } from './types';
+import type { NlToEsqlTaskParams, NlToEsqlTaskEvent } from './types';
 
 const loadDocBase = once(() => EsqlDocumentBase.load());
 

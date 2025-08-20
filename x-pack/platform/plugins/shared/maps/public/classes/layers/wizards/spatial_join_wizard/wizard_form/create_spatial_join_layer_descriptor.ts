@@ -15,7 +15,7 @@ import {
   VECTOR_STYLES,
 } from '../../../../../../common/constants';
 import { getJoinAggKey } from '../../../../../../common/get_agg_key';
-import {
+import type {
   CountAggDescriptor,
   JoinDescriptor,
   VectorStylePropertiesDescriptor,

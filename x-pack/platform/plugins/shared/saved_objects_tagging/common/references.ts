@@ -12,7 +12,7 @@ import type {
   SavedObjectsFindOptionsReference,
 } from '@kbn/core/server';
 import { tagSavedObjectTypeName } from './constants';
-import { Tag } from './types';
+import type { Tag } from './types';
 
 type SavedObjectReferenceLike = SavedObjectReference | SavedObjectsFindOptionsReference;
 

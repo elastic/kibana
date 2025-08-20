@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { UpgradeLicenseCallToAction } from '.';
-import { HttpSetup } from '@kbn/core-http-browser';
+import type { HttpSetup } from '@kbn/core-http-browser';
 
 const testProps = {
   connectorPrompt: <div>{'Connector Prompt'}</div>,

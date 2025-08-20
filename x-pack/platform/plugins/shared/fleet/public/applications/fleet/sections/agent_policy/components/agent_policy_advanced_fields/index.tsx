@@ -835,7 +835,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 agent_features: id === 'hostname' ? [] : [{ name: 'fqdn', enabled: true }],
               });
             }}
-            name="radio group"
+            name="hostNameFormat"
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
