@@ -24,6 +24,7 @@ export interface FileData {
 export interface ComponentData extends FileData {
   iconType?: string;
   relativePath?: string;
+  codeowners: string[];
 }
 
 export interface ReactFiberNode {

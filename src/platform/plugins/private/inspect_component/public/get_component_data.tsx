@@ -33,13 +33,11 @@ export const getComponentData = async ({
       ...fileData,
       iconType,
       relativePath,
+      codeowners,
     };
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(
-        <InspectFlyout codeowners={codeowners} componentData={componentData} />,
-        core.rendering
-      ),
+      toMountPoint(<InspectFlyout componentData={componentData} />, core.rendering),
       flyoutOptions
     );
 

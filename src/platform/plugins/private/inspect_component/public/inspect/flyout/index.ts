@@ -8,6 +8,6 @@
  */
 
 export { Header } from './header';
-export { CodeownersSection } from './codeowners_section';
+export { ComponentDataSection } from './component_data_section';
 export { LinksSection } from './links_section';
 export { InspectFlyout, flyoutOptions } from './inspect_flyout';

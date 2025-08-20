@@ -8,16 +8,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { LinksSection } from './links_section';
-import { CodeownersSection } from './codeowners_section';
+import { ComponentDataSection } from './component_data_section';
 import { Header } from './header';
 import type { ComponentData } from '../../types';
 
 interface Props {
-  codeowners: string[];
   componentData: ComponentData;
 }
 
@@ -26,7 +25,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   'data-test-subj': 'inspectComponentFlyout',
 };
 
-export const InspectFlyout = ({ codeowners, componentData }: Props) => {
+export const InspectFlyout = ({ componentData }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const flyoutCss = css`
@@ -38,13 +37,7 @@ export const InspectFlyout = ({ codeowners, componentData }: Props) => {
       <Header />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup direction="column" gutterSize="l">
-          {/* TODO: Improve styling */}
-          {componentData.iconType && (
-            <EuiText size="s" color="subdued">
-              Icon: {componentData.iconType}
-            </EuiText>
-          )}
-          <CodeownersSection codeowners={codeowners} />
+          <ComponentDataSection componentData={componentData} />
           <LinksSection componentData={componentData} />
         </EuiFlexGroup>
       </EuiFlexItem>
