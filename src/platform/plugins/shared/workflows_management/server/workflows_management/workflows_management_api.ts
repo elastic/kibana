@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -68,40 +69,55 @@ export class WorkflowsManagementApi {
     this.schedulerService = schedulerService;
   }
 
-  public async getWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
-    return await this.workflowsService.searchWorkflows(params);
+  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+    return await this.workflowsService.searchWorkflows(params, spaceId);
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
-    return await this.workflowsService.getWorkflow(id);
+  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+    return await this.workflowsService.getWorkflow(id, spaceId);
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
-    return await this.workflowsService.createWorkflow(workflow);
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    return await this.workflowsService.createWorkflow(workflow, spaceId, request);
   }
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
-  ): Promise<UpdatedWorkflowResponseDto> {
-    return await this.workflowsService.updateWorkflow(id, workflow);
+    workflow: Partial<EsWorkflow>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto | null> {
+    return await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds);
+  public async deleteWorkflows(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
   }
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
-    return await this.schedulerService.runWorkflow(workflow, inputs);
+    return await this.schedulerService.runWorkflow(workflow, spaceId, inputs);
   }
 
-  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
+  public async testWorkflow(
+    workflowYaml: string,
+    inputs: Record<string, any>,
+    spaceId: string
+  ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
@@ -122,26 +138,35 @@ export class WorkflowsManagementApi {
         status: workflowToCreate.status,
         definition: workflowToCreate.definition,
       },
+      spaceId,
       inputs
     );
   }
 
-  public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions({
-      workflowId,
-    });
+  public async getWorkflowExecutions(
+    workflowId: string,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
+    return await this.workflowsService.searchWorkflowExecutions(
+      {
+        workflowId,
+      },
+      spaceId
+    );
   }
 
   public async getWorkflowExecution(
-    workflowExecutionId: string
+    workflowExecutionId: string,
+    spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
-    return await this.workflowsService.getWorkflowExecution(workflowExecutionId);
+    return await this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   public async getWorkflowExecutionLogs(
-    params: GetWorkflowExecutionLogsParams
+    params: GetWorkflowExecutionLogsParams,
+    spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
-    const result = await this.workflowsService.getExecutionLogs(params.executionId);
+    const result = await this.workflowsService.getExecutionLogs(params.executionId, spaceId);
 
     // Transform the logs to match our API format
     return {
