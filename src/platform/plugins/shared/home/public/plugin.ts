@@ -130,6 +130,7 @@ export class HomePublicPlugin
           contentClient: contentManagement.client,
           savedObjectsTagging,
           contentManagement,
+          userProfile: coreStart.userProfile,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })
