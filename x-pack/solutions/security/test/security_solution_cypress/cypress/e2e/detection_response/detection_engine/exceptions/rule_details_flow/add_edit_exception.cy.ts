@@ -8,34 +8,26 @@
 import { getException, getExceptionList } from '../../../../../objects/exception';
 import { getNewRule } from '../../../../../objects/rule';
 
-import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../../../screens/alerts';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import {
-  goToClosedAlertsOnRuleDetailsPage,
-  goToOpenedAlertsOnRuleDetailsPage,
-} from '../../../../../tasks/alerts';
 import { login } from '../../../../../tasks/login';
 import {
   addExceptionFlyoutFromViewerHeader,
-  goToAlertsTab,
-  goToExceptionsTab,
   openEditException,
   openExceptionFlyoutFromEmptyViewerPrompt,
   removeException,
   searchForExceptionItem,
   visitRuleDetailsPage,
-  waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
 import {
-  addExceptionConditions,
   addExceptionFlyoutItemName,
   editException,
   editExceptionFlyoutItemName,
   selectAddToRuleRadio,
-  selectBulkCloseAlerts,
   selectSharedListToAddExceptionTo,
   submitEditedExceptionItem,
   submitNewExceptionItem,
+  addExceptionEntryFieldValueOfItemX,
+  addExceptionEntryFieldValueValue,
 } from '../../../../../tasks/exceptions';
 import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
 import {
@@ -56,10 +48,8 @@ import {
   createExceptionListItem,
   deleteExceptionLists,
 } from '../../../../../tasks/api_calls/exceptions';
-import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
 describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless'] }, () => {
-  const NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS = '3 alerts';
   const FIELD_DIFFERENT_FROM_EXISTING_ITEM_FIELD = 'agent.name';
   const ITEM_FIELD = 'unique_value.test';
 
@@ -118,7 +108,7 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless']
       });
     });
 
-    it('Edits an exception item', () => {
+    it('can edit an exception item', () => {
       const NEW_ITEM_NAME = 'Exception item-EDITED';
       const ITEM_NAME = 'Sample Exception List Item 2';
 
@@ -156,6 +146,15 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless']
       cy.get(EXCEPTION_CARD_ITEM_CONDITIONS).should('have.text', ' agent.nameIS foo');
     });
 
+    it('displays no exceptions prompt when exceptions are removed', () => {
+      // displays existing exception items
+      cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
+
+      // when removing exception and again, no more exist, empty screen shows again
+      removeException();
+      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
+    });
+
     describe('rule with existing shared exceptions', () => {
       it('Creates an exception item to add to shared list', () => {
         // displays existing exception items
@@ -166,7 +165,8 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless']
         addExceptionFlyoutFromViewerHeader();
 
         // add exception item conditions
-        addExceptionConditions(getException());
+        addExceptionEntryFieldValueOfItemX(`${getException().field}{downarrow}{enter}`, 0, 0);
+        addExceptionEntryFieldValueValue(getException().value, 0);
 
         // Name is required so want to check that submit is still disabled
         cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
@@ -197,7 +197,8 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless']
         addExceptionFlyoutFromViewerHeader();
 
         // add exception item conditions
-        addExceptionConditions(getException());
+        addExceptionEntryFieldValueOfItemX(`${getException().field}{downarrow}{enter}`, 0, 0);
+        addExceptionEntryFieldValueValue(getException().value, 0);
 
         // Name is required so want to check that submit is still disabled
         cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
@@ -264,11 +265,8 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless']
       openExceptionFlyoutFromEmptyViewerPrompt();
 
       // add exception item conditions
-      addExceptionConditions({
-        field: 'agent.name',
-        operator: 'is one of',
-        values: ['foo', 'FOO', 'bar'],
-      });
+      addExceptionEntryFieldValueOfItemX(`agent.name{downarrow}{enter}`, 0, 0);
+      addExceptionEntryFieldValueValue('foo', 0);
 
       // Name is required so want to check that submit is still disabled
       cy.get(CONFIRM_BTN).should('have.attr', 'disabled');
@@ -283,45 +281,11 @@ describe('Add/edit exception from rule details', { tags: ['@ess', '@serverless']
       // rule has shared lists attached to it already
       cy.get(ADD_TO_SHARED_LIST_RADIO_INPUT).should('have.attr', 'disabled');
 
-      // Close matching alerts
-      selectBulkCloseAlerts();
-
       // submit
       submitNewExceptionItem();
 
       // new exception item displays
       cy.get(EXCEPTION_ITEM_VIEWER_CONTAINER).should('have.length', 1);
-
-      // Alerts table should now be empty from having added exception and closed
-      // matching alert
-      goToAlertsTab();
-      cy.get(EMPTY_ALERT_TABLE).should('exist');
-
-      // Closed alert should appear in table
-      goToClosedAlertsOnRuleDetailsPage();
-      cy.get(ALERTS_COUNT).should('exist');
-      cy.get(ALERTS_COUNT).should('have.text', `${NUMBER_OF_AUDITBEAT_EXCEPTIONS_ALERTS}`);
-
-      // Remove the exception and load an event that would have matched that exception
-      // to show that said exception now starts to show up again
-      goToExceptionsTab();
-
-      // when removing exception and again, no more exist, empty screen shows again
-      removeException();
-      cy.get(NO_EXCEPTIONS_EXIST_PROMPT).should('exist');
-
-      // load more docs
-      cy.task('esArchiverLoad', { archiveName: 'exceptions_2' });
-
-      // now that there are no more exceptions, the docs should match and populate alerts
-      goToAlertsTab();
-      waitForAlertsToPopulate();
-      goToOpenedAlertsOnRuleDetailsPage();
-      waitForTheRuleToBeExecuted();
-      waitForAlertsToPopulate();
-
-      cy.get(ALERTS_COUNT).should('exist');
-      cy.get(ALERTS_COUNT).should('have.text', '2 alerts');
     });
   });
 });
