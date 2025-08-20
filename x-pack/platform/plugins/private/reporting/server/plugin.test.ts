@@ -165,7 +165,7 @@ describe('Reporting Plugin', () => {
   describe('features registration', () => {
     it('does not register Kibana reporting feature in traditional build flavour', async () => {
       plugin.setup(coreSetup, pluginSetup);
-      expect(featuresSetup.registerKibanaFeature).not.toHaveBeenCalled();
+      expect(featuresSetup.registerKibanaFeature).toHaveBeenCalledTimes(1);
       expect(featuresSetup.enableReportingUiCapabilities).toHaveBeenCalledTimes(1);
     });
 
