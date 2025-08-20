@@ -23,7 +23,7 @@ export const getIsConversationOwner = (
     user === undefined || conversation === undefined || conversation?.id === '';
   if (isLoadingState) {
     // some loading state
-    return true;
+    return false;
   }
   const conversationUser =
     conversation?.createdBy ??
