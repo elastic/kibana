@@ -43,7 +43,7 @@ export interface SuggestionType<TPayload extends {} = {}> {
   /* Unique identifier for the suggestion type */
   id: string;
   /* Unique identifier for the type of attachment the suggestion is for */
-  attachmentId: string;
+  attachmentTypeId: string;
   /* The owner of the suggestion. Dictates which solutions can use this suggestion */
   owner: SuggestionOwner;
   // Handlers and tools associated with each handler. Can be called programmatically or used with tool calling

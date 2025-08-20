@@ -15,7 +15,7 @@ export const getExampleByServiceName = (dependencies: {
 }): SuggestionType<SyntheticsMonitorSuggestion> => {
   return {
     id: 'example',
-    attachmentId: '.page',
+    attachmentTypeId: '.page',
     owner: 'observability',
     handlers: {
       searchExampleByServiceName: {
