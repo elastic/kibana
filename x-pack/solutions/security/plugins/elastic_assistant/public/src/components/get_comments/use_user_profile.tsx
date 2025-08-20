@@ -23,6 +23,9 @@ export const useUserProfile = ({ user }: Props) => {
   return useQuery({
     queryKey: ['userProfile', user?.id ?? ''],
     queryFn: async () => {
+      if (!user?.id) {
+        return [];
+      }
       const data = await userProfile?.bulkGet<{ avatar: UserProfileAvatarData }>({
         uids: new Set([user?.id ?? '']),
         dataPath: 'avatar',

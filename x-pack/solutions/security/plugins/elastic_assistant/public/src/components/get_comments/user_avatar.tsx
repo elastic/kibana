@@ -20,9 +20,24 @@ interface Props {
 export const SecurityUserAvatar: React.FC<Props> = ({ user }) => {
   const { data: userProfile } = useUserProfile({ user });
   if (userProfile) {
-    return <UserAvatar user={userProfile.user} avatar={userProfile.avatar} size="l" />;
+    return (
+      <UserAvatar
+        data-test-subj="userAvatar"
+        user={userProfile.user}
+        avatar={userProfile.avatar}
+        size="l"
+      />
+    );
   }
-  return <EuiAvatar name="user" size="l" color="subdued" iconType="userAvatar" />;
+  return (
+    <EuiAvatar
+      data-test-subj="genericAvatar"
+      name="user"
+      size="l"
+      color="subdued"
+      iconType="userAvatar"
+    />
+  );
 };
 
 export const SecurityUserName: React.FC<Props> = ({ user }) => {
