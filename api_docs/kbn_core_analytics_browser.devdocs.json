@@ -724,6 +724,10 @@
                 "path": "x-pack/platform/plugins/private/global_search_bar/public/telemetry/event_reporter.ts"
               },
               {
+                "plugin": "indicesMetadata",
+                "path": "x-pack/platform/plugins/private/indices_metadata/server/lib/services/sender.ts"
+              },
+              {
                 "plugin": "intercepts",
                 "path": "x-pack/platform/plugins/private/intercepts/public/prompter/service/telemetry/event_reporter.ts"
               },
@@ -1098,6 +1102,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_alert_suppression_telemetry_event.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_gap_detected_telemetry_event.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -1718,6 +1726,14 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/task/rule_migrations_telemetry_client.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_gap_detected_telemetry_event.test.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/rule_types/utils/telemetry/send_gap_detected_telemetry_event.test.ts"
               },
               {
                 "plugin": "@kbn/core",
