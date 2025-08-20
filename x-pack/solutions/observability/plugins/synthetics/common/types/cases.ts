@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export type * from './synthetics_monitor';
-export type * from './monitor_validation';
-export type * from './default_alerts';
-export type * from './overview';
-export type * from './cases';
+import { OverviewStatusMetaData } from '../runtime_types';
+
+export type SyntheticsSuggestion = Array<OverviewStatusMetaData>;

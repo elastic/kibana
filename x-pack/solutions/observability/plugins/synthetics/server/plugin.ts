@@ -31,6 +31,8 @@ import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../common/constants/synthetics_alerts';
 import { syntheticsRuleTypeFieldMap } from './alert_rules/common';
 import { SyncPrivateLocationMonitorsTask } from './tasks/sync_private_locations_monitors_task';
+import { getMonitorByServiceName } from './cases/suggestion';
+import { SyntheticsSuggestion } from '../common/types';
 
 export class Plugin implements PluginType {
   private savedObjectsClient?: SavedObjectsClientContract;
@@ -75,7 +77,8 @@ export class Plugin implements PluginType {
       isDev: this.initContext.env.mode.dev,
       share: plugins.share,
       alerting: plugins.alerting,
-    } as SyntheticsServerSetup;
+      cases: plugins.cases,
+    } as unknown as SyntheticsServerSetup;
 
     this.syntheticsService = new SyntheticsService(this.server);
 
@@ -96,6 +99,12 @@ export class Plugin implements PluginType {
       plugins.taskManager,
       this.syntheticsMonitorClient
     );
+
+    core.getStartServices().then(([coreStart]) => {
+      plugins.cases.attachmentFramework.registerSuggestion<SyntheticsSuggestion>(
+        getMonitorByServiceName(coreStart, this.logger)
+      );
+    });
 
     return {};
   }

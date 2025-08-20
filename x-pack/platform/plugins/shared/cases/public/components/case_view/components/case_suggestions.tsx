@@ -20,7 +20,6 @@ export const CaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
   if (isLoadingSuggestions) {
     return <EuiLoadingSpinner size="m" />;
   }
-
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="m" wrap direction="column">
