@@ -13,6 +13,7 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ListIndexInfo } from './steps/list_indices';
 import { listIndices } from './steps/list_indices';
 import { getIndexMappings } from './steps/get_mappings';
+import { cleanupMapping } from './utils/mappings';
 
 export interface RelevantIndex {
   indexName: string;
@@ -42,16 +43,22 @@ export const indexExplorer = async ({
     esClient,
   });
 
+  const allMappings = await getIndexMappings({
+    indices: allIndices.map((index) => index.index),
+    esClient,
+  });
+
+  const cleanedMappings: Record<string, MappingTypeMapping> = {};
+  for (const [indexName, mapping] of Object.entries(allMappings)) {
+    cleanedMappings[indexName] = cleanupMapping(mapping.mappings);
+  }
+
   const selectedIndices = await selectIndices({
     indices: allIndices,
+    mappings: cleanedMappings,
     nlQuery,
     model,
     limit,
-  });
-
-  const mappings = await getIndexMappings({
-    indices: selectedIndices.map((index) => index.indexName),
-    esClient,
   });
 
   const relevantIndices: RelevantIndex[] = selectedIndices.map<RelevantIndex>(
@@ -59,7 +66,7 @@ export const indexExplorer = async ({
       return {
         indexName,
         reason,
-        mappings: mappings[indexName].mappings,
+        mappings: cleanedMappings[indexName],
       };
     }
   );
@@ -74,11 +81,13 @@ export interface SelectedIndex {
 
 const selectIndices = async ({
   indices,
+  mappings,
   nlQuery,
   model,
   limit = 1,
 }: {
   indices: ListIndexInfo[];
+  mappings: Record<string, MappingTypeMapping>;
   nlQuery: string;
   model: ScopedModel;
   limit?: number;
@@ -103,10 +112,16 @@ const selectIndices = async ({
 
        *The natural language query is:* ${nlQuery}
 
-       *List of indices:*
-       ${indices.map((index) => `- ${index.index}`).join('\n')}
+       *List of indices with their descriptions:*
+       ${indices
+         .map((index) => {
+           const indexMapping = mappings[index.index];
+           const description = indexMapping?._meta?.description || 'No description available';
+           return `- ${index.index}: ${description}`;
+         })
+         .join('\n')}
 
-       Based on those information, please return most relevant indices with your reasoning.
+       Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
        Remember, you should select at maximum ${limit} indices.
        `,
     ],
