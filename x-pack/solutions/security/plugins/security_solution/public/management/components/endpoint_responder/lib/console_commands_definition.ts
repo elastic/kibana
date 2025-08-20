@@ -463,7 +463,7 @@ export const getEndpointConsoleCommands = ({
       meta: commandMeta,
       exampleInstruction: CONSOLE_COMMANDS.runscript.about,
       validate: capabilitiesAndPrivilegesValidator(agentType),
-      mustHaveArgs: true,
+      mustHaveArgs: false,
       helpGroupLabel: HELP_GROUPS.responseActions.label,
       helpGroupPosition: HELP_GROUPS.responseActions.position,
       helpCommandPosition: 9,
@@ -614,6 +614,7 @@ const adjustCommandsForSentinelOne = ({
         };
       } else if (command.name === 'runscript') {
         command.helpDisabled = false;
+        command.mustHaveArgs = true;
         command.exampleUsage = (
           enteredCommand?: Command<
             CommandDefinition,
@@ -755,6 +756,7 @@ const adjustCommandsForCrowdstrike = ({
           ...command,
           exampleUsage: `runscript --Raw=\`\`\`Get-ChildItem .\`\`\` --CommandLine=""`,
           helpUsage: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.helpUsage,
+          mustHaveArgs: true,
           args: {
             Raw: {
               required: false,
@@ -831,6 +833,7 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
         return {
           ...command,
           exampleUsage: `runscript --ScriptName='test.ps1'`,
+          mustHaveArgs: true,
           args: {
             ScriptName: {
               required: true,

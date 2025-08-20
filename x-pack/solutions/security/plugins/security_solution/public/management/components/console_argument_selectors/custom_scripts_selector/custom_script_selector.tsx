@@ -20,6 +20,7 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
+import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 import type { CustomScriptsRequestQueryParams } from '../../../../../common/api/endpoint/custom_scripts/get_custom_scripts_route';
 import type { EndpointCommandDefinitionMeta } from '../../endpoint_responder/types';
 import type { ResponseActionScript } from '../../../../../common/endpoint/types';
@@ -67,6 +68,7 @@ export const CustomScriptSelector = memo<
     EndpointCommandDefinitionMeta
   >
 >(({ value, valueText, onChange, store: _store, command, requestFocus }) => {
+  const testId = useTestIdGenerator(`scriptSelector-${command.commandDefinition.name}`);
   const { agentType, platform } = command.commandDefinition.meta ?? {};
 
   const {
@@ -162,7 +164,7 @@ export const CustomScriptSelector = memo<
 
   const renderOption = (option: SelectableOption) => {
     return (
-      <>
+      <div data-test-subj={testId('script')}>
         <EuiText size="s" css={truncationStyle}>
           <strong data-test-subj={`${option.label}-label`}>{option.label}</strong>
         </EuiText>
@@ -173,7 +175,7 @@ export const CustomScriptSelector = memo<
             </EuiText>
           </EuiToolTip>
         )}
-      </>
+      </div>
     );
   };
 
@@ -227,7 +229,7 @@ export const CustomScriptSelector = memo<
   useCustomScriptsErrorToast(scriptsError, notifications);
 
   if (isAwaitingRenderDelay || (isLoadingScripts && !scriptsError)) {
-    return <EuiLoadingSpinner />;
+    return <EuiLoadingSpinner data-test-subj={testId('loading')} size="m" />;
   }
 
   return (
@@ -238,7 +240,9 @@ export const CustomScriptSelector = memo<
         padding: 0,
         minWidth: 400,
       }}
+      data-test-subj={testId()}
       closePopover={handleClosePopover}
+      panelProps={{ 'data-test-subj': testId('popoverPanel') }}
       button={
         <EuiToolTip content={TOOLTIP_TEXT} position="top" display="block">
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
