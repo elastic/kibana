@@ -6,15 +6,24 @@
  */
 import { ContainerModule } from 'inversify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import { type PluginConfigDescriptor } from '@kbn/core/server';
 import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import type { ActionsConfig } from './config';
-import { configSchema } from './config';
+import { configSchema, getValidatedConfig } from './config';
 import type { ActionsClient as ActionsClientClass } from './actions_client';
 import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 import { Actions } from './module';
 import type { ActionsPluginSetupDeps, ActionsPluginStartDeps } from './types';
+import {
+  ACTIONS_CONFIG,
+  IN_MEMORY_CONNECTORS_SERVICE,
+  IN_MEMORY_METRICS_SERVICE,
+  LOGGER,
+  TELEMETRY_LOGGER,
+} from './constants';
+import { resolveCustomHosts } from './lib/custom_host_settings';
+import { InMemoryMetrics } from './monitoring';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
@@ -65,6 +74,28 @@ export { urlAllowListValidator } from './sub_action_framework/helpers';
 export { ActionExecutionSourceType } from './lib/action_execution_source';
 
 export const module = new ContainerModule(({ bind }) => {
+  bind(LOGGER).toDynamicValue(({ get }) => {
+    const loggerFactory = get(PluginInitializer('logger'));
+    return loggerFactory.get();
+  });
+  bind(TELEMETRY_LOGGER).toDynamicValue(({ get }) => {
+    const loggerFactory = get(PluginInitializer('logger'));
+    return loggerFactory.get('usage');
+  });
+  bind(ACTIONS_CONFIG).toDynamicValue(({ get }) => {
+    const logger = get(LOGGER);
+    const configService = get(PluginInitializer('config'));
+    return getValidatedConfig(
+      logger,
+      resolveCustomHosts(logger, configService.get<ActionsConfig>())
+    );
+  });
+  bind(IN_MEMORY_CONNECTORS_SERVICE).toConstantValue([]);
+  bind(IN_MEMORY_METRICS_SERVICE).toDynamicValue(({ get }) => {
+    const loggerFactory = get(PluginInitializer('logger'));
+    return new InMemoryMetrics(loggerFactory.get('in_memory_metrics'));
+  });
+
   bind(Actions).toSelf().inSingletonScope();
 
   bind(Setup).toDynamicValue(({ get }) => {
