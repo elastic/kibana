@@ -190,7 +190,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
     } catch (e) {
       const error = e as Error;
       notifications.toasts.addDanger({
-        title: i18n.translate('xpack.observabilityAiAssistantManagement.apmSettings.save.error', {
+        title: i18n.translate('xpack.observabilityAiAssistantManagement.save.error', {
           defaultMessage: 'An error occurred while saving the settings',
         }),
         text: error.message,

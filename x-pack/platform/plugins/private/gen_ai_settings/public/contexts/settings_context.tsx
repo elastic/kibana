@@ -46,6 +46,11 @@ export const SettingsContextProvider = ({ children }: { children: React.ReactNod
   return <SettingsContext.Provider value={value}>{children}</SettingsContext.Provider>;
 };
 
+function combineErrors(errors: Error[]): Error {
+  const message = errors.map(err => err.message || String(err)).join("; ");
+  return new Error(message);
+}
+
 function getSettingsFields({
   settingsKeys,
   uiSettings,
@@ -60,7 +65,7 @@ function getSettingsFields({
   const uiSettingsDefinition = uiSettings.getAll();
   const normalizedSettings = normalizeSettings(uiSettingsDefinition);
 
-  return settingsKeys.reduce((acc, key) => {
+  return settingsKeys.reduce<Record<string, FieldDefinition>>((acc, key) => {
     const setting: UiSettingMetadata = normalizedSettings[key];
     if (setting) {
       const field = getFieldDefinition({
@@ -71,7 +76,7 @@ function getSettingsFields({
       acc[key] = field;
     }
     return acc;
-  }, {} as Record<string, FieldDefinition>);
+  }, {});
 }
 
 const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
@@ -109,9 +114,9 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
   const saveAllMutation = useMutation({
     mutationFn: async () => {
       if (settings && !isEmpty(unsavedChanges)) {
-        let updateErrorOccurred = false;
+        const updateErrors: Error[] = [];
         const subscription = settings.client.getUpdateErrors$().subscribe((error) => {
-          updateErrorOccurred = true;
+          updateErrors.push(error);
         });
         try {
           await Promise.all(
@@ -121,8 +126,8 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
           );
           queryClient.invalidateQueries({ queryKey: ['settingsFields', settingsKeys] });
           cleanUnsavedChanges();
-          if (updateErrorOccurred) {
-            throw new Error('One or more settings updates failed');
+          if (updateErrors.length > 0) {
+            throw combineErrors(updateErrors);
           }
         } catch (e) {
           throw e;
@@ -152,10 +157,10 @@ const Settings = ({ settingsKeys }: { settingsKeys: string[] }) => {
     fields: fieldsQuery.data ?? {},
     unsavedChanges,
     handleFieldChange,
-    saveAll: saveAllMutation.mutate,
+    saveAll: saveAllMutation.mutateAsync,
     isSaving: saveAllMutation.isLoading || saveSingleSettingMutation.isLoading,
     cleanUnsavedChanges,
-    saveSingleSetting: saveSingleSettingMutation.mutate,
+    saveSingleSetting: saveSingleSettingMutation.mutateAsync,
   };
 };
 

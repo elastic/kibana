@@ -20,6 +20,7 @@ import { i18n } from '@kbn/i18n';
 import type { UseGenAiConnectorsResult } from '../../hooks/use_genai_connectors';
 import { useSettingsContext } from '../../contexts/settings_context';
 import { NO_DEFAULT_CONNECTOR } from '../../../common/constants';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface Props {
   connectors: UseGenAiConnectorsResult;
@@ -94,6 +95,8 @@ const getOptionsByValues = (
 export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
   const [options, setOptions] = useState<EuiComboBoxOptionOption<string>[]>(getOptions(connectors));
   const { handleFieldChange, fields, unsavedChanges } = useSettingsContext();
+    const { services } = useKibana();
+  const { notifications } = services;
 
   useEffect(() => {
     setOptions(getOptions(connectors));
@@ -102,6 +105,14 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
   const onChangeDefaultLlm = (selectedOptions: EuiComboBoxOptionOption<string>[]) => {
     const values = selectedOptions.map((option) => option.value);
     if (values.length > 1) {
+      notifications.toasts.addDanger({
+        title: i18n.translate('xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.title', {
+          defaultMessage: 'An error occurred while changing the setting',
+        }),
+        text: i18n.translate('xpack.observabilityAiAssistantManagement.defaultLlm.onChange.error.multipleSelected.text', {
+          defaultMessage: 'Only one default AI connector can be selected',
+        }),
+      });
       throw new Error('Only one default AI connector can be selected');
     }
     const value = values[0] ?? NO_DEFAULT_CONNECTOR;
@@ -159,7 +170,7 @@ export const DefaultAIConnector: React.FC<Props> = ({ connectors }) => {
 
       <EuiFormRow>
         <EuiCheckbox
-          id={'basicCheckboxId'}
+          id='defaultAiConnectorCheckbox'
           data-test-subj="defaultAiConnectorCheckbox"
           disabled={fields[GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]?.isReadOnly}
           label={
