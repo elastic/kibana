@@ -55,7 +55,7 @@ describe('checking changes on all registered encrypted SO types', () => {
     }
   });
 
-  // This test is meant to fail when any change is made ESO registerations (change or addition).
+  // This test is meant to fail when any change is made to ESO registrations (change or addition).
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Kibana Security team to review the ESO changes.
   // The number of types in the hashMap should never be reduced, it should only increase.
@@ -87,7 +87,7 @@ describe('checking changes on all registered encrypted SO types', () => {
     expect(Object.keys(hashMap).length).toEqual(ESO_TYPES_COUNT);
   });
 
-  // This test is meant to fail when any change is made in registered SO types that could potentially impact an ESO.
+  // This test is meant to fail when any change is made in to any ESO types that could impact migrations.
   // Though there is a similar test in core, this is relevent to ESOs and the Kibana Security team.
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Kibana Security team to review the ESO changes.
@@ -128,7 +128,7 @@ describe('checking changes on all registered encrypted SO types', () => {
     expect(Object.keys(hashMap).length).toEqual(ESO_TYPES_COUNT);
   });
 
-  // This test is meant to more granularly detect what changes when occured to an SO's migration-related properties.
+  // This test is meant to more granularly detect what changes when occured to an ESO's migration-related properties.
   // Though there is a similar test in core, this is relevent to ESOs and the Kibana Security team.
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Kibana Security team to review the ESO changes.
