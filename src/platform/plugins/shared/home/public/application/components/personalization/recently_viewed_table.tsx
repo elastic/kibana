@@ -10,12 +10,12 @@ import React, { useState } from 'react';
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
 import {
   formatDate,
-  EuiBasicTable,
   EuiLink,
   EuiPanel,
   EuiTitle,
   EuiSpacer,
   EuiText,
+  EuiInMemoryTable,
 } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
@@ -31,15 +31,14 @@ export const PersonalizedRecentlyViewed = ({
   addBasePath,
 }: RecentlyAccessedTableProps) => {
   const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(5);
-  console.log('recentlyAccessed', recentlyAccessed);
+  const [pageSize, setPageSize] = useState(10);
   const items: ChromeRecentlyAccessedHistoryItem[] =
-    recentlyAccessed?.map((recentlyAccessed: any) => {
+    recentlyAccessed?.map((dashboard: ChromeRecentlyAccessedHistoryItem) => {
       return {
-        id: recentlyAccessed.id,
-        label: recentlyAccessed.label,
-        link: recentlyAccessed.link,
-        lastAccessed: recentlyAccessed.lastAccessed,
+        id: dashboard.id,
+        label: dashboard.label,
+        link: dashboard.link,
+        lastAccessed: dashboard.lastAccessed,
       };
     }) ?? [];
 
@@ -59,7 +58,7 @@ export const PersonalizedRecentlyViewed = ({
         if (!lastAccessed) return '-';
         return formatDate(lastAccessed, 'D MMM YYYY');
       },
-      sortable: true,
+      sortable: true, // how does it work?
     },
   ];
 
@@ -84,30 +83,29 @@ export const PersonalizedRecentlyViewed = ({
       textOnly: true,
     };
   };
-  const pageSizeOptions = [5, 10, 20, 50];
+  const pageSizeOptions = [2, 5, 10, 20, 50];
 
   const onTableChange = ({ page }: { page: { index: number; size: number } }) => {
     if (page) {
-      const { index: pageIndex, size: pageSize } = page;
-      setPageIndex(pageIndex);
-      setPageSize(pageSize);
+      const { index, size } = page;
+      setPageIndex(index);
+      setPageSize(size);
     }
   };
 
   // Manually handle pagination of data
   const findRecentlyViewed = (
     dashboard: ChromeRecentlyAccessedHistoryItem[],
-    pageIndex: number,
-    pageSize: number
+    index: number,
+    size: number
   ) => {
-    console.log('dashboard', dashboard);
     let pageOfItems;
 
-    if (!pageIndex && !pageSize) {
+    if (!index && !size) {
       pageOfItems = dashboard;
     } else {
-      const startIndex = pageIndex * pageSize;
-      pageOfItems = dashboard.slice(startIndex, Math.min(startIndex + pageSize, dashboard.length));
+      const startIndex = index * size;
+      pageOfItems = dashboard.slice(startIndex, Math.min(startIndex + size, dashboard.length));
     }
 
     return {
@@ -122,13 +120,15 @@ export const PersonalizedRecentlyViewed = ({
     totalItemCount,
     pageSizeOptions,
   };
+  const isLastPage = pageSize * (pageIndex + 1) >= totalItemCount;
   const resultsCount =
-    pageSize === 0 ? (
+    totalItemCount < pageSize && pageSize ? (
       <strong>All</strong>
     ) : (
       <>
         <strong>
-          {pageSize * pageIndex + 1}-{pageSize * pageIndex + pageSize}
+          {pageSize * pageIndex + 1}
+          {!isLastPage && <>-{pageSize * pageIndex + pageSize}</>}
         </strong>{' '}
         of {totalItemCount}
       </>
@@ -149,13 +149,12 @@ export const PersonalizedRecentlyViewed = ({
         </EuiTitle>
         <EuiSpacer size="m" />
         <EuiText size="xs">Showing {resultsCount}</EuiText>
-        <EuiBasicTable
+        <EuiInMemoryTable
           tableCaption={i18n.translate('home.recentlyViewedTable.caption', {
             defaultMessage: 'Recently viewed dashboards',
           })}
           responsiveBreakpoint={false}
-          items={pageOfItems}
-          rowHeader="name"
+          items={items}
           columns={columns}
           rowProps={getRowProps}
           cellProps={getCellProps}
