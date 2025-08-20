@@ -128,10 +128,11 @@ export const useAzureCredentialsForm = ({
   const lastManualCredentialsType = useRef<string | undefined>(undefined);
 
   useEffect(() => {
-    const isInvalid = setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && !hasArmTemplateUrl;
-    if (isInvalid && isValid) {
+    const isValidArmTemplateSelection =
+      setupFormat === AZURE_SETUP_FORMAT.ARM_TEMPLATE && hasArmTemplateUrl;
+    if (!isValidArmTemplateSelection && isValid) {
       updatePolicy({
-        isValid: !isInvalid,
+        isValid: false,
         updatedPolicy: newPolicy,
       });
     }
