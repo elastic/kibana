@@ -110,7 +110,7 @@ describe('DataStreamClient', () => {
       expect(indexTemplate.index_template._meta).toEqual({
         previousVersions: [],
         userAgent: '@kbn/data-streams',
-        version: '29549ae1226515eae53ce62ba6aaae0cf920c3db',
+        version: '057071d3cd930dc4ebaa1aaa5c18360b8d7912cc',
         managed: true,
       });
       expect(indexTemplate.index_template.data_stream).toEqual({
@@ -234,9 +234,9 @@ describe('DataStreamClient', () => {
       });
 
       expect(indexTemplate.index_template._meta).toEqual({
-        previousVersions: ['29549ae1226515eae53ce62ba6aaae0cf920c3db'],
+        previousVersions: ['057071d3cd930dc4ebaa1aaa5c18360b8d7912cc'],
         userAgent: '@kbn/data-streams',
-        version: 'a90f59afc64f48c6870f2e0562539d952b786e42',
+        version: '2a84370ea6cfb20521959213e604ebcd1314dede',
         managed: true,
       });
 
