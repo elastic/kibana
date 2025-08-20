@@ -681,10 +681,28 @@ export class SettingsPageObject extends FtrService {
     const currentName = await field.getAttribute('value');
     this.log.debug(`setIndexPatternField set to ${currentName}`);
     expect(currentName).to.eql(indexPatternName);
-    await this.retry.waitFor('validating the given index pattern should be finished', async () => {
-      const isValidating = await field.getAttribute('data-is-validating');
-      return isValidating === '0';
-    });
+    await this.retry.waitFor(
+      'the index pattern form should be valid and finished validating',
+      async () => {
+        // Find the main form element.
+        const form = await this.testSubjects.find('indexPatternEditorForm');
+
+        // Get the value of the data-validation-error attribute.
+        const validationError = await form.getAttribute('data-validation-error');
+
+        // Also, get the validation state of the specific input field.
+        const isValidating = await field.getAttribute('data-is-validating');
+
+        this.log.debug(
+          `Validation ${
+            isValidating ? 'finished' : 'not finished'
+          }, found ${validationError} errors`
+        );
+
+        // The form is ready and valid when validation is finished (0) and there are no validation errors (0).
+        return isValidating === '0' && validationError === '0';
+      }
+    );
   }
 
   async removeIndexPattern() {

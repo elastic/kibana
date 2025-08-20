@@ -17,7 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const globalNav = getService('globalNav');
   const es = getService('es');
-  const retry = getService('retry');
 
   describe('index pattern empty view', () => {
     before(async () => {
@@ -60,9 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       await testSubjects.click('refreshIndicesButton');
       await testSubjects.existOrFail('createDataViewButton', { timeout: 5000 });
-      await retry.try(async () => {
-        await PageObjects.settings.createIndexPattern('logstash-*', '');
-      });
+      await PageObjects.settings.createIndexPattern('logstash-*', '');
     });
 
     it(`doesn't show read-only badge`, async () => {

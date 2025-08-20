@@ -14,7 +14,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'home', 'settings']);
-  const retry = getService('retry');
 
   describe('test large number of fields', function () {
     this.tags(['skipCloud']);
@@ -27,9 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/es_archiver/large_fields'
       );
       await PageObjects.settings.navigateTo();
-      await retry.try(async () => {
-        await PageObjects.settings.createIndexPattern('testhuge', 'date');
-      });
+      await PageObjects.settings.createIndexPattern('testhuge', 'date');
     });
 
     it('test_huge data should have expected number of fields', async function () {
