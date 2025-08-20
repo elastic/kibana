@@ -49,7 +49,7 @@ const buildQuerySubmittedPayload = (
   };
 
   if (preferredSchema) {
-    payload.preferred_schema = preferredSchema;
+    payload.schema_selected = preferredSchema;
   }
 
   return payload;
@@ -261,7 +261,7 @@ export const useUnifiedSearch = () => {
     onDateRangeChange,
   ]);
 
-  // Track telemetry event on query/filter/date changes
+  // Track telemetry event on query/filter/date/schema changes
   useEffect(() => {
     const dateRangeInTimestamp = getDateRangeAsTimestamp();
     telemetry.reportHostsViewQuerySubmitted(
