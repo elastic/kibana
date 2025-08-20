@@ -90,7 +90,8 @@
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
     "@kbn/inference-common",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/langgraph-checkpoint-saver"
   ],
   "exclude": [
     "target/**/*",
