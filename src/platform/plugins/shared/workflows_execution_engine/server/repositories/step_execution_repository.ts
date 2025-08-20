@@ -15,13 +15,25 @@ export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
   constructor(private esClient: ElasticsearchClient) {}
 
-  // public async searchStepExecutionsByExecutionId(
-  //   executionId: string
-  // ): Promise<EsWorkflowStepExecution[]> {
-  //   // TODO: To be implemented
-  //   // Will be used to fetch step executions by execution ID during state recovery
-  //   return [];
-  // }
+  /**
+   * Searches for step executions by workflow execution ID.
+   *
+   * @param executionId - The ID of the workflow execution to search for step executions.
+   * @returns A promise that resolves to an array of step executions associated with the given execution ID.
+   */
+  public async searchStepExecutionsByExecutionId(
+    executionId: string
+  ): Promise<EsWorkflowStepExecution[]> {
+    const response = await this.esClient.search<EsWorkflowStepExecution>({
+      index: this.indexName,
+      query: {
+        match: { workflowRunId: executionId },
+      },
+      sort: 'startedAt:desc',
+    });
+
+    return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
+  }
 
   /**
    * Creates a new step execution document in Elasticsearch.

@@ -18,7 +18,43 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.chatSystemIndex",
+        "type": "Function",
+        "tags": [],
+        "label": "chatSystemIndex",
+        "description": [
+          "\nHelper function to define chat system indices."
+        ],
+        "signature": [
+          "(suffix: string) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-server",
+            "id": "def-common.chatSystemIndex.$1",
+            "type": "string",
+            "tags": [],
+            "label": "suffix",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/indices.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "@kbn/onechat-server",
@@ -2042,6 +2078,23 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-server",
+        "id": "def-common.chatSystemIndexPrefix",
+        "type": "string",
+        "tags": [],
+        "label": "chatSystemIndexPrefix",
+        "description": [
+          "\nPrefix of the chat system indices.\n\nThe Kibana system user has the same permission on those indices than it has on Kibana system indices."
+        ],
+        "signature": [
+          "\".chat-\""
+        ],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-server/src/indices.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
