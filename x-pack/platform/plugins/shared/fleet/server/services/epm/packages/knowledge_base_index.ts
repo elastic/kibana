@@ -11,6 +11,7 @@ import type { KnowledgeBaseItem } from '../../../../common/types';
 import { appContextService } from '../../app_context';
 
 export const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
+export const DEFAULT_SIZE = 1000; // Set a reasonable default size for search results
 
 export async function saveKnowledgeBaseContentToIndex({
   esClient,
@@ -87,7 +88,7 @@ export async function getPackageKnowledgeBaseFromIndex(
       index: INTEGRATION_KNOWLEDGE_INDEX,
       query,
       sort: [{ filename: 'asc' }],
-      size: 1000,
+      size: DEFAULT_SIZE,
     });
 
     return response.hits.hits.map((hit: any) => ({

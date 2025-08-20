@@ -6,52 +6,103 @@
  */
 
 import {
+  type TestElasticsearchUtils,
+  type TestKibanaUtils,
+  createTestServers,
+  createRootWithCorePlugins,
+} from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+import {
   saveKnowledgeBaseContentToIndex,
   INTEGRATION_KNOWLEDGE_INDEX,
   updatePackageKnowledgeBaseVersion,
 } from '../services/epm/packages/knowledge_base_index';
 import { getPackageKnowledgeBase } from '../services/epm/packages/get';
+
 import type { KnowledgeBaseItem } from '../../common/types/models/epm';
 
-describe('Knowledge Base End-to-End Integration Test', () => {
-  let esClient: jest.Mocked<any>;
+import { waitForFleetSetup } from './helpers';
 
-  beforeEach(() => {
-    esClient = {
-      indices: {
-        existsIndexTemplate: jest.fn().mockResolvedValue(true),
-        exists: jest.fn().mockResolvedValue(true),
-        putIndexTemplate: jest.fn().mockResolvedValue({}),
-        create: jest.fn().mockResolvedValue({}),
+describe('Knowledge Base End-to-End Integration Test', () => {
+  let esServer: TestElasticsearchUtils;
+  let kbnServer: TestKibanaUtils;
+  let esClient: ElasticsearchClient;
+
+  const startServers = async () => {
+    const { startES } = createTestServers({
+      adjustTimeout: (t) => jest.setTimeout(t),
+      settings: {
+        es: {
+          license: 'trial',
+        },
+        kbn: {},
       },
-      deleteByQuery: jest.fn().mockResolvedValue({}),
-      bulk: jest.fn().mockResolvedValue({}),
-      search: jest.fn().mockResolvedValue({
-        hits: {
-          hits: [
+    });
+
+    esServer = await startES();
+
+    const root = createRootWithCorePlugins(
+      {
+        xpack: {
+          fleet: {
+            registryUrl: 'http://localhost',
+          },
+        },
+        logging: {
+          loggers: [
             {
-              _source: {
-                package_name: 'test-integration',
-                filename: 'setup-guide.md',
-                content:
-                  '# Setup Guide\n\nThis guide helps you set up the integration.\n\n## Prerequisites\n\n- Node.js 16+\n- Elasticsearch cluster',
-                version: '1.2.0',
-              },
-            },
-            {
-              _source: {
-                package_name: 'test-integration',
-                filename: 'troubleshooting.md',
-                content:
-                  '# Troubleshooting\n\n## Common Issues\n\n### Connection Problems\n\nIf you experience connection issues, check your network settings.',
-                version: '1.2.0',
-              },
+              name: 'plugins.fleet',
+              level: 'info',
             },
           ],
         },
-      }),
+      },
+      { oss: false }
+    );
+
+    await root.preboot();
+    const coreSetup = await root.setup();
+    const coreStart = await root.start();
+    await waitForFleetSetup(root);
+
+    kbnServer = {
+      root,
+      coreSetup,
+      coreStart,
+      stop: async () => await root.shutdown(),
     };
-    jest.clearAllMocks();
+
+    esClient = coreStart.elasticsearch.client.asInternalUser;
+  };
+
+  const stopServers = async () => {
+    if (kbnServer) {
+      await kbnServer.stop();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+  };
+
+  beforeAll(async () => {
+    await startServers();
+  });
+
+  afterAll(async () => {
+    await stopServers();
+  });
+
+  beforeEach(async () => {
+    // Clean up any existing test data before each test
+    try {
+      await esClient.indices.delete({
+        index: INTEGRATION_KNOWLEDGE_INDEX,
+        ignore_unavailable: true,
+      });
+    } catch (error) {
+      // Ignore errors if index doesn't exist
+    }
   });
 
   it('should save and retrieve knowledge base content through the complete flow', async () => {
@@ -77,49 +128,8 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       knowledgeBaseContent,
     });
 
-    // Verify that the knowledge base content was indexed correctly
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: INTEGRATION_KNOWLEDGE_INDEX,
-      query: {
-        bool: {
-          must: [
-            { term: { 'package_name.keyword': 'test-integration' } },
-            { term: { version: '1.2.0' } },
-          ],
-        },
-      },
-      refresh: true,
-    });
-
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      operations: expect.arrayContaining([
-        {
-          index: {
-            _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-integration-setup-guide.md',
-          },
-        },
-        {
-          package_name: 'test-integration',
-          filename: 'setup-guide.md',
-          content: expect.stringContaining('Setup Guide'),
-          version: '1.2.0',
-        },
-        {
-          index: {
-            _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-integration-troubleshooting.md',
-          },
-        },
-        {
-          package_name: 'test-integration',
-          filename: 'troubleshooting.md',
-          content: expect.stringContaining('Troubleshooting'),
-          version: '1.2.0',
-        },
-      ]),
-      refresh: 'wait_for',
-    });
+    // Wait a moment for the documents to be indexed
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Step 2: Retrieve knowledge base content through the API
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
@@ -128,45 +138,31 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       pkgVersion: '1.2.0',
     });
 
-    // Verify that the search was called correctly
-    expect(esClient.search).toHaveBeenCalledWith({
-      index: INTEGRATION_KNOWLEDGE_INDEX,
-      query: {
-        bool: {
-          must: [
-            { term: { 'package_name.keyword': 'test-integration' } },
-            { term: { version: '1.2.0' } },
-          ],
-        },
-      },
-      sort: [{ filename: 'asc' }],
-      size: 1000,
-    });
-
     // Verify that the retrieved content matches what was saved
-    expect(retrievedKnowledgeBase).toEqual({
-      package_name: 'test-integration',
-      version: '1.2.0',
-      installed_at: expect.any(String),
-      knowledge_base_content: [
-        {
-          filename: 'setup-guide.md',
-          content: expect.stringContaining('Setup Guide'),
-          path: 'docs/knowledge_base/setup-guide.md',
-          installed_at: expect.any(String),
-        },
-        {
-          filename: 'troubleshooting.md',
-          content: expect.stringContaining('Troubleshooting'),
-          path: 'docs/knowledge_base/troubleshooting.md',
-          installed_at: expect.any(String),
-        },
-      ],
-    });
+    expect(retrievedKnowledgeBase).toBeDefined();
+    expect(retrievedKnowledgeBase?.package_name).toBe('test-integration');
+    expect(retrievedKnowledgeBase?.version).toBe('1.2.0');
+    expect(retrievedKnowledgeBase?.knowledge_base_content).toHaveLength(2);
+
+    // Check the first knowledge base item
+    const setupGuide = retrievedKnowledgeBase?.knowledge_base_content.find(
+      (item) => item.filename === 'setup-guide.md'
+    );
+    expect(setupGuide).toBeDefined();
+    expect(setupGuide?.content).toContain('Setup Guide');
+    expect(setupGuide?.content).toContain('Prerequisites');
+
+    // Check the second knowledge base item
+    const troubleshooting = retrievedKnowledgeBase?.knowledge_base_content.find(
+      (item) => item.filename === 'troubleshooting.md'
+    );
+    expect(troubleshooting).toBeDefined();
+    expect(troubleshooting?.content).toContain('Troubleshooting');
+    expect(troubleshooting?.content).toContain('Connection Problems');
   });
 
   it('should handle packages without knowledge base content', async () => {
-    // Test that packages without knowledge base content don't call bulk index
+    // Test that packages without knowledge base content don't create any documents
     await saveKnowledgeBaseContentToIndex({
       esClient,
       pkgName: 'simple-package',
@@ -174,14 +170,8 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       knowledgeBaseContent: [],
     });
 
-    expect(esClient.bulk).not.toHaveBeenCalled();
-
-    // Mock empty search results for retrieval
-    esClient.search.mockResolvedValueOnce({
-      hits: {
-        hits: [],
-      },
-    });
+    // Wait a moment for any potential indexing
+    await new Promise((resolve) => setTimeout(resolve, 500));
 
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
       esClient,
@@ -226,6 +216,18 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       knowledgeBaseContent: knowledgeBaseContentV1,
     });
 
+    // Wait for indexing
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // Verify v1.0.0 content is present
+    const v1Result = await getPackageKnowledgeBase({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+    });
+    expect(v1Result?.knowledge_base_content).toHaveLength(1);
+    expect(v1Result?.knowledge_base_content[0].filename).toBe('old-guide.md');
+
     // Step 2: Upgrade to version 2.0.0 using the upgrade function
     await updatePackageKnowledgeBaseVersion({
       esClient,
@@ -235,44 +237,33 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       knowledgeBaseContent: knowledgeBaseContentV2,
     });
 
-    // Verify that old version content was deleted (called twice - once for v1.0.0, once for upgrade)
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: INTEGRATION_KNOWLEDGE_INDEX,
-      query: {
-        term: { 'package_name.keyword': 'test-package' },
-      },
-      refresh: true,
-    });
+    // Wait for indexing
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Verify that new version content was indexed
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      operations: expect.arrayContaining([
-        {
-          index: {
-            _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-package-new-guide.md',
-          },
-        },
-        {
-          package_name: 'test-package',
-          filename: 'new-guide.md',
-          content: expect.stringContaining('New Guide'),
-          version: '2.0.0',
-        },
-        {
-          index: {
-            _index: INTEGRATION_KNOWLEDGE_INDEX,
-            _id: 'test-package-features.md',
-          },
-        },
-        {
-          package_name: 'test-package',
-          filename: 'features.md',
-          content: expect.stringContaining('New Features'),
-          version: '2.0.0',
-        },
-      ]),
-      refresh: 'wait_for',
+    // Verify that old version content is no longer available
+    const oldVersionResult = await getPackageKnowledgeBase({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
     });
+    expect(oldVersionResult).toBeUndefined();
+
+    // Verify that new version content is available
+    const newVersionResult = await getPackageKnowledgeBase({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '2.0.0',
+    });
+    expect(newVersionResult?.knowledge_base_content).toHaveLength(2);
+
+    const newGuide = newVersionResult?.knowledge_base_content.find(
+      (item) => item.filename === 'new-guide.md'
+    );
+    expect(newGuide?.content).toContain('New Guide');
+
+    const features = newVersionResult?.knowledge_base_content.find(
+      (item) => item.filename === 'features.md'
+    );
+    expect(features?.content).toContain('New Features');
   });
 });
