@@ -5,14 +5,7 @@
  * 2.0.
  */
 
-import {
-  type EuiAutoSize,
-  EuiAutoSizer,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiProgress,
-  EuiSpacer,
-} from '@elastic/eui';
+import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
 import React, { useMemo, useState } from 'react';
@@ -57,7 +50,7 @@ export const OverviewCardView = ({
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  const { loaded, loading } = useOverviewStatus({
+  const { loaded } = useOverviewStatus({
     scopeStatusByLocation: true,
   });
 
@@ -77,7 +70,6 @@ export const OverviewCardView = ({
   return (
     <>
       <div style={isUnGrouped ? { height: listHeight } : undefined}>
-        {loading && loaded ? <EuiProgress size="xs" color="accent" /> : <EuiSpacer size="xs" />}
         {isUnGrouped ? (
           loaded && monitorsSortedByStatus.length ? (
             <EuiAutoSizer>

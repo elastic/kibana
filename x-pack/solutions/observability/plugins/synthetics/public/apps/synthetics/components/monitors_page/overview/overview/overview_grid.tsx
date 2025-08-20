@@ -6,7 +6,7 @@
  */
 import React, { memo, useCallback, useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { useOverviewTrendsRequests } from '../../hooks/use_overview_trends_requests';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
@@ -32,7 +32,11 @@ export const OverviewGrid = memo(
   ({ view, isEmbeddable }: { view: OverviewView; isEmbeddable?: boolean }) => {
     const dispatch = useDispatch();
 
-    const { status, loaded } = useOverviewStatus({
+    const {
+      status,
+      loaded: isInitialized,
+      loading,
+    } = useOverviewStatus({
       scopeStatusByLocation: true,
     });
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
@@ -51,7 +55,7 @@ export const OverviewGrid = memo(
     }, [dispatch, lastRefresh]);
 
     // Display no monitors found when down, up, or disabled filter produces no results
-    if (status && !monitorsSortedByStatus.length && loaded) {
+    if (status && !monitorsSortedByStatus.length && isInitialized) {
       return <NoMonitorsFound />;
     }
 
@@ -86,7 +90,18 @@ export const OverviewGrid = memo(
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiSpacer size="m" />
+        {loading && isInitialized ? (
+          <>
+            <EuiProgress size="xs" color="accent" />
+            <EuiSpacer
+              css={{
+                blockSize: 14,
+              }}
+            />
+          </>
+        ) : (
+          <EuiSpacer size="m" />
+        )}
         {view === 'cardView' ? (
           <OverviewCardView
             monitorsSortedByStatus={monitorsSortedByStatus}
