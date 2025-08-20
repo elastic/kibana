@@ -87,9 +87,7 @@ export class SyncPrivateLocationMonitorsTask {
     let lastTotalParams = taskInstance.state.lastTotalParams || 0;
     let lastTotalMWs = taskInstance.state.lastTotalMWs || 0;
     try {
-      this.debugLog(
-        `Syncing private location monitors, last total params ${lastTotalParams}, last run ${lastStartedAt}`
-      );
+      this.debugLog(`Syncing private location monitors, last total params ${lastTotalParams}`);
       const soClient = savedObjects.createInternalRepository([
         MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
       ]);
