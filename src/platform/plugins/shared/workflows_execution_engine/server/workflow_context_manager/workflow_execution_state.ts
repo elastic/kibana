@@ -10,6 +10,7 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution } from '@kbn/workflows';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
+import { v4 as generateUuid } from 'uuid';
 
 interface Change {
   objectId: string;
@@ -66,14 +67,14 @@ export class WorkflowExecutionState {
    * @param stepId The unique identifier of the step
    * @returns An array of step execution objects or undefined if no executions exist
    */
-  public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] | undefined {
+  public getStepExecutionsByStepId(stepId: string): EsWorkflowStepExecution[] {
     if (!this.stepIdExecutionIdIndex.has(stepId)) {
       return [];
     }
 
     return this.stepIdExecutionIdIndex
-      .get(stepId)
-      ?.map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution);
+      .get(stepId)!
+      .map((executionId) => this.stepExecutions.get(executionId) as EsWorkflowStepExecution);
   }
 
   /**
@@ -93,27 +94,24 @@ export class WorkflowExecutionState {
 
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
     if (!step.id) {
-      throw new Error('Step execution ID is required for update');
-    }
-
-    if (!this.stepExecutions.has(step.id)) {
+      const stepExecutionId = generateUuid();
       const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
       if (!stepExecutions.length) {
         this.stepIdExecutionIdIndex.set(step.stepId as string, []);
       }
-      this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(step.id as string);
+      this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(stepExecutionId as string);
       this.stepExecutions.set(
-        step.id as string,
+        stepExecutionId as string,
         {
           ...step,
-          id: step.id,
+          id: stepExecutionId,
           executionIndex: stepExecutions.length,
           workflowRunId: this.workflowExecution.id,
           workflowId: this.workflowExecution.workflowId,
         } as EsWorkflowStepExecution
       );
-      this.stepChanges.set(step.id, {
-        objectId: step.id,
+      this.stepChanges.set(stepExecutionId, {
+        objectId: stepExecutionId,
         changeType: 'create',
       });
     } else {

@@ -33,7 +33,6 @@ export interface EsWorkflowExecution {
   /** Serialized graphlib.Graph */
   executionGraph?: any;
   currentNodeId?: string; // The node currently being executed
-  stack: string[]; // Stack of nodes being executed
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -60,7 +59,6 @@ export interface Provider {
 export interface EsWorkflowStepExecution {
   id: string;
   stepId: string;
-  stack: string[];
   workflowRunId: string;
   workflowId: string;
   status: ExecutionStatus;

@@ -22,7 +22,6 @@ export class EnterForeachNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
     let foreachState = this.wfExecutionRuntimeManager.getStepState(this.step.id);
 
     if (!foreachState) {

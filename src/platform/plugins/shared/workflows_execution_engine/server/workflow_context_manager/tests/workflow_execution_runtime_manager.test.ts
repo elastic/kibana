@@ -191,15 +191,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(underTest.getCurrentStep()).toEqual({ id: 'node1' });
     });
 
-    it('should set stack to empty array', async () => {
-      await underTest.start();
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({
-          stack: [],
-        })
-      );
-    });
-
     it('should start the workflow execution and update workflow status in runtime', async () => {
       await underTest.start();
 
@@ -273,36 +264,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
           topologicalIndex: 2,
           status: ExecutionStatus.RUNNING,
           startedAt: mockDateNow.toISOString(),
-        })
-      );
-    });
-
-    it('should generate correct id according to current scope when no executions yet', async () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        stack: ['node1', 'node2'],
-      } as Partial<EsWorkflowExecution>);
-      (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([]);
-      await underTest.startStep('node3');
-
-      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'node1__node2__node3__0',
-          stack: ['node1', 'node2'],
-        })
-      );
-    });
-
-    it('should generate correct id according to current scope when there are executions', async () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        stack: ['node1', 'node2'],
-      } as Partial<EsWorkflowExecution>);
-      (workflowExecutionState.getStepExecutionsByStepId as jest.Mock).mockReturnValue([{}]);
-      await underTest.startStep('node3');
-
-      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
-        expect.objectContaining({
-          id: 'node1__node2__node3__1',
-          stack: ['node1', 'node2'],
         })
       );
     });
@@ -527,35 +488,6 @@ describe('WorkflowExecutionRuntimeManager', () => {
         },
         tags: ['workflow', 'execution', 'complete'],
       });
-    });
-  });
-
-  describe('enterScope', () => {
-    it('should push current step to the stack', () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        stack: ['node1', 'node2'],
-      } as Partial<EsWorkflowExecution>);
-      underTest.goToStep('node3');
-      underTest.enterScope();
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({
-          stack: ['node1', 'node2', 'node3'],
-        })
-      );
-    });
-  });
-
-  describe('exitScope', () => {
-    it('should pop the last step from the stack', () => {
-      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
-        stack: ['node1', 'node2', 'node3'],
-      } as Partial<EsWorkflowExecution>);
-      underTest.exitScope();
-      expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
-        expect.objectContaining({
-          stack: ['node1', 'node2'],
-        })
-      );
     });
   });
 });

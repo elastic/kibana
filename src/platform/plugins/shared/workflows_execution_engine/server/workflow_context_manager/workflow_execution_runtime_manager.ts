@@ -118,23 +118,6 @@ export class WorkflowExecutionRuntimeManager {
     this.currentStepIndex = -1;
   }
 
-  public enterScope(): void {
-    const currentStep = this.getCurrentStep();
-    const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
-    stack.push(currentStep.id);
-    this.workflowExecutionState.updateWorkflowExecution({
-      stack,
-    });
-  }
-
-  public exitScope(): void {
-    const stack = [...this.workflowExecutionState.getWorkflowExecution().stack];
-    stack.pop();
-    this.workflowExecutionState.updateWorkflowExecution({
-      stack,
-    });
-  }
-
   public getStepResult(stepId: string): RunStepResult | undefined {
     const latestStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
 
@@ -201,9 +184,7 @@ export class WorkflowExecutionRuntimeManager {
         const stepStartedAt = new Date();
 
         const stepExecution = {
-          id: this.generateStepExecutionId(nodeId),
           stepId: nodeId,
-          stack: [...this.getWorkflowExecution().stack],
           topologicalIndex: this.topologicalOrder.findIndex((id) => id === stepId),
           status: ExecutionStatus.RUNNING,
           startedAt: stepStartedAt.toISOString(),
@@ -452,7 +433,6 @@ export class WorkflowExecutionRuntimeManager {
       status: ExecutionStatus.RUNNING,
       currentNodeId: this.topologicalOrder[this.currentStepIndex],
       startedAt: new Date().toISOString(),
-      stack: [],
     };
     this.workflowExecutionState.updateWorkflowExecution(updatedWorkflowExecution);
     this.logWorkflowStart();
@@ -526,22 +506,6 @@ export class WorkflowExecutionRuntimeManager {
 
     this.workflowExecutionState.updateWorkflowExecution(workflowExecutionUpdate);
     await this.workflowExecutionState.flush();
-  }
-
-  /**
-   * Generates a unique ID for the current step execution.
-   *
-   * The ID is created by joining the scope IDs of all scopes in the execution stack
-   * with double underscores (`__`).
-   *
-   * @returns {string} A string representing the unique step execution ID
-   */
-  private generateStepExecutionId(stepId: string): string {
-    const stepExecutions = this.workflowExecutionState.getStepExecutionsByStepId(
-      stepId
-    ) as EsWorkflowStepExecution[];
-    const stack = this.getWorkflowExecution().stack;
-    return stack.concat([stepId, stepExecutions.length.toString()]).join('__');
   }
 
   private getCurrentStepError(): any | undefined {
