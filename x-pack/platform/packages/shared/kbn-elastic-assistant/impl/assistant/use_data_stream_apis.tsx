@@ -17,9 +17,8 @@ import type {
   RefetchQueryFilters,
 } from '@tanstack/react-query';
 import { useFetchAnonymizationFields } from './api/anonymization_fields/use_fetch_anonymization_fields';
-import type { FetchConversationsResponse } from './api';
+import type { ConversationWithOwner, FetchConversationsResponse } from './api';
 import { useFetchPrompts } from './api';
-import type { Conversation } from '../..';
 import { useFetchCurrentUserConversations } from '../..';
 
 interface Props {
@@ -32,7 +31,7 @@ export interface DataStreamApis {
   allPrompts: PromptResponse[];
   allSystemPrompts: PromptResponse[];
   anonymizationFields: FindAnonymizationFieldsResponse;
-  conversations: Record<string, Conversation>;
+  conversations: Record<string, ConversationWithOwner>;
   currentUser?: User;
   isErrorAnonymizationFields: boolean;
   isFetchedAnonymizationFields: boolean;

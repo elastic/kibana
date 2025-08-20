@@ -57,7 +57,6 @@ const ShareBadgeComponent: React.FC<Props> = ({
           description: i18n.ONLY_VISIBLE_TO_YOU,
         },
         'data-test-subj': ConversationSharedState.Private,
-        disabled: !isConversationOwner,
         label: i18n.PRIVATE,
         isGroupLabel: false,
       },
@@ -68,7 +67,6 @@ const ShareBadgeComponent: React.FC<Props> = ({
           description: i18n.VISIBLE_GLOBAL,
         },
         'data-test-subj': ConversationSharedState.Global,
-        disabled: !isConversationOwner,
         label: i18n.GLOBAL,
         isGroupLabel: false,
       },
@@ -79,12 +77,11 @@ const ShareBadgeComponent: React.FC<Props> = ({
           description: i18n.VISIBLE_SHARED,
         },
         'data-test-subj': ConversationSharedState.Shared,
-        disabled: !isConversationOwner,
         label: i18n.SHARED,
         isGroupLabel: false,
       },
     ],
-    [conversationSharedState, isConversationOwner]
+    [conversationSharedState]
   );
 
   const unshareConversation = useCallback(async () => {

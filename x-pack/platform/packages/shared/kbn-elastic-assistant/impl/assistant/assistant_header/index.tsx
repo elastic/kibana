@@ -21,6 +21,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApiConfig } from '@kbn/elastic-assistant-common';
+import type { ConversationWithOwner } from '../api';
 import { ConversationSettingsMenu } from '../settings/settings_context_menu/conversation_settings_menu';
 import { ShareBadge } from '../share_conversation/share_badge';
 import type { ConversationSharedState } from '../share_conversation/utils';
@@ -61,7 +62,7 @@ interface OwnProps {
     cId: string;
     cTitle?: string;
   }) => void;
-  conversations: Record<string, Conversation>;
+  conversations: Record<string, ConversationWithOwner>;
   conversationsLoaded: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   refetchCurrentUserConversations: DataStreamApis['refetchCurrentUserConversations'];
@@ -131,7 +132,7 @@ export const AssistantHeader: React.FC<Props> = ({
     () => !selectedConversation || selectedConversation.id === '',
     [selectedConversation]
   );
-
+  console.log('isNewConversation', isNewConversation);
   return (
     <>
       <FlyoutNavigation

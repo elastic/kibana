@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -18,8 +18,8 @@ import { ConversationSharedState } from '../share_conversation/utils';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {
-  [alertConvo.title]: alertConvo,
-  [welcomeConvo.title]: welcomeConvo,
+  [alertConvo.title]: { ...alertConvo, isConversationOwner: true },
+  [welcomeConvo.title]: { ...welcomeConvo, isConversationOwner: true },
 };
 const testProps = {
   conversationSharedState: ConversationSharedState.Private,
@@ -106,5 +106,34 @@ describe('AssistantHeader', () => {
     });
 
     expect(screen.getByRole('button', { name: CLOSE })).toBeInTheDocument();
+  });
+
+  it('renders share badge when sharing is enabled', () => {
+    render(<AssistantHeader {...testProps} isAssistantSharingEnabled={true} />, {
+      wrapper: TestProviders,
+    });
+    expect(screen.getByTestId('shareBadgeButton')).not.toBeDisabled();
+    expect(screen.getByTestId('connector-selector')).not.toBeDisabled();
+    expect(
+      within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
+    ).not.toBeDisabled();
+  });
+
+  it('disables share badge when isConversationOwner=false', () => {
+    render(
+      <AssistantHeader
+        {...testProps}
+        isConversationOwner={false}
+        isAssistantSharingEnabled={true}
+      />,
+      {
+        wrapper: TestProviders,
+      }
+    );
+    expect(screen.getByTestId('shareBadgeButton')).toBeDisabled();
+    expect(screen.getByTestId('connector-selector')).toBeDisabled();
+    expect(
+      within(screen.getByTestId('conversationTitle')).getByTestId('euiInlineReadModeButton')
+    ).toBeDisabled();
   });
 });
