@@ -77,6 +77,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
+import type { SiemReadiness } from './siem_readiness';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
