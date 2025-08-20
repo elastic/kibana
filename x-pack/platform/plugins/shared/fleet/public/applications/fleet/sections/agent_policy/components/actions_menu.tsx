@@ -117,7 +117,7 @@ export const AgentPolicyActionMenu = memo<{
                 !isAuthorizedForAutoUpgradeAgents && (
                   <FormattedMessage
                     id="xpack.fleet.agentPolicyActionMenu.manageAutoUpgradeAgentsDisabledTooltip"
-                    defaultMessage="Agent policies and Agents 'All' privileges are required to auto-upgrade agents."
+                    defaultMessage="Agent policies, and Agents 'All' privileges are required to auto-upgrade agents."
                   />
                 )
               }
@@ -196,14 +196,27 @@ export const AgentPolicyActionMenu = memo<{
           );
 
           const managedMenuItems = [viewPolicyItem];
+          const agentBasedActionsDisabledTooltipText = isFleetServerPolicy ? (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyActionMenu.addFleetServerDisabledTooltip"
+              defaultMessage="Fleet settings, Agent policies, and Agents 'All' privileges are required to add a Fleet Server."
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyActionMenu.enrollAgentDisabledTooltip"
+              defaultMessage="Agents 'All' privilege is required to enroll agents."
+            />
+          );
+
+          const isAuthorizedForAgentAction =
+            (isFleetServerPolicy && authz.fleet.addFleetServers) ||
+            (!isFleetServerPolicy && authz.fleet.addAgents);
           const agentBasedMenuItems = [
             <EuiContextMenuItem
               icon="plusInCircle"
-              disabled={
-                (isFleetServerPolicy && !authz.fleet.addFleetServers) ||
-                (!isFleetServerPolicy && !authz.fleet.addAgents)
-              }
+              disabled={!isAuthorizedForAgentAction}
               data-test-subj="agentPolicyActionMenuAddAgentButton"
+              toolTipContent={!isAuthorizedForAgentAction && agentBasedActionsDisabledTooltipText}
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsEnrollmentFlyoutOpen(true);
