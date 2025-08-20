@@ -58,12 +58,12 @@ describe(
       [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: {
         title: 'Closing alert restarts alert suppression',
         message:
-          'Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert.',
+          'Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. Learn more.',
       },
       [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: {
         title: "Closing alert doesn't interrupt alert suppression",
         message:
-          "Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups.",
+          "Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. Learn more.",
       },
     };
 
@@ -71,11 +71,7 @@ describe(
       cy.get('[data-test-subj="alertCloseInfoModal"]')
         .should('be.visible')
         .should('contain.text', messages[setting].title)
-        .should('contain.text', messages[setting].message)
-        .should(
-          'contain.text',
-          "This behavior can be modified in Kibana's Advanced Settings. Please contact your admin to make this change."
-        );
+        .should('contain.text', messages[setting].message);
     };
     const verifyModalContinue = () =>
       verifyModal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow);
