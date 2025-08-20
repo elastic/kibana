@@ -111,6 +111,9 @@ export const ManagementContainer = memo(() => {
   );
 
   const trustedDevicesEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+  const endpointExceptionsMovedUnderManagement = useIsExperimentalFeatureEnabled(
+    'endpointExceptionsMovedUnderManagement'
+  );
 
   const {
     loading,
@@ -158,11 +161,13 @@ export const ManagementContainer = memo(() => {
         component={PolicyTelemetry}
         hasPrivilege={canReadPolicyManagement}
       />
-      <PrivilegedRoute
-        path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
-        component={EndpointExceptionsTelemetry}
-        hasPrivilege={canReadEndpointExceptions}
-      />
+      {endpointExceptionsMovedUnderManagement && (
+        <PrivilegedRoute
+          path={MANAGEMENT_ROUTING_ENDPOINT_EXCEPTIONS_PATH}
+          component={EndpointExceptionsTelemetry}
+          hasPrivilege={canReadEndpointExceptions}
+        />
+      )}
       <PrivilegedRoute
         path={MANAGEMENT_ROUTING_TRUSTED_APPS_PATH}
         component={TrustedAppTelemetry}
