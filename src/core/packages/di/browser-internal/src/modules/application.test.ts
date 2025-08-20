@@ -48,7 +48,6 @@ describe('application', () => {
     container.loadSync(applicationModule);
     container.bind(CoreSetup('application')).toConstantValue(application);
     container.bind(CoreStart('injection')).toConstantValue(injection);
-    container.bind(TestApplication).toSelf().inRequestScope();
     container.bind(Application).toConstantValue(TestApplication);
   });
 
