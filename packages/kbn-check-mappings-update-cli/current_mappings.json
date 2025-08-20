@@ -4273,6 +4273,9 @@
         "enabled": false,
         "type": "object"
       },
+      "deleted_at": {
+        "type": "date"
+      },
       "description": {
         "fields": {
           "keyword": {

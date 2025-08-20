@@ -57,6 +57,7 @@ import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 import type { Logger } from '@kbn/logging';
 import { Router } from '@kbn/shared-ux-router';
+import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
 import { isPrinting$ } from './utils/printing_observable';
 import { DocTitleService } from './doc_title';
 import { NavControlsService } from './nav_controls';
@@ -99,6 +100,7 @@ export interface StartDeps {
   userProfile: UserProfileService;
   uiSettings: IUiSettingsClient;
   analytics: AnalyticsServiceStart;
+  featureFlags: FeatureFlagsStart;
 }
 
 /** @internal */
@@ -266,6 +268,7 @@ export class ChromeService {
     userProfile,
     uiSettings,
     analytics,
+    featureFlags,
   }: StartDeps): Promise<InternalChromeStart> {
     this.initVisibility(application);
     this.handleEuiFullScreenChanges();
@@ -341,6 +344,7 @@ export class ChromeService {
       http,
       chromeBreadcrumbs$: breadcrumbs$,
       logger: this.logger,
+      featureFlags,
     });
     const recentlyAccessed = this.recentlyAccessed.start({ http, key: 'recentlyAccessed' });
     const docTitle = this.docTitle.start();

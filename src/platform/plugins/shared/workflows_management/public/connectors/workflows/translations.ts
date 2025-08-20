@@ -65,3 +65,39 @@ export const CREATE_NEW_WORKFLOW = i18n.translate(
     defaultMessage: 'Create new',
   }
 );
+
+export const FILTER_WORKFLOWS_PLACEHOLDER = i18n.translate(
+  'xpack.stackConnectors.components.workflows.filterWorkflowsPlaceholder',
+  {
+    defaultMessage: 'Filter workflows',
+  }
+);
+
+export const WORKFLOW_DISABLED_WARNING = i18n.translate(
+  'xpack.stackConnectors.components.workflows.workflowDisabledWarning',
+  {
+    defaultMessage: 'This workflow is currently disabled',
+  }
+);
+
+export const DISABLED_BADGE_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.workflows.disabledBadgeLabel',
+  {
+    defaultMessage: 'Disabled',
+  }
+);
+
+export const SELECTED_WORKFLOW_DISABLED_ERROR = i18n.translate(
+  'xpack.stackConnectors.components.workflows.selectedWorkflowDisabledError',
+  {
+    defaultMessage:
+      'The previously selected workflow is no longer available. Please select a different workflow.',
+  }
+);
+
+export const OPEN_WORKFLOW_LINK = i18n.translate(
+  'xpack.stackConnectors.components.workflows.openWorkflowLink',
+  {
+    defaultMessage: 'Open workflow',
+  }
+);

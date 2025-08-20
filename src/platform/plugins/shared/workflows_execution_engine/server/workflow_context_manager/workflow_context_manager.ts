@@ -14,6 +14,7 @@ import type { z } from '@kbn/zod';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
+  spaceId: string;
   workflowRunId: string;
   workflow: z.infer<typeof WorkflowSchema>;
   event: any;
@@ -33,6 +34,7 @@ export class WorkflowContextManager {
 
   constructor(init: ContextManagerInit) {
     this.context = {
+      spaceId: init.spaceId,
       workflowRunId: init.workflowRunId,
       event: init.event,
       consts: init.workflow.consts || {},

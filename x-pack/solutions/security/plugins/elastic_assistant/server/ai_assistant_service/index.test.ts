@@ -10,7 +10,10 @@ import {
   loggingSystemMock,
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
-import type { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStream,
+  IndicesGetDataStreamResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Subject } from 'rxjs';
 import { ReplaySubject } from 'rxjs';
@@ -87,7 +90,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       next_generation_managed_by: 'Data stream lifecycle',
       prefer_ilm: false,
       rollover_on_write: false,
-    },
+    } as Partial<IndicesDataStream> as IndicesDataStream,
   ],
 };
 

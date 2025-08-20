@@ -60,7 +60,9 @@ export const EditAPMPolicy: StoryFn = () => {
         policy={{} as PackagePolicy}
         newPolicy={newPolicy}
         onChange={(value) => {
-          setIsPolicyValid(value.isValid);
+          if (value.isValid !== undefined) {
+            setIsPolicyValid(value.isValid);
+          }
           const updatedVars = value.updatedPolicy.inputs?.[0].vars;
           setNewPolicy((state) => ({
             ...state,

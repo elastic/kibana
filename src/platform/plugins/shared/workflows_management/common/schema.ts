@@ -75,13 +75,6 @@ const connectors: ConnectorContract[] = [
       })
     ),
   },
-  {
-    type: 'delay',
-    paramsSchema: z.object({
-      delay: z.number(),
-    }),
-    outputSchema: z.null(),
-  },
 ];
 
 export const getOutputSchemaForStepType = (stepType: string) => {

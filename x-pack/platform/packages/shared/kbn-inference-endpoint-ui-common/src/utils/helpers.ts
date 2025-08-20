@@ -45,7 +45,7 @@ export const getNonEmptyValidator = (
 ) => {
   return (...args: Parameters<ValidationFunc>): ReturnType<ValidationFunc> => {
     const [{ value, path }] = args;
-    const newSchema: ConfigEntryView[] = [];
+    const updatedFormFields: ConfigEntryView[] = [];
 
     const configData = (value ?? {}) as Record<string, unknown>;
     let hasErrors = false;
@@ -68,10 +68,11 @@ export const getNonEmptyValidator = (
             }
           }
         }
-        newSchema.push(field);
+
+        updatedFormFields.push(field);
       });
 
-      validationEventHandler(newSchema);
+      validationEventHandler(updatedFormFields);
       if (hasErrors) {
         return {
           code: 'ERR_FIELD_MISSING',

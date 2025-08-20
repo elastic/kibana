@@ -50,3 +50,4 @@ export type {
   AgentEventEmitter,
   RunAgentOnEventFn,
 } from './agents';
+export { chatSystemIndex, chatSystemIndexPrefix } from './src/indices';

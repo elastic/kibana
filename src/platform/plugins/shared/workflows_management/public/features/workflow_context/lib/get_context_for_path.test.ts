@@ -21,7 +21,7 @@ describe('getContextSchemaForPath', () => {
     enabled: true,
     triggers: [
       {
-        type: 'triggers.elastic.manual' as const,
+        type: 'manual' as const,
         enabled: true,
       },
     ],
@@ -82,11 +82,12 @@ describe('getContextSchemaForPath', () => {
     const context = getContextSchemaForPath(definition, workflowGraph, ['steps', 0]);
 
     expect(Object.keys(context.shape).sort()).toEqual(
-      ['workflowRunId', 'now', 'event', 'steps', 'consts'].sort()
+      ['spaceId', 'workflowRunId', 'now', 'event', 'steps', 'consts'].sort()
     );
     expectZodSchemaEqual(
       context,
       z.object({
+        spaceId: z.string(),
         workflowRunId: z.string(),
         now: z.date(),
         event: EventSchema,
@@ -109,6 +110,7 @@ describe('getContextSchemaForPath', () => {
     expectZodSchemaEqual(
       context,
       z.object({
+        spaceId: z.string(),
         workflowRunId: z.string(),
         now: z.date(),
         event: EventSchema,

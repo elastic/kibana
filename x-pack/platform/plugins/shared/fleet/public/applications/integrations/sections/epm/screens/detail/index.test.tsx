@@ -75,8 +75,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should display agent policy usage count', async () => {
-      expect(await renderResult.findByTestId('agentPolicyCount')).not.toBeNull();
+    it('should display policy usage count', async () => {
+      expect(await renderResult.findByTestId('policyCount')).not.toBeNull();
     });
 
     it('should show the Policies tab', async () => {
@@ -113,8 +113,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    it('should NOT display policy usage count', async () => {
+      expect(renderResult.queryByTestId('policyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
@@ -151,8 +151,8 @@ describe('When on integration detail', () => {
       await act(() => mockedApi.waitForApi());
     }, TESTS_TIMEOUT);
 
-    it('should NOT display agent policy usage count', async () => {
-      expect(renderResult.queryByTestId('agentPolicyCount')).toBeNull();
+    it('should NOT display policy usage count', async () => {
+      expect(renderResult.queryByTestId('policyCount')).toBeNull();
     });
 
     it('should NOT display the Policies tab', async () => {
@@ -843,6 +843,7 @@ On Windows, the module was tested with Nginx installed from the Chocolatey repos
   const epmGetStatsResponse: GetStatsResponse = {
     response: {
       agent_policy_count: 2,
+      package_policy_count: 2,
     },
   };
 

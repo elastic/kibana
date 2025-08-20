@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, skip } from 'rxjs';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import type { initializeControlGroupManager } from './control_group_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
@@ -16,7 +16,7 @@ import type { initializeLayoutManager } from './layout_manager';
 import type { DashboardChildren } from './layout_manager/types';
 import type { DashboardSettings, DashboardState } from '../../common';
 import { isDashboardSection } from '../../common';
-import type { initializeSettingsManager } from './settings_manager';
+import { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
 import type { DashboardPanel } from '../../server';
 
@@ -91,6 +91,32 @@ describe('unsavedChangesManager', () => {
   });
 
   describe('onUnsavedChanges', () => {
+    describe('onSettingsChanges', () => {
+      test('should have unsaved changes when tags change', (done) => {
+        const settingsManager = initializeSettingsManager();
+        const unsavedChangesManager = initializeUnsavedChangesManager({
+          viewMode$,
+          storeUnsavedChanges: false,
+          controlGroupManager: controlGroupManagerMock,
+          lastSavedState: DEFAULT_DASHBOARD_STATE,
+          layoutManager: layoutManagerMock,
+          savedObjectId$,
+          settingsManager,
+          unifiedSearchManager: unifiedSearchManagerMock,
+          getReferences,
+        });
+
+        unsavedChangesManager.api.hasUnsavedChanges$
+          .pipe(skip(1))
+          .subscribe((hasUnsavedChanges) => {
+            expect(hasUnsavedChanges).toBe(true);
+            done();
+          });
+
+        settingsManager.api.setTags(['New tag']);
+      });
+    });
+
     describe('session state', () => {
       test('should backup unsaved panel changes and references when only layout changes', (done) => {
         initializeUnsavedChangesManager({

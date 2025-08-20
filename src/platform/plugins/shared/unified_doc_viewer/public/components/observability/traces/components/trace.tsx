@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonIcon } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
@@ -48,6 +48,13 @@ export const Trace = ({
   const [showFullScreenWaterfall, setShowFullScreenWaterfall] = useState(false);
 
   const { from: rangeFrom, to: rangeTo } = data.query.timefilter.timefilter.getAbsoluteTime();
+
+  const fullScreenButtonLabel = i18n.translate(
+    'unifiedDocViewer.observability.traces.trace.fullScreen.button',
+    {
+      defaultMessage: 'Expand trace timeline',
+    }
+  );
 
   const getParentApi = useCallback(
     () => ({
@@ -110,21 +117,17 @@ export const Trace = ({
         </EuiFlexItem>
         {showWaterfall && (
           <EuiFlexItem grow={false}>
-            <EuiButtonIcon
+            <EuiButtonEmpty
               data-test-subj="unifiedDocViewerObservabilityTracesTraceFullScreenButton"
-              iconSize="m"
+              size="xs"
               iconType="fullScreen"
-              color="text"
-              aria-label={i18n.translate(
-                'unifiedDocViewer.observability.traces.trace.fullScreen.button',
-                {
-                  defaultMessage: 'Open full screen waterfall',
-                }
-              )}
               onClick={() => {
                 setShowFullScreenWaterfall(true);
               }}
-            />
+              aria-label={fullScreenButtonLabel}
+            >
+              {fullScreenButtonLabel}
+            </EuiButtonEmpty>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

@@ -61,7 +61,6 @@ export { type UserIdAndName } from './base/users';
 export {
   oneChatDefaultAgentId,
   AgentType,
-  AgentMode,
   type AgentDescriptor,
   type AgentDefinition,
   type AgentConfiguration,

@@ -63,5 +63,12 @@ policy_templates:
         title: System Metrics
         description: System metrics collection
         deployment_modes: ["default"]
+  - name: no_deployment_mode_default_only
+    title: No Deployment Mode Default Only Template
+    description: Template that only supports default deployment with no explicit deployment_mode
+    inputs:
+      - type: cloudwatch
+        title: CloudWatch Metrics for only default deployment
+        description: AWS CloudWatch metrics
 owner:
   github: elastic/fleet

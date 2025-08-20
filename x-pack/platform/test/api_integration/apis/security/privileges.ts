@@ -318,7 +318,7 @@ export default function ({ getService }: FtrProviderContext) {
       guidedOnboardingFeature: ['all', 'read', 'minimal_all', 'minimal_read'],
       aiAssistantManagementSelection: ['all', 'read', 'minimal_all', 'minimal_read'],
     },
-    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring'],
+    reserved: ['fleet-setup', 'ml_user', 'ml_admin', 'ml_apm_user', 'monitoring', 'reporting_user'],
   };
 
   describe('Privileges', () => {

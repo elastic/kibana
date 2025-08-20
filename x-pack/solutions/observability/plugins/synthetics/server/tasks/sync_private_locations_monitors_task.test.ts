@@ -171,11 +171,19 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const result = await task.runTask({ taskInstance });
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Syncing private location monitors because data has changed'
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        1,
+        '[syncGlobalParams] Syncing private location monitors, last total params 1 '
+      );
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        2,
+        '[syncGlobalParams] Syncing private location monitors because data has changed '
+      );
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        3,
+        '[syncGlobalParams] Sync of private location monitors succeeded '
       );
       expect(task.syncGlobalParams).toHaveBeenCalled();
-      expect(mockLogger.debug).toHaveBeenCalledWith('Sync of private location monitors succeeded');
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         lastStartedAt: taskInstance.startedAt?.toISOString(),
@@ -198,7 +206,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(getPrivateLocationsModule.getPrivateLocations).toHaveBeenCalled();
       expect(task.syncGlobalParams).not.toHaveBeenCalled();
-      expect(mockLogger.debug).toHaveBeenCalledWith('Sync of private location monitors succeeded');
+      expect(mockLogger.debug).toHaveBeenLastCalledWith(
+        '[syncGlobalParams] Sync of private location monitors succeeded '
+      );
     });
 
     it('should handle errors during the run', async () => {

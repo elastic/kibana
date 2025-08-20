@@ -27,6 +27,8 @@ import type {
   SyntheticsMonitorStatusRuleParams as StatusRuleParams,
   TimeWindow,
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { MappingDynamicTemplate } from '@elastic/elasticsearch/lib/api/types';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
 import type { MonitorStatusActionGroup } from '../../common/constants/synthetics_alerts';
@@ -285,6 +287,7 @@ export const setRecoveredAlertsContext = ({
       ...(basePath && spaceId && alertUuid
         ? { [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid) }
         : {}),
+      grouping: alertHit?.[ALERT_GROUPING],
     };
     alertsClient.setAlertData({ id: recoveredAlertId, context });
   }
@@ -557,9 +560,20 @@ export const syntheticsRuleTypeFieldMap = {
   ...legacyExperimentalFieldMap,
 };
 
+const stringAsKeywords: MappingDynamicTemplate = {
+  path_match: `${ALERT_GROUPING}.*`,
+  match_mapping_type: 'string',
+  mapping: { type: 'keyword', ignore_above: 1024 },
+};
+const dynamicTemplates = [
+  {
+    strings_as_keywords: stringAsKeywords,
+  },
+];
+
 export const SyntheticsRuleTypeAlertDefinition: IRuleTypeAlerts<MonitorStatusAlertDocument> = {
   context: SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-  mappings: { fieldMap: syntheticsRuleTypeFieldMap },
+  mappings: { fieldMap: syntheticsRuleTypeFieldMap, dynamicTemplates },
   useLegacyAlerts: true,
   shouldWrite: true,
 };

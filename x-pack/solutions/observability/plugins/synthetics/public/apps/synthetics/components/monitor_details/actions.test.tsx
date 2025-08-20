@@ -28,6 +28,18 @@ jest.mock('react-redux', () => ({
   useSelector: jest.fn(),
 }));
 
+jest.mock('./hooks/use_selected_monitor', () => ({
+  useSelectedMonitor: jest
+    .fn()
+    .mockReturnValue({ monitor: { config_id: 'test-config-id', name: 'Test Monitor' } }),
+}));
+
+jest.mock('../../hooks', () => ({
+  useMonitorDetailLocator: jest.fn().mockReturnValue('/mock-monitor-url'),
+  useGetUrlParams: jest.fn().mockReturnValue({ dateRangeStart: 'now-15m', dateRangeEnd: 'now' }),
+  useEnablement: jest.fn().mockReturnValue({ isServiceAllowed: true }),
+}));
+
 describe('Actions Component', () => {
   let mockDispatch: jest.Mock;
 

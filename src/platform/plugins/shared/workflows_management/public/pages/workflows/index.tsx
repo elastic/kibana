@@ -19,7 +19,7 @@ import { WorkflowList } from '../../features/workflow_list/ui';
 const workflowTemplateYaml = `name: New workflow
 enabled: false
 triggers:
-  - type: triggers.elastic.manual
+  - type: manual
 steps:
   - name: first-step
     type: console

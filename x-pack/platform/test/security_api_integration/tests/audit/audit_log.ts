@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('logs audit events when reading and writing saved objects', async () => {
       await supertest.get('/audit_log?query=param').set('kbn-xsrf', 'foo').expect(204);
-      await logFile.isWritten();
+      await logFile.isWritten(7500);
       const content = await logFile.readJSON();
 
       const httpEvent = content.find(

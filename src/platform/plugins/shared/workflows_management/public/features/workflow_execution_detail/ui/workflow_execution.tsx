@@ -96,8 +96,12 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 
     const intervalId = setInterval(() => {
       if (
-        workflowExecution.status === ExecutionStatus.RUNNING ||
-        workflowExecution.status === ExecutionStatus.PENDING
+        ![
+          ExecutionStatus.COMPLETED,
+          ExecutionStatus.FAILED,
+          ExecutionStatus.CANCELLED,
+          ExecutionStatus.SKIPPED,
+        ].includes(workflowExecution.status)
       ) {
         refetch();
         return;

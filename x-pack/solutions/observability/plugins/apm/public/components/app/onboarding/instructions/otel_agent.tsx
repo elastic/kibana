@@ -159,27 +159,15 @@ function ConfigureSDKInstructions({
   apmServerUrl: string;
   apiKeyDetails?: AgentApiDetails;
 }) {
-  const [selectedOptionId, setSelectedOptionId] = useState<SDKInstructionsOptionID>('apm');
+  const [selectedOptionId, setSelectedOptionId] = useState<SDKInstructionsOptionID>('otlp');
 
   return (
     <>
       <EuiButtonGroup
         legend="Default single select button group"
         options={[
+          { id: 'otlp', label: 'Managed OTLP Endpoint' },
           { id: 'apm', label: 'Classic APM Endpoint' },
-          {
-            id: 'otlp',
-            label: 'Managed OTLP Endpoint',
-            iconType: 'beaker',
-            iconSide: 'right',
-            toolTipContent: (
-              <FormattedMessage
-                id="xpack.apm.onboarding.otel.managedOtlpEndpointTooltip"
-                defaultMessage="This functionality is in Tech Preview."
-              />
-            ),
-            toolTipProps: { position: 'right' },
-          },
         ]}
         idSelected={selectedOptionId}
         onChange={(id) => setSelectedOptionId(id as SDKInstructionsOptionID)}

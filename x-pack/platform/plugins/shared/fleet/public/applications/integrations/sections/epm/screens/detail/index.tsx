@@ -66,7 +66,7 @@ import { useIsFirstTimeAgentUserQuery } from './hooks';
 import { getInstallPkgRouteOptions } from './utils';
 import {
   BackLink,
-  IntegrationAgentPolicyCount,
+  IntegrationPolicyCount,
   UpdateIcon,
   IconPanel,
   LoadingIconPanel,
@@ -541,11 +541,11 @@ export function Detail() {
                 ? [
                     { isDivider: true },
                     {
-                      label: i18n.translate('xpack.fleet.epm.usedByLabel', {
-                        defaultMessage: 'Agent policies',
+                      label: i18n.translate('xpack.fleet.epm.policiesCountLabel', {
+                        defaultMessage: 'Policies',
                       }),
-                      'data-test-subj': 'agentPolicyCount',
-                      content: <IntegrationAgentPolicyCount packageName={packageInfo.name} />,
+                      'data-test-subj': 'policyCount',
+                      content: <IntegrationPolicyCount packageName={packageInfo.name} />,
                     },
                   ]
                 : []),

@@ -12,7 +12,7 @@ export const PRIVILEGED_USER_ACTIVITY_QUERY_ID = 'privileged-user-activity-query
 export const PAGE_SIZE = 10;
 
 const privilegedUserOption = {
-  text: (
+  inputDisplay: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.privilegedUser"
       defaultMessage="Privileged user"
@@ -22,7 +22,7 @@ const privilegedUserOption = {
 };
 
 const sourceIpOption = {
-  text: (
+  inputDisplay: (
     <FormattedMessage
       id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.sourceIp"
       defaultMessage="Source IP"
@@ -34,7 +34,7 @@ const sourceIpOption = {
 export const GRANTED_RIGHTS_STACK_BY = [
   privilegedUserOption,
   {
-    text: (
+    inputDisplay: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.targetUser"
         defaultMessage="Target user"
@@ -43,7 +43,7 @@ export const GRANTED_RIGHTS_STACK_BY = [
     value: 'target_user',
   },
   {
-    text: (
+    inputDisplay: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.grantedRight"
         defaultMessage="Granted right"
@@ -57,7 +57,7 @@ export const GRANTED_RIGHTS_STACK_BY = [
 export const ACCOUNT_SWITCH_STACK_BY = [
   privilegedUserOption,
   {
-    text: (
+    inputDisplay: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.targetAccount"
         defaultMessage="Target account"
@@ -66,7 +66,7 @@ export const ACCOUNT_SWITCH_STACK_BY = [
     value: 'target_user',
   },
   {
-    text: (
+    inputDisplay: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.targetAdminGroup"
         defaultMessage="Target admin group"
@@ -80,7 +80,7 @@ export const ACCOUNT_SWITCH_STACK_BY = [
 export const AUTHENTICATIONS_STACK_BY = [
   privilegedUserOption,
   {
-    text: (
+    inputDisplay: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.source"
         defaultMessage="Source"
@@ -89,7 +89,7 @@ export const AUTHENTICATIONS_STACK_BY = [
     value: 'source',
   },
   {
-    text: (
+    inputDisplay: (
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.userActivity.stackBy.type"
         defaultMessage="Type"

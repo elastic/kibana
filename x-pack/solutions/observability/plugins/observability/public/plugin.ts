@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/public';
-import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
+import {
+  type CasesPublicSetup,
+  CasesDeepLinkId,
+  type CasesPublicStart,
+  getCasesDeepLinks,
+} from '@kbn/cases-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';

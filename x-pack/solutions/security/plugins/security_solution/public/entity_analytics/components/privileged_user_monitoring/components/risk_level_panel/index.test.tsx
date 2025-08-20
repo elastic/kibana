@@ -47,7 +47,7 @@ describe('RiskLevelsPrivilegedUsersPanel', () => {
   it('renders the panel with the correct title', () => {
     render(<RiskLevelsPrivilegedUsersPanel spaceId={'default'} />, { wrapper: TestProviders });
 
-    expect(screen.getByText('Risk levels of privileged users')).toBeInTheDocument();
+    expect(screen.getByText('Privileged user risk levels')).toBeInTheDocument();
   });
 
   it('renders the error callout when there is an error', () => {

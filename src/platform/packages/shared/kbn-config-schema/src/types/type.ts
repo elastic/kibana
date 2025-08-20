@@ -284,7 +284,9 @@ function prettyPrintTypeParts(
 ): string | string[] {
   if (!isSchema(schema)) {
     if (schema === null) return 'null';
-    return `${schema ?? 'unknown'}${optional ? '?' : ''}`;
+    // schema can be a Symbol (because of SymbolSchema). We need to wrap it with String() because
+    // implicit conversion of a 'symbol' to a 'string' will fail at runtime.
+    return `${String(schema ?? 'unknown')}${optional ? '?' : ''}`;
   }
 
   const isOptionalType = optional || schema._flags?.presence === 'optional';

@@ -290,8 +290,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   );
 
   const onKeydownMonaco = useCallback(
-    (ev: monaco.IKeyboardEvent) => {
+    (ev: monaco.IKeyboardEvent, editor: monaco.editor.IStandaloneCodeEditor) => {
       if (ev.keyCode === monaco.KeyCode.Escape) {
+        const inspectTokensWidget = editor?.getContribution(
+          'editor.contrib.inspectTokens'
+          // @ts-expect-errors -- "_widget" is not part of the TS interface but does exist
+        )?._widget;
+        // If the inspect tokens widget is open then we want to let monaco handle ESCAPE for it,
+        // otherwise widget will not close.
+        if (inspectTokensWidget) return;
         // If the autocompletion context menu is open then we want to let ESCAPE close it but
         // **not** exit out of editing mode.
         if (!isSuggestionMenuOpen.current) {
@@ -486,7 +493,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         textboxMutationObserver.current.observe(textbox, { attributes: true });
       }
 
-      editor.onKeyDown(onKeydownMonaco);
+      editor.onKeyDown((ev: monaco.IKeyboardEvent) => {
+        onKeydownMonaco(ev, editor);
+      });
       editor.onDidBlurEditorText(onBlurMonaco);
 
       const messageContribution = editor.getContribution('editor.contrib.messageController');

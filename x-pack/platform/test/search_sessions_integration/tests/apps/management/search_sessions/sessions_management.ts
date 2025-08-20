@@ -92,6 +92,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return s.length === 0;
         });
       });
+
+      it('Should be called "Search Sessions" in the management apps sidebar', async () => {
+        await PageObjects.common.navigateToApp('management');
+        const searchSessionsAnchor = await testSubjects.find('search_sessions');
+        const anchorText = await searchSessionsAnchor.getVisibleText();
+        expect(anchorText).to.be('Search Sessions');
+      });
     });
   });
 }
