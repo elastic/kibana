@@ -62,17 +62,6 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
     this.runtimeFields = Object.keys(dataStreams.searchRuntimeMappings ?? {});
   }
 
-  /**
-   * An idempotent setup method that should be called before any other methods.
-   */
-  public async setup() {
-    await initialize({
-      dataStreams: this.dataStreams,
-      elasticsearchClient: this.client,
-      logger: this.logger,
-    });
-  }
-
   public async index(args: IDataStreamClientIndexRequest<S>) {
     return this.client.index({
       index: this.dataStreams.name,
