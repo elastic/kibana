@@ -392,7 +392,8 @@ export default ({ getService }: FtrProviderContext) => {
         const sources = await api.listEntitySources({ query: {} });
         const names = sources.body.map((s: any) => s.name);
         expect(names).toContain('StarWars');
-        await waitForPrivMonUsersToBeSynced(9);
+        await privMonUtils.waitForSyncTaskRun();
+
         // Check if the users are indexed
         const res = await api.listPrivMonUsers({ query: {} });
         const userNames = res.body.map((u: any) => u.user.name);
