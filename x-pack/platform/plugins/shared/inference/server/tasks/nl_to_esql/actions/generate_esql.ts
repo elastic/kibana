@@ -26,6 +26,12 @@ import {
   OutputEventType,
   ToolChoiceType,
 } from '@kbn/inference-common';
+import {
+  withoutTokenCountEvents,
+  isChatCompletionMessageEvent,
+  MessageRole,
+  OutputEventType,
+} from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import type { EsqlDocumentBase } from '../doc_base';

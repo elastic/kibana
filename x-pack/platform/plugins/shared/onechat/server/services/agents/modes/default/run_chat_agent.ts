@@ -32,7 +32,7 @@ export type RunChatAgentFn = (
 /**
  * Create the handler function for the default onechat agent.
  */
-export const runChatAgent: RunChatAgentFn = async (
+export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation = [],

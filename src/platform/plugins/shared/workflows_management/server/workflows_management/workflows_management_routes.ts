@@ -8,11 +8,18 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import { CreateWorkflowCommandSchema } from '@kbn/workflows';
-import { WorkflowsManagementApi, type GetWorkflowsParams } from './workflows_management_api';
+import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { WorkflowsManagementApi } from './workflows_management_api';
+import { type GetWorkflowsParams } from './workflows_management_api';
 
-export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logger: Logger) {
+export function defineRoutes(
+  router: IRouter,
+  api: WorkflowsManagementApi,
+  logger: Logger,
+  spaces: SpacesServiceStart
+) {
   router.get(
     {
       path: '/api/workflows/{id}',
@@ -37,7 +44,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        const workflow = await api.getWorkflow(id);
+        const spaceId = spaces.getSpaceId(request);
+        const workflow = await api.getWorkflow(id, spaceId);
         if (!workflow) {
           return response.notFound({
             body: {
@@ -76,11 +84,16 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { limit, offset } = request.query as GetWorkflowsParams;
+
+        const spaceId = spaces.getSpaceId(request);
         return response.ok({
-          body: await api.getWorkflows({
-            limit,
-            offset,
-          }),
+          body: await api.getWorkflows(
+            {
+              limit,
+              offset,
+            },
+            spaceId
+          ),
         });
       } catch (error) {
         return response.customError({
@@ -113,7 +126,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     },
     async (context, request, response) => {
       try {
-        const createdWorkflow = await api.createWorkflow(request.body);
+        const spaceId = spaces.getSpaceId(request);
+        const createdWorkflow = await api.createWorkflow(request.body, spaceId, request);
         return response.ok({ body: createdWorkflow });
       } catch (error) {
         return response.customError({
@@ -150,8 +164,13 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
+        const spaceId = spaces.getSpaceId(request);
+        const updated = await api.updateWorkflow(id, request.body, spaceId, request);
+        if (updated === null) {
+          return response.notFound();
+        }
         return response.ok({
-          body: await api.updateWorkflow(id, request.body),
+          body: updated,
         });
       } catch (error) {
         return response.customError({
@@ -188,7 +207,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        await api.deleteWorkflows([id]);
+        const spaceId = spaces.getSpaceId(request);
+        await api.deleteWorkflows([id], spaceId, request);
         return response.ok();
       } catch (error) {
         return response.customError({
@@ -224,7 +244,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { ids } = request.body as { ids: string[] };
-        await api.deleteWorkflows(ids);
+        const spaceId = spaces.getSpaceId(request);
+        await api.deleteWorkflows(ids, spaceId, request);
         return response.ok();
       } catch (error) {
         return response.customError({
@@ -263,12 +284,13 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { id } = request.params as { id: string };
-        const workflow = await api.getWorkflow(id);
+        const spaceId = spaces.getSpaceId(request);
+        const workflow = await api.getWorkflow(id, spaceId);
         if (!workflow) {
           return response.notFound();
         }
         const { inputs } = request.body as { inputs: Record<string, any> };
-        const workflowRunId = await api.runWorkflow(workflow, inputs);
+        const workflowRunId = await api.runWorkflow(workflow, spaceId, inputs);
         return response.ok({
           body: workflowRunId,
         });
@@ -299,9 +321,12 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     },
     async (context, request, response) => {
       try {
+        const spaceId = spaces.getSpaceId(request);
+
         const workflowExecutionId = await api.testWorkflow(
           request.body.workflowYaml,
-          request.body.inputs
+          request.body.inputs,
+          spaceId
         );
 
         return response.ok({
@@ -343,8 +368,9 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { workflowId } = request.query as { workflowId: string };
+        const spaceId = spaces.getSpaceId(request);
         return response.ok({
-          body: await api.getWorkflowExecutions(workflowId),
+          body: await api.getWorkflowExecutions(workflowId, spaceId),
         });
       } catch (error) {
         return response.customError({
@@ -380,7 +406,8 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
     async (context, request, response) => {
       try {
         const { workflowExecutionId } = request.params;
-        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId);
+        const spaceId = spaces.getSpaceId(request);
+        const workflowExecution = await api.getWorkflowExecution(workflowExecutionId, spaceId);
         if (!workflowExecution) {
           return response.notFound();
         }
@@ -422,14 +449,18 @@ export function defineRoutes(router: IRouter, api: WorkflowsManagementApi, logge
       try {
         const { workflowExecutionId } = request.params;
         const { limit, offset, sortField, sortOrder } = request.query;
+        const spaceId = spaces.getSpaceId(request);
 
-        const logs = await api.getWorkflowExecutionLogs({
-          executionId: workflowExecutionId,
-          limit,
-          offset,
-          sortField,
-          sortOrder,
-        });
+        const logs = await api.getWorkflowExecutionLogs(
+          {
+            executionId: workflowExecutionId,
+            limit,
+            offset,
+            sortField,
+            sortOrder,
+          },
+          spaceId
+        );
 
         return response.ok({
           body: logs,
