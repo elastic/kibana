@@ -25,17 +25,10 @@ describe('registerRoutes', () => {
 
     expect(httpSetup.createRouter).toHaveBeenCalledTimes(1);
     expect(router.get).toHaveBeenCalledTimes(2);
-    expect(router.post).toHaveBeenCalledTimes(1);
 
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/api/kibana/management/saved_objects/_find',
-      }),
-      expect.any(Function)
-    );
-    expect(router.post).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/_bulk_get',
       }),
       expect.any(Function)
     );
