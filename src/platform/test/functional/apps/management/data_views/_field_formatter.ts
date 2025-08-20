@@ -22,6 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const indexPatterns = getService('indexPatterns');
   const toasts = getService('toasts');
+  const retry = getService('retry');
 
   describe('field formatter', function () {
     this.tags(['skipFirefox']);
@@ -571,10 +572,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       specs.forEach((spec, index) => {
         it(`check field format of "${index}" field`, async () => {
           const renderedValue = await testSubjects.find(`tableDocViewRow-${index}-value`);
-          const text = await renderedValue.getVisibleText();
-          expect(text).to.be(spec.expectFormattedValue);
+          await retry.try(async () => {
+            const text = await renderedValue.getVisibleText();
+            expect(text).to.be(spec.expectFormattedValue);
+          });
           if (spec.expect) {
-            await spec.expect(renderedValue);
+            const expectFn = spec.expect;
+            await retry.try(async () => {
+              await expectFn(renderedValue);
+            });
           }
         });
       });
