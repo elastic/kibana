@@ -50,10 +50,7 @@ const startSync = (appState: DiscoverAppStateContainer) => {
 
 let mockServices = createDiscoverServicesMock();
 
-async function getState(
-  url: string = '/',
-  { savedSearch, isEmptyUrl }: { savedSearch?: SavedSearch; isEmptyUrl?: boolean } = {}
-) {
+async function getState(url: string = '/', { savedSearch }: { savedSearch?: SavedSearch } = {}) {
   const nextHistory = createBrowserHistory<HistoryLocationState>();
   nextHistory.push(url);
   mockServices.dataViews.create = jest.fn().mockImplementation((spec) => {
@@ -517,8 +514,7 @@ describe('Discover state', () => {
 
     test('loadNewSavedSearch with URL changing interval state', async () => {
       const { state, customizationService, getCurrentUrl } = await getState(
-        '/#?_a=(interval:month,columns:!(bytes))&_g=()',
-        { isEmptyUrl: false }
+        '/#?_a=(interval:month,columns:!(bytes))&_g=()'
       );
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -542,8 +538,7 @@ describe('Discover state', () => {
 
     test('loadSavedSearch with no id, given URL changes state', async () => {
       const { state, customizationService, getCurrentUrl } = await getState(
-        '/#?_a=(interval:month,columns:!(bytes))&_g=()',
-        { isEmptyUrl: false }
+        '/#?_a=(interval:month,columns:!(bytes))&_g=()'
       );
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -606,7 +601,6 @@ describe('Discover state', () => {
       const url = '/#?_a=(interval:month,columns:!(message))&_g=()';
       const { state, customizationService, getCurrentUrl } = await getState(url, {
         savedSearch: savedSearchMock,
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -636,7 +630,6 @@ describe('Discover state', () => {
       };
       const { state, customizationService } = await getState(url, {
         savedSearch,
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -670,7 +663,6 @@ describe('Discover state', () => {
         .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch,
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -704,7 +696,6 @@ describe('Discover state', () => {
         .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch,
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -740,9 +731,7 @@ describe('Discover state', () => {
 
     test('loadSavedSearch without id ignoring invalid index in URL, adding a warning toast', async () => {
       const url = '/#?_a=(dataSource:(dataViewId:abc,type:dataView))&_g=()';
-      const { state, customizationService } = await getState(url, {
-        isEmptyUrl: false,
-      });
+      const { state, customizationService } = await getState(url);
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
@@ -771,7 +760,6 @@ describe('Discover state', () => {
           ...savedSearchMock,
           id: undefined,
         },
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -791,7 +779,6 @@ describe('Discover state', () => {
       const url = '/#?_a=(dataSource:(dataViewId:abc,type:dataView))&_g=()';
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMock,
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1059,7 +1046,6 @@ describe('Discover state', () => {
         .mockReturnValue(savedSearchMockWithESQLCopy.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQLCopy,
-        isEmptyUrl: false,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -1283,7 +1269,7 @@ describe('Discover state', () => {
     test('onOpenSavedSearch - cleanup of previous filter', async () => {
       const { state, customizationService, history } = await getState(
         "/#?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))&_a=(columns:!(customer_first_name),filters:!(('$state':(store:appState),meta:(alias:!n,disabled:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,key:customer_first_name,negate:!f,params:(query:Mary),type:phrase),query:(match_phrase:(customer_first_name:Mary)))),hideChart:!f,index:ff959d40-b880-11e8-a6d9-e546fe2bba5f,interval:auto,query:(language:kuery,query:''),sort:!())",
-        { savedSearch: savedSearchMock, isEmptyUrl: false }
+        { savedSearch: savedSearchMock }
       );
       jest.spyOn(mockServices.filterManager, 'getAppFilters').mockImplementation(() => {
         return state.appState.getState().filters!;
