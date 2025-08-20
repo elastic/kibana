@@ -30,7 +30,6 @@ import { Duration, Timestamp } from '@kbn/apm-ui-shared';
 import type { Span } from '../../../../../../../../typings/es_schemas/ui/span';
 import type { Transaction } from '../../../../../../../../typings/es_schemas/ui/transaction';
 import { useFetcher, isPending } from '../../../../../../../hooks/use_fetcher';
-import { DiscoverSpanLink } from '../../../../../../shared/links/discover_links/discover_span_link';
 import { SpanMetadata } from '../../../../../../shared/metadata_table/span_metadata';
 import { getSpanLinksTabContent } from '../../../../../../shared/span_links/span_links_tab_content';
 import { Summary } from '../../../../../../shared/summary';
@@ -133,27 +132,13 @@ export function SpanFlyout({
     <EuiPortal>
       <ResponsiveFlyout onClose={onClose} size="m" ownFocus={true}>
         <EuiFlyoutHeader hasBorder>
-          <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiTitle>
-                <h2>
-                  {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
-                    defaultMessage: 'Span details',
-                  })}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            {span && (
-              <EuiFlexItem grow={false}>
-                <DiscoverSpanLink spanId={span.span.id}>
-                  {i18n.translate(
-                    'xpack.apm.transactionDetails.spanFlyout.viewSpanInDiscoverButtonLabel',
-                    { defaultMessage: 'View span in Discover' }
-                  )}
-                </DiscoverSpanLink>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
+          <EuiTitle>
+            <h2>
+              {i18n.translate('xpack.apm.transactionDetails.spanFlyout.spanDetailsTitle', {
+                defaultMessage: 'Span details',
+              })}
+            </h2>
+          </EuiTitle>
           {span?.span.composite && (
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>

@@ -33,7 +33,7 @@ interface Props {
   children: React.ReactNode;
 }
 
-export const getDiscoverHref = ({
+const getDiscoverHref = ({
   basePath,
   location,
   query,
