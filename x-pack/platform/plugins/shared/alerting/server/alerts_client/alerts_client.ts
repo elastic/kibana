@@ -844,7 +844,9 @@ export class AlertsClient<
       )) {
         // Go through matched alerts, find the in memory object
         alertIds.forEach((alertId) => {
-          const newAlert = newAlerts.find((alert) => alert.getUuid() === alertId || alert.getId() === alertId);
+          const newAlert = newAlerts.find(
+            (alert) => alert.getUuid() === alertId || alert.getId() === alertId
+          );
           if (!newAlert) {
             return;
           }
@@ -878,7 +880,10 @@ export class AlertsClient<
         maintenanceWindowIds: uniqueMaintenanceWindowIds,
       };
     } catch (err) {
-      this.options.logger.error(`Error updating maintenance window IDs: ${err.message}`, this.logTags);
+      this.options.logger.error(
+        `Error updating maintenance window IDs: ${err.message}`,
+        this.logTags
+      );
       return { alertIds: [], maintenanceWindowIds: [] };
     }
   }
