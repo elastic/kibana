@@ -40,13 +40,7 @@ import {
   DataSourceType,
   isDataSourceType,
 } from '../../../../common/data_sources';
-import type {
-  InternalStateStore,
-  RuntimeStateManager,
-  TabActionInjector,
-  TabState,
-  TabStateGlobalState,
-} from './redux';
+import type { InternalStateStore, RuntimeStateManager, TabActionInjector, TabState } from './redux';
 import {
   createTabActionInjector,
   internalStateActions,
@@ -571,14 +565,7 @@ export function getDiscoverStateContainer({
 
     const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
     const globalState = selectTab(internalState.getState(), tabId).globalState;
-    let globalStateUpdate: Partial<TabStateGlobalState> = {};
-
-    restoreStateFromSavedSearch({
-      savedSearch: nextSavedSearch,
-      updateGlobalState: (update) => {
-        globalStateUpdate = { ...globalStateUpdate, ...update };
-      },
-    });
+    const globalStateUpdate = restoreStateFromSavedSearch({ savedSearch: nextSavedSearch });
 
     // a saved search can't have global (pinned) filters so we can reset global filters state
     if (globalState.filters) {

@@ -11,21 +11,15 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { isRefreshIntervalValid, isTimeRangeValid } from '../../../../utils/validate_time';
 import type { TabStateGlobalState } from '../redux';
 
-export const restoreStateFromSavedSearch = ({
-  savedSearch,
-  updateGlobalState,
-}: {
-  savedSearch: SavedSearch;
-  updateGlobalState: (globalStateUpdate: Partial<TabStateGlobalState>) => void;
-}) => {
+export const restoreStateFromSavedSearch = ({ savedSearch }: { savedSearch: SavedSearch }) => {
   if (!savedSearch) {
-    return;
+    return {};
   }
 
   const isTimeBased = savedSearch.searchSource.getField('index')?.isTimeBased();
 
   if (!isTimeBased) {
-    return;
+    return {};
   }
 
   const globalStateUpdate: Partial<TabStateGlobalState> = {};
@@ -41,7 +35,5 @@ export const restoreStateFromSavedSearch = ({
     globalStateUpdate.refreshInterval = savedSearch.refreshInterval;
   }
 
-  if (Object.keys(globalStateUpdate).length > 0) {
-    updateGlobalState(globalStateUpdate);
-  }
+  return globalStateUpdate;
 };

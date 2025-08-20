@@ -22,85 +22,66 @@ describe('discover restore state from saved search', () => {
   };
 
   test('should not update timefilter if attributes are not set', async () => {
-    const updateGlobalState = jest.fn();
+    const globalState = restoreStateFromSavedSearch({ savedSearch: savedSearchMockWithTimeField });
 
-    restoreStateFromSavedSearch({
-      savedSearch: savedSearchMockWithTimeField,
-      updateGlobalState,
-    });
-
-    expect(updateGlobalState).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should not update timefilter if timeRestore is disabled', async () => {
-    const updateGlobalState = jest.fn();
-
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: false,
         timeRange,
         refreshInterval,
       },
-      updateGlobalState,
     });
 
-    expect(updateGlobalState).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should update timefilter if timeRestore is enabled', async () => {
-    const updateGlobalState = jest.fn();
-
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
         timeRange,
         refreshInterval,
       },
-      updateGlobalState,
     });
 
-    expect(updateGlobalState).toHaveBeenCalledWith({
+    expect(globalState).toEqual({
       timeRange,
       refreshInterval,
     });
   });
 
   test('should not update if data view is not time based', async () => {
-    const updateGlobalState = jest.fn();
-
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMock,
         timeRestore: true,
         timeRange,
         refreshInterval,
       },
-      updateGlobalState,
     });
 
-    expect(updateGlobalState).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should not update timefilter if attributes are missing', async () => {
-    const updateGlobalState = jest.fn();
-
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
       },
-      updateGlobalState,
     });
 
-    expect(updateGlobalState).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 
   test('should not update timefilter if attributes are invalid', async () => {
-    const updateGlobalState = jest.fn();
-
-    restoreStateFromSavedSearch({
+    const globalState = restoreStateFromSavedSearch({
       savedSearch: {
         ...savedSearchMockWithTimeField,
         timeRestore: true,
@@ -113,9 +94,8 @@ describe('discover restore state from saved search', () => {
           value: -500,
         },
       },
-      updateGlobalState,
     });
 
-    expect(updateGlobalState).not.toHaveBeenCalled();
+    expect(globalState).toEqual({});
   });
 });
