@@ -81,8 +81,8 @@ export function SpanLinks({ docId, traceId }: Props) {
   );
 
   const columns = useMemo(
-    () => getColumns({ generateDiscoverLink, type, traceIndexPattern: indexes.apm.traces }),
-    [generateDiscoverLink, indexes.apm.traces, type]
+    () => getColumns({ generateDiscoverLink, type }),
+    [generateDiscoverLink, type]
   );
 
   if (

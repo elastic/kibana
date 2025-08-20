@@ -14,8 +14,10 @@ import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
+import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
+import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 const NOT_AVAILABLE_LABEL = i18n.translate('xpack.apm.notAvailableLabel', {
   defaultMessage: 'N/A',
@@ -24,10 +26,8 @@ const NOT_AVAILABLE_LABEL = i18n.translate('xpack.apm.notAvailableLabel', {
 export const getColumns = ({
   generateDiscoverLink,
   type,
-  traceIndexPattern,
 }: {
-  traceIndexPattern?: string;
-  generateDiscoverLink: (whereClause: string) => string | undefined;
+  generateDiscoverLink: GenerateDiscoverLink;
   type: SpanLinkType;
 }): Array<EuiBasicTableColumn<SpanLinkDetails>> => [
   {
@@ -44,14 +44,20 @@ export const getColumns = ({
           text={item.details?.spanName || NOT_AVAILABLE_LABEL}
         />
       );
-      const href = generateDiscoverLink(`span.id == "${item.spanId}"`);
+      const href = generateDiscoverLink({ [SPAN_ID_FIELD]: item.spanId });
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          {href ? <EuiLink href={href}>{content}</EuiLink> : content}
+          {href ? (
+            <EuiLink data-test-subj={`${type}-spanNameLink-${item.spanId}`} href={href}>
+              {content}
+            </EuiLink>
+          ) : (
+            content
+          )}
         </span>
       );
     },
@@ -79,7 +85,9 @@ export const getColumns = ({
       const content = (
         <EuiTextTruncate data-test-subj={`${type}-serviceName-${serviceName}`} text={serviceName} />
       );
-      const href = generateDiscoverLink(`service.name == "${item.details!.serviceName}"`);
+      const href = item.details?.serviceName
+        ? generateDiscoverLink({ [SERVICE_NAME_FIELD]: item.details!.serviceName })
+        : undefined;
       return (
         <span
           css={css`
@@ -88,7 +96,15 @@ export const getColumns = ({
         >
           <ServiceNameWithIcon
             agentName={item.details?.agentName}
-            serviceName={href ? <EuiLink href={href}>{content}</EuiLink> : content}
+            serviceName={
+              href ? (
+                <EuiLink data-test-subj={`${type}-serviceNameLink-${serviceName}`} href={href}>
+                  {content}
+                </EuiLink>
+              ) : (
+                content
+              )
+            }
           />
         </span>
       );
@@ -105,14 +121,20 @@ export const getColumns = ({
       const content = (
         <EuiTextTruncate data-test-subj={`${type}-traceId-${item.traceId}`} text={item.traceId} />
       );
-      const href = generateDiscoverLink(`trace.id == "${item.traceId}"`);
+      const href = generateDiscoverLink({ [TRACE_ID_FIELD]: item.traceId });
       return (
         <span
           css={css`
             width: 100%;
           `}
         >
-          {href ? <EuiLink href={href}>{content}</EuiLink> : content}
+          {href ? (
+            <EuiLink data-test-subj={`${type}-traceIdLink-${item.traceId}`} href={href}>
+              {content}
+            </EuiLink>
+          ) : (
+            content
+          )}
         </span>
       );
     },

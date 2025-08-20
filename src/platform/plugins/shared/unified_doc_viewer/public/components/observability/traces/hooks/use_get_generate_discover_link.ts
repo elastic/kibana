@@ -10,6 +10,8 @@
 import { from, where } from '@kbn/esql-composer';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
+export type GenerateDiscoverLink = (whereClause?: Record<string, any>) => string | undefined;
+
 export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: string }) {
   const {
     data,
@@ -20,13 +22,22 @@ export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: st
   const timeRange = data.query.timefilter.timefilter.getAbsoluteTime();
   const discoverLocator = locators.get('DISCOVER_APP_LOCATOR');
 
-  function generateDiscoverLink(whereClause?: string, params?: Record<string, any>) {
+  const generateDiscoverLink: GenerateDiscoverLink = (whereClause) => {
     if (!discoverLocator || !indexPattern) {
       return undefined;
     }
 
     const esql = from(indexPattern)
-      .pipe(whereClause ? where(whereClause, params) : (query) => query)
+      .pipe(
+        whereClause
+          ? where(
+              Object.keys(whereClause)
+                .map((key) => `${key} == ?${key}`)
+                .join(' AND '),
+              whereClause
+            )
+          : (query) => query
+      )
       .toString();
 
     const url = discoverLocator.getRedirectUrl({
@@ -36,7 +47,7 @@ export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: st
     });
 
     return url;
-  }
+  };
 
   return {
     generateDiscoverLink,
