@@ -4,22 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Container, ContainerModule, ServiceIdentifier } from 'inversify';
+import { ContainerModule } from 'inversify';
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { CoreSetup, CoreStart, PluginInitializer } from '@kbn/core-di-server';
-import { Logger, type PluginConfigDescriptor } from '@kbn/core/server';
+import { CoreSetup, CoreStart } from '@kbn/core-di-server';
+import { type PluginConfigDescriptor } from '@kbn/core/server';
+import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
 import type { ActionsConfig } from './config';
-import { configSchema, getValidatedConfig } from './config';
+import { configSchema } from './config';
 import type { ActionsClient as ActionsClientClass } from './actions_client';
 import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
 import { Actions } from './module';
-import { resolveCustomHosts } from './lib/custom_host_settings';
-import { InMemoryMetrics } from './monitoring';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core/packages/di/common';
-import { LicenseState } from './lib';
-import { satisfies } from 'semver';
-import { ActionsPluginsSetup } from './plugin';
-import { ActionsPluginSetupDeps, ActionsPluginStartDeps } from './types';
+import type { ActionsPluginSetupDeps, ActionsPluginStartDeps } from './types';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';

@@ -1,3 +1,10 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { injectable, inject } from 'inversify';
 import { PluginInitializer } from '@kbn/core-di-server';
 import type {
@@ -14,44 +21,35 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
-import { ActionsConfig, AllowedHosts, getValidatedConfig } from './config';
+import type { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
+import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
+import type { ActionsConfig } from './config';
+import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import {
-  ActionType,
-  CaseConnector,
-  InMemoryConnector,
-  PluginSetupContract,
-  PluginStartContract,
-  SubActionConnector,
-  UnsecuredActionsClient,
-} from '.';
+import type { ActionType, InMemoryConnector, PluginSetupContract, PluginStartContract } from '.';
+import { CaseConnector, SubActionConnector, UnsecuredActionsClient } from '.';
 import {
   ACTION_SAVED_OBJECT_TYPE,
   ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
   ALERT_SAVED_OBJECT_TYPE,
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 } from './constants/saved_objects';
-import {
-  ActionExecutionSource,
-  ActionExecutor,
-  ILicenseState,
-  LicenseState,
-  TaskRunnerFactory,
-  spaceIdToNamespace,
-} from './lib';
+import type { ActionExecutionSource, ILicenseState } from './lib';
+import { ActionExecutor, LicenseState, TaskRunnerFactory, spaceIdToNamespace } from './lib';
 import { ACTIONS_FEATURE } from './feature';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './lib/event_based_telemetry';
-import { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
-import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
+import { getActionsConfigurationUtilities } from './actions_config';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
 import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { isConnectorDeprecated } from './application/connector/lib';
 import { registerActionsUsageCollector } from './usage';
 import { ActionTypeRegistry } from './action_type_registry';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import { setupSavedObjects } from './saved_objects';
 
 import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
@@ -69,24 +67,19 @@ import { ActionsClient } from './actions_client';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { ActionsAuthorization } from './authorization/actions_authorization';
-import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { initializeActionsTelemetry, scheduleActionsTelemetry } from './usage/task';
 import { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import { defineRoutes } from './routes';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
-import { SubActionConnectorType } from './sub_action_framework/types';
+import type { SubActionConnectorType } from './sub_action_framework/types';
 import { createSystemConnectors } from './create_system_actions';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
 import { renderMustacheObject } from './lib/mustache_renderer';
-import { ServerlessPluginStart } from '@kbn/serverless/server';
-import { ActionsPluginsStart } from './plugin';
-import { PluginSetup } from '@kbn/core/packages/di/common';
-import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import type { ActionsPluginsStart } from './plugin';
 
-type Config = PluginInitializerContext<ActionsConfig>['config'];
+type InitConfig = PluginInitializerContext<ActionsConfig>['config'];
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
@@ -115,7 +108,7 @@ export class Actions {
 
   constructor(
     @inject(PluginInitializer('logger')) private loggerFactory: LoggerFactory,
-    @inject(PluginInitializer('config')) private config: Config
+    @inject(PluginInitializer('config')) private config: InitConfig
   ) {
     this.logger = this.loggerFactory.get();
     this.telemetryLogger = this.loggerFactory.get('usage');
