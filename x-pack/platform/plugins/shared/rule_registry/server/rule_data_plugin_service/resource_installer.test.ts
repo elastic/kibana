@@ -302,7 +302,7 @@ describe('resourceInstaller', () => {
               settings: {},
             },
           }));
-          mockClusterClient.indices.getAlias.mockImplementation(async () => GetAliasResponse);
+          mockClusterClient.indices.getAlias.mockImplementation(async () => ({}));
           mockClusterClient.indices.getDataStream.mockImplementation(async () => ({
             data_streams: [],
           }));
@@ -357,7 +357,7 @@ describe('resourceInstaller', () => {
             );
           } else {
             expect(mockClusterClient.indices.getAlias).toHaveBeenCalledWith(
-              expect.objectContaining({ name: '.alerts-observability.logs.alerts-*' })
+              expect.objectContaining({ name: '.alerts-observability.logs.alerts-default' })
             );
             expect(mockClusterClient.indices.create).toHaveBeenCalledWith(
               expect.objectContaining({
@@ -589,16 +589,25 @@ describe('resourceInstaller', () => {
               Array [
                 "Ignored PUT mappings for .alerts-observability.metrics.alerts-default; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
               ],
+              Array [
+                "Failed to update mappings for data stream: .alerts-observability.metrics.alerts-default, updating write index (ignored) mappings instead",
+              ],
+              Array [
+                "Failed to update mappings for write index of data stream: .alerts-observability.metrics.alerts-default, rolling over instead",
+              ],
             ]
           `);
           } else {
             expect(errorMessages).toMatchInlineSnapshot(`
             Array [
               Array [
-                "Ignored PUT mappings for alias_1; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
+                "Ignored PUT mappings for .internal.alerts-test.alerts-default-000001; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
               ],
               Array [
-                "Ignored PUT mappings for alias_2; error generating simulated mappings: expecting simulateIndexTemplate() to throw",
+                "Failed to update mappings for concrete indices matching: .internal.alerts-observability.metrics.alerts-default-*",
+              ],
+              Array [
+                "Failed to update mappings for write index of alias: alias_2, rolling over instead",
               ],
             ]
           `);
@@ -626,16 +635,25 @@ describe('resourceInstaller', () => {
               Array [
                 "Ignored PUT mappings for .alerts-observability.metrics.alerts-default; simulated mappings were empty",
               ],
+              Array [
+                "Failed to update mappings for data stream: .alerts-observability.metrics.alerts-default, updating write index (ignored) mappings instead",
+              ],
+              Array [
+                "Failed to update mappings for write index of data stream: .alerts-observability.metrics.alerts-default, rolling over instead",
+              ],
             ]
           `);
           } else {
             expect(errorMessages).toMatchInlineSnapshot(`
             Array [
               Array [
-                "Ignored PUT mappings for alias_1; simulated mappings were empty",
+                "Ignored PUT mappings for .internal.alerts-test.alerts-default-000001; simulated mappings were empty",
               ],
               Array [
-                "Ignored PUT mappings for alias_2; simulated mappings were empty",
+                "Failed to update mappings for concrete indices matching: .internal.alerts-observability.metrics.alerts-default-*",
+              ],
+              Array [
+                "Failed to update mappings for write index of alias: alias_2, rolling over instead",
               ],
             ]
           `);
