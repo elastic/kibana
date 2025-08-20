@@ -24,8 +24,22 @@ export const createPrivilegedUsersCrudService = ({
 
   const create = async (
     user: CreatePrivMonUserRequestBody,
-    source: PrivMonUserSource
+    source: PrivMonUserSource,
+    maxUsersAllowed: number
   ): Promise<CreatePrivMonUserResponse> => {
+    const currentUserCount = await esClient.count({
+      index,
+      query: {
+        term: {
+          'user.is_privileged': true,
+        },
+      },
+    });
+
+    if (currentUserCount.count >= maxUsersAllowed) {
+      throw new Error(`Cannot create user: Maximum user limit of ${maxUsersAllowed} reached`);
+    }
+
     const doc = merge(user, {
       user: {
         is_privileged: true,
@@ -34,6 +48,7 @@ export const createPrivilegedUsersCrudService = ({
         sources: [source],
       },
     });
+
     const res = await esClient.index({
       index,
       refresh: 'wait_for',
