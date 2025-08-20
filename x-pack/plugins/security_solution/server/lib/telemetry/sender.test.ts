@@ -175,6 +175,7 @@ describe('TelemetryEventsSender', () => {
             entity_id: 'some_entity_id',
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               session_info: {
@@ -347,6 +348,7 @@ describe('TelemetryEventsSender', () => {
             entity_id: 'some_entity_id',
             Ext: {
               protection: 'PsProtectedSignerAntimalware-Light',
+              services: ['SepScanService'],
               relative_file_creation_time: 48628704.4029488,
               relative_file_name_modify_time: 48628704.4029488,
               session_info: {
