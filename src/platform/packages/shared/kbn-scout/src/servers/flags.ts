@@ -17,13 +17,14 @@ import type { CliSupportedServerModes } from '../types';
 export type StartServerOptions = ReturnType<typeof parseServerFlags>;
 
 export const SERVER_FLAG_OPTIONS: FlagOptions = {
-  string: ['serverless', 'esFrom', 'kibana-install-dir'],
+  string: ['serverless', 'esFrom', 'kibana-install-dir', 'kibana-config'],
   boolean: ['stateful', 'logToFile'],
   help: `
     --stateful           Start Elasticsearch and Kibana with default ESS configuration
     --serverless         Start Elasticsearch and Kibana with serverless project configuration: es | oblt | security
     --esFrom             Build Elasticsearch from source or run snapshot or serverless. Default: $TEST_ES_FROM or "snapshot"
     --kibana-install-dir Run Kibana from existing install directory instead of from source
+    --kibana-config      Path to a Kibana config file to use.
     --logToFile          Write the log output from Kibana/ES to files instead of to stdout
   `,
 };
@@ -42,6 +43,7 @@ export function parseServerFlags(flags: FlagsReader) {
 
   const esFrom = flags.enum('esFrom', ['source', 'snapshot', 'serverless']);
   const installDir = flags.string('kibana-install-dir');
+  const kibanaConfig = flags.string('kibana-config');
   const logsDir = flags.boolean('logToFile')
     ? resolve(REPO_ROOT, 'data/ftr_servers_logs', uuidV4())
     : undefined;
@@ -50,6 +52,7 @@ export function parseServerFlags(flags: FlagsReader) {
     mode,
     esFrom,
     installDir,
+    kibanaConfig,
     logsDir,
   };
 }

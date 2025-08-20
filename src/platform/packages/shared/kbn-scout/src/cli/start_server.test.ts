@@ -30,6 +30,8 @@ describe('runStartServer', () => {
     flagsReader = {
       arrayOfStrings: jest.fn(),
       boolean: jest.fn(),
+      string: jest.fn(),
+      enum: jest.fn(),
     } as any;
 
     log = {
@@ -45,12 +47,24 @@ describe('runStartServer', () => {
   });
 
   it('initializes log directory if logsDir is provided', async () => {
+    (parseServerFlags as jest.Mock).mockReturnValue({ logsDir: 'path/to/logs/directory' });
     await runStartServer(flagsReader, log);
     expect(initLogsDir).toHaveBeenCalledWith(log, 'path/to/logs/directory');
   });
 
   it('starts the servers with the correct options', async () => {
+    (parseServerFlags as jest.Mock).mockReturnValue({ logsDir: 'path/to/logs/directory' });
     await runStartServer(flagsReader, log);
     expect(startServers).toHaveBeenCalledWith(log, { logsDir: 'path/to/logs/directory' });
+  });
+
+  it('starts the servers with kibanaConfig', async () => {
+    (parseServerFlags as jest.Mock).mockReturnValue({
+      kibanaConfig: 'my-config.yml',
+    });
+    await runStartServer(flagsReader, log);
+    expect(startServers).toHaveBeenCalledWith(log, {
+      kibanaConfig: 'my-config.yml',
+    });
   });
 });

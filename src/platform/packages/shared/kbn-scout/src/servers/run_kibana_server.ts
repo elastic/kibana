@@ -19,6 +19,7 @@ export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
   installDir?: string;
+  kibanaConfig?: string;
   extraKbnOpts?: string[];
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
@@ -119,17 +120,28 @@ export async function runKibanaServer(options: {
   await Promise.all(promises);
 }
 
-export function getExtraKbnOpts(installDir: string | undefined, isServerless: boolean) {
+export function getExtraKbnOpts(
+  installDir: string | undefined,
+  isServerless: boolean,
+  kibanaConfig?: string
+) {
   if (installDir) {
     return [];
   }
 
-  return [
+  const extraOpts = [
     '--dev',
-    '--no-dev-config',
     '--no-dev-credentials',
     isServerless
       ? '--server.versioned.versionResolution=newest'
       : '--server.versioned.versionResolution=oldest',
   ];
+
+  if (kibanaConfig) {
+    extraOpts.push(`--config=${kibanaConfig}`);
+  } else {
+    extraOpts.push('--no-dev-config');
+  }
+
+  return extraOpts;
 }
