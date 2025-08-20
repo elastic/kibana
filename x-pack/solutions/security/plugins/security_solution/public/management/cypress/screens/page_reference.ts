@@ -65,7 +65,7 @@ export const getEndpointManagementPageList = (): EndpointManagementPage[] => {
       id: 'trustedDevices',
       title: 'Trusted Devices Page',
       url: APP_TRUSTED_DEVICES_PATH,
-      pageTestSubj: 'trustedDevicesList',
+      pageTestSubj: 'trustedDevicesList-container',
     },
     {
       id: 'eventFilters',

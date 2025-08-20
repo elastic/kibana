@@ -37,11 +37,14 @@ describe(
         allPages.endpointList,
         allPages.policyList,
         allPages.trustedApps,
-        allPages.trustedDevices,
         allPages.blocklist,
         allPages.eventFilters,
       ];
-      const deniedPages = [allPages.responseActionLog, allPages.hostIsolationExceptions];
+      const deniedPages = [
+        allPages.responseActionLog,
+        allPages.hostIsolationExceptions,
+        allPages.trustedDevices,
+      ];
       let username: string;
       let password: string;
 
