@@ -20,7 +20,6 @@ export interface GetTrustedDevicesListResponse {
   data: TrustedDevice[];
 }
 
-/** API request params for updating a Trusted Device */
 export type PutTrustedDevicesRequestParams = TypeOf<
   typeof PutTrustedDeviceUpdateRequestSchema.params
 >;
@@ -34,24 +33,22 @@ export interface TrustedDeviceConditionEntry<
   T extends TrustedDeviceConditionEntryField = TrustedDeviceConditionEntryField
 > {
   field: T;
-  type: 'match' | 'wildcard'; // Only allow exact match or wildcards, no hash validation
+  type: 'match' | 'wildcard';
   operator: 'included';
   value: string;
 }
 
 interface TrustedDeviceConditionEntries {
   os: OperatingSystem.WINDOWS | OperatingSystem.MAC;
-  entries: TrustedDeviceConditionEntry[]; // No OS-specific entries unlike TrustedApps
+  entries: TrustedDeviceConditionEntry[];
 }
 
-/** Type for a new Trusted Device Entry */
 export type NewTrustedDevice = {
   name: string;
   description?: string;
-  effectScope: EffectScope; // Reuse the same EffectScope type from TrustedApps
+  effectScope: EffectScope;
 } & TrustedDeviceConditionEntries;
 
-/** A trusted device entry */
 export type TrustedDevice = NewTrustedDevice & {
   version: string;
   id: string;
