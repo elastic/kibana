@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import {
   AWS_PROVIDER_TEST_SUBJ,
-  AWS_SINGLE_ACCOUNT_TEST_ID,
+  AWS_SINGLE_ACCOUNT_TEST_SUBJ,
   AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   AWS_INPUT_TEST_SUBJECTS,
@@ -51,7 +51,7 @@ export default function (providerContext: FtrProviderContext) {
       });
       it('CIS_AWS Single Cloud Formation workflow', async () => {
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.clickOptionButton('aws-cloudformation-setup-option');
         await pageObjects.header.waitUntilLoadingHasFinished();
@@ -66,7 +66,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('On Add Agent modal there should be modal that has Cloud Formation details as well as button that redirects user to Cloud formation page on AWS upon clicking them ', async () => {
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await pageObjects.header.waitUntilLoadingHasFinished();
         await cisIntegration.inputUniqueIntegrationName();
         await cisIntegration.clickOptionButton('aws-cloudformation-setup-option');
@@ -249,7 +249,7 @@ export default function (providerContext: FtrProviderContext) {
       it('CIS_AWS Single Manual Assume Role Workflow', async () => {
         const roleArn = 'RoleArnTestValue';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.fillInTextField(AWS_INPUT_TEST_SUBJECTS.ROLE_ARN, roleArn);
         await cisIntegration.inputUniqueIntegrationName();
@@ -271,7 +271,7 @@ export default function (providerContext: FtrProviderContext) {
         const directAccessKeyId = 'directAccessKeyIdTest';
         const directAccessSecretKey = 'directAccessSecretKeyTest';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
         await cisIntegration.selectValue(
@@ -310,7 +310,7 @@ export default function (providerContext: FtrProviderContext) {
         const accessKeySecretKey = 'accessKeySecretKeyTest';
         const tempAccessSessionToken = 'tempAccessSessionTokenTest';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
         await cisIntegration.selectValue(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ, 'temporary_keys');
@@ -355,7 +355,7 @@ export default function (providerContext: FtrProviderContext) {
         const sharedCredentialFile = 'sharedCredentialFileTest';
         const sharedCredentialProfileName = 'sharedCredentialProfileNameTest';
         await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
-        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+        await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS.MANUAL);
         await cisIntegration.clickOptionButton(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ);
         await cisIntegration.selectValue(

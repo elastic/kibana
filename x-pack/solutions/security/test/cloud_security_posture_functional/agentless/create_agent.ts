@@ -8,6 +8,7 @@
 import type * as http from 'http';
 import expect from '@kbn/expect';
 import equals from 'fast-deep-equal';
+import { AWS_PROVIDER_TEST_SUBJ, AWS_SINGLE_ACCOUNT_TEST_SUBJ } from '@kbn/cloud-security-posture';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { setupMockServer } from './mock_agentless_api';
@@ -46,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
       await cisIntegration.inputUniqueIntegrationName();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await cisIntegration.selectSetupTechnology('agent-based');
@@ -71,8 +72,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
@@ -114,8 +115,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
@@ -150,8 +151,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
       await pageObjects.header.waitUntilLoadingHasFinished();
@@ -183,8 +184,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         CLOUD_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
-      await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
-      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
+      await cisIntegration.clickOptionButton(AWS_PROVIDER_TEST_SUBJ);
+      await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_SUBJ);
 
       await cisIntegration.inputIntegrationName(integrationPolicyName);
       await cisIntegration.selectSetupTechnology('agent-based');

@@ -16,7 +16,7 @@ export const AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS = {
 };
 
 export const AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'awsOrganizationTestId';
-export const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
+export const AWS_SINGLE_ACCOUNT_TEST_SUBJ = 'awsSingleTestId';
 
 export const AWS_INPUT_TEST_SUBJECTS = {
   ROLE_ARN: 'awsRoleArnInput',
