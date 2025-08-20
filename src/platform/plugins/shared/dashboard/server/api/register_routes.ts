@@ -15,11 +15,11 @@ import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
+import type { DashboardItem } from '../content_management/v1';
 import {
   dashboardGetResultSchema,
   dashboardCreateResultSchema,
   dashboardSearchResultsSchema,
-  DashboardItem,
 } from '../content_management/v1';
 import {
   dashboardAttributesSchemaRequest,
@@ -86,10 +86,12 @@ export function registerAPIRoutes({
               })
             ),
           }),
+          // body would be a different schema for just the public api matching the new format.
           body: dashboardCreateRequestAttributesSchema,
         },
         response: {
           200: {
+            // this function would transform the response from the content management shape to the new format
             body: () => dashboardCreateResultSchema,
           },
         },
@@ -98,8 +100,17 @@ export function registerAPIRoutes({
     async (ctx, req, res) => {
       const { id } = req.params;
       const { references, spaces: initialNamespaces, ...attributes } = req.body;
+
+      // function to transform from the new format shape to content management shape
+      function transformToContentManagementShape(req) {
+        return req;
+      }
+
       const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
+        .getForRequest({
+          request: transformToContentManagementShape(req),
+          requestHandlerContext: ctx,
+        })
         .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
@@ -146,10 +157,12 @@ export function registerAPIRoutes({
               meta: { description: 'A unique identifier for the dashboard.' },
             }),
           }),
+          // body would be a different schema for just the public api matching the new format.
           body: dashboardAttributesSchemaRequest,
         },
         response: {
           200: {
+            // this function would transform the response from the content management shape to the new format
             body: () => dashboardCreateResultSchema,
           },
         },
@@ -157,8 +170,16 @@ export function registerAPIRoutes({
     },
     async (ctx, req, res) => {
       const { references, ...attributes } = req.body;
+
+      // function to transform from the new format shape to content management shape
+      function transformToContentManagementShape(req) {
+        return req;
+      }
       const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
+        .getForRequest({
+          request: transformToContentManagementShape(req),
+          requestHandlerContext: ctx,
+        })
         .for(CONTENT_ID, LATEST_VERSION);
       let result;
       try {
@@ -275,6 +296,7 @@ export function registerAPIRoutes({
         },
         response: {
           200: {
+            // this function would transform the response from the content management shape to the new format
             body: () => dashboardGetResultSchema,
           },
         },

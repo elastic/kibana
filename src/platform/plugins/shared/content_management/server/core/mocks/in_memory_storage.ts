@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GetResult } from '../../../common';
+import type { GetResult } from '../../../common';
 import type { ContentStorage, StorageContext } from '../types';
 
 export interface FooContent {
