@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { IEvent, IEventLogServiceBase, IEventLoggerBase } from 'x-pack/platform/packages/shared/kbn-event-log-types';
+import type { IEvent, IEventLogServiceBase, IEventLoggerBase } from '@kbn/event-log-types';
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { KueryNode } from '@kbn/es-query';
 
-export type { IEvent, IValidatedEvent } from 'x-pack/platform/packages/shared/kbn-event-log-types';
+export type { IEvent, IValidatedEvent } from '@kbn/event-log-types';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
 import type { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import type {
