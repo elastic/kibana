@@ -13,5 +13,3 @@ import { InspectComponentPluginServer } from './plugin';
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new InspectComponentPluginServer(initializerContext);
 };
-
-export { getComponentCodeowners } from './codeowners';
