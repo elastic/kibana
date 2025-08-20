@@ -16,6 +16,7 @@ import {
   backgroundTaskNodeModelVersions,
   taskModelVersions,
   taskResultModelVersions,
+  taskPollRequestModelVersions,
 } from './model_versions';
 
 export { scheduleRruleSchemaV1, scheduleRruleSchemaV2 } from './schemas/rrule';
@@ -41,6 +42,22 @@ export function setupSavedObjects(
     },
     indexPattern: '.kibana_task_results',
     modelVersions: taskResultModelVersions,
+  });
+
+  savedObjects.registerType({
+    name: 'task_poll_request',
+    namespaceType: 'agnostic',
+    hidden: true,
+    mappings: {
+      dynamic: false,
+      properties: {
+        taskId: {
+          type: 'keyword',
+        },
+      },
+    },
+    indexPattern: '.kibana_task_poll_requests',
+    modelVersions: taskPollRequestModelVersions,
   });
 
   savedObjects.registerType({

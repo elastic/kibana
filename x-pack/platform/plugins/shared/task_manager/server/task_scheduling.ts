@@ -128,6 +128,7 @@ export class TaskScheduling {
         ...(options?.request ? { request: options?.request } : {}),
       }
     );
+    await this.store.requestPoll(task.id);
 
     const resp = await this.store.awaitTaskRunResult<Result>(task.id);
 

@@ -300,6 +300,7 @@ export class TaskManagerPlugin
       TASK_SO_NAME,
       BACKGROUND_TASK_NODE_SO_NAME,
       'task_result',
+      'task_poll_request',
     ]);
 
     this.kibanaDiscoveryService = new KibanaDiscoveryService({
