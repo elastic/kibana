@@ -30,7 +30,7 @@ export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseId }) => {
         }}
       >
         {isLoading && <EuiProgress size="xs" color="primary" />}
-        <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>
+        {!error && <EuiMarkdownFormat textSize="s">{summary}</EuiMarkdownFormat>}
       </EuiCallOut>
       <EuiSpacer size="m" />
     </EuiFlexItem>
