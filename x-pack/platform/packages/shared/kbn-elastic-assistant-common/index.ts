@@ -6,6 +6,7 @@
  */
 
 // Schema constants
+
 export * from './impl/schemas';
 
 export { defaultAssistantFeatures } from './impl/capabilities';
@@ -44,6 +45,8 @@ export type {
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
 export { parseBedrockBuffer, handleBedrockChunk } from './impl/utils/bedrock';
+export { getIsConversationOwner } from './impl/utils/sharing_helpers';
+
 export * from './constants';
 
 /** currently the same shape as "fields" property in the ES response */

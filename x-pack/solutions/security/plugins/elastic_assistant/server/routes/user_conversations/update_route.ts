@@ -10,6 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  getIsConversationOwner,
 } from '@kbn/elastic-assistant-common';
 import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
@@ -68,10 +69,10 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             });
           }
           if (
-            // if no createdBy, skip check. This is a legacy conversation, and the update script will assign the conversation.user[0] to the createdBy
-            existingConversation.createdBy &&
-            existingConversation.createdBy.name !== authenticatedUser?.username &&
-            existingConversation.createdBy.id !== authenticatedUser?.profile_uid
+            !getIsConversationOwner(existingConversation, {
+              name: authenticatedUser?.username,
+              id: authenticatedUser?.profile_uid,
+            })
           ) {
             return assistantResponse.error({
               body: `conversation id: "${id}". Updating a conversation is only allowed for the owner of the conversation.`,

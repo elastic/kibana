@@ -12,6 +12,7 @@ import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { Message, Replacements } from '@kbn/elastic-assistant-common';
 import {
+  getIsConversationOwner,
   API_VERSIONS,
   newContentReferencesStore,
   ExecuteConnectorRequestBody,
@@ -138,10 +139,11 @@ export const postActionsConnectorExecuteRoute = (
               id: conversationId,
             });
             if (
-              // if no createdBy, skip check. This is a legacy conversation, and the update script will assign the conversation.user[0] to the createdBy
-              conversation?.createdBy &&
-              conversation?.createdBy.name !== checkResponse.currentUser?.username &&
-              conversation?.createdBy.id !== checkResponse.currentUser?.profile_uid
+              conversation &&
+              !getIsConversationOwner(conversation, {
+                name: checkResponse.currentUser?.username,
+                id: checkResponse.currentUser?.profile_uid,
+              })
             ) {
               return resp.error({
                 body: `Updating a conversation is only allowed for the owner of the conversation.`,

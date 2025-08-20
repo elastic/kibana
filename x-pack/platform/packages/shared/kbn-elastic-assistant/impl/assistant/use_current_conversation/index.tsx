@@ -14,6 +14,7 @@ import type {
   RefetchQueryFilters,
 } from '@tanstack/react-query';
 import type { ApiConfig, PromptResponse, User } from '@kbn/elastic-assistant-common';
+import { getIsConversationOwner } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ConversationSharedState } from '../share_conversation/utils';
 import { getConversationSharedState } from '../share_conversation/utils';
@@ -310,33 +311,7 @@ export const useCurrentConversation = ({
 
   // is current user the owner of the conversation?
   const isConversationOwner = useMemo(() => {
-    console.log('currentConversation?.createdBy', currentConversation?.createdBy);
-    console.log('currentUser', currentUser);
-    console.log('condition', {
-      con0:
-        currentConversation?.id === '' ||
-        (currentConversation?.createdBy &&
-          currentConversation?.createdBy?.id === currentUser?.id) ||
-        currentConversation?.createdBy?.name === currentUser?.name ||
-        (currentConversation?.users.length === 1 &&
-          (currentConversation?.users[0].id === currentUser?.id ||
-            currentConversation?.users[0].name === currentUser?.name)),
-      con1:
-        currentConversation?.createdBy && currentConversation?.createdBy?.id === currentUser?.id,
-      con2: currentConversation?.createdBy?.name === currentUser?.name,
-      con3:
-        currentConversation?.users.length === 1 &&
-        (currentConversation?.users[0].id === currentUser?.id ||
-          currentConversation?.users[0].name === currentUser?.name),
-    });
-    return (
-      currentConversation?.id === '' ||
-      (currentConversation?.createdBy && currentConversation?.createdBy?.id === currentUser?.id) ||
-      currentConversation?.createdBy?.name === currentUser?.name ||
-      (currentConversation?.users.length === 1 &&
-        (currentConversation?.users[0].id === currentUser?.id ||
-          currentConversation?.users[0].name === currentUser?.name))
-    );
+    return getIsConversationOwner(currentConversation, currentUser);
   }, [currentConversation, currentUser]);
 
   const conversationSharedState = useMemo(

@@ -453,21 +453,18 @@ describe('useCurrentConversation', () => {
   });
 
   it('should set isConversationOwner={true}', async () => {
-    const conversationTitle = 'Test Conversation';
-    const conversation = {
-      ...mockData.welcome_id,
-      id: 'test-id',
-      title: conversationTitle,
-      messages: [],
-    } as Conversation;
-
     const { result } = setupHook({
-      conversations: { ...mockData, 'test-id': conversation },
+      conversations: mockData,
+      currentUser: MOCK_CURRENT_USER,
     });
-    expect(result.current.isConversationOwner).toEqual(true);
+    await act(async () => {
+      await result.current.setCurrentConversation(mockData.welcome_id);
+    });
+
+    await waitFor(() => expect(result.current.isConversationOwner).toEqual(true));
   });
 
-  it.only('should set isConversationOwner={false}', async () => {
+  it('should set isConversationOwner={false}', async () => {
     const anotherUser = { name: 'another-user' };
     const conversation = {
       ...mockData.welcome_id,
@@ -477,11 +474,55 @@ describe('useCurrentConversation', () => {
 
     const { result } = setupHook({
       conversations: { ...mockData, welcome_id: conversation },
+      currentUser: { name: 'elastic' },
     });
     await act(async () => {
       await result.current.setCurrentConversation(conversation);
     });
 
     await waitFor(() => expect(result.current.isConversationOwner).toEqual(false));
+  });
+
+  it('should set conversationSharedState={private}', async () => {
+    const { result } = setupHook({
+      conversations: mockData,
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(mockData.welcome_id);
+    });
+
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('private'));
+  });
+
+  it('should set conversationSharedState={shared}', async () => {
+    const conversation = {
+      ...mockData.welcome_id,
+      users: [MOCK_CURRENT_USER, { name: 'another-user' }],
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, welcome_id: conversation },
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(conversation);
+    });
+
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('shared'));
+  });
+
+  it('should set conversationSharedState={global}', async () => {
+    const conversation = {
+      ...mockData.welcome_id,
+      users: [],
+    } as Conversation;
+
+    const { result } = setupHook({
+      conversations: { ...mockData, welcome_id: conversation },
+    });
+    await act(async () => {
+      await result.current.setCurrentConversation(conversation);
+    });
+
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('global'));
   });
 });

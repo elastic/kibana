@@ -28,11 +28,18 @@ describe('useUserProfile', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
-
   it('Does not fetch if no user id is provided', async () => {
     const { result } = renderHook(() => useUserProfile({}), { wrapper });
     await waitFor(() => {
-      expect(result.current.isEnabled).toEqual(false);
+      // TODO uncomment this assertion after tanstack upgrade (5.85.5)
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          fetchStatus: 'idle',
+          isError: false,
+          isFetched: false,
+          isFetchedAfterMount: false,
+        })
+      );
     });
   });
 
@@ -48,7 +55,8 @@ describe('useUserProfile', () => {
     });
     await waitFor(() => expect(result.current.isSuccess).toEqual(true));
     await waitFor(() => {
-      expect(result.current.isEnabled).toEqual(true);
+      // TODO uncomment this assertion after tanstack upgrade (5.85.5)
+      // expect(result.current.isEnabled).toEqual(true);
       expect(result.current.isLoading).toEqual(false);
       expect(result.current.data).toEqual({
         data: { avatar: { imageUrl: 'avatar-url' } },
