@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect } from 'react-router-dom';
+import type { AuthenticatedUser } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
@@ -29,10 +32,50 @@ export interface HomeAppProps {
 }
 
 export function HomeApp({ directories, solutions }: HomeAppProps) {
-  const { chrome, application, getBasePath, addBasePath, environmentService, dataViewsService } =
-    getServices();
+  const {
+    chrome,
+    application,
+    getBasePath,
+    addBasePath,
+    environmentService,
+    dataViewsService,
+    contentManagement,
+  } = getServices();
+  const { services } = useKibana();
   const environment = environmentService.getEnvironment();
+  const [currentUser, setCurrentUser] = useState<AuthenticatedUser | null>(null);
+  const [dashboards, setDashboards] = useState<any[]>([]);
   const isCloudEnabled = environment.cloud;
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        if (services.security) {
+          const user = await services.security.authc.getCurrentUser();
+          setCurrentUser(user);
+        }
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(error);
+      }
+    };
+
+    getCurrentUser();
+  }, [services.security]);
+
+  // Fetch all dashboards (no filtering)
+  useEffect(() => {
+    const fetchDashboards = async () => {
+      if (!contentManagement) return;
+      const response = await contentManagement.client.search({
+        contentTypeId: 'dashboard',
+        query: {},
+        options: { spaces: ['*'], fields: ['title', 'description', 'createdBy'] },
+      });
+      const dashboardHits = (response as { hits: any[] }).hits;
+      setDashboards(dashboardHits);
+    };
+    fetchDashboards();
+  }, [contentManagement]);
 
   const recentlyAccessed = chrome.recentlyAccessed.get();
   const renderTutorialDirectory = (props: RouteComponentProps<{ tab: string }>) => {
@@ -80,6 +123,8 @@ export function HomeApp({ directories, solutions }: HomeAppProps) {
               urlBasePath={getBasePath()}
               hasUserDataView={() => dataViewsService.hasUserDataView()}
               isCloudEnabled={isCloudEnabled}
+              userId={currentUser?.profile_uid}
+              dashboards={dashboards}
             />
           </Route>
           <Redirect to="/" />

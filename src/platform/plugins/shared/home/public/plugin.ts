@@ -129,6 +129,7 @@ export class HomePublicPlugin
           shareStart,
           contentClient: contentManagement.client,
           savedObjectsTagging,
+          contentManagement,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

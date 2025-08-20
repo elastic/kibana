@@ -25,6 +25,7 @@ import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/publi
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { TutorialService } from '../services/tutorials';
 import type { AddDataService } from '../services/add_data';
 import type { FeatureCatalogueRegistry } from '../services/feature_catalogue';
@@ -61,6 +62,7 @@ export interface HomeKibanaServices {
   i18nStart: I18nStart;
   contentClient: ContentClient;
   savedObjectsTagging: SavedObjectTaggingOssPluginStart;
+  contentManagement: ContentManagementPublicStart;
 }
 
 let services: HomeKibanaServices | null = null;

@@ -27,6 +27,7 @@ import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
 import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_table';
 import { ContentByTagTable } from './personalization/content_by_tag_table';
+import { PersonalizedDashboardsCreatedByUser } from './personalization/created_by_user';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 
@@ -39,8 +40,9 @@ export interface HomeProps {
   hasUserDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
   recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
+  userId?: string;
+  dashboards?: any[];
 }
-
 interface State {
   isLoading: boolean;
   isNewKibanaInstance: boolean;
@@ -79,7 +81,7 @@ export class Home extends Component<HomeProps, State> {
     body.classList.remove('isHomPage');
   }
 
-  public componentDidMount() {
+  public async componentDidMount() {
     this._isMounted = true;
     this.fetchIsNewKibanaInstance();
 
@@ -131,14 +133,25 @@ export class Home extends Component<HomeProps, State> {
       .sort((directoryA, directoryB) => (directoryA.order ?? -1) - (directoryB.order ?? -1));
   }
 
+  private getDashboardsByUser(dashboards: any[], userId?: string) {
+    if (!userId) return [];
+    const log = dashboards.filter((dashboard) => {
+      return dashboard.createdBy === userId;
+    });
+    return log;
+  }
+
   private renderNormal() {
-    const { addBasePath, solutions, isCloudEnabled, recentlyAccessed } = this.props;
+    const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
+      this.props;
+
     const { application, trackUiMetric, contentClient, savedObjectsTagging, uiSettings } =
       getServices();
     console.log(getServices());
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
+    const dashboardsCreatedByUser = this.getDashboardsByUser(dashboards ?? [], userId);
 
     // Show card for console if none of the manage data plugins are available, most likely in OSS
     if (manageDataFeatures.length < 1 && devTools) {
@@ -155,11 +168,20 @@ export class Home extends Component<HomeProps, State> {
         panelled={false}
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
-        <PersonalizedRecentlyViewed recentlyAccessed={recentlyAccessed} addBasePath={addBasePath} />
+        {recentlyAccessed && (
+          <PersonalizedRecentlyViewed
+            recentlyAccessed={recentlyAccessed}
+            addBasePath={addBasePath}
+          />
+        )}
         <ContentByTagTable
           contentClient={contentClient}
           uiSettings={uiSettings}
           savedObjectsTagging={savedObjectsTagging}
+        />
+        <PersonalizedDashboardsCreatedByUser
+          dashboards={dashboardsCreatedByUser}
+          addBasePath={addBasePath}
         />
         <AddData
           addBasePath={addBasePath}
