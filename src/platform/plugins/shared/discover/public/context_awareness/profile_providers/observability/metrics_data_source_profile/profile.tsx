@@ -9,6 +9,7 @@
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { dynamic } from '@kbn/shared-ux-utility';
+import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
@@ -23,6 +24,7 @@ export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
   profileId: METRICS_DATA_SOURCE_PROFILE_ID,
+  restrictedToProductFeature: METRICS_EXPERIENCE_PRODUCT_FEATURE_ID,
   isExperimental: true,
   profile: {
     getDefaultAppState: (prev) => (params) => ({
@@ -37,6 +39,8 @@ export const createMetricsDataSourceProfileProvider = (
     }),
   },
   resolve: (params) => {
+    // This filter still needs to be narrowed down to `FROM metrics-*` or `TS metrics-*`
+    // and possibly other conditions
     if (
       !isOfAggregateQueryType(params.query) ||
       !params.query.esql.toLowerCase().includes('metrics')

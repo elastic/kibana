@@ -365,8 +365,8 @@ export function UnifiedHistogramChart({
         {...a11yCommonProps}
         toolbarCss={chartToolbarCss}
         toolbar={{
-          rightSide: toolbarRightSide,
-          leftSide: chartVisible ? actions : [],
+          leftSide: toolbarRightSide,
+          rightSide: chartVisible ? actions : [],
         }}
       >
         {chartVisible && (

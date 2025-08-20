@@ -196,9 +196,7 @@ const CustomChartSectionWrapper = ({
   const { setUnifiedHistogramApi, ...restProps } = unifiedHistogramProps;
   const { api, stateProps, requestParams } = useServicesBootstrap({
     ...restProps,
-    initialState: {
-      ...unifiedHistogramProps.initialState,
-    },
+    initialState: unifiedHistogramProps.initialState,
     localStorageKeyPrefix:
       chartSectionConfig.localStorageKeyPrefix ?? unifiedHistogramProps.localStorageKeyPrefix,
   });

@@ -84,7 +84,7 @@ export const DummyMetricsGrid = ({
     [fields, setBreakdown]
   );
 
-  const rightSideComponents = useMemo(
+  const leftSideComponents = useMemo(
     () => [
       renderToggleActions(),
       <ToolbarSelector
@@ -115,8 +115,8 @@ export const DummyMetricsGrid = ({
       id="unifiedMetricsExperienceGridPanel"
       toolbarCss={chartToolbarCss}
       toolbar={{
-        rightSide: rightSideComponents,
-        leftSide: actions,
+        leftSide: leftSideComponents,
+        rightSide: actions,
       }}
     >
       <div css={histogramCss}>{'Dummy Metrics Grid'}</div>

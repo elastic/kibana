@@ -17,8 +17,8 @@ interface ChartSectionTemplateProps {
   id: string;
   toolbarCss?: SerializedStyles;
   toolbar?: {
-    rightSide?: React.ReactNode;
-    leftSide?: IconButtonGroupProps['buttons'];
+    leftSide?: React.ReactNode;
+    rightSide?: IconButtonGroupProps['buttons'];
   };
   children: React.ReactNode;
 }
@@ -50,21 +50,21 @@ export const ChartSectionTemplate = ({
         >
           <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
             <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-              {React.Children.toArray(rightSide).map((child, i) => (
+              {React.Children.toArray(leftSide).map((child, i) => (
                 <EuiFlexItem grow={false} key={i}>
                   {child}
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>
           </EuiFlexItem>
-          {leftSide.length > 0 && (
+          {rightSide.length > 0 && (
             <EuiFlexItem grow={false}>
               <IconButtonGroup
                 legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
                   defaultMessage: 'Chart actions',
                 })}
                 buttonSize="s"
-                buttons={leftSide}
+                buttons={rightSide}
               />
             </EuiFlexItem>
           )}
