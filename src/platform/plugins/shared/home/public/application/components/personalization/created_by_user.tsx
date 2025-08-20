@@ -115,7 +115,7 @@ export const PersonalizedDashboardsCreatedByUser = ({
         <EuiText size="xs">Showing {resultsCount}</EuiText>
         <EuiInMemoryTable
           tableCaption={i18n.translate('home.dashboardsCreatedByMe.caption', {
-            defaultMessage: 'Dashboards created by loggedin user',
+            defaultMessage: 'Dashboards created by me',
           })}
           responsiveBreakpoint={false}
           items={items}

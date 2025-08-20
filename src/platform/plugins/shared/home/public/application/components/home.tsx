@@ -239,11 +239,6 @@ export class Home extends Component<HomeProps, State> {
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
         {this.renderTabs(tabs)}
-        <ContentByTagTable
-          contentClient={contentClient}
-          uiSettings={uiSettings}
-          savedObjectsTagging={savedObjectsTagging}
-        />
         <AddData
           addBasePath={addBasePath}
           application={application}
