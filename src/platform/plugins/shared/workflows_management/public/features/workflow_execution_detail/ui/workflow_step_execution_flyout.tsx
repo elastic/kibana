@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -22,14 +22,16 @@ import {
   useEuiTheme,
   EuiButtonIcon,
   EuiDescriptionList,
+  EuiSkeletonText,
 } from '@elastic/eui';
-import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui/workflow_execution_logs_table';
-import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { StatusBadge, getExecutionStatusIcon, JSONDataTable } from '../../../shared/ui';
+import { useStepExecution } from '../model/use_step_execution';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 interface WorkflowStepExecutionFlyoutProps {
   workflowExecutionId: string;
-  stepExecution: EsWorkflowStepExecution;
+  stepId: string;
   closeFlyout: () => void;
   goNext?: () => void;
   goPrevious?: () => void;
@@ -37,41 +39,82 @@ interface WorkflowStepExecutionFlyoutProps {
 
 export const WorkflowStepExecutionFlyout = ({
   workflowExecutionId,
-  stepExecution,
+  stepId,
   closeFlyout,
   goNext,
   goPrevious,
 }: WorkflowStepExecutionFlyoutProps) => {
   const { euiTheme } = useEuiTheme();
 
-  const complicatedFlyoutTitleId = `Step ${stepExecution.stepId} Execution Details`;
+  const { data: stepExecution, isLoading } = useStepExecution(workflowExecutionId, stepId);
 
-  const tabs = [
-    {
-      id: 'input',
-      name: 'Input',
-    },
-    {
-      id: 'output',
-      name: 'Output',
-    },
-    {
-      id: 'timeline',
-      name: 'Timeline',
-    },
-  ];
+  const { setSelectedStep } = useWorkflowUrlState();
 
-  const [selectedTabId, setSelectedTabId] = useState<string>('timeline');
+  useEffect(() => {
+    setSelectedStep(stepId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepId]);
 
-  const renderTabs = tabs.map((tab, index) => (
-    <EuiTab
-      onClick={() => setSelectedTabId(tab.id)}
-      isSelected={tab.id === selectedTabId}
-      key={index}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
+  const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'input',
+        name: 'Input',
+      },
+      {
+        id: 'output',
+        name: stepExecution?.output ? 'Output' : 'Error',
+      },
+      {
+        id: 'timeline',
+        name: 'Timeline',
+      },
+    ],
+    [stepExecution]
+  );
+
+  const [selectedTabId, setSelectedTabId] = useState<string>('input');
+
+  const renderInput = () => {
+    if (stepExecution?.input) {
+      return (
+        <JSONDataTable
+          data={stepExecution.input}
+          title="Step Input"
+          data-test-subj="stepExecutionInputTable"
+        />
+      );
+    }
+    return <EuiText>No input</EuiText>;
+  };
+
+  const renderOutput = () => {
+    if (stepExecution?.error) {
+      return (
+        <JSONDataTable
+          data={stepExecution.error as any}
+          title="Step Error"
+          data-test-subj="stepExecutionErrorTable"
+        />
+      );
+    }
+    if (stepExecution?.output) {
+      return (
+        <JSONDataTable
+          data={stepExecution.output}
+          title="Step Output"
+          data-test-subj="stepExecutionOutputTable"
+        />
+      );
+    }
+    return <EuiText>No output</EuiText>;
+  };
+
+  const renderTimeline = () => {
+    return <WorkflowExecutionLogsTable executionId={workflowExecutionId} stepId={stepId} />;
+  };
 
   return (
     <EuiFlyout
@@ -80,6 +123,8 @@ export const WorkflowStepExecutionFlyout = ({
       hideCloseButton
       aria-labelledby={complicatedFlyoutTitleId}
       paddingSize="none"
+      type="push"
+      size="s"
     >
       <EuiFlyoutHeader hasBorder>
         <EuiFlexGroup
@@ -113,46 +158,58 @@ export const WorkflowStepExecutionFlyout = ({
         </EuiFlexGroup>
         <EuiSpacer size="s" />
         <div css={{ padding: euiTheme.size.m }}>
-          <EuiTitle size="m">
-            <h2
-              id={complicatedFlyoutTitleId}
-              css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
-            >
-              {getExecutionStatusIcon(euiTheme, stepExecution.status)}
-              {stepExecution.stepId}
-            </h2>
-          </EuiTitle>
+          {isLoading && <EuiSkeletonText lines={1} />}
+          {stepExecution && (
+            <EuiTitle size="m">
+              <h2
+                id={complicatedFlyoutTitleId}
+                css={{ display: 'flex', alignItems: 'center', gap: euiTheme.size.s }}
+              >
+                {getExecutionStatusIcon(euiTheme, stepExecution.status)}
+                {stepExecution.stepId}
+              </h2>
+            </EuiTitle>
+          )}
           <EuiSpacer size="m" />
           <EuiText size="xs">
-            <EuiDescriptionList
-              textStyle="reverse"
-              type="responsiveColumn"
-              compressed
-              listItems={[
-                {
-                  title: 'Status',
-                  description: <StatusBadge status={stepExecution.status} />,
-                },
-                {
-                  title: 'Execution time',
-                  description: `${stepExecution.executionTimeMs}ms`,
-                },
-              ]}
-            />
+            {isLoading && <EuiSkeletonText lines={2} />}
+            {stepExecution && (
+              <EuiDescriptionList
+                textStyle="reverse"
+                type="responsiveColumn"
+                compressed
+                listItems={[
+                  {
+                    title: 'Status',
+                    description: <StatusBadge status={stepExecution.status} />,
+                  },
+                  {
+                    title: 'Execution time',
+                    description: `${stepExecution.executionTimeMs}ms`,
+                  },
+                ]}
+              />
+            )}
           </EuiText>
           <EuiSpacer size="m" />
-          <EuiTabs css={{ marginBottom: -13 }}>{renderTabs}</EuiTabs>
+          <EuiTabs css={{ marginBottom: -13 }}>
+            {tabs.map((tab, index) => (
+              <EuiTab
+                onClick={() => setSelectedTabId(tab.id)}
+                isSelected={tab.id === selectedTabId}
+                key={index}
+              >
+                {tab.name}
+              </EuiTab>
+            ))}
+          </EuiTabs>
         </div>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        {selectedTabId === 'input' && <EuiText>Input</EuiText>}
-        {selectedTabId === 'output' && <EuiText>Output</EuiText>}
-        {selectedTabId === 'timeline' && (
-          <WorkflowExecutionLogsTable
-            executionId={workflowExecutionId}
-            stepId={stepExecution.stepId}
-          />
-        )}
+        {isLoading && <EuiSkeletonText lines={2} />}
+        {selectedTabId === 'input' && renderInput()}
+        {selectedTabId === 'output' && renderOutput()}
+        {selectedTabId === 'timeline' && renderTimeline()}
       </EuiFlyoutBody>
     </EuiFlyout>
   );

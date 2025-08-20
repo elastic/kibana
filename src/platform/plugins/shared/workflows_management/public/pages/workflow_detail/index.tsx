@@ -35,6 +35,7 @@ import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_even
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
 import { WorkflowExecution } from '../../features/workflow_execution_detail/ui/workflow_execution';
+import { useWorkflowExecution } from '../../entities/workflows/model/useWorkflowExecution';
 
 const WorkflowYAMLEditor = React.lazy(() =>
   import('../../widgets/workflow_yaml_editor/ui').then((module) => ({
@@ -58,6 +59,10 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   } = useWorkflowDetail(id);
   const [workflowEventModalOpen, setWorkflowEventModalOpen] = useState(false);
   const [testWorkflowModalOpen, setTestWorkflowModalOpen] = useState(false);
+  const { activeTab, setActiveTab, selectedExecutionId, selectedStepId } = useWorkflowUrlState();
+
+  // TODO: FIX: do not fetch execution twice
+  const { data: execution } = useWorkflowExecution(selectedExecutionId ?? null);
 
   chrome!.setBreadcrumbs([
     {
@@ -101,8 +106,6 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     setWorkflowYaml(wfString);
     setHasChanges(originalWorkflowYaml !== wfString);
   };
-
-  const { activeTab, setActiveTab, selectedExecutionId } = useWorkflowUrlState();
 
   const { updateWorkflow, runWorkflow } = useWorkflowActions();
 
@@ -150,6 +153,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           value={workflowYaml}
           onChange={(v) => handleChange(v ?? '')}
           hasChanges={hasChanges}
+          highlightStep={selectedStepId}
+          stepExecutions={execution?.stepExecutions}
         />
       </React.Suspense>
     );

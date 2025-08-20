@@ -67,7 +67,7 @@ export const WorkflowStepExecutionListItem = ({
             <p css={{ color: euiTheme.colors.textSubdued }}>{formattedStartedAt}</p>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiText css={{ fontWeight: 'bold' }}>{stepExecution.stepId}</EuiText>
+            <b>{stepExecution.stepId}</b>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>

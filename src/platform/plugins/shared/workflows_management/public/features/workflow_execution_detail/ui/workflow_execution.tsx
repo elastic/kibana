@@ -252,8 +252,9 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 
     return (
       <WorkflowStepExecutionFlyout
+        key={selectedStepExecution.id}
         workflowExecutionId={workflowExecutionId}
-        stepExecution={selectedStepExecution}
+        stepId={selectedStepExecution.stepId}
         closeFlyout={() => setSelectedStepExecution(null)}
         goNext={goNext}
         goPrevious={goPrevious}
@@ -276,7 +277,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
         onStepExecutionClick={(stepExecutionId) => {
           setSelectedStepExecution(stepExecutionId);
         }}
-        selectedId={null}
+        selectedId={selectedStepExecutionId ?? null}
       />
     </>
   );

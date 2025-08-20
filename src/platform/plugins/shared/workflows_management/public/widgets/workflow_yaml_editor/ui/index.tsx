@@ -14,13 +14,19 @@ import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import YAML from 'yaml';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
-import { navigateToErrorPosition } from '../lib/utils';
+import {
+  getHighlightStepDecorations,
+  getMonacoRangeFromYamlNode,
+  navigateToErrorPosition,
+} from '../lib/utils';
 import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
+import { getStepNodeRange } from '../../../../common/lib/yaml_utils';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -43,6 +49,33 @@ const editorStyles = {
         backgroundColor: euiTheme.colors.backgroundLightWarning,
         borderRadius: '2px',
       },
+      '.step-highlight': {
+        backgroundColor: euiTheme.colors.backgroundBaseAccent,
+        borderRadius: '2px',
+      },
+      '.dimmed': {
+        opacity: 0.5,
+      },
+      '.step-execution-completed': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.vis.euiColorVis0,
+          borderRadius: '50%',
+        },
+      },
+      '.step-execution-failed': {
+        '&:before': {
+          content: '""',
+          display: 'block',
+          width: '12px',
+          height: '12px',
+          backgroundColor: euiTheme.colors.danger,
+          borderRadius: '50%',
+        },
+      },
     }),
 };
 
@@ -51,6 +84,8 @@ export const WorkflowYAMLEditor = ({
   filename = `${workflowId}.yaml`,
   readOnly = false,
   hasChanges = false,
+  highlightStep,
+  stepExecutions,
   onMount,
   onChange,
   onSave,
@@ -74,6 +109,12 @@ export const WorkflowYAMLEditor = ({
     ];
   }, [workflowJsonSchema]);
 
+  const yamlDocumentRef = useRef<YAML.Document | null>(null);
+  const highlightStepDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+  const stepExecutionsDecorationCollectionRef =
+    useRef<monaco.editor.IEditorDecorationsCollection | null>(null);
+
   const { validationErrors, validateVariables, handleMarkersChanged } = useYamlValidation({
     workflowYamlSchema: WORKFLOW_ZOD_SCHEMA_LOOSE,
     onValidationErrors,
@@ -81,13 +122,19 @@ export const WorkflowYAMLEditor = ({
 
   const [isEditorMounted, setIsEditorMounted] = useState(false);
 
-  const validateMustacheExpressionsEverywhere = useCallback(() => {
+  const changeSideEffects = useCallback(() => {
     if (editorRef.current) {
       const model = editorRef.current.getModel();
       if (!model) {
         return;
       }
       validateVariables(editorRef.current);
+      try {
+        const value = editorRef.current.getValue();
+        yamlDocumentRef.current = YAML.parseDocument(value ?? '');
+      } catch (error) {
+        yamlDocumentRef.current = null;
+      }
     }
   }, [validateVariables]);
 
@@ -96,9 +143,9 @@ export const WorkflowYAMLEditor = ({
       if (onChange) {
         onChange(value);
       }
-      validateMustacheExpressionsEverywhere();
+      changeSideEffects();
     },
-    [onChange, validateMustacheExpressionsEverywhere]
+    [onChange, changeSideEffects]
   );
 
   const handleEditorDidMount = (editor: monaco.editor.IStandaloneCodeEditor) => {
@@ -116,9 +163,76 @@ export const WorkflowYAMLEditor = ({
   useEffect(() => {
     // After editor is mounted, validate the initial content
     if (isEditorMounted && editorRef.current) {
-      validateMustacheExpressionsEverywhere();
+      changeSideEffects();
     }
-  }, [validateMustacheExpressionsEverywhere, isEditorMounted]);
+  }, [changeSideEffects, isEditorMounted]);
+
+  useEffect(() => {
+    const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
+    if (!isEditorMounted || !yamlDocumentRef.current || !highlightStep || !model) {
+      if (highlightStepDecorationCollectionRef.current) {
+        highlightStepDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const stepNode = getStepNodeRange(yamlDocumentRef.current, highlightStep);
+    if (!stepNode) {
+      return;
+    }
+    const range = getMonacoRangeFromYamlNode(model, stepNode);
+    if (!range) {
+      return;
+    }
+    editorRef.current?.revealLineInCenter(range.startLineNumber);
+    if (highlightStepDecorationCollectionRef.current) {
+      highlightStepDecorationCollectionRef.current.clear();
+    }
+    highlightStepDecorationCollectionRef.current =
+      editorRef.current?.createDecorationsCollection(getHighlightStepDecorations(model, range)) ??
+      null;
+  }, [highlightStep, isEditorMounted]);
+
+  useEffect(() => {
+    const model = editorRef.current?.getModel() as monaco.editor.ITextModel;
+    if (!isEditorMounted || !model || !stepExecutions || !yamlDocumentRef.current) {
+      if (stepExecutionsDecorationCollectionRef.current) {
+        stepExecutionsDecorationCollectionRef.current.clear();
+      }
+      return;
+    }
+    const decorations = stepExecutions
+      .map((stepExecution) => {
+        // @ts-expect-error - TODO: fix this
+        const stepNode = getStepNodeRange(yamlDocumentRef.current, stepExecution.stepId);
+        if (!stepNode) {
+          return null;
+        }
+        const stepRange = getMonacoRangeFromYamlNode(model, stepNode);
+        if (!stepRange) {
+          return null;
+        }
+        const decoration: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            stepRange.startLineNumber,
+            stepRange.startColumn,
+            stepRange.startLineNumber,
+            stepRange.endColumn
+          ),
+          options: {
+            glyphMarginClassName: `step-execution-${stepExecution.status} ${
+              !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+            }`,
+          },
+        };
+        return decoration;
+      })
+      .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
+    if (stepExecutionsDecorationCollectionRef.current) {
+      stepExecutionsDecorationCollectionRef.current.clear();
+    }
+    stepExecutionsDecorationCollectionRef.current =
+      editorRef.current?.createDecorationsCollection(decorations) ?? null;
+  }, [isEditorMounted, stepExecutions, highlightStep]);
 
   const completionProvider = useMemo(() => {
     return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
@@ -139,6 +253,7 @@ export const WorkflowYAMLEditor = ({
     () => ({
       readOnly,
       minimap: { enabled: false },
+      automaticLayout: true,
       lineNumbers: 'on',
       glyphMargin: true,
       scrollBeyondLastLine: false,
@@ -153,6 +268,7 @@ export const WorkflowYAMLEditor = ({
       theme: 'workflows-yaml-light',
       padding: {
         top: 24,
+        bottom: 64,
       },
       quickSuggestions: {
         other: true,
