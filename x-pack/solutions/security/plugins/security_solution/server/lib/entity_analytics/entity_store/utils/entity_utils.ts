@@ -67,6 +67,13 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
 
+export const getEntitiesSnapshotIndexName = (entityType: EntityTypeOpenAPI, snapshotDate: Date, namespace: string) =>
+  entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: snapshotDate.toISOString().split('T')[0],
+    definitionId: buildEntityDefinitionId(entityType, namespace),
+  });
+
 export const buildEntityDefinitionId = (entityType: EntityTypeOpenAPI, space: string) => {
   return `security_${entityType}_${space}`;
 };
