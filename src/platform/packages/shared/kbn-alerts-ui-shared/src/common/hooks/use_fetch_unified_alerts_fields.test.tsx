@@ -64,9 +64,9 @@ describe('useFetchAlertsFieldsNewApi', () => {
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
-      expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/fields', {
-        query: { rule_type_ids: [] },
-      });
+    });
+    expect(mockHttpGet).toHaveBeenCalledWith('/internal/rac/alerts/fields', {
+      query: { rule_type_ids: [] },
     });
 
     expect(result.current.data).toEqual({
@@ -139,26 +139,26 @@ describe('useFetchAlertsFieldsNewApi', () => {
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
-      expect(result.current.data).toEqual({
-        fields: [
-          {
-            name: 'fakeCategory',
-          },
-        ],
-      });
+    });
+    expect(result.current.data).toEqual({
+      fields: [
+        {
+          name: 'fakeCategory',
+        },
+      ],
     });
 
     rerender();
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledTimes(1);
-      expect(result.current.data).toEqual({
-        fields: [
-          {
-            name: 'fakeCategory',
-          },
-        ],
-      });
+    });
+    expect(result.current.data).toEqual({
+      fields: [
+        {
+          name: 'fakeCategory',
+        },
+      ],
     });
   });
 
@@ -177,11 +177,10 @@ describe('useFetchAlertsFieldsNewApi', () => {
       }
     );
 
+    expect(mockHttpGet).toHaveBeenCalledTimes(1);
     await waitFor(() => {
-      expect(mockHttpGet).toHaveBeenCalledTimes(1);
-
       expect(result.current.isError).toBe(true);
-      expect(mockToasts.addDanger).toHaveBeenCalledWith('Unable to load alert fields');
     });
+    expect(mockToasts.addDanger).toHaveBeenCalledWith('Unable to load alert fields');
   });
 });

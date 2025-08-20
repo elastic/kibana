@@ -86,15 +86,15 @@ describe('AlertFilterControls', () => {
   });
 
   it('clears the cache when removed from the tree', async () => {
-    const result = render(<AlertFilterControls {...props} />);
-    act(() => result.unmount());
+    const view = render(<AlertFilterControls {...props} />);
+    act(() => view.unmount());
 
     expect(mockServices.dataViews.clearInstanceCache).toHaveBeenCalled();
   });
 
   it('does not clear the cache on removal when cache management is disabled', async () => {
-    const result = render(<AlertFilterControls {...props} preventCacheClearOnUnmount={true} />);
-    act(() => result.unmount());
+    const view = render(<AlertFilterControls {...props} preventCacheClearOnUnmount={true} />);
+    act(() => view.unmount());
 
     expect(mockServices.dataViews.clearInstanceCache).not.toHaveBeenCalled();
   });
