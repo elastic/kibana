@@ -25,10 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('console');
       // Ensure that the text area can be interacted with
       await PageObjects.console.skipTourIfExists();
-
-      await PageObjects.console.openConfig();
-      await PageObjects.console.toggleKeyboardShortcuts(true);
-      await PageObjects.console.openConsole();
     });
 
     beforeEach(async () => {
@@ -37,6 +33,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('keyboard shortcuts', () => {
       let tabOpened = false;
+      before(async () => {
+        await PageObjects.console.openConfig();
+        await PageObjects.console.toggleKeyboardShortcuts(true);
+        await PageObjects.console.openConsole();
+      });
       afterEach(async () => {
         if (tabOpened) {
           await browser.closeCurrentWindow();

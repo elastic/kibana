@@ -430,11 +430,8 @@ export class ConsolePageObject extends FtrService {
   public async toggleKeyboardShortcuts(enabled: boolean) {
     await this.openSettings();
 
-    // while the settings form opens/loads this may fail, so retry for a while
-    await this.retry.try(async () => {
-      const toggle = await this.testSubjects.find('enableKeyboardShortcuts');
-      await toggle.click();
-    });
+    await this.testSubjects.waitForEnabled('enableKeyboardShortcuts');
+    await this.testSubjects.setEuiSwitch('enableKeyboardShortcuts', enabled ? 'check' : 'uncheck');
   }
 
   public async hasSuccessBadge() {
