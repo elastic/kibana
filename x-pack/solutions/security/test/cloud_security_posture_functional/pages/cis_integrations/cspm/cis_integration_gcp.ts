@@ -6,9 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../../../ftr_provider_context';
-import { policiesSavedObjects } from '../constants';
-
 import {
   GCP_PROVIDER_TEST_SUBJ,
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
@@ -16,6 +13,8 @@ import {
   GCP_SINGLE_ACCOUNT_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
 } from '@kbn/cloud-security-posture';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import { policiesSavedObjects } from '../constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function (providerContext: FtrProviderContext) {
