@@ -93,7 +93,10 @@ import { ShowValueListModal } from '../../../../../value_list/components/show_va
 import type { ArtifactFormComponentProps } from '../../../../components/artifact_list_page';
 import { TrustedAppsArtifactsDocsLink } from './artifacts_docs_link';
 import { isAdvancedModeEnabled } from '../../../../../../common/endpoint/service/artifacts/utils';
-import { ADVANCED_MODE_TAG, PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT } from '../../../../../../common/endpoint/service/artifacts/constants';
+import {
+  ADVANCED_MODE_TAG,
+  PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT,
+} from '../../../../../../common/endpoint/service/artifacts/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
@@ -691,11 +694,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       () => [
         {
           id: 'events',
-          label: (
-            <EuiText size="s">
-              Events
-            </EuiText>
-          ),
+          label: <EuiText size="s">Events</EuiText>,
           iconType: isFilterProcessDescendantsSelected ? 'empty' : 'checkInCircleFilled',
           'data-test-subj': 'trustedApps-filterEventsButton',
         },
@@ -714,7 +713,6 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
       [isFilterProcessDescendantsSelected]
     );
 
-    // console.log(PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT)
     const filterTypeSubsection = useMemo(() => {
       if (!isFilterProcessDescendantsFeatureEnabled) return null;
       return (
@@ -729,12 +727,12 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           <EuiSpacer size="m" />
           {isFilterProcessDescendantsSelected && (
             <>
-                <EuiText size="s">
+              <EuiText size="s">
                 <FormattedMessage
                   id="xpack.securitySolution.trustedApps.filterProcessDescendants.additionalConditionDescription"
                   defaultMessage="Additional condition added:"
                 />
-                </EuiText>
+              </EuiText>
               <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
               <EuiSpacer size="m" />
             </>
@@ -840,6 +838,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
+        {filterTypeSubsection}
         {isTAAdvancedModeFeatureFlagEnabled && isFormAdvancedMode && (
           <>
             <EuiSpacer size="s" />
