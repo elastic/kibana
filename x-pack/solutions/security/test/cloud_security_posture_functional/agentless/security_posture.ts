@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public/services/setup_technology_selector';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
@@ -46,7 +47,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const hasSetupTechnologySelector = await testSubjects.exists(
-        cisIntegration.testSubjectIds.SETUP_TECHNOLOGY_SELECTOR
+        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
@@ -65,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const hasSetupTechnologySelector = await testSubjects.exists(
-        cisIntegration.testSubjectIds.SETUP_TECHNOLOGY_SELECTOR
+        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
@@ -83,7 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
 
       const hasSetupTechnologySelector = await testSubjects.exists(
-        cisIntegration.testSubjectIds.SETUP_TECHNOLOGY_SELECTOR
+        SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ
       );
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
