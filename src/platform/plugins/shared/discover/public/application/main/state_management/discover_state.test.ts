@@ -77,7 +77,6 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
     services: mockServices,
   });
   jest.spyOn(nextState.dataState, 'fetch');
-  await nextState.internalState.dispatch(internalStateActions.loadDataViewList());
   nextState.internalState.dispatch(
     internalStateActions.setInitializationState({ hasESData: true, hasUserDataView: true })
   );
@@ -448,6 +447,7 @@ describe('Discover state', () => {
 
     test('loadDataViewList', async () => {
       const { state } = await getState('');
+      await state.internalState.dispatch(internalStateActions.loadDataViewList());
       expect(state.internalState.getState().savedDataViews.length).toBe(3);
     });
 
