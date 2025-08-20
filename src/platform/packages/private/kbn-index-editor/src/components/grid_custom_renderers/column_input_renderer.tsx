@@ -8,12 +8,13 @@
  */
 
 import type { EuiDataGridColumn } from '@elastic/eui';
-import { CustomGridColumnProps } from '@kbn/unified-data-table';
+import type { CustomGridColumnProps } from '@kbn/unified-data-table';
 import { EuiFieldText, EuiButtonEmpty, EuiForm, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import React, { useState, KeyboardEvent, useCallback } from 'react';
+import type { KeyboardEvent } from 'react';
+import React, { useState, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isPlaceholderColumn } from '../../utils';
-import { IndexUpdateService } from '../../index_update_service';
+import type { IndexUpdateService } from '../../index_update_service';
 import { useAddColumnName } from '../../hooks/use_add_column_name';
 
 export const getColumnInputRenderer = (

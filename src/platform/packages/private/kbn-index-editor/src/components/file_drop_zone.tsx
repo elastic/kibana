@@ -22,6 +22,7 @@ import type { PropsWithChildren } from 'react';
 import React, { type FC, useCallback } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import useObservable from 'react-use/lib/useObservable';
 import { getOverrideConfirmation } from './modals/override_warning_modal';
 import { EmptyPrompt } from './empty_prompt';
 import { FilesPreview } from './file_preview';
@@ -53,11 +54,15 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   const { indexUpdateService } = services;
   const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
 
+  const isSaving = useObservable(indexUpdateService.isSaving$, false);
+
   const isAnalyzing =
     uploadStatus.analysisStatus === STATUS.STARTED &&
     uploadStatus.overallImportStatus === STATUS.NOT_STARTED;
 
-  const isUploading = uploadStatus.overallImportStatus === STATUS.STARTED;
+  const isUploading =
+    uploadStatus.overallImportStatus === STATUS.STARTED ||
+    (uploadStatus.overallImportStatus === STATUS.COMPLETED && isSaving);
   const overallImportProgress = uploadStatus.overallImportProgress;
 
   const onFilesSelected = useCallback(
@@ -156,13 +161,14 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
   );
 
   const showFilePreview =
-    !isDragActive &&
-    filesStatus.length > 0 &&
-    uploadStatus.overallImportStatus !== STATUS.COMPLETED;
+    isSaving ||
+    (!isDragActive &&
+      filesStatus.length > 0 &&
+      uploadStatus.overallImportStatus !== STATUS.COMPLETED);
 
   let content: React.ReactNode = children;
 
-  if (noResults && !showFilePreview) {
+  if (noResults && !showFilePreview && !isSaving) {
     content = (
       <EuiFlexGroup direction="column" gutterSize="s" css={{ height: '100%' }}>
         <EuiFlexItem grow={false}>{content}</EuiFlexItem>

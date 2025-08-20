@@ -41,13 +41,17 @@ export function createEditLookupIndexContentAction(
       const fileManager = new FileUploadManager(
         fileUpload,
         coreStart.http,
-        data.dataViews,
+        data,
         coreStart.notifications,
         null,
         false,
         true,
         existingIndexName,
-        { index: { mode: 'lookup' } }
+        { index: { mode: 'lookup' } },
+        // On index searchable
+        (index) => {
+          indexUpdateService.onFileUploadFinished(index);
+        }
       );
 
       const storage = new Storage(localStorage);

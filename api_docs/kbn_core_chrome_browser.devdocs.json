@@ -3407,7 +3407,7 @@
         "label": "RenderAs",
         "description": [],
         "signature": [
-          "\"item\" | \"block\" | \"accordion\" | \"panelOpener\""
+          "\"home\" | \"item\" | \"block\" | \"accordion\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,
@@ -3422,7 +3422,7 @@
         "label": "RenderAs",
         "description": [],
         "signature": [
-          "\"item\" | \"block\" | \"accordion\" | \"panelOpener\""
+          "\"home\" | \"item\" | \"block\" | \"accordion\" | \"panelOpener\""
         ],
         "path": "src/core/packages/chrome/browser/src/project_navigation.ts",
         "deprecated": false,

@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { isPlaceholderColumn } from '../utils';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 
 const fieldAlreadyExistsError = (columnName: string) =>
   i18n.translate('indexEditor.addColumn.duplicatedName', {

@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KibanaContextExtra } from '../types';
+import type { KibanaContextExtra } from '../types';
 import { useFileSelectorContext } from './file_drop_zone';
 
 export const EmptyPrompt: FC = () => {

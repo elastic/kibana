@@ -13,7 +13,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
-import { KibanaContextExtra, IndexEditorErrors } from '../types';
+import type { KibanaContextExtra } from '../types';
+import { IndexEditorErrors } from '../types';
 
 const errorMessages: Record<IndexEditorErrors, string> = {
   [IndexEditorErrors.GENERIC_SAVING_ERROR]: i18n.translate(
