@@ -69,7 +69,11 @@ export async function closeDataStream(es: Client, name: string) {
     throw new Error(`Data stream ${name} has no indices to close`);
   }
 
-  for (const index of dataStreams[0].indices) {
-    await es.indices.close({ index: index.index_name });
+  try {
+    for (const index of dataStreams[0].indices) {
+      await es.indices.close({ index: index.index_name });
+    }
+  } catch (e) {
+    throw new Error(`Failed to close data stream ${name}: ${e.message}`);
   }
 }
