@@ -37,6 +37,9 @@ export function ViewInDiscover() {
           transactionName
             ? where(`transaction.name == ?transactionName`, { transactionName })
             : (query) => query,
+          transactionType
+            ? where(`transaction.type == ?transactionType`, { transactionType })
+            : (query) => query,
           sampleRangeFrom
             ? where(`transaction.duration.us >= ?sampleRangeFrom`, { sampleRangeFrom })
             : (query) => query,
