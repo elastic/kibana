@@ -9,7 +9,6 @@ import { compressToEncodedURIComponent } from 'lz-string';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
-  const find = getService('find');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
   const editorTestSubjectSelector = 'searchProfilerEditor';
