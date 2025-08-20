@@ -23,8 +23,8 @@ Ensure that you have the necessary dependencies installed and that your developm
 This example showcases:
 
 - How to register a case suggestion definition via the Cases plugin's attachment framework.
-- How to specify custom case suggestion handlers for fetching the relevant data data, on the client-side.
-- How to specifcy custom React components to render for the discovered suggestion in the UI, on the server-side d.
+- How to specify custom case suggestion handlers for fetching the relevant data data, on the server-side.
+- How to specifcy custom React components to render for the discovered suggestion in the UI, on the client-side.
 
 ## Key Files
 
