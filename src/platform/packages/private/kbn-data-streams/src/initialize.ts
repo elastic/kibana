@@ -163,14 +163,14 @@ export async function initialize({
 
       const result = await Promise.allSettled(promises);
 
-      const updateErrors: string[] = [];
+      const updateErrors: unknown[] = [];
       for (const res of result) {
         if (res.status === 'rejected') {
-          updateErrors.push(res.reason.message);
+          updateErrors.push(res.reason);
         }
       }
       if (updateErrors.length) {
-        throw new Error(updateErrors.join('\n'));
+        throw new Error(updateErrors.map((e) => String(e)).join('\n'));
       }
     }
   }
