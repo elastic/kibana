@@ -103,7 +103,7 @@ export const PersonalizedDashboardsCreatedByUser = ({
       paddingSize="xl"
       aria-labelledby="homeDashboardsCreatedByMe__title"
     >
-      <EuiPanel paddingSize="m" style={{ maxWidth: '50%' }}>
+      <EuiPanel>
         <EuiTitle size="s">
           <h3>
             {i18n.translate('home.dashboardsCreatedByMe.title', {

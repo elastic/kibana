@@ -139,7 +139,7 @@ export const PersonalizedRecentlyViewed = ({
       paddingSize="xl"
       aria-labelledby="homeSolutions__title"
     >
-      <EuiPanel paddingSize="m" style={{ maxWidth: '50%' }}>
+      <EuiPanel>
         <EuiTitle size="s">
           <h3>
             {i18n.translate('home.recentlyViewedTable.title', {

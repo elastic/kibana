@@ -14,6 +14,8 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
+import { EuiTabs, EuiTab, EuiPanel, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { HOME_APP_BASE_PATH } from '../../../common/constants';
 import type {
   FeatureCatalogueEntry,
@@ -47,6 +49,7 @@ interface State {
   isLoading: boolean;
   isNewKibanaInstance: boolean;
   isWelcomeEnabled: boolean;
+  selectedTabId: string;
 }
 
 export class Home extends Component<HomeProps, State> {
@@ -71,6 +74,7 @@ export class Home extends Component<HomeProps, State> {
       isLoading: isWelcomeEnabled,
       isNewKibanaInstance: false,
       isWelcomeEnabled,
+      selectedTabId: 'recentlyViewed', // <-- default tab id
     };
   }
 
@@ -141,13 +145,54 @@ export class Home extends Component<HomeProps, State> {
     return log;
   }
 
+  private onSelectedTabChanged = (id: string) => {
+    this.setState({ selectedTabId: id });
+  };
+
+  private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
+    const { selectedTabId } = this.state;
+    return (
+      <EuiPanel paddingSize="none" hasShadow={false}>
+        <EuiFlexGroup gutterSize="none">
+          <EuiFlexItem>
+            <EuiTabs
+              css={css`
+                padding-left: 24px;
+              `}
+            >
+              {tabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  onClick={() => this.onSelectedTabChanged(tab.id)}
+                  isSelected={tab.id === selectedTabId}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <div style={{ marginTop: 16 }}>
+              {tabs.find((tab) => tab.id === selectedTabId)?.content}
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <ContentByTagTable
+              contentClient={getServices().contentClient}
+              uiSettings={getServices().uiSettings}
+              savedObjectsTagging={getServices().savedObjectsTagging}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    );
+  }
+
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
       this.props;
 
     const { application, trackUiMetric, contentClient, savedObjectsTagging, uiSettings } =
       getServices();
-    console.log(getServices());
+    // console.log(getServices());
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
@@ -157,7 +202,32 @@ export class Home extends Component<HomeProps, State> {
     if (manageDataFeatures.length < 1 && devTools) {
       manageDataFeatures.push(devTools);
     }
-
+    const tabs = [
+      {
+        id: 'recentlyViewed',
+        name: i18n.translate('home.tabs.recentlyViewed', {
+          defaultMessage: 'Recents',
+        }),
+        content: (
+          <PersonalizedRecentlyViewed
+            recentlyAccessed={recentlyAccessed}
+            addBasePath={addBasePath}
+          />
+        ),
+      },
+      {
+        id: 'createdByUser',
+        name: i18n.translate('home.tabs.createdByUser', {
+          defaultMessage: 'Created by me',
+        }),
+        content: (
+          <PersonalizedDashboardsCreatedByUser
+            dashboards={dashboardsCreatedByUser}
+            addBasePath={addBasePath}
+          />
+        ),
+      },
+    ];
     return (
       <KibanaPageTemplate
         data-test-subj="homeApp"
@@ -168,20 +238,11 @@ export class Home extends Component<HomeProps, State> {
         panelled={false}
       >
         <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
-        {recentlyAccessed && (
-          <PersonalizedRecentlyViewed
-            recentlyAccessed={recentlyAccessed}
-            addBasePath={addBasePath}
-          />
-        )}
+        {this.renderTabs(tabs)}
         <ContentByTagTable
           contentClient={contentClient}
           uiSettings={uiSettings}
           savedObjectsTagging={savedObjectsTagging}
-        />
-        <PersonalizedDashboardsCreatedByUser
-          dashboards={dashboardsCreatedByUser}
-          addBasePath={addBasePath}
         />
         <AddData
           addBasePath={addBasePath}
