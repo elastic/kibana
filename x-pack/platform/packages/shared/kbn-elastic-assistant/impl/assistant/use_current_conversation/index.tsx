@@ -310,9 +310,10 @@ export const useCurrentConversation = ({
   );
 
   // is current user the owner of the conversation?
-  const isConversationOwner = useMemo(() => {
-    return getIsConversationOwner(currentConversation, currentUser);
-  }, [currentConversation, currentUser]);
+  const isConversationOwner = useMemo(
+    () => getIsConversationOwner(currentConversation, currentUser),
+    [currentConversation, currentUser]
+  );
 
   const conversationSharedState = useMemo(
     () => getConversationSharedState(currentConversation),

@@ -15,6 +15,7 @@ import type {
 import { useInfiniteQuery } from '@tanstack/react-query';
 import type { User } from '@kbn/elastic-assistant-common';
 import {
+  getIsConversationOwner,
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
@@ -43,7 +44,7 @@ export interface UseFetchCurrentUserConversationsParams {
   setTotalItemCount?: (total: number) => void;
 }
 export interface ConversationWithOwner extends Conversation {
-  isConversationOwner?: boolean;
+  isConversationOwner: boolean;
 }
 export interface FetchCurrentUserConversations {
   data: Record<string, ConversationWithOwner>;
@@ -140,25 +141,16 @@ export const useFetchCurrentUserConversations = ({
         getNextPageParam,
         refetchOnWindowFocus,
         select: (searchResponse) => {
-          if (currentUser && (currentUser.id || currentUser.name)) {
-            return {
-              ...searchResponse,
-              pages: searchResponse.pages.map((p) => ({
-                ...p,
-                data: p.data.map((conversation) => ({
-                  ...conversation,
-                  ...(conversation.createdBy
-                    ? {
-                        isConversationOwner:
-                          conversation?.createdBy.id === currentUser?.id ||
-                          conversation?.createdBy.name === currentUser?.name,
-                      }
-                    : {}),
-                })),
+          return {
+            ...searchResponse,
+            pages: searchResponse.pages.map((p) => ({
+              ...p,
+              data: p.data.map((conversation) => ({
+                ...conversation,
+                isConversationOwner: getIsConversationOwner(conversation, currentUser),
               })),
-            };
-          }
-          return searchResponse;
+            })),
+          };
         },
       }
     );
