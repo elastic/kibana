@@ -18,6 +18,7 @@ import type {
   ChatCompleteAPI,
   ToolCallsOf,
 } from '@kbn/inference-common';
+import { isEmpty, pick } from 'lodash';
 import {
   withoutTokenCountEvents,
   isChatCompletionMessageEvent,
@@ -25,7 +26,6 @@ import {
   OutputEventType,
   ToolChoiceType,
 } from '@kbn/inference-common';
-import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
 import type { EsqlDocumentBase } from '../doc_base';
@@ -180,7 +180,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
               }
 
               const args = onlyToolCall.function.arguments;
-              if (args && isPopulatedObject<string, string[]>(args, ['commands', 'functions'])) {
+              if (args && !isEmpty(pick(args, ['commands', 'functions']))) {
                 return askLlmToRespond({
                   documentationRequest: {
                     commands: args.commands,
