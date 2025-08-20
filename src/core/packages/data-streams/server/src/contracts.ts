@@ -18,7 +18,7 @@ export interface DataStreamsSetup {
   /**
    * Register your data stream definition for setup.
    *
-   * @remark This will ensure that at start time you do not need to set up this data stream definition
+   * @remark This will create and update the mappings of the data stream ensuring it's ready to be used at start time
    *
    * @public
    */
