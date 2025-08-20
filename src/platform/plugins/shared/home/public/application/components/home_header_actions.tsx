@@ -51,6 +51,17 @@ export const HomeHeaderActions = ({
       </EuiTitle>
     </EuiFlexItem>
     <EuiFlexItem grow={false}>
+      <EuiButtonEmpty
+        iconType="importAction"
+        href={addBasePath('#/tutorial_directory/fileDataViz')}
+        data-test-subj="uploadFileButton"
+      >
+        {i18n.translate('home.header.uploadFileButton', {
+          defaultMessage: 'Upload a file',
+        })}
+      </EuiButtonEmpty>
+    </EuiFlexItem>
+    <EuiFlexItem grow={false}>
       <RedirectAppLinks coreStart={{ application }}>
         {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
         <EuiButton
@@ -70,34 +81,24 @@ export const HomeHeaderActions = ({
         </EuiButton>
       </RedirectAppLinks>
     </EuiFlexItem>
+
     <EuiFlexItem grow={false}>
-      <EuiButtonEmpty
-        iconType="importAction"
-        href={addBasePath('#/tutorial_directory/fileDataViz')}
-        data-test-subj="uploadFileButton"
-      >
-        {i18n.translate('home.header.uploadFileButton', {
-          defaultMessage: 'Upload a file',
-        })}
-      </EuiButtonEmpty>
-    </EuiFlexItem>
-    <EuiFlexItem grow={false}>
-      {!isCloudEnabled ? (
+      {/* {!isCloudEnabled ? (
         <MoveData addBasePath={addBasePath} />
-      ) : (
-        <EuiImage
-          alt={i18n.translate('home.addData.illustration.alt.text', {
-            defaultMessage: 'Illustration of Elastic data integrations',
-          })}
-          src={
-            addBasePath('/plugins/kibanaReact/assets/') +
-            (isDarkMode
-              ? 'illustration_integrations_darkmode.svg'
-              : 'illustration_integrations_lightmode.svg')
-          }
-          style={{ height: 80, width: 'auto' }}
-        />
-      )}
+      ) : ( */}
+      <EuiImage
+        alt={i18n.translate('home.addData.illustration.alt.text', {
+          defaultMessage: 'Illustration of Elastic data integrations',
+        })}
+        src={
+          addBasePath('/plugins/kibanaReact/assets/') +
+          (isDarkMode
+            ? 'illustration_integrations_darkmode.svg'
+            : 'illustration_integrations_lightmode.svg')
+        }
+        style={{ height: 80, width: 'auto' }}
+      />
+      {/* )} */}
     </EuiFlexItem>
   </EuiFlexGroup>
 );

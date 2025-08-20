@@ -8,14 +8,13 @@
  */
 
 import React, { Component } from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
-import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
-import { EuiTabs, EuiTab, EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
+import type { AuthenticatedUser, ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
+import { EuiTabs, EuiTab, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   FavoritesClient,
@@ -28,7 +27,6 @@ import type {
   FeatureCatalogueCategory,
 } from '../../services';
 import { getServices } from '../kibana_services';
-import { AddData } from './add_data';
 import { ManageData } from './manage_data';
 import { SolutionsSection } from './solutions_section';
 import { Welcome } from './welcome';
@@ -36,6 +34,8 @@ import { PersonalizedRecentlyViewed } from './personalization/recently_viewed_ta
 import { ContentByTagTable } from './personalization/content_by_tag_table';
 import { PersonalizedDashboardsCreatedByUser } from './personalization/created_by_user';
 import { HomeFavoriteDashboards } from './personalization/favorite_dashboards';
+import { createAppNavigationHandler } from './app_navigation_handler';
+import { HomeHeaderActions } from './home_header_actions';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
 const HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY = 'home:solutions:hide';
@@ -50,7 +50,7 @@ export interface HomeProps {
   hasUserDataView: () => Promise<boolean>;
   isCloudEnabled: boolean;
   recentlyAccessed?: ChromeRecentlyAccessedHistoryItem[];
-  userId?: string;
+  currentUser?: AuthenticatedUser | null;
   dashboards?: any[];
 }
 interface State {
@@ -187,8 +187,9 @@ export class Home extends Component<HomeProps, State> {
               {tabs.find((tab) => tab.id === selectedTabId)?.content}
             </div>
           </EuiFlexItem>
-          {this.state.tagIds.map((tagId: string, index: number) => (
-            <EuiFlexItem>
+
+          <EuiFlexItem>
+            {this.state.tagIds.map((tagId: string, index: number) => (
               <ContentByTagTable
                 tagId={tagId}
                 saveTag={(newTagId: string) => {
@@ -201,8 +202,8 @@ export class Home extends Component<HomeProps, State> {
                   );
                 }}
               />
-            </EuiFlexItem>
-          ))}
+            ))}
+          </EuiFlexItem>
         </EuiFlexGrid>
       </KibanaPageTemplate.Section>
     );
@@ -219,19 +220,20 @@ export class Home extends Component<HomeProps, State> {
   };
 
   private renderNormal() {
-    const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
+    const { addBasePath, solutions, isCloudEnabled, currentUser, dashboards, recentlyAccessed } =
       this.props;
-
     const { application, trackUiMetric, http, userProfile } = getServices();
     const dashboardFavoritesClient = new FavoritesClient('dashboards', 'dashboard', {
       http,
       userProfile,
     });
-    // console.log(getServices());
     const isDarkMode = getServices().theme?.getTheme().darkMode ?? false;
     const devTools = this.findDirectoryById('console');
     const manageDataFeatures = this.getFeaturesByCategory('admin');
-    const dashboardsCreatedByUser = this.getDashboardsByUser(dashboards ?? [], userId);
+    const dashboardsCreatedByUser = this.getDashboardsByUser(
+      dashboards ?? [],
+      currentUser?.profile_uid
+    );
     const dashboardQueryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -283,31 +285,27 @@ export class Home extends Component<HomeProps, State> {
       },
     ];
     return (
-      <KibanaPageTemplate
-        data-test-subj="homeApp"
-        pageHeader={{
-          bottomBorder: false,
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home!" />,
-          paddingSize: 's',
-        }}
-        panelled={false}
-      >
+      <KibanaPageTemplate data-test-subj="homeApp" panelled={false}>
+        <KibanaPageTemplate.Section bottomBorder grow={false}>
+          <HomeHeaderActions
+            addBasePath={addBasePath}
+            application={application}
+            isCloudEnabled={isCloudEnabled}
+            isDarkMode={isDarkMode}
+            trackUiMetric={trackUiMetric}
+            createAppNavigationHandler={createAppNavigationHandler}
+            currentUserName={currentUser?.full_name ?? currentUser?.username}
+          />
+        </KibanaPageTemplate.Section>
         {this.renderTabs(tabs)}
-
-        <AddData
-          addBasePath={addBasePath}
-          application={application}
-          isDarkMode={isDarkMode}
-          isCloudEnabled={isCloudEnabled}
-        />
-
-        <SolutionsSection
-          addBasePath={addBasePath}
-          solutions={solutions}
-          onHideSolutionsSection={this.hideSolutions}
-          hideSolutionsSection={this.state.hideSolutionsSection}
-        />
-
+        {!this.state.hideSolutionsSection && (
+          <SolutionsSection
+            addBasePath={addBasePath}
+            solutions={solutions}
+            hideSolutionsSection={this.state.hideSolutionsSection}
+            onHideSolutionsSection={this.hideSolutions}
+          />
+        )}
         <ManageData
           addBasePath={addBasePath}
           application={application}
@@ -323,8 +321,8 @@ export class Home extends Component<HomeProps, State> {
           onChangeDefaultRoute={() => {
             trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
           }}
-          onHideSolutionsSection={this.hideSolutions}
           hideSolutionsSection={this.state.hideSolutionsSection}
+          onHideSolutionsSection={this.hideSolutions}
         />
       </KibanaPageTemplate>
     );

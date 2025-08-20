@@ -15,9 +15,11 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiButton,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFavorites } from '@kbn/content-management-favorites-public';
+import { NoDataCard, NoDataCardProvider } from '@kbn/shared-ux-card-no-data';
 
 interface FavoriteDashboards {
   dashboards: any[];
@@ -90,37 +92,68 @@ export const HomeFavoriteDashboards = ({ dashboards, addBasePath }: FavoriteDash
   const showEmptyState = items.length === 0;
 
   return (
-    <EuiPanel>
+    <EuiPanel style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       {showEmptyState ? (
-        <div style={{ textAlign: 'center' }}>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('home.favoriteDashboards.emptyTitle', {
+        <NoDataCardProvider
+          addBasePath={addBasePath}
+          canAccessFleet
+          navigateToUrl={(url: string) =>
+            window.location.assign(addBasePath('/app/dashboards#/list'))
+          }
+        >
+          <EuiFlexItem>
+            <NoDataCard
+              title={i18n.translate('home.favoriteDashboards.emptyTitle', {
                 defaultMessage: "You don't have any favorite dashboards yet",
               })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s">
-            <p>
-              {i18n.translate('home.favoriteDashboards.emptyDescription', {
+              description={i18n.translate('home.favoriteDashboards.emptyDescription', {
                 defaultMessage:
                   'To add dashboards to your favorites, open the dashboards list and mark your favorites.',
               })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <EuiButton
-            fill
-            href={addBasePath('/app/dashboards#/list')}
-            data-test-subj="seeDashboardsListButton"
-          >
-            {i18n.translate('home.favoriteDashboards.seeDashboardsListButton', {
-              defaultMessage: 'See all dashboards',
-            })}
-          </EuiButton>
-        </div>
+              canAccessFleet
+              button={
+                <EuiButton
+                  fill
+                  href={addBasePath('/app/dashboards#/list')}
+                  data-test-subj="seeDashboardsListButton"
+                >
+                  {i18n.translate('home.favoriteDashboards.seeDashboardsListButton', {
+                    defaultMessage: 'See all dashboards',
+                  })}
+                </EuiButton>
+              }
+            />
+          </EuiFlexItem>
+        </NoDataCardProvider>
       ) : (
+        // <div style={{ textAlign: 'center' }}>
+        //   <EuiTitle size="xs">
+        //     <h4>
+        //       {i18n.translate('home.favoriteDashboards.emptyTitle', {
+        //         defaultMessage: "You don't have any favorite dashboards yet",
+        //       })}
+        //     </h4>
+        //   </EuiTitle>
+        //   <EuiSpacer size="s" />
+        //   <EuiText size="s">
+        //     <p>
+        //       {i18n.translate('home.favoriteDashboards.emptyDescription', {
+        //         defaultMessage:
+        //           'To add dashboards to your favorites, open the dashboards list and mark your favorites.',
+        //       })}
+        //     </p>
+        //   </EuiText>
+        //   <EuiSpacer size="m" />
+        //   <EuiButton
+        //     fill
+        //     href={addBasePath('/app/dashboards#/list')}
+        //     data-test-subj="seeDashboardsListButton"
+        //   >
+        //     {i18n.translate('home.favoriteDashboards.seeDashboardsListButton', {
+        //       defaultMessage: 'See all dashboards',
+        //     })}
+        //   </EuiButton>
+        // </div>
         <>
           <EuiTitle size="s">
             <h3>
