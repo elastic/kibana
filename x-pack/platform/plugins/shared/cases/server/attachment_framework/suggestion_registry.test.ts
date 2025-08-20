@@ -23,7 +23,7 @@ describe('AttachmentSuggestionRegistry', () => {
       const suggestionType: SuggestionType = {
         id: 'test-suggestion',
         owner: 'observability',
-        attachmentId: 'attachment-1',
+        attachmentTypeId: 'attachment-1',
         handlers: {
           testHandler: {
             handler: jest.fn(),
@@ -46,14 +46,14 @@ describe('AttachmentSuggestionRegistry', () => {
     it('should filter suggestions by owner', () => {
       const suggestionType1: SuggestionType = {
         id: 'suggestion-1',
-        attachmentId: 'attachment-1',
+        attachmentTypeId: 'attachment-1',
         owner: 'observability',
         handlers: {},
       };
 
       const suggestionType2: SuggestionType = {
         id: 'suggestion-2',
-        attachmentId: 'attachment-2',
+        attachmentTypeId: 'attachment-2',
         owner: 'securitySolution',
         handlers: {},
       };
@@ -92,7 +92,7 @@ describe('AttachmentSuggestionRegistry', () => {
       const suggestionType: SuggestionType = {
         id: 'test-suggestion',
         owner: 'observability',
-        attachmentId: 'attachment-1',
+        attachmentTypeId: 'attachment-1',
         handlers: {
           handler1: {
             handler: mockHandler1,
@@ -112,7 +112,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
+        'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-02T00:00:00Z',
@@ -153,7 +153,7 @@ describe('AttachmentSuggestionRegistry', () => {
 
       const suggestionType: SuggestionType = {
         id: 'test-suggestion',
-        attachmentId: 'attachment-1',
+        attachmentTypeId: 'attachment-1',
         owner: 'observability',
         handlers: {
           handler1: {
@@ -174,7 +174,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
+        'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-02T00:00:00Z',
@@ -201,7 +201,7 @@ describe('AttachmentSuggestionRegistry', () => {
       const suggestionType: SuggestionType = {
         id: 'duplicate-suggestion',
         owner: 'observability',
-        attachmentId: 'attachment-1',
+        attachmentTypeId: 'attachment-1',
         handlers: {},
       };
 
@@ -221,7 +221,7 @@ describe('AttachmentSuggestionRegistry', () => {
       const suggestionType: SuggestionType = {
         id: 'test-suggestion',
         owner: 'observability',
-        attachmentId: 'attachment-1',
+        attachmentTypeId: 'attachment-1',
         handlers: {
           handler1: {
             handler: mockHandler,
@@ -235,7 +235,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
+        'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-02T00:00:00Z',

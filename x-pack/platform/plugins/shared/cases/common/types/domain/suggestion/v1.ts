@@ -11,7 +11,7 @@ import { OWNERS } from '../../../constants/owners';
 const suggestionOwnerSchema = z.enum(OWNERS);
 
 export const suggestionContextRt = z.object({
-  'service.name': z.string().optional(),
+  'service.name': z.array(z.string()).optional(),
   timeRange: z
     .object({
       from: z.string(),
