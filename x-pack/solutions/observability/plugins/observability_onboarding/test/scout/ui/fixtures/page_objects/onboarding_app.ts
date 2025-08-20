@@ -23,15 +23,15 @@ export class OnboardingApp {
   }
 
   get kubernetesUseCaseTile() {
-    return this.page.getByTestId('observabilityOnboardingUseCaseCard-kubernetess');
+    return this.page.getByTestId('observabilityOnboardingUseCaseCard-kubernetes');
   }
 
   get cloudUseCaseTile() {
-    return this.page.getByTestId('observabilityOnboardingUseCaseCard-clouds');
+    return this.page.getByTestId('observabilityOnboardingUseCaseCard-clous');
   }
 
   get applicationUseCaseTile() {
-    return this.page.getByTestId('observabilityOnboardingUseCaseCard-applications');
+    return this.page.getByTestId('observabilityOnboardingUseCaseCard-application');
   }
 
   get autoDetectLogsCard() {
