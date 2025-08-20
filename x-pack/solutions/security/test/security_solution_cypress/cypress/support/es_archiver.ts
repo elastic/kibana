@@ -78,7 +78,7 @@ export const esArchiver = (
     log,
     client,
     kbnClient,
-    baseDir: fromRoot('x-pack/test/functional/es_archives/security_solution'),
+    baseDir: fromRoot('x-pack/solutions/security/test/fixtures/es_archives/security_solution'),
   });
 
   on('task', {

@@ -746,15 +746,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       describe('#Page Content with alerts', () => {
         before(async () => {
           return Promise.all([
-            esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+            esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            ),
+            esArchiver.load(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+            ),
           ]);
         });
 
         after(async () => {
           return Promise.all([
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-            esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+            esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'
+            ),
+            esArchiver.unload(
+              'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+            ),
           ]);
         });
 

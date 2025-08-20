@@ -44,7 +44,7 @@ Please, before opening a PR with the new test, please make sure that the test fa
 
 Note that we use tags in order to select which tests we want to execute:
 
-- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless. 
+- `@serverless` includes a test in the Serverless test suite for PRs (the so-called first quality gate) and QA environment for the periodic pipeline. You need to explicitly add this tag to any test you want to run in CI for serverless.
 - `@serverlessQA` includes a test in the Serverless test suite for the Kibana release process of serverless. You need to explicitly add this tag to any test you want you run in CI for the Kibana QA quality gate. These tests should be stable, otherwise they will be blocking the release pipeline. They should be also critical enough, so that when they fail, there's a high chance of an SDH or blocker issue to be reported.
 - `@ess` includes a test in the normal, non-Serverless test suite. You need to explicitly add this tag to any test you want to run against a non-Serverless environment.
 - `@skipInEss` excludes a test from the non-Serverless test suite. The test will not be executed as part for the PR process. All the skipped tests should have a link to a ticket describing the reason why the test got skipped.
@@ -56,6 +56,7 @@ Please, before opening a PR with a new test, make sure that the test fails. If y
 ## Running the tests
 
 ### Run them locally
+
 When running the tests, FTR is used to spawn both a Kibana instance (http://localhost:5620) and an Elasticsearch instance (http://localhost:9220) with a preloaded minimum set of data (see preceding "Test data" section).
 
 Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
@@ -114,13 +115,11 @@ describe(
     env: {
       ftrConfig: {
         kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'MY_EXPERIMENTAL_FLAG',
-          ])}`,
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify(['MY_EXPERIMENTAL_FLAG'])}`,
         ],
       },
     },
-  },
+  }
   // ...
 );
 ```
@@ -144,19 +143,18 @@ Cypress convention starting version 10 (previously known as integration). Contai
 
 ### Area teams folders
 
-These directories contain tests which are run in their own Buildkite pipeline. 
+These directories contain tests which are run in their own Buildkite pipeline.
 
 If you belong to one of the teams listed in the table, please add new e2e specs to the corresponding directory.
 
-| Directory | Area team |
-| -- | -- |
-| `e2e/explore` | Threat Hunting Explore |
-| `e2e/investigations` | Threat Hunting Investigations |
-| `e2e/detection_response/rule_management` | Detection Rule Management |
-| `e2e/detection_response/detection_engine` | Detection Engine |
-| `e2e/ai_assistant` | AI Assistant |
-| `e2e/entity_analytics` | Entity Analytics |
-
+| Directory                                 | Area team                     |
+| ----------------------------------------- | ----------------------------- |
+| `e2e/explore`                             | Threat Hunting Explore        |
+| `e2e/investigations`                      | Threat Hunting Investigations |
+| `e2e/detection_response/rule_management`  | Detection Rule Management     |
+| `e2e/detection_response/detection_engine` | Detection Engine              |
+| `e2e/ai_assistant`                        | AI Assistant                  |
+| `e2e/entity_analytics`                    | Entity Analytics              |
 
 ### fixtures/
 
@@ -245,24 +243,22 @@ Archives used only for Cypress tests purposes are stored in `x-pack/solutions/se
 
 ```typescript
 cy.task('esArchiverLoad', { archiveName: 'overview' });
-cy.task('esArchiverUnload', { archiveName: 'overview'});
-
+cy.task('esArchiverUnload', { archiveName: 'overview' });
 ```
 
-You can also use archives located in `x-pack/test/functional/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
+You can also use archives located in `x-pack/solutions/security/test/fixtures/es_archives/security_solution` by specifying `type: 'ftr'` in the archiver tasks:
 
 ```typescript
-// loads then unloads from x-pack/test/functional/es_archives/security_solution/alias
-cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr'});
-cy.task('esArchiverUnload', { archiveName: 'alias', type:'ftr'});
+// loads then unloads from x-pack/solutions/security/test/fixtures/es_archives/security_solution/alias
+cy.task('esArchiverLoad', { archiveName: 'alias', type: 'ftr' });
+cy.task('esArchiverUnload', { archiveName: 'alias', type: 'ftr' });
 ```
 
 ## Serverless
 
 Note that we use tags in order to select which tests we want to execute, if you want a test to be executed on serverless you need to add @serverless tag to it.
 
-
-### Running serverless tests locally pointing to FTR serverless (First Quality Gate) 
+### Running serverless tests locally pointing to FTR serverless (First Quality Gate)
 
 Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
@@ -282,6 +278,7 @@ Run the tests with the following yarn scripts from `x-pack/solutions/security/te
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
 #### PLIs
+
 When running serverless Cypress tests, the following PLIs are set by default:
 
 ```
@@ -293,19 +290,17 @@ When running serverless Cypress tests, the following PLIs are set by default:
 With the above configuration we'll be able to cover most of the scenarios, but there are some cases were we might want to use a different configuration. In that case, we just need to pass to the header of the test, which is the configuration we want for it.
 
 ```typescript
-describe(
-  'Entity Analytics Dashboard in Serverless',
-  {
-    tags: '@serverless',
-    env: {
-      ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'essentials' },
-          { product_line: 'endpoint', product_tier: 'essentials' },
-        ],
-      },
+describe('Entity Analytics Dashboard in Serverless', {
+  tags: '@serverless',
+  env: {
+    ftrConfig: {
+      productTypes: [
+        { product_line: 'security', product_tier: 'essentials' },
+        { product_line: 'endpoint', product_tier: 'essentials' },
+      ],
     },
-  });
+  },
+});
 ```
 
 Per the way we set the environment during the execution process on CI, the above configuration is going to be valid when the test is executed on headless mode.
@@ -319,6 +314,7 @@ Custom roles for serverless is currently supported only for stateless environmen
 ##### Creating a Custom Role
 
 To create a custom role, use the Cypress task `createServerlessCustomRole`. This task requires two parameters:
+
 - **`roleDescriptor`**: Defines the permissions and access for the role.
 - **`roleName`**: A unique name for the custom role.
 
@@ -349,7 +345,6 @@ Once the custom role is created, you can log in to the application using your re
 ```typescript
 login('customRole');
 ```
-
 
 ##### Deleting a Custom Role
 
@@ -396,7 +391,7 @@ after(() => {
 Note that when using any of the below scripts, the tests are going to be executed through an MKI project with the version that is currently available in QA. If you need to use
 a specific commit (i.e. debugging a failing tests on the periodic pipeline), check the section: `Running serverless tests locally pointing to a MKI project created in QA environment with an overridden image`.
 
-Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`: 
+Run the tests with the following yarn scripts from `x-pack/solutions/security/test/security_solution_cypress`:
 
 | Script Name                                               | Description                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -411,7 +406,6 @@ Run the tests with the following yarn scripts from `x-pack/solutions/security/te
 | cypress:run:qa:serverless:ai_assistant                    | Runs all tests tagged as SERVERLESS in the `e2e/ai_assistant` directory in headless mode using the QA environment and real MKI projects.                                                                                                                                                                                    |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
-
 
 #### Setup required
 
@@ -436,7 +430,7 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-By default all our Serverless tests are executed with the `platform_engineer` role. 
+By default all our Serverless tests are executed with the `platform_engineer` role.
 
 So you need to add to your organization a new user that has the required role. You can achieve that by using email aliases.
 
@@ -463,8 +457,7 @@ You need to have everything setup as mentioned above in `Setup required`. Once t
 yarn cypress:open:qa:serverless --commit <commitHash>
 ```
 
-
-#### Testing with different roles 
+#### Testing with different roles
 
 If you want to execute a test using Cypress on visual mode with MKI, you need to make sure you have the user created in your organization, and add it tot he `.ftr/role_users.json`:
 
@@ -482,6 +475,7 @@ If you want to execute a test using Cypress on visual mode with MKI, you need to
 ```
 
 As role names please use:
+
 - admin
 - detections_admin
 - editor
@@ -502,6 +496,7 @@ The above should be the same used on the automation.
 #### PLIs
 
 When running serverless Cypress tests on QA environment, the following PLIs are set by default:
+
 ```
       { product_line: 'security', product_tier: 'complete' },
       { product_line: 'endpoint', product_tier: 'complete' },
@@ -511,19 +506,17 @@ When running serverless Cypress tests on QA environment, the following PLIs are 
 With the above configuration we'll be able to cover most of the scenarios, but there are some cases were we might want to use a different configuration. In that case, we just need to pass to the header of the test, which is the configuration we want for it.
 
 ```typescript
-describe(
-  'Entity Analytics Dashboard in Serverless',
-  {
-    tags: '@serverless',
-    env: {
-      ftrConfig: {
-        productTypes: [
-          { product_line: 'security', product_tier: 'essentials' },
-          { product_line: 'endpoint', product_tier: 'essentials' },
-        ],
-      },
+describe('Entity Analytics Dashboard in Serverless', {
+  tags: '@serverless',
+  env: {
+    ftrConfig: {
+      productTypes: [
+        { product_line: 'security', product_tier: 'essentials' },
+        { product_line: 'endpoint', product_tier: 'essentials' },
+      ],
     },
-  });
+  },
+});
 ```
 
 For test developing or test debugging purposes on QA, you have avaialable the following options:
@@ -548,13 +541,13 @@ The above command will open the Cypress UI with all tests in the `e2e` directory
 
 Note that all the above flags can be combined.
 
-
 ## Development Best Practices
 
 Below you will a set of best practices that should be followed when writing Cypress tests.
 
 ### For serverless
-Reuse just those tests that have the SAME exact behaviour and steps. Take the necessity of adding a conditional to the test to make it pass in order to, perform a different set of steps, setup, or assertions, as a signal for the need of a serverless 
+
+Reuse just those tests that have the SAME exact behaviour and steps. Take the necessity of adding a conditional to the test to make it pass in order to, perform a different set of steps, setup, or assertions, as a signal for the need of a serverless
 specific test.
 
 ### Avoid forced actions

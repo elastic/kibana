@@ -31,13 +31,21 @@ export default function getTotalIOBytesTests({ getService }: FtrProviderContext)
 
   describe(`Session view - ${GET_TOTAL_IO_BYTES_ROUTE} - with a basic license`, () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
-      await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/io_events'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/process_events');
-      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/io_events'
+      );
     });
 
     it(`${GET_TOTAL_IO_BYTES_ROUTE} returns a page of IO events`, async () => {

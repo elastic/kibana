@@ -25,11 +25,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Log stream supports nano precision', function () {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/logs_with_nano_date'
+      );
       await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: true });
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/logs_with_nano_date');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/logs_with_nano_date'
+      );
       await kibanaServer.uiSettings.update({ [OBSERVABILITY_ENABLE_LOGS_STREAM]: false });
     });
 

@@ -7,6 +7,7 @@
 
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -21,6 +22,7 @@ import {
   RuleExecutionStatusWarningReasons,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
+  type RawRule,
 } from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
@@ -3597,6 +3599,37 @@ describe('Task Runner', () => {
       '5555',
       '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
     ]);
+  });
+
+  test('should return shouldDisableTask when task is enabled but rule is not', async () => {
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: { ...mockedTaskInstance },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    const mockedRuleTypeSavedObjectDisabled = {
+      ...(mockedRuleTypeSavedObject as Rule),
+      enabled: false,
+    };
+    const mockedRawRuleSODisabled: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+    };
+    mockedRawRuleSODisabled.attributes.enabled = false;
+
+    mockGetAlertFromRaw.mockReturnValue(mockedRuleTypeSavedObjectDisabled);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const result = await taskRunner.run();
+
+    expect(ruleType.executor).not.toHaveBeenCalled();
+
+    expect(result.shouldDisableTask).toEqual(true);
+    expect(result.taskRunError?.message).toBe(
+      'Rule failed to execute because rule ran after it was disabled.'
+    );
   });
 
   function testAlertingEventLogCalls({

@@ -548,14 +548,18 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('alerts', () => {
       describe('security_solution', () => {
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
           await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
         });
 
         const createCommentAndRefreshIndex = async ({

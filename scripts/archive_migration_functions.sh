@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ??? Should we migrate
-#     x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space
+#     x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0_space
 # ### Yes, it needs migration
 #   ### Saved Object type(s) that we care about:
 #     index-pattern
