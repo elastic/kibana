@@ -11,11 +11,10 @@ import React from 'react';
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import { dynamic } from '@kbn/shared-ux-utility';
 
-export const UnifiedDocViewerObservabilityTracesSpanOverview = dynamic(() => import('.'), {
+export const LazyUnifiedHistogramMetricsExperienceGrid = dynamic(() => import('.'), {
   fallback: (
     <EuiDelayRender delay={300}>
       <EuiSkeletonText />
     </EuiDelayRender>
   ),
 });
-// here

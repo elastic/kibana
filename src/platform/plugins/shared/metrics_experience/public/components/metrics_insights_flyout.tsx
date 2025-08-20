@@ -24,7 +24,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import type { MetricField } from '../../common/fields/types';
-import { categorizeDimensions } from '../utils';
+import { categorizeDimensions } from '../../common/dimensions/categorize_dimensions';
 import { DimensionBadges } from './dimension_badges';
 
 interface MetricInsightsFlyoutProps {

@@ -8,17 +8,13 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { dynamic } from '@kbn/shared-ux-utility';
+import { UnifiedHistogramMetricsExperienceGrid } from '@kbn/metrics-experience-plugin/public';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
-
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
 const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
-
-const LazyMetricsGridSection = dynamic(() => import('./dummy_metrics_grid'));
-
 export const createMetricsDataSourceProfileProvider = (
   services: ProfileProviderServices
 ): MetricsExperienceDataSourceProfileProvider => ({
@@ -31,7 +27,7 @@ export const createMetricsDataSourceProfileProvider = (
     }),
     getChartSectionConfiguration: (prev) => () => ({
       ...(prev ? prev() : {}),
-      Component: LazyMetricsGridSection,
+      Component: UnifiedHistogramMetricsExperienceGrid,
       replaceDefaultHistogram: true,
       localStorageKeyPrefix: 'discover:metricsExperience',
     }),

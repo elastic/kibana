@@ -12,21 +12,25 @@ import ReactDOM from 'react-dom';
 import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { createMetricsExperienceRepositoryClient } from './api';
-import type { MetricsExperiencePluginClass, MetricsExperienceService } from './types';
+import type {
+  MetricsExperiencePluginClass,
+  MetricsExperiencePluginStartDependencies,
+  MetricsExperienceService,
+} from './types';
 
 const MetricsExperienceApplication = dynamic(() =>
   import('./application').then((mod) => ({ default: mod.Application }))
 );
 
 export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
-  public setup(core: CoreSetup) {
+  public setup(core: CoreSetup<MetricsExperiencePluginStartDependencies>) {
     // Register app
     core.application.register({
       id: 'metricsExperience',
       title: 'Metrics Experience',
       async mount(appMountParameters: AppMountParameters) {
         const { element } = appMountParameters;
-        const [coreStart] = await core.getStartServices();
+        const [coreStart, pluginsStart] = await core.getStartServices();
 
         const services: MetricsExperienceService = {
           callApi: createMetricsExperienceRepositoryClient(core),
@@ -38,6 +42,7 @@ export class MetricsExperiencePlugin implements MetricsExperiencePluginClass {
               coreStart={coreStart}
               appMountParameters={appMountParameters}
               service={services}
+              pluginsStart={pluginsStart}
             />
           ),
           element

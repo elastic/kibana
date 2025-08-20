@@ -20,6 +20,8 @@
     "@kbn/field-types",
     "@kbn/zod",
     "@kbn/es-types",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
+    "@kbn/unified-histogram",
+    "@kbn/data-views-plugin"
   ]
 }

@@ -8,6 +8,7 @@
  */
 
 import type { Plugin as PluginClass } from '@kbn/core/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { MetricsExperienceRepositoryClient } from './api';
 
 export interface MetricsExperienceService {
@@ -22,8 +23,10 @@ export interface MetricsExperiencePluginStart {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface MetricsExperiencePluginSetupDependencies {}
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface MetricsExperiencePluginStartDependencies {}
+
+export interface MetricsExperiencePluginStartDependencies {
+  dataViews: DataViewsPublicPluginStart;
+}
 
 export type MetricsExperiencePluginClass = PluginClass<
   MetricsExperiencePluginSetup,
