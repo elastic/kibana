@@ -178,14 +178,14 @@ export const AwsCredentialsFormAgentless = ({
         info={
           showCloudConnectors ? (
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentlessCloudConnector"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContentAgentlessCloudConnector"
               defaultMessage="Utilize AWS Access Keys or Cloud Connector to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 shortName,
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
-                      id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
+                      id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.gettingStartedLink"
                       defaultMessage="Getting Started"
                     />
                   </EuiLink>
@@ -194,14 +194,14 @@ export const AwsCredentialsFormAgentless = ({
             />
           ) : (
             <FormattedMessage
-              id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentAgentless"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.setupInfoContent.agentlessAccessKeys"
               defaultMessage="Utilize AWS Access Keys to set up and deploy {shortName} for assessing your AWS environment's security posture. Refer to our {gettingStartedLink} guide for details."
               values={{
                 shortName,
                 gettingStartedLink: (
                   <EuiLink href={awsOverviewPath} target="_blank">
                     <FormattedMessage
-                      id="securitySolutionPackages.awsIntegration.gettingStarted.setupInfoContentLink"
+                      id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.gettingStarted.gettingStartedLink"
                       defaultMessage="Getting Started"
                     />
                   </EuiLink>
@@ -214,7 +214,7 @@ export const AwsCredentialsFormAgentless = ({
       <EuiSpacer size="l" />
       <AwsCredentialTypeSelector
         label={i18n.translate(
-          'securitySolutionPackages.awsIntegration.awsCredentialTypeSelectorLabelAgentless',
+          'securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.awsCredentialTypeSelectorLabelAgentless',
           {
             defaultMessage: 'Preferred method',
           }
@@ -242,7 +242,7 @@ export const AwsCredentialsFormAgentless = ({
         <>
           <EuiCallOut color="warning">
             <FormattedMessage
-              id="securitySolutionPackages.fleetIntegration.awsCloudCredentials.cloudFormationSupportedMessage"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.supportedMessage"
               defaultMessage="Launch Cloud Formation for Automated Credentials not supported in current integration version. Please upgrade to the latest version to enable Launch CloudFormation for automated credentials."
             />
           </EuiCallOut>
@@ -272,7 +272,7 @@ export const AwsCredentialsFormAgentless = ({
             href={templateUrl}
           >
             <FormattedMessage
-              id="securitySolutionPackages.agentlessForms.agentlessAWSCredentialsForm.cloudFormation.launchButton"
+              id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.cloudFormation.launchButton"
               defaultMessage="Launch CloudFormation"
             />
           </EuiButton>

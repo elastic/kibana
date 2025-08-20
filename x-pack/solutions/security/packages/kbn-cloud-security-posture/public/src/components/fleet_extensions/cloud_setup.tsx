@@ -41,7 +41,7 @@ const EditScreenStepTitle = () => (
     <EuiTitle size="s">
       <h4>
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.integrationSettingsTitle"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.integrationSettingsTitle"
           defaultMessage="Integration Settings"
         />
       </h4>
@@ -126,7 +126,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         {isEditPage && <EditScreenStepTitle />}
         {/* Shows info on the active policy template */}
         <FormattedMessage
-          id="securitySolutionPackages.fleetIntegration.configureIntegrationDescription"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.configureIntegrationDescription"
           defaultMessage="Select the cloud service provider (CSP) you want to monitor and then fill in the name and description to help identify this integration"
         />
         <EuiSpacer size="l" />
@@ -195,7 +195,7 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                   }}
                 >
                   <FormattedMessage
-                    id="securitySolutionPackages.fleetIntegration.advancedOptionsLabel"
+                    id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.advancedOptionsLabel"
                     defaultMessage="Advanced options"
                   />
                 </EuiText>
@@ -212,8 +212,8 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
                   updatePolicy({ updatedPolicy: { ...newPolicy, namespace } });
                 }}
                 data-test-subj={NAMESPACE_INPUT_TEST_SUBJ}
-                labelId="securitySolutionPackages.fleetIntegration.namespaceLabel"
-                helpTextId="securitySolutionPackages.fleetIntegration.awsAccountType.awsOrganizationDescription"
+                labelId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.namespaceLabel"
+                helpTextId="securitySolutionPackages.cloudSecurityPosture.cloudSetup.aws.accountType.awsOrganizationDescription"
               />
             </EuiAccordion>
           </>

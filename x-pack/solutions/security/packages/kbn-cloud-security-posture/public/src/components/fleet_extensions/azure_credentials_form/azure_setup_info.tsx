@@ -21,7 +21,7 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiTitle size="xs">
         <h2>
           <FormattedMessage
-            id="securitySolutionPackages.azureIntegration.setupInfoContentTitle"
+            id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.setupInfoContentTitle"
             defaultMessage="Setup Access"
           />
         </h2>
@@ -29,14 +29,14 @@ export const AzureSetupInfoContent = ({ documentationLink }: AzureSetupInfoConte
       <EuiSpacer size="l" />
       <EuiText color="subdued" size="s">
         <FormattedMessage
-          id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContent"
+          id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.gettingStarted.setupInfoContent"
           defaultMessage="Utilize an Azure Resource Manager (ARM) template (a built-in Azure IaC tool) or a series of manual steps to set up and deploy {shortName} for assessing your Azure environment's security posture. Refer to our {gettingStartedLink} guide for details."
           values={{
             shortName,
             gettingStartedLink: (
               <EuiLink href={documentationLink} target="_blank">
                 <FormattedMessage
-                  id="securitySolutionPackages.azureIntegration.gettingStarted.setupInfoContentLink"
+                  id="securitySolutionPackages.cloudSecurityPosture.cloudSetup.azure.gettingStarted.setupInfoContentLink"
                   defaultMessage="Getting Started"
                 />
               </EuiLink>
