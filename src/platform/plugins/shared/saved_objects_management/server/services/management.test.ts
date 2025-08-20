@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsManagement } from './management';
-import type { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import { SavedObjectTypeRegistry } from '@kbn/core/server';
+import { SavedObjectsManagement } from './management';
 
 describe('SavedObjectsManagement', () => {
   let registry: SavedObjectTypeRegistry;
