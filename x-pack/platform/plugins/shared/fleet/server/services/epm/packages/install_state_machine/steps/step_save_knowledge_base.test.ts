@@ -9,6 +9,18 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 
 import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
 
+// Mock the app context service
+jest.mock('../../../../app_context', () => ({
+  appContextService: {
+    getLogger: jest.fn().mockReturnValue({
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    }),
+  },
+}));
+
 let esClient: jest.Mocked<ElasticsearchClient>;
 
 describe('saveKnowledgeBaseContent', () => {
@@ -48,16 +60,12 @@ describe('saveKnowledgeBaseContent', () => {
 
     // Verify that deleteByQuery was called to clean up existing documents
     expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.integration_knowledge',
+      index: '.integration_knowledge*',
       query: {
         bool: {
-          must: [
-            { term: { 'package_name.keyword': 'test-package' } },
-            { term: { version: '1.0.0' } },
-          ],
+          must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
         },
       },
-      refresh: true,
     });
 
     // Verify that bulk was called with the correct operations
@@ -69,6 +77,7 @@ describe('saveKnowledgeBaseContent', () => {
           filename: 'test-guide.md',
           content: '# Test Guide\n\nThis is a test knowledge base document.',
           version: '1.0.0',
+          installed_at: expect.any(String),
         },
         { index: { _index: '.integration_knowledge', _id: 'test-package-troubleshooting.md' } },
         {
@@ -76,6 +85,7 @@ describe('saveKnowledgeBaseContent', () => {
           filename: 'troubleshooting.md',
           content: '# Troubleshooting\n\nCommon issues and solutions.',
           version: '1.0.0',
+          installed_at: expect.any(String),
         },
       ],
       refresh: 'wait_for',

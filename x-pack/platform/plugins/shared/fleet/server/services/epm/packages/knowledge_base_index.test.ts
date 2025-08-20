@@ -18,6 +18,18 @@ import {
   updatePackageKnowledgeBaseVersion,
 } from './knowledge_base_index';
 
+// Mock the app context service
+jest.mock('../../app_context', () => ({
+  appContextService: {
+    getLogger: jest.fn().mockReturnValue({
+      error: jest.fn(),
+      warn: jest.fn(),
+      info: jest.fn(),
+      debug: jest.fn(),
+    }),
+  },
+}));
+
 describe('knowledge_base_index', () => {
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
 
@@ -56,16 +68,12 @@ describe('knowledge_base_index', () => {
       const afterCall = new Date().toISOString();
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
           bool: {
-            must: [
-              { term: { 'package_name.keyword': 'test-package' } },
-              { term: { version: '1.0.0' } },
-            ],
+            must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
           },
         },
-        refresh: true,
       });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
@@ -160,7 +168,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: INTEGRATION_KNOWLEDGE_INDEX,
         query: {
-          term: { 'package_name.keyword': 'test-package' },
+          term: { package_name: 'test-package' },
         },
         sort: [{ filename: 'asc' }],
         size: 1000,
@@ -189,10 +197,7 @@ describe('knowledge_base_index', () => {
         index: INTEGRATION_KNOWLEDGE_INDEX,
         query: {
           bool: {
-            must: [
-              { term: { 'package_name.keyword': 'test-package' } },
-              { term: { version: '1.0.0' } },
-            ],
+            must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
           },
         },
         sort: [{ filename: 'asc' }],
@@ -239,11 +244,10 @@ describe('knowledge_base_index', () => {
       await deletePackageKnowledgeBase(mockEsClient, 'test-package');
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { 'package_name.keyword': 'test-package' },
+          term: { package_name: 'test-package' },
         },
-        refresh: true,
       });
     });
 
@@ -251,16 +255,12 @@ describe('knowledge_base_index', () => {
       await deletePackageKnowledgeBase(mockEsClient, 'test-package', '1.0.0');
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
           bool: {
-            must: [
-              { term: { 'package_name.keyword': 'test-package' } },
-              { term: { version: '1.0.0' } },
-            ],
+            must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
           },
         },
-        refresh: true,
       });
     });
   });
@@ -289,11 +289,10 @@ describe('knowledge_base_index', () => {
 
       // Should delete all existing content for the package
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { 'package_name.keyword': 'test-package' },
+          term: { package_name: 'test-package' },
         },
-        refresh: true,
       });
 
       // Should index new content with new version
@@ -322,11 +321,10 @@ describe('knowledge_base_index', () => {
 
       // Should still delete all existing content for the package (fresh install case)
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { 'package_name.keyword': 'test-package' },
+          term: { package_name: 'test-package' },
         },
-        refresh: true,
       });
 
       expect(mockEsClient.bulk).toHaveBeenCalledWith({
@@ -354,11 +352,10 @@ describe('knowledge_base_index', () => {
       });
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { 'package_name.keyword': 'test-package' },
+          term: { package_name: 'test-package' },
         },
-        refresh: true,
       });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
@@ -374,11 +371,10 @@ describe('knowledge_base_index', () => {
       });
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { 'package_name.keyword': 'test-package' },
+          term: { package_name: 'test-package' },
         },
-        refresh: true,
       });
 
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
