@@ -11,7 +11,7 @@ import { useLoadConnectors } from '@kbn/elastic-assistant';
 import { useKibana } from '../../../common/lib/kibana';
 import { useEntityAnalyticsRoutes } from '../api';
 
-export const useRiskScoreSpikesAiSummary = ({
+export const useRiskScoreAiSummary = ({
   identifier,
   identifierKey,
   connectorId = '',
@@ -22,7 +22,7 @@ export const useRiskScoreSpikesAiSummary = ({
   connectorId?: string;
   enabled?: boolean;
 }) => {
-  const { fetchRiskScoreSpikesAiSummary } = useEntityAnalyticsRoutes();
+  const { fetchRiskScoreAiSummary } = useEntityAnalyticsRoutes();
   const { http } = useKibana().services;
   const { data: aiConnectors = [] } = useLoadConnectors({
     http,
@@ -33,11 +33,11 @@ export const useRiskScoreSpikesAiSummary = ({
     [aiConnectors, connectorId]
   );
   return useQuery(
-    ['EA_LLM_RISK_SPIKES', identifier, identifierKey],
+    ['EA_LLM_RISK_SUMMARY', identifier, identifierKey],
     () => {
       const { actionTypeId } = connector;
 
-      return fetchRiskScoreSpikesAiSummary({
+      return fetchRiskScoreAiSummary({
         identifier,
         identifierKey,
         apiConfig: {

@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ApiConfig, RiskScoreSpikesPostRequestBody } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, RiskScoreSummaryPostRequestBody } from '@kbn/elastic-assistant-common';
 import { newContentReferencesStore } from '@kbn/elastic-assistant-common';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
@@ -42,7 +42,7 @@ export const getAssistantToolParams = ({
   langSmithProject?: string;
   langSmithApiKey?: string;
   logger: Logger;
-  request: KibanaRequest<unknown, unknown, RiskScoreSpikesPostRequestBody>;
+  request: KibanaRequest<unknown, unknown, RiskScoreSummaryPostRequestBody>;
 }): AssistantToolParams => {
   const traceOptions = {
     projectName: langSmithProject,
@@ -83,5 +83,5 @@ export const getAssistantToolParams = ({
 
 export const getAssistantTool = (getRegisteredTools: GetRegisteredTools, pluginName: string) => {
   const assistantTools = getRegisteredTools(pluginName);
-  return assistantTools.find((tool) => tool.id === 'risk-spikes');
+  return assistantTools.find((tool) => tool.id === 'risk-summary');
 };

@@ -8,15 +8,15 @@
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { IRouter, Logger, IKibanaResponse } from '@kbn/core/server';
 import {
-  RiskScoreSpikesPostRequestBody,
-  RiskScoreSpikesPostResponse,
+  RiskScoreSummaryPostRequestBody,
+  RiskScoreSummaryPostResponse,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 
 import moment from 'moment/moment';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import _ from 'lodash';
-import { RISK_SPIKES } from '../../../common/constants';
+import { RISK_SUMMARY } from '../../../common/constants';
 import { getAssistantTool, getAssistantToolParams } from './helpers';
 import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from '../helpers';
 import { buildResponse } from '../../lib/build_response';
@@ -26,11 +26,11 @@ const ROUTE_HANDLER_TIMEOUT = 10 * 60 * 1000; // 10 * 60 seconds = 10 minutes
 const LANG_CHAIN_TIMEOUT = ROUTE_HANDLER_TIMEOUT - 10_000; // 9 minutes 50 seconds
 const CONNECTOR_TIMEOUT = LANG_CHAIN_TIMEOUT - 10_000; // 9 minutes 40 seconds
 
-export const postRiskSpikesRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const postRiskSummaryRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
   router.versioned
     .post({
       access: 'internal',
-      path: RISK_SPIKES,
+      path: RISK_SUMMARY,
       options: {
         tags: ['access:elasticAssistant'],
         timeout: {
@@ -48,16 +48,20 @@ export const postRiskSpikesRoute = (router: IRouter<ElasticAssistantRequestHandl
         version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(RiskScoreSpikesPostRequestBody),
+            body: buildRouteValidationWithZod(RiskScoreSummaryPostRequestBody),
           },
           response: {
             200: {
-              body: { custom: buildRouteValidationWithZod(RiskScoreSpikesPostResponse) },
+              body: { custom: buildRouteValidationWithZod(RiskScoreSummaryPostResponse) },
             },
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<RiskScoreSpikesPostResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<RiskScoreSummaryPostResponse>> => {
         const startTime = moment(); // start timing the generation
         const resp = buildResponse(response);
         const assistantContext = await context.elasticAssistant;
@@ -82,7 +86,7 @@ export const postRiskSpikesRoute = (router: IRouter<ElasticAssistantRequestHandl
 
           // get parameters from the request body
           const { apiConfig, langSmithApiKey, langSmithProject, identifier, identifierKey } =
-            request.body as RiskScoreSpikesPostRequestBody;
+            request.body as RiskScoreSummaryPostRequestBody;
 
           if (!identifier || !identifierKey) {
             return resp.error({
@@ -93,14 +97,6 @@ export const postRiskSpikesRoute = (router: IRouter<ElasticAssistantRequestHandl
 
           // get an Elasticsearch client for the authenticated user:
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-          // const RiskSpikesClient = await assistantContext.getRiskSpikesDataClient();
-
-          // if (!RiskSpikesClient) {
-          //   return resp.error({
-          //     body: `Entity resolution data client not initialized`,
-          //     statusCode: 500,
-          //   });
-          // }
 
           const searchRes = await esClient.search({
             index: '.internal.alerts-security.alerts-default*',
@@ -185,7 +181,7 @@ export const postRiskSpikesRoute = (router: IRouter<ElasticAssistantRequestHandl
             });
           }
 
-          const castResult = JSON.parse(result) as RiskScoreSpikesPostResponse;
+          const castResult = JSON.parse(result) as RiskScoreSummaryPostResponse;
           const endTime = moment(); // end timing the generation
 
           logger.info(

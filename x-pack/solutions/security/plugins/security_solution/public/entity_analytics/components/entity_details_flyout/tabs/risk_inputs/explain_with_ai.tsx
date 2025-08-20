@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
+
 import { ConnectorSelectorInline } from '@kbn/elastic-assistant';
 import {
   EuiFlexGroup,
@@ -20,10 +20,7 @@ import {
   EuiAccordion,
   EuiTitle,
 } from '@elastic/eui';
-// import type { SpikeEntity } from '../../../common/api/entity_analytics';
-// import { RiskScoreSpikeBadges } from './badges';
-// import entityImage from './img/entity_high.png';
-import { useRiskScoreSpikesAiSummary } from '../../entity_analytics/api/hooks/use_risk_spikes';
+import { useRiskScoreAiSummary } from '../../../../api/hooks/use_risk_summary';
 
 // replaces a space followed by numbers followed by a closing bracket ) with a newline and a dash followed by the numbers for
 // better readability e,g  1) becomes \n - 1
@@ -35,31 +32,17 @@ const constConvertNumbersToLists = (str: string) => {
   });
 };
 
-export interface InvestigateRiskScoreSpikeExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'investigate-risk-score-spike';
-  params: InvestigateRiskScoreSpikePanelProps;
-}
-
-export const InvestigateRiskScoreSpikePanelKey: InvestigateRiskScoreSpikeExpandableFlyoutProps['key'] =
-  'investigate-risk-score-spike';
-
-export interface InvestigateRiskScoreSpikePanelProps extends Record<string, unknown> {
-  spike: SpikeEntity;
-}
-
-interface SpikeEntity {
+export interface ExplainWithAIProps extends Record<string, unknown> {
   identifier: string;
   identifierKey: string;
 }
 
-export const InvestigateRiskScoreSpikeLeftPanel = ({
-  spike,
-}: InvestigateRiskScoreSpikePanelProps) => {
+export const ExplainWithAI = ({ identifier, identifierKey }: ExplainWithAIProps) => {
   const [connectorId, setConnectorId] = React.useState<string | undefined>(undefined);
   const [performRequest, setPerformRequest] = React.useState(false);
-  const { data, isLoading } = useRiskScoreSpikesAiSummary({
-    identifier: spike.identifier,
-    identifierKey: spike.identifierKey,
+  const { data, isLoading } = useRiskScoreAiSummary({
+    identifier,
+    identifierKey,
     connectorId,
     enabled: performRequest,
   });
@@ -79,10 +62,9 @@ export const InvestigateRiskScoreSpikeLeftPanel = ({
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle>
-            <h3>{`Investigate Risk Score Spike for ${spike.identifier}`}</h3>
+            <h3>{`Explain Risk Score Contributions for ${identifier}`}</h3>
           </EuiTitle>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>{/* <RiskScoreSpikeBadges spike={spike} /> */}</EuiFlexItem>
         <EuiHorizontalRule margin="m" />
         <EuiFlexItem grow={false}>
           {!data && (
@@ -186,4 +168,4 @@ export const InvestigateRiskScoreSpikeLeftPanel = ({
   );
 };
 
-InvestigateRiskScoreSpikeLeftPanel.displayName = 'InvestigateRiskScoreSpikePanel';
+ExplainWithAI.displayName = 'ExplainWithAI';

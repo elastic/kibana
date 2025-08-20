@@ -14,7 +14,7 @@ import { findAttackDiscoveriesRoute } from './attack_discovery/get/find_attack_d
 import { getAttackDiscoveryRoute } from './attack_discovery/get/get_attack_discovery';
 import { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';
 import { postAttackDiscoveryBulkRoute } from './attack_discovery/post/post_attack_discovery_bulk';
-import { postRiskSpikesRoute } from './risk_spikes/post_risk_spikes';
+import { postRiskSummaryRoute } from './risk_summary/post_risk_summary';
 import type { ElasticAssistantPluginRouter } from '../types';
 import { createConversationRoute } from './user_conversations/create_route';
 import { deleteConversationRoute } from './user_conversations/delete_route';
@@ -142,5 +142,5 @@ export const registerRoutes = (
   getDefendInsightsRoute(router);
   postDefendInsightsRoute(router);
 
-  postRiskSpikesRoute(router);
+  postRiskSummaryRoute(router);
 };

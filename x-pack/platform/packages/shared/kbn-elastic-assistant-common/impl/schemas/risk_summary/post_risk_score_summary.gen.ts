@@ -18,8 +18,8 @@ import { z } from '@kbn/zod';
 
 import { ApiConfig } from '../conversations/common_attributes.gen';
 
-export type RiskScoreSpikesPostRequestBody = z.infer<typeof RiskScoreSpikesPostRequestBody>;
-export const RiskScoreSpikesPostRequestBody = z.object({
+export type RiskScoreSummaryPostRequestBody = z.infer<typeof RiskScoreSummaryPostRequestBody>;
+export const RiskScoreSummaryPostRequestBody = z.object({
   identifier: z.string(),
   identifierKey: z.string(),
   /**
@@ -36,10 +36,10 @@ export const RiskScoreSpikesPostRequestBody = z.object({
   langSmithApiKey: z.string().optional(),
   model: z.string().optional(),
 });
-export type RiskScoreSpikesPostRequestBodyInput = z.input<typeof RiskScoreSpikesPostRequestBody>;
+export type RiskScoreSummaryPostRequestBodyInput = z.input<typeof RiskScoreSummaryPostRequestBody>;
 
-export type RiskScoreSpikesPostResponse = z.infer<typeof RiskScoreSpikesPostResponse>;
-export const RiskScoreSpikesPostResponse = z.object({
+export type RiskScoreSummaryPostResponse = z.infer<typeof RiskScoreSummaryPostResponse>;
+export const RiskScoreSummaryPostResponse = z.object({
   summary: z.string(),
   detailedExplanation: z.string(),
   recommendations: z.string(),

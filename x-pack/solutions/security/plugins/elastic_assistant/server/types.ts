@@ -34,7 +34,7 @@ import type {
   ExecuteConnectorRequestBody,
   Replacements,
   ContentReferencesStore,
-  RiskScoreSpikesPostRequestBody,
+  RiskScoreSummaryPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type {
@@ -292,7 +292,7 @@ export interface AssistantToolParams {
     | ExecuteConnectorRequestBody
     | AttackDiscoveryPostRequestBody
     | DefendInsightsPostRequestBody
-    | RiskScoreSpikesPostRequestBody
+    | RiskScoreSummaryPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;

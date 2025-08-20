@@ -3,9 +3,9 @@ info:
   title: Post Entity Search discovery API endpoint
   version: '1'
 paths:
-  /internal/elastic_assistant/risk_spikes:
+  /internal/elastic_assistant/risk_summary:
     post:
-      operationId: RiskScoreSpikesPost
+      operationId: RiskScoreSummaryPost
       x-codegen-enabled: true
       description: Find matching entity suggestions
       summary: Generate matching entity suggestions for the given entity via the Elastic Assistant

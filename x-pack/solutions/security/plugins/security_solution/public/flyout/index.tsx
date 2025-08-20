@@ -83,10 +83,6 @@ import {
   VulnerabilityFindingsPreviewPanelKey,
 } from './csp_details/vulnerabilities_flyout/constants';
 import { FindingsVulnerabilityPanel } from './csp_details/vulnerabilities_flyout/vulnerabilities_right';
-import {
-  InvestigateRiskScoreSpikeLeftPanel,
-  InvestigateRiskScoreSpikePanelKey,
-} from './risk_score_spike_details/ai_investigate_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -227,14 +223,6 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     component: (props) => (
       <FindingsMisconfigurationPanel
         {...(props as FindingsMisconfigurationPanelExpandableFlyoutPropsNonPreview).params}
-      />
-    ),
-  },
-  {
-    key: InvestigateRiskScoreSpikePanelKey,
-    component: (props) => (
-      <InvestigateRiskScoreSpikeLeftPanel
-        {...(props as InvestigateRiskScoreSpikeExpandableFlyoutProps).params}
       />
     ),
   },
