@@ -73,6 +73,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/232416
+    // FLAKY: https://github.com/elastic/kibana/issues/232417
     describe.skip('downsampling', () => {
       const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
       before(async () => {
