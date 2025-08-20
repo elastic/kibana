@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { mergeEntityStoreIndices } from './entity_utils';
+import { mergeEntityStoreIndices, getEntitiesSnapshotIndexName } from './entity_utils';
 
 describe('mergeEntityStoreIndices', () => {
   it('returns the original indices if indexPattern is empty', () => {
