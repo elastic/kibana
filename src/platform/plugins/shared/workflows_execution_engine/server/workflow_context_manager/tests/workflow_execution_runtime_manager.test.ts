@@ -442,11 +442,9 @@ describe('WorkflowExecutionRuntimeManager', () => {
       );
     });
 
-    it('should fail workflow execution if its current step failed', async () => {
-      underTest.goToStep('node2');
-      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
-        stepId: 'node3',
-        output: { success: true, data: {} },
+    it('should fail workflow execution if workflow error is set', async () => {
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        startedAt: '2025-08-05T00:00:00.000Z',
         error: 'Second step failed',
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
@@ -454,9 +452,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
       expect(workflowExecutionState.updateWorkflowExecution).toHaveBeenCalledWith(
         expect.objectContaining({
           status: ExecutionStatus.FAILED,
-          error: 'Second step failed',
           finishedAt: '2025-08-06T00:00:04.000Z',
-          duration: 14404000,
+          duration: 86404000,
         })
       );
     });
@@ -472,10 +469,8 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
 
     it('should log workflow failure', async () => {
-      underTest.goToStep('node2');
-      (workflowExecutionState.getLatestStepExecution as jest.Mock).mockReturnValue({
-        stepId: 'node3',
-        output: { success: true, data: {} },
+      (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
+        startedAt: '2025-08-05T00:00:00.000Z',
         error: 'Second step failed',
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();

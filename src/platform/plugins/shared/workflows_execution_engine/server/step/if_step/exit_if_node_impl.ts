@@ -18,7 +18,7 @@ export class ExitIfNodeImpl implements StepImplementation {
   ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.enterScope();
+    this.wfExecutionRuntimeManager.exitScope();
     await this.wfExecutionRuntimeManager.finishStep(this.step.startNodeId);
     this.wfExecutionRuntimeManager.goToNextStep();
   }

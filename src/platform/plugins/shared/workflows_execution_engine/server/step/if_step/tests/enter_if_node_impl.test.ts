@@ -20,12 +20,14 @@ describe('EnterIfNodeImpl', () => {
   let startStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
   let getNodeSuccessors: jest.Mock<any, any, any>;
+  let enterScope: jest.Mock<any, any, any>;
   let workflowContextLoggerMock: IWorkflowEventLogger;
   let workflowContextManagerMock: WorkflowContextManager;
 
   beforeEach(() => {
     startStep = jest.fn();
     goToStep = jest.fn();
+    enterScope = jest.fn();
     getNodeSuccessors = jest.fn();
     workflowContextLoggerMock = {
       logDebug: jest.fn(),
@@ -45,6 +47,7 @@ describe('EnterIfNodeImpl', () => {
       startStep,
       goToStep,
       getNodeSuccessors,
+      enterScope,
     } as any;
     impl = new EnterIfNodeImpl(
       step,
@@ -69,6 +72,11 @@ describe('EnterIfNodeImpl', () => {
   it('should start the step', async () => {
     await impl.run();
     expect(wfExecutionRuntimeManagerMock.startStep).toHaveBeenCalledWith(step.id);
+  });
+
+  it('should enter scope', async () => {
+    await impl.run();
+    expect(wfExecutionRuntimeManagerMock.enterScope).toHaveBeenCalledTimes(1);
   });
 
   describe('then branch', () => {
