@@ -13,7 +13,7 @@ import { runGenerateOtelSemconvCli } from './generate';
 export function cli() {
   return run(async ({ log }) => {
     return runGenerateOtelSemconvCli({
-      // log: log.withContext('@kbn/otel-semantic-conventions'), // TODO: This function will be available when this PR is merged
+      // log: log.withContext('@kbn/otel-semantic-conventions'), // TODO: This function will be available when this PR is merged https://github.com/elastic/kibana/pull/232076
       log,
     });
   });
