@@ -15,7 +15,7 @@ import { usePageSummary } from '../../hooks/use_page_summary';
 
 interface AddToCaseCommentProps {
   comment: string;
-  onCommentChange: React.Dispatch<React.SetStateAction<string>>;
+  onCommentChange: (change: string) => void;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   notifications: NotificationsStart;
@@ -30,7 +30,7 @@ export function AddToCaseComment({
 }: AddToCaseCommentProps) {
   const handleStreamingUpdate = useCallback(
     (partialSummary: string) => {
-      onCommentChange((prevComment) => (prevComment || '') + partialSummary); // Append new data
+      onCommentChange(partialSummary); // Append new data
     },
     [onCommentChange]
   );
@@ -81,7 +81,7 @@ export function AddToCaseComment({
       onChange={(e) => {
         onCommentChange(e.target.value);
       }}
-      value={comment || ''}
+      value={comment}
       fullWidth
       rows={5}
     />

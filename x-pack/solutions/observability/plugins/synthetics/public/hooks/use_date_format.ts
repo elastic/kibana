@@ -33,6 +33,6 @@ export function useUTCDateFormat(): DateFormatter {
   return (timestamp?: string) => {
     if (!timestamp) return '';
     const date = moment.utc(timestamp);
-    return `${date.format('ll')} @ ${date.format('LTS')}`;
+    return date.toISOString();
   };
 }

@@ -10,15 +10,15 @@ import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { EuiConfirmModal, EuiModalHeader, EuiModalHeaderTitle, EuiModalBody } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
+import type { ObservabilityAIAssistantPublicStart } from '@kbn/observability-ai-assistant-plugin/public';
 import {
   type PageAttachmentPersistedState,
   PAGE_ATTACHMENT_TYPE,
 } from '@kbn/page-attachment-schema';
-import { useChatService } from '../../hooks/use_chat_service';
-import { usePageSummary } from '../../hooks/use_page_summary';
 import { type CasesPermissions } from '@kbn/cases-plugin/common';
 import type { NotificationsStart } from '@kbn/core/public';
+import { useChatService } from '../../hooks/use_chat_service';
+import { usePageSummary } from '../../hooks/use_page_summary';
 import { AddToCaseComment } from '../add_to_case_comment';
 
 export interface AddPageAttachmentToCaseModalProps {
@@ -117,7 +117,7 @@ function AddToCaseButtonContent({
   onCloseModal,
 }: AddPageAttachmentToCaseModalProps) {
   const [isCommentModalOpen, setIsCommentModalOpen] = useState(true);
-  const [isCommentLoading, setIsLoading] = useState(true);
+  const [isCommentLoading, setIsCommentLoading] = useState(true);
   const [comment, setComment] = useState<string>('');
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
   const { screenContexts } = usePageSummary({
@@ -148,6 +148,10 @@ function AddToCaseButtonContent({
       ],
     });
   }, [casesModal, comment, pageAttachmentState, screenContexts]);
+
+  const handleCommentChange = useCallback((change: string) => {
+    setComment((prevComment) => (prevComment || '') + change);
+  }, []);
 
   return isCommentModalOpen ? (
     <EuiConfirmModal
@@ -184,9 +188,11 @@ function AddToCaseButtonContent({
       </EuiModalHeader>
       <EuiModalBody>
         <AddToCaseComment
-          onCommentChange={(change) => setComment(change)}
+          onCommentChange={handleCommentChange}
           comment={comment}
-          setIsCommentLoading={setIsLoading}
+          setIsLoading={setIsCommentLoading}
+          notifications={notifications}
+          observabilityAIAssistant={observabilityAIAssistant}
         />
       </EuiModalBody>
     </EuiConfirmModal>

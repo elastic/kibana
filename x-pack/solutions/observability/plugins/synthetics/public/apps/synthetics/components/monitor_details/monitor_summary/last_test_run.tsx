@@ -7,6 +7,7 @@
 
 import React from 'react';
 import dedent from 'dedent';
+import moment from 'moment';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -45,6 +46,7 @@ import { useJourneySteps } from '../hooks/use_journey_steps';
 import { useSelectedMonitor } from '../hooks/use_selected_monitor';
 import { useMonitorLatestPing } from '../hooks/use_monitor_latest_ping';
 import { useDateFormat, useUTCDateFormat } from '../../../../../hooks/use_date_format';
+import { getErrorDuration } from '../../../utils/formatting';
 import { useScreenContext } from '../../../hooks/use_screen_context';
 
 export const LastTestRun = () => {
@@ -91,17 +93,36 @@ export const LastTestRunComponent = ({
   const selectedLocation = useSelectedLocation();
   const { basePath } = useSyntheticsSettingsContext();
 
-  const status = parseBadgeStatus(latestPing?.summary?.down! > 0 ? 'fail' : 'success');
+  const isDown = latestPing?.summary?.down! > 0;
+  const status = parseBadgeStatus(isDown ? 'fail' : 'success');
   const formatter = useDateFormat();
   const utcFormatter = useUTCDateFormat();
   const lastRunTimestamp = formatter(latestPing?.['@timestamp']);
   const lastRunTimestampUTC = utcFormatter(latestPing?.['@timestamp']);
   const errorMessage = latestPing?.error?.message;
+  const stateStartedAt = latestPing?.state?.started_at;
+  const stateEndsAt = Date.now();
+  const formattedStateStartedAt = formatter(latestPing?.state?.started_at);
+  const utcStateStartedAt = utcFormatter(latestPing?.state?.started_at);
+  const stateDuration =
+    stateStartedAt && stateEndsAt
+      ? getErrorDuration(moment(stateStartedAt), moment(stateEndsAt))
+      : 0;
 
   useScreenContext({
     screenDescription: dedent(`The user is viewing the last test run for monitor "${monitor.name}". 
     The last test run ${status} and was executed at ${lastRunTimestamp} (${lastRunTimestampUTC} UTC).
-    ${errorMessage ? `The latest error was: ${errorMessage}` : ''}`),
+    
+    ${errorMessage ? `The latest error was: ${errorMessage}` : ''}. 
+
+    ${
+      stateStartedAt && stateDuration
+        ? `The monitor has been ${
+            isDown ? 'down' : 'up'
+          } for ${stateDuration} since ${formattedStateStartedAt} (${utcStateStartedAt} UTC).`
+        : ''
+    }
+    `),
   });
 
   return (

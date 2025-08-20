@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { useRef, useCallback, useState, useMemo } from 'react';
 import {
   MessageRole,
-  ObservabilityAIAssistantPublicStart,
+  type ObservabilityAIAssistantPublicStart,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { useChatService } from './use_chat_service';
 
@@ -81,9 +81,9 @@ export const usePageSummary = ({
                 Include specific numbers, percentages, error counts, response times, and exact timestamps when available.
                 
                 Report anomalies, spikes, drops, or failures with their precise timing and impact.
-                
-                Use both UTC and local timestamps if provided - do not convert times yourself.
-                
+
+                Use both UTC and local timestamps if provided. Use the date format provided - do not convert times yourself. When both local and UTC times are available, include the local time first and the UTC time in parentheses.
+
                 Begin immediately with the most urgent findings.`),
             },
           },
