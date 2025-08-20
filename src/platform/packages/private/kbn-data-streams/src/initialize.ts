@@ -68,7 +68,7 @@ export async function initialize({
   await retryEs(() =>
     elasticsearchClient.indices.putIndexTemplate({
       name: dataStreams.name,
-      priority: dataStreams.priority,
+      priority: dataStreams.template.priority,
       index_patterns: [`${dataStreams.name}*`],
       composed_of: dataStreams.template.composedOf,
       data_stream: {
@@ -78,7 +78,7 @@ export async function initialize({
         ...dataStreams.template,
       },
       _meta: {
-        ...dataStreams._meta,
+        ...dataStreams.template._meta,
         version: nextHash,
         previousVersions,
       },

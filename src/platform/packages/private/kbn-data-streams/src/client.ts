@@ -55,10 +55,8 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
   private readonly runtimeFields: string[];
   private constructor(
     private readonly client: ElasticsearchClient,
-    private readonly logger: Logger,
     private readonly dataStreams: AnyDataStream
   ) {
-    this.logger = logger.get('data-streams-client');
     this.runtimeFields = Object.keys(dataStreams.searchRuntimeMappings ?? {});
   }
 
@@ -94,7 +92,7 @@ export class DataStreamClient<S extends object, SRM extends BaseSearchRuntimeMap
     args: DataStreamClientArgs<S, SRM>
   ): Promise<DataStreamClient<S, SRM>> {
     await initialize(args);
-    return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.logger, args.dataStreams);
+    return new DataStreamClient<S, SRM>(args.elasticsearchClient, args.dataStreams);
   }
 
   // TODO: expose a create function that skips initialization

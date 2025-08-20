@@ -83,24 +83,33 @@ export interface DataStreamDefinition<
    */
   name: string;
 
-  /** @default 100 */
-  priority?: number;
+  // https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request
+  searchRuntimeMappings?: SearchRuntimeMappings;
 
   /**
-   * Auto-populated with the following properties:
-   * managed: true;                  // present as a managed index template/data stream
-   * userAgent: string;              // an indication of what code created the resources
-   * version: string;                // the version of the data stream, basically a serialisation of the data stream definition
-   * previousVersions: string[];     // previous data stream definitions
+   * Is this a hidden data stream?
+   * @default true
    */
-  _meta?: {
-    [key: string]: unknown;
-  };
+  hidden?: boolean;
 
   /**
    * The index template definition for the data stream.
    */
   template: Pick<api.IndicesIndexTemplateSummary, 'aliases'> & {
+    /** @default 100 */
+    priority?: number;
+
+    /**
+     * Auto-populated with the following properties:
+     * managed: true;                  // present as a managed index template/data stream
+     * userAgent: string;              // an indication of what code created the resources
+     * version: string;                // the version of the data stream, basically a serialisation of the data stream definition
+     * previousVersions: string[];     // previous data stream definitions
+     */
+    _meta?: {
+      [key: string]: unknown;
+    };
+
     mappings?: DataStreamDefinitionMappings<Schema>;
     /**
      * @remark "hidden" defaults to true for the data stream and the backing indices
@@ -114,15 +123,6 @@ export interface DataStreamDefinition<
      */
     composedOf?: string[];
   };
-
-  // https://www.elastic.co/docs/manage-data/data-store/mapping/define-runtime-fields-in-search-request
-  searchRuntimeMappings?: SearchRuntimeMappings;
-
-  /**
-   * Is this a hidden data stream?
-   * @default true
-   */
-  hidden?: boolean;
 }
 
 // Data client

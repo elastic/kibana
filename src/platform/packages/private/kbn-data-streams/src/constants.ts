@@ -15,12 +15,12 @@ import type { AnyDataStreamDefinition } from './types';
  */
 export const defaultDataStreamDefinition: () => Partial<AnyDataStreamDefinition> = () => ({
   hidden: true,
-  priority: 100,
-  _meta: {
-    managed: true,
-    userAgent: '@kbn/data-streams',
-  },
   template: {
+    priority: 100,
+    _meta: {
+      managed: true,
+      userAgent: '@kbn/data-streams',
+    },
     mappings: {
       dynamic: false,
     },
