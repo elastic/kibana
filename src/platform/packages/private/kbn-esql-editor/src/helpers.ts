@@ -351,6 +351,9 @@ export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
       .slider {
         display: none;
       }
+      a {
+        color: ${theme.euiTheme.colors.accent} !important;
+      }
     }
     .hover-row.status-bar {
       display: none;
