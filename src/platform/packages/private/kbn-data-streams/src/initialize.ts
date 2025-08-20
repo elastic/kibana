@@ -75,7 +75,9 @@ export async function initialize({
         hidden: dataStreams.hidden,
       },
       template: {
-        ...dataStreams.template,
+        aliases: dataStreams.template.aliases,
+        mappings: dataStreams.template.mappings,
+        settings: dataStreams.template.settings,
       },
       _meta: {
         ...dataStreams.template._meta,
