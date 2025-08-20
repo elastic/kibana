@@ -11,6 +11,7 @@ import type {
   StaleDownConfig,
   SyntheticsCommonState,
 } from '../../common/runtime_types/alert_rules/common';
+import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 const dateFormat = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const monitorName = 'test-monitor';
@@ -522,6 +523,7 @@ describe('setRecoveredAlertsContext', () => {
             'monitor.type': 'HTTP',
             'error.message': 'test-error-message',
             configId,
+            [ALERT_GROUPING]: { monitor: { id: monitorId }, location: { id: location } },
           },
         },
       ]),
@@ -565,6 +567,7 @@ describe('setRecoveredAlertsContext', () => {
         lastErrorMessage: 'test-error-message',
         monitorType: 'HTTP',
         hostName: 'test-host',
+        grouping: { monitor: { id: monitorId }, location: { id: location } },
       },
     });
   });
