@@ -13,7 +13,7 @@ import chroma from 'chroma-js';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const oldColorMappingsDashboardFixture =
-  'x-pack/test/functional/fixtures/kbn_archiver/lens/old_color_mapping_dashboard.json';
+  'x-pack/platform/test/functional/fixtures/kbn_archives/lens/old_color_mapping_dashboard.json';
 
 const palettes = getKbnPalettes({ darkMode: false });
 const defaultPaletteColors = palettes

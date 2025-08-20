@@ -24,13 +24,13 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
     const localIndexPatternString = 'logstash-*';
     const remoteIndexPatternString = 'ftr-remote:logstash-*';
     const localFixtures = {
-      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json',
-      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/default',
+      lensBasic: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json',
+      lensDefault: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/default',
     };
 
     const remoteFixtures = {
-      lensBasic: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/lens_basic.json',
-      lensDefault: 'x-pack/test/functional/fixtures/kbn_archiver/lens/ccs/default',
+      lensBasic: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/ccs/lens_basic.json',
+      lensDefault: 'x-pack/platform/test/functional/fixtures/kbn_archives/lens/ccs/default',
     };
     let esNode: EsArchiver;
     let fixtureDirs: {

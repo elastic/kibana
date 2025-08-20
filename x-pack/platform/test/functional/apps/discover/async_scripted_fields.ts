@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async function () {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash'
       );
       await esArchiver.loadIfNeeded(
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
