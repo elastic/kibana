@@ -245,7 +245,7 @@ export function UnifiedHistogramChart({
     isPlainRecord,
   });
 
-  const toolbarRightSide = useMemo(
+  const toolbarLetSide = useMemo(
     () => [
       renderCustomChartToggleActions ? (
         renderCustomChartToggleActions()
@@ -365,7 +365,7 @@ export function UnifiedHistogramChart({
         {...a11yCommonProps}
         toolbarCss={chartToolbarCss}
         toolbar={{
-          leftSide: toolbarRightSide,
+          leftSide: toolbarLetSide,
           rightSide: chartVisible ? actions : [],
         }}
       >

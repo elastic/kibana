@@ -288,7 +288,7 @@ export const getDiscoverAppStateContainer = ({
             rowHeight: rowHeight === undefined,
             breakdownField: breakdownField === undefined,
             hideChart: hideChart === undefined,
-            hideSidebar: hideSidebar === undefined,
+            hideSidebar: true,
           },
         })
       );
