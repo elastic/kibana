@@ -8,7 +8,7 @@
 import { getBannerInfoMock } from './plugin.test.mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
-import { BannerConfiguration } from '../common/types';
+import type { BannerConfiguration } from '../common/types';
 import { BannersPlugin } from './plugin';
 
 const nextTick = async () => await new Promise<void>((resolve) => resolve());

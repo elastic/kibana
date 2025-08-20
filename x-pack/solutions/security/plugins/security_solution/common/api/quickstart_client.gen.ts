@@ -437,6 +437,9 @@ import type {
   StopRuleMigrationResponse,
   UpdateRuleMigrationRequestParamsInput,
   UpdateRuleMigrationRequestBodyInput,
+  UpdateRuleMigrationIndexPatternRequestParamsInput,
+  UpdateRuleMigrationIndexPatternRequestBodyInput,
+  UpdateRuleMigrationIndexPatternResponse,
   UpdateRuleMigrationRulesRequestParamsInput,
   UpdateRuleMigrationRulesRequestBodyInput,
   UpdateRuleMigrationRulesResponse,
@@ -1085,8 +1088,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Download a file from an endpoint.
-   */
+    * Download a file from an endpoint. 
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+    */
   async endpointFileDownload(props: EndpointFileDownloadProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileDownload`);
     return this.kbnClient
@@ -1103,8 +1110,12 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
-   * Get information for the specified file using the file ID.
-   */
+    * Get information for the specified file using the file ID.
+> info
+> To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+> {`file_id`} = {`action_id`}`.`{`agent_id`}
+
+    */
   async endpointFileInfo(props: EndpointFileInfoProps) {
     this.log.info(`${new Date().toISOString()} Calling API EndpointFileInfo`);
     return this.kbnClient
@@ -2750,6 +2761,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Updates the index pattern for eligible and/or selected rules of a migration
+   */
+  async updateRuleMigrationIndexPattern(props: UpdateRuleMigrationIndexPatternProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpdateRuleMigrationIndexPattern`);
+    return this.kbnClient
+      .request<UpdateRuleMigrationIndexPatternResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/update_index_pattern',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Updates rules migrations attributes
    */
   async updateRuleMigrationRules(props: UpdateRuleMigrationRulesProps) {
@@ -3155,6 +3185,10 @@ export interface UpdateRuleProps {
 export interface UpdateRuleMigrationProps {
   params: UpdateRuleMigrationRequestParamsInput;
   body: UpdateRuleMigrationRequestBodyInput;
+}
+export interface UpdateRuleMigrationIndexPatternProps {
+  params: UpdateRuleMigrationIndexPatternRequestParamsInput;
+  body: UpdateRuleMigrationIndexPatternRequestBodyInput;
 }
 export interface UpdateRuleMigrationRulesProps {
   params: UpdateRuleMigrationRulesRequestParamsInput;

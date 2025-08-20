@@ -10,10 +10,11 @@ import { useController } from 'react-hook-form';
 import { EuiFormRow, EuiLink } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import { ElasticsearchProcessorType, elasticsearchProcessorTypes } from '@kbn/streams-schema';
+import type { ElasticsearchProcessorType } from '@kbn/streams-schema';
+import { elasticsearchProcessorTypes } from '@kbn/streams-schema';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 import { deserializeJson, serializeXJson } from '../../helpers';
 
 export const JsonEditor = () => {

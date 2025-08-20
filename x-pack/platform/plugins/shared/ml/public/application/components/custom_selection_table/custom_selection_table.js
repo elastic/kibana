@@ -291,6 +291,7 @@ export function CustomSelectionTable({
               )}
               {singleSelection && (
                 <EuiRadio
+                  name="jobSelection"
                   id={item[tableItemId]}
                   data-test-subj={`${item[tableItemId]}-radio-button`}
                   checked={isItemSelected(item[tableItemId])}

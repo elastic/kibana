@@ -8,7 +8,7 @@
  */
 
 import * as Either from 'fp-ts/Either';
-import * as TaskEither from 'fp-ts/TaskEither';
+import type * as TaskEither from 'fp-ts/TaskEither';
 import type { estypes } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
@@ -19,7 +19,7 @@ import {
   type RetryableEsClientError,
 } from './catch_retryable_es_client_errors';
 import { DEFAULT_PIT_KEEP_ALIVE } from './open_pit';
-import { EsResponseTooLargeError } from '.';
+import type { EsResponseTooLargeError } from '.';
 
 /** @internal */
 export interface ReadWithPit {

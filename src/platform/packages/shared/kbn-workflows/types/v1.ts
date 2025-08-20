@@ -8,7 +8,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { WorkflowSchema, WorkflowYaml } from '../spec/schema';
+import type { WorkflowYaml } from '../spec/schema';
+import { WorkflowSchema } from '../spec/schema';
 
 export enum ExecutionStatus {
   // In progress
@@ -24,10 +25,15 @@ export enum ExecutionStatus {
 }
 
 export interface EsWorkflowExecution {
+  spaceId: string;
   id: string;
   workflowId: string;
   status: ExecutionStatus;
+  context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
+  /** Serialized graphlib.Graph */
+  executionGraph?: any;
+  currentNodeId?: string; // The node currently being executed
   createdAt: string;
   error: string | null;
   createdBy: string;
@@ -35,6 +41,8 @@ export interface EsWorkflowExecution {
   finishedAt: string;
   duration: number;
   triggeredBy?: string; // 'manual' or 'scheduled'
+  traceId?: string; // APM trace ID for observability
+  entryTransactionId?: string; // APM root transaction ID for trace embeddable
 }
 
 export interface ProviderInput {
@@ -50,6 +58,7 @@ export interface Provider {
 }
 
 export interface EsWorkflowStepExecution {
+  spaceId: string;
   id: string;
   stepId: string;
   workflowRunId: string;
@@ -59,8 +68,9 @@ export interface EsWorkflowStepExecution {
   completedAt?: string;
   executionTimeMs?: number;
   topologicalIndex: number;
-  error?: string;
-  output?: Record<string, any>;
+  error?: string | null;
+  output?: Record<string, any> | null;
+  state?: Record<string, any>;
 }
 
 export enum WorkflowStatus {
@@ -81,12 +91,14 @@ export interface WorkflowExecutionHistoryModel {
 }
 
 export interface WorkflowExecutionLogModel {
+  spaceId: string;
   timestamp: string;
   message: string;
   level: string;
 }
 
 export interface WorkflowExecutionDto {
+  spaceId: string;
   id: string;
   status: ExecutionStatus;
   startedAt: string;
@@ -124,6 +136,7 @@ export const EsWorkflowSchema = z.object({
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
   definition: WorkflowSchema,
+  deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
 });
 

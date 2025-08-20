@@ -34,84 +34,76 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 
-// Failing: See https://github.com/elastic/kibana/issues/176621
-describe.skip(
-  'Expandable flyout left panel correlations',
-  { tags: ['@ess', '@serverless'] },
-  () => {
-    beforeEach(() => {
-      deleteAlertsAndRules();
-      login();
-      createRule(getNewRule());
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-      expandAlertAtIndexExpandableFlyout();
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      createNewCaseFromExpandableFlyout();
-      openInsightsTab();
-      openCorrelationsTab();
-    });
+describe('Expandable flyout left panel correlations', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    login();
+    createRule(getNewRule());
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+    expandAlertAtIndexExpandableFlyout();
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    createNewCaseFromExpandableFlyout();
+    openInsightsTab();
+    openCorrelationsTab();
+  });
 
-    it('should render correlations details correctly', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('have.text', 'Insights')
-        .and('have.class', 'euiTab-isSelected');
+  it('should render correlations details correctly', () => {
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
+      .should('have.text', 'Insights')
+      .and('have.class', 'euiTab-isSelected');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
-        .should('have.text', 'Correlations')
-        .and('have.class', 'euiButtonGroupButton-isSelected');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_CORRELATIONS_BUTTON)
+      .should('have.text', 'Correlations')
+      .and('have.class', 'euiButtonGroupButton-isSelected');
 
-      // cy.log('suppressed alerts');
+    // cy.log('suppressed alerts');
 
-      // TODO get proper data to test suppressed alerts
-      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE).scrollIntoView();
-      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE)
-      //   .should('be.visible')
-      //   .and('contain.text', '1 suppressed alert');
-      // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_INVESTIGATE_IN_TIMELINE_BUTTON).should('be.visible');
+    // TODO get proper data to test suppressed alerts
+    // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE).scrollIntoView();
+    // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_TITLE)
+    //   .should('be.visible')
+    //   .and('contain.text', '1 suppressed alert');
+    // cy.get(CORRELATIONS_SUPPRESSED_ALERTS_INVESTIGATE_IN_TIMELINE_BUTTON).should('be.visible');
 
-      cy.log('related cases');
+    cy.log('related cases');
 
-      cy.get(CORRELATIONS_CASES_SECTION_TITLE).should('contain.text', '1 related case');
-      cy.get(CORRELATIONS_CASES_SECTION_TABLE)
-        .should('contain.text', 'case')
-        .and('contain.text', 'open');
+    cy.get(CORRELATIONS_CASES_SECTION_TITLE).should('contain.text', '1 related case');
+    cy.get(CORRELATIONS_CASES_SECTION_TABLE)
+      .should('contain.text', 'case')
+      .and('contain.text', 'open');
 
-      cy.log('related alerts by source event');
+    cy.log('related alerts by source event');
 
-      cy.get(CORRELATIONS_SOURCE_SECTION_TITLE).should(
-        'contain.text',
-        '1 alert related by source event'
-      );
-      cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('exist');
-      cy.get(CORRELATIONS_SOURCE_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
-        'contain.text',
-        'Investigate in timeline'
-      );
+    cy.get(CORRELATIONS_SOURCE_SECTION_TITLE).should(
+      'contain.text',
+      '1 alert related by source event'
+    );
+    cy.get(CORRELATIONS_SOURCE_SECTION_TABLE).should('exist');
+    cy.get(CORRELATIONS_SOURCE_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
+      'contain.text',
+      'Investigate in timeline'
+    );
 
-      cy.log('related alerts by session');
+    cy.log('related alerts by session');
 
-      cy.get(CORRELATIONS_SESSION_SECTION_TITLE).should(
-        'contain.text',
-        '1 alert related by session'
-      );
-      cy.get(CORRELATIONS_SESSION_SECTION_TABLE).should('exist');
-      cy.get(CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
-        'contain.text',
-        'Investigate in timeline'
-      );
+    cy.get(CORRELATIONS_SESSION_SECTION_TITLE).should('contain.text', '1 alert related by session');
+    cy.get(CORRELATIONS_SESSION_SECTION_TABLE).should('exist');
+    cy.get(CORRELATIONS_SESSION_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
+      'contain.text',
+      'Investigate in timeline'
+    );
 
-      cy.log('related alerts by ancestry');
+    cy.log('related alerts by ancestry');
 
-      cy.get(CORRELATIONS_ANCESTRY_SECTION_TITLE).should(
-        'contain.text',
-        '1 alert related by ancestry'
-      );
-      cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('exist');
-      cy.get(CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
-        'contain.text',
-        'Investigate in timeline'
-      );
-    });
-  }
-);
+    cy.get(CORRELATIONS_ANCESTRY_SECTION_TITLE).should(
+      'contain.text',
+      '1 alert related by ancestry'
+    );
+    cy.get(CORRELATIONS_ANCESTRY_SECTION_TABLE).should('exist');
+    cy.get(CORRELATIONS_ANCESTRY_SECTION_INVESTIGATE_IN_TIMELINE_BUTTON).should(
+      'contain.text',
+      'Investigate in timeline'
+    );
+  });
+});

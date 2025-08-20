@@ -9,8 +9,8 @@
 import { i18n } from '@kbn/i18n';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type { ESQLAstItem, ESQLLiteral } from '../../types';
-import { FunctionParameterType } from '../types';
-import { ISuggestionItem } from '../../commands_registry/types';
+import type { FunctionParameterType } from '../types';
+import type { ISuggestionItem } from '../../commands_registry/types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
 import { getControlSuggestion } from './autocomplete/helpers';
 import { timeUnitsToSuggest } from '../constants';

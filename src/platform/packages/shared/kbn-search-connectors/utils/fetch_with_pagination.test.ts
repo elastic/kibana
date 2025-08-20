@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { fetchWithPagination } from './fetch_with_pagination';
 

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import type { useHistory, useLocation } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ErrorsTab } from './errors/errors_tab';
@@ -16,7 +16,7 @@ import { OverviewPage } from './overview/overview_page';
 import { MonitorsPageHeader } from './management/page_header/monitors_page_header';
 import { CreateMonitorButton } from './create_monitor_button';
 import { MonitorManagementPage } from './monitors_page';
-import { RouteProps } from '../../routes';
+import type { RouteProps } from '../../routes';
 import { ERRORS_ROUTE, MONITORS_ROUTE, OVERVIEW_ROUTE } from '../../../../../common/constants';
 
 export const getMonitorsRoute = (

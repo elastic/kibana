@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowYaml } from '../spec/schema';
-import { EsWorkflow, WorkflowStatus } from './v1';
+import type { WorkflowYaml } from '../spec/schema';
+import type { EsWorkflow } from './v1';
+import { WorkflowStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
-): Omit<EsWorkflow, 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'> {
+): Omit<
+  EsWorkflow,
+  'spaceId' | 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'
+> {
   // TODO: handle merge, if, foreach, etc.
 
   return {
@@ -21,5 +25,6 @@ export function transformWorkflowYamlJsontoEsWorkflow(
     tags: workflowDefinition.tags ?? [],
     status: workflowDefinition.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
     definition: workflowDefinition,
+    deleted_at: null,
   };
 }

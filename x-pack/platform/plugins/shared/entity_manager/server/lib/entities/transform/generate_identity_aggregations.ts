@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 
 export function generateIdentityAggregations(definition: EntityDefinition) {
   return definition.identityFields.reduce(

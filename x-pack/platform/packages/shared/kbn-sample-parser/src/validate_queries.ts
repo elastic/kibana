@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { LoghubSystem } from './read_loghub_system_files';
+import type { LoghubSystem } from './read_loghub_system_files';
 import { getFileOrThrow, getQueriesFilename } from './utils';
 
 interface DslQuery {
