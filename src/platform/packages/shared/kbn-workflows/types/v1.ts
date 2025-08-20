@@ -25,6 +25,7 @@ export enum ExecutionStatus {
 }
 
 export interface EsWorkflowExecution {
+  spaceId: string;
   id: string;
   workflowId: string;
   status: ExecutionStatus;
@@ -57,6 +58,7 @@ export interface Provider {
 }
 
 export interface EsWorkflowStepExecution {
+  spaceId: string;
   id: string;
   stepId: string;
   workflowRunId: string;
@@ -89,12 +91,14 @@ export interface WorkflowExecutionHistoryModel {
 }
 
 export interface WorkflowExecutionLogModel {
+  spaceId: string;
   timestamp: string;
   message: string;
   level: string;
 }
 
 export interface WorkflowExecutionDto {
+  spaceId: string;
   id: string;
   status: ExecutionStatus;
   startedAt: string;
