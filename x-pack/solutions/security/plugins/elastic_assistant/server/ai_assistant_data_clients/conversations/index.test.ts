@@ -181,6 +181,7 @@ describe('AIAssistantConversationsDataClient', () => {
         messages: [
           {
             '@timestamp': '2019-12-13T16:40:33.400Z',
+            id: expect.any(String),
             content: 'test content',
             is_error: undefined,
             reader: undefined,
