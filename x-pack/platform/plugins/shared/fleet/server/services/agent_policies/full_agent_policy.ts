@@ -659,7 +659,7 @@ export function transformOutputToFullPolicyOutput(
 
   // Add streams configuration when write_to_streams is enabled
   if ((output as any).write_to_streams === true) {
-    newOutput.streams = ['logs', 'logs*'];
+    newOutput.streams = ['logs', 'logs.*'];
   }
 
   return newOutput;
