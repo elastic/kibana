@@ -5709,10 +5709,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/elastic-assistant-checkpoint-saver-plugin@link:x-pack/solutions/security/plugins/elastic_assistant_checkpoint_saver":
-  version "0.0.0"
-  uid ""
-
 "@kbn/elastic-assistant-common@link:x-pack/platform/packages/shared/kbn-elastic-assistant-common":
   version "0.0.0"
   uid ""
