@@ -1,3 +1,10 @@
+### Table of Contents
+
+- [Guiding principles](#guiding-principles)
+- [Key concepts](#key-concepts)
+- [Best practices](#best-practices)
+- [Examples](#examples)
+
 Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 ### Guiding principles
