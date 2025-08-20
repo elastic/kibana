@@ -138,7 +138,7 @@ export async function initialize({
       } = await retryEs(() =>
         elasticsearchClient.indices.simulateIndexTemplate({ name: dataStreams.name })
       );
-      logger.debug(`Applying new mappings to write index: ${writeIndex}`);
+      logger.debug(`Applying mappings to write index: ${writeIndex}`);
       await retryEs(() =>
         elasticsearchClient.indices.putMapping({
           index: writeIndex.index_name,
@@ -152,6 +152,7 @@ export async function initialize({
       for (const index of indices)
         promises.push(
           limit(async () => {
+            logger.debug(`Applying settings to index: ${index}`);
             await retryEs(() =>
               elasticsearchClient.indices.putSettings({
                 index: index.index_name,
