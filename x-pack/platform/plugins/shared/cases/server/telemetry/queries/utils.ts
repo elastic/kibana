@@ -242,13 +242,13 @@ export const getCountsAndMaxAlertsData = async ({
 
   const sec = getSolutionStats('securitySolution', res?.aggregations);
   const obs = getSolutionStats('observability', res?.aggregations);
-  const cases = getSolutionStats('cases', res?.aggregations);
+  const main = getSolutionStats('cases', res?.aggregations);
   const all = getTotalStats(res?.aggregations);
   return {
     all,
     sec,
     obs,
-    cases,
+    main,
   };
 };
 

@@ -123,7 +123,7 @@ export const casesSchema: CasesTelemetrySchema = {
     all: { ...countSchema, maxOnACase: long },
     obs: { ...countSchema, maxOnACase: long },
     sec: { ...countSchema, maxOnACase: long },
-    cases: { ...countSchema, maxOnACase: long },
+    main: { ...countSchema, maxOnACase: long },
   },
   connectors: {
     all: {

@@ -207,7 +207,7 @@ export interface CasesTelemetry {
     all: Count & { maxOnACase: number };
     obs: Count & { maxOnACase: number };
     sec: Count & { maxOnACase: number };
-    cases: Count & { maxOnACase: number };
+    main: Count & { maxOnACase: number };
   };
   connectors: {
     all: {
