@@ -34,6 +34,7 @@ export default function profilingApiIntegrationTests({
   const logger = getService('log');
 
   describe('Profiling API tests', function () {
+    this.tags('skipFIPS');
     const filePattern = getGlobPattern();
     const tests = globby.sync(filePattern, { cwd });
 
