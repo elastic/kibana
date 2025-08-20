@@ -7,21 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  ESQLAst,
-  ESQLCommand,
-  ESQLMessage,
-  EsqlQuery,
-  walk,
-  esqlCommandRegistry,
-  ErrorTypes,
-} from '@kbn/esql-ast';
+import type { ESQLAst, ESQLCommand, ESQLMessage, ErrorTypes } from '@kbn/esql-ast';
+import { EsqlQuery, walk, esqlCommandRegistry } from '@kbn/esql-ast';
 import { getMessageFromId } from '@kbn/esql-ast/src/definitions/utils';
 import type {
   ESQLFieldWithMetadata,
   ICommandCallbacks,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type { ESQLCallbacks } from '../shared/types';
 import { collectUserDefinedColumns } from '../shared/user_defined_columns';

@@ -12,7 +12,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../../../../hooks/use_kibana';
-import { ProcessorFormState } from '../../types';
+import type { ProcessorFormState } from '../../types';
 
 export const DissectPatternDefinition = () => {
   const { core } = useKibana();

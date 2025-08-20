@@ -20,7 +20,7 @@
 // 4. Visualize with aggregation on the scripted field by clicking unifiedFieldList.clickFieldListItemVisualize
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');

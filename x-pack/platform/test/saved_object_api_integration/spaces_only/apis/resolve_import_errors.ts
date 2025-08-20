@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   resolveImportErrorsTestSuiteFactory,
   resolveImportErrorsTestCaseFailures,

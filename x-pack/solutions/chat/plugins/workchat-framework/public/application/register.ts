@@ -8,7 +8,7 @@
 import { type CoreSetup, AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { WORKCHAT_FRAMEWORK_APP_ID } from '../../common/features';
 import type { WorkChatFrameworkPluginStartDependencies } from '../types';
-import { InternalServices } from '../services';
+import type { InternalServices } from '../services';
 
 export const registerApp = ({
   core,
