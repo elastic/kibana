@@ -7,23 +7,18 @@
 
 import React, { useEffect } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiMarkdownFormat, EuiProgress } from '@elastic/eui';
-import type { CaseUI } from '../../../../common';
-import { useCaseSummary } from '../hooks/use_case_summary';
+import { useGetCaseSummary } from '../hooks/use_get_case_summary';
 
 interface CaseSummaryProps {
-  caseData: CaseUI;
-  markdown?: boolean;
+  caseId: string;
 }
 
-export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseData, markdown }) => {
-  const { summary, isLoading, generateSummary } = useCaseSummary({
-    caseData,
-    markdown,
-  });
+export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseId }) => {
+  const { isLoading, summary, error, getCaseSummary } = useGetCaseSummary();
 
   useEffect(() => {
-    generateSummary();
-  }, [generateSummary]);
+    getCaseSummary({ caseId, connectorId: 'azure-gpt4o' });
+  }, [getCaseSummary, caseId]);
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-view-assignees">
