@@ -112,7 +112,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
+        'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-02T00:00:00Z',
@@ -174,7 +174,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
+        'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-02T00:00:00Z',
@@ -235,7 +235,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
-        'service.name': 'test-service',
+        'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
           to: '2023-01-02T00:00:00Z',
