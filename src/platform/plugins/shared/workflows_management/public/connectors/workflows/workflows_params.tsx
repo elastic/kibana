@@ -167,7 +167,13 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       setLoadError(null);
 
       try {
-        const response = await http.post('/api/workflows/search');
+        const response = await http.post('/api/workflows/search', {
+          body: JSON.stringify({
+            limit: 1000,
+            page: 1,
+            query: '',
+          }),
+        });
         const workflowsMap = response as WorkflowListDto;
 
         // Check if the currently selected workflow is disabled

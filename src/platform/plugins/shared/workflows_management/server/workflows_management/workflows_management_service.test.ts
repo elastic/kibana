@@ -157,6 +157,7 @@ describe('WorkflowsService', () => {
       expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: WORKFLOW_SAVED_OBJECT_TYPE,
+        page: 1,
         perPage: 100,
         sortField: 'updated_at',
         sortOrder: 'desc',
