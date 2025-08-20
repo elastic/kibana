@@ -1121,8 +1121,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/fixtures/es_archiver/makelogs @elastic/kibana-data-discovery
-/x-pack/test/functional/fixtures/kbn_archiver/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/async_scripted_fields.ts#L35
-/x-pack/test/functional/fixtures/kbn_archiver/discover @elastic/kibana-data-discovery
+/x-pack/platform/test/functional/fixtures/kbn_archives/kibana_scripted_fields_on_logstash.json @elastic/kibana-data-discovery # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/discover/async_scripted_fields.ts#L35
+/x-pack/platform/test/functional/fixtures/kbn_archives/discover @elastic/kibana-data-discovery
 /x-pack/platform/test/search_sessions_integration @elastic/kibana-data-discovery
 /x-pack/platform/test/stack_functional_integration/apps/ccs/ccs_discover.js @elastic/kibana-data-discovery
 /x-pack/platform/test/stack_functional_integration/apps/management/_index_pattern_create.js @elastic/kibana-data-discovery
@@ -1188,8 +1188,8 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/test/api_integration/fixtures/kbn_archiver/lens/constant_keyword.json @elastic/kibana-visualizations
 ^/src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
 ^/src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
-/x-pack/test/functional/fixtures/kbn_archiver/visualize @elastic/kibana-visualizations
-/x-pack/test/functional/fixtures/kbn_archiver/lens @elastic/kibana-visualizations
+/x-pack/platform/test/functional/fixtures/kbn_archives/visualize @elastic/kibana-visualizations
+/x-pack/platform/test/functional/fixtures/kbn_archives/lens @elastic/kibana-visualizations
 ^/src/platform/test/functional/page_objects/legacy/data_table_vis.ts @elastic/kibana-visualizations
 ^/src/platform/test/functional/page_objects/annotation_library_editor_page.ts @elastic/kibana-visualizations # Assigned per git blame
 ^/src/platform/test/functional/firefox/visualize.config.ts @elastic/kibana-visualizations
@@ -1666,7 +1666,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /x-pack/platform/plugins/private/discover_enhanced/test/scout/ui/tests/discover_cdp_perf.spec.ts @elastic/kibana-data-discovery # test tracks bundle size limits
 /x-pack/platform/plugins/private/painless_lab/test/scout @elastic/appex-qa # temporarily
 /x-pack/test/functional/fixtures/package_registry_config.yml @elastic/appex-qa # No usages found
-/x-pack/test/functional/fixtures/kbn_archiver/packaging.json @elastic/appex-qa # No usages found
+/x-pack/platform/test/functional/fixtures/kbn_archives/packaging.json @elastic/appex-qa # No usages found
 /x-pack/solutions/security/test/fixtures/es_archives/filebeat @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/logstash_functional @elastic/appex-qa
 /x-pack/platform/test/fixtures/es_archives/event_log_legacy_ids @elastic/appex-qa
@@ -1920,7 +1920,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 ^/src/platform/test/plugin_functional/test_suites/saved_objects* @elastic/kibana-core
 ^/src/platform/test/plugin_functional/test_suites/core* @elastic/kibana-core
 ^/src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
-/x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management @elastic/kibana-core
+/x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management @elastic/kibana-core
 /x-pack/platform/test/functional_embedded @elastic/kibana-core
 /src/platform/test/node_roles_functional @elastic/kibana-core
 /src/platform/test/functional/page_objects/newsfeed_page.ts @elastic/kibana-core # assigned per https://github.com/elastic/kibana/pull/160210
@@ -2191,7 +2191,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 
 # Management Experience - Deployment Management
 ^/src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts
-/x-pack/test/functional/fixtures/kbn_archiver/home/feature_controls/security/security.json @elastic/kibana-management
+/x-pack/platform/test/functional/fixtures/kbn_archives/home/feature_controls/security/security.json @elastic/kibana-management
 /x-pack/platform/test/fixtures/es_archives/upgrade_assistant @elastic/kibana-management
 /x-pack/platform/test/functional/services/ace_editor.ts @elastic/kibana-management
 /x-pack/platform/test/functional/page_objects/remote_clusters_page.ts @elastic/kibana-management
@@ -2819,7 +2819,7 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/upgrade/apps/reporting @elastic/appex-sharedux
 /x-pack/test/functional/apps/advanced_settings @elastic/appex-sharedux
 ^/src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
-/x-pack/test/functional/fixtures/kbn_archiver/global_search @elastic/appex-sharedux
+/x-pack/platform/test/functional/fixtures/kbn_archives/global_search @elastic/appex-sharedux
 /src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
 /x-pack/platform/test/plugin_functional/test_suites/global_search @elastic/appex-sharedux
 /src/platform/test/plugin_functional/test_suites/shared_ux @elastic/appex-sharedux
