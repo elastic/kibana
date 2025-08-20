@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { useFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { getExecutionStatusColor, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
