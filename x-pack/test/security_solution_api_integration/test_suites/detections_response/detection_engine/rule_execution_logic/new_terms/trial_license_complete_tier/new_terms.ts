@@ -86,12 +86,16 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA New terms type rules', () => {
     before(async () => {
       await esArchiver.load(path);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/new_terms'
+      );
     });
 
     after(async () => {
       await esArchiver.unload(path);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/security_solution/new_terms'
+      );
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -934,18 +938,18 @@ export default ({ getService }: FtrProviderContext) => {
     describe('timestamp override and fallback', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_fallback'
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
       });
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_fallback'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_fallback'
         );
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timestamp_override_3'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
         );
       });
 
@@ -1039,11 +1043,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts should be be enriched', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.load('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/entity/risks');
+        await esArchiver.unload('x-pack/solutions/security/test/fixtures/es_archives/entity/risks');
       });
 
       it('should be enriched with host risk score', async () => {
@@ -1064,15 +1068,21 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('with asset criticality', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
-        await esArchiver.load('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
-        await esArchiver.unload('x-pack/test/functional/es_archives/asset_criticality');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/asset_criticality'
+        );
       });
 
       const { indexListOfDocuments } = dataGeneratorFactory({
@@ -1124,14 +1134,16 @@ export default ({ getService }: FtrProviderContext) => {
     describe('@skipInServerlessMKI manual rule run', () => {
       beforeEach(async () => {
         await stopAllManualRuns(supertest);
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/ecs_compliant');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
+        );
       });
 
       afterEach(async () => {
         await stopAllManualRuns(supertest);
         await deleteAllRules(supertest, log);
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
         );
       });
 

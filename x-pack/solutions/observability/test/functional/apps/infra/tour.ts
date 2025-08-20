@@ -28,14 +28,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     let isCloud: boolean;
     before(async () => {
       isCloud = await deployment.isCloud();
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await pageObjects.common.navigateToApp('observability');
       // Need to increase the browser height so the tour steps fit to screen
       await browser.setWindowSize(1600, 1400);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       await browser.removeLocalStorageItem(observTourStepStorageKey);
     });
 

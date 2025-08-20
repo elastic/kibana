@@ -31,15 +31,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Infrastructure Source Configuration', function () {
     before(async () =>
       Promise.all([
-        esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
-        esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.load('x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'),
+        esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        ),
         kibanaServer.savedObjects.cleanStandardList(),
       ])
     );
     after(async () =>
       Promise.all([
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
-        esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
+        esArchiver.unload('x-pack/solutions/observability/test/fixtures/es_archives/infra/alerts'),
+        esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+        ),
         kibanaServer.savedObjects.cleanStandardList(),
       ])
     );

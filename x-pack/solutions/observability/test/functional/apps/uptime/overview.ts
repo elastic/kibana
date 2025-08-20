@@ -8,7 +8,8 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export const UPTIME_HEARTBEAT_DATA = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
+export const UPTIME_HEARTBEAT_DATA =
+  'x-pack/solutions/observability/test/fixtures/es_archives/uptime/full_heartbeat';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const { uptime, common } = getPageObjects(['uptime', 'common']);

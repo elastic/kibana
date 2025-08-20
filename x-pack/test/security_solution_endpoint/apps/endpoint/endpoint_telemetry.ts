@@ -46,7 +46,9 @@ export default function ({ getService }: FtrProviderContext) {
     });
     describe('when agents are connected with endpoint integration disabled', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/telemetry/agent_only');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/agent_only'
+        );
       });
 
       it('reports no endpoints or policies', async () => {
@@ -72,7 +74,9 @@ export default function ({ getService }: FtrProviderContext) {
           'checkin_now',
           0
         );
-        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/telemetry/checkin_now');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/checkin_now'
+        );
         await telemetryTestResources.deleteArchive('checkin_now');
       });
 
@@ -102,7 +106,7 @@ export default function ({ getService }: FtrProviderContext) {
           2
         );
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/endpoint/telemetry/checkin_2_days_ago'
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/checkin_2_days_ago'
         );
         await telemetryTestResources.deleteArchive('checkin_2_days_ago');
       });
@@ -128,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('when agents are connected with endpoints integration malware enabled', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_malware_enabled'
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/endpoint_malware_enabled'
         );
       });
 
@@ -141,7 +145,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('when agents are connected with endpoints integration malware disabled', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_malware_disabled'
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/endpoint_malware_disabled'
         );
       });
       it('reports the correct number of windows and macos endpoints under policies malware', async () => {
@@ -153,7 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
     describe('when agents are connected with endpoints integration uninstalled', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/endpoint/telemetry/endpoint_uninstalled'
+          'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/endpoint_uninstalled'
         );
       });
       it('reports no endpoints or policies', async () => {
@@ -181,7 +185,7 @@ export default function ({ getService }: FtrProviderContext) {
             0
           );
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/endpoint/telemetry/cloned_endpoint_test'
+            'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/cloned_endpoint_test'
           );
           await telemetryTestResources.deleteArchive('cloned_endpoint_test');
         });
@@ -228,7 +232,7 @@ export default function ({ getService }: FtrProviderContext) {
             0
           );
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/endpoint/telemetry/cloned_endpoint_test'
+            'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/cloned_endpoint_test'
           );
           await telemetryTestResources.deleteArchive('cloned_endpoint_test');
         });
@@ -275,7 +279,7 @@ export default function ({ getService }: FtrProviderContext) {
             0
           );
           await esArchiver.load(
-            'x-pack/test/functional/es_archives/endpoint/telemetry/cloned_endpoint_test'
+            'x-pack/solutions/security/test/fixtures/es_archives/endpoint/telemetry/cloned_endpoint_test'
           );
           await telemetryTestResources.deleteArchive('cloned_endpoint_test');
         });

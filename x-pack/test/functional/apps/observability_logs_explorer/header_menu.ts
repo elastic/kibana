@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability_logs_explorer/data_streams'
       );
       await PageObjects.observabilityLogsExplorer.navigateTo();
     });
@@ -32,7 +32,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability_logs_explorer/data_streams'
       );
     });
 

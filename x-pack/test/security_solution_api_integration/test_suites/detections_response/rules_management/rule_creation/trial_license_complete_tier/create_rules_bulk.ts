@@ -69,11 +69,15 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('creating rules in bulk', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+        );
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(
+          'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+        );
       });
 
       beforeEach(async () => {

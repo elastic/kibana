@@ -30,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
@@ -45,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/observability_logs_explorer/data_streams'
+        'x-pack/solutions/observability/test/fixtures/es_archives/observability_logs_explorer/data_streams'
       );
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
