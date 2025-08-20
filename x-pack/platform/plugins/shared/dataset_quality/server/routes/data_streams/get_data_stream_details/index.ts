@@ -99,7 +99,7 @@ export async function getDataStreamDetails({
     };
   } catch (e) {
     // Respond with empty object if data stream does not exist
-    if (e.statusCode === 404) {
+    if (e.statusCode === 404 || e.body?.error?.type === 'index_closed_exception') {
       return {};
     }
     throw e;
