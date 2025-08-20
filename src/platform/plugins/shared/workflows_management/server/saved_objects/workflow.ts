@@ -106,7 +106,7 @@ export const workflowSavedObjectType: SavedObjectsType<WorkflowSavedObjectAttrib
           type: 'mappings_addition',
           addedMappings: {
             enabled: {
-              type: 'boolean',
+              type: 'boolean' as const,
             },
           },
         },
