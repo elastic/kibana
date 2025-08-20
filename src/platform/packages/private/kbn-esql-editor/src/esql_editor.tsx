@@ -939,7 +939,13 @@ const ESQLEditorInternal = function ESQLEditor({
                 position: relative;
               `}
             >
-              <div css={styles.editorContainer}>
+              <div
+                css={styles.editorContainer}
+                onContextMenu={(e) => {
+                  // Prevent browser's default context menu to ensure Monaco's context menu always appears
+                  e.preventDefault();
+                }}
+              >
                 <CodeEditor
                   htmlId={htmlId}
                   aria-label={formLabel}
@@ -973,8 +979,10 @@ const ESQLEditorInternal = function ESQLEditor({
                     // and the user needs to click again the editor.
                     // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
                     editor.onMouseDown((e) => {
-                      // Don't interfere with right-clicks (context menu)
+                      // Don't interfere with right-clicks (context menu) - let Monaco handle them
                       if (e.event.rightButton) {
+                        // Ensure the browser's default context menu is prevented
+                        e.event.preventDefault();
                         return;
                       }
 
