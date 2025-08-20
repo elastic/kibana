@@ -30,4 +30,6 @@ export {
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,
+  type NaturalLanguageSearchResponse,
+  unifiedSearch,
 } from './tools';

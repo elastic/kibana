@@ -10,8 +10,7 @@
  */
 export const builtinToolIds = {
   indexExplorer: '.index_explorer',
-  relevanceSearch: '.relevance_search',
-  naturalLanguageSearch: '.nl_search',
+  search: '.search',
   listIndices: '.list_indices',
   getIndexMapping: '.get_index_mapping',
   getDocumentById: '.get_document_by_id',

@@ -30,6 +30,13 @@ export {
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
   idRegexp,
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
 } from './tools';
 export {
   OnechatErrorCode,
