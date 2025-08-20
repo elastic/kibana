@@ -15,6 +15,7 @@ import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { UpdatePolicy } from '../types';
 import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
+import { GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ, GCP_SINGLE_ACCOUNT_TEST_SUBJ } from '../test_subjects';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [
@@ -35,7 +36,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
           }
         )
       : undefined,
-    testId: 'gcpOrganizationAccountTestId',
+    testId: GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   },
   {
     id: GCP_SINGLE_ACCOUNT,
@@ -45,7 +46,7 @@ const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps
         defaultMessage: 'Single Project',
       }
     ),
-    testId: 'gcpSingleAccountTestId',
+    testId: GCP_SINGLE_ACCOUNT_TEST_SUBJ,
   },
 ];
 

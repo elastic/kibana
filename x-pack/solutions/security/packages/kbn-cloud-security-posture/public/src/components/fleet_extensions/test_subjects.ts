@@ -30,6 +30,9 @@ export const AWS_INPUT_TEST_SUBJECTS = {
 };
 
 export const GCP_PROVIDER_TEST_SUBJ = 'cloudSetupGcpTestId';
+export const GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'gcpOrganizationAccountTestId';
+export const GCP_SINGLE_ACCOUNT_TEST_SUBJ = 'gcpSingleAccountTestId';
+
 export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   GOOGLE_CLOUD_SHELL_SETUP: 'google_cloud_shell_setup_test_id',
   PROJECT_ID: 'project_id_test_id',
@@ -46,6 +49,8 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS = {
 };
 
 export const AZURE_PROVIDER_TEST_SUBJ = 'cloudSetupAzureTestId';
+export const AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ = 'azureOrganizationAccountTestId';
+export const AZURE_SINGLE_ACCOUNT_TEST_SUBJ = 'azureSingleAccountTestId';
 export const AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ = 'azure-credentials-type-selector';
 
 export const AZURE_SETUP_FORMAT_TEST_SUBJECTS = {
