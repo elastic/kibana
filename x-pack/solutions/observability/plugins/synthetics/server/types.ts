@@ -36,6 +36,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { TelemetryEventsSender } from './telemetry/sender';
 import type { UptimeConfig } from './config';
 import type { SyntheticsEsClient } from './lib';
@@ -75,6 +76,7 @@ export interface SyntheticsPluginsSetupDependencies {
   taskManager: TaskManagerSetupContract;
   telemetry: TelemetryPluginSetup;
   share: SharePluginSetup;
+  cases: CasesServerSetup;
 }
 
 export interface SyntheticsPluginsStartDependencies {
@@ -86,6 +88,7 @@ export interface SyntheticsPluginsStartDependencies {
   telemetry: TelemetryPluginStart;
   spaces?: SpacesPluginStart;
   alerting: AlertingServerStart;
+  cases: CasesServerStart;
 }
 
 export type UptimeRequestHandlerContext = CustomRequestHandlerContext<{

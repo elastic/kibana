@@ -54,7 +54,6 @@ export function getSLOByServiceName(
       }): Promise<SuggestionHandlerResponse<SLOSuggestion>> => {
         const serviceNames = 'service.name' in context ? context['service.name'] : [];
         const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
-
         if (!serviceNames.length) {
           return { suggestions: [] };
         }
