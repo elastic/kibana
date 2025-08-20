@@ -24,7 +24,7 @@ For every field in the log:
 2. For **each final field** (combined or uncombined):
 
    * Assign the **most appropriate ECS field name** (e.g., `@timestamp`, `log.level`, `log.logger`, `message`).  
-     * If the field doesn't fit ECS, use `custom_<name>` for the first such field. For additional fields that would map to the same ECS name append numeric suffixes: `custom_<name>2`, `custom_<name>3`, etc.  
+     * If the field doesn't fit ECS, use `custom.<name>` for the first such field. For additional fields that would map to the same ECS name append numeric suffixes: `custom.<name>2`, `custom.<name>3`, etc.  
 
    * Assign the **best matching standard GROK component**.  
      * Any standard GROK pattern may be used.  
