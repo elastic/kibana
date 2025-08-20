@@ -5,34 +5,63 @@
  * 2.0.
  */
 
-import type { NormalizedColumn } from './normalize_tokens';
+/**
+ * Represents a single log line with masked content and their literal values.
+ */
+export interface MaskedMessage {
+  masked: string;
+  literals: string[];
+}
 
-/** Result of a single token analysis */
-export interface TokenMatch {
-  patterns: number[];
-  /** Literal token text */
+/**
+ * Represents a column for a single log line.
+ */
+export interface SingleLineColumn {
   value: string;
+  tokens: SingleLineToken[];
 }
 
-/** Template representation of one log message */
-export interface MessageTemplate {
-  /** Delimiter discovered for this set of messages */
-  delimiter: string;
-  /** Per‑token metadata */
-  columns: Array<{
-    value: string;
-    tokens: TokenMatch[];
-  }>; // [column][token]
-  /** Original message */
-  original: string;
+/**
+ * Represents a token in a single line column with possible GROK patterns and exclusions determined.
+ */
+export interface SingleLineToken {
+  value: string;
+  patterns: number[];
+  excludedPatterns: number[];
 }
 
-/** Final API return type */
-export interface ExtractTemplateResult {
-  /** Root template common to all messages */
-  // root: TemplateRoot;
-  roots: NormalizedColumn[];
-  delimiter: string;
-  /** One entry per message */
-  templates: MessageTemplate[];
+/**
+ * Represents a normalized column derived from multiple log lines.
+ */
+export interface NormalizedColumn<T = NormalizedToken> {
+  tokens: T[];
+  whitespace: {
+    minLeading: number;
+    maxLeading: number;
+    minTrailing: number;
+    maxTrailing: number;
+  };
+}
+
+/**
+ * Represents a token in a normalized column with possible GROK patterns and exclusions determined.
+ */
+export interface NormalizedToken {
+  values: string[];
+  patterns: number[];
+  excludedPatterns: number[];
+}
+
+/**
+ * Represents a column of named tokens.
+ */
+export type NamedColumn = NormalizedColumn<NamedToken>;
+
+/**
+ * Represents either a literal value (id is `undefined`) or a named field and the GROK pattern used to extract its values.
+ */
+export interface NamedToken {
+  id: string | undefined;
+  pattern: string;
+  values: string[];
 }

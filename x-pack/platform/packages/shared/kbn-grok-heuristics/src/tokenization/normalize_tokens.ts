@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { GROK_REGEX_MAP, PATTERN_PRECEDENCE } from './constants';
+import { GROK_REGEX_MAP, PATTERN_PRECEDENCE } from '../constants';
+import type { SingleLineToken, NormalizedToken } from '../types';
 
 /** --------------------------------------------------------------
  *  Helpers
@@ -26,36 +27,11 @@ const patternIndex = (name: string): number => {
 const DATA_IDX = patternIndex(BuiltinPattern.DATA);
 const NOTSPACE_IDX = patternIndex(BuiltinPattern.NOTSPACE);
 
-export interface Token {
-  value: string;
-  patterns: number[];
-  excludedPatterns: number[];
-}
-
-export interface TokenizedColumn {
-  tokens: Token[];
-  value: string;
-}
-
-// Tokens per line normalizsed into single row
-export interface NormalizedToken {
-  values: string[];
-  patterns: number[];
-  excludedPatterns: number[];
-}
-
-export interface NormalizedColumn {
-  tokens: NormalizedToken[];
-  whitespace: {
-    minLeading: number;
-    maxLeading: number;
-    minTrailing: number;
-    maxTrailing: number;
-  };
-}
-
 /** Compute the intersection of patterns (and union of exclude patterns) for the given accessor. */
-const intersectPatternsBy = (lists: Token[][], accessor: (row: Token[]) => Token | undefined) => {
+const intersectPatternsBy = (
+  lists: SingleLineToken[][],
+  accessor: (row: SingleLineToken[]) => SingleLineToken | undefined
+) => {
   const first = accessor(lists[0]);
   if (!first) return { patterns: [DATA_IDX], excludedPatterns: [] };
   const patterns = first.patterns.filter((p) =>
@@ -76,8 +52,8 @@ const intersectPatternsBy = (lists: Token[][], accessor: (row: Token[]) => Token
 
 /** Decide if accessor produces a common token across all rows. */
 const isCommonTokenBy = (
-  lists: Token[][],
-  accessor: (row: Token[]) => Token | undefined
+  lists: SingleLineToken[][],
+  accessor: (row: SingleLineToken[]) => SingleLineToken | undefined
 ): boolean => {
   const firstTok = accessor(lists[0]);
   if (!firstTok) return false;
@@ -92,8 +68,8 @@ const isCommonTokenBy = (
 
 /** Build NormalizedToken for given accessor (gracefully handles shorter rows). */
 const buildTokenBy = (
-  tokensByRow: Token[][],
-  accessor: (row: Token[]) => Token | undefined
+  tokensByRow: SingleLineToken[][],
+  accessor: (row: SingleLineToken[]) => SingleLineToken | undefined
 ): NormalizedToken => {
   const { patterns, excludedPatterns } = intersectPatternsBy(tokensByRow, accessor);
   return {
@@ -123,18 +99,9 @@ const buildTokenBy = (
  *      • For any row, the candidate index would collide with the other pointer.
  * 4. Residual middle segment is normalised via fixed‑/variable‑length logic.
  */
-export function normalizeTokensForColumn(
-  tokenLists: Token[][],
-  minLeading: number,
-  maxLeading: number,
-  minTrailing: number,
-  maxTrailing: number
-): NormalizedColumn {
-  if (tokenLists.length === 0) {
-    return {
-      tokens: [],
-      whitespace: { minLeading, maxLeading, minTrailing, maxTrailing },
-    };
+export function normalizeTokens(tokensPerLine: SingleLineToken[][]): NormalizedToken[] {
+  if (tokensPerLine.length === 0) {
+    return [];
   }
 
   let leftIdx = 0; // absolute index from start
@@ -147,22 +114,22 @@ export function normalizeTokensForColumn(
   let scanRight = true;
 
   /** Helper: per‑row right‑hand accessor for current offset. */
-  const rightAccessor = (off: number) => (row: Token[]) => {
+  const rightAccessor = (off: number) => (row: SingleLineToken[]) => {
     const idx = row.length - off;
     return idx >= 0 ? row[idx] : undefined;
   };
 
   while (scanLeft || scanRight) {
     // Prevent overrun: calculate minimal right index across rows.
-    const minRightIdx = Math.min(...tokenLists.map((row) => row.length - rightOff));
+    const minRightIdx = Math.min(...tokensPerLine.map((row) => row.length - rightOff));
     if (leftIdx > minRightIdx) break; // pointers crossed on at least one row
 
     // ----- Left scan --------------------------------------------------------
     if (scanLeft) {
       const idx = leftIdx; // freeze index for this iteration
-      const leftAcc = (row: Token[]) => (idx < row.length ? row[idx] : undefined);
-      if (isCommonTokenBy(tokenLists, leftAcc)) {
-        prefix.push(buildTokenBy(tokenLists, leftAcc));
+      const leftAcc = (row: SingleLineToken[]) => (idx < row.length ? row[idx] : undefined);
+      if (isCommonTokenBy(tokensPerLine, leftAcc)) {
+        prefix.push(buildTokenBy(tokensPerLine, leftAcc));
         leftIdx++;
       } else {
         scanLeft = false;
@@ -174,7 +141,7 @@ export function normalizeTokensForColumn(
     if (!scanLeft && !scanRight) break;
 
     // update crossing condition again before right scan
-    const minRightIdxBeforeRight = Math.min(...tokenLists.map((row) => row.length - rightOff));
+    const minRightIdxBeforeRight = Math.min(...tokensPerLine.map((row) => row.length - rightOff));
     if (leftIdx > minRightIdxBeforeRight) break;
 
     // ----- Right scan -------------------------------------------------------
@@ -183,11 +150,11 @@ export function normalizeTokensForColumn(
       const rAcc = rightAccessor(off);
 
       // Prevent duplication: if any row's right index <= leftIdx - 1, stop.
-      const wouldCollide = tokenLists.some((row) => row.length - off <= leftIdx - 1);
+      const wouldCollide = tokensPerLine.some((row) => row.length - off <= leftIdx - 1);
       if (wouldCollide) {
         scanRight = false;
-      } else if (isCommonTokenBy(tokenLists, rAcc)) {
-        suffix.unshift(buildTokenBy(tokenLists, rAcc));
+      } else if (isCommonTokenBy(tokensPerLine, rAcc)) {
+        suffix.unshift(buildTokenBy(tokensPerLine, rAcc));
         rightOff++;
       } else {
         scanRight = false;
@@ -200,7 +167,7 @@ export function normalizeTokensForColumn(
   const midStart = leftIdx;
 
   // Determine length of middle per row (exclusive of suffix part)
-  const midLens = tokenLists.map((row) => Math.max(0, row.length - rightOff + 1 - midStart));
+  const midLens = tokensPerLine.map((row) => Math.max(0, row.length - rightOff + 1 - midStart));
   const hasMiddle = midLens.some((l) => l > 0);
   const fixedLen = hasMiddle && midLens.every((l) => l === midLens[0]);
 
@@ -209,11 +176,11 @@ export function normalizeTokensForColumn(
       const len = midLens[0];
       for (let i = 0; i < len; i++) {
         const idx = midStart + i;
-        const accessor = (row: Token[]) => row[idx];
-        normalized.push(buildTokenBy(tokenLists, accessor));
+        const accessor = (row: SingleLineToken[]) => row[idx];
+        normalized.push(buildTokenBy(tokensPerLine, accessor));
       }
     } else {
-      const concatenated = tokenLists.map((row) => {
+      const concatenated = tokensPerLine.map((row) => {
         const endIdx = row.length - rightOff + 1;
         return row
           .slice(midStart, endIdx)
@@ -255,7 +222,8 @@ export function normalizeTokensForColumn(
     }
   }
 
-  const reevaluated = compacted.map((token): NormalizedToken => {
+  // Re-evaluate compacted tokens
+  return compacted.map((token): NormalizedToken => {
     const matchingPattern = PATTERN_PRECEDENCE.find((pattern, idx) => {
       return token.values.every((value) => {
         return (
@@ -263,15 +231,11 @@ export function normalizeTokensForColumn(
         );
       });
     });
+
     return {
       patterns: matchingPattern ? [PATTERN_PRECEDENCE.indexOf(matchingPattern)] : [DATA_IDX],
       excludedPatterns: token.excludedPatterns,
       values: token.values,
     };
   });
-
-  return {
-    tokens: reevaluated,
-    whitespace: { minLeading, maxLeading, minTrailing, maxTrailing },
-  };
 }

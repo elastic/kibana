@@ -7,9 +7,9 @@
 
 import { orderBy } from 'lodash';
 import { uniq } from 'lodash';
-import { BRACKET_PAIRS } from './mask_capturing_brackets';
-import { QUOTE_PAIRS } from './mask_quotes';
-import { buildGrokRegexMap } from './parse_patterns';
+import { BRACKET_PAIRS } from './tokenization/mask_capturing_brackets';
+import { QUOTE_PAIRS } from './tokenization/mask_quotes';
+import { buildGrokRegexMap } from './grok_patterns';
 
 const ALL_PAIRS = {
   ...QUOTE_PAIRS,

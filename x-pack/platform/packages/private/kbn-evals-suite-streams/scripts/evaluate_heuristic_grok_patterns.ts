@@ -30,13 +30,11 @@ import chalk from 'chalk';
 import yargs from 'yargs/yargs';
 import { flattenObject } from '@kbn/object-utils';
 import { get } from 'lodash';
-import type { ReviewFields } from '@kbn/grok-heuristics';
 import {
-  getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
   getGrokPattern,
-  syncExtractTemplate,
+  extractTokensDangerouslySlow,
 } from '@kbn/grok-heuristics';
 import { getLogGroups } from '@kbn/streams-plugin/server/routes/internal/streams/processing/get_log_groups';
 
@@ -106,7 +104,7 @@ async function getSuggestions(
   stream: string,
   connectorId: string,
   messages: string[],
-  reviewFields: ReviewFields
+  reviewFields: ReturnType<typeof getReviewFields>
 ) {
   const data = await fetch(
     `${KIBANA_URL}/internal/streams/${stream}/processing/_suggestions/grok`,
@@ -206,14 +204,13 @@ export async function evaluateGrokSuggestions() {
         return acc;
       }, []);
 
-      const { roots, delimiter } = syncExtractTemplate(messages);
-      const { usefulTokens, usefulColumns } = getUsefulTokens(roots, delimiter);
-      const grokPattern = getGrokPattern(usefulTokens);
-      const reviewFields = getReviewFields(usefulColumns, 10);
+      const tokens = extractTokensDangerouslySlow(messages);
+      const grokPattern = getGrokPattern(tokens);
+      const reviewFields = getReviewFields(tokens, 10);
       console.log(`- ${stream}: ${chalk.dim(grokPattern)}`);
 
       const suggestion = await getSuggestions(stream, connector, messages, reviewFields);
-      const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, suggestion);
+      const grokProcessor = getGrokProcessor(tokens, suggestion);
       if (!grokProcessor) {
         throw new Error('No grokProcessor returned');
       }

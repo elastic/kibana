@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import patternsFile from './pattern_file.text';
+import patternsFile from './grok_patterns.text';
 
 export type GrokPatternMap = Record<string, string>;
 

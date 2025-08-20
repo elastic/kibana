@@ -10,12 +10,11 @@ import { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
 import {
-  getUsefulTokens,
   getReviewFields,
   getGrokProcessor,
   mergeGrokProcessors,
   groupMessagesByPattern,
-  syncExtractTemplate,
+  extractTokensDangerouslySlow,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { get } from 'lodash';
@@ -105,9 +104,8 @@ export function useGrokPatternSuggestion() {
 
       const result = await Promise.allSettled(
         groupedMessages.map((group) => {
-          const { roots, delimiter } = syncExtractTemplate(group.messages);
-          const { usefulTokens, usefulColumns } = getUsefulTokens(roots, delimiter);
-          const reviewFields = getReviewFields(usefulColumns, 10);
+          const tokens = extractTokensDangerouslySlow(group.messages);
+          const reviewFields = getReviewFields(tokens, 10);
 
           return streamsRepositoryClient
             .fetch('POST /internal/streams/{name}/processing/_suggestions/grok', {
@@ -122,12 +120,11 @@ export function useGrokPatternSuggestion() {
               },
             })
             .then((response) => {
-              const grokProcessor = getGrokProcessor(usefulTokens, reviewFields, response);
-              const inlinedPatterns = inlineGrokPatterns(grokProcessor);
+              const grokProcessor = getGrokProcessor(tokens, response);
 
               return {
                 ...grokProcessor,
-                patterns: inlinedPatterns,
+                patterns: inlineGrokPatterns(grokProcessor),
                 pattern_definitions: {},
               };
             });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { PATTERN_PRECEDENCE } from './constants';
-import type { NormalizedToken } from './normalize_tokens';
-import { normalizeTokensForColumn } from './normalize_tokens';
-import { findMatchingPatterns } from './find_matching_patterns';
+import { PATTERN_PRECEDENCE } from '../constants';
+import type { NormalizedToken } from '../types';
+import { normalizeTokens } from './normalize_tokens';
+import { findMatchingPatterns } from './tokenize_lines';
 import { uniq } from 'lodash';
 
 const formatTokens = (tokens: NormalizedToken[]) => {
@@ -46,9 +46,9 @@ describe('normalizeTokensForColumn', () => {
         createTokenList(['[', 'bar', '@', 'example.com', ']']),
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(formatTokens(result.tokens)).toEqual([
+      expect(formatTokens(result)).toEqual([
         ['[', ['[']],
         ['WORD', ['foo', 'bar']],
         ['@', ['@']],
@@ -75,9 +75,9 @@ describe('normalizeTokensForColumn', () => {
         ],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(formatTokens(result.tokens)).toEqual([
+      expect(formatTokens(result)).toEqual([
         ['[', ['[']],
         ['IPV4', ['192.168.1.1', '10.0.0.1']],
         [':', [':']],
@@ -106,19 +106,16 @@ describe('normalizeTokensForColumn', () => {
         ],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       // Last token should be ]
-      expect(result.tokens[result.tokens.length - 1].values).toEqual([']', ']']);
+      expect(result[result.length - 1].values).toEqual([']', ']']);
 
       // Second to last token should be example.com
-      expect(result.tokens[result.tokens.length - 2].values).toEqual([
-        'example.com',
-        'example.com',
-      ]);
+      expect(result[result.length - 2].values).toEqual(['example.com', 'example.com']);
 
       // Third to last token should be @
-      expect(result.tokens[result.tokens.length - 3].values).toEqual(['@', '@']);
+      expect(result[result.length - 3].values).toEqual(['@', '@']);
     });
 
     it('identifies common suffix patterns when values differ with different token lengths', () => {
@@ -147,9 +144,9 @@ describe('normalizeTokensForColumn', () => {
         ],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(formatTokens(result.tokens)).toEqual([
+      expect(formatTokens(result)).toEqual([
         ['WORD', ['User', 'Name']],
         [' ', [' ']],
         ['WORD', ['named', 'Alice']],
@@ -180,15 +177,15 @@ describe('normalizeTokensForColumn', () => {
         ],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       // Should have 5 tokens: [, middle1, middle2, middle3, ]
-      expect(result.tokens.length).toBe(5);
+      expect(result.length).toBe(5);
 
       // Middle tokens should be generalized but kept separate
-      expect(result.tokens[1].values).toEqual(['foo', 'abc']);
-      expect(result.tokens[2].values).toEqual(['bar', 'def']);
-      expect(result.tokens[3].values).toEqual(['baz', 'ghi']);
+      expect(result[1].values).toEqual(['foo', 'abc']);
+      expect(result[2].values).toEqual(['bar', 'def']);
+      expect(result[3].values).toEqual(['baz', 'ghi']);
     });
 
     it('collapses variable length middle segments into a single NOTSPACE token', () => {
@@ -197,9 +194,9 @@ describe('normalizeTokensForColumn', () => {
         createTokenList(['[', 'abc', ']']),
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(formatTokens(result.tokens)).toEqual([
+      expect(formatTokens(result)).toEqual([
         ['[', ['[']],
         ['NOTSPACE', ['foo.bar.baz', 'abc']],
         [']', [']']],
@@ -212,11 +209,11 @@ describe('normalizeTokensForColumn', () => {
         [createToken('['), createToken('abc.def'), createToken(']')],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       // Middle token should use NOTSPACE pattern
-      expect(result.tokens[1].values).toEqual(['foo.bar.baz', 'abc.def']);
-      expect(result.tokens[1].patterns[0]).toEqual(NOTSPACE_IDX);
+      expect(result[1].values).toEqual(['foo.bar.baz', 'abc.def']);
+      expect(result[1].patterns[0]).toEqual(NOTSPACE_IDX);
     });
 
     it('uses DATA for middle segments with spaces', () => {
@@ -225,12 +222,12 @@ describe('normalizeTokensForColumn', () => {
         [createToken('['), createToken('abc def'), createToken(']')],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       // Middle token should use DATA pattern
-      expect(result.tokens[1].values).toEqual(['foo bar baz', 'abc def']);
-      expect(result.tokens[1].patterns).toContain(DATA_IDX);
-      expect(result.tokens[1].patterns).not.toContain(NOTSPACE_IDX);
+      expect(result[1].values).toEqual(['foo bar baz', 'abc def']);
+      expect(result[1].patterns).toContain(DATA_IDX);
+      expect(result[1].patterns).not.toContain(NOTSPACE_IDX);
     });
   });
 
@@ -253,16 +250,16 @@ describe('normalizeTokensForColumn', () => {
         ],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       // Should properly identify the structure [%{NOTSPACE}@%{DATA}]
-      expect(result.tokens.length).toBe(5);
-      expect(result.tokens[0].values).toEqual(['[', '[']);
-      expect(result.tokens[1].values).toEqual(['foo.bar.baz', 'foo.baz']);
-      expect(result.tokens[1].patterns).toContain(NOTSPACE_IDX);
-      expect(result.tokens[2].values).toEqual(['@', '@']);
-      expect(result.tokens[3].values).toEqual(['mydomain.com', 'mydomain.com']);
-      expect(result.tokens[4].values).toEqual([']', ']']);
+      expect(result.length).toBe(5);
+      expect(result[0].values).toEqual(['[', '[']);
+      expect(result[1].values).toEqual(['foo.bar.baz', 'foo.baz']);
+      expect(result[1].patterns).toContain(NOTSPACE_IDX);
+      expect(result[2].values).toEqual(['@', '@']);
+      expect(result[3].values).toEqual(['mydomain.com', 'mydomain.com']);
+      expect(result[4].values).toEqual([']', ']']);
     });
   });
 
@@ -283,10 +280,10 @@ describe('normalizeTokensForColumn', () => {
         createTokenList(['crond', '(', 'pam_unix', ')', '[', '23469', ']', ':']),
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       expect(
-        result.tokens
+        result
           .concat()
           .reverse()
           .slice(0, 4)
@@ -331,9 +328,9 @@ describe('normalizeTokensForColumn', () => {
         ]),
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(formatTokens(result.tokens)).toEqual([
+      expect(formatTokens(result)).toEqual([
         ['[', ['[']],
         [
           'NOTSPACE',
@@ -437,10 +434,10 @@ describe('normalizeTokensForColumn', () => {
         ],
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      const beginning = result.tokens.slice(0, 1);
-      const end = result.tokens.slice(-3);
+      const beginning = result.slice(0, 1);
+      const end = result.slice(-3);
 
       expect(formatTokens(beginning)).toEqual([['[', ['[']]]);
 
@@ -458,37 +455,28 @@ describe('normalizeTokensForColumn', () => {
         createTokenList(['error', ':']),
       ];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(formatTokens(result.tokens)).toEqual([['NOTSPACE', ['started', 'stopped', 'error:']]]);
+      expect(formatTokens(result)).toEqual([['NOTSPACE', ['started', 'stopped', 'error:']]]);
     });
   });
 
   describe('Edge cases', () => {
     it('handles empty token lists', () => {
       const tokenLists: any[][] = [[], []];
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
-      expect(result.tokens).toEqual([]);
+      expect(result).toEqual([]);
     });
 
     it('handles single token lists', () => {
       const tokenLists = [[createToken('foo')], [createToken('bar')]];
 
-      const result = normalizeTokensForColumn(tokenLists, 0, 0, 0, 0);
+      const result = normalizeTokens(tokenLists);
 
       // Should generalize to a single token with DATA pattern
-      expect(result.tokens.length).toBe(1);
-      expect(result.tokens[0].values).toEqual(['foo', 'bar']);
-    });
-
-    it('handles whitespace information correctly', () => {
-      const result = normalizeTokensForColumn([], 1, 3, 1, 2);
-
-      expect(result.whitespace.minLeading).toBe(1);
-      expect(result.whitespace.maxLeading).toBe(3);
-      expect(result.whitespace.minTrailing).toBe(1);
-      expect(result.whitespace.maxTrailing).toBe(2);
+      expect(result.length).toBe(1);
+      expect(result[0].values).toEqual(['foo', 'bar']);
     });
   });
 });
