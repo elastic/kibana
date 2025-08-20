@@ -220,6 +220,7 @@ export const HeaderRightContent: React.FunctionComponent<HeaderRightContentProps
               { isDivider: true },
               ...(canEnableAutomaticAgentUpgrades &&
               authz.fleet.allAgentPolicies &&
+              authz.fleet.allAgents &&
               !agentPolicy.is_managed
                 ? [
                     {

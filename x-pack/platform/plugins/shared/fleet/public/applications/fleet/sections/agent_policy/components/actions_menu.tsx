@@ -108,8 +108,9 @@ export const AgentPolicyActionMenu = memo<{
 
           const manageAutoUpgradeAgentsItem = (
             <EuiContextMenuItem
+              data-test-subj="agentPolicyActionMenuManageAutoUpgradeAgentsButton"
               icon="gear"
-              disabled={!authz.fleet.allAgentPolicies}
+              disabled={!authz.fleet.allAgentPolicies || !authz.fleet.allAgents}
               onClick={() => {
                 setIsContextMenuOpen(false);
                 setIsManageAutoUpgradeAgentsModalOpen(!isManageAutoUpgradeAgentsModalOpen);
