@@ -328,9 +328,9 @@ async function fetchAllSuggestions(
   }
 
   try {
-    // For manual triggers, wait longer (5 seconds) since user explicitly requested LLM
+    // For manual triggers, wait longer (15 seconds) since user explicitly requested LLM
     const timeoutPromise = new Promise<string[]>((_, reject) =>
-      setTimeout(() => reject(new Error('LLM timeout')), 10000)
+      setTimeout(() => reject(new Error('LLM timeout')), 15000)
     );
 
     const llmQueries = await Promise.race([llmRequest, timeoutPromise]);

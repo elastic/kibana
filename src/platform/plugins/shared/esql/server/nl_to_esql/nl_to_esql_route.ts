@@ -29,11 +29,11 @@ export const registerNLtoESQLRoute = (
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
   context: PluginInitializerContext
 ) => {
-  router.get(
+  router.post(
     {
-      path: '/internal/esql/nl_to_esql/{query}',
+      path: '/internal/esql/nl_to_esql',
       validate: {
-        params: schema.object({
+        body: schema.object({
           query: schema.string(),
         }),
       },
@@ -58,7 +58,7 @@ export const registerNLtoESQLRoute = (
 
         const mappings = await getIndexMappings({ indices: sources, esClient: client });
 
-        const { query } = request.params;
+        const { query } = request.body as { query: string };
         const [, { inference, actions }] = await getStartServices();
 
         const connectors = await getConnectorList({ actions, request });
@@ -72,7 +72,9 @@ export const registerNLtoESQLRoute = (
         Your task is to generate an ES|QL query given a natural language query from the user.
 
         - Natural language query: "${query}",
-        - Index to use must be among these sources "${sources.join(
+        - The index might be mentioned in the query "${query}". So try to find it from there.
+        - If you find the index, you can use it to narrow down the search.
+        - Otherwise, the index to use must be among these sources "${sources.join(
           ', '
         )}". Instead of listing a list of the same indices you can use the astersik wildcard
         - When you find the index you can get the fields mapping from the mappings

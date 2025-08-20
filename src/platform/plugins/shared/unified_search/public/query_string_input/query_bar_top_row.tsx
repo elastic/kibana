@@ -373,7 +373,12 @@ export const QueryBarTopRow = React.memo(
       async (value: string) => {
         setNlToesqlIsLoading(true);
 
-        const message: { content: string } = await http.get(`/internal/esql/nl_to_esql/${value}`);
+        const message: { content: string } = await http.post('/internal/esql/nl_to_esql', {
+          body: JSON.stringify({ query: value }),
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
         if (message && 'content' in message) {
           const query = extractQueryFromLLMMessage(message.content);
           if (query) {

@@ -18,6 +18,7 @@ import {
   type EuiButtonColor,
   useGeneratedHtmlId,
   EuiFormLabel,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
@@ -187,6 +188,7 @@ const ESQLEditorInternal = function ESQLEditor({
   const [isLanguageComponentOpen, setIsLanguageComponentOpen] = useState(false);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
   const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [isLLMLoading, setIsLLMLoading] = useState(false);
   const [abortController, setAbortController] = useState(new AbortController());
 
   // contains both client side validation and server messages
@@ -593,13 +595,22 @@ const ESQLEditorInternal = function ESQLEditor({
         return items;
       },
       getESQLCompletionFromLLM: async (queryString: string) => {
+        setIsLLMLoading(true);
         try {
-          const message: { content: string } = await core.http.get(
-            `/internal/esql/esql_completion/${queryString}`
+          const message: { content: string } = await core.http.post(
+            '/internal/esql/esql_completion',
+            {
+              body: JSON.stringify({ query: queryString }),
+              headers: {
+                'Content-Type': 'application/json',
+              },
+            }
           );
           return message.content;
         } catch (error) {
           return '';
+        } finally {
+          setIsLLMLoading(false);
         }
       },
     };
@@ -904,6 +915,7 @@ const ESQLEditorInternal = function ESQLEditor({
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
+      {isLLMLoading && <EuiProgress size="xs" color="accent" />}
       <EuiFlexGroup
         gutterSize="none"
         css={{
@@ -998,7 +1010,6 @@ const ESQLEditorInternal = function ESQLEditor({
                         monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI,
                       ],
                       contextMenuGroupId: 'navigation',
-                      contextMenuOrder: 1.5,
                       run: (editorInstance) => {
                         // Set the flag to indicate our custom action was triggered
                         inlineCompletionsProviderRef.current?.triggerLLMSuggestions();

@@ -29,11 +29,11 @@ export const registerESQLCompletionRoute = (
   getStartServices: CoreSetup<EsqlServerPluginStart>['getStartServices'],
   context: PluginInitializerContext
 ) => {
-  router.get(
+  router.post(
     {
-      path: '/internal/esql/esql_completion/{query}',
+      path: '/internal/esql/esql_completion',
       validate: {
-        params: schema.object({
+        body: schema.object({
           query: schema.string(),
         }),
       },
@@ -49,7 +49,7 @@ export const registerESQLCompletionRoute = (
       try {
         const core = await requestHandlerContext.core;
         const client = core.elasticsearch.client.asCurrentUser;
-        const { query } = request.params;
+        const { query } = request.body as { query: string };
 
         const index = getIndexPatternFromESQLQuery(query);
 
