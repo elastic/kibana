@@ -1191,21 +1191,21 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
         options: { allowGlobalResource: true, typesRequiringAccessControl },
       });
 
-      let errMessage: string;
-      try {
-        this.accessControlService.enforceAccessControl({
-          typesRequiringAccessControl,
-          authorizationResult,
-          currentSpace: namespaceString,
-        });
-      } catch (err) {
-        errMessage = err;
-      }
+      /**
+       * enforceAccessControl acts only on the current space and is only either fully_authorized or unauthorized.
+       * Even though this is a bulk operation, we don't allow partial changes to access control, i.e the incoming
+       * list of SOs must all support access control.
+       */
+      this.accessControlService.enforceAccessControl({
+        typesRequiringAccessControl,
+        authorizationResult,
+        currentSpace: namespaceString,
+      });
 
-      if (authorizationResult.status === 'unauthorized') {
-        errMessage = `Unable to ${authzAction} for types ${[...typesRequiringAccessControl].join(
-          ', '
-        )}`;
+      if (authorizationResult.status !== 'fully_authorized') {
+        const errMessage = `Unable to ${authzAction} for types ${[
+          ...typesRequiringAccessControl,
+        ].join(', ')}`;
         const err = new Error(errMessage);
         this.addAuditEvent({
           action: auditAction!,
