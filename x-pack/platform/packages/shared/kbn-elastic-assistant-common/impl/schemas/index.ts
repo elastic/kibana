@@ -76,4 +76,6 @@ export * from './alert_summary/find_alert_summary_route.gen';
 
 export * from './security_ai_prompts/find_prompts_route.gen';
 
+export * from './risk_spikes/post_risk_score_spikes.gen';
+
 export { PromptResponse, PromptTypeEnum } from './prompts/bulk_crud_prompts_route.gen';

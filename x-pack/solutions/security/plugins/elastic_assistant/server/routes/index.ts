@@ -24,3 +24,5 @@ export { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 
 // Evaluate
 export { postEvaluateRoute } from './evaluate/post_evaluate';
+
+export { postRiskSpikesRoute } from './risk_spikes/post_risk_spikes';

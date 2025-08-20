@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Post Entity Search discovery API endpoint
+  version: '1'
+paths:
+  /internal/elastic_assistant/risk_spikes:
+    post:
+      operationId: RiskScoreSpikesPost
+      x-codegen-enabled: true
+      description: Find matching entity suggestions
+      summary: Generate matching entity suggestions for the given entity via the Elastic Assistant
+      tags:
+        - entity_analytics
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - apiConfig
+                - identifier
+                - identifierKey
+              properties:
+                identifier:
+                  type: string
+                identifierKey:
+                  type: string
+                apiConfig:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
+                  description: LLM API configuration.
+                langSmithProject:
+                  description: used for development
+                  type: string
+                langSmithApiKey:
+                  description: used for development
+                  type: string
+                model:
+                  type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - summary
+                  - detailedExplanation
+                  - recommendations
+                properties:
+                  summary:
+                    type: string
+                  detailedExplanation:
+                    type: string
+                  recommendations: 
+                    type: string
+                  
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                  message:
+                    type: string
+

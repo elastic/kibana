@@ -50,3 +50,5 @@ export const CAPABILITIES = `${BASE_PATH}/capabilities`;
 export const MINIMUM_AI_ASSISTANT_LICENSE = 'enterprise' as const;
 
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
+
+export const RISK_SPIKES = `${BASE_PATH}/risk_spikes`;

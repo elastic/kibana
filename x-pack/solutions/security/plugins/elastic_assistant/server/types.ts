@@ -34,12 +34,14 @@ import type {
   ExecuteConnectorRequestBody,
   Replacements,
   ContentReferencesStore,
+  RiskScoreSpikesPostRequestBody,
 } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type {
   LicensingApiRequestHandlerContext,
   LicensingPluginStart,
 } from '@kbn/licensing-plugin/server';
+import type { Alert } from '@kbn/alerts-as-data-utils';
 import type {
   ActionsClientChatVertexAI,
   ActionsClientChatOpenAI,
@@ -264,6 +266,9 @@ export type AssistantToolLlm =
   | InferenceChatModel;
 
 export interface AssistantToolParams {
+  mostRecentAlerts: Alert[];
+  identifier?: string;
+  identifierKey?: string;
   alertsIndexPattern?: string;
   assistantContext?: ElasticAssistantApiRequestHandlerContext;
   anonymizationFields?: AnonymizationFieldResponse[];
@@ -284,7 +289,10 @@ export interface AssistantToolParams {
   request: KibanaRequest<
     unknown,
     unknown,
-    ExecuteConnectorRequestBody | AttackDiscoveryPostRequestBody | DefendInsightsPostRequestBody
+    | ExecuteConnectorRequestBody
+    | AttackDiscoveryPostRequestBody
+    | DefendInsightsPostRequestBody
+    | RiskScoreSpikesPostRequestBody
   >;
   size?: number;
   telemetry?: AnalyticsServiceSetup;
