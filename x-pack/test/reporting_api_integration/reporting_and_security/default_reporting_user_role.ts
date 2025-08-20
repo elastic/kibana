@@ -42,11 +42,11 @@ const defaultUserRoleTestServices = ({ getService }: FtrProviderContext) => {
   const PRIVILEGED_REPORTING_USER = 'test_privileged_reporting_user_' + randomString();
   const PRIVILEGED_REPORTING_USER_PASSWORD = 'changeme_' + randomString();
 
-  const archiveRoot = 'x-pack/platform/test/fixtures/es_archives';
+  const archiveRoot = 'x-pack/test/functional/es_archives';
   const ecommerceArchivePath = archiveRoot + '/reporting/ecommerce';
   const logsArchivePath = archiveRoot + '/logstash_functional';
 
-  const soRoot = 'x-pack/platform/test/functional/fixtures/kbn_archives/reporting';
+  const soRoot = 'x-pack/test/functional/fixtures/kbn_archiver/reporting';
   const logsSOPath = soRoot + '/logs';
   const ecommerceSOPath = soRoot + '/ecommerce';
 
