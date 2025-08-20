@@ -21,15 +21,27 @@ import googleScc from '../assets/icons/third_party_icons/google_scc.svg';
 const MAX_ICONS = 2;
 
 export type ThirdPartyIntegrationId =
-  | 'wiz'
+  | 'Wiz'
   | 'aws_security_hub'
   | 'aws_inspector'
-  | 'microsoft_365_defender'
-  | 'google_scc'
-  | 'tenable'
-  | 'qualys'
-  | 'rapid7'
-  | 'elastic';
+  | 'Microsoft'
+  | 'Google Security Command Center'
+  | 'Tenable'
+  | 'Qualys VMDR'
+  | 'Rapid7'
+  | 'Elastic';
+
+const INTEGRATION_LABELS: Record<ThirdPartyIntegrationId, string> = {
+  Wiz: 'Wiz',
+  aws_security_hub: 'AWS Security Hub',
+  aws_inspector: 'AWS Inspector',
+  Microsoft: 'Microsoft 365 Defender',
+  'Google Security Command Center': 'Google Security Command Center',
+  Tenable: 'Tenable',
+  'Qualys VMDR': 'Qualys',
+  Rapid7: 'Rapid7',
+  Elastic: 'Elastic Security',
+};
 
 interface Props {
   type: ThirdPartyIntegrationId;
@@ -40,23 +52,23 @@ interface Props {
 
 const getThirdPartyIconType = (type: ThirdPartyIntegrationId): string | undefined => {
   switch (type) {
-    case 'wiz':
+    case 'Wiz':
       return wiz; // Replace with actual icon reference
     case 'aws_security_hub':
       return awsSecurityHub;
     case 'aws_inspector':
       return awsInspector;
-    case 'microsoft_365_defender':
+    case 'Microsoft':
       return defender;
-    case 'google_scc':
+    case 'Google Security Command Center':
       return googleScc; // Or a reference like googleCloudLogo
-    case 'tenable':
+    case 'Tenable':
       return tenable;
-    case 'qualys':
+    case 'Qualys VMDR':
       return qualys;
-    case 'rapid7':
+    case 'Rapid7':
       return rapid7;
-    case 'elastic':
+    case 'Elastic':
       return 'logoSecurity';
     default:
       return undefined;
@@ -76,21 +88,36 @@ export const ThirdPartyIcon = (props: Props) => {
 
 export const renderThirdPartyIcons = (
   integrations: ThirdPartyIntegrationId[],
-  size: 's' | 'm' | 'l' = 'l' // Optional size parameter, defaults to 'm'
+  size: 's' | 'm' | 'l' = 'l'
 ) => {
   const visibleIcons = integrations.slice(0, MAX_ICONS);
-  const hiddenCount = integrations.length - visibleIcons.length;
+  const hiddenIcons = integrations.slice(MAX_ICONS);
+  const hiddenCount = hiddenIcons.length;
 
   const items = visibleIcons.map((integration) => (
     <EuiFlexItem key={integration} grow={false}>
-      <ThirdPartyIcon type={integration} size={size} />
+      <EuiToolTip content={INTEGRATION_LABELS[integration] || integration}>
+        <ThirdPartyIcon type={integration} size={size} />
+      </EuiToolTip>
     </EuiFlexItem>
   ));
 
-  if (hiddenCount > 0) {
+  if (integrations.length > MAX_ICONS) {
+    const sortedHiddenLabels = hiddenIcons.map((id) => INTEGRATION_LABELS[id] || id).sort();
+
+    const tooltipContent = (
+      <>
+        {sortedHiddenLabels.map((label, index) => (
+          <div key={index}>{label}</div>
+        ))}
+      </>
+    );
+
     items.push(
       <EuiFlexItem key="more-icons" grow={false}>
-        <EuiBadge color="hollow">{`+${hiddenCount}`}</EuiBadge>
+        <EuiToolTip content={tooltipContent}>
+          <EuiBadge color="hollow">{`+${hiddenCount}`}</EuiBadge>
+        </EuiToolTip>
       </EuiFlexItem>
     );
   }

@@ -12,7 +12,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { useGetMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import {
+  renderThirdPartyIcons,
+  useGetMisconfigurationStatusColor,
+} from '@kbn/cloud-security-posture';
 import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
@@ -117,10 +120,8 @@ export const MisconfigurationsPreview = ({
   isLinkEnabled: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
-  const { hasMisconfigurationFindings, passedFindings, failedFindings } = useHasMisconfigurations(
-    field,
-    value
-  );
+  const { hasMisconfigurationFindings, passedFindings, failedFindings, vendorList } =
+    useHasMisconfigurations(field, value);
   const findingsStats = useGetFindingsStats(passedFindings, failedFindings);
 
   useEffect(() => {
@@ -153,6 +154,13 @@ export const MisconfigurationsPreview = ({
   return (
     <ExpandablePanel
       header={{
+        headerContent: (
+          <>
+            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+              {renderThirdPartyIcons(vendorList)}
+            </EuiFlexGroup>
+          </>
+        ),
         iconType: !isPreviewMode && hasMisconfigurationFindings ? 'arrowStart' : '',
         title: (
           <EuiTitle
@@ -176,7 +184,6 @@ export const MisconfigurationsPreview = ({
           passedFindings={passedFindings}
           failedFindings={failedFindings}
         />
-
         <EuiFlexItem grow={2}>
           <EuiFlexGroup direction="column" gutterSize="none">
             <EuiFlexItem />
