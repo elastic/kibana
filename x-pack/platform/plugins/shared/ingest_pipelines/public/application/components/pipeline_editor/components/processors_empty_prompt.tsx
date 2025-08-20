@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../context';
 import { AddProcessorButton } from './add_processor_button';
-import { OnDoneLoadJsonHandler, LoadFromJsonButton } from './load_from_json';
+import type { OnDoneLoadJsonHandler } from './load_from_json';
+import { LoadFromJsonButton } from './load_from_json';
 
 const i18nTexts = {
   emptyPromptTitle: i18n.translate('xpack.ingestPipelines.pipelineEditor.emptyPrompt.title', {

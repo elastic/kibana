@@ -11,7 +11,7 @@ import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
-import { RouteDependencies } from '../../types';
+import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
 
 export function registerReindexIndicesRoutes({

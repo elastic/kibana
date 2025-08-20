@@ -9,7 +9,8 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { createMockRouter, MockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
+import type { MockRouter } from '../__mocks__/routes.mock';
+import { createMockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 

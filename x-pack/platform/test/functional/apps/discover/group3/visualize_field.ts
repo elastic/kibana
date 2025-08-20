@@ -6,9 +6,9 @@
  */
 
 import expect from '@kbn/expect';
-import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DebugState } from '@elastic/charts';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

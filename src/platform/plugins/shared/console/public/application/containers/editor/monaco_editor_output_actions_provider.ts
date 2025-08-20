@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
 import { debounce } from 'lodash';
 import { monaco } from '@kbn/monaco';
 import { createOutputParser } from '@kbn/monaco/src/languages/console/output_parser';

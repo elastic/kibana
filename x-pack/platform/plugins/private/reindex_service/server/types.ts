@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
+import type { IRouter } from '@kbn/core/server';
 import type { Version } from '@kbn/upgrade-assistant-pkg-server';
-import { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
-import {
+import type { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
+import type {
   ReindexServiceScopedClient,
   ReindexServiceScopedClientArgs,
 } from './src/lib/reindex_service_wrapper';

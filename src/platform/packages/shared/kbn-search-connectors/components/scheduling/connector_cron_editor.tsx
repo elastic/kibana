@@ -10,8 +10,8 @@
 import React, { useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ConnectorScheduling } from '../../types/connectors';
-import { Frequency } from '../../types/cron_editor';
+import type { ConnectorScheduling } from '../../types/connectors';
+import type { Frequency } from '../../types/cron_editor';
 import { CronEditor } from '../cron_editor';
 
 interface ConnectorCronEditorProps {

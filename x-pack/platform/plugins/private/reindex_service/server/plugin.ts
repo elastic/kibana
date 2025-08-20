@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import {
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
   CoreSetup,
   Logger,
-  SavedObjectsClient,
   SavedObjectsServiceStart,
   ElasticsearchServiceStart,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 
 import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
-import { RouteDependencies, ReindexServiceServerPluginStart } from './types';
+import type { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
-import {
-  ReindexServiceWrapper,
-  ReindexServiceInternalApi,
-} from './src/lib/reindex_service_wrapper';
+import type { ReindexServiceInternalApi } from './src/lib/reindex_service_wrapper';
+import { ReindexServiceWrapper } from './src/lib/reindex_service_wrapper';
 import { credentialStoreFactory } from './src/lib/credential_store';
 import { registerBatchReindexIndicesRoutes, registerReindexIndicesRoutes } from './src/routes';
 

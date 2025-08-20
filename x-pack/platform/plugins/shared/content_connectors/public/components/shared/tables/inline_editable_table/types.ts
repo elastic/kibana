@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React from 'react';
-import { Column, ItemWithAnID } from '../../types';
+import type React from 'react';
+import type { Column, ItemWithAnID } from '../../types';
 
 export interface FormErrors {
   [key: string]: string | undefined;

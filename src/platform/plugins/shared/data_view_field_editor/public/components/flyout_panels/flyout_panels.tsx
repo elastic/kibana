@@ -16,7 +16,8 @@ import React, {
   useLayoutEffect,
 } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexGroupProps, EuiFlyoutProps } from '@elastic/eui';
+import type { EuiFlexGroupProps, EuiFlyoutProps } from '@elastic/eui';
+import { EuiFlexGroup } from '@elastic/eui';
 
 interface Panel {
   width?: number;
