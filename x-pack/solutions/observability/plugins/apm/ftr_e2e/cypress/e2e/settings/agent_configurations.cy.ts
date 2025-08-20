@@ -359,6 +359,55 @@ describe('Agent configuration', () => {
         });
       });
 
+      describe('Adding New Row Validation', () => {
+        beforeEach(() => {
+          // change predefined setting so action bar with save button is active
+          cy.getByTestSubj('row_deactivate_all_instrumentations')
+            .find('[data-test-subj="apmSelectWithPlaceholderSelect"]')
+            .select('true');
+
+          // trigger validation errors
+          cy.getByTestSubj('apmSettingsAddAdvancedConfigurationButton').click();
+          cy.contains('Save configuration').click();
+
+          cy.contains('Value cannot be empty').should('be.visible');
+          cy.contains('Key cannot be empty').should('be.visible');
+        });
+
+        it('should show validation errors and remove them after providing valid values', () => {
+          const customKey = 'custom.test.setting';
+          const customValue = 'test-value';
+
+          cy.getByTestSubj('apmSettingsAdvancedConfigurationKeyField').first().type(customKey);
+          cy.getByTestSubj('apmSettingsAdvancedConfigurationValueField').first().type(customValue);
+
+          cy.contains('Value cannot be empty').should('not.exist');
+          cy.contains('Key cannot be empty').should('not.exist');
+        });
+
+        it('should show validation errors and remove them after discarding changes', () => {
+          // discard changes
+          cy.getByTestSubj('apmBottomBarActionsDiscardChangesButton').click();
+
+          // reopen new config row
+          cy.getByTestSubj('apmSettingsAddAdvancedConfigurationButton').click();
+
+          cy.contains('Value cannot be empty').should('not.exist');
+          cy.contains('Key cannot be empty').should('not.exist');
+        });
+
+        it('should show validation errors and remove them after deleting row', () => {
+          // delete row
+          cy.getByTestSubj('apmSettingsRemoveAdvancedConfigurationButton').click();
+
+          // reopen new config row
+          cy.getByTestSubj('apmSettingsAddAdvancedConfigurationButton').click();
+
+          cy.contains('Value cannot be empty').should('not.exist');
+          cy.contains('Key cannot be empty').should('not.exist');
+        });
+      });
+
       describe('Complete Configuration Flow', () => {
         // delete congfiguration after test, otherwise unable to create new one
         afterEach(() => {
