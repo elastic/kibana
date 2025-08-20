@@ -17,6 +17,7 @@ import type {
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -42,6 +43,7 @@ import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type { GetWorkflowsParams } from './workflows_management_api';
+import { searchStepExecutions } from './lib/search_step_executions';
 
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
@@ -193,6 +195,27 @@ export class WorkflowsService {
         total: response.total,
       },
     };
+  }
+
+  public async getStepExecution(
+    workflowExecutionId: string,
+    stepId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    if (!this.esClient) {
+      throw new Error('Elasticsearch client not initialized');
+    }
+    const stepExecutions = await searchStepExecutions({
+      esClient: this.esClient,
+      logger: this.logger,
+      stepsExecutionIndex: this.stepsExecutionIndex,
+      workflowExecutionId,
+      additionalQuery: {
+        match: {
+          stepId,
+        },
+      },
+    });
+    return stepExecutions[0] ?? null;
   }
 
   public async getWorkflowExecution(id: string): Promise<WorkflowExecutionDto | null> {

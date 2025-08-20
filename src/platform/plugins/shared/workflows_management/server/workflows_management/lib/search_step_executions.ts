@@ -9,12 +9,14 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { estypes } from '@elastic/elasticsearch';
 
 interface SearchStepExectionsParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   stepsExecutionIndex: string;
   workflowExecutionId: string;
+  additionalQuery?: estypes.QueryDslQueryContainer;
 }
 
 export const searchStepExecutions = async ({
@@ -22,13 +24,25 @@ export const searchStepExecutions = async ({
   logger,
   stepsExecutionIndex,
   workflowExecutionId,
+  additionalQuery,
 }: SearchStepExectionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
     logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
+
+    const mustQueries: estypes.QueryDslQueryContainer[] = [
+      { match: { workflowRunId: workflowExecutionId } },
+    ];
+
+    if (additionalQuery) {
+      mustQueries.push(additionalQuery);
+    }
+
     const response = await esClient.search<EsWorkflowStepExecution>({
       index: stepsExecutionIndex,
       query: {
-        match: { workflowRunId: workflowExecutionId },
+        bool: {
+          must: mustQueries,
+        },
       },
       sort: 'startedAt:dsc',
     });

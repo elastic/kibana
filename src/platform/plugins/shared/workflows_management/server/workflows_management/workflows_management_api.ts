@@ -11,6 +11,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
+  EsWorkflowStepExecution,
   UpdatedWorkflowResponseDto,
   WorkflowDetailDto,
   WorkflowExecutionDto,
@@ -185,5 +186,12 @@ export class WorkflowsManagementApi {
       limit: params.limit || 100,
       offset: params.offset || 0,
     };
+  }
+
+  public async getStepExecution(
+    workflowExecutionId: string,
+    stepId: string
+  ): Promise<EsWorkflowStepExecution | null> {
+    return await this.workflowsService.getStepExecution(workflowExecutionId, stepId);
   }
 }

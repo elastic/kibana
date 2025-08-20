@@ -135,6 +135,7 @@ export class WorkflowExecutionRuntimeManager {
     }
 
     return {
+      input: stepExecution.input,
       output: stepExecution.output || {},
       error: stepExecution.error,
     };
@@ -143,6 +144,7 @@ export class WorkflowExecutionRuntimeManager {
   public async setStepResult(stepId: string, result: RunStepResult): Promise<void> {
     this.workflowExecutionState.upsertStep({
       stepId,
+      input: result.input,
       output: result.output,
       error: result.error,
     });
@@ -245,6 +247,7 @@ export class WorkflowExecutionRuntimeManager {
           executionTimeMs,
           error: startedStepExecution.error,
           output: startedStepExecution.output,
+          input: startedStepExecution.input,
         } as Partial<EsWorkflowStepExecution>;
 
         this.workflowExecutionState.upsertStep(stepExecutionUpdate);
@@ -560,7 +563,7 @@ export class WorkflowExecutionRuntimeManager {
     const stepName = node?.name || step.stepId;
     const isSuccess = step?.status === ExecutionStatus.COMPLETED;
     this.workflowLogger?.logInfo(`Step '${stepName}' ${isSuccess ? 'completed' : 'failed'}`, {
-      workflow: { step_id: stepId },
+      workflow: { step_id: step.stepId },
       event: {
         action: 'step-complete',
         category: ['workflow', 'step'],
