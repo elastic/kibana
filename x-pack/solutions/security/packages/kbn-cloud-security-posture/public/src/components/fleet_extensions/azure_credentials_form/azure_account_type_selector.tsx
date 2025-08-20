@@ -20,6 +20,10 @@ import {
   AZURE_SINGLE_ACCOUNT,
 } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
+import {
+  AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
+  AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
+} from '../test_subjects';
 
 const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean
@@ -32,7 +36,7 @@ const getAzureAccountTypeOptions = (
         defaultMessage: 'Azure Organization',
       }
     ),
-    testId: 'azureOrganizationAccountTestId',
+    testId: AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
     disabled: isAzureOrganizationDisabled,
     tooltip: isAzureOrganizationDisabled
       ? i18n.translate(
@@ -51,7 +55,7 @@ const getAzureAccountTypeOptions = (
         defaultMessage: 'Single Subscription',
       }
     ),
-    testId: 'azureSingleAccountTestId',
+    testId: AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
   },
 ];
 
