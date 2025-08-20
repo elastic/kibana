@@ -206,6 +206,13 @@ export function SettingsPage({
     setRevalidate(false);
   };
 
+  const handleDiscardChanges = () => {
+    setRemovedConfigCount(0);
+    setRevalidate(false);
+    setValidationErrors(new Map());
+    resetSettings();
+  };
+
   return (
     <>
       <EuiForm>
@@ -315,10 +322,7 @@ export function SettingsPage({
       {(unsavedChangesCount > 0 || removedConfigCount > 0) && (
         <BottomBarActions
           isLoading={isSaving}
-          onDiscardChanges={() => {
-            setRemovedConfigCount(0);
-            resetSettings();
-          }}
+          onDiscardChanges={handleDiscardChanges}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
