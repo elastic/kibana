@@ -62,10 +62,6 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
     },
   }) =>
   async (dispatch, getState, { services, runtimeStateManager, urlStateStorage }) => {
-    const tabsEnabled = services.core.featureFlags.getBooleanValue(
-      TABS_ENABLED_FEATURE_FLAG_KEY,
-      false
-    );
     dispatch(disconnectTab({ tabId }));
     dispatch(internalStateSlice.actions.resetOnSavedSearchChange({ tabId }));
 
@@ -96,6 +92,11 @@ export const initializeSingleTab: InternalStateThunkActionCreator<
         })
       );
     }
+
+    const tabsEnabled = services.core.featureFlags.getBooleanValue(
+      TABS_ENABLED_FEATURE_FLAG_KEY,
+      false
+    );
 
     let tabInitialAppState: DiscoverAppState | undefined;
     let tabInitialInternalState: TabState['initialInternalState'] | undefined;

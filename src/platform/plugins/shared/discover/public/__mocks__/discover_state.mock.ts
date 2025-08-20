@@ -41,7 +41,7 @@ export function getDiscoverStateMock({
   services: originalServices = discoverServiceMock,
 }: {
   isTimeBased?: boolean;
-  savedSearch?: SavedSearch;
+  savedSearch?: SavedSearch | false;
   runtimeStateManager?: RuntimeStateManager;
   stateStorageContainer?: IKbnUrlStateStorage;
   history?: History<HistoryLocationState>;
@@ -73,23 +73,28 @@ export function getDiscoverStateMock({
     urlStateStorage: stateStorageContainer,
     tabsStorageManager,
   });
-  savedSearch ??= isTimeBased ? savedSearchMockWithTimeField : savedSearchMock;
-  const persistedDiscoverSession: DiscoverSession = {
-    ...savedSearch,
-    id: savedSearch.id ?? '',
-    title: savedSearch.title ?? '',
-    description: savedSearch.description ?? '',
-    tabs: [
-      fromSavedSearchToSavedObjectTab({
-        tab: {
-          id: savedSearch.id ?? '',
-          label: savedSearch.title ?? '',
-        },
-        savedSearch,
-        services,
-      }),
-    ],
-  };
+  const finalSavedSearch =
+    savedSearch === false
+      ? undefined
+      : savedSearch ?? (isTimeBased ? savedSearchMockWithTimeField : savedSearchMock);
+  const persistedDiscoverSession: DiscoverSession | undefined = finalSavedSearch
+    ? {
+        ...finalSavedSearch,
+        id: finalSavedSearch.id ?? '',
+        title: finalSavedSearch.title ?? '',
+        description: finalSavedSearch.description ?? '',
+        tabs: [
+          fromSavedSearchToSavedObjectTab({
+            tab: {
+              id: finalSavedSearch.id ?? '',
+              label: finalSavedSearch.title ?? '',
+            },
+            savedSearch: finalSavedSearch,
+            services,
+          }),
+        ],
+      }
+    : undefined;
   const mockUserId = 'mockUserId';
   const mockSpaceId = 'mockSpaceId';
   const initialTabsState = tabsStorageManager.loadLocally({
@@ -107,7 +112,7 @@ export function getDiscoverStateMock({
         persistedDiscoverSession,
       },
       'requestId',
-      { discoverSessionId: savedSearch.id }
+      { discoverSessionId: finalSavedSearch?.id }
     )
   );
   const container = getDiscoverStateContainer({
@@ -127,7 +132,9 @@ export function getDiscoverStateMock({
     cleanup: async () => {},
   });
   tabRuntimeState.stateContainer$.next(container);
-  container.savedSearchState.set(savedSearch);
+  if (finalSavedSearch) {
+    container.savedSearchState.set(finalSavedSearch);
+  }
 
   return container;
 }

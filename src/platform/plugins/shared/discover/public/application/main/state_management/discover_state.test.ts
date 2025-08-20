@@ -9,7 +9,11 @@
 
 import type { DiscoverStateContainer } from './discover_state';
 import { createSearchSessionRestorationDataProvider } from './discover_state';
-import { internalStateActions, selectTabRuntimeState } from './redux';
+import {
+  fromSavedSearchToSavedObjectTab,
+  internalStateActions,
+  selectTabRuntimeState,
+} from './redux';
 import type { History } from 'history';
 import { createBrowserHistory, createMemoryHistory } from 'history';
 import { createSearchSourceMock, dataPluginMock } from '@kbn/data-plugin/public/mocks';
@@ -62,10 +66,9 @@ async function getState(
       ...spec,
     });
   });
-  savedSearch ??= savedSearchMockWithTimeFieldNew;
   const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateMock({
-    savedSearch: copySavedSearch(savedSearch),
+    savedSearch: savedSearch ? copySavedSearch(savedSearch) : false,
     runtimeStateManager,
     history: nextHistory,
     services: mockServices,
@@ -563,22 +566,21 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch given an empty URL, no state changes', async () => {
-      const { state, customizationService, getCurrentUrl } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
-      jest.spyOn(mockServices.savedSearch, 'get').mockImplementationOnce(() => {
-        const savedSearch = copySavedSearch(savedSearchMock);
-        const savedSearchWithDefaults = updateSavedSearch({
+      const savedSearch = copySavedSearch(savedSearchMock);
+      const savedSearchWithDefaults = updateSavedSearch({
+        savedSearch,
+        appState: getInitialState({
+          initialUrlState: undefined,
           savedSearch,
-          appState: getInitialState({
-            initialUrlState: undefined,
-            savedSearch,
-            services: mockServices,
-          }),
-          globalState: state.getCurrentTab().globalState,
           services: mockServices,
-        });
-        return Promise.resolve(savedSearchWithDefaults);
+        }),
+        services: mockServices,
+      });
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchWithDefaults.searchSource);
+      const { state, customizationService, getCurrentUrl } = await getState('/', {
+        savedSearch: savedSearchWithDefaults,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -663,6 +665,9 @@ describe('Discover state', () => {
         timeRange: { from: 'now-15d', to: 'now' },
         refreshInterval: { pause: false, value: 60000 },
       };
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch,
         isEmptyUrl: false,
@@ -694,6 +699,9 @@ describe('Discover state', () => {
         timeRange: { from: 'now-15d', to: 'now' },
         refreshInterval: { pause: false, value: 60000 },
       };
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch,
         isEmptyUrl: false,
@@ -733,10 +741,6 @@ describe('Discover state', () => {
     test('loadSavedSearch without id ignoring invalid index in URL, adding a warning toast', async () => {
       const url = '/#?_a=(dataSource:(dataViewId:abc,type:dataView))&_g=()';
       const { state, customizationService } = await getState(url, {
-        savedSearch: {
-          ...savedSearchMock,
-          id: undefined,
-        },
         isEmptyUrl: false,
       });
       await state.internalState.dispatch(
@@ -810,22 +814,21 @@ describe('Discover state', () => {
     });
 
     test('loadSavedSearch data view handling', async () => {
-      const { state, customizationService, history } = await getState('/', {
-        savedSearch: savedSearchMock,
-      });
-      jest.spyOn(mockServices.savedSearch, 'get').mockImplementationOnce(() => {
-        const savedSearch = copySavedSearch(savedSearchMock);
-        const savedSearchWithDefaults = updateSavedSearch({
+      let savedSearch = copySavedSearch(savedSearchMock);
+      let savedSearchWithDefaults = updateSavedSearch({
+        savedSearch,
+        appState: getInitialState({
+          initialUrlState: undefined,
           savedSearch,
-          appState: getInitialState({
-            initialUrlState: undefined,
-            savedSearch,
-            services: mockServices,
-          }),
-          globalState: state.getCurrentTab().globalState,
           services: mockServices,
-        });
-        return Promise.resolve(savedSearchWithDefaults);
+        }),
+        services: mockServices,
+      });
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchWithDefaults.searchSource);
+      const { state, customizationService, history } = await getState('/', {
+        savedSearch: savedSearchWithDefaults,
       });
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -841,20 +844,41 @@ describe('Discover state', () => {
         'the-data-view-id'
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      jest.spyOn(mockServices.savedSearch, 'get').mockImplementationOnce(() => {
-        const savedSearch = copySavedSearch(savedSearchMockWithTimeField);
-        const savedSearchWithDefaults = updateSavedSearch({
+      savedSearch = { ...copySavedSearch(savedSearchMockWithTimeField), id: savedSearch.id };
+      savedSearchWithDefaults = updateSavedSearch({
+        savedSearch,
+        appState: getInitialState({
+          initialUrlState: undefined,
           savedSearch,
-          appState: getInitialState({
-            initialUrlState: undefined,
-            savedSearch,
-            services: mockServices,
-          }),
-          globalState: state.getCurrentTab().globalState,
           services: mockServices,
-        });
-        return Promise.resolve(savedSearchWithDefaults);
+        }),
+        globalState: state.getCurrentTab().globalState,
+        services: mockServices,
       });
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchWithDefaults.searchSource);
+      jest.spyOn(mockServices.savedSearch, 'getDiscoverSession').mockImplementationOnce(() => {
+        return Promise.resolve({
+          ...savedSearchWithDefaults,
+          id: savedSearchWithDefaults.id ?? '',
+          title: savedSearchWithDefaults.title ?? '',
+          description: savedSearchWithDefaults.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchWithDefaults.id ?? '',
+                label: savedSearchWithDefaults.title ?? '',
+              },
+              savedSearch: savedSearchWithDefaults,
+              services: mockServices,
+            }),
+          ],
+        });
+      });
+      await state.internalState.dispatch(
+        internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithDefaults.id })
+      );
       history.push('/');
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
@@ -870,20 +894,40 @@ describe('Discover state', () => {
         'index-pattern-with-timefield-id'
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
-      jest.spyOn(mockServices.savedSearch, 'get').mockImplementationOnce(() => {
-        const savedSearch = copySavedSearch(savedSearchMock);
-        const savedSearchWithDefaults = updateSavedSearch({
+      savedSearch = copySavedSearch(savedSearchMock);
+      savedSearchWithDefaults = updateSavedSearch({
+        savedSearch,
+        appState: getInitialState({
+          initialUrlState: undefined,
           savedSearch,
-          appState: getInitialState({
-            initialUrlState: undefined,
-            savedSearch,
-            services: mockServices,
-          }),
-          globalState: state.getCurrentTab().globalState,
           services: mockServices,
-        });
-        return Promise.resolve(savedSearchWithDefaults);
+        }),
+        services: mockServices,
       });
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchWithDefaults.searchSource);
+      jest.spyOn(mockServices.savedSearch, 'getDiscoverSession').mockImplementationOnce(() => {
+        return Promise.resolve({
+          ...savedSearchWithDefaults,
+          id: savedSearchWithDefaults.id ?? '',
+          title: savedSearchWithDefaults.title ?? '',
+          description: savedSearchWithDefaults.description ?? '',
+          tabs: [
+            fromSavedSearchToSavedObjectTab({
+              tab: {
+                id: savedSearchWithDefaults.id ?? '',
+                label: savedSearchWithDefaults.title ?? '',
+              },
+              savedSearch: savedSearchWithDefaults,
+              services: mockServices,
+            }),
+          ],
+        });
+      });
+      await state.internalState.dispatch(
+        internalStateActions.initializeTabs({ discoverSessionId: savedSearchWithDefaults.id })
+      );
       await state.internalState.dispatch(
         state.injectCurrentTab(internalStateActions.initializeSingleTab)({
           initializeSingleTabParams: {
@@ -961,6 +1005,9 @@ describe('Discover state', () => {
       const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
       savedSearchWithQueryAndFilters.searchSource.setField('query', query);
       savedSearchWithQueryAndFilters.searchSource.setField('filter', filters);
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchWithQueryAndFilters.searchSource);
       const { state, customizationService } = await getState('/', {
         savedSearch: savedSearchWithQueryAndFilters,
       });
@@ -981,6 +1028,9 @@ describe('Discover state', () => {
     test('loadSavedSearch with ad-hoc data view being added to internal state adHocDataViews', async () => {
       const savedSearchAdHocCopy = copySavedSearch(savedSearchAdHoc);
       const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchAdHocCopy.searchSource);
       const { state, customizationService } = await getState('/', {
         savedSearch: savedSearchAdHocCopy,
       });
@@ -1004,6 +1054,9 @@ describe('Discover state', () => {
       const savedSearchMockWithESQLCopy = copySavedSearch(savedSearchMockWithESQL);
       const persistedDataViewId = savedSearchMockWithESQLCopy?.searchSource.getField('index')!.id;
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearchMockWithESQLCopy.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQLCopy,
         isEmptyUrl: false,
@@ -1219,10 +1272,11 @@ describe('Discover state', () => {
           },
         })
       );
+      expect(state.savedSearchState.getState().hideChart).toBe(false);
       state.savedSearchState.update({ nextState: { hideChart: true } });
       expect(state.savedSearchState.getState().hideChart).toBe(true);
       state.actions.onOpenSavedSearch(savedSearchMock.id!);
-      expect(state.savedSearchState.getState().hideChart).toBe(undefined);
+      expect(state.savedSearchState.getState().hideChart).toBe(false);
       state.actions.stopSyncing();
     });
 
@@ -1299,7 +1353,7 @@ describe('Discover state', () => {
       );
       await new Promise(process.nextTick);
       const initialUrlState =
-        '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())';
+        '/#?_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))';
       expect(getCurrentUrl()).toBe(initialUrlState);
       expect(
         selectTabRuntimeState(
@@ -1312,7 +1366,7 @@ describe('Discover state', () => {
       await state.actions.onChangeDataView(dataViewComplexMock.id!);
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),interval:auto,sort:!(!(data,desc)))"`
+        `"/#?_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!(!(data,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
       );
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(2);
@@ -1342,14 +1396,16 @@ describe('Discover state', () => {
     });
 
     test('undoSavedSearchChanges with timeRestore', async () => {
-      const { state, customizationService } = await getState('/', {
-        savedSearch: {
-          ...savedSearchMockWithTimeField,
-          timeRestore: true,
-          refreshInterval: { pause: false, value: 1000 },
-          timeRange: { from: 'now-15d', to: 'now-10d' },
-        },
-      });
+      const savedSearch = {
+        ...savedSearchMockWithTimeField,
+        timeRestore: true,
+        refreshInterval: { pause: false, value: 1000 },
+        timeRange: { from: 'now-15d', to: 'now-10d' },
+      };
+      mockServices.data.search.searchSource.create = jest
+        .fn()
+        .mockReturnValue(savedSearch.searchSource);
+      const { state, customizationService } = await getState('/', { savedSearch });
       const setTime = jest.fn();
       const setRefreshInterval = jest.fn();
       mockServices.data.query.timefilter.timefilter.setTime = setTime;
