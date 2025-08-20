@@ -35,7 +35,8 @@ export const OnechatAgents = () => {
           defaultMessage: 'Agents',
         })}
         description={i18n.translate('xpack.onechat.agents.description', {
-          defaultMessage: 'Manage and view your AI agents.',
+          defaultMessage:
+            'Agents are AI assistants that use tools to answer questions, take action, or support workflows.',
         })}
         rightSideItems={headerButtons}
       />
