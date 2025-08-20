@@ -94,6 +94,11 @@ export interface DataStreamDefinition<
 
   /**
    * The index template definition for the data stream.
+   *
+   * This template definition corresponds to types from ES:
+   *  - api.IndicesPutIndexTemplateRequest
+   *  - api.IndicesIndexTemplate
+   *  - api.IndicesIndexTemplateSummary
    */
   template: Pick<api.IndicesIndexTemplateSummary, 'aliases'> & {
     /** @default 100 */
