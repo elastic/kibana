@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
+import type { EuiDataGridProps } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
