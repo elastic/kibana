@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { debounce } from 'lodash';
+import { debounce, initial } from 'lodash';
 import PropTypes from 'prop-types';
 import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
@@ -88,10 +88,12 @@ interface BaseSavedObjectFinder {
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
   showFilter?: boolean;
+  showSearch?: boolean;
   leftChildren?: ReactElement | ReactElement[];
   children?: ReactElement | ReactElement[];
   helpText?: string;
   getTooltipText?: (item: SavedObjectFinderItem) => string | undefined;
+  initialTag?: string;
 }
 
 interface SavedObjectFinderFixedPage extends BaseSavedObjectFinder {
@@ -149,8 +151,6 @@ class SavedObjectFinderUiClass extends React.Component<
       },
     });
 
-    console.log({ response });
-
     const savedObjects = response.hits
       .map((savedObject) => {
         const {
@@ -158,8 +158,6 @@ class SavedObjectFinderUiClass extends React.Component<
         } = savedObject;
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name ? name : titleToUse;
-        console.log(metaDataMap[savedObject.type]?.getEditUrl);
-        console.log('editUrl:', metaDataMap[savedObject.type]?.getEditUrl?.(savedObject) ?? null);
         return {
           ...savedObject,
           version: savedObject.version,
@@ -198,7 +196,7 @@ class SavedObjectFinderUiClass extends React.Component<
     this.state = {
       items: [],
       isFetchingItems: false,
-      query: Query.parse(''),
+      query: Query.parse(props.initialTag ? `tag:(${props.initialTag})` : ''),
     };
   }
 
@@ -210,6 +208,16 @@ class SavedObjectFinderUiClass extends React.Component<
   public componentDidMount() {
     this.isComponentMounted = true;
     this.fetchItems();
+  }
+
+  public componentDidUpdate(
+    prevProps: SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>
+  ) {
+    if (this.props.initialTag && prevProps.initialTag !== this.props.initialTag) {
+      this.setState({
+        query: Query.parse(`tag:(${this.props.initialTag})`),
+      });
+    }
   }
 
   private getSavedObjectMetaDataMap(): Record<string, SavedObjectMetaData> {
@@ -387,6 +395,7 @@ class SavedObjectFinderUiClass extends React.Component<
         schema: {
           recognizedFields: ['type', 'tag'],
         },
+        hidden: !this.props.showSearch,
       },
       filters: this.props.showFilter
         ? [
@@ -415,7 +424,7 @@ class SavedObjectFinderUiClass extends React.Component<
             columns={columns}
             data-test-subj="savedObjectsFinderTable"
             message={this.props.noItemsMessage}
-            search={search}
+            search={this.props.showSearch ? search : undefined}
             pagination={pagination}
             sorting={!!this.state.query?.text ? undefined : sorting}
             onTableChange={onTableChange}

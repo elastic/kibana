@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
+import { EuiPanel, EuiTitle, EuiSpacer, EuiBadge, EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { ContentClientProvider } from '@kbn/content-management-plugin/public';
@@ -15,10 +15,39 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import { getServices } from '../../kibana_services';
 
-interface ContentByTagsProps {}
+const HOME_SELECTED_TAG_LOCAL_STORAGE_KEY = 'homeContentByTagTableTag';
 
-export const ContentByTagTable = ({}: ContentByTagsProps) => {
+export const ContentByTagTable = () => {
   const { application, uiSettings, savedObjectsTagging, contentClient, http } = getServices();
+  const [tagId, setTagId] = React.useState(
+    localStorage.getItem(HOME_SELECTED_TAG_LOCAL_STORAGE_KEY) || ''
+  );
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+  const tag = savedObjectsTagging.getTaggingApi()?.ui.getTag(tagId);
+
+  const TagsSelector = savedObjectsTagging.getTaggingApi()?.ui.components.TagSelector;
+
+  const togglePopover = () => setIsPopoverOpen(!isPopoverOpen);
+  const closePopover = () => setIsPopoverOpen(false);
+
+  const tagButtonAnchor = tag ? (
+    <EuiBadge
+      color={tag.color}
+      onClick={togglePopover}
+      onClickAriaLabel={i18n.translate('home.contentByTagsTable.selectTagAriaLabel', {
+        defaultMessage: 'Click to open tag selection popover',
+      })}
+    >
+      {tag?.name || 'Select tag'}
+    </EuiBadge>
+  ) : (
+    <EuiButtonEmpty size="s" onClick={togglePopover}>
+      {i18n.translate('home.contentByTagsTable.selectTag', {
+        defaultMessage: 'Select tag',
+      })}
+    </EuiButtonEmpty>
+  );
 
   return (
     <KibanaPageTemplate.Section
@@ -30,8 +59,27 @@ export const ContentByTagTable = ({}: ContentByTagsProps) => {
         <EuiTitle size="s">
           <h3>
             {i18n.translate('home.contentByTagsTable.title', {
-              defaultMessage: 'Content by tags',
+              defaultMessage: 'Content for ',
             })}
+            <EuiPopover
+              button={tagButtonAnchor}
+              closePopover={closePopover}
+              isOpen={isPopoverOpen}
+              panelStyle={{ minWidth: 300 }}
+            >
+              {TagsSelector ? (
+                <TagsSelector
+                  selected={tagId ? [tagId] : []}
+                  onTagsSelected={([selectedTag, newTag = '']) => {
+                    localStorage.setItem(
+                      HOME_SELECTED_TAG_LOCAL_STORAGE_KEY,
+                      newTag || selectedTag
+                    );
+                    setTagId(newTag || selectedTag);
+                  }}
+                />
+              ) : null}
+            </EuiPopover>
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
@@ -40,13 +88,14 @@ export const ContentByTagTable = ({}: ContentByTagsProps) => {
           <I18nProvider>
             <SavedObjectFinder
               id="homeContentByTagsTable"
-              showFilter={true}
+              showFilter={false}
+              showSearch={false}
               services={{
                 savedObjectsTagging: savedObjectsTagging.getTaggingApi(),
                 contentClient,
                 uiSettings,
               }}
-              euiTablePersistProps={{}}
+              initialTag={tag?.name || ''}
               onChoose={(id, type, name, savedObject, editUrl) => {
                 const savedObjectEditUrl = editUrl
                   ? editUrl
@@ -70,13 +119,13 @@ export const ContentByTagTable = ({}: ContentByTagsProps) => {
                   type: `visualization`,
                   getIconForSavedObject: () => 'visualizeApp',
                   name: 'Visualization',
-                  getEditUrl: (savedObject) => `/app/visualize/edit/${savedObject.id}`,
+                  getEditUrl: (savedObject) => `/app/visualize#/edit/${savedObject.id}`,
                 },
                 {
                   type: 'lens',
                   getIconForSavedObject: () => 'lensApp',
                   name: 'Lens',
-                  getEditUrl: (savedObject) => `/app/lens/edit/${savedObject.id}`,
+                  getEditUrl: (savedObject) => `/app/lens#/edit/${savedObject.id}`,
                 },
                 {
                   type: 'map',
