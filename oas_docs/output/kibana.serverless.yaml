@@ -12189,6 +12189,9 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Get information for the specified file using the file ID.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -12233,6 +12236,9 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Download a file from an endpoint.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path
