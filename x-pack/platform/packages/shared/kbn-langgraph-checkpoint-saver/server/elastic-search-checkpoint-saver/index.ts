@@ -58,7 +58,10 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
   static defaultCheckpointWritesIndex = 'checkpoint_writes';
 
-  static readonly checkpointFieldMap = {
+  /**
+   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
+   */
+  static readonly checkpointsFieldMap = {
     '@timestamp': {
       type: 'date',
       array: false,
@@ -73,6 +76,9 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     metadata: { type: 'binary', array: false, required: true },
   } as const;
 
+  /**
+   * When modifying the field maps, ensure you perform upgrade testing for all graphs depending on this saver.
+   */
   static readonly checkpointWritesFieldMap = {
     '@timestamp': {
       type: 'date',
@@ -118,44 +124,6 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
   }
 
   /**
-   * Setup required indices
-   */
-  async setup() {
-    return Promise.all([
-      this.createCheckpointIndex(),
-      this.createCheckpointWritesIndex(),
-    ]);
-  }
-
-  private async createCheckpointIndex() {
-    const exists = await this.client.indices.exists({ index: this.checkpointIndex })
-    if (exists) {
-      return;
-    }
-
-    await this.client.indices.create({
-      index: this.checkpointIndex,
-      mappings: {
-        properties: ElasticSearchSaver.checkpointFieldMap,
-      },
-    });
-  }
-
-  private async createCheckpointWritesIndex() {
-    const exists = await this.client.indices.exists({ index: this.checkpointWritesIndex });
-    if (exists) {
-      return
-    }
-
-    await this.client.indices.create({
-      index: this.checkpointWritesIndex,
-      mappings: {
-        properties: ElasticSearchSaver.checkpointWritesFieldMap,
-      },
-    });
-  }
-
-  /**
    * Retrieves a checkpoint from Elasticsearch based on the
    * provided config. If the config contains a "checkpoint_id" key, the checkpoint with
    * the matching thread ID and checkpoint ID is retrieved. Otherwise, the latest checkpoint
@@ -171,7 +139,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     const result = await this.client.search<CheckpointDocument>({
       index: this.checkpointIndex,
       size: 1,
-      sort: [{ checkpoint_id: { order: 'desc' } }],
+      sort: [{ checkpoint_id: { order: 'desc' }}, { '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
           must: [
@@ -289,7 +257,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
     const result = await this.client.search<CheckpointDocument>({
       index: this.checkpointIndex,
       ...(limit ? { size: limit } : {}),
-      sort: [{ checkpoint_id: { order: 'desc' } }],
+      sort: [{ checkpoint_id: { order: 'desc' } }, { '@timestamp': { order: 'desc' } }],
       query: {
         bool: {
           must: mustClauses,
@@ -372,7 +340,7 @@ export class ElasticSearchSaver extends BaseCheckpointSaver {
 
     const compositeId = `thread_id:${threadId}|checkpoint_ns:${checkpointNs}|checkpoint_id:${checkpointId}`;
 
-    await this.client.index({
+    await this.client.create({
       index: this.checkpointIndex,
       id: compositeId,
       document: doc,

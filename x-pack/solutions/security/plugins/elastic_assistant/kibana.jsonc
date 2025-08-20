@@ -34,7 +34,6 @@
       "elasticAssistantSharedState",
       "aiAssistantManagementSelection",
       "discover",
-      "elasticAssistantCheckpointSaver"
     ],
     "requiredBundles": [
       "kibanaReact",
