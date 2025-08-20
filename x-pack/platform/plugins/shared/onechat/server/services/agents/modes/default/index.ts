@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { runPlannerAgent } from './run_planner_agent';
+export { runDefaultAgentMode } from './run_chat_agent';
