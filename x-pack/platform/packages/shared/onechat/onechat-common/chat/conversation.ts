@@ -6,7 +6,7 @@
  */
 
 import type { UserIdAndName } from '../base/users';
-import { ToolResult } from '../tools/tool_result';
+import type { ToolResult } from '../tools/tool_result';
 
 /**
  * Represents a user input that initiated a conversation round.

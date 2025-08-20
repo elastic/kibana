@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { VisualizeServices } from '../types';
+import type { VisualizeServices } from '../types';
 import {
   CHARTS_WITHOUT_SMALL_MULTIPLES,
   CHARTS_TO_BE_DEPRECATED,

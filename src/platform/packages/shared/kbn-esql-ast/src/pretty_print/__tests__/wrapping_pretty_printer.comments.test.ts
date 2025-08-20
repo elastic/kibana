@@ -8,7 +8,8 @@
  */
 
 import { parse } from '../../parser';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src, { withFormatting: true });
@@ -603,6 +604,18 @@ FROM index
         const text = reprint(query).text;
 
         expect(text).toBe(`ROW 1 * /* 1 */ /* 2 */ 2 /* 3 */ /* 4 */`);
+      });
+
+      test('right from function call', () => {
+        const query = `FROM logs-*-* | WHERE QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */ | LIMIT 10`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          `FROM logs-*-*
+  | WHERE
+      QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */
+  | LIMIT 10`
+        );
       });
 
       test('first operand with top comment', () => {

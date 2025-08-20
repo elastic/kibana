@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
+import type { PageOrientation, PredefinedPageSize } from 'pdfmake/interfaces';
 import type { Layout } from '.';
 import { DEFAULT_SELECTORS } from '.';
 import type { LayoutParams, LayoutSelectorDictionary } from '../../common/layout';

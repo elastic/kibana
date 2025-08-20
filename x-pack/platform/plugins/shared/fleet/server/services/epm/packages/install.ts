@@ -20,7 +20,7 @@ import type {
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 import pRetry from 'p-retry';
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type {
   KibanaAssetReference,
