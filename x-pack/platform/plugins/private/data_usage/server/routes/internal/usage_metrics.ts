@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { metricTypesSchema } from '../../services/autoops_api';
-import { METRIC_TYPE_VALUES, type MetricTypes } from '../../../common/rest_types';
+import { isMetricType, METRIC_TYPE_VALUES, type MetricTypes } from '../../../common/rest_types';
 import { DATA_USAGE_METRICS_API_ROUTE } from '../../../common';
 import type { DataUsageContext, DataUsageRouter } from '../../types';
 
@@ -44,9 +44,6 @@ export const registerUsageMetricsRoute = (
     );
 };
 
-const isValidMetricType = (value: string): value is MetricTypes =>
-  METRIC_TYPE_VALUES.includes(value as MetricTypes);
-
 const DateSchema = schema.string({
   minLength: 1,
   validate: (v) => (v.trim().length ? undefined : 'Date ISO string must not be empty'),
@@ -61,7 +58,7 @@ export const UsageMetricsRequestSchema = schema.object({
       const trimmedValues = values.map((v) => v.trim());
       if (trimmedValues.some((v) => !v.length)) {
         return '[metricTypes] list cannot contain empty values';
-      } else if (trimmedValues.some((v) => !isValidMetricType(v))) {
+      } else if (trimmedValues.some((v) => !isMetricType(v))) {
         return `must be one of ${METRIC_TYPE_VALUES.join(', ')}`;
       }
     },
