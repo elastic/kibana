@@ -20,7 +20,7 @@ import {
 } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
-import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
+import { PROCESS_DESCENDANT_EXTRA_ENTRY } from '../../../../common/endpoint/service/artifacts/constants';
 import type { ExperimentalFeatures } from '../../../../common';
 import { isFilterProcessDescendantsEnabled } from '../../../../common/endpoint/service/artifacts/utils';
 import type {
@@ -186,10 +186,13 @@ export function translateToEndpointExceptions(
 
           storeUniqueItem(translatedItem);
         });
-      } else if (
+      } else if ((
         experimentalFeatures.filterProcessDescendantsForEventFiltersEnabled &&
         entry.list_id === ENDPOINT_ARTIFACT_LISTS.eventFilters.id &&
-        isFilterProcessDescendantsEnabled(entry)
+        isFilterProcessDescendantsEnabled(entry)) || (
+        experimentalFeatures.filterProcessDescendantsForTrustedAppsEnabled &&
+        entry.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id &&
+        isFilterProcessDescendantsEnabled(entry))
       ) {
         const translatedItem = translateProcessDescendantEventFilter(schemaVersion, entry);
         storeUniqueItem(translatedItem);
@@ -211,7 +214,7 @@ function translateProcessDescendantEventFilter(
 ): TranslatedExceptionListItem {
   const translatedEntries: TranslatedEntriesOfDescendantOf = translateItem(schemaVersion, {
     ...entry,
-    entries: [...entry.entries, PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY],
+    entries: [...entry.entries, PROCESS_DESCENDANT_EXTRA_ENTRY],
   }) as TranslatedEntriesOfDescendantOf;
 
   return {

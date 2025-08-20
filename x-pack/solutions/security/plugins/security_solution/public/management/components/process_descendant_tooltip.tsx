@@ -9,8 +9,8 @@ import React, { memo } from 'react';
 import type { CommonProps } from '@elastic/eui';
 import { EuiToolTip, EuiText, EuiIcon } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT } from '.dfadf./../../../common/endpoint/service/artifacts/constants';
+import { useTestIdGenerator } from '../hooks/use_test_id_generator';
+import { PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT } from '../../../common/endpoint/service/artifacts/constants';
 
 interface ProcessDescendantsTooltipProps extends CommonProps {
   indicateExtraEntry?: boolean;
@@ -31,7 +31,7 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltip"
+                id="xpack.securitySolution.filterProcessDescendants.tooltip"
                 defaultMessage="Filtering the descendants of a process means that events from the matched process are ingested, but events from its descendant processes are omitted."
               />
             </p>
@@ -39,18 +39,18 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
               <>
                 <p>
                   <FormattedMessage
-                    id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipExtraEntry"
+                    id="xpack.securitySolution.filterProcessDescendants.tooltipExtraEntry"
                     defaultMessage="Note: the following additional condition is applied:"
                   />
                 </p>
                 <p>
-                  <code>{PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT}</code>
+                  <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
                 </p>
               </>
             )}
             <p>
               <FormattedMessage
-                id="xpack.securitySolution.eventFilters.filterProcessDescendants.tooltipVersionInfo"
+                id="xpack.securitySolution.filterProcessDescendants.tooltipVersionInfo"
                 defaultMessage="Process descendant filtering works only with Agents v8.15 and newer."
               />
             </p>

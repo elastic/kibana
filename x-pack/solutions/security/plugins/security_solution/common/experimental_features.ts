@@ -217,6 +217,11 @@ export const allowedExperimentalValues = Object.freeze({
   filterProcessDescendantsForEventFiltersEnabled: true,
 
   /**
+   * Adds a new option to filter descendants of a process for Management / Event Filters
+   */
+  filterProcessDescendantsForTrustedAppsEnabled: true,
+
+  /**
    * Enables the rule's bulk action to manage alert suppression
    */
   bulkEditAlertSuppressionEnabled: true,
