@@ -332,7 +332,8 @@ export class ManifestManager {
 
   /**
    * Builds an array of artifacts (one per supported OS) based on the current state of the
-   * Trusted Devices list (which uses the `exception-list-agnostic` SO type)
+   * Trusted Devices list
+   * @protected
    */
   protected async buildTrustedDevicesArtifacts(
     allPolicyIds: string[]

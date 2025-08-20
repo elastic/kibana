@@ -29,10 +29,6 @@ const ConditionEntryTypeSchema = schema.oneOf([
 ]);
 const ConditionEntryOperatorSchema = schema.literal('included');
 
-/*
- * Entry schema for trusted device fields - simpler than trusted apps since
- * all fields use the same validation (non-empty string) and work across all OS
- */
 const TrustedDeviceEntrySchema = schema.object({
   field: schema.oneOf([
     schema.literal(TrustedDeviceConditionEntryField.USERNAME),
@@ -48,9 +44,6 @@ const TrustedDeviceEntrySchema = schema.object({
   }),
 });
 
-/**
- * Simple validation function for trusted device entries to check for duplicates
- */
 const getTrustedDeviceDuplicateFields = (entries: TrustedDeviceConditionEntry[]): string[] => {
   const fields: string[] = [];
   const seen = new Set<string>();
@@ -77,10 +70,6 @@ const entriesSchemaOptions = {
   },
 };
 
-/*
- * Entries array schema for trusted devices.
- * Unlike trusted apps, trusted devices use the same schema across all OS types.
- */
 const EntriesSchema = schema.arrayOf(TrustedDeviceEntrySchema, entriesSchemaOptions);
 
 const getTrustedDeviceForOsScheme = () =>
