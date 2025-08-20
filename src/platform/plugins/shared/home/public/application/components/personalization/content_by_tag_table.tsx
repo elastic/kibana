@@ -6,29 +6,20 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useState } from 'react';
-import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
-import { formatDate, EuiLink, EuiPanel, EuiTitle, EuiSpacer, EuiText } from '@elastic/eui';
+import React from 'react';
+import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
-import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ContentClientProvider, type ContentClient } from '@kbn/content-management-plugin/public';
+import { ContentClientProvider } from '@kbn/content-management-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import { getServices } from '../../kibana_services';
 
-interface ContentByTagsProps {
-  contentClient: ContentClient;
-  uiSettings: IUiSettingsClient;
-  savedObjectsTagging: SavedObjectTaggingOssPluginStart;
-}
+interface ContentByTagsProps {}
 
-export const ContentByTagTable = ({
-  contentClient,
-  uiSettings,
-  savedObjectsTagging,
-}: ContentByTagsProps) => {
+export const ContentByTagTable = ({}: ContentByTagsProps) => {
+  const { application, uiSettings, savedObjectsTagging, contentClient, http } = getServices();
+
   return (
     <KibanaPageTemplate.Section
       bottomBorder
@@ -55,45 +46,49 @@ export const ContentByTagTable = ({
                 contentClient,
                 uiSettings,
               }}
-              onChoose={(...args) => {
-                alert(JSON.stringify(args));
-                console.log(args);
+              euiTablePersistProps={{}}
+              onChoose={(id, type, name, savedObject, editUrl) => {
+                const savedObjectEditUrl = editUrl
+                  ? editUrl
+                  : `/app/management/kibana/objects/${type}/${id}`;
+                application.navigateToUrl(http.basePath.prepend(savedObjectEditUrl));
               }}
               savedObjectMetaData={[
                 {
                   type: `search`,
                   getIconForSavedObject: () => 'discoverApp',
                   name: 'Discover session',
+                  getEditUrl: (savedObject) => `/app/discover/view/${savedObject.id}`,
                 },
                 {
                   type: 'index-pattern',
                   getIconForSavedObject: () => 'indexPatternApp',
                   name: 'Data view',
+                  getEditUrl: (savedObject) => `/app/management/data_views/edit/${savedObject.id}`,
                 },
                 {
                   type: `visualization`,
                   getIconForSavedObject: () => 'visualizeApp',
                   name: 'Visualization',
+                  getEditUrl: (savedObject) => `/app/visualize/edit/${savedObject.id}`,
                 },
                 {
                   type: 'lens',
                   getIconForSavedObject: () => 'lensApp',
                   name: 'Lens',
+                  getEditUrl: (savedObject) => `/app/lens/edit/${savedObject.id}`,
                 },
                 {
                   type: 'map',
                   getIconForSavedObject: () => 'logoMaps',
                   name: 'Map',
-                },
-                {
-                  type: 'event-annotation-group',
-                  getIconForSavedObject: () => 'annotation',
-                  name: 'Annotation',
+                  getEditUrl: (savedObject) => `/app/maps/map/${savedObject.id}`,
                 },
                 {
                   type: 'dashboard',
                   getIconForSavedObject: () => 'dashboardApp',
                   name: 'Dashboard',
+                  getEditUrl: (savedObject) => `/app/dashboards/view/${savedObject.id}`,
                 },
               ]}
             />

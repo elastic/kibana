@@ -181,11 +181,7 @@ export class Home extends Component<HomeProps, State> {
             </div>
           </EuiFlexItem>
           <EuiFlexItem>
-            <ContentByTagTable
-              contentClient={getServices().contentClient}
-              uiSettings={getServices().uiSettings}
-              savedObjectsTagging={getServices().savedObjectsTagging}
-            />
+            <ContentByTagTable />
           </EuiFlexItem>
         </EuiFlexGroup>
       </KibanaPageTemplate.Section>

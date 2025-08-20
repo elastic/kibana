@@ -51,6 +51,7 @@ export interface SavedObjectMetaData<T extends FinderAttributes = FinderAttribut
   getTooltipForSavedObject?(savedObject: SavedObjectCommon<T>): string;
   showSavedObject?(savedObject: SavedObjectCommon<T>): boolean;
   getSavedObjectSubType?(savedObject: SavedObjectCommon<T>): string;
+  getEditUrl(savedObject: SavedObjectCommon<T>): string;
   /** @deprecated doesn't do anything, the full object is returned **/
   includeFields?: string[];
 }
@@ -59,6 +60,7 @@ export interface SavedObjectFinderItem extends SavedObjectCommon {
   title: string | null;
   name: string | null;
   simple: SavedObjectCommon<FinderAttributes>;
+  editUrl: string | null;
 }
 
 interface SavedObjectFinderState {
@@ -80,7 +82,8 @@ interface BaseSavedObjectFinder {
     id: SavedObjectCommon['id'],
     type: SavedObjectCommon['type'],
     name: string,
-    savedObject: SavedObjectCommon
+    savedObject: SavedObjectCommon,
+    editUrl: string | null
   ) => void;
   noItemsMessage?: ReactNode;
   savedObjectMetaData: Array<SavedObjectMetaData<FinderAttributes>>;
@@ -146,6 +149,8 @@ class SavedObjectFinderUiClass extends React.Component<
       },
     });
 
+    console.log({ response });
+
     const savedObjects = response.hits
       .map((savedObject) => {
         const {
@@ -153,6 +158,8 @@ class SavedObjectFinderUiClass extends React.Component<
         } = savedObject;
         const titleToUse = typeof title === 'string' ? title : '';
         const nameToUse = name ? name : titleToUse;
+        console.log(metaDataMap[savedObject.type]?.getEditUrl);
+        console.log('editUrl:', metaDataMap[savedObject.type]?.getEditUrl?.(savedObject) ?? null);
         return {
           ...savedObject,
           version: savedObject.version,
@@ -160,6 +167,7 @@ class SavedObjectFinderUiClass extends React.Component<
           name: nameToUse,
           simple: savedObject,
           description,
+          editUrl: metaDataMap[savedObject.type]?.getEditUrl?.(savedObject) ?? null,
         };
       })
       .filter((savedObject) => {
@@ -309,7 +317,7 @@ class SavedObjectFinderUiClass extends React.Component<
               onClick={
                 onChoose
                   ? () => {
-                      onChoose(item.id, item.type, fullName, item.simple);
+                      onChoose(item.id, item.type, fullName, item.simple, item?.editUrl);
                     }
                   : undefined
               }
