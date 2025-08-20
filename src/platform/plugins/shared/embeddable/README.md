@@ -69,8 +69,8 @@ The embeddable panel passes the embeddable API to UiActions. Each UiAction uses 
 | UiAction | Description | Trigger | Optional interfaces required by action |
 | ---------| ----------- | ---------- | ---------- |
 | ACTION_ADD_TO_LIBRARY | Converts by-value panel to by-reference panel and stores panel configuration to library | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
-| ACTION_CLONE_PANEL | Clones panel in page | |
-| ACTION_COPY_TO_DASHBOARD | Opens copy to dashboard modal | CONTEXT_MENU_TRIGGER | |
+| ACTION_CLONE_PANEL | Clones panel in page | CONTEXT_MENU_TRIGGER | |
+| ACTION_COPY_TO_DASHBOARD | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesTitle |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | ACTION_EDIT_PANEL |
@@ -81,7 +81,10 @@ The embeddable panel passes the embeddable API to UiActions. Each UiAction uses 
 | ACTION_REMOVE_PANEL | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
 | ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
 | generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |
+| open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | CONTEXT_MENU_TRIGGER | |
+| SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | CONTEXT_MENU_TRIGGER | |
 
 ### Best practices
 
