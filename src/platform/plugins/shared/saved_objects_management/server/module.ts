@@ -10,10 +10,11 @@
 import { ContainerModule } from 'inversify';
 import { CapabilitiesProvider, Route } from '@kbn/core-di-server';
 import { capabilitiesProvider } from './capabilities_provider';
-import { BulkDeleteRoute, ScrollCountRoute } from './routes';
+import { BulkDeleteRoute, GetAllowedTypesRoute, ScrollCountRoute } from './routes';
 
 export const module = new ContainerModule(({ bind }) => {
   bind(CapabilitiesProvider).toConstantValue(capabilitiesProvider);
   bind(Route).toConstantValue(BulkDeleteRoute);
+  bind(Route).toConstantValue(GetAllowedTypesRoute);
   bind(Route).toConstantValue(ScrollCountRoute);
 });
