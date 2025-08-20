@@ -250,6 +250,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
   const isLoading =
     rootProfileState.rootProfileLoading ||
     mainRouteInitializationState.loading ||
+    tabsInitializationState.loading ||
     areTabsInitializing;
 
   if (isLoading) {
