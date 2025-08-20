@@ -114,7 +114,7 @@ export function SpanOverview({
               css={
                 containerHeight
                   ? css`
-                      height: ${containerHeight}px;
+                      max-height: ${containerHeight}px;
                       overflow: auto;
                     `
                   : undefined

@@ -104,7 +104,7 @@ export function TransactionOverview({
             css={
               containerHeight
                 ? css`
-                    height: ${containerHeight}px;
+                    max-height: ${containerHeight}px;
                     overflow: auto;
                   `
                 : undefined

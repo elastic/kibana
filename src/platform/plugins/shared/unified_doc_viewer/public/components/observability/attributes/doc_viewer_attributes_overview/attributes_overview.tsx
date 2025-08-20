@@ -162,7 +162,7 @@ export function AttributesOverview({
       css={
         containerHeight
           ? css`
-              height: ${containerHeight}px;
+              max-height: ${containerHeight}px;
               overflow: hidden;
             `
           : undefined
