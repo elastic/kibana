@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -88,7 +88,13 @@ export const DataGrid = ({
     [rows, toasts, filter, isEsqlMode]
   );
 
-  const renderCellValue = ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+  const dataGridRenderCellValue = ({
+    rowIndex,
+    columnId,
+  }: {
+    rowIndex: number;
+    columnId: string;
+  }) => {
     const fieldName = rows[rowIndex]?.name;
     const fieldConfig = fields[fieldName];
 
@@ -98,41 +104,54 @@ export const DataGrid = ({
     return null;
   };
 
+  const dataGridColumns: EuiDataGridProps['columns'] = useMemo(
+    () => [
+      { id: 'name', cellActions: fieldCellActions },
+      { id: 'value', cellActions: fieldValueCellActions },
+    ],
+    [fieldCellActions, fieldValueCellActions]
+  );
+
+  const dataGridColumnVisibility: EuiDataGridProps['columnVisibility'] = useMemo(
+    () => ({
+      visibleColumns: ['name', 'value'],
+      setVisibleColumns: () => null,
+    }),
+    []
+  );
+
+  const dataGridStaticProps: {
+    css: EuiDataGridProps['css'];
+    gridStyle: EuiDataGridProps['gridStyle'];
+    rowHeightsOptions: EuiDataGridProps['rowHeightsOptions'];
+    inMemory: EuiDataGridProps['inMemory'];
+  } = {
+    css: css`
+      .euiDataGridHeader {
+        height: 20px;
+      }
+      .euiDataGridHeaderCell {
+        display: none;
+      }
+    `,
+    gridStyle: {
+      border: 'horizontal',
+      rowHover: 'none',
+      cellPadding: 'm',
+      fontSize: 's',
+    },
+    rowHeightsOptions: { defaultHeight: 'auto' },
+    inMemory: { level: 'enhancements' },
+  };
+
   return (
     <EuiDataGrid
-      css={css`
-        .euiDataGridHeader {
-          height: 20px;
-        }
-        .euiDataGridHeaderCell {
-          display: none;
-        }
-      `}
       aria-label={title}
-      columns={[
-        {
-          id: 'name',
-          cellActions: fieldCellActions,
-        },
-        {
-          id: 'value',
-          cellActions: fieldValueCellActions,
-        },
-      ]}
+      columns={dataGridColumns}
       rowCount={rows.length}
-      renderCellValue={renderCellValue}
-      columnVisibility={{
-        visibleColumns: ['name', 'value'],
-        setVisibleColumns: () => null,
-      }}
-      gridStyle={{
-        border: 'horizontal',
-        rowHover: 'none',
-        cellPadding: 'm',
-        fontSize: 's',
-      }}
-      rowHeightsOptions={{ defaultHeight: 'auto' }}
-      inMemory={{ level: 'enhancements' }}
+      renderCellValue={dataGridRenderCellValue}
+      columnVisibility={dataGridColumnVisibility}
+      {...dataGridStaticProps}
       toolbarVisibility={false}
     />
   );
