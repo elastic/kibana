@@ -257,7 +257,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.file': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialFileText',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialFileText',
         {
           defaultMessage: 'Path to JSON file containing the credentials and key used to subscribe',
         }
@@ -266,7 +266,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.json': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialJSONText',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialJSONText',
         {
           defaultMessage: 'JSON blob containing the credentials and key used to subscribe',
         }
@@ -276,7 +276,7 @@ export const gcpField: GcpInputFields = {
     },
     'gcp.credentials.type': {
       label: i18n.translate(
-        'securitySolutionPackages.findings.gcpIntegration.gcpInputText.credentialSelectBoxTitle',
+        'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcpgcpInputText.credentialSelectBoxTitle',
         {
           defaultMessage: 'Credential',
         }
