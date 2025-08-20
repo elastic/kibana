@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { services as functionalServices } from '../../functional/services';
+import { services as functionalServices } from '../../functional_search/services';
 import { AppSearchServiceProvider } from './app_search_service';
 
 export const services = {
