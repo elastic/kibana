@@ -4298,7 +4298,7 @@
         "type": "text"
       },
       "enabled": {
-        "type": "true"
+        "type": "boolean"
       },
       "tags": {
         "type": "keyword"
