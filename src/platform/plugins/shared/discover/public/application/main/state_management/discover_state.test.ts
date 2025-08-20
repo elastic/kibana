@@ -63,9 +63,15 @@ async function getState(url: string = '/', { savedSearch }: { savedSearch?: Save
       ...spec,
     });
   });
+  if (savedSearch) {
+    savedSearch = copySavedSearch(savedSearch);
+    mockServices.data.search.searchSource.create = jest
+      .fn()
+      .mockReturnValue(savedSearch.searchSource);
+  }
   const runtimeStateManager = createRuntimeStateManager();
   const nextState = getDiscoverStateMock({
-    savedSearch: savedSearch ? copySavedSearch(savedSearch) : false,
+    savedSearch: savedSearch ?? false,
     runtimeStateManager,
     history: nextHistory,
     services: mockServices,
@@ -393,9 +399,6 @@ describe('Discover state', () => {
       mockServices.data.query.timefilter.timefilter.getRefreshInterval = jest.fn(() => {
         return { pause: true, value: 1000 };
       });
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearchMock.searchSource);
     });
 
     afterEach(() => {
@@ -571,9 +574,6 @@ describe('Discover state', () => {
         }),
         services: mockServices,
       });
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearchWithDefaults.searchSource);
       const { state, customizationService, getCurrentUrl } = await getState('/', {
         savedSearch: savedSearchWithDefaults,
       });
@@ -658,9 +658,6 @@ describe('Discover state', () => {
         timeRange: { from: 'now-15d', to: 'now' },
         refreshInterval: { pause: false, value: 60000 },
       };
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch,
       });
@@ -691,9 +688,6 @@ describe('Discover state', () => {
         timeRange: { from: 'now-15d', to: 'now' },
         refreshInterval: { pause: false, value: 60000 },
       };
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch,
       });
@@ -811,9 +805,6 @@ describe('Discover state', () => {
         }),
         services: mockServices,
       });
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearchWithDefaults.searchSource);
       const { state, customizationService, history } = await getState('/', {
         savedSearch: savedSearchWithDefaults,
       });
@@ -992,9 +983,6 @@ describe('Discover state', () => {
       const filters = [{ meta: { index: 'the-data-view-id' }, query: { match_all: {} } }];
       savedSearchWithQueryAndFilters.searchSource.setField('query', query);
       savedSearchWithQueryAndFilters.searchSource.setField('filter', filters);
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearchWithQueryAndFilters.searchSource);
       const { state, customizationService } = await getState('/', {
         savedSearch: savedSearchWithQueryAndFilters,
       });
@@ -1015,9 +1003,6 @@ describe('Discover state', () => {
     test('loadSavedSearch with ad-hoc data view being added to internal state adHocDataViews', async () => {
       const savedSearchAdHocCopy = copySavedSearch(savedSearchAdHoc);
       const adHocDataViewId = savedSearchAdHoc.searchSource.getField('index')!.id;
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearchAdHocCopy.searchSource);
       const { state, customizationService } = await getState('/', {
         savedSearch: savedSearchAdHocCopy,
       });
@@ -1041,9 +1026,6 @@ describe('Discover state', () => {
       const savedSearchMockWithESQLCopy = copySavedSearch(savedSearchMockWithESQL);
       const persistedDataViewId = savedSearchMockWithESQLCopy?.searchSource.getField('index')!.id;
       const url = "/#?_a=(dataSource:(dataViewId:'the-data-view-id',type:dataView))&_g=()";
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearchMockWithESQLCopy.searchSource);
       const { state, customizationService } = await getState(url, {
         savedSearch: savedSearchMockWithESQLCopy,
       });
@@ -1388,9 +1370,6 @@ describe('Discover state', () => {
         refreshInterval: { pause: false, value: 1000 },
         timeRange: { from: 'now-15d', to: 'now-10d' },
       };
-      mockServices.data.search.searchSource.create = jest
-        .fn()
-        .mockReturnValue(savedSearch.searchSource);
       const { state, customizationService } = await getState('/', { savedSearch });
       const setTime = jest.fn();
       const setRefreshInterval = jest.fn();
