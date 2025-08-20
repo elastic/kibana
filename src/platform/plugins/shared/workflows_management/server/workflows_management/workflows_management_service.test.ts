@@ -29,6 +29,7 @@ describe('WorkflowsService', () => {
       get: jest.fn(),
       bulkGet: jest.fn(),
       delete: jest.fn(),
+      asScopedToNamespace: jest.fn(),
     } as any;
 
     mockEsClient = {
@@ -44,6 +45,7 @@ describe('WorkflowsService', () => {
     mockLogger = loggerMock.create();
 
     const mockEsClientPromise = Promise.resolve(mockEsClient);
+    mockSavedObjectsClient.asScopedToNamespace.mockReturnValue(mockSavedObjectsClient);
     const mockGetSavedObjectsClient = jest.fn().mockResolvedValue(mockSavedObjectsClient);
 
     service = new WorkflowsService(
@@ -87,6 +89,7 @@ describe('WorkflowsService', () => {
 
       await service.deleteWorkflows(workflowIds, spaceId, mockRequest);
 
+      expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('workflow-1');
       expect(mockTaskScheduler.unscheduleWorkflowTasks).toHaveBeenCalledWith('workflow-2');
 
@@ -152,12 +155,13 @@ describe('WorkflowsService', () => {
 
       await service.searchWorkflows({ limit: 100, offset: 0 }, spaceId);
 
+      expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: WORKFLOW_SAVED_OBJECT_TYPE,
         perPage: 100,
         sortField: 'updated_at',
         sortOrder: 'desc',
-        filter: `workflow.attributes.spaceId: "default" AND not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
+        filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
       });
     });
   });
@@ -194,6 +198,7 @@ definition:
         // Ignore errors from yaml parsing - we just want to verify the saved object structure
       }
 
+      expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         WORKFLOW_SAVED_OBJECT_TYPE,
         expect.objectContaining({

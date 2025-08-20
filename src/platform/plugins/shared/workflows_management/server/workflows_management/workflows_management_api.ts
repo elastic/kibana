@@ -104,12 +104,13 @@ export class WorkflowsManagementApi {
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
-    return await this.schedulerService.runWorkflow(workflow, inputs);
+    return await this.schedulerService.runWorkflow(workflow, spaceId, inputs);
   }
 
   public async testWorkflow(
@@ -132,12 +133,12 @@ export class WorkflowsManagementApi {
 
     return await this.schedulerService.runWorkflow(
       {
-        spaceId,
         id: 'test-workflow',
         name: workflowToCreate.name,
         status: workflowToCreate.status,
         definition: workflowToCreate.definition,
       },
+      spaceId,
       inputs
     );
   }

@@ -29,8 +29,8 @@ export interface WorkflowsPluginSetup {
 export interface WorkflowsPluginStart {
   runWorkflow(
     workflow: WorkflowExecutionEngineModel,
-    params: Record<string, any>,
-    spaceId: string
+    spaceId: string,
+    params: Record<string, any>
   ): Promise<string>;
 }
 

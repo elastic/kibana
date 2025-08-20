@@ -83,7 +83,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
           }
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflow, inputs);
+          return await this.api.runWorkflow(workflow, spaceId, inputs);
         };
       };
 
@@ -178,7 +178,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
     const getSavedObjectsClient = () =>
       core
         .getStartServices()
-        .then(([coreStart]) => coreStart.savedObjects.createInternalRepository());
+        .then(([coreStart]) => coreStart.savedObjects.getUnsafeInternalClient());
 
     this.workflowsService = new WorkflowsService(
       esClientPromise,
@@ -205,6 +205,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
 
     this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
+    // Initialize workflow task scheduler with the start contract
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);
 

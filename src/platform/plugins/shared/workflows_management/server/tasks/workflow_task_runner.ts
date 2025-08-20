@@ -60,7 +60,6 @@ export function createWorkflowTaskRunner({
           // Convert to execution model
           const executionGraph = convertToWorkflowGraph(workflow.definition);
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
-            spaceId,
             id: workflow.id,
             name: workflow.name,
             status: workflow.status,
@@ -73,6 +72,7 @@ export function createWorkflowTaskRunner({
             workflowExecutionModel,
             {
               workflowRunId: `scheduled-${Date.now()}`,
+              spaceId,
               inputs: {},
               event: {
                 type: 'scheduled',

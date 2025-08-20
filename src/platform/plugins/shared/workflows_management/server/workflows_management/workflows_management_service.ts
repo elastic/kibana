@@ -115,11 +115,12 @@ export class WorkflowsService {
     params: GetWorkflowsParams,
     spaceId: string
   ): Promise<WorkflowListDto> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
       type: WORKFLOW_SAVED_OBJECT_TYPE,
       // Exclude deleted workflows (by checking for null/undefined deleted_at) and workflows from other spaces
-      filter: `${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.spaceId: "${spaceId}" AND not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
+      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
       perPage: 100,
       sortField: 'updated_at',
       sortOrder: 'desc',
@@ -135,7 +136,6 @@ export class WorkflowsService {
         return {
           workflowId,
           history: executions.results.map((execution) => ({
-            spaceId: execution.spaceId,
             id: execution.id,
             workflowId: execution.workflowId,
             workflowName: '', // Will be filled from workflow data
@@ -175,7 +175,6 @@ export class WorkflowsService {
       );
 
       return {
-        spaceId: so.attributes.spaceId,
         id: so.id,
         name: so.attributes.name,
         description: so.attributes.description || '',
@@ -218,19 +217,15 @@ export class WorkflowsService {
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     try {
       const response = await savedObjectsClient.get<WorkflowSavedObjectAttributes>(
         WORKFLOW_SAVED_OBJECT_TYPE,
         id
       );
 
-      if (response.attributes.spaceId !== spaceId) {
-        return null;
-      }
-
       return {
-        spaceId: response.attributes.spaceId,
         id: response.id,
         name: response.attributes.name,
         description: response.attributes.description,
@@ -255,7 +250,8 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
@@ -265,7 +261,6 @@ export class WorkflowsService {
 
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
-      spaceId,
       name: workflowToCreate.name,
       description: workflowToCreate.description,
       status: workflowToCreate.status,
@@ -292,7 +287,6 @@ export class WorkflowsService {
     }
 
     return {
-      spaceId,
       id: response.id,
       name: response.attributes.name,
       description: response.attributes.description,
@@ -312,7 +306,8 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     const { yaml, definition, ...rest } = workflow;
 
     try {
@@ -320,7 +315,7 @@ export class WorkflowsService {
         WORKFLOW_SAVED_OBJECT_TYPE,
         id
       );
-      if (existed.attributes.spaceId !== spaceId) {
+      if (!existed) {
         return null;
       }
     } catch (error) {
@@ -384,7 +379,8 @@ export class WorkflowsService {
     spaceId: string,
     request: KibanaRequest
   ): Promise<void> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
 
     const savedObjects = await savedObjectsClient.bulkGet<WorkflowSavedObjectAttributes>(
       workflowIds.map((id) => ({
@@ -396,15 +392,9 @@ export class WorkflowsService {
     const existedWorkflows: Array<SavedObject<WorkflowSavedObjectAttributes>> =
       savedObjects.saved_objects;
 
-    const filteredWorkflows = await Promise.all(
-      existedWorkflows.filter(async (existed) => {
-        return existed.attributes.spaceId === spaceId;
-      })
-    );
-
     // Remove tasks scheduled for deleted workflows
     if (this.taskScheduler) {
-      for (const workflow of filteredWorkflows) {
+      for (const workflow of existedWorkflows) {
         await this.taskScheduler.unscheduleWorkflowTasks(workflow.id);
       }
     }
@@ -413,7 +403,7 @@ export class WorkflowsService {
     const authenticatedUser = getAuthenticatedUser(request, this.security);
     const deletedAt = new Date();
     await Promise.all(
-      filteredWorkflows.map((workflow) =>
+      existedWorkflows.map((workflow) =>
         savedObjectsClient.update<WorkflowSavedObjectAttributes>(
           WORKFLOW_SAVED_OBJECT_TYPE,
           workflow.id,
