@@ -15,10 +15,10 @@ Ex.
 cd x-pack
 
 # Run tests that do not require enterpriseSearch.host variable
-node scripts/functional_tests --config test/functional_enterprise_search/without_host_configured.config.ts
+node scripts/functional_tests --config solutions/search/test/functional_enterprise_search/without_host_configured.config.ts
 
 # Run tests that require enterpriseSearch.host variable
-APP_SEARCH_API_KEY=[use private key from local App Search instance here] node scripts/functional_tests --config test/functional_enterprise_search/with_host_configured.config.ts
+APP_SEARCH_API_KEY=[use private key from local App Search instance here] node scripts/functional_tests --config solutions/search/test/functional_enterprise_search/with_host_configured.config.ts
 ```
 
 ## Enterprise Search Requirement

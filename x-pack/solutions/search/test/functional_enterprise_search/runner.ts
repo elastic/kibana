@@ -35,9 +35,9 @@ export async function runEnterpriseSearchTests(
   await withEnterpriseSearch(context, (runnerEnv) =>
     withProcRunner(log, async (procs) => {
       await procs.run('cypress', {
-        cmd: '../../../node_modules/.bin/cypress',
+        cmd: '../../../../../node_modules/.bin/cypress',
         args: [cypressCommand, '--config-file', './cypress.config.ts', '--browser', 'chrome'],
-        cwd: resolve(__dirname, '../../solutions/search/plugins/enterprise_search'),
+        cwd: resolve(__dirname, '../../plugins/enterprise_search'),
         env: {
           FORCE_COLOR: '1',
           // eslint-disable-next-line @typescript-eslint/naming-convention

@@ -2177,7 +2177,7 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/platform/test/functional/apps/dev_tools/embedded_console.ts @elastic/search-kibana
 /x-pack/platform/test/functional/apps/ingest_pipelines/feature_controls/ingest_pipelines_security.ts @elastic/search-kibana
 /x-pack/test/functional/page_objects/embedded_console.ts @elastic/search-kibana
-/x-pack/test/functional_enterprise_search/ @elastic/search-kibana
+/x-pack/solutions/search/test/functional_enterprise_search/ @elastic/search-kibana
 /x-pack/solutions/search/plugins/enterprise_search/public/applications/shared/doc_links @elastic/platform-docs
 /x-pack/test_serverless/api_integration/test_suites/search/serverless_search @elastic/search-kibana
 /x-pack/test_serverless/functional/test_suites/search/ @elastic/search-kibana

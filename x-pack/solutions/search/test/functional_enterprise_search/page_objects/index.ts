@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pageObjects as basePageObjects } from '../../functional/page_objects';
+import { pageObjects as basePageObjects } from '../../functional_search/page_objects';
 import { AppSearchPageProvider } from './app_search';
 import { WorkplaceSearchPageProvider } from './workplace_search';
 

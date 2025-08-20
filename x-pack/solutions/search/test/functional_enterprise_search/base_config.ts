@@ -11,7 +11,7 @@ import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
+    require.resolve('@kbn/test-suites-xpack-platform/functional/config.base')
   );
 
   const kibanaCommonTestsConfig = await readConfigFile(
