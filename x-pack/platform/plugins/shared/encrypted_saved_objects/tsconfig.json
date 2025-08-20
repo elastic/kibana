@@ -3,7 +3,10 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["server/**/*"],
+  "include": [
+    "server/**/*",
+    "integration_tests/**/*"
+  ],
   "kbn_references": [
     "@kbn/security-plugin",
     "@kbn/config-schema",
