@@ -181,6 +181,14 @@ export interface CloudSetup {
    */
   isElasticStaffOwned?: boolean;
   /**
+   * The experience level associated with this deployment. Only available when running on Elastic Cloud.
+   */
+  experienceLevel?: string;
+  /**
+   * The trial intent associated with this deployment. Only available when running on Elastic Cloud.
+   */
+  trialIntent?: string;
+  /**
    * Registers CloudServiceProviders so start's `CloudContextProvider` hooks them.
    *
    * @param contextProvider The React component from the Service Provider.

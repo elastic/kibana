@@ -106,6 +106,14 @@ export interface CloudSetup {
    */
   isElasticStaffOwned?: boolean;
   /**
+   * The experience level associated with this deployment. Only available when running on Elastic Cloud.
+   */
+  experienceLevel?: string;
+  /**
+   * The trial intent associated with this deployment. Only available when running on Elastic Cloud.
+   */
+  trialIntent?: string;
+  /**
    * APM configuration keys.
    */
   apm: {
@@ -357,6 +365,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isCloudEnabled,
       trialEndDate: this.config.trial_end_date ? new Date(this.config.trial_end_date) : undefined,
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
+      experienceLevel: this.config.experience_level,
+      trialIntent: this.config.trial_intent,
       apm: {
         url: this.config.apm?.url,
         secretToken: this.config.apm?.secret_token,

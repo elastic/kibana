@@ -39,16 +39,18 @@ describe('MetadataService', () => {
   });
 
   const initialMetadata: FlatMetadata = {
-    instanceKey: 'project-id',
-    offering: 'serverless',
-    version: '1.2.3',
-    build_num: 123,
-    build_sha: 'abcdefghijklmnopqrstux',
-    build_sha_short: 'abcde',
-    project_type: 'project-type',
-    product_tier: 'my-product-tier',
-    organizationKey: 'organization-id',
-    is_elastic_staff: true,
+  instanceKey: 'project-id',
+  offering: 'serverless',
+  version: '1.2.3',
+  build_num: 123,
+  build_sha: 'abcdefghijklmnopqrstux',
+  build_sha_short: 'abcde',
+  project_type: 'project-type',
+  product_tier: 'my-product-tier',
+  organizationKey: 'organization-id',
+  is_elastic_staff: true,
+  experience_level: 'intermediate',
+  trial_intent: 'learn_kibana',
   };
 
   const multiContextFormat = {
@@ -66,6 +68,8 @@ describe('MetadataService', () => {
     organization: {
       key: 'organization-id',
       is_elastic_staff: true,
+      experience_level: 'intermediate',
+      trial_intent: 'learn_kibana',
     },
   };
 
