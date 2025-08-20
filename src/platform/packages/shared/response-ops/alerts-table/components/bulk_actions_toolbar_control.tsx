@@ -17,10 +17,11 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert } from '@kbn/alerting-types';
 import useObservable from 'react-use/lib/useObservable';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { BulkActionsPanelConfig, BulkActionsVerbs, RowSelection, TimelineItem } from '../types';
+import type { BulkActionsPanelConfig, RowSelection, TimelineItem } from '../types';
+import { BulkActionsVerbs } from '../types';
 import * as i18n from '../translations';
 import { useAlertsTableContext } from '../contexts/alerts_table_context';
 

@@ -10,7 +10,7 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { LegacyMetricState } from '../../../common/types';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
 import { generateId } from '../../id_generator';
-import { DatasourcePublicAPI, FramePublicAPI } from '../../types';
+import type { DatasourcePublicAPI, FramePublicAPI } from '../../types';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { CUSTOM_PALETTE } from '@kbn/coloring';

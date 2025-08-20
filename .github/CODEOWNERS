@@ -949,6 +949,7 @@ x-pack/platform/plugins/private/global_search_providers @elastic/appex-sharedux
 x-pack/platform/plugins/private/graph @elastic/kibana-visualizations
 x-pack/platform/plugins/private/grokdebugger @elastic/kibana-management
 x-pack/platform/plugins/private/index_lifecycle_management @elastic/kibana-management
+x-pack/platform/plugins/private/indices_metadata @elastic/security-solution
 x-pack/platform/plugins/private/intercepts @elastic/appex-sharedux
 x-pack/platform/plugins/private/license_api_guard @elastic/kibana-management
 x-pack/platform/plugins/private/logstash @elastic/logstash
@@ -1189,6 +1190,10 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic/obs-entities
 /x-pack/platform/test/api_integration/apis/entity_manager @elastic/obs-entities
 
+# Metrics Experience
+/src/platform/plugins/shared/metrics_experience @elastic/obs-ux-infra_services-team
+/src/platform/test/api_integration/apis/metrics_experience @elastic/obs-ux-infra_services-team
+/src/platform/test/api_integration/fixtures/es_archiver/metrics_experience @elastic/obs-ux-infra_services-team
 
 # Data Discovery
 /x-pack/platform/test/api_integration/services/data_view_api.ts @elastic/kibana-data-discovery
@@ -1224,8 +1229,8 @@ x-pack/platform/test/serverless/api_integration/test_suites/platform_security @e
 /src/platform/test/functional/fixtures/es_archiver/discover @elastic/kibana-data-discovery
 /src/platform/test/api_integration/apis/saved_queries @elastic/kibana-data-discovery
 /x-pack/platform/test/api_integration/apis/kibana/kql_telemetry @elastic/kibana-data-discovery @elastic/kibana-visualizations
-/x-pack/test_serverless/functional/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
-/x-pack/test_serverless/functional/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
+/x-pack/platform/test/serverless/fixtures/es_archives/pre_calculated_histogram @elastic/kibana-data-discovery
+/x-pack/platform/test/serverless/fixtures/es_archives/kibana_sample_data_flights_index_pattern @elastic/kibana-data-discovery
 /x-pack/platform/test/serverless/functional/configs/security/config.examples.ts   @elastic/kibana-data-discovery
 /x-pack/platform/test/serverless/functional/configs/security/config.examples.context_awareness.ts @elastic/kibana-data-discovery
 /src/platform/test/accessibility/apps/discover.ts @elastic/kibana-data-discovery
@@ -1316,7 +1321,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/test/functional/page_objects/lens_page.ts @elastic/kibana-visualizations
 /x-pack/platform/test/fixtures/es_archives/lens @elastic/kibana-visualizations
 /x-pack/platform/test/examples/embedded_lens @elastic/kibana-visualizations
-/x-pack/test/api_integration/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+/x-pack/platform/test/api_integration/fixtures/kbn_archives/lens/ @elastic/kibana-visualizations
 /x-pack/platform/test/api_integration/apis/lens @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/test_suites/custom_visualizations @elastic/kibana-visualizations
 /src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
@@ -1337,7 +1342,7 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /x-pack/platform/test/functional/apps/graph @elastic/kibana-visualizations
 /src/platform/test/api_integration/apis/event_annotations @elastic/kibana-visualizations
 /x-pack/platform/test/serverless/functional/test_suites/visualizations/ @elastic/kibana-visualizations
-/x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/ @elastic/kibana-visualizations
+/x-pack/platform/test/serverless/fixtures/kbn_archives/lens/ @elastic/kibana-visualizations
 
 # ES|QL
 /src/platform/test/api_integration/apis/esql/*.ts @elastic/kibana-esql
@@ -1365,7 +1370,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/accessibility/apps/group3/reporting.ts @elastic/response-ops
 /x-pack/platform/test/functional/page_objects/reporting_page.ts @elastic/response-ops
 /x-pack/platform/test/upgrade/apps/reporting @elastic/response-ops
-/x-pack/test_serverless/functional/fixtures/kbn_archiver/reporting @elastic/response-ops
+/x-pack/platform/test/serverless/fixtures/kbn_archives/reporting @elastic/response-ops
 
 ### Global Experience Tagging
 /x-pack/platform/test/saved_object_tagging/ @elastic/appex-sharedux
@@ -1674,7 +1679,7 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/platform/test/api_integration_deployment_agnostic/apis/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.index.ts @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/test/api_integration_deployment_agnostic/configs/serverless/oblt.streams.serverless.config.ts @elastic/streams-program-team @elastic/obs-ux-logs-team
-/x-pack/test/api_integration/fixtures/kbn_archiver/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
+/x-pack/platform/test/api_integration/fixtures/kbn_archives/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/platform/plugins/shared/streams_app/test/scout/ui/tests @elastic/streams-program-team @elastic/obs-ux-logs-team
 /x-pack/test_serverless/functional/test_suites/observability/streams @elastic/streams-program-team @elastic/obs-ux-logs-team
 
