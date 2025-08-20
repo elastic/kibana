@@ -113,17 +113,9 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
 );
 
 export const ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE = i18n.translate(
-  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionTitle',
+  'xpack.securitySolution.alert.closeInfoModal.restartSuppressionTitle',
   {
     defaultMessage: 'Closing alert restarts alert suppression',
-  }
-);
-
-export const ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_MESSAGE = i18n.translate(
-  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage',
-  {
-    defaultMessage:
-      'Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert.',
   }
 );
 
@@ -134,19 +126,10 @@ export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE = i18n.tra
   }
 );
 
-export const ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_MESSAGE = i18n.translate(
-  'xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage',
+export const ALERT_CLOSE_INFO_MODAL_LEARN_MORE_LINK = i18n.translate(
+  'xpack.securitySolution.alert.closeInfoModal.learnMoreLink',
   {
-    defaultMessage:
-      "Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups.",
-  }
-);
-
-export const ALERT_CLOSE_INFO_MODAL_CONTACT_ADMIN_MESSAGE = i18n.translate(
-  'xpack.securitySolution.alert.closeInfoModal.contactAdminMessage',
-  {
-    defaultMessage:
-      "This behavior can be modified in Kibana's Advanced Settings. Please contact your admin to make this change.",
+    defaultMessage: 'Learn more',
   }
 );
 

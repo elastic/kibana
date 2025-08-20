@@ -6,7 +6,15 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiCheckbox, EuiConfirmModal, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiCheckbox,
+  EuiConfirmModal,
+  EuiLink,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import {
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
@@ -16,6 +24,32 @@ import * as i18n from './translations';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 const DO_NOT_SHOW_AGAIN_SETTING_KEY = 'securitySolution.alertCloseInfoModal.doNotShowAgain';
+
+const learnMoreLink = (
+  <EuiLink data-test-subj="AlertCloseInfoModalLearnMoreLink" target="_blank">
+    {i18n.ALERT_CLOSE_INFO_MODAL_LEARN_MORE_LINK}
+  </EuiLink>
+);
+
+const restartSuppressionMessageComponent = (
+  <FormattedMessage
+    id="xpack.securitySolution.alert.closeInfoModal.restartSuppressionMessage"
+    defaultMessage="Any new, duplicate events will be grouped and suppressed. Each unique group will be associated with a new alert. {link}."
+    values={{
+      link: learnMoreLink,
+    }}
+  />
+);
+
+const continueSuppressionMessageComponent = (
+  <FormattedMessage
+    id="xpack.securitySolution.alert.closeInfoModal.continueSuppressionMessage"
+    defaultMessage="Duplicate events will continue to be grouped and suppressed, but new alerts won't be created for these groups. {link}."
+    values={{
+      link: learnMoreLink,
+    }}
+  />
+);
 
 const AlertCloseConfirmationModal = ({
   onConfirmationResult,
@@ -44,13 +78,12 @@ const AlertCloseConfirmationModal = ({
     currentSettingValue === SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow
       ? {
           title: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_TITLE,
-          message: i18n.ALERT_CLOSE_INFO_MODAL_CONTINUE_SUPPRESSION_WINDOW_MESSAGE,
+          message: continueSuppressionMessageComponent,
         }
       : {
           title: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_TITLE,
-          message: i18n.ALERT_CLOSE_INFO_MODAL_RESTART_SUPPRESSION_MESSAGE,
+          message: restartSuppressionMessageComponent,
         };
-
   return (
     <EuiConfirmModal
       aria-labelledby={modalTitleId}
@@ -64,8 +97,6 @@ const AlertCloseConfirmationModal = ({
       data-test-subj="alertCloseInfoModal"
     >
       <EuiText>{message}</EuiText>
-      <EuiSpacer size="m" />
-      <EuiText>{i18n.ALERT_CLOSE_INFO_MODAL_CONTACT_ADMIN_MESSAGE}</EuiText>
       <EuiSpacer size="m" />
       <EuiCheckbox
         data-test-subj="doNotShowAgainCheckbox"
