@@ -10,3 +10,4 @@ export { apiKeyPendingInvalidationModelVersions } from './api_key_pending_invali
 export { maintenanceWindowModelVersions } from './maintenance_window_model_versions';
 export { ruleModelVersions } from './rule_model_versions';
 export { rulesSettingsModelVersions } from './rules_settings_model_versions';
+export { gapFillAutoSchedulerModelVersions } from './gap_fill_auto_scheduler_model_versions';
