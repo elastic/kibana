@@ -8,11 +8,12 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { getFieldValue, PROCESSOR_EVENT_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
-import type { DocumentProfileProvider } from '../../../../profiles';
+import type { DataSourceContext, DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import type { ContextWithProfileId } from '../../../../profile_service';
 import { createGetDocViewer } from './accessors';
 
 const OBSERVABILITY_TRACES_SPAN_DOCUMENT_PROFILE_ID = 'observability-traces-span-document-profile';
@@ -33,40 +34,45 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
       logs: logsContextService.getAllLogsIndexPattern() ?? '',
     }),
   },
-  resolve: ({ record, rootContext }) => {
+  resolve: ({ record, rootContext, dataSourceContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
     if (!isObservabilitySolutionView) {
       return { isMatch: false };
     }
 
-    const isSpanRecord = getIsSpanRecord({
+    return resolveSpanRecord({
       record,
+      dataSourceContext,
     });
-
-    if (!isSpanRecord) {
-      return { isMatch: false };
-    }
-
-    return {
-      isMatch: true,
-      context: {
-        type: DocumentType.Span,
-      },
-    };
   },
 });
 
-const getIsSpanRecord = ({ record }: { record: DataTableRecord }) => {
-  return isSpanDocument(record);
+const resolveSpanRecord = ({
+  record,
+  dataSourceContext,
+}: {
+  record: DataTableRecord;
+  dataSourceContext: ContextWithProfileId<DataSourceContext>;
+}) => {
+  const isMatchingRecord = dataSourceContext.category === 'traces' && isSpanDocument(record);
+
+  return isMatchingRecord
+    ? ({
+        isMatch: true,
+        context: {
+          type: DocumentType.Span,
+        },
+      } as const)
+    : ({ isMatch: false } as const);
 };
 
 const isSpanDocument = (record: DataTableRecord) => {
-  const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
+  const transactionName = getFieldValue(record, TRANSACTION_NAME_FIELD);
 
   const isApmSpan = processorEvent === 'span';
   const isOtelSpan = processorEvent == null;
 
-  return dataStreamType === 'traces' && (isApmSpan || isOtelSpan);
+  return !transactionName && (isApmSpan || isOtelSpan);
 };

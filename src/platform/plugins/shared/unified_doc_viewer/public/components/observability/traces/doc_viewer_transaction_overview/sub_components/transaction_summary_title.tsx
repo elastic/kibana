@@ -19,7 +19,7 @@ import { HighlightField } from '../../components/highlight_field';
 import { TransactionNameLink } from '../../components/transaction_name_link';
 
 export interface TransactionSummaryTitleProps {
-  serviceName: string;
+  serviceName?: string;
   transactionName?: string;
   formattedTransactionName?: string;
   id?: string;
@@ -58,41 +58,45 @@ export const TransactionSummaryTitle = ({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h2>
+      {serviceName && (
+        <EuiTitle size="xs">
           {transactionName ? (
-            <FieldContent
-              title={transactionName}
-              value={transactionName}
-              field={TRANSACTION_NAME_FIELD}
-              showActions={showActions}
-            >
-              <HighlightField
+            <h2>
+              <FieldContent
+                title={transactionName}
                 value={transactionName}
-                formattedValue={formattedTransactionName}
-                as="strong"
+                field={TRANSACTION_NAME_FIELD}
+                showActions={showActions}
               >
-                {({ content }) => (
-                  <TransactionNameLink
-                    serviceName={serviceName}
-                    transactionName={transactionName}
-                    renderContent={() => content}
-                  />
-                )}
-              </HighlightField>
-            </FieldContent>
+                <HighlightField
+                  value={transactionName}
+                  formattedValue={formattedTransactionName}
+                  as="strong"
+                >
+                  {({ content }) => (
+                    <TransactionNameLink
+                      serviceName={serviceName}
+                      transactionName={transactionName}
+                      renderContent={() => content}
+                    />
+                  )}
+                </HighlightField>
+              </FieldContent>
+            </h2>
           ) : (
-            <FieldContent
-              title={serviceName}
-              value={serviceName}
-              field={SERVICE_NAME_FIELD}
-              showActions={showActions}
-            >
-              {serviceName}
-            </FieldContent>
+            <h2>
+              <FieldContent
+                title={serviceName}
+                value={serviceName}
+                field={SERVICE_NAME_FIELD}
+                showActions={showActions}
+              >
+                {serviceName}
+              </FieldContent>
+            </h2>
           )}
-        </h2>
-      </EuiTitle>
+        </EuiTitle>
+      )}
 
       {id && (
         <FieldContent title={id} value={id} field={TRANSACTION_ID_FIELD} showActions={showActions}>

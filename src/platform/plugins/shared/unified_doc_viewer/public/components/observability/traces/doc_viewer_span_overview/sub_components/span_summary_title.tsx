@@ -77,7 +77,9 @@ export const SpanSummaryTitle = ({
   ) : (
     <FieldContent title={spanId} value={spanId} field={SPAN_ID_FIELD} showActions={showActions}>
       <EuiTitle size="xs">
-        <HighlightField value={spanId} formattedValue={formattedSpanId} as="h2" />
+        <h2>
+          <HighlightField value={spanId} formattedValue={formattedSpanId} as="strong" />
+        </h2>
       </EuiTitle>
     </FieldContent>
   );

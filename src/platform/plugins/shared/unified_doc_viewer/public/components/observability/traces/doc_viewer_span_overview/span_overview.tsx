@@ -117,9 +117,7 @@ export function SpanOverview({
                       height: ${containerHeight}px;
                       overflow: auto;
                     `
-                  : css`
-                      display: block;
-                    `
+                  : undefined
               }
             >
               <EuiFlexItem>

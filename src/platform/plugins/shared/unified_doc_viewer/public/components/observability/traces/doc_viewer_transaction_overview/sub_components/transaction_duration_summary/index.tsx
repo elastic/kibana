@@ -18,10 +18,10 @@ import { Section } from '../../../components/section';
 import { FieldWithoutActions } from '../../../components/field_without_actions';
 
 export interface TransactionDurationSummaryProps {
-  transactionDuration: number;
-  transactionName: string;
-  transactionType: string;
-  serviceName: string;
+  transactionDuration?: number;
+  transactionName?: string;
+  transactionType?: string;
+  serviceName?: string;
 }
 
 export function TransactionDurationSummary({
@@ -43,7 +43,7 @@ export function TransactionDurationSummary({
     serviceName,
   });
 
-  return (
+  return transactionDuration != null ? (
     <Section
       title={i18n.translate(
         'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.title',
@@ -79,38 +79,42 @@ export function TransactionDurationSummary({
             />
           </EuiText>
         </FieldWithoutActions>
-        <EuiHorizontalRule margin="xs" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xxxs">
-              <h3>
-                {i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
-                  {
-                    defaultMessage: 'Latency',
-                  }
+        {transactionType && (
+          <>
+            <EuiHorizontalRule margin="xs" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiTitle size="xxxs">
+                  <h3>
+                    {i18n.translate(
+                      'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
+                      {
+                        defaultMessage: 'Latency',
+                      }
+                    )}
+                  </h3>
+                </EuiTitle>
+
+                {(latencyChartLoading || latencyChartData) && (
+                  <DurationDistributionChart
+                    data={latencyChartData?.transactionDistributionChartData ?? []}
+                    markerValue={latencyChartData?.percentileThresholdValue ?? 0}
+                    markerCurrentEvent={transactionDuration}
+                    hasData={!!latencyChartData}
+                    loading={latencyChartLoading}
+                    hasError={latencyChartHasError}
+                    eventType={ProcessorEvent.transaction}
+                    showAxisTitle={false}
+                    showLegend={false}
+                    dataTestSubPrefix="docViewerTransactionOverview"
+                  />
                 )}
-              </h3>
-            </EuiTitle>
-
-            {(latencyChartLoading || latencyChartData) && (
-              <DurationDistributionChart
-                data={latencyChartData?.transactionDistributionChartData ?? []}
-                markerValue={latencyChartData?.percentileThresholdValue ?? 0}
-                markerCurrentEvent={transactionDuration}
-                hasData={!!latencyChartData}
-                loading={latencyChartLoading}
-                hasError={latencyChartHasError}
-                eventType={ProcessorEvent.transaction}
-                showAxisTitle={false}
-                showLegend={false}
-                dataTestSubPrefix="docViewerTransactionOverview"
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </>
     </Section>
-  );
+  ) : null;
 }

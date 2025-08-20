@@ -85,8 +85,8 @@ interface SpanLatencyChartData {
 }
 
 interface UseSpanLatencyChartParams {
-  spanName: string;
-  serviceName: string;
+  spanName?: string;
+  serviceName?: string;
   isOtelSpan?: boolean;
 }
 

@@ -53,7 +53,7 @@ describe('transactionDocumentProfileProvider', () => {
     const transactionDocumentProfileProvider =
       createObservabilityTracesTransactionDocumentProfileProvider(mockServices);
 
-    it('matches records with the correct data stream type and the correct processor event', () => {
+    it('matches records with the correct data source category and the correct processor event', () => {
       expect(
         transactionDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
@@ -61,6 +61,19 @@ describe('transactionDocumentProfileProvider', () => {
           record: buildMockRecord('index', {
             'data_stream.type': ['traces'],
             'processor.event': ['transaction'],
+          }),
+        })
+      ).toEqual(RESOLUTION_MATCH);
+    });
+
+    it('matches records that contain enough data to determine it is a transaction', () => {
+      expect(
+        transactionDocumentProfileProvider.resolve({
+          rootContext: getRootContext({ profileId }),
+          dataSourceContext: DATA_SOURCE_CONTEXT,
+          record: buildMockRecord('index', {
+            'transaction.id': ['e0'],
+            'transaction.name': ['GET'],
           }),
         })
       ).toEqual(RESOLUTION_MATCH);

@@ -67,14 +67,24 @@ describe('spanDocumentProfileProvider', () => {
       ).toEqual(RESOLUTION_MATCH);
     });
 
-    it('does not match records with neither characteristic', () => {
+    it('does not match records that could be transactions', () => {
+      expect(
+        spanDocumentProfileProvider.resolve({
+          rootContext: getRootContext({ profileId }),
+          dataSourceContext: DATA_SOURCE_CONTEXT,
+          record: buildMockRecord('another-index', { 'transaction.name': 'GET' }),
+        })
+      ).toEqual(RESOLUTION_MISMATCH);
+    });
+
+    it('defaults to matching as a span if given no distinguishing fields', () => {
       expect(
         spanDocumentProfileProvider.resolve({
           rootContext: getRootContext({ profileId }),
           dataSourceContext: DATA_SOURCE_CONTEXT,
           record: buildMockRecord('another-index'),
         })
-      ).toEqual(RESOLUTION_MISMATCH);
+      ).toEqual(RESOLUTION_MATCH);
     });
 
     it('does not match records with the correct data stream type but the incorrect processor event', () => {

@@ -14,8 +14,11 @@ import { i18n } from '@kbn/i18n';
 import { asDuration } from '../../utils';
 import { PercentOfParent } from './percent_of_parent';
 
+const DURATION_LABEL = i18n.translate('apmUiShared.duration.label', {
+  defaultMessage: 'Duration',
+});
 export interface DurationProps {
-  duration: number;
+  duration?: number;
   parent?: {
     duration?: number;
     type: 'trace' | 'transaction';
@@ -26,9 +29,9 @@ export interface DurationProps {
 }
 
 export function Duration({ duration, parent, size = 's', showTooltip = false }: DurationProps) {
-  const label = i18n.translate('apmUiShared.duration.label', {
-    defaultMessage: 'Duration',
-  });
+  if (duration == null) {
+    return null;
+  }
 
   const content = !parent ? (
     <EuiText size={size}>{asDuration(duration)}</EuiText>
@@ -46,5 +49,5 @@ export function Duration({ duration, parent, size = 's', showTooltip = false }: 
     </EuiText>
   );
 
-  return showTooltip ? <EuiToolTip content={label}>{content}</EuiToolTip> : <>{content}</>;
+  return showTooltip ? <EuiToolTip content={DURATION_LABEL}>{content}</EuiToolTip> : <>{content}</>;
 }
