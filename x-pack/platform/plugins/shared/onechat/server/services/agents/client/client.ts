@@ -30,7 +30,8 @@ import type {
   AgentUpdateRequest,
 } from '../../../../common/agents';
 import type { ToolsServiceStart } from '../../tools';
-import { AgentProfileStorage, createStorage } from './storage';
+import type { AgentProfileStorage } from './storage';
+import { createStorage } from './storage';
 import { createRequestToEs, type Document, fromEs, updateProfile } from './converters';
 import { ensureValidId, validateToolSelection } from './utils';
 

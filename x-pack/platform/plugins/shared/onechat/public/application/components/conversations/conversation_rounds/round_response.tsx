@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
-import { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingElastic } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
+import React from 'react';
+import { useTimer } from '../../../hooks/use_timer';
 import { ChatMessageText } from './chat_message_text';
 import { RoundThinking } from './round_thinking';
 import { RoundTimer } from './round_timer';
-import { useTimer } from '../../../hooks/use_timer';
 
 export interface RoundResponseProps {
   response: AssistantResponse;
@@ -28,42 +28,26 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
   const { showTimer, elapsedTime, isStopped } = useTimer({ isLoading });
   const showThinking = showTimer || steps.length > 0;
   return (
-    <EuiFlexGroup direction="row" gutterSize="m">
-      <EuiFlexItem grow={false}>
-        {isLoading ? (
-          <EuiLoadingElastic
-            size="l"
-            aria-label={i18n.translate('xpack.onechat.roundThinking.loading', {
-              defaultMessage: 'Assistant is thinking',
-            })}
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
+        defaultMessage: 'Assistant response',
+      })}
+    >
+      {showThinking && (
+        <EuiFlexItem grow={false}>
+          <RoundThinking
+            steps={steps}
+            loadingIndicator={
+              showTimer ? <RoundTimer elapsedTime={elapsedTime} isStopped={isStopped} /> : null
+            }
           />
-        ) : (
-          <EuiIcon type="logoElastic" size="l" />
-        )}
-      </EuiFlexItem>
-      <EuiFlexItem>
-        <EuiFlexGroup
-          direction="column"
-          gutterSize="s"
-          aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
-            defaultMessage: 'Assistant response',
-          })}
-        >
-          {showThinking && (
-            <EuiFlexItem grow={false}>
-              <RoundThinking
-                steps={steps}
-                loadingIndicator={
-                  showTimer ? <RoundTimer elapsedTime={elapsedTime} isStopped={isStopped} /> : null
-                }
-              />
-            </EuiFlexItem>
-          )}
+        </EuiFlexItem>
+      )}
 
-          <EuiFlexItem>
-            <ChatMessageText content={message} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <EuiFlexItem>
+        <ChatMessageText content={message} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

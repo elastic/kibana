@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MonacoEditorActionsProvider } from '../../application/containers/editor/monaco_editor_actions_provider';
-import { CoreEditor, Range, Token } from '../../types';
+import type { MonacoEditorActionsProvider } from '../../application/containers/editor/monaco_editor_actions_provider';
+import type { CoreEditor, Range, Token } from '../../types';
 
 export interface ResultTerm {
   meta?: string;

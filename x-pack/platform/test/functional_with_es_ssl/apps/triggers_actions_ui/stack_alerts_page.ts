@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CustomCheerio } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { CustomCheerio } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const FILTERABLE_SOLUTIONS = ['Stack management', 'Machine Learning', 'Observability', 'Security'];
 

@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EUI_MODAL_CONFIRM_BUTTON, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
-import { ScriptedFieldItem } from '../../types';
+import type { ScriptedFieldItem } from '../../types';
 
 interface DeleteScritpedFieldConfirmationModalProps {
   field: ScriptedFieldItem;

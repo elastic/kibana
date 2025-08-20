@@ -10,7 +10,7 @@
 import { join } from 'path';
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
-import { SavedObject } from '@kbn/core/types';
+import type { SavedObject } from '@kbn/core/types';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 interface MinimalSO {

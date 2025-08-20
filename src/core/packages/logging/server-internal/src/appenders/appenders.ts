@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { assertNever } from '@kbn/std';
-import { DisposableAppender } from '@kbn/logging';
+import type { DisposableAppender } from '@kbn/logging';
 import type { AppenderConfigType } from '@kbn/core-logging-server';
 
 import { Layouts } from '../layouts/layouts';
