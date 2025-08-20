@@ -657,6 +657,11 @@ export function transformOutputToFullPolicyOutput(
     newOutput.preset = preset ?? getDefaultPresetForEsOutput(config_yaml ?? '', load);
   }
 
+  // Add streams configuration when write_to_streams is enabled
+  if ((output as any).write_to_streams === true) {
+    newOutput.streams = ['logs', 'logs*'];
+  }
+
   return newOutput;
 }
 
