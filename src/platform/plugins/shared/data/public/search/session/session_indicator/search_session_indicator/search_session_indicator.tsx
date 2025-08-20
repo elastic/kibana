@@ -412,13 +412,9 @@ const searchSessionIndicatorViewStateToProps = ({
           : i18n.translate('data.searchSessionIndicator.canceledTitleText', {
               defaultMessage: 'Search session stopped',
             }),
-        description: hasBackgroundSearchEnabled
-          ? i18n.translate('data.searchSessionIndicator.backgroundSearchCanceledDescriptionText', {
-              defaultMessage: 'You are viewing incomplete data',
-            })
-          : i18n.translate('data.searchSessionIndicator.canceledDescriptionText', {
-              defaultMessage: 'You are viewing incomplete data',
-            }),
+        description: i18n.translate('data.searchSessionIndicator.canceledDescriptionText', {
+          defaultMessage: 'You are viewing incomplete data',
+        }),
         whenText: (props: SearchSessionIndicatorProps) =>
           i18n.translate('data.searchSessionIndicator.canceledWhenText', {
             defaultMessage: 'Stopped {when}',
