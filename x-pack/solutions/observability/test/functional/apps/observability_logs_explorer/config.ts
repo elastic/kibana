@@ -40,7 +40,7 @@ interface ObsLogExplorerConfig {
 export default async function createTestConfig({
   readConfigFile,
 }: FtrConfigProviderContext): Promise<ObsLogExplorerConfig> {
-  const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+  const functionalConfig = await readConfigFile(require.resolve('../../config.base.ts'));
   const services = functionalConfig.get('services');
 
   const packageRegistryConfig = path.join(__dirname, './common/package_registry_config.yml');
