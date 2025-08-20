@@ -14,10 +14,7 @@ import type {
   entry,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { entriesNested } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_TRUSTED_APPS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 import type { ExceptionListSoSchema } from '../schemas/saved_objects';
 
@@ -58,7 +55,12 @@ export const migrations = {
       attributes: {
         ...doc.attributes,
         ...(doc.attributes.entries &&
-          [ENDPOINT_LIST_ID, ENDPOINT_TRUSTED_APPS_LIST_ID].includes(doc.attributes.list_id) && {
+          (
+            [
+              ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+              ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
+            ] as string[]
+          ).includes(doc.attributes.list_id) && {
             entries: (doc.attributes.entries as EntriesArray).map<EntryType>(migrateEntry),
           }),
         ...(doc.attributes._tags &&
@@ -72,7 +74,7 @@ export const migrations = {
   '7.12.0': (
     doc: SavedObjectUnsanitizedDoc<ExceptionListSoSchema>
   ): SavedObjectSanitizedDoc<ExceptionListSoSchema> => {
-    if (doc.attributes.list_id === ENDPOINT_TRUSTED_APPS_LIST_ID) {
+    if (doc.attributes.list_id === ENDPOINT_ARTIFACT_LISTS.trustedApps.id) {
       return {
         ...doc,
         ...{
