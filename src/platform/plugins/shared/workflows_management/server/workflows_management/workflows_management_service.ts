@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  KibanaRequest,
+  Logger,
+  SavedObject,
+  SavedObjectsClientContract,
+  SecurityServiceStart,
+} from '@kbn/core/server';
 import type {
   CreateWorkflowCommand,
   EsWorkflow,
@@ -21,10 +28,11 @@ import type {
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
+import { getAuthenticatedUser } from '../lib/get_user';
 import type { WorkflowSavedObjectAttributes } from '../saved_objects/workflow';
 import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
-import { createIndexWithMappings } from './lib/create_index';
+import { createOrUpdateIndex } from './lib/create_index';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import {
   WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
@@ -38,12 +46,13 @@ import type { GetWorkflowsParams } from './workflows_management_api';
 export class WorkflowsService {
   private esClient: ElasticsearchClient | null = null;
   private taskScheduler: WorkflowTaskScheduler | null = null;
-  private logger: Logger;
-  private getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
-  private workflowsExecutionIndex: string;
-  private stepsExecutionIndex: string;
+  private readonly logger: Logger;
+  private readonly getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
+  private readonly workflowsExecutionIndex: string;
+  private readonly stepsExecutionIndex: string;
   private workflowEventLoggerService: SimpleWorkflowLogger | null = null;
   private workflowExecutionLogsIndex: string;
+  private security?: SecurityServiceStart;
 
   constructor(
     esClientPromise: Promise<ElasticsearchClient>,
@@ -66,6 +75,10 @@ export class WorkflowsService {
     this.taskScheduler = taskScheduler;
   }
 
+  public setSecurityService(security: SecurityServiceStart) {
+    this.security = security;
+  }
+
   private async initialize(
     esClientPromise: Promise<ElasticsearchClient>,
     workflowExecutionLogsIndex: string,
@@ -79,13 +92,13 @@ export class WorkflowsService {
 
     // Create required indices with proper mappings (workflows are now saved objects)
     await Promise.all([
-      createIndexWithMappings({
+      createOrUpdateIndex({
         esClient: this.esClient,
         indexName: this.workflowsExecutionIndex,
         mappings: WORKFLOWS_EXECUTIONS_INDEX_MAPPINGS,
         logger: this.logger,
       }),
-      createIndexWithMappings({
+      createOrUpdateIndex({
         esClient: this.esClient,
         indexName: this.stepsExecutionIndex,
         mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
@@ -98,10 +111,16 @@ export class WorkflowsService {
     );
   }
 
-  public async searchWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async searchWorkflows(
+    params: GetWorkflowsParams,
+    spaceId: string
+  ): Promise<WorkflowListDto> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     const response = await savedObjectsClient.find<WorkflowSavedObjectAttributes>({
       type: WORKFLOW_SAVED_OBJECT_TYPE,
+      // Exclude deleted workflows (by checking for null/undefined deleted_at) and workflows from other spaces
+      filter: `not ${WORKFLOW_SAVED_OBJECT_TYPE}.attributes.deleted_at: *`,
       perPage: 100,
       sortField: 'updated_at',
       sortOrder: 'desc',
@@ -113,7 +132,7 @@ export class WorkflowsService {
     // Fetch execution history for all workflows in parallel
     const executionHistoryPromises = workflowIds.map(async (workflowId) => {
       try {
-        const executions = await this.searchWorkflowExecutions({ workflowId });
+        const executions = await this.searchWorkflowExecutions({ workflowId }, spaceId);
         return {
           workflowId,
           history: executions.results.map((execution) => ({
@@ -137,7 +156,7 @@ export class WorkflowsService {
 
     const executionHistoryResults = await Promise.all(executionHistoryPromises);
 
-    // Create a map for quick lookup
+    // Create a map for a quick lookup
     const historyByWorkflowId = executionHistoryResults.reduce((acc, result) => {
       acc[result.workflowId] = result.history;
       return acc;
@@ -180,7 +199,10 @@ export class WorkflowsService {
     };
   }
 
-  public async getWorkflowExecution(id: string): Promise<WorkflowExecutionDto | null> {
+  public async getWorkflowExecution(
+    id: string,
+    spaceId: string
+  ): Promise<WorkflowExecutionDto | null> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -190,11 +212,13 @@ export class WorkflowsService {
       workflowExecutionIndex: this.workflowsExecutionIndex,
       stepsExecutionIndex: this.stepsExecutionIndex,
       workflowExecutionId: id,
+      spaceId,
     });
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     try {
       const response = await savedObjectsClient.get<WorkflowSavedObjectAttributes>(
         WORKFLOW_SAVED_OBJECT_TYPE,
@@ -221,8 +245,13 @@ export class WorkflowsService {
     }
   }
 
-  public async createWorkflow(workflow: CreateWorkflowCommand): Promise<WorkflowDetailDto> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async createWorkflow(
+    workflow: CreateWorkflowCommand,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     const parsedYaml = parseWorkflowYamlToJSON(workflow.yaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (!parsedYaml.success) {
       throw new Error('Invalid workflow yaml: ' + parsedYaml.error.message);
@@ -230,6 +259,7 @@ export class WorkflowsService {
     // @ts-expect-error - TODO: fix this
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data);
 
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
     const savedObjectData: WorkflowSavedObjectAttributes = {
       name: workflowToCreate.name,
       description: workflowToCreate.description,
@@ -237,8 +267,9 @@ export class WorkflowsService {
       tags: workflowToCreate.tags || [],
       yaml: workflow.yaml,
       definition: workflowToCreate.definition,
-      createdBy: 'system', // TODO: get from context
-      lastUpdatedBy: 'system', // TODO: get from context
+      createdBy: authenticatedUser,
+      lastUpdatedBy: authenticatedUser,
+      deleted_at: null,
     };
 
     const response = await savedObjectsClient.create<WorkflowSavedObjectAttributes>(
@@ -271,10 +302,26 @@ export class WorkflowsService {
 
   public async updateWorkflow(
     id: string,
-    workflow: Partial<EsWorkflow>
-  ): Promise<UpdatedWorkflowResponseDto> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+    workflow: Partial<EsWorkflow>,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<UpdatedWorkflowResponseDto | null> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
     const { yaml, definition, ...rest } = workflow;
+
+    try {
+      const existed = await savedObjectsClient.get<WorkflowSavedObjectAttributes>(
+        WORKFLOW_SAVED_OBJECT_TYPE,
+        id
+      );
+      if (!existed) {
+        return null;
+      }
+    } catch (error) {
+      this.logger.error(`Can't read workflow ${id}: ${error}`);
+      return null;
+    }
 
     let updateData: Partial<WorkflowSavedObjectAttributes>;
 
@@ -292,7 +339,7 @@ export class WorkflowsService {
         tags: updatedWorkflow.tags || [],
         yaml,
         definition: updatedWorkflow.definition,
-        lastUpdatedBy: 'system', // TODO: get from context
+        lastUpdatedBy: getAuthenticatedUser(request, this.security),
       };
 
       // Update scheduled tasks if triggers changed
@@ -310,7 +357,7 @@ export class WorkflowsService {
     } else {
       updateData = {
         ...rest,
-        lastUpdatedBy: 'system', // TODO: get from context
+        lastUpdatedBy: getAuthenticatedUser(request, this.security),
       };
     }
 
@@ -327,24 +374,54 @@ export class WorkflowsService {
     };
   }
 
-  public async deleteWorkflows(workflowIds: string[]): Promise<void> {
-    const savedObjectsClient = await this.getSavedObjectsClient();
+  public async deleteWorkflows(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    const baseSavedObjectsClient = await this.getSavedObjectsClient();
+    const savedObjectsClient = baseSavedObjectsClient.asScopedToNamespace(spaceId);
 
-    // Remove scheduled tasks for deleted workflows
+    const savedObjects = await savedObjectsClient.bulkGet<WorkflowSavedObjectAttributes>(
+      workflowIds.map((id) => ({
+        type: WORKFLOW_SAVED_OBJECT_TYPE,
+        id,
+      }))
+    );
+
+    const existedWorkflows: Array<SavedObject<WorkflowSavedObjectAttributes>> =
+      savedObjects.saved_objects;
+
+    // Remove tasks scheduled for deleted workflows
     if (this.taskScheduler) {
-      for (const workflowId of workflowIds) {
-        await this.taskScheduler.unscheduleWorkflowTasks(workflowId);
+      for (const workflow of existedWorkflows) {
+        await this.taskScheduler.unscheduleWorkflowTasks(workflow.id);
       }
     }
 
+    // Soft delete workflows by setting deleted_at timestamp instead of removing them
+    const authenticatedUser = getAuthenticatedUser(request, this.security);
+    const deletedAt = new Date();
     await Promise.all(
-      workflowIds.map((id) => savedObjectsClient.delete(WORKFLOW_SAVED_OBJECT_TYPE, id))
+      existedWorkflows.map((workflow) =>
+        savedObjectsClient.update<WorkflowSavedObjectAttributes>(
+          WORKFLOW_SAVED_OBJECT_TYPE,
+          workflow.id,
+          {
+            deleted_at: deletedAt,
+            lastUpdatedBy: authenticatedUser,
+          }
+        )
+      )
     );
   }
 
-  public async searchWorkflowExecutions(params: {
-    workflowId: string;
-  }): Promise<WorkflowExecutionListDto> {
+  public async searchWorkflowExecutions(
+    params: {
+      workflowId: string;
+    },
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
     }
@@ -353,7 +430,23 @@ export class WorkflowsService {
       esClient: this.esClient,
       logger: this.logger,
       workflowExecutionIndex: this.workflowsExecutionIndex,
-      query: { match: { workflowId: params.workflowId } },
+      query: {
+        bool: {
+          must: [
+            { term: { workflowId: params.workflowId } },
+            {
+              bool: {
+                should: [
+                  { term: { spaceId } },
+                  // Backward compatibility for objects without spaceId
+                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
     });
   }
 
@@ -423,7 +516,7 @@ export class WorkflowsService {
     }
   }
 
-  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
+  public async getExecutionLogs(executionId: string, spaceId: string): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [
