@@ -183,7 +183,7 @@ export const SchemaSelector = ({
 
   const handleSchemaSelectorClick = useCallback(() => {
     telemetry.reportSchemaSelectorInteraction({
-      interaction: 'open drop-down',
+      interaction: 'open dropdown',
       schema_selected: value,
       schemas_available: schemas,
     });

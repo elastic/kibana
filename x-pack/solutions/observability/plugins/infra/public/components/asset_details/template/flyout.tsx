@@ -52,6 +52,7 @@ export const Flyout = ({
       onClose={handleOnClose}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={entity.type}
+      data-schema-selected={schema}
       aria-labelledby={i18n.translate('xpack.infra.assetDetails.flyout.ariaLabel', {
         defaultMessage: '{name} details',
         values: { name: entity.name },

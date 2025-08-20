@@ -92,6 +92,7 @@ export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
       data-asset-type={entity.type}
+      data-schema-selected={schema}
     >
       <Content />
     </InfraPageTemplate>
