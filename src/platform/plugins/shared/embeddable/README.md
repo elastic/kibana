@@ -47,26 +47,25 @@ Required publishing package interfaces. An embeddable must implement these inter
 
 Optional publishing package interfaces. Embeddables may implement these interfaces. Embeddables without interface implemenations will not show UiActions that require an interface.
 
-| Interface | Description | UiActions |
-| ----------- | ----------- | ----------- |
-| HasUniqueId | Provides uuid | ACTION_REMOVE_PANEL |
-| CanAccessViewMode | ACTION_REMOVE_PANEL |
+| Interface | Description | Used by |
+| --------- | ----------- | --------- |
+| HasInspectorAdapters | Interface for accessing inspector adaptors | ACTION_INSPECT_PANEL |
 
 </details>
 
 ### Embeddable panel
 The EmbeddableRenderer React component wraps embeddable components in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
 
-The embeddable panel uses UiActions and Triggers to customize embeddable interactions.
+The embeddable panel uses UiActions and Triggers registry to make the embeddable UI extensible. The table below lists the trigger events used by the embeddable panel.
 
 | Trigger | Description |
-| ----------| ----------- |
+| ------- | ----------- |
 | CONTEXT_MENU_TRIGGER | trigger to add an action to a panel's context menu |
 | PANEL_HOVER_TRIGGER | trigger to add an action to a panel's hover menu |
 | PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
 | PANEL_NOTIFICATION_TRIGGER | trigger to add a notification to the top-right corner of a panel |
 
-The embeddable panel passes the embeddable API to all UiActions for a trigger. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required presentation packages.
+The embeddable panel passes the embeddable API to all UiActions for a trigger. Each UiAction uses its `isCompatable` method to exclude embeddable API's that do not implement the required shared interfaces. An action is not displayed when `isCompatable` returns false.
 
 For example, the [edit panal action](https://github.com/elastic/kibana/tree/main/src/platform/plugins/private/presentation_panel/public/panel_actions/edit_panel_action/edit_panel_action.ts) defines the "Edit" panel context menu action. The action's `isCompatible` check uses the `apiHasEditCapabilities` type guard to check that an embeddable API implements the `HasEditCapabilities` interface. When an embeddable API implements the interface and all other conditions of `isCompatible` check are true, the "Edit" action is availabe in the panel context menu. When an embeddable API does not implement the interface, the "Edit" action is not available in the panel context menu.
 
@@ -74,9 +73,10 @@ For example, the [edit panal action](https://github.com/elastic/kibana/tree/main
 
 <summary>Expand to view available UiActions</summary>
 
-| UiAction | Description | Required publishing packages |
-| ---------| ----------- | ---------------------------- |
-| ACTION_REMOVE_PANEL |  |  |
+| UiAction | Description | interfaces |
+| ---------| ----------- | ---------- |
+| ACTION_REMOVE_PANEL | Removes embeddable from page |  |
+| ACTION_INSPECT_PANEL | Opens inspector flyout | HasInspectorAdapters |
 
 </details>
 
