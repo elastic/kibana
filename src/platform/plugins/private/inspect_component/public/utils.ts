@@ -16,12 +16,32 @@ import type {
 import { getComponentData } from './get_component_data';
 import { EUI_DATA_ICON_TYPE } from './constants';
 
-const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileData | null => {
-  if (!fiberNode) return null;
+const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | undefined => {
+  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
+  return fiberKey ? (node as any)[fiberKey] : undefined;
+};
 
-  if (fiberNode._debugSource) return fiberNode._debugSource;
+const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
+  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
 
-  return findDebugSourceUpwards(fiberNode._debugOwner);
+  while (current) {
+    const fiber = getFiberFromDomNode(current);
+    if (fiber) {
+      // Traverse fiber chain to find _debugSource
+      let fiberCursor: ReactFiberNode | null | undefined = fiber;
+      while (fiberCursor) {
+        if (fiberCursor._debugSource) {
+          return fiberCursor._debugSource;
+        }
+        fiberCursor = fiberCursor._debugOwner;
+      }
+    }
+
+    // Move up the DOM tree - this is necessary to find the fiber node on third-party components
+    current = current.parentElement;
+  }
+
+  return;
 };
 
 export const getElementFromPoint = ({
@@ -34,7 +54,7 @@ export const getElementFromPoint = ({
     const isSvg = el instanceof SVGElement;
     const isOverlay = el.id === overlayId;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
-    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg; // the !isSvg check is done because there is some weird edge case with SVG elements and elementsFromPoint
+    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg; // There is some edge case with SVG elements that are not inspectable
 
     if (isNotInspectable || isOverlay || isPath) continue;
 
@@ -63,31 +83,13 @@ export const getInspectedElementData = async ({
   event.preventDefault();
   event.stopPropagation();
 
-  let fileData: FileData | null = null;
-
   const target = getElementFromPoint({ event, overlayId });
-
   if (!target) {
     setIsInspecting(false);
     return;
   }
 
-  const reactFiberKey = Object.keys(target).find((key) => key.startsWith('__reactFiber$'));
-  const targetReactFiber = reactFiberKey ? (target as any)?.[reactFiberKey] : null;
-
-  if (targetReactFiber) {
-    if (targetReactFiber._debugSource) {
-      fileData = targetReactFiber._debugSource;
-    } else {
-      const parentDebugSource = findDebugSourceUpwards(targetReactFiber._debugOwner);
-
-      if (parentDebugSource) {
-        fileData = parentDebugSource;
-      } else {
-        fileData = null;
-      }
-    }
-  }
+  const fileData = findDebugSource(target);
 
   if (!fileData) {
     setIsInspecting(false);
