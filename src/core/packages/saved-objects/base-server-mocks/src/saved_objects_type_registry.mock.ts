@@ -30,6 +30,7 @@ const createRegistryMock = (): jest.Mocked<
     getIndex: jest.fn(),
     isImportableAndExportable: jest.fn(),
     getNameAttribute: jest.fn(),
+    supportsAccessControl: jest.fn(),
   };
 
   mock.getVisibleTypes.mockReturnValue([]);
@@ -49,7 +50,7 @@ const createRegistryMock = (): jest.Mocked<
   mock.isImportableAndExportable.mockReturnValue(true);
   mock.getVisibleToHttpApisTypes.mockReturnValue(false);
   mock.getNameAttribute.mockReturnValue(undefined);
-
+  mock.supportsAccessControl.mockReturnValue(false);
   return mock;
 };
 
