@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type http from 'http';
 
-import type { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/common/rest_types';
+import type { UsageMetricsRequestBody } from '@kbn/data-usage-plugin/server/routes/internal/usage_metrics';
 import { DATA_USAGE_METRICS_API_ROUTE } from '@kbn/data-usage-plugin/common';
 import { transformMetricsData } from '@kbn/data-usage-plugin/server/routes/internal/usage_metrics_handler';
 import type { SupertestWithRoleScopeType } from '../../../services';
