@@ -9,9 +9,10 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import { EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiScreenReaderOnly } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { FormattedMessage } from '@kbn/i18n-react';
+
+import { i18n } from '@kbn/i18n';
 import { SolutionPanel } from './solution_panel';
 import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../..';
 
@@ -23,31 +24,46 @@ const sortByOrder = (
 interface Props {
   addBasePath: (path: string) => string;
   solutions: FeatureCatalogueSolution[];
+  hideSolutionsSection: boolean;
+  onHideSolutionsSection: (hide: boolean) => void;
 }
 
-export const SolutionsSection: FC<Props> = ({ addBasePath, solutions }) => {
-  if (solutions.length) {
-    solutions = solutions.sort(sortByOrder);
-
-    return (
-      <KibanaPageTemplate.Section bottomBorder aria-labelledby="homeSolutions__title" grow={false}>
-        <EuiScreenReaderOnly>
-          <h2 id="homeSolutions__title">
-            <FormattedMessage
-              id="home.solutionsSection.sectionTitle"
-              defaultMessage="Pick your solution"
-            />
-          </h2>
-        </EuiScreenReaderOnly>
-
-        <EuiFlexGroup>
-          {solutions.map((solution) => (
-            <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
-          ))}
-        </EuiFlexGroup>
-      </KibanaPageTemplate.Section>
-    );
-  } else {
+export const SolutionsSection: FC<Props> = ({
+  addBasePath,
+  solutions,
+  hideSolutionsSection,
+  onHideSolutionsSection,
+}) => {
+  if (hideSolutionsSection || solutions.length === 0) {
     return null;
   }
+
+  const sortedSolutions = solutions.sort(sortByOrder);
+
+  return (
+    <KibanaPageTemplate.Section bottomBorder aria-labelledby="homeSolutions__section" grow={false}>
+      <EuiButtonEmpty
+        iconType="eyeClosed"
+        onClick={() => onHideSolutionsSection(true)}
+        flush="left"
+      >
+        {i18n.translate('home.hideSection', {
+          defaultMessage: 'Hide section',
+        })}
+      </EuiButtonEmpty>
+      <EuiScreenReaderOnly>
+        <h2 id="homeSolutions__title">
+          {i18n.translate('home.solutionsSectionTitle', {
+            defaultMessage: 'Pick your solution',
+          })}
+        </h2>
+      </EuiScreenReaderOnly>
+
+      <EuiFlexGroup>
+        {sortedSolutions.map((solution) => (
+          <SolutionPanel addBasePath={addBasePath} key={solution.id} solution={solution} />
+        ))}
+      </EuiFlexGroup>
+    </KibanaPageTemplate.Section>
+  );
 };

@@ -162,11 +162,10 @@ export class Home extends Component<HomeProps, State> {
     this.setState({ selectedTabId: id });
   };
 
-  // private handleToggleSolutionsSection = () => {
-  //   const newHideValue = !this.state.hideSolutionsSection;
-  //   localStorage.setItem(SOLUTIONS_SECTION_HIDE_KEY, JSON.stringify(newHideValue));
-  //   this.setState({ hideSolutionsSection: newHideValue });
-  // };
+  private handleHideSolutionsSection = (hide: boolean) => {
+    localStorage.setItem(SOLUTIONS_SECTION_HIDE_KEY, JSON.stringify(hide));
+    this.setState({ hideSolutionsSection: hide });
+  };
 
   private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
     const { selectedTabId } = this.state;
@@ -208,7 +207,6 @@ export class Home extends Component<HomeProps, State> {
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled, currentUser, dashboards, recentlyAccessed } =
       this.props;
-    console.log(currentUser);
     const { application, trackUiMetric, http, userProfile } = getServices();
     const dashboardFavoritesClient = new FavoritesClient('dashboards', 'dashboard', {
       http,
@@ -292,22 +290,16 @@ export class Home extends Component<HomeProps, State> {
             currentUserName={currentUser?.full_name ?? currentUser?.username}
           />
         </KibanaPageTemplate.Section>
-        {/* <EuiFlexGroup gutterSize="none" alignItems="center"> */}
-        {/* <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={i18n.translate('home.toggleSolutionsSection.label', {
-                defaultMessage: 'Show Solutions section',
-              })}
-              checked={!this.state.hideSolutionsSection}
-              onChange={this.handleToggleSolutionsSection}
-              data-test-subj="toggleSolutionsSectionSwitch"
-            />
-          </EuiFlexItem> */}
-        {/* </EuiFlexGroup> */}
+
         {this.renderTabs(tabs)}
-        {!this.state.hideSolutionsSection && (
-          <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
-        )}
+
+        <SolutionsSection
+          addBasePath={addBasePath}
+          solutions={solutions}
+          hideSolutionsSection={this.state.hideSolutionsSection}
+          onHideSolutionsSection={this.handleHideSolutionsSection}
+        />
+
         <ManageData
           addBasePath={addBasePath}
           application={application}
@@ -323,6 +315,8 @@ export class Home extends Component<HomeProps, State> {
           onChangeDefaultRoute={() => {
             trackUiMetric(METRIC_TYPE.CLICK, 'change_to_different_default_route');
           }}
+          hideSolutionsSection={this.state.hideSolutionsSection}
+          onHideSolutionsSection={this.handleHideSolutionsSection}
         />
       </KibanaPageTemplate>
     );
