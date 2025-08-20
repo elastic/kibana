@@ -47,3 +47,8 @@ export interface GetInspectedElementOptions {
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
+
+export interface InspectComponentResponse {
+  codeowners: string[];
+  relativePath: string;
+}

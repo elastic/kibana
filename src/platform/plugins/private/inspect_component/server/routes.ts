@@ -11,7 +11,6 @@ import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { INSPECT_COMPONENT_ROUTE } from '../common';
 import { getComponentCodeowners } from './codeowners';
 
 interface InspectComponentRoutesOptions {
@@ -25,7 +24,7 @@ export const registerInspectComponentRoutes = ({ http, logger }: InspectComponen
   /** @internal */
   router.post(
     {
-      path: INSPECT_COMPONENT_ROUTE,
+      path: '/internal/inspect_component/inspect',
       security: {
         authz: {
           enabled: false,

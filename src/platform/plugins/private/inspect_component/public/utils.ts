@@ -14,7 +14,7 @@ import type {
   ReactFiberNode,
 } from './types';
 import { getComponentData } from './get_component_data';
-import { EUI_DATA_ICON_TYPE } from '../common';
+import { EUI_DATA_ICON_TYPE } from './constants';
 
 const findDebugSourceUpwards = (fiberNode: ReactFiberNode | null | undefined): FileData | null => {
   if (!fiberNode) return null;

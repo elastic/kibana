@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export interface InspectComponentResponse {
-  codeowners: string[];
-  relativePath: string;
-}
+export const EUI_DATA_ICON_TYPE = 'data-icon-type';

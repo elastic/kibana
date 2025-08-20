@@ -25,7 +25,6 @@ export const getComponentCodeowners = (path: string) => {
 
   let folderPath = path;
 
-  // TODO: Improve this
   // Find the first matching folder in the codeowners file
   while (folderPath) {
     const found = codeowners.find((c) => c.startsWith(folderPath));

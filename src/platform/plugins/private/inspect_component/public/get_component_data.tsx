@@ -9,10 +9,8 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { GetComponentDataOptions } from './types';
-import type { InspectComponentResponse } from '../common';
+import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
-import { INSPECT_COMPONENT_ROUTE } from '../common/constants';
 
 export const getComponentData = async ({
   core,
@@ -23,7 +21,7 @@ export const getComponentData = async ({
 }: GetComponentDataOptions) => {
   try {
     const { codeowners, relativePath }: InspectComponentResponse = await core.http.post(
-      INSPECT_COMPONENT_ROUTE,
+      '/internal/inspect_component/inspect',
       {
         body: JSON.stringify({ path: fileData.fileName }),
       }
