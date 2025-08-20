@@ -35,8 +35,7 @@ export function SearchProfilerPageProvider({ getService }: FtrProviderContext) {
       await testSubjects.click('profileButton');
     },
     async getProfileContent() {
-      const profileTree = await find.byClassName('prfDevTool__main__profiletree');
-      // const profileTree = await find.byClassName('prfDevTool__page');
+      const profileTree = await testSubjects.find('profileTree');
       return profileTree.getVisibleText();
     },
     getUrlWithIndexAndQuery({ indexName, query }: { indexName: string; query: any }) {
