@@ -18,4 +18,7 @@ module.exports = {
     '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/**/*.{ts,tsx}',
   ],
   moduleNameMapper: require('../../server/__mocks__/module_name_map'),
+  setupFilesAfterEnv: [
+    '<rootDir>/x-pack/solutions/security/plugins/security_solution/public/threat_intelligence/test/setup.ts',
+  ],
 };
