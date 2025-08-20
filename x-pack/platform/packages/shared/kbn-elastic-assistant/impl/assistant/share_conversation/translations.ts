@@ -94,3 +94,17 @@ export const GLOBAL_ERROR = i18n.translate(
     defaultMessage: 'Could not share conversation globally',
   }
 );
+
+export const SHARED_SUCCESS = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.privateSuccess',
+  {
+    defaultMessage: 'Successfully shared conversation with selected users',
+  }
+);
+
+export const SHARED_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.privateError',
+  {
+    defaultMessage: 'Could not share conversation with selected users',
+  }
+);

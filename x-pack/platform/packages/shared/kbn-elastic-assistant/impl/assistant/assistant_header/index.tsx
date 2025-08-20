@@ -132,7 +132,7 @@ export const AssistantHeader: React.FC<Props> = ({
     () => !selectedConversation || selectedConversation.id === '',
     [selectedConversation]
   );
-  console.log('isNewConversation', isNewConversation);
+
   return (
     <>
       <FlyoutNavigation

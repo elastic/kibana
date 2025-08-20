@@ -40,7 +40,7 @@ const ShareModalComponent: React.FC<Props> = ({
 }) => {
   const { copyConversationUrl, updateConversationUsers } = useConversation();
 
-  const { currentUser } = useAssistantContext();
+  const { currentUser, toasts } = useAssistantContext();
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
   useEffect(() => {
     const conversationUsers =
@@ -71,20 +71,31 @@ const ShareModalComponent: React.FC<Props> = ({
 
   const onSaveShare = useCallback(async () => {
     setIsModalOpen(false);
-    if (selectedConversation && selectedConversation?.id !== '') {
-      await updateConversationUsers({
-        conversationId: selectedConversation.id,
-        updatedUsers: [
-          ...nextUsers.map((user) => ({
-            id: user?.uid ?? '',
-            name: user?.user?.username ?? '',
-          })),
-          // readd current user
-          ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
-        ],
+    try {
+      if (selectedConversation && selectedConversation?.id !== '') {
+        await updateConversationUsers({
+          conversationId: selectedConversation.id,
+          updatedUsers: [
+            ...nextUsers.map((user) => ({
+              id: user?.uid ?? '',
+              name: user?.user?.username ?? '',
+            })),
+            // readd current user
+            ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
+          ],
+        });
+        await refetchCurrentUserConversations();
+        refetchCurrentConversation({});
+        toasts?.addSuccess({
+          title: i18n.SHARED_SUCCESS,
+        });
+      } else {
+        throw new Error('No conversation available to share');
+      }
+    } catch (error) {
+      toasts?.addError(error, {
+        title: i18n.SHARED_ERROR,
       });
-      await refetchCurrentUserConversations();
-      refetchCurrentConversation({});
     }
   }, [
     currentUser,
@@ -93,6 +104,7 @@ const ShareModalComponent: React.FC<Props> = ({
     refetchCurrentUserConversations,
     selectedConversation,
     setIsModalOpen,
+    toasts,
     updateConversationUsers,
   ]);
 

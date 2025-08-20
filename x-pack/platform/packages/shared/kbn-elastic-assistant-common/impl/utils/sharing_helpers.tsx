@@ -7,6 +7,15 @@
 
 import type { ConversationResponse, User } from '../schemas';
 
+export const getCurrentConversationOwner = (
+  conversation: Pick<ConversationResponse, 'createdBy' | 'users'>
+) => {
+  return (
+    conversation?.createdBy ??
+    // no createdBy property indicates legacy conversation, where only user was the owner
+    (conversation?.users.length === 1 ? conversation?.users[0] : {})
+  );
+};
 /**
  * Checks if the current user is the owner of the conversation.
  * The owner is defined as the user who created the conversation or, in legacy conversations,
@@ -19,16 +28,9 @@ export const getIsConversationOwner = (
   conversation: Pick<ConversationResponse, 'createdBy' | 'users' | 'id'> | undefined,
   user?: User
 ): boolean => {
-  const isLoadingState =
-    user === undefined || conversation === undefined || conversation?.id === '';
-  if (isLoadingState) {
-    // some loading state
-    return false;
-  }
-  const conversationUser =
-    conversation?.createdBy ??
-    // no createdBy property indicates legacy conversation, where only user was the owner
-    (conversation?.users.length === 1 ? conversation?.users[0] : {});
+  if (user === undefined || conversation === undefined) return false;
+  if (conversation?.id === '') return true;
+  const conversationUser = getCurrentConversationOwner(conversation);
   const hasMatchingId = !!conversationUser?.id && !!user?.id && conversationUser?.id === user?.id;
   const hasMatchingName =
     !!conversationUser?.name && !!user?.name && conversationUser?.name === user?.name;

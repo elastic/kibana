@@ -33,14 +33,16 @@ const SharedConversationOwnerCalloutComponent: React.FC<{
   const onDismiss = useCallback(() => {
     setLocalStorageShowConversation(false);
   }, [setLocalStorageShowConversation]);
-  const { description, title } = useMemo(
+  const { icon, description, title } = useMemo(
     () =>
       isGloballyShared
         ? {
+            icon: 'globe',
             title: i18n.CONVERSATION_SHARED_TITLE,
             description: i18n.OWNERSHIP_CALLOUT,
           }
         : {
+            icon: 'users',
             title: i18n.CONVERSATION_SHARED_SELECTED_TITLE,
             description: i18n.OWNERSHIP_CALLOUT_SELECTED,
           },
@@ -55,7 +57,7 @@ const SharedConversationOwnerCalloutComponent: React.FC<{
       `}
       size="s"
       title={title}
-      iconType="users"
+      iconType={icon}
       onDismiss={onDismiss}
     >
       {description}

@@ -11,7 +11,10 @@ import React from 'react';
 
 import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { Replacements } from '@kbn/elastic-assistant-common';
-import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
+import {
+  getCurrentConversationOwner,
+  replaceAnonymizedValuesWithOriginalValues,
+} from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel';
 import { SecurityUserAvatar, SecurityUserName } from './user_avatar';
@@ -140,7 +143,9 @@ export const getComments: GetComments =
 
         const messageProps = {
           timelineAvatar: isUser ? (
-            <SecurityUserAvatar user={message.user} />
+            <SecurityUserAvatar
+              user={message.user ?? getCurrentConversationOwner(currentConversation)}
+            />
           ) : (
             <AssistantAvatar name="machine" size="l" color="subdued" />
           ),
@@ -149,7 +154,13 @@ export const getComments: GetComments =
               ? new Date().toLocaleString()
               : new Date(message.timestamp).toLocaleString()
           ),
-          username: isUser ? <SecurityUserName user={message.user} /> : i18n.ASSISTANT,
+          username: isUser ? (
+            <SecurityUserName
+              user={message.user ?? getCurrentConversationOwner(currentConversation)}
+            />
+          ) : (
+            i18n.ASSISTANT
+          ),
           eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
         };
 
