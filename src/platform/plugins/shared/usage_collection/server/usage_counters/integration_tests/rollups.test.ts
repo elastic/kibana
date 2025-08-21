@@ -16,11 +16,8 @@ import {
   createRootWithCorePlugins,
 } from '@kbn/core-test-helpers-kbn-server';
 
-import {
-  serializeCounterKey,
-  UsageCountersSavedObjectAttributes,
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
-} from '../saved_objects';
+import type { UsageCountersSavedObjectAttributes } from '../saved_objects';
+import { serializeCounterKey, USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { USAGE_COUNTERS_KEEP_DOCS_FOR_DAYS } from '../rollups/constants';
 import { rollUsageCountersIndices } from '../rollups/rollups';
 import { type CounterAttributes, createCounters, toCounterMetric } from './counter_utils';

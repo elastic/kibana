@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { CaseSeverity, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 import { OBSERVABILITY_OWNER } from '@kbn/cases-plugin/common';
 import { navigateToCasesApp } from '@kbn/test-suites-xpack-platform/serverless/shared/lib/cases';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const owner = OBSERVABILITY_OWNER;
 

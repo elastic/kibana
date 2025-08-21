@@ -22,11 +22,13 @@ test.describe(
     test.beforeEach(async ({ apiServices, browserAuth, pageObjects }) => {
       await browserAuth.loginAsAdmin();
       // Clear existing processors before each test
-      await apiServices.streams.updateStreamProcessors('logs-generic-default', [
-        { grok: { field: 'message', patterns: ['%{WORD:attributes.method}'] } },
-        { set: { field: 'custom_field', value: 'custom_value' } },
-        { rename: { field: 'custom_field', target_field: 'renamed_custom_field' } },
-      ]);
+      await apiServices.streams.updateStreamProcessors('logs-generic-default', {
+        steps: [
+          { action: 'grok', from: 'message', patterns: ['%{WORD:attributes.method}'] },
+          { action: 'set', to: 'custom_field', value: 'custom_value' },
+          { action: 'rename', from: 'custom_field', to: 'renamed_custom_field' },
+        ],
+      });
 
       await pageObjects.streams.gotoProcessingTab('logs-generic-default');
     });

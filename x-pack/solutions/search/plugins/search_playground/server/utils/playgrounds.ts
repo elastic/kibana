@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { SavedObjectsFindResponse, type SavedObject } from '@kbn/core/server';
+import type { SavedObjectsFindResponse } from '@kbn/core/server';
+import { type SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type {
   PlaygroundSavedObject,
@@ -19,7 +20,7 @@ export function validatePlayground(playground: PlaygroundSavedObject): string[] 
   if (playground.name.trim().length === 0) {
     errors.push(
       i18n.translate('xpack.searchPlayground.playgroundNameError', {
-        defaultMessage: 'Playground name cannot be empty',
+        defaultMessage: 'RAG Playground name cannot be empty',
       })
     );
   }

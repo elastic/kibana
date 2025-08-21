@@ -6,16 +6,17 @@
  */
 
 import { intersection } from 'lodash';
-import { from, of, Observable, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { from, of, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type {
   IndicesGetMappingResponse,
   MappingPropertyBase,
   IndicesStatsResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
+import type { DataStreamFieldStatsPerNamespace, DatasetIndexPattern } from './types';
 
-import {
+import type {
   IndexBasicInfo,
   DataStreamStatsPerNamespace,
   DataStreamStats,
@@ -242,6 +243,7 @@ export function getIndexBasicStats({
           index: indexChunk,
           metric: ['docs', 'store'],
           filter_path: ['indices.*.primaries.docs', 'indices.*.primaries.store.size_in_bytes'],
+          forbid_closed_indices: false,
         })
       )
     )
@@ -361,6 +363,7 @@ async function getIndicesInfoForPattern({
         index: indexChunk,
         features: ['mappings'],
         filter_path: ['*.mappings', '*._meta'],
+        ignore_unavailable: true,
       })
     )
   );

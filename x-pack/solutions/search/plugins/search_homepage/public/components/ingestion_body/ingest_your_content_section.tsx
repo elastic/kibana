@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiCard,
   EuiPanel,
@@ -18,7 +19,6 @@ import {
   EuiText,
   EuiIcon,
   EuiButton,
-  IconType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

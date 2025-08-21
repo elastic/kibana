@@ -6,19 +6,16 @@
  */
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
-import { RoutingDefinition, routingDefinitionListSchema } from './routing';
-import {
-  WiredIngestStreamEffectiveLifecycle,
-  wiredIngestStreamEffectiveLifecycleSchema,
-} from './lifecycle';
-import {
-  FieldDefinition,
-  InheritedFieldDefinition,
-  fieldDefinitionSchema,
-  inheritedFieldDefinitionSchema,
-} from '../../fields';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { RoutingDefinition } from './routing';
+import { routingDefinitionListSchema } from './routing';
+import type { WiredIngestStreamEffectiveLifecycle } from './lifecycle';
+import { wiredIngestStreamEffectiveLifecycleSchema } from './lifecycle';
+import type { FieldDefinition, InheritedFieldDefinition } from '../../fields';
+import { fieldDefinitionSchema, inheritedFieldDefinitionSchema } from '../../fields';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 
 /* eslint-disable @typescript-eslint/no-namespace */

@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { EuiAvatar, EuiAvatarProps } from '@elastic/eui';
+import type { EuiAvatarProps } from '@elastic/eui';
+import { EuiAvatar } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { AssistantIcon } from './icon';

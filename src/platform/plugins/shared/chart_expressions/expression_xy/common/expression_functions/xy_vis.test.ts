@@ -9,7 +9,7 @@
 
 import { xyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
-import { sampleArgs, sampleLayer } from '../__mocks__';
+import { sampleArgs, sampleLayer } from '../test_utils';
 import { XY_VIS } from '../constants';
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 
