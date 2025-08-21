@@ -8,21 +8,17 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
+import type { IfStep, ForEachStep, WorkflowYaml, WaitStep, ConnectorStep } from '../../spec/schema';
 import type {
-  AtomicGraphNode,
-  ConnectorStep,
-  EnterConditionBranchNode,
-  EnterForeachNode,
   EnterIfNode,
-  ExitConditionBranchNode,
-  ExitForeachNode,
   ExitIfNode,
-  ForEachStep,
-  IfStep,
+  EnterForeachNode,
+  ExitForeachNode,
+  EnterConditionBranchNode,
+  ExitConditionBranchNode,
+  AtomicGraphNode,
   WaitGraphNode,
-  WaitStep,
-  WorkflowYaml,
-} from '@kbn/workflows';
+} from '../../types/execution';
 import { convertToWorkflowGraph } from './build_execution_graph';
 
 describe('convertToWorkflowGraph', () => {

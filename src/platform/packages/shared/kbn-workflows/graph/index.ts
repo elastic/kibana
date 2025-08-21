@@ -7,4 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { convertToWorkflowGraph } from './build_execution_graph/build_execution_graph';
+export {
+  convertToWorkflowGraph,
+  convertToSerializableGraph,
+} from './build_execution_graph/build_execution_graph';
