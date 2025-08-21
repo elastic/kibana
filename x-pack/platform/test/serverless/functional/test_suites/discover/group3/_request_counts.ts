@@ -225,6 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should send no more than 3 requests (documents + chart + other bucket) when changing to a breakdown field with an other bucket', async () => {
+        // await testSubjects.click('discoverNewButton');
         await expectSearches(type, 3, async () => {
           await PageObjects.discover.chooseBreakdownField('extension.raw');
         });
