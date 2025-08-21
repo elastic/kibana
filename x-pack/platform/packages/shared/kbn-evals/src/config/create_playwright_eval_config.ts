@@ -17,6 +17,7 @@ export interface EvaluationTestOptions extends ScoutTestOptions {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
   repetitions: number;
+  timeout?: number;
 }
 
 function getLogLevel() {
@@ -34,9 +35,11 @@ function getLogLevel() {
 export function createPlaywrightEvalsConfig({
   testDir,
   repetitions,
+  timeout,
 }: {
   testDir: string;
   repetitions?: number;
+  timeout?: number;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const log = new ToolingLog({
     level: getLogLevel(),
@@ -109,6 +112,6 @@ export function createPlaywrightEvalsConfig({
     },
     projects: nextProjects,
     globalSetup: require.resolve('./setup.js'),
-    timeout: 5 * 60_000,
+    timeout: timeout ?? 5 * 60_000,
   });
 }
