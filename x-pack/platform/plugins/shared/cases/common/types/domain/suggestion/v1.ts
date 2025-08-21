@@ -30,10 +30,7 @@ export type SuggestionRequest = z.infer<typeof suggestionRequestRt>;
 
 export type SuggestionOwner = z.infer<typeof suggestionOwnerSchema>;
 export type SuggestionOwners = SuggestionOwner[];
-export interface GenericSuggestionPayload {
-  id: string;
-  [key: PropertyKey]: unknown;
-}
+export type GenericSuggestionPayload = object;
 
 export interface AttachmentItem<
   TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
