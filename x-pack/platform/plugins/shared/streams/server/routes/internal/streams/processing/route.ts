@@ -9,6 +9,9 @@ import type { FlattenRecord } from '@kbn/streams-schema';
 import { flattenRecord, namedFieldDefinitionConfigSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { streamlangDSLSchema } from '@kbn/streamlang';
+import { from, map } from 'rxjs';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Observable } from 'rxjs';
 import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -104,6 +107,13 @@ export const processingSuggestionRoute = createServerRoute({
   },
 });
 
+type GrokSuggestionResponse = Observable<
+  ServerSentEventBase<
+    'grok_suggestion',
+    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> }
+  >
+>;
+
 export const processingGrokSuggestionRoute = createServerRoute({
   endpoint: 'POST /internal/streams/{name}/processing/_suggestions/grok',
   options: {
@@ -115,7 +125,12 @@ export const processingGrokSuggestionRoute = createServerRoute({
     },
   },
   params: processingGrokSuggestionsSchema,
-  handler: async ({ params, request, getScopedClients, server }) => {
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<GrokSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
       throw new SecurityError('Cannot access API on the current pricing tier');
@@ -125,12 +140,21 @@ export const processingGrokSuggestionRoute = createServerRoute({
       request,
     });
 
-    return handleProcessingGrokSuggestions({
-      params,
-      inferenceClient,
-      streamsClient,
-      scopedClusterClient,
-    });
+    // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
+    // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+    return from(
+      handleProcessingGrokSuggestions({
+        params,
+        inferenceClient,
+        streamsClient,
+        scopedClusterClient,
+      })
+    ).pipe(
+      map((grokProcessor) => ({
+        grokProcessor,
+        type: 'grok_suggestion' as const,
+      }))
+    );
   },
 });
 

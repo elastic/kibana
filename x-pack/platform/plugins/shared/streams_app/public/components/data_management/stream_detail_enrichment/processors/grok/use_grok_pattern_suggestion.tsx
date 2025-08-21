@@ -19,6 +19,7 @@ import {
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { get } from 'lodash';
+import { lastValueFrom } from 'rxjs';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { showErrorToast } from '../../../../../hooks/use_streams_app_fetch';
 import {
@@ -107,27 +108,32 @@ export function useGrokPatternSuggestion() {
         groupedMessages.map((group) => {
           const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
 
-          return streamsRepositoryClient
-            .fetch('POST /internal/streams/{name}/processing/_suggestions/grok', {
-              signal: abortController.signal,
-              params: {
-                path: { name: params.streamName },
-                body: {
-                  connector_id: params.connectorId,
-                  sample_messages: group.messages.slice(0, 10),
-                  review_fields: getReviewFields(grokPatternNodes, 10),
+          // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+          // There is only ever going to be a single event emitted so we can safely use `lastValueFrom`.
+          return lastValueFrom(
+            streamsRepositoryClient.stream(
+              'POST /internal/streams/{name}/processing/_suggestions/grok',
+              {
+                signal: abortController.signal,
+                params: {
+                  path: { name: params.streamName },
+                  body: {
+                    connector_id: params.connectorId,
+                    sample_messages: group.messages.slice(0, 10),
+                    review_fields: getReviewFields(grokPatternNodes, 10),
+                  },
                 },
-              },
-            })
-            .then((reviewResult) => {
-              const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult);
+              }
+            )
+          ).then((reviewResult) => {
+            const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult.grokProcessor);
 
-              return {
-                ...grokProcessor,
-                patterns: unwrapPatternDefinitions(grokProcessor), // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
-                pattern_definitions: {},
-              };
-            });
+            return {
+              ...grokProcessor,
+              patterns: unwrapPatternDefinitions(grokProcessor), // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
+              pattern_definitions: {},
+            };
+          });
         })
       );
 
