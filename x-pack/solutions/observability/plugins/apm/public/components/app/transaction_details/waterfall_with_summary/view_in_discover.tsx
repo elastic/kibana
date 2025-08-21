@@ -10,6 +10,16 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { from, where } from '@kbn/esql-composer';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_NAME,
+  TRANSACTION_DURATION,
+  TRANSACTION_NAME,
+  TRANSACTION_TYPE,
+} from '@kbn/apm-types';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
   ENVIRONMENT_ALL_VALUE,
@@ -24,7 +34,8 @@ export function ViewInDiscover() {
   const { query: queryParams } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
-    '/dependencies/operation'
+    '/dependencies/operation',
+    '/traces/explorer/waterfall'
   );
   const {
     transactionName,
@@ -52,31 +63,37 @@ export function ViewInDiscover() {
     query: {
       esql: from('traces-*')
         .pipe(
-          serviceName ? where(`service.name == ?serviceName`, { serviceName }) : (query) => query,
+          serviceName
+            ? where(`${SERVICE_NAME} == ?serviceName`, { serviceName })
+            : (query) => query,
           environment &&
             environment !== ENVIRONMENT_ALL_VALUE &&
             environment !== ENVIRONMENT_NOT_DEFINED_VALUE
-            ? where(`service.environment == ?environment`, { environment })
+            ? where(`${SERVICE_ENVIRONMENT} == ?environment`, { environment })
             : (query) => query,
-          transactionName
-            ? where(`transaction.name == ?transactionName`, { transactionName })
+          transactionName || spanName
+            ? where(`${transactionName ? TRANSACTION_NAME : SPAN_NAME} == ?name`, {
+                name: transactionName ?? spanName,
+              })
             : (query) => query,
           transactionType
-            ? where(`transaction.type == ?transactionType`, { transactionType })
+            ? where(`${TRANSACTION_TYPE} == ?transactionType`, { transactionType })
             : (query) => query,
-          spanName ? where(`span.name == ?spanName`, { spanName }) : (query) => query,
           dependencyName
-            ? where(`span.destination.service.resource == ?dependencyName`, { dependencyName })
+            ? where(`${SPAN_DESTINATION_SERVICE_RESOURCE} == ?dependencyName`, { dependencyName })
             : (query) => query,
-          sampleRangeFrom
-            ? transactionName
-              ? where(`transaction.duration.us >= ?sampleRangeFrom`, { sampleRangeFrom })
-              : where(`span.duration.us >= ?sampleRangeFrom`, { sampleRangeFrom })
-            : (query) => query,
-          sampleRangeTo
-            ? transactionName
-              ? where(`transaction.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
-              : where(`span.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
+          sampleRangeFrom && sampleRangeTo
+            ? where(
+                `${
+                  transactionName ? TRANSACTION_DURATION : SPAN_DURATION
+                } >= ?sampleRangeFrom AND ${
+                  transactionName ? TRANSACTION_DURATION : SPAN_DURATION
+                } <= ?sampleRangeTo`,
+                {
+                  sampleRangeFrom,
+                  sampleRangeTo,
+                }
+              )
             : (query) => query,
           kuery ? where(`QSTR("${kuery.replaceAll('"', '\\"')}")`) : (query) => query
         )

@@ -99,6 +99,8 @@ describe('ViewInDiscover', () => {
       spanName: 'elasticsearch-query',
       dependencyName: 'elasticsearch',
       environment: 'staging',
+      sampleRangeFrom: 1000,
+      sampleRangeTo: 5000,
     };
 
     mockUseAnyOfApmParams.mockReturnValue({
@@ -109,7 +111,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.destination.service.resource == "${query.dependencyName}"`,
+        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.destination.service.resource == "${query.dependencyName}"\n  | WHERE span.duration.us >= ${query.sampleRangeFrom} AND span.duration.us <= ${query.sampleRangeTo}`,
       },
     });
   });
@@ -128,7 +130,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.duration.us >= ${query.sampleRangeFrom}\n  | WHERE transaction.duration.us <= ${query.sampleRangeTo}`,
+        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.duration.us >= ${query.sampleRangeFrom} AND transaction.duration.us <= ${query.sampleRangeTo}`,
       },
     });
   });
@@ -147,7 +149,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.duration.us >= ${query.sampleRangeFrom}\n  | WHERE span.duration.us <= ${query.sampleRangeTo}`,
+        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.duration.us >= ${query.sampleRangeFrom} AND span.duration.us <= ${query.sampleRangeTo}`,
       },
     });
   });
@@ -224,7 +226,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.type == "${query.transactionType}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.destination.service.resource == "${query.dependencyName}"\n  | WHERE transaction.duration.us >= ${query.sampleRangeFrom}\n  | WHERE transaction.duration.us <= ${query.sampleRangeTo}\n  | WHERE QSTR("error.message: \\"timeout\\"")`,
+        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.type == "${query.transactionType}"\n  | WHERE span.destination.service.resource == "${query.dependencyName}"\n  | WHERE transaction.duration.us >= ${query.sampleRangeFrom} AND transaction.duration.us <= ${query.sampleRangeTo}\n  | WHERE QSTR("error.message: \\"timeout\\"")`,
       },
     });
   });
