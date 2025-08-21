@@ -13,8 +13,8 @@
 export const SAVED_OBJECT_TYPES_MAX_SIZE = 200 as const;
 
 export { BulkDeleteRoute } from './bulk_delete';
-export { BulkGetRoute } from './bulk_get';
-export { FindRoute } from './find';
+export { BulkGetRoute, bulkGetClientFactory } from './bulk_get';
+export { FindRoute, findClientFactory } from './find';
 export { GetAllowedTypesRoute } from './get_allowed_types';
-export { RelationshipsRoute } from './relationships';
-export { ScrollCountRoute } from './scroll_count';
+export { RelationshipsRoute, relationshipsClientFactory } from './relationships';
+export { ScrollCountRoute, scrollCountClientFactory } from './scroll_count';
