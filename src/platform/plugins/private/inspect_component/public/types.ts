@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { Dispatch, SetStateAction } from 'react';
 
@@ -37,6 +38,8 @@ export interface GetComponentDataOptions {
   core: CoreStart;
   fileData: FileData;
   iconType?: string;
+  target: HTMLElement | SVGElement;
+  euiTheme: EuiThemeComputed;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
@@ -45,6 +48,7 @@ export interface GetInspectedElementOptions {
   event: PointerEvent;
   core: CoreStart;
   overlayId: string;
+  euiTheme: EuiThemeComputed;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
@@ -61,4 +65,9 @@ export interface ActionLink {
   icon: string;
   id: string;
   label: string;
+}
+
+export interface SetElementHighlightOptions {
+  target: HTMLElement | SVGElement;
+  euiTheme: EuiThemeComputed;
 }

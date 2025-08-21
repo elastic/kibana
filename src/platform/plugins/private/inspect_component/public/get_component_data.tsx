@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
 
@@ -16,6 +17,8 @@ export const getComponentData = async ({
   core,
   fileData,
   iconType,
+  target,
+  euiTheme,
   setFlyoutRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
@@ -37,6 +40,16 @@ export const getComponentData = async ({
       toMountPoint(<InspectFlyout componentData={componentData} />, core.rendering),
       flyoutOptions
     );
+
+    const restore = setElementHighlight({
+      target,
+      euiTheme,
+    });
+
+    flyout.onClose.then(() => {
+      restore();
+      setFlyoutRef(undefined);
+    });
 
     setFlyoutRef(flyout);
   } catch (e) {

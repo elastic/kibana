@@ -12,6 +12,7 @@ import type {
   GetElementFromPointOptions,
   GetInspectedElementOptions,
   ReactFiberNode,
+  SetElementHighlightOptions,
 } from './types';
 import { getComponentData } from './get_component_data';
 import { EUI_DATA_ICON_TYPE } from './constants';
@@ -77,6 +78,7 @@ export const getInspectedElementData = async ({
   event,
   core,
   overlayId,
+  euiTheme,
   setFlyoutRef,
   setIsInspecting,
 }: GetInspectedElementOptions) => {
@@ -105,7 +107,21 @@ export const getInspectedElementData = async ({
     core,
     fileData,
     iconType: iconType || undefined,
+    target,
+    euiTheme,
     setFlyoutRef,
     setIsInspecting,
   });
+};
+
+export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
+  const originalStyles = {
+    border: target.style.border,
+  };
+
+  target.style.border = `2px solid ${euiTheme.colors.primary}`;
+
+  return () => {
+    target.style.border = originalStyles.border;
+  };
 };

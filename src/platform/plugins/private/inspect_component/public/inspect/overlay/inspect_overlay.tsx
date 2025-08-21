@@ -43,6 +43,7 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
       event,
       core,
       overlayId,
+      euiTheme,
       setFlyoutRef,
       setIsInspecting,
     });
