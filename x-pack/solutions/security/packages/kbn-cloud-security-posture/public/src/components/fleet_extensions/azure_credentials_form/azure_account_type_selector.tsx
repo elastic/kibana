@@ -10,20 +10,18 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { type NewPackagePolicy, SetupTechnology } from '@kbn/fleet-plugin/public';
 import { EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
+  AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
+  AZURE_ORGANIZATION_ACCOUNT,
+  AZURE_SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { AzureAccountType, UpdatePolicy } from '../types';
-import {
-  AZURE_CREDENTIALS_TYPE,
-  AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SINGLE_ACCOUNT,
-} from '../constants';
+import { AZURE_CREDENTIALS_TYPE } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-import {
-  AZURE_ORGANIZATION_ACCOUNT_TEST_SUBJ,
-  AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
-} from '../test_subjects';
 
 const getAzureAccountTypeOptions = (
   isAzureOrganizationDisabled: boolean

@@ -12,6 +12,11 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import {
+  GCP_INPUT_FIELDS_TEST_SUBJECTS,
+  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+  GCP_ORGANIZATION_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import {
@@ -22,12 +27,8 @@ import {
   getGcpCredentialsType,
   getGcpInputVarsFields,
 } from '../utils';
-import { GCP_CREDENTIALS_TYPE, GCP_ORGANIZATION_ACCOUNT, GCP_SETUP_ACCESS } from '../constants';
+import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from '../constants';
 import { ReadDocumentation } from '../common';
-import {
-  GCP_INPUT_FIELDS_TEST_SUBJECTS,
-  GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
-} from '../test_subjects';
 import type { GcpFields, GcpInputFields, UpdatePolicy } from '../types';
 import { GcpInputVarFields } from './gcp_input_var_fields';
 import { GCPSetupInfoContent } from './gcp_setup_info';

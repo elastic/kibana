@@ -12,7 +12,7 @@ import {
   AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   AZURE_INPUT_FIELDS_TEST_SUBJECTS,
   AZURE_SINGLE_ACCOUNT_TEST_SUBJ,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { policiesSavedObjects } from '../constants';
 

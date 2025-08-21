@@ -16,11 +16,11 @@ import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
 import { getFlattenedObject } from '@kbn/std';
 import { i18n } from '@kbn/i18n';
+import { AWS_SINGLE_ACCOUNT } from '@kbn/cloud-security-posture-common';
 import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   TEMPLATE_URL_ELASTIC_RESOURCE_ID_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
-  AWS_SINGLE_ACCOUNT,
   AWS_CREDENTIALS_TYPE,
   AZURE_CREDENTIALS_TYPE,
   GCP_CREDENTIALS_TYPE,

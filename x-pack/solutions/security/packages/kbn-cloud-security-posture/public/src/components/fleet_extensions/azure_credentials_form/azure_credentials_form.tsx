@@ -11,16 +11,16 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import {
+  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
+  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import { getAzureCredentialsFormManualOptions } from './get_azure_credentials_form_options';
 import { useAzureCredentialsForm } from './azure_hooks';
 import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import { AZURE_SETUP_FORMAT, ARM_TEMPLATE_EXTERNAL_DOC_URL } from '../constants';
-import {
-  AZURE_SETUP_FORMAT_TEST_SUBJECTS,
-  AZURE_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
-} from '../test_subjects';
 import { AzureSetupInfoContent } from './azure_setup_info';
 import { AzureInputVarFields } from './azure_input_var_fields';
 import type { AzureCredentialsType, AzureSetupFormat, UpdatePolicy } from '../types';

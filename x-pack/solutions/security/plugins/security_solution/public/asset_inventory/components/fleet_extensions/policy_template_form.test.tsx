@@ -37,7 +37,7 @@ import {
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   GCP_PROVIDER_TEST_SUBJ,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import CloudAssetInventoryPolicyTemplateForm from './policy_template_form';
 import { useKibana } from '../../hooks/use_kibana';
 import { SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING } from '@kbn/management-settings-ids';
