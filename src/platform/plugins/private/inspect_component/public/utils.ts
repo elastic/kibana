@@ -76,28 +76,45 @@ export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.u
   .includes('mac');
 
 export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
-  const rect = target.getBoundingClientRect();
-  const isPortal = Boolean(target.closest('[data-euiportal="true"]'));
+  const rectangle = target.getBoundingClientRect();
+  const isInsidePortal = Boolean(target.closest('[data-euiportal="true"]'));
 
   const overlay = document.createElement('div');
   Object.assign(overlay.style, {
     position: 'absolute',
-    top: `${rect.top + window.scrollY}px`,
-    left: `${rect.left + window.scrollX}px`,
-    width: `${rect.width}px`,
-    height: `${rect.height}px`,
+    top: `${rectangle.top + window.scrollY}px`,
+    left: `${rectangle.left + window.scrollX}px`,
+    width: `${rectangle.width}px`,
+    height: `${rectangle.height}px`,
     background: transparentize(euiTheme.colors.primary, 0.3),
     border: `2px solid ${euiTheme.colors.primary}`,
     pointerEvents: 'none',
-    zIndex: isPortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout) - 1,
+    boxSizing: 'border-box',
+    borderRadius: getComputedStyle(target).borderRadius,
+    zIndex: isInsidePortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout) - 1,
   });
 
   document.body.appendChild(overlay);
+
+  // Removes the overlay when the element is no longer visible, which can happen when using components like accordions or tabs
+  // This won't add the overlay back if the element becomes visible again
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const isVisible = entries.some((entry) => entry.isIntersecting);
+      if (overlay.parentNode && !isVisible) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    },
+    { threshold: 0 }
+  );
+
+  observer.observe(target);
 
   return () => {
     if (overlay.parentNode) {
       overlay.parentNode.removeChild(overlay);
     }
+    observer.disconnect();
   };
 };
 

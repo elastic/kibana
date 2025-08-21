@@ -41,13 +41,13 @@ export const getComponentData = async ({
       flyoutOptions
     );
 
-    const removeHighlight = setElementHighlight({
+    const restore = setElementHighlight({
       target,
       euiTheme,
     });
 
     flyout.onClose.then(() => {
-      removeHighlight();
+      restore();
       setFlyoutRef(undefined);
     });
 
