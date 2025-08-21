@@ -7,23 +7,21 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiButtonEmpty,
+  EuiLink,
 } from '@elastic/eui';
+import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
-export interface DashboardMetadata {
-  id: string;
-  title: string;
-  description: string;
-}
 
 export interface ActionButtonProps {
-  onClick: (dashboard: DashboardMetadata) => void;
+  onClick: (dashboard: RelatedDashboard) => void;
   label: string;
   isLoading: boolean;
   isDisabled: boolean;
@@ -33,43 +31,50 @@ export interface ActionButtonProps {
 export function DashboardTile({
   dashboard,
   actionButtonProps,
+  timeRange,
 }: {
-  dashboard: DashboardMetadata;
+  dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
 }) {
   const {
     services: {
       share: { url: urlService },
+      savedObjectsTagging: { ui: savedObjectsTaggingUi },
     },
   } = useKibana();
   const dashboardLocator = urlService.locators.get<DashboardLocatorParams>(DASHBOARD_APP_LOCATOR);
 
+  const tagsReferences: SavedObjectsReference[] = (dashboard.tags || []).flatMap((tag) => {
+    const ref = savedObjectsTaggingUi.convertNameToReference(tag);
+    return ref ? [{ ...ref, name: tag }] : [];
+  });
+
   return (
     <>
-      <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id}>
-        <EuiFlexItem key={dashboard.id}>
-          <EuiText size="s">
-            <a
-              href="#"
-              onClick={async (e) => {
-                e.preventDefault();
-                if (dashboardLocator) {
-                  const url = await dashboardLocator.getUrl({
-                    dashboardId: dashboard.id,
-                  });
-                  window.open(url, '_blank');
-                } else {
-                  console.error('Dashboard locator is not available');
-                }
-              }}
-            >
-              {dashboard.title}
-            </a>
-          </EuiText>
+      <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
+        <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
+          <EuiLink
+            data-test-subj="o11yDashboardTileLink"
+            href={dashboardLocator?.getRedirectUrl({
+              dashboardId: dashboard.id,
+              timeRange,
+            })}
+            target="_blank"
+          >
+            {dashboard.title}
+          </EuiLink>
           <EuiText color={'subdued'} size="s">
             {dashboard.description}
           </EuiText>
-        </EuiFlexItem>
+          {tagsReferences.length ? (
+            <savedObjectsTaggingUi.components.TagList
+              object={{
+                references: tagsReferences,
+              }}
+            />
+          ) : null}
+        </EuiFlexGroup>
         {actionButtonProps ? (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty

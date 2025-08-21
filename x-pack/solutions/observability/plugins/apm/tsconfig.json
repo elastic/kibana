@@ -141,6 +141,8 @@
     "@kbn/cases-plugin",
     "@kbn/apm-ui-shared",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/react-kibana-mount",
+    "@kbn/licensing-types",
   ],
   "exclude": ["target/**/*"]
 }

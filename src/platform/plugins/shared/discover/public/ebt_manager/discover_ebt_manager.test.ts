@@ -14,6 +14,7 @@ import { registerDiscoverEBTManagerAnalytics } from './discover_ebt_manager_regi
 import { ContextualProfileLevel } from '../context_awareness/profiles_manager';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { NON_ECS_FIELD } from './scoped_discover_ebt_manager';
 
 jest.mock('@kbn/ebt-tools', () => ({
   ...jest.requireActual('@kbn/ebt-tools'),
@@ -287,7 +288,8 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
-        eventName: 'dataTableSelection', // non-ECS fields would not be included in properties
+        eventName: 'dataTableSelection',
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
       });
     });
 
@@ -316,7 +318,8 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
-        eventName: 'dataTableRemoval', // non-ECS fields would not be included in properties
+        eventName: 'dataTableRemoval',
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
       });
     });
 
@@ -348,7 +351,8 @@ describe('DiscoverEBTManager', () => {
       });
 
       expect(coreSetupMock.analytics.reportEvent).toHaveBeenLastCalledWith('discover_field_usage', {
-        eventName: 'filterAddition', // non-ECS fields would not be included in properties
+        eventName: 'filterAddition',
+        fieldName: NON_ECS_FIELD, // non-ECS fields would be tracked with a "<non-ecs>" label
         filterOperation: '_exists_',
       });
     });

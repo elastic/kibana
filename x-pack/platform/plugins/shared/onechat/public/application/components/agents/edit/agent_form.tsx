@@ -20,7 +20,8 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AgentDefinition } from '@kbn/onechat-common';
+import type { AgentDefinition } from '@kbn/onechat-common';
+import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
 import { useForm, Controller, FormProvider } from 'react-hook-form';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -57,15 +58,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
   };
 
   const onSaveError = (err: Error) => {
-    const errorMessage = isCreateMode
+    const errorMessageTitle = isCreateMode
       ? i18n.translate('xpack.onechat.agents.createErrorMessage', {
           defaultMessage: 'Failed to create agent',
         })
       : i18n.translate('xpack.onechat.agents.updateErrorMessage', {
           defaultMessage: 'Failed to update agent',
         });
-    notifications.toasts.addError(err, {
-      title: errorMessage,
+
+    notifications.toasts.addDanger({
+      title: errorMessageTitle,
+      text: formatOnechatErrorMessage(err),
     });
   };
 
@@ -79,10 +82,11 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
       navigateToOnechatUrl(appPaths.agents.list);
     },
     onError: (err: Error) => {
-      notifications.toasts.addError(err, {
+      notifications.toasts.addDanger({
         title: i18n.translate('xpack.onechat.agents.deleteErrorMessage', {
           defaultMessage: 'Failed to delete agent',
         }),
+        text: formatOnechatErrorMessage(err),
       });
     },
   });

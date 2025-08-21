@@ -11,12 +11,14 @@ import Path from 'path';
 
 import Resolve from 'resolve';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getPackages, type Package } from '@kbn/repo-packages';
-
+import { getPackages, type Package, type ParsedPackageJson } from '@kbn/repo-packages';
+import { exports as resolvePackageExports } from 'resolve.exports';
 import { safeStat, readFileSync } from './helpers/fs';
-import { ResolveResult } from './resolve_result';
+import type { ResolveResult } from './resolve_result';
 import { getRelativeImportReq } from './helpers/import_req';
 import { memoize } from './helpers/memoize';
+
+// Use lightweight resolver for "exports" maps
 
 const NODE_MODULE_SEG = Path.sep + 'node_modules' + Path.sep;
 
@@ -153,6 +155,10 @@ export class ImportResolver {
       return Path.resolve(REPO_ROOT, `node_modules/@elastic/opentelemetry-node/lib/sdk.js`);
     }
 
+    if (req.startsWith('@typescript-eslint/parser')) {
+      return Path.resolve(REPO_ROOT, `node_modules/@typescript-eslint/parser/dist/index.js`);
+    }
+
     // turn root-relative paths into relative paths
     if (
       req.startsWith('src/') ||
@@ -208,6 +214,14 @@ export class ImportResolver {
       };
     } catch (error) {
       if (error && error.code === 'MODULE_NOT_FOUND') {
+        // fallback: attempt to resolve using the "exports" map in package.json
+        //
+        // TODO: Kibana operations team to look again into this once working on https://github.com/elastic/kibana-operations/issues/309 . Resolve library should have added native support for exports by then.
+        const expRes = this.tryExportsResolve(req, dirname);
+        if (expRes) {
+          return expRes;
+        }
+
         if (req === 'fsevents') {
           return {
             type: 'optional-and-missing',
@@ -234,6 +248,68 @@ export class ImportResolver {
     }
 
     return null;
+  }
+
+  private tryExportsResolve(req: string, dirname: string): ResolveResult | null {
+    // Ignore relative or absolute requests – only handle bare specifiers
+    if (req.startsWith('.') || Path.isAbsolute(req)) {
+      return null;
+    }
+
+    // Split into <packageName> and sub-path segments
+    const parts = req.split('/');
+    const pkgName = parts[0].startsWith('@') ? `${parts[0]}/${parts[1]}` : parts[0];
+    const subPathParts = parts.slice(pkgName.startsWith('@') ? 2 : 1);
+
+    // "exports" maps only apply to sub-paths (eg. "pkg/foo")
+    if (subPathParts.length === 0) {
+      return null;
+    }
+
+    // Locate the dependency's package.json
+    let manifestPath: string | undefined;
+    try {
+      manifestPath = Resolve.sync(`${pkgName}/package.json`, {
+        basedir: dirname,
+        ...this.baseResolveOpts,
+      });
+    } catch {
+      return null;
+    }
+
+    const pkgDir = Path.dirname(manifestPath);
+    const pkgJsonRaw = this.baseResolveOpts.readFileSync(manifestPath);
+    if (!pkgJsonRaw) {
+      return null;
+    }
+
+    let pkgJson: ParsedPackageJson;
+    try {
+      pkgJson = JSON.parse(pkgJsonRaw);
+    } catch {
+      return null;
+    }
+
+    // Use resolve.exports to determine the correct file for the sub-path
+    const entry = `./${subPathParts.join('/')}`;
+    const targets = resolvePackageExports(pkgJson as any, entry) as string[] | undefined;
+
+    if (!targets || targets.length === 0) {
+      return null;
+    }
+
+    // Prefer the first resolved target
+    const absolute = Path.resolve(pkgDir, targets[0]);
+    const stat = this.safeStat(absolute);
+    if (!stat || !stat.isFile()) {
+      return null;
+    }
+
+    return {
+      type: 'file',
+      absolute,
+      nodeModule: pkgName,
+    };
   }
 
   /**

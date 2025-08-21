@@ -7,17 +7,19 @@
 
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import type { LinkedDashboard, SuggestedDashboard } from '@kbn/observability-schema';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import { DashboardTiles } from './related_dashboards/dashboard_tiles';
-import { DashboardMetadata } from './related_dashboards/dashboard_tile';
 import { useAddSuggestedDashboards } from '../hooks/use_add_suggested_dashboard';
 
 interface RelatedDashboardsProps {
   rule: Rule;
-  suggestedDashboards?: DashboardMetadata[];
-  linkedDashboards?: DashboardMetadata[];
+  suggestedDashboards?: SuggestedDashboard[];
+  linkedDashboards?: LinkedDashboard[];
   isLoadingRelatedDashboards: boolean;
   onSuccessAddSuggestedDashboard: () => Promise<void>;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
 }
 
 export function RelatedDashboards({
@@ -26,6 +28,7 @@ export function RelatedDashboards({
   linkedDashboards,
   suggestedDashboards,
   onSuccessAddSuggestedDashboard,
+  timeRange,
 }: RelatedDashboardsProps) {
   const { onClickAddSuggestedDashboard, addingDashboardId } = useAddSuggestedDashboards({
     rule,
@@ -64,6 +67,7 @@ export function RelatedDashboards({
         isLoadingDashboards={isLoadingRelatedDashboards}
         dashboards={linkedDashboards}
         dataTestSubj="linked-dashboards"
+        timeRange={timeRange}
       />
       <DashboardTiles
         title={i18n.translate('xpack.observability.alertDetails.suggestedDashboards', {
@@ -72,6 +76,7 @@ export function RelatedDashboards({
         isLoadingDashboards={isLoadingRelatedDashboards}
         dashboards={suggestedDashboardsWithButton}
         dataTestSubj="suggested-dashboards"
+        timeRange={timeRange}
       />
     </div>
   );

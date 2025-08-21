@@ -2382,6 +2382,69 @@
         },
         {
           "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableSetup.registerTransforms",
+          "type": "Function",
+          "tags": [],
+          "label": "registerTransforms",
+          "description": [],
+          "signature": [
+            "(type: string, getTransforms: () => Promise<",
+            {
+              "pluginId": "embeddable",
+              "scope": "common",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-common.EmbeddableTransforms",
+              "text": "EmbeddableTransforms"
+            },
+            "<any, any> | undefined>) => void"
+          ],
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerTransforms.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableSetup.registerTransforms.$2",
+              "type": "Function",
+              "tags": [],
+              "label": "getTransforms",
+              "description": [],
+              "signature": [
+                "() => Promise<",
+                {
+                  "pluginId": "embeddable",
+                  "scope": "common",
+                  "docId": "kibEmbeddablePluginApi",
+                  "section": "def-common.EmbeddableTransforms",
+                  "text": "EmbeddableTransforms"
+                },
+                "<any, any> | undefined>"
+              ],
+              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
           "id": "def-public.EmbeddableSetup.registerEnhancement",
           "type": "Function",
           "tags": [
@@ -2516,6 +2579,78 @@
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableStart.getTransforms",
+          "type": "Function",
+          "tags": [],
+          "label": "getTransforms",
+          "description": [],
+          "signature": [
+            "(type: string) => Promise<",
+            {
+              "pluginId": "embeddable",
+              "scope": "common",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-common.EmbeddableTransforms",
+              "text": "EmbeddableTransforms"
+            },
+            "<object, object> | undefined>"
+          ],
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableStart.getTransforms.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
+          "id": "def-public.EmbeddableStart.hasTransforms",
+          "type": "Function",
+          "tags": [],
+          "label": "hasTransforms",
+          "description": [],
+          "signature": [
+            "(type: string) => boolean"
+          ],
+          "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-public.EmbeddableStart.hasTransforms.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/embeddable/public/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
             }
           ],
           "returnComment": []
@@ -2823,6 +2958,68 @@
         },
         {
           "parentPluginId": "embeddable",
+          "id": "def-server.EmbeddableSetup.registerTransforms",
+          "type": "Function",
+          "tags": [],
+          "label": "registerTransforms",
+          "description": [],
+          "signature": [
+            "(type: string, transforms: ",
+            {
+              "pluginId": "embeddable",
+              "scope": "common",
+              "docId": "kibEmbeddablePluginApi",
+              "section": "def-common.EmbeddableTransforms",
+              "text": "EmbeddableTransforms"
+            },
+            "<any, any>) => void"
+          ],
+          "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-server.EmbeddableSetup.registerTransforms.$1",
+              "type": "string",
+              "tags": [],
+              "label": "type",
+              "description": [],
+              "signature": [
+                "string"
+              ],
+              "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "embeddable",
+              "id": "def-server.EmbeddableSetup.registerTransforms.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "transforms",
+              "description": [],
+              "signature": [
+                {
+                  "pluginId": "embeddable",
+                  "scope": "common",
+                  "docId": "kibEmbeddablePluginApi",
+                  "section": "def-common.EmbeddableTransforms",
+                  "text": "EmbeddableTransforms"
+                },
+                "<any, any>"
+              ],
+              "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "embeddable",
           "id": "def-server.EmbeddableSetup.registerEnhancement",
           "type": "Function",
           "tags": [],
@@ -2934,7 +3131,15 @@
           "section": "def-server.EmbeddableStateWithType",
           "text": "EmbeddableStateWithType"
         },
-        ">"
+        "> & { getTransforms: (type: string) => ",
+        {
+          "pluginId": "embeddable",
+          "scope": "common",
+          "docId": "kibEmbeddablePluginApi",
+          "section": "def-common.EmbeddableTransforms",
+          "text": "EmbeddableTransforms"
+        },
+        "<object, object> | undefined; }"
       ],
       "path": "src/platform/plugins/shared/embeddable/server/plugin.ts",
       "deprecated": false,
@@ -3042,6 +3247,37 @@
           " | undefined; type: string; }"
         ],
         "path": "src/platform/plugins/shared/embeddable/server/persistable_state/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-common.EmbeddableTransforms",
+        "type": "Type",
+        "tags": [],
+        "label": "EmbeddableTransforms",
+        "description": [],
+        "signature": [
+          "{ transformOut?: ((state: StoredState, references?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined) => State) | undefined; transformIn?: ((state: State) => { state: StoredState; references?: ",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
+          "[] | undefined; }) | undefined; }"
+        ],
+        "path": "src/platform/plugins/shared/embeddable/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

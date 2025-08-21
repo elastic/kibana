@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export * from './repository';
-export * from './snapshot';
-export * from './restore';
-export * from './policy';
-export * from './indices';
+export type * from './repository';
+export type * from './snapshot';
+export type * from './restore';
+export type * from './policy';
+export type * from './indices';

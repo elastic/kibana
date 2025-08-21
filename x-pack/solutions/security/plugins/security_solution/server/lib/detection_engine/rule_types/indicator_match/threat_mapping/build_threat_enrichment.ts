@@ -6,11 +6,11 @@
  */
 
 import type { SignalsEnrichment } from '../../types';
-import type { BuildThreatEnrichmentOptions, GetThreatListOptions } from './types';
-import { buildThreatMappingFilter } from './build_threat_mapping_filter';
-import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import type { BuildThreatEnrichmentOptions } from './types';
+import { getSignalIdToMatchedQueriesMap } from './get_signal_id_to_matched_queries_map';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
+import { validateCompleteThreatMatches } from './validate_complete_threat_matches';
 
 // we do want to make extra requests to the threat index to get enrichments from all threats
 // previously we were enriched alerts only from `currentThreatList` but not all threats
@@ -20,44 +20,33 @@ export const buildThreatEnrichment = ({
   threatFilters,
   threatIndicatorPath,
   pitId,
-  reassignPitId,
+  reassignThreatPitId,
   threatIndexFields,
+  allowedFieldsForTermsQuery,
+  threatMapping,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
-    const threatFiltersFromEvents = buildThreatMappingFilter({
-      threatMapping: sharedParams.completeRule.ruleParams.threatMapping,
-      threatList: signals,
-      entryKey: 'field',
-      allowedFieldsForTermsQuery: {
-        source: {},
-        threat: {},
-      },
-    });
-
-    const threatSearchParams: Omit<GetThreatListOptions, 'searchAfter'> = {
+    const { signalIdToMatchedQueriesMap, threatList } = await getSignalIdToMatchedQueriesMap({
+      services,
       sharedParams,
-      esClient: services.scopedClusterClient.asCurrentUser,
-      threatFilters: [...threatFilters, threatFiltersFromEvents],
-      threatListConfig: {
-        _source: [`${threatIndicatorPath}.*`, 'threat.feed.*'],
-        fields: undefined,
-      },
+      signals,
+      allowedFieldsForTermsQuery,
       pitId,
-      reassignPitId,
-      indexFields: threatIndexFields,
-    };
-
-    const signalsQueryMap = await getSignalsQueryMapFromThreatIndex({
-      threatSearchParams,
-      eventsCount: signals.length,
-      termsQueryAllowed: false,
+      reassignThreatPitId,
+      threatFilters,
+      threatIndexFields,
+      threatIndicatorPath,
     });
+
+    const { matchedEvents: validatedSignalIdToMatchedQueriesMap } = validateCompleteThreatMatches(
+      signalIdToMatchedQueriesMap,
+      threatMapping
+    );
 
     const enrichment = threatEnrichmentFactory({
-      signalsQueryMap,
+      signalIdToMatchedQueriesMap: validatedSignalIdToMatchedQueriesMap,
       threatIndicatorPath,
-      threatFilters,
-      threatSearchParams,
+      matchedThreats: threatList,
     });
 
     return enrichment(signals);

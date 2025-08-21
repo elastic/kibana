@@ -6,12 +6,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import {
-  AgentMode,
-  type ConversationRound,
-  type RoundInput,
-  type ChatAgentEvent,
-} from '@kbn/onechat-common';
+import type { AgentMode } from '@kbn/onechat-common';
+import { type ConversationRound, type RoundInput, type ChatAgentEvent } from '@kbn/onechat-common';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ModelProvider } from '../src/model_provider';
@@ -28,6 +24,8 @@ export interface AgentHandlerParams {
   agentParams: AgentParams;
   /** ID of this run */
   runId: string;
+  /** optional signal to abort the execution of the agent */
+  abortSignal?: AbortSignal;
 }
 
 export interface AgentHandlerReturn {

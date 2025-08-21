@@ -9,7 +9,7 @@
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../../../dashboard_saved_object';
-import { DashboardAttributes } from '../../types';
+import type { DashboardAttributes } from '../../types';
 import { transformControlGroupOut } from './transform_control_group_out';
 import { transformSearchSourceOut } from './transform_search_source_out';
 import { transformOptionsOut } from './transform_options_out';
@@ -45,7 +45,7 @@ export function transformDashboardOut(
     ...(controlGroupInput && { controlGroupInput: transformControlGroupOut(controlGroupInput) }),
     ...(description && { description }),
     ...(kibanaSavedObjectMeta && {
-      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta),
+      kibanaSavedObjectMeta: transformSearchSourceOut(kibanaSavedObjectMeta, references),
     }),
     ...(optionsJSON && { options: transformOptionsOut(optionsJSON) }),
     ...((panelsJSON || sections) && {

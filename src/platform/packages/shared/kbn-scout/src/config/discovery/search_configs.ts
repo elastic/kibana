@@ -9,7 +9,7 @@
 
 import fastGlob from 'fast-glob';
 import path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import yaml from 'js-yaml';
@@ -27,7 +27,10 @@ interface PluginScoutConfig {
 
 export const getScoutPlaywrightConfigs = (searchPaths: string[], log: ToolingLog) => {
   const patterns = searchPaths.map((basePath) =>
-    path.join(basePath, '**/test/scout/ui/{playwright.config.ts,parallel.playwright.config.ts}')
+    path.join(
+      basePath,
+      '**/test/scout/{ui,api}/{playwright.config.ts,parallel.playwright.config.ts}'
+    )
   );
 
   log.info('Searching for Playwright config files in the following paths:');

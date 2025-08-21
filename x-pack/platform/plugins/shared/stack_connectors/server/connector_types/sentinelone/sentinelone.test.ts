@@ -164,4 +164,33 @@ describe('SentinelOne Connector', () => {
       ).resolves.toEqual(connectorInstance.mockResponses.downloadRemoteScriptResults);
     });
   });
+
+  describe(`#getRemoteScripts()`, () => {
+    it('should pass query parameters to sentinelone API', async () => {
+      const queryOptions = {
+        osTypes: 'windows',
+        limit: 123,
+        sortBy: 'scriptName',
+        cursor: 'at-position-1',
+        groupIds: 'abc',
+        ids: '987',
+        isAvailableForArs: true,
+        query: 'match something',
+        scriptType: 'action',
+        siteIds: 'site-aaa',
+        skip: 10,
+        skipCount: true,
+        sortOrder: 'asc',
+      };
+
+      await connectorInstance.getRemoteScripts(queryOptions, connectorUsageCollector);
+
+      expect(connectorInstance.requestSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          url: `${connectorInstance.constructorParams.config.url}${API_PATH}/remote-scripts`,
+          params: expect.objectContaining(queryOptions),
+        })
+      );
+    });
+  });
 });

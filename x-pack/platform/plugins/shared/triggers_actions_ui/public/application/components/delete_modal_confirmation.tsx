@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { EuiCallOut, EuiConfirmModal } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import React, { useEffect, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '../../common/lib/kibana';
 import {
   getSuccessfulDeletionNotificationText,
@@ -56,6 +55,8 @@ export const DeleteModalConfirmation = ({
     http,
     notifications: { toasts },
   } = useKibana().services;
+  const modalTitleId = useGeneratedHtmlId();
+
   const numIdsToDelete = idsToDelete.length;
   if (!deleteModalFlyoutVisible) {
     return null;
@@ -63,9 +64,11 @@ export const DeleteModalConfirmation = ({
 
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       buttonColor="danger"
       data-test-subj="deleteIdsConfirmation"
       title={getConfirmDeletionButtonText(numIdsToDelete, singleTitle, multipleTitle)}
+      titleProps={{ id: modalTitleId }}
       onCancel={() => {
         setDeleteModalVisibility(false);
         onCancel();

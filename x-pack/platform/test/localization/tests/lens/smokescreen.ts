@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { range } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { getI18nLocaleFromServerArgs } from '../utils';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -144,6 +144,48 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     }
   }
 
+  function getTranslationDe(term: string, field?: string, values: number = 3) {
+    switch (term) {
+      case 'legacyMetric':
+        return 'Legacy-Metrik';
+      case 'datatable':
+        return 'Tabelle';
+      case 'bar':
+        return 'Bar'; // 'Säulendiagramm'; Not translated yet.
+      case 'line':
+        return 'Zeile';
+      case 'pie':
+        return 'Torte';
+      case 'treemap':
+        return 'Treemap';
+      case 'heatmap':
+        return 'Heatmap';
+      case 'Number':
+        return 'Zahl';
+      case 'Percent':
+        return 'Prozent';
+      case 'Linear':
+        return 'Linear';
+      case 'Records':
+        return 'Aufzeichnungen';
+      case 'records':
+        return 'Einträge';
+      case 'moving_average':
+        return 'Gleitender Durchschnitt';
+      case 'average':
+        return field ? `Durchschnitt von ${field}` : `Durchschnitt`;
+      case 'max':
+        // return field ? `${field} Maximum` : 'Maximum';
+        return field ? `Maximal ${field}` : 'Maximum';
+      case 'terms':
+        return field ? `Top ${values} values of ${field}` : 'Top values'; // Not translated yet
+      case 'sum':
+        return 'Summe';
+      default:
+        return term;
+    }
+  }
+
   function getExpectedI18nTranslator(locale: string): (term: string, field?: string) => string {
     switch (locale) {
       case 'ja-JP':
@@ -152,6 +194,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return getTranslationZh;
       case 'fr-FR':
         return getTranslationFr;
+      case 'de-DE':
+        return getTranslationDe;
       default:
         return (v: string, field?: string) => v;
     }
@@ -605,6 +649,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'cumulative_sum',
         keepOpen: true,
       });
+
       await lens.configureReference({
         field: termTranslator('Records'),
       });

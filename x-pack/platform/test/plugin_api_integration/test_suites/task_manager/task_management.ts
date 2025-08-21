@@ -10,12 +10,9 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import {
-  ConcreteTaskInstance,
-  BulkUpdateTaskResult,
-  Frequency,
-} from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import { Frequency } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
 
@@ -1129,56 +1126,54 @@ export default function ({ getService }: FtrProviderContext) {
         expect(task.runAt).to.eql(scheduledRunAt);
       });
     });
+
+    it('should set status of recurring task back to idle when schedule interval is greater than timeout', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskTimingOut',
+        schedule: { interval: '1d' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('running');
+        expect(scheduledTask.startedAt).not.to.be(null);
+        expect(scheduledTask.retryAt).not.to.be(null);
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('idle');
+        expect(scheduledTask.startedAt).to.be(null);
+        expect(scheduledTask.retryAt).to.be(null);
+      });
+    });
+
+    it('should disable a task that returns shouldDisableTask: true', async () => {
+      const task = await scheduleTask({
+        taskType: 'sampleRecurringTaskDisablesItself',
+        schedule: { interval: '1d' },
+        params: {},
+      });
+
+      await retry.try(async () => {
+        const [scheduledTask] = (await currentTasks()).docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('running');
+        expect(scheduledTask.startedAt).not.to.be(null);
+        expect(scheduledTask.retryAt).not.to.be(null);
+      });
+
+      await retry.try(async () => {
+        const currTasks = await currentTasks();
+
+        const [scheduledTask] = currTasks.docs;
+        expect(scheduledTask.id).to.eql(task.id);
+        expect(scheduledTask.status).to.be('idle');
+        expect(scheduledTask.enabled).to.be(false);
+      });
+    });
   });
-
-  // TODO: Add this back in with https://github.com/elastic/kibana/issues/106139
-  // function ensureOverlappingTasksDontExceedThreshold(
-  //   executions: Array<{
-  //     result: {
-  //       id: string;
-  //       state: {
-  //         timings: Array<{
-  //           start: number;
-  //           stop: number;
-  //         }>;
-  //       };
-  //     };
-  //   }>,
-  //   threshold: number
-  // ) {
-  //   const executionRanges = executions.map((execution) => ({
-  //     id: execution.result.id,
-  //     range: range(
-  //       // calculate range of milliseconds
-  //       // in which the task was running (that should be good enough)
-  //       execution.result.state.timings[0].start,
-  //       execution.result.state.timings[0].stop
-  //     ),
-  //   }));
-
-  //   const intersections = new Map<string, string[]>();
-  //   for (const currentExecution of executionRanges) {
-  //     for (const executionToComparteTo of executionRanges) {
-  //       if (currentExecution.id !== executionToComparteTo.id) {
-  //         // find all executions that intersect
-  //         if (intersection(currentExecution.range, executionToComparteTo.range).length) {
-  //           intersections.set(currentExecution.id, [
-  //             ...(intersections.get(currentExecution.id) ?? []),
-  //             executionToComparteTo.id,
-  //           ]);
-  //         }
-  //       }
-  //     }
-  //   }
-
-  //   const tooManyIntersectingTasks = [...intersections.entries()].find(
-  //     // make sure each task intersects with, at most, threshold of other task
-  //     ([, intersectingTasks]) => intersectingTasks.length > threshold
-  //   );
-  //   if (tooManyIntersectingTasks) {
-  //     throw new Error(
-  //       `Invalid execution found: ${tooManyIntersectingTasks[0]} overlaps with ${tooManyIntersectingTasks[1]}`
-  //     );
-  //   }
-  // }
 }

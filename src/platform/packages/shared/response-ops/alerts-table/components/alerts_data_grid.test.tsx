@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent, useMemo, useReducer } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useMemo, useReducer } from 'react';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { AlertsDataGrid } from './alerts_data_grid';
-import { AlertsDataGridProps, BulkActionsState } from '../types';
-import { AdditionalContext, RenderContext } from '../types';
-import { EuiButton, EuiButtonIcon, EuiDataGridColumnCellAction, EuiFlexItem } from '@elastic/eui';
+import type { AlertsDataGridProps, BulkActionsState } from '../types';
+import type { AdditionalContext, RenderContext } from '../types';
+import type { EuiDataGridColumnCellAction } from '@elastic/eui';
+import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from '../reducers/bulk_actions_reducer';
 import { getJsDomPerformanceFix } from '../utils/test';
 import { useCaseViewNavigation } from '../hooks/use_case_view_navigation';
@@ -41,6 +43,7 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 jest.mock('../hooks/use_case_view_navigation');
 
 const cellActionOnClickMockedFn = jest.fn();
+const mockOnChangeVisibleColumns = jest.fn();
 
 const { fix, cleanup } = getJsDomPerformanceFix();
 
@@ -432,6 +435,36 @@ describe('AlertsDataGrid', () => {
           `field-${columnToHide.id}-checkbox`
         );
         expect(columnCheckbox).toBeChecked();
+      });
+
+      it('should toggle column visibility on via column selector dropdown on a hidden column', async () => {
+        const columnToDisplay = mockColumns[0].id;
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            toolbarVisibility={{
+              showColumnSelector: true,
+            }}
+            visibleColumns={mockColumns.map((c) => c.id).filter((id) => id !== columnToDisplay)}
+            onChangeVisibleColumns={mockOnChangeVisibleColumns}
+          />
+        );
+        const columnSelectorBtn = await screen.findByTestId('dataGridColumnSelectorButton');
+
+        fireEvent.click(columnSelectorBtn);
+
+        const columnVisibilityToggle = await screen.findByTestId(
+          `dataGridColumnSelectorToggleColumnVisibility-${columnToDisplay}`
+        );
+
+        fireEvent.click(columnVisibilityToggle);
+
+        expect(mockOnChangeVisibleColumns).toHaveBeenLastCalledWith([
+          'kibana.alert.rule.name',
+          'kibana.alert.reason',
+          'kibana.alert.status',
+          'kibana.alert.case_ids',
+        ]);
       });
     });
 

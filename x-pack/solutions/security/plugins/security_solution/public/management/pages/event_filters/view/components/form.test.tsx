@@ -30,6 +30,7 @@ import { buildPerPolicyTag } from '../../../../../../common/endpoint/service/art
 
 jest.setTimeout(15_000); // Costly tests, hitting 2 seconds execution time locally
 
+jest.mock('../../../../../common/components/user_privileges');
 jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../../common/containers/source');
 jest.mock('../../../../../common/hooks/use_license', () => {

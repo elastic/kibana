@@ -7,17 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
+import type { Reference } from '@kbn/content-management-utils';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  SerializedSearchSourceFields,
 } from '@kbn/data-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { isObject } from 'lodash';
-import { Reference } from '../../../common/content_management';
-import { VisualizeSavedVisInputState } from '../../embeddable/types';
-import { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
+import type { VisualizeSavedVisInputState } from '../../embeddable/types';
+import type { SavedVisState, SerializedVis, VisSavedObject } from '../../types';
 import type { SerializableAttributes } from '../../vis_types/vis_type_alias_registry';
 import { extractControlsReferences, injectControlsReferences } from './controls_references';
 import { extractTimeSeriesReferences, injectTimeSeriesReferences } from './timeseries_references';
@@ -141,7 +140,7 @@ export function extractReferences({
   references = [],
 }: {
   attributes: SerializableAttributes;
-  references: SavedObjectReference[];
+  references: Reference[];
 }) {
   const updatedAttributes = { ...attributes };
   const updatedReferences = [...references];
@@ -150,7 +149,7 @@ export function extractReferences({
     const [searchSource, searchSourceReferences] = extractSearchSourceReferences(
       updatedAttributes.searchSourceFields as SerializedSearchSourceFields
     );
-    updatedAttributes.searchSourceFields = searchSource as SavedObjectAttribute;
+    updatedAttributes.searchSourceFields = searchSource as SerializableAttributes;
     searchSourceReferences.forEach((r) => updatedReferences.push(r));
   }
 
@@ -183,7 +182,7 @@ export function extractReferences({
   };
 }
 
-export function injectReferences(savedObject: VisSavedObject, references: SavedObjectReference[]) {
+export function injectReferences(savedObject: VisSavedObject, references: Reference[]) {
   if (savedObject.searchSourceFields) {
     savedObject.searchSourceFields = injectSearchSourceReferences(
       savedObject.searchSourceFields as any,

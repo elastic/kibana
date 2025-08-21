@@ -32,6 +32,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             link: 'observability-overview',
+            title,
+            icon,
+            renderAs: 'home',
+            sideNavVersion: 'v2',
+          },
+          {
+            link: 'observability-overview',
+            sideNavVersion: 'v1',
           },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -74,6 +82,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 {
                   link: 'streams' as const,
                   withBadge: true,
+                  badgeTypeV2: 'techPreview' as const,
                   badgeOptions: {
                     icon: 'beaker',
                     tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
@@ -85,15 +94,30 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               ]
             : []),
           {
-            id: 'apm',
-            link: 'apm:services',
+            id: 'applications',
             title: i18n.translate('xpack.observability.obltNav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
+                link: 'apm:services',
                 children: [
+                  {
+                    link: 'apm:service-map',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-map'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
+                  {
+                    link: 'apm:service-groups-list',
+                    getIsActive: ({ pathNameSerialized, prepend }) => {
+                      return pathNameSerialized.startsWith(prepend('/app/apm/service-groups'));
+                    },
+                    sideNavStatus: 'hidden',
+                  },
                   {
                     link: 'apm:services',
                     getIsActive: ({ pathNameSerialized }) => {
@@ -182,7 +206,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'metrics:inventory',
                     title: i18n.translate('xpack.observability.infrastructure.inventory', {
-                      defaultMessage: 'Infrastructure Inventory',
+                      defaultMessage: 'Infrastructure inventory',
                     }),
                     getIsActive: ({ pathNameSerialized, prepend }) => {
                       return pathNameSerialized.startsWith(prepend('/app/metrics/inventory'));
@@ -210,7 +234,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 title: i18n.translate(
                   'xpack.observability.obltNav.infrastructure.universalProfiling',
                   {
-                    defaultMessage: 'Universal profiling',
+                    defaultMessage: 'Universal Profiling',
                   }
                 ),
                 children: [
@@ -444,9 +468,15 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                       { link: 'management:objects' },
                       { link: 'management:tags' },
                       { link: 'management:search_sessions' },
-                      { link: 'management:aiAssistantManagementSelection' },
                       { link: 'management:spaces' },
                       { link: 'management:settings' },
+                    ],
+                  },
+                  {
+                    title: 'AI',
+                    children: [
+                      { link: 'management:genAiSettings' },
+                      { link: 'management:aiAssistantManagementSelection' },
                     ],
                   },
                   {

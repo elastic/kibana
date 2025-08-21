@@ -10,7 +10,6 @@
 import { type DashboardState, prefixReferencesFromPanel } from '../../../common';
 import type { DashboardChildState, DashboardLayout } from './types';
 import type { DashboardSection } from '../../../server';
-import { embeddableService } from '../../services/kibana_services';
 
 export function serializeLayout(
   layout: DashboardLayout,
@@ -27,26 +26,12 @@ export function serializeLayout(
     const panelConfig = childState[panelId]?.rawState ?? {};
     references.push(...prefixReferencesFromPanel(panelId, childState[panelId]?.references ?? []));
 
-    // TODO move savedObjectRef extraction into embeddable implemenations
-    const savedObjectId = (panelConfig as { savedObjectId?: string }).savedObjectId;
-    let panelRefName: string | undefined;
-    if (savedObjectId && !embeddableService.hasTransforms(type)) {
-      panelRefName = `panel_${panelId}`;
-
-      references.push({
-        name: `${panelId}:panel_${panelId}`,
-        type,
-        id: savedObjectId,
-      });
-    }
-
     const { sectionId, ...restOfGridData } = gridData; // drop section ID
     const panelState = {
       type,
       gridData: restOfGridData,
       panelIndex: panelId,
       panelConfig,
-      ...(panelRefName !== undefined && { panelRefName }),
     };
 
     if (sectionId) {

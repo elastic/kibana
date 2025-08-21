@@ -12,9 +12,10 @@ import { type EsDocSearchProps, buildSearchBody, useEsDocSearch } from './use_es
 import { Subject } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ElasticRequestState } from '@kbn/unified-doc-viewer';
-import { buildDataTableRecord, DataTableRecord } from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
+import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
-import { UnifiedDocViewerServices } from '../types';
+import type { UnifiedDocViewerServices } from '../types';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

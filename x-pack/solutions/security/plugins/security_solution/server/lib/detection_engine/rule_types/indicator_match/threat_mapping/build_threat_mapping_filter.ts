@@ -7,11 +7,9 @@
 
 import { get } from 'lodash/fp';
 import type { Filter } from '@kbn/es-query';
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ThreatMapping } from '../../../../../../common/api/detection_engine/model/rule_schema';
+
 import type {
   BooleanFilter,
   BuildEntriesMappingFilterOptions,
@@ -19,8 +17,8 @@ import type {
   CreateAndOrClausesOptions,
   CreateInnerAndClausesOptions,
   FilterThreatMappingOptions,
-  SplitShouldClausesOptions,
   TermQuery,
+  ThreatMappingEntries,
 } from './types';
 import { ThreatMatchQueryType } from './types';
 import { encodeThreatMatchNamedQuery } from './utils';
@@ -30,18 +28,12 @@ export const MAX_CHUNK_SIZE = 1024;
 export const buildThreatMappingFilter = ({
   threatMapping,
   threatList,
-  chunkSize,
   entryKey = 'value',
   allowedFieldsForTermsQuery,
 }: BuildThreatMappingFilterOptions): Filter => {
-  const computedChunkSize = chunkSize ?? MAX_CHUNK_SIZE;
-  if (computedChunkSize > 1024) {
-    throw new TypeError('chunk sizes cannot exceed 1024 in size');
-  }
   const query = buildEntriesMappingFilter({
     threatMapping,
     threatList,
-    chunkSize: computedChunkSize,
     entryKey,
     allowedFieldsForTermsQuery,
   });
@@ -68,6 +60,10 @@ export const filterThreatMapping = ({
   threatMapping
     .map((threatMap) => {
       const atLeastOneItemMissingInThreatList = threatMap.entries.some((entry) => {
+        // DOES NOT MATCH clause allows undefined values
+        if (entry.negate) {
+          return false;
+        }
         const itemValue = get(entry[entryKey], threatListItem.fields);
         return itemValue == null || itemValue.length !== 1;
       });
@@ -83,35 +79,70 @@ export const createInnerAndClauses = ({
   threatMappingEntries,
   threatListItem,
   entryKey,
-}: CreateInnerAndClausesOptions): BooleanFilter[] => {
-  return threatMappingEntries.reduce<BooleanFilter[]>((accum, threatMappingEntry) => {
+}: CreateInnerAndClausesOptions): QueryDslQueryContainer[] => {
+  return threatMappingEntries.reduce<QueryDslQueryContainer[]>((accum, threatMappingEntry) => {
     const value = get(threatMappingEntry[entryKey], threatListItem.fields);
-    if (value != null && value.length === 1) {
+    const queryName = encodeThreatMatchNamedQuery({
+      id: threatListItem._id,
+      index: threatListItem._index,
+      field: threatMappingEntry.field,
+      value: threatMappingEntry.value,
+      queryType: ThreatMatchQueryType.match,
+      negate: threatMappingEntry.negate,
+    });
+    const matchKey = threatMappingEntry[entryKey === 'field' ? 'value' : 'field'];
+
+    if (threatMappingEntry.negate) {
+      const negateClause = buildNegateClause(value, matchKey, queryName);
+      if (negateClause) {
+        accum.push(negateClause);
+      }
+    } else if (value != null && value.length === 1) {
       // These values could be potentially 10k+ large so mutating the array intentionally
       accum.push({
-        bool: {
-          should: [
-            {
-              match: {
-                [threatMappingEntry[entryKey === 'field' ? 'value' : 'field']]: {
-                  query: value[0],
-                  _name: encodeThreatMatchNamedQuery({
-                    id: threatListItem._id,
-                    index: threatListItem._index,
-                    field: threatMappingEntry.field,
-                    value: threatMappingEntry.value,
-                    queryType: ThreatMatchQueryType.match,
-                  }),
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
+        match: {
+          [matchKey]: {
+            query: value[0],
+            _name: queryName,
+          },
         },
       });
     }
+
     return accum;
   }, []);
+};
+
+const buildNegateClause = (
+  value: unknown,
+  matchKey: string,
+  queryName: string
+): QueryDslQueryContainer | undefined => {
+  if (value == null) {
+    return {
+      exists: {
+        field: matchKey,
+        _name: queryName,
+      },
+    };
+  }
+
+  if (Array.isArray(value) && value.length === 1) {
+    return {
+      bool: {
+        must_not: {
+          match: {
+            [matchKey]: {
+              query: value[0],
+            },
+          },
+        },
+        _name: queryName,
+      },
+    };
+  }
+
+  return undefined;
 };
 
 export const createAndOrClauses = ({
@@ -139,7 +170,6 @@ export const createAndOrClauses = ({
 export const buildEntriesMappingFilter = ({
   threatMapping,
   threatList,
-  chunkSize,
   entryKey,
   allowedFieldsForTermsQuery,
 }: BuildEntriesMappingFilterOptions): BooleanFilter => {
@@ -149,26 +179,23 @@ export const buildEntriesMappingFilter = ({
         allowedFieldsForTermsQuery?.source?.[entry.field] &&
         allowedFieldsForTermsQuery?.threat?.[entry.value]
     );
-  const combinedShould = threatMapping.reduce<{
-    match: QueryDslQueryContainer[];
-    term: TermQuery[];
-  }>(
+  const combinedShould = threatMapping.reduce<Array<QueryDslQueryContainer | TermQuery>>(
     (acc, threatMap) => {
       if (threatMap.entries.length > 1 || !allFieldAllowedForTermQuery(threatMap.entries)) {
-        threatList.forEach((threatListSearchItem) => {
+        threatList.forEach((threatListItem) => {
           const filteredEntries = filterThreatMapping({
             threatMapping: [threatMap],
-            threatListItem: threatListSearchItem,
+            threatListItem,
             entryKey,
           });
           const queryWithAndOrClause = createAndOrClauses({
             threatMapping: filteredEntries,
-            threatListItem: threatListSearchItem,
+            threatListItem,
             entryKey,
           });
           if (queryWithAndOrClause.length !== 0) {
             // These values can be 10k+ large, so using a push here for performance
-            acc.match.push(...queryWithAndOrClause);
+            acc.push(...queryWithAndOrClause);
           }
         });
       } else {
@@ -178,7 +205,7 @@ export const buildEntriesMappingFilter = ({
           .filter((val) => val)
           .map((val) => val[0]);
         if (threats.length > 0) {
-          acc.term.push({
+          acc.push({
             terms: {
               _name: encodeThreatMatchNamedQuery({
                 field: threatMappingEntry.field,
@@ -192,39 +219,8 @@ export const buildEntriesMappingFilter = ({
       }
       return acc;
     },
-    { match: [], term: [] }
+    []
   );
 
-  const matchShould = splitShouldClauses({
-    should:
-      combinedShould.match.length > 0
-        ? [{ bool: { should: combinedShould.match, minimum_should_match: 1 } }]
-        : [],
-    chunkSize,
-  });
-  return { bool: { should: [...matchShould, ...combinedShould.term], minimum_should_match: 1 } };
-};
-
-export const splitShouldClauses = ({
-  should,
-  chunkSize,
-}: SplitShouldClausesOptions): BooleanFilter[] => {
-  if (should.length <= chunkSize) {
-    return should;
-  } else {
-    return should.reduce<BooleanFilter[]>((accum, item, index) => {
-      const chunkIndex = Math.floor(index / chunkSize);
-      const currentChunk = accum[chunkIndex];
-      if (!currentChunk) {
-        // create a new element in the array at the correct spot
-        accum[chunkIndex] = { bool: { should: [], minimum_should_match: 1 } };
-      }
-      // Add to the existing array element. Using mutatious push here since these arrays can get very large such as 10k+ and this is going to be a hot code spot.
-      if (Array.isArray(accum[chunkIndex].bool?.should)) {
-        (accum[chunkIndex].bool?.should as QueryDslQueryContainer[]).push(item);
-      }
-
-      return accum;
-    }, []);
-  }
+  return { bool: { should: combinedShould, minimum_should_match: 1 } };
 };

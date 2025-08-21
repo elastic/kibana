@@ -19,7 +19,6 @@ import { usePermissions } from '../../hooks/use_permissions';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../hooks/use_kibana';
 import { CreateSloBtn } from './components/common/create_slo_btn';
-import { FeedbackButton } from './components/common/feedback_button';
 import { SloList } from './components/slo_list';
 import { SloListSearchBar } from './components/slo_list_search_bar';
 
@@ -66,7 +65,7 @@ export function SlosPage() {
       data-test-subj="slosPage"
       pageHeader={{
         pageTitle: i18n.translate('xpack.slo.slosPage.', { defaultMessage: 'SLOs' }),
-        rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
+        rightSideItems: [<CreateSloBtn />],
       }}
       topSearchBar={<SloListSearchBar />}
     >

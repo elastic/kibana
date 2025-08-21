@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 
 import { styles } from './layout_footer.styles';
 
@@ -22,5 +23,13 @@ export interface LayoutFooterProps {
  * @returns The rendered LayoutFooter component.
  */
 export const LayoutFooter = ({ children }: LayoutFooterProps) => {
-  return <footer css={styles.root}>{children}</footer>;
+  return (
+    <footer
+      css={styles.root}
+      className="kbnChromeLayoutFooter"
+      data-test-subj="kbnChromeLayoutFooter"
+    >
+      {children}
+    </footer>
+  );
 };

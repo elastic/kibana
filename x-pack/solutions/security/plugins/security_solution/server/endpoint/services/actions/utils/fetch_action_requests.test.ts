@@ -7,6 +7,7 @@
 
 import type { FetchActionRequestsOptions } from './fetch_action_requests';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { applyActionListEsSearchMock } from '../mocks';
 import { fetchActionRequests } from './fetch_action_requests';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../common/endpoint/constants';
@@ -46,9 +47,10 @@ describe('fetchActionRequests()', () => {
             must: [
               {
                 bool: {
-                  filter: [],
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
                 },
               },
+              { bool: { filter: [] } },
             ],
           },
         },
@@ -73,9 +75,10 @@ describe('fetchActionRequests()', () => {
             must: [
               {
                 bool: {
-                  filter: [],
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
                 },
               },
+              { bool: { filter: [] } },
             ],
           },
         },
@@ -101,6 +104,11 @@ describe('fetchActionRequests()', () => {
             must: [
               {
                 bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
+              {
+                bool: {
                   filter: [{ terms: { 'data.command': ['isolate', 'upload'] } }],
                 },
               },
@@ -124,7 +132,14 @@ describe('fetchActionRequests()', () => {
         index: ENDPOINT_ACTIONS_INDEX,
         query: {
           bool: {
-            must: [{ bool: { filter: [{ terms: { input_type: ['crowdstrike'] } }] } }],
+            must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
+              { bool: { filter: [{ terms: { input_type: ['crowdstrike'] } }] } },
+            ],
           },
         },
         from: 0,
@@ -144,7 +159,14 @@ describe('fetchActionRequests()', () => {
         index: ENDPOINT_ACTIONS_INDEX,
         query: {
           bool: {
-            must: [{ bool: { filter: [{ terms: { agents: ['agent-1', 'agent-2'] } }] } }],
+            must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
+              { bool: { filter: [{ terms: { agents: ['agent-1', 'agent-2'] } }] } },
+            ],
           },
         },
         from: 0,
@@ -164,7 +186,14 @@ describe('fetchActionRequests()', () => {
         index: ENDPOINT_ACTIONS_INDEX,
         query: {
           bool: {
-            must: [{ bool: { filter: [{ range: { expiration: { gte: 'now' } } }] } }],
+            must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
+              { bool: { filter: [{ range: { expiration: { gte: 'now' } } }] } },
+            ],
           },
         },
         from: 0,
@@ -185,6 +214,11 @@ describe('fetchActionRequests()', () => {
         query: {
           bool: {
             must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
               { bool: { filter: [{ range: { '@timestamp': { gte: fetchOptions.startDate } } }] } },
             ],
           },
@@ -207,6 +241,11 @@ describe('fetchActionRequests()', () => {
         query: {
           bool: {
             must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
               { bool: { filter: [{ range: { '@timestamp': { lte: fetchOptions.endDate } } }] } },
             ],
           },
@@ -229,6 +268,11 @@ describe('fetchActionRequests()', () => {
         query: {
           bool: {
             must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
               { bool: { filter: [] } },
               {
                 bool: {
@@ -263,7 +307,14 @@ describe('fetchActionRequests()', () => {
         index: ENDPOINT_ACTIONS_INDEX,
         query: {
           bool: {
-            must: [{ bool: { filter: [] } }],
+            must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
+              { bool: { filter: [] } },
+            ],
             must_not: { exists: { field: 'data.alert_id' } },
           },
         },
@@ -284,7 +335,14 @@ describe('fetchActionRequests()', () => {
         index: ENDPOINT_ACTIONS_INDEX,
         query: {
           bool: {
-            must: [{ bool: { filter: [] } }],
+            must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
+              { bool: { filter: [] } },
+            ],
             must_not: { exists: { field: 'data.alert_id' } },
           },
         },
@@ -314,6 +372,11 @@ describe('fetchActionRequests()', () => {
           bool: {
             filter: { exists: { field: 'data.alert_id' } },
             must: [
+              {
+                bool: {
+                  filter: { terms: { 'agent.policy.integrationPolicyId': ['111', '222'] } },
+                },
+              },
               {
                 bool: {
                   filter: [
@@ -356,8 +419,7 @@ describe('fetchActionRequests()', () => {
       expect(
         fetchOptions.endpointService.getInternalFleetServices().packagePolicy.fetchAllItemIds
       ).toHaveBeenCalledWith(expect.anything(), {
-        kuery:
-          'ingest-package-policies.package.name: (endpoint OR sentinel_one OR crowdstrike OR microsoft_defender_endpoint OR m365_defender)',
+        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name: (endpoint OR sentinel_one OR crowdstrike OR microsoft_defender_endpoint OR m365_defender)`,
       });
     });
 

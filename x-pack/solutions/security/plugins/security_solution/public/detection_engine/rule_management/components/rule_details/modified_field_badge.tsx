@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { EuiToolTip } from '@elastic/eui';
 import * as i18n from './translations';
-import { usePrebuiltRuleBaseVersionContext } from './base_version_diff/base_version_context';
+import { useRuleCustomizationsContext } from './rule_customizations_diff/rule_customizations_context';
 import { PrebuiltRuleDiffBadge } from './prebuilt_rule_diff_badge';
 
 interface ModifiedFieldBadgeProps {
@@ -17,16 +18,22 @@ interface ModifiedFieldBadgeProps {
 export const ModifiedFieldBadge: React.FC<ModifiedFieldBadgeProps> = ({ fieldName }) => {
   const {
     state: { doesBaseVersionExist, modifiedFields },
-  } = usePrebuiltRuleBaseVersionContext();
+  } = useRuleCustomizationsContext();
 
   if (!doesBaseVersionExist || !modifiedFields.has(fieldName)) {
     return null;
   }
 
   return (
-    <PrebuiltRuleDiffBadge
-      label={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
-      dataTestSubj="modified-prebuilt-rule-per-field-badge"
-    />
+    <EuiToolTip
+      position="right"
+      title={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
+      content={i18n.MODIFIED_FIELD_BADGE_TOOLTIP_CONTENT}
+    >
+      <PrebuiltRuleDiffBadge
+        label={i18n.MODIFIED_PREBUILT_RULE_PER_FIELD_LABEL}
+        dataTestSubj={`modified-prebuilt-rule-per-field-${fieldName}-badge`}
+      />
+    </EuiToolTip>
   );
 };

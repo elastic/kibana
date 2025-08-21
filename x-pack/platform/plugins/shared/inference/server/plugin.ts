@@ -7,18 +7,18 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import {
+import type {
   BoundInferenceClient,
   InferenceClient,
-  aiAssistantAnonymizationSettings,
   AnonymizationSettings,
 } from '@kbn/inference-common';
+import { aiAnonymizationSettings } from '@kbn/inference-common';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { createClient as createInferenceClient, createChatModel } from './inference_client';
 import { RegexWorkerService } from './chat_complete/anonymization/regex_worker_service';
 import { registerRoutes } from './routes';
 import type { InferenceConfig } from './config';
-import {
+import type {
   InferenceBoundClientCreateOptions,
   InferenceClientCreateOptions,
   InferenceServerSetup,
@@ -49,8 +49,7 @@ export class InferencePlugin
     coreSetup: CoreSetup<InferenceStartDependencies, InferenceServerStart>,
     pluginsSetup: InferenceSetupDependencies
   ): InferenceServerSetup {
-    const { [aiAssistantAnonymizationSettings]: anonymizationRules, ...restSettings } = uiSettings;
-    coreSetup.uiSettings.register(restSettings);
+    coreSetup.uiSettings.register(uiSettings);
     const router = coreSetup.http.createRouter();
 
     registerRoutes({
@@ -71,16 +70,21 @@ export class InferencePlugin
     const createAnonymizationRulesPromise = async (request: KibanaRequest) => {
       const soClient = core.savedObjects.getScopedClient(request);
       const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
-      const settingsStr = await uiSettingsClient.get<string | undefined>(
-        aiAssistantAnonymizationSettings
-      );
+      const settingsStr = await uiSettingsClient.get<string | undefined>(aiAnonymizationSettings);
 
       if (!settingsStr) {
         return [];
       }
 
-      return (JSON.parse(settingsStr) as AnonymizationSettings).rules;
+      try {
+        const settings = JSON.parse(settingsStr) as AnonymizationSettings;
+        return settings.rules || [];
+      } catch (error) {
+        this.logger.error('Failed to parse anonymization settings:', error);
+        return [];
+      }
     };
+
     return {
       getClient: <T extends InferenceClientCreateOptions>(options: T) => {
         return createInferenceClient({

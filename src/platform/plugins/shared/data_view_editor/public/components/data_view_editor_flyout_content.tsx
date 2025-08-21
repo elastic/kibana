@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useCallback } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiTitle,
@@ -25,15 +26,8 @@ import useObservable from 'react-use/lib/useObservable';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
-import {
-  DataView,
-  DataViewSpec,
-  Form,
-  useForm,
-  useFormData,
-  useKibana,
-  UseField,
-} from '../shared_imports';
+import type { DataView, DataViewSpec } from '../shared_imports';
+import { Form, useForm, useFormData, useKibana, UseField } from '../shared_imports';
 
 import { FlyoutPanels } from './flyout_panels';
 
@@ -41,7 +35,7 @@ import { removeSpaces } from '../lib';
 
 import { noTimeFieldLabel, noTimeFieldValue } from '../lib/extract_time_fields';
 
-import {
+import type {
   DataViewEditorContext,
   RollupIndicesCapsResponse,
   IndexPatternConfig,
@@ -61,7 +55,7 @@ import {
   RollupDeprecatedWarning,
 } from '.';
 import { editDataViewModal } from './confirm_modals/edit_data_view_changed_modal';
-import { DataViewEditorService } from '../data_view_editor_service';
+import type { DataViewEditorService } from '../data_view_editor_service';
 
 export interface Props {
   /**
@@ -77,6 +71,7 @@ export interface Props {
   showManagementLink?: boolean;
   allowAdHoc: boolean;
   dataViewEditorService: DataViewEditorService;
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 const editorTitle = i18n.translate('indexPatternEditor.title', {
@@ -94,6 +89,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
   editData,
   allowAdHoc,
   showManagementLink,
+  getDataViewHelpText,
   dataViewEditorService,
 }: Props) => {
   const styles = useMemoCss(componentStyles);
@@ -202,6 +198,10 @@ const IndexPatternEditorFlyoutContentComponent = ({
   }, [dataViewEditorService, type]);
 
   const getRollupIndices = (rollupCapsRes: RollupIndicesCapsResponse) => Object.keys(rollupCapsRes);
+  const titleHelpText = useMemo(
+    () => editData && getDataViewHelpText && getDataViewHelpText(editData),
+    [editData, getDataViewHelpText]
+  );
 
   const onTypeChange = useCallback(
     (newType: INDEX_PATTERN_TYPE) => {
@@ -263,73 +263,72 @@ const IndexPatternEditorFlyoutContentComponent = ({
 
   return (
     <FlyoutPanels.Group flyoutClassName={'indexPatternEditorFlyout'} maxWidth={1180}>
-      <FlyoutPanels.Item
-        css={styles.flyoutPanel}
-        data-test-subj="indexPatternEditorFlyout"
-        border="right"
-      >
-        <EuiTitle data-test-subj="flyoutTitle">
-          <h2>{editData ? editorTitleEditMode : editorTitle}</h2>
-        </EuiTitle>
-        {showManagementLink && editData && editData.id && (
-          <EuiLink
-            href={application.getUrlForApp('management', {
-              path: `/kibana/dataViews/dataView/${editData.id}`,
-            })}
+      <FlyoutPanels.Item data-test-subj="indexPatternEditorFlyout" border="right">
+        <FlyoutPanels.Content>
+          <EuiTitle data-test-subj="flyoutTitle">
+            <h2 id="dataViewEditorFlyoutTitle">{editData ? editorTitleEditMode : editorTitle}</h2>
+          </EuiTitle>
+          {showManagementLink && editData && editData.id && (
+            <EuiLink
+              href={application.getUrlForApp('management', {
+                path: `/kibana/dataViews/dataView/${editData.id}`,
+              })}
+            >
+              {i18n.translate('indexPatternEditor.goToManagementPage', {
+                defaultMessage: 'Manage settings and view field details',
+              })}
+            </EuiLink>
+          )}
+          <Form
+            form={form}
+            css={styles.patternEditorForm}
+            error={form.getErrors()}
+            isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
+            data-validation-error={form.getErrors().length ? '1' : '0'}
+            data-test-subj="indexPatternEditorForm"
           >
-            {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'Manage settings and view field details',
-            })}
-          </EuiLink>
-        )}
-        <Form
-          form={form}
-          css={styles.patternEditorForm}
-          error={form.getErrors()}
-          isInvalid={form.isSubmitted && !form.isValid && form.getErrors().length}
-          data-validation-error={form.getErrors().length ? '1' : '0'}
-          data-test-subj="indexPatternEditorForm"
-        >
-          <UseField path="isAdHoc" />
-          {indexPatternTypeSelect}
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <NameField namesNotAllowed={existingDataViewNames || []} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <TitleField
-                isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
-                matchedIndices$={dataViewEditorService.matchedIndices$}
-                rollupIndicesCapabilities={rollupIndicesCapabilities}
-                indexPatternValidationProvider={
-                  dataViewEditorService.indexPatternValidationProvider
-                }
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="l" />
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <TimestampField
-                options$={dataViewEditorService.timestampFieldOptions$}
-                isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
-                matchedIndices$={dataViewEditorService.matchedIndices$}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <AdvancedParamsContent
-            disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
-            disableId={!!editData}
-            onAllowHiddenChange={() => {
-              form.getFields().title.validate();
-            }}
-            defaultVisible={editData?.getAllowHidden()}
-          />
-        </Form>
+            <UseField path="isAdHoc" />
+            {indexPatternTypeSelect}
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <NameField namesNotAllowed={existingDataViewNames || []} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <TitleField
+                  isRollup={form.getFields().type?.value === INDEX_PATTERN_TYPE.ROLLUP}
+                  matchedIndices$={dataViewEditorService.matchedIndices$}
+                  rollupIndicesCapabilities={rollupIndicesCapabilities}
+                  indexPatternValidationProvider={
+                    dataViewEditorService.indexPatternValidationProvider
+                  }
+                  titleHelpText={titleHelpText}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="l" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <TimestampField
+                  options$={dataViewEditorService.timestampFieldOptions$}
+                  isLoadingOptions$={dataViewEditorService.loadingTimestampFields$}
+                  matchedIndices$={dataViewEditorService.matchedIndices$}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <AdvancedParamsContent
+              disableAllowHidden={type === INDEX_PATTERN_TYPE.ROLLUP}
+              disableId={!!editData}
+              onAllowHiddenChange={() => {
+                form.getFields().title.validate();
+              }}
+              defaultVisible={editData?.getAllowHidden()}
+            />
+          </Form>
+        </FlyoutPanels.Content>
         <Footer
           onCancel={onCancel}
           onSubmit={async (adhoc?: boolean) => {
@@ -376,10 +375,6 @@ const IndexPatternEditorFlyoutContentComponent = ({
 const componentStyles = {
   patternEditorForm: css({
     flexGrow: 1,
-  }),
-  flyoutPanel: css({
-    display: 'flex',
-    flexDirection: 'column',
   }),
   loadingWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({

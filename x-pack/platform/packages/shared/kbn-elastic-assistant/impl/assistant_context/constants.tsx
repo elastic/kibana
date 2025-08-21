@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { KnowledgeBaseConfig } from '../assistant/types';
+import type { KnowledgeBaseConfig } from '../assistant/types';
 
 export const ATTACK_DISCOVERY_STORAGE_KEY = 'attackDiscovery';
 export const DEFEND_INSIGHTS_STORAGE_KEY = 'defendInsights';
@@ -30,6 +30,8 @@ export const CONVERSATION_TABLE_SESSION_STORAGE_KEY = 'conversationTable';
 export const QUICK_PROMPT_TABLE_SESSION_STORAGE_KEY = 'quickPromptTable';
 export const SYSTEM_PROMPT_TABLE_SESSION_STORAGE_KEY = 'systemPromptTable';
 export const ANONYMIZATION_TABLE_SESSION_STORAGE_KEY = 'anonymizationTable';
+export const ANONYMIZATION_PROMPT_CONTEXT_TABLE_SESSION_STORAGE_KEY =
+  'anonymizationPromptContextTable';
 
 /** The default `n` latest alerts, ordered by risk score, sent as context to the assistant */
 export const DEFAULT_LATEST_ALERTS = 100;

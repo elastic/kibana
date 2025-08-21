@@ -6,13 +6,12 @@
  */
 /* eslint-disable import/no-default-export */
 
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Search solution FF tests', function () {
     // Shared test file to close the global solution tour
     loadTestFile(require.resolve('./apps/shared/solution_tour'));
     // add tests that require feature flags, defined in config.feature_flags.ts
-    loadTestFile(require.resolve('./apps/search_playground/saved_playgrounds'));
   });
 };

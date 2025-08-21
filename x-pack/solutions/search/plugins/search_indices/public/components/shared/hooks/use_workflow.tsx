@@ -6,7 +6,9 @@
  */
 
 import { useEffect, useState } from 'react';
-import { WORKFLOW_LOCALSTORAGE_KEY, WorkflowId } from '@kbn/search-shared-ui';
+import type { WorkflowId } from '@kbn/search-shared-ui';
+import { WORKFLOW_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
+import { useLocation } from 'react-router-dom';
 import {
   DenseVectorIngestDataCodeExamples,
   SemanticIngestDataCodeExamples,
@@ -66,18 +68,28 @@ function onboardingTokenToWorkflowId(token: string | undefined | null): Workflow
 const DEFAULT_WORKFLOW_ID: WorkflowId = 'semantic';
 
 export const useWorkflow = () => {
-  const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
-  const workflowId = isWorkflowId(localStorageWorkflow) ? localStorageWorkflow : null;
-  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(
-    workflowId || DEFAULT_WORKFLOW_ID
-  );
   const { data } = useOnboardingTokenQuery();
+  const { search } = useLocation();
+  const [selectedWorkflowId, setSelectedWorkflowId] = useState<WorkflowId>(DEFAULT_WORKFLOW_ID);
 
   useEffect(() => {
-    if (data?.token && !localStorageWorkflow) {
+    const workflowFromQuery = new URLSearchParams(search).get('workflow');
+    if (workflowFromQuery && isWorkflowId(workflowFromQuery)) {
+      setSelectedWorkflowId(workflowFromQuery);
+      return;
+    }
+
+    const localStorageWorkflow = localStorage.getItem(WORKFLOW_LOCALSTORAGE_KEY);
+    if (isWorkflowId(localStorageWorkflow)) {
+      setSelectedWorkflowId(localStorageWorkflow);
+      return;
+    }
+
+    if (data?.token) {
       setSelectedWorkflowId(onboardingTokenToWorkflowId(data.token));
     }
-  }, [data, localStorageWorkflow]);
+  }, [search, data]);
+
   return {
     selectedWorkflowId,
     setSelectedWorkflowId: (newWorkflowId: WorkflowId) => {

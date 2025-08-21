@@ -122,6 +122,7 @@ export const LookupsFileUpload = React.memo<LookupsFileUploadProps>(
             fullWidth
           >
             <EuiFilePicker
+              isInvalid={errors.length > 0}
               id="lookupsFilePicker"
               ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
               fullWidth

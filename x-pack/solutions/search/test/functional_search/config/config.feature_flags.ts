@@ -5,29 +5,23 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+
+import { pageObjects } from '../page_objects';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('@kbn/test-suites-xpack/functional/config.base')
-  );
+  const searchFuncationalConfig = await readConfigFile(require.resolve('../config'));
 
   return {
-    ...xpackFunctionalConfig.getAll(),
+    ...searchFuncationalConfig.getAll(),
+    pageObjects,
     junit: {
       reportName: 'Search Solution UI Functional Tests w/ Feature Flagged Features',
     },
-    esTestCluster: {
-      ...xpackFunctionalConfig.get('esTestCluster'),
-      serverArgs: [
-        ...xpackFunctionalConfig.get('esTestCluster.serverArgs'),
-        'xpack.security.enabled=true',
-      ],
-    },
     kbnTestServer: {
-      ...xpackFunctionalConfig.get('kbnTestServer'),
+      ...searchFuncationalConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        ...searchFuncationalConfig.get('kbnTestServer.serverArgs'),
         '--xpack.spaces.defaultSolution=es', // Default to Search Solution
         `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
       ],

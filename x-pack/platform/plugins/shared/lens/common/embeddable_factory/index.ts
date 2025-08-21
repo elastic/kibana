@@ -7,8 +7,8 @@
 
 import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObjectReference } from '@kbn/core/types';
-import {
+import type { Reference } from '@kbn/content-management-utils';
+import type {
   EmbeddableRegistryDefinition,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
@@ -29,7 +29,7 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
   }
 
   // match references based on name, so only references associated with this lens panel are injected.
-  const matchedReferences: SavedObjectReference[] = [];
+  const matchedReferences: Reference[] = [];
 
   if (Array.isArray(typedState.attributes.references)) {
     typedState.attributes.references.forEach((serializableRef) => {
@@ -47,7 +47,7 @@ export const inject: NonNullable<EmbeddableRegistryDefinition['inject']> = (
 };
 
 export const extract: NonNullable<EmbeddableRegistryDefinition['extract']> = (state) => {
-  let references: SavedObjectReference[] = [];
+  let references: Reference[] = [];
   const typedState = state as unknown as LensRuntimeState;
 
   if ('attributes' in typedState && typedState.attributes !== undefined) {

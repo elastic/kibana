@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AgentMode, ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
-import { AgentHandlerContext } from '@kbn/onechat-server';
+import type { ConversationRound, RoundInput, ToolSelection } from '@kbn/onechat-common';
+import { AgentMode } from '@kbn/onechat-common';
+import type { AgentHandlerContext } from '@kbn/onechat-server';
 import { runChatAgent } from './chat';
 import { runReasoningAgent } from './reasoning';
 import { runPlannerAgent } from './planner';
@@ -39,6 +40,10 @@ export interface RunAgentParams {
    * The agent this run is for. Used for tracing.
    */
   agentId?: string;
+  /**
+   * optional signal to abort the execution of the agent
+   */
+  abortSignal?: AbortSignal;
 }
 
 export interface RunAgentResponse {

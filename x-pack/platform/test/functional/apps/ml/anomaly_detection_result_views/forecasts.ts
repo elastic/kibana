@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 // @ts-expect-error not full interface
 const JOB_CONFIG: Job = {
@@ -39,13 +39,12 @@ export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/164381
-  describe.skip('forecasts', function () {
+  describe('forecasts', function () {
     this.tags(['ml']);
 
     describe('with single metric job', function () {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+        await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
         await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
         await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -96,10 +95,12 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep('should display the forecasts toggle checkbox');
         await ml.forecast.assertForecastCheckboxExists();
 
-        await ml.testExecution.logTestStep(
-          'should display the forecast in the single metric chart'
-        );
-        await ml.forecast.assertForecastChartElementsExists();
+        // Disabling forecast chart check until https://github.com/elastic/kibana/issues/229143 is resolved.
+        // The chart slider sometimes does not move over to the forecast section of the chart.
+        // await ml.testExecution.logTestStep(
+        //   'should display the forecast in the single metric chart'
+        // );
+        // await ml.forecast.assertForecastChartElementsExists();
 
         await ml.testExecution.logTestStep('should hide the forecast in the single metric chart');
         await ml.forecast.clickForecastCheckbox();

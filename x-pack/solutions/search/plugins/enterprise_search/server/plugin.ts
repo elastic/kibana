@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   Plugin,
   PluginInitializerContext,
   CoreSetup,
   Logger,
   SavedObjectsServiceStart,
-  DEFAULT_APP_CATEGORIES,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
-import { i18n } from '@kbn/i18n';
 
 import {
   ENTERPRISE_SEARCH_HOME_PLUGIN,
@@ -31,12 +30,8 @@ import {
   SEARCH_HOMEPAGE,
   SEARCH_INDICES_START,
   SEARCH_INDEX_MANAGEMENT,
+  SEARCH_APPS_TITLE,
 } from '../common/constants';
-
-import {
-  databaseSearchGuideId,
-  databaseSearchGuideConfig,
-} from '../common/guided_onboarding/search_guide_config';
 
 import { AS_TELEMETRY_NAME } from './collectors/app_search/telemetry';
 import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
@@ -67,7 +62,7 @@ import { getConnectorsSearchResultProvider } from './utils/connectors_search_res
 import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
-import { ConfigType } from '.';
+import type { ConfigType } from '.';
 
 export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, PluginsStart> {
   private readonly config: ConfigType;
@@ -94,7 +89,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       customIntegrations,
       ml,
       licensing,
-      guidedOnboarding,
       cloud,
       contentConnectors,
     }: PluginsSetup
@@ -156,9 +150,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     });
     features.registerKibanaFeature({
       id: APPLICATIONS_PLUGIN.ID,
-      name: i18n.translate('xpack.enterpriseSearch.applications.featureName', {
-        defaultMessage: 'Search Applications',
-      }),
+      name: SEARCH_APPS_TITLE,
       order: 3,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
@@ -293,13 +285,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       },
       name: 'Enterprise Search Behavioral Analytics Logs',
     });
-
-    /**
-     * Register a config for the search guide
-     */
-    if (config.hasConnectors) {
-      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
-    }
 
     /**
      * Register our integrations in the global search bar

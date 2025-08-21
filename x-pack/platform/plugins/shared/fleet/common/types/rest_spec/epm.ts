@@ -249,3 +249,14 @@ export interface DeletePackageDatastreamAssetsRequest {
 export interface DeletePackageDatastreamAssetsResponse {
   success: boolean;
 }
+
+export interface RollbackPackageRequest {
+  params: {
+    pkgname: string;
+  };
+}
+
+export interface RollbackPackageResponse {
+  success: boolean;
+  version: string;
+}

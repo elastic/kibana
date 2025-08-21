@@ -154,6 +154,8 @@ exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Error INDEX 1`] = `undefined`;
 
+exports[`Error KIND 1`] = `undefined`;
+
 exports[`Error KUBERNETES 1`] = `undefined`;
 
 exports[`Error KUBERNETES_CONTAINER_ID 1`] = `undefined`;
@@ -251,6 +253,8 @@ exports[`Error OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Error OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Error OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Error OTEL_EVENT_NAME 1`] = `"otel event name"`;
 
 exports[`Error OTEL_SPAN_LINKS 1`] = `undefined`;
 
@@ -547,6 +551,8 @@ exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
 exports[`Span INDEX 1`] = `undefined`;
 
+exports[`Span KIND 1`] = `undefined`;
+
 exports[`Span KUBERNETES 1`] = `undefined`;
 
 exports[`Span KUBERNETES_CONTAINER_ID 1`] = `undefined`;
@@ -644,6 +650,8 @@ exports[`Span OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Span OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Span OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Span OTEL_EVENT_NAME 1`] = `"otel event name"`;
 
 exports[`Span OTEL_SPAN_LINKS 1`] = `undefined`;
 
@@ -944,6 +952,8 @@ exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
 exports[`Transaction INDEX 1`] = `undefined`;
 
+exports[`Transaction KIND 1`] = `undefined`;
+
 exports[`Transaction KUBERNETES 1`] = `
 Object {
   "pod": Object {
@@ -1047,6 +1057,8 @@ exports[`Transaction OBSERVER_LISTENING 1`] = `undefined`;
 exports[`Transaction OBSERVER_VERSION 1`] = `"whatever"`;
 
 exports[`Transaction OBSERVER_VERSION_MAJOR 1`] = `8`;
+
+exports[`Transaction OTEL_EVENT_NAME 1`] = `"otel event name"`;
 
 exports[`Transaction OTEL_SPAN_LINKS 1`] = `undefined`;
 

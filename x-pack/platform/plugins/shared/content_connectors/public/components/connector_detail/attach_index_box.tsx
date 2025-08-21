@@ -10,10 +10,10 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
@@ -27,7 +27,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { Connector, MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
+import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AttachIndexLogic } from './attach_index_logic';
@@ -277,6 +278,7 @@ export const AttachIndexBox: React.FC<AttachIndexBoxProps> = ({ connector }) => 
             isInvalid={!!error}
           >
             <EuiComboBox
+              isInvalid={!!error}
               placeholder={i18n.translate(
                 'xpack.searchConnectorsattachIndexBox.euiFormRow.indexSelector.placeholder',
                 { defaultMessage: 'Select or create an index' }

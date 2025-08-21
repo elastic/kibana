@@ -18,7 +18,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 
 import { performChecks } from '../../helpers';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 import { hasReadWriteAttackDiscoveryAlertsPrivileges } from '../helpers/index_privileges';
 
 export const postAttackDiscoveryBulkRoute = (
@@ -74,7 +74,7 @@ export const postAttackDiscoveryBulkRoute = (
 
         const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
           ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-          false
+          true
         );
 
         if (!attackDiscoveryAlertsEnabled) {

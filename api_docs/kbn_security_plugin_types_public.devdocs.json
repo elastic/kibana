@@ -948,8 +948,12 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.ts"
               },
               {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/public/plugin.tsx"
+              },
+              {
+                "plugin": "@kbn/test-suites-xpack-platform",
+                "path": "x-pack/platform/test/security_functional/plugins/test_endpoints/public/plugin.tsx"
               },
               {
                 "plugin": "cases",
@@ -962,6 +966,14 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/api.test.ts"
+              },
+              {
+                "plugin": "searchPlayground",
+                "path": "x-pack/solutions/search/plugins/search_playground/public/hooks/use_user_profile.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -970,10 +982,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/user_profiles/use_get_current_user_profile.tsx"
-              },
-              {
-                "plugin": "searchPlayground",
-                "path": "x-pack/solutions/search/plugins/search_playground/public/hooks/use_user_profile.ts"
               }
             ]
           }

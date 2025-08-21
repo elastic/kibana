@@ -58,6 +58,20 @@ describe('indexDocument', () => {
     });
   });
 
+  test('should call cluster client bulk with given doc and id', async () => {
+    // @ts-expect-error
+    clusterClientAdapter.indexDocument({ id: 'abc', body: { message: 'foo' }, index: 'event-log' });
+
+    await retryUntil('cluster client bulk called', () => {
+      return clusterClient.bulk.mock.calls.length !== 0;
+    });
+
+    expect(clusterClient.bulk).toHaveBeenCalledWith({
+      body: [{ create: { _id: 'abc' } }, { message: 'foo' }],
+      index: 'kibana-event-log-ds',
+    });
+  });
+
   test('should log an error when cluster client throws an error', async () => {
     clusterClient.bulk.mockRejectedValue(new Error('expected failure'));
     clusterClientAdapter.indexDocument({ body: { message: 'foo' }, index: 'event-log' });
@@ -569,7 +583,7 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
       prefer_ilm: false,
       rollover_on_write: true,
       next_generation_managed_by: 'Index Lifecycle Management',
-    },
+    } as Partial<estypes.IndicesDataStream> as estypes.IndicesDataStream,
   ],
 };
 

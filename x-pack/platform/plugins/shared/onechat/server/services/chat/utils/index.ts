@@ -6,4 +6,14 @@
  */
 
 export { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
-export { generateConversationTitle } from './generate_title';
+export { generateTitle$, generateConversationTitle } from './generate_title';
+export { handleCancellation } from './handle_cancellation';
+export { getChatModel$ } from './get_chat_model';
+export { executeAgent$ } from './execute_agent';
+export {
+  getConversation$,
+  conversationExists$,
+  createPlaceholderConversation$,
+  updateConversation$,
+  createConversation$,
+} from './conversations';

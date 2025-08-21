@@ -6,7 +6,7 @@
  */
 
 import { sloList } from '../../data/slo/slo';
-import { UseFetchSloListResponse } from '../use_fetch_slo_list';
+import type { UseFetchSloListResponse } from '../use_fetch_slo_list';
 
 export const useFetchSloList = (): UseFetchSloListResponse => {
   return {

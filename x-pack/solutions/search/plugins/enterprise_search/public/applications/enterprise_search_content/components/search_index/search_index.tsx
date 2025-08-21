@@ -11,17 +11,18 @@ import { useParams } from 'react-router-dom';
 
 import { useValues } from 'kea';
 
-import { EuiSpacer, EuiTabbedContent, EuiTabbedContentTab } from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { ClientConfigType } from '../../../../../common/types';
+import type { ClientConfigType } from '../../../../../common/types';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../shared/kibana';
 import { SEARCH_INDEX_PATH, SEARCH_INDEX_TAB_PATH } from '../../routes';
 
-import { ElasticsearchViewIndex } from '../../types';
+import type { ElasticsearchViewIndex } from '../../types';
 import { isConnectorIndex } from '../../utils/indices';
 import { ConnectorConfiguration } from '../connector_detail/connector_configuration';
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
@@ -61,28 +62,11 @@ export const SearchIndex: React.FC = () => {
 
   const { indexName } = useValues(IndexNameLogic);
 
-  /**
-   * Guided Onboarding needs us to mark the add data step as complete as soon as the user has data in an index.
-   * This needs to be checked for any of the 3 registered search guideIds
-   * Putting it here guarantees that if a user is viewing an index with data, it'll be marked as complete
-   */
   const {
     config,
-    guidedOnboarding,
     productFeatures: { hasDefaultIngestPipeline },
     updateSideNavDefinition,
   } = useValues(KibanaLogic);
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('databaseSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding.guidedOnboardingApi?.completeGuideStep('databaseSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
 
   useEffect(() => {
     return () => {

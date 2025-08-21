@@ -16,13 +16,7 @@ import type {
   AlertsTableImperativeApi,
   AlertsTableProps,
 } from '@kbn/response-ops-alerts-table/types';
-import {
-  ALERT_RULE_NAME,
-  ALERT_RULE_PARAMETERS,
-  ALERT_SEVERITY,
-  AlertConsumers,
-  TIMESTAMP,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_SEVERITY, AlertConsumers, TIMESTAMP } from '@kbn/rule-data-utils';
 import { ESQL_RULE_TYPE_ID, QUERY_RULE_TYPE_ID } from '@kbn/securitysolution-rules';
 import type {
   EuiDataGridProps,
@@ -31,6 +25,7 @@ import type {
 } from '@elastic/eui';
 import type { PackageListItem } from '@kbn/fleet-plugin/common';
 import styled from '@emotion/styled';
+import { RELATED_INTEGRATION } from '../../../constants';
 import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { useAdditionalBulkActions } from '../../../hooks/alert_summary/use_additional_bulk_actions';
@@ -44,13 +39,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { CellValue } from './render_cell';
 import { buildTimeRangeFilter } from '../../alerts_table/helpers';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 export const TIMESTAMP_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.timeStamp',
   { defaultMessage: 'Timestamp' }
 );
-export const RELATION_INTEGRATION_COLUMN = i18n.translate(
+export const RELATED_INTEGRATION_COLUMN = i18n.translate(
   'xpack.securitySolution.alertSummary.table.column.relatedIntegrationName',
   { defaultMessage: 'Integration' }
 );
@@ -69,8 +63,8 @@ export const columns: EuiDataGridProps['columns'] = [
     displayAsText: TIMESTAMP_COLUMN,
   },
   {
-    id: ALERT_RULE_PARAMETERS,
-    displayAsText: RELATION_INTEGRATION_COLUMN,
+    id: RELATED_INTEGRATION,
+    displayAsText: RELATED_INTEGRATION_COLUMN,
   },
   {
     id: ALERT_SEVERITY,
@@ -114,19 +108,6 @@ export interface AdditionalTableContext {
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 export interface TableProps {
@@ -142,26 +123,13 @@ export interface TableProps {
    * List of installed AI for SOC integrations
    */
   packages: PackageListItem[];
-  /**
-   * Result from the useQuery to fetch all rules
-   */
-  ruleResponse: {
-    /**
-     * Result from fetching all rules
-     */
-    rules: RuleResponse[];
-    /**
-     * True while rules are being fetched
-     */
-    isLoading: boolean;
-  };
 }
 
 /**
  * Renders the table showing all the alerts. This component leverages the ResponseOps AlertsTable in a similar way that the alerts page does.
  * The table is used in combination with the GroupedAlertsTable component.
  */
-export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }: TableProps) => {
+export const Table = memo(({ dataView, groupingFilters, packages }: TableProps) => {
   const {
     services: {
       application,
@@ -240,13 +208,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
     [dataView]
   );
 
-  const additionalContext: AdditionalTableContext = useMemo(
-    () => ({
-      packages,
-      ruleResponse,
-    }),
-    [packages, ruleResponse]
-  );
+  const additionalContext: AdditionalTableContext = useMemo(() => ({ packages }), [packages]);
 
   const refetchRef = useRef<AlertsTableImperativeApi>(null);
   const refetch = useCallback(() => {
@@ -254,6 +216,8 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
   }, []);
 
   const bulkActions = useAdditionalBulkActions({ refetch });
+
+  const runtimeMappings = useMemo(() => dataView.getRuntimeMappings(), [dataView]);
 
   return (
     <EuiDataGridStyleWrapper>
@@ -273,6 +237,7 @@ export const Table = memo(({ dataView, groupingFilters, packages, ruleResponse }
         renderAdditionalToolbarControls={renderAdditionalToolbarControls}
         renderCellValue={CellValue}
         rowHeightsOptions={ROW_HEIGHTS_OPTIONS}
+        runtimeMappings={runtimeMappings}
         ruleTypeIds={RULE_TYPE_IDS}
         services={services}
         toolbarVisibility={TOOLBAR_VISIBILITY}

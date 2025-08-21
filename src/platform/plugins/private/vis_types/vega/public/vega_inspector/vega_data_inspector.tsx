@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import './vega_data_inspector.scss';
-
 import React, { useState, useEffect } from 'react';
 import { EuiTabbedContent, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { InspectorViewProps } from '@kbn/inspector-plugin/public';
-import { VegaInspectorAdapters } from './vega_inspector';
+import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
+import { css } from '@emotion/react';
+import type { VegaInspectorAdapters } from './vega_inspector';
 import { DataViewer, SignalViewer, SpecViewer } from './components';
 
 export type VegaDataInspectorProps = InspectorViewProps<VegaInspectorAdapters>;
@@ -30,6 +29,24 @@ const signalValuesLabel = i18n.translate('visTypeVega.inspector.signalValuesLabe
 const specLabel = i18n.translate('visTypeVega.inspector.specLabel', {
   defaultMessage: 'Spec',
 });
+
+const vegaDataInspectorStyles = {
+  base: css({
+    height: '100%',
+    // TODO: EUI needs to provide props to pass down from EuiTabbedContent to tabs and content
+    display: 'flex',
+    flexDirection: 'column',
+
+    "[role='tablist']": {
+      flexShrink: 0,
+    },
+
+    "[role='tabpanel']": {
+      flexGrow: 1,
+    },
+  }),
+  specViewer: css({ height: '100%' }),
+};
 
 const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   const [error, setError] = useState<string | undefined>();
@@ -73,20 +90,18 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
     {
       id: 'spec-viewer--id',
       name: specLabel,
-      content: (
-        <SpecViewer className="vgaVegaDataInspector__specViewer" vegaAdapter={adapters.vega} />
-      ),
+      content: <SpecViewer vegaAdapter={adapters.vega} css={vegaDataInspectorStyles.specViewer} />,
       'data-test-subj': 'vegaDataInspectorSpecViewerButton',
     },
   ];
 
   return (
     <EuiTabbedContent
-      className="vgaVegaDataInspector"
       size="s"
       tabs={tabs}
       initialSelectedTab={tabs[0]}
       autoFocus="selected"
+      css={vegaDataInspectorStyles.base}
     />
   );
 };

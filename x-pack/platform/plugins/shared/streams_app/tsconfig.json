@@ -26,9 +26,7 @@
     "@kbn/streams-schema",
     "@kbn/es-query",
     "@kbn/zod",
-    "@kbn/utility-types",
     "@kbn/share-plugin",
-    "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
@@ -76,5 +74,8 @@
     "@kbn/unified-doc-viewer",
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
+    "@kbn/utility-types",
+    "@kbn/apm-synthtrace-client",
+    "@kbn/streamlang"
   ]
 }

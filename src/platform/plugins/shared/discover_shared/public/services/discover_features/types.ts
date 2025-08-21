@@ -10,7 +10,7 @@
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import { FeaturesRegistry } from '../../../common';
+import type { FeaturesRegistry } from '../../../common';
 
 /**
  * Features types
@@ -24,13 +24,14 @@ import { FeaturesRegistry } from '../../../common';
  * will be shown on the logs-overview preset tab of the UnifiedDocViewer.
  */
 
-export interface StreamsFeatureRenderDeps {
+export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
 }
 
-export interface StreamsFeature {
+export interface ObservabilityStreamsFeature {
   id: 'streams';
-  renderStreamsField: (deps: StreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamField: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
+  renderFlyoutStreamProcessingLink: (deps: ObservabilityStreamsFeatureRenderDeps) => JSX.Element;
 }
 
 export interface ObservabilityLogsAIAssistantFeatureRenderDeps {
@@ -71,7 +72,7 @@ export type SecuritySolutionFeature =
 
 // This should be a union of all the available client features.
 export type DiscoverFeature =
-  | StreamsFeature
+  | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
   | SecuritySolutionFeature;

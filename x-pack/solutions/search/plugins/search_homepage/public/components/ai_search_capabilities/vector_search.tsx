@@ -47,6 +47,7 @@ export const VectorSearch: React.FC = () => {
       }
     ),
     dataTestSubj: 'createVectorIndexButton',
+    workflow: 'vector',
   };
 
   return <AISearchWorkflow capability={vectorSearchText} />;

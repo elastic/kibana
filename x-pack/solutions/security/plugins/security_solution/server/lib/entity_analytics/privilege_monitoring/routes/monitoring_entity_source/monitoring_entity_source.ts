@@ -10,19 +10,26 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
-import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
+import {
+  API_VERSIONS,
+  APP_ID,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+} from '../../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
-import type {
-  GetEntitySourceResponse,
-  UpdateEntitySourceResponse,
-} from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
 import {
   CreateEntitySourceRequestBody,
   UpdateEntitySourceRequestBody,
   type CreateEntitySourceResponse,
+  type GetEntitySourceResponse,
+  type UpdateEntitySourceResponse,
   GetEntitySourceRequestParams,
   UpdateEntitySourceRequestParams,
 } from '../../../../../../common/api/entity_analytics/privilege_monitoring/monitoring_entity_source/monitoring_entity_source.gen';
+import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
+import { createEngineStatusService } from '../../engine/status_service';
+import { PrivilegeMonitoringApiKeyType } from '../../auth/saved_object';
+import { monitoringEntitySourceType } from '../../saved_objects/monitoring_entity_source_type';
+import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../constants';
 
 export const monitoringEntitySourceRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -52,10 +59,33 @@ export const monitoringEntitySourceRoute = (
         const siemResponse = buildSiemResponse(response);
 
         try {
+          await assertAdvancedSettingsEnabled(
+            await context.core,
+            ENABLE_PRIVILEGED_USER_MONITORING_SETTING
+          );
+
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
-          const body = await client.init(request.body);
 
+          const body = await client.init(request.body);
+          const privMonDataClient = await secSol.getPrivilegeMonitoringDataClient();
+          const soClient = privMonDataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
+          });
+
+          const statusService = createEngineStatusService(privMonDataClient, soClient);
+          const engineStatus = await statusService.get();
+
+          try {
+            if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+              await statusService.scheduleNow();
+            }
+          } catch (e) {
+            logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
+          }
           return response.ok({ body });
         } catch (e) {
           const error = transformError(e);
@@ -67,7 +97,6 @@ export const monitoringEntitySourceRoute = (
         }
       }
     );
-
   router.versioned
     .get({
       access: 'public',
@@ -133,6 +162,25 @@ export const monitoringEntitySourceRoute = (
           const secSol = await context.securitySolution;
           const client = secSol.getMonitoringEntitySourceDataClient();
           const body = await client.update({ ...request.body, id: request.params.id });
+
+          const privMonDataClient = secSol.getPrivilegeMonitoringDataClient();
+          const soClient = privMonDataClient.getScopedSoClient(request, {
+            includedHiddenTypes: [
+              PrivilegeMonitoringApiKeyType.name,
+              monitoringEntitySourceType.name,
+            ],
+          });
+
+          const statusService = createEngineStatusService(privMonDataClient, soClient);
+          const engineStatus = await statusService.get();
+
+          try {
+            if (engineStatus.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
+              await statusService.scheduleNow();
+            }
+          } catch (e) {
+            logger.warn(`[Privilege Monitoring] Error scheduling task, received ${e.message}`);
+          }
 
           return response.ok({ body });
         } catch (e) {
