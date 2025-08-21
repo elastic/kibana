@@ -13,6 +13,7 @@ import type { SplunkOriginalDashboardExport } from '../../../../../common/siem_m
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
 import type { DashboardMigrationDashboard } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import type { DashboardMigrationsClientDependencies } from '../types';
 
 const INDEX_NAME = '.kibana-siem-dashboard-migrations-dashboards';
 

@@ -11,7 +11,7 @@ import {
   RuleTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
-import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
+import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../../rules/constants';
 
 export const dsl = {
   isFullyTranslated(): QueryDslQueryContainer {

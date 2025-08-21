@@ -6,6 +6,7 @@
  */
 
 import type { IndexAdapter, IndexPatternAdapter } from '@kbn/index-adapter';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { MigrationTranslationResult } from '../../../../common/siem_migrations/model/migration.gen';
 import type {
   RuleMigration,
@@ -17,6 +18,7 @@ import type { RuleVersions } from './data/rule_migrations_data_prebuilt_rules_cl
 import type { Stored } from '../types';
 import type {
   SiemMigrationsClientDependencies,
+  SiemMigrationsCreateClientParams,
   SiemMigrationsIndexNameProvider,
 } from '../common/types';
 
@@ -79,3 +81,6 @@ export type RuleMigrationIndexNameProviders = Record<
 export type RuleMigrationsClientDependencies = SiemMigrationsClientDependencies & {
   rulesClient: RulesClient;
 };
+
+export type RuleMigrationsCreateClientParams =
+  SiemMigrationsCreateClientParams<RuleMigrationsClientDependencies>;

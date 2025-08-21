@@ -16,10 +16,10 @@ import {
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
-import type { AddRuleMigrationRulesInput } from './rule_migrations_data_rules_client';
-import type { StoredRuleMigration } from '../types';
+import type { StoredRuleMigrationRule } from '../types';
 import { SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
-import { conditions } from './search';
+import type { CreateMigrationItemInput } from '../../common/data/siem_migrations_data_item_client';
+import { dsl } from './dsl_queries';
 
 describe('RuleMigrationsDataRulesClient', () => {
   let ruleMigrationsDataRulesClient: RuleMigrationsDataRulesClient;
@@ -49,7 +49,7 @@ describe('RuleMigrationsDataRulesClient', () => {
 
   describe('create', () => {
     test('should create rule migrations in bulk', async () => {
-      const ruleMigrations: AddRuleMigrationRulesInput[] = [
+      const ruleMigrations: CreateMigrationItemInput<RuleMigrationRule>[] = [
         {
           migration_id: 'migration1',
           original_rule: {
@@ -138,22 +138,25 @@ describe('RuleMigrationsDataRulesClient', () => {
     });
 
     test('should handle bulk operations in chunks', async () => {
-      const ruleMigrations: AddRuleMigrationRulesInput[] = Array.from({ length: 600 }, (_, i) => ({
-        migration_id: 'migration1',
-        original_rule: {
-          id: `rule${i}`,
-          vendor: 'splunk',
-          title: `Test Rule ${i}`,
-          description: `Test description ${i}`,
-          query: `test query ${i}`,
-          query_language: 'spl',
-        },
-        elastic_rule: {
-          id: `elastic_rule${i}`,
-          title: `Elastic Rule ${i}`,
-          query: `elastic query ${i}`,
-        },
-      }));
+      const ruleMigrations: CreateMigrationItemInput<RuleMigrationRule>[] = Array.from(
+        { length: 600 },
+        (_, i) => ({
+          migration_id: 'migration1',
+          original_rule: {
+            id: `rule${i}`,
+            vendor: 'splunk',
+            title: `Test Rule ${i}`,
+            description: `Test description ${i}`,
+            query: `test query ${i}`,
+            query_language: 'spl',
+          },
+          elastic_rule: {
+            id: `elastic_rule${i}`,
+            title: `Elastic Rule ${i}`,
+            query: `elastic query ${i}`,
+          },
+        })
+      );
 
       await ruleMigrationsDataRulesClient.create(ruleMigrations);
 
@@ -379,7 +382,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         created_by: 'testProfileUid',
       };
 
-      await ruleMigrationsDataRulesClient.saveCompleted(ruleMigration as StoredRuleMigration);
+      await ruleMigrationsDataRulesClient.saveCompleted(ruleMigration as StoredRuleMigrationRule);
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -435,7 +438,7 @@ describe('RuleMigrationsDataRulesClient', () => {
         created_by: 'testProfileUid',
       };
 
-      await ruleMigrationsDataRulesClient.saveError(ruleMigration as StoredRuleMigration);
+      await ruleMigrationsDataRulesClient.saveError(ruleMigration as StoredRuleMigrationRule);
 
       expect(esClient.asInternalUser.update).toHaveBeenCalledWith({
         index: '.kibana-siem-rule-migrations',
@@ -741,7 +744,7 @@ describe('RuleMigrationsDataRulesClient', () => {
             '@timestamp': '2025-08-04T00:00:00.000Z',
             created_by: 'testProfileUid',
           },
-        ] as StoredRuleMigration[],
+        ] as StoredRuleMigrationRule[],
       };
       jest.spyOn(ruleMigrationsDataRulesClient, 'get').mockResolvedValue(mockGetResponse);
 
@@ -792,7 +795,7 @@ describe('RuleMigrationsDataRulesClient', () => {
                   _id: ['rule1', 'rule2'],
                 },
               },
-              conditions.isMissingIndex(),
+              dsl.isMissingIndex(),
             ],
           },
         },
@@ -827,7 +830,7 @@ describe('RuleMigrationsDataRulesClient', () => {
                   migration_id: 'migration1',
                 },
               },
-              conditions.isMissingIndex(),
+              dsl.isMissingIndex(),
             ],
           },
         },

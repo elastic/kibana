@@ -15,7 +15,7 @@ import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_clie
 import type { MigrateRuleConfigSchema, MigrateRuleState } from './agent/types';
 import { getRuleMigrationAgent } from './agent';
 import { RuleMigrationsRetriever } from './retrievers';
-import type { StoredRuleMigrationRule } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigrationRule } from '../types';
 import { EsqlKnowledgeBase } from '../../common/task/util/esql_knowledge_base';
 import { nullifyMissingProperties } from '../../common/task/util/nullify_missing_properties';
 import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_runner';

@@ -11,6 +11,7 @@ import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type { CustomEvaluator } from '../../common/task/siem_migrations_task_evaluator';
+import type { RuleMigrationsClientDependencies } from '../types';
 
 // Mock dependencies
 jest.mock('langsmith/evaluation', () => ({

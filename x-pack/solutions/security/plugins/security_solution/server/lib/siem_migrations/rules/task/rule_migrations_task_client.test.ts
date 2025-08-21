@@ -15,7 +15,7 @@ import {
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { StoredRuleMigration } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigration } from '../types';
 import type { RuleMigrationTaskStartParams } from './types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
