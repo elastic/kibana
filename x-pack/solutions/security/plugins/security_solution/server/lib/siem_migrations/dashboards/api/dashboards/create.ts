@@ -102,7 +102,7 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           }));
 
           if (resources.length > 0) {
-            dashboardMigrationsClient.data.resources.create(resources);
+            await dashboardMigrationsClient.data.resources.create(resources);
           }
           return res.ok();
         } catch (error) {
