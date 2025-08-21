@@ -11,7 +11,7 @@ import { isOfAggregateQueryType } from '@kbn/es-query';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { METRICS_EXPERIENCE_PRODUCT_FEATURE_ID } from '../../../../../common/constants';
 import type { DataSourceProfileProvider } from '../../../profiles';
-import { DataSourceCategory } from '../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
@@ -42,8 +42,9 @@ export const createMetricsDataSourceProfileProvider = (
     // This filter still needs to be narrowed down to `FROM metrics-*` or `TS metrics-*`
     // and possibly other conditions
     if (
-      !isOfAggregateQueryType(params.query) ||
-      !params.query.esql.toLowerCase().includes('metrics')
+      params.rootContext.solutionType !== SolutionType.Observability &&
+      (!isOfAggregateQueryType(params.query) ||
+        !params.query.esql.toLowerCase().includes('metrics'))
     ) {
       return {
         isMatch: false,
