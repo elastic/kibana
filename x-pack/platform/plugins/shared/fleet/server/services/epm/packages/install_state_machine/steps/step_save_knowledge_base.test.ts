@@ -63,7 +63,7 @@ describe('saveKnowledgeBaseContent', () => {
       index: '.integration_knowledge*',
       query: {
         bool: {
-          must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
+          must: [{ match: { package_name: 'test-package' } }, { match: { version: '1.0.0' } }],
         },
       },
     });

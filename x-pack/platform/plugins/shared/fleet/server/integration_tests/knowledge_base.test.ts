@@ -17,12 +17,11 @@ import {
   saveKnowledgeBaseContentToIndex,
   INTEGRATION_KNOWLEDGE_INDEX,
   updatePackageKnowledgeBaseVersion,
+  getPackageKnowledgeBaseFromIndex,
 } from '../services/epm/packages/knowledge_base_index';
 import { getPackageKnowledgeBase } from '../services/epm/packages/get';
 
 import type { KnowledgeBaseItem } from '../../common/types/models/epm';
-
-import { waitForFleetSetup } from './helpers';
 
 describe('Knowledge Base End-to-End Integration Test', () => {
   let esServer: TestElasticsearchUtils;
@@ -44,16 +43,11 @@ describe('Knowledge Base End-to-End Integration Test', () => {
 
     const root = createRootWithCorePlugins(
       {
-        xpack: {
-          fleet: {
-            registryUrl: 'http://localhost',
-          },
-        },
         logging: {
           loggers: [
             {
-              name: 'plugins.fleet',
-              level: 'info',
+              name: 'root',
+              level: 'error', // Reduce log noise
             },
           ],
         },
@@ -64,7 +58,6 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     await root.preboot();
     const coreSetup = await root.setup();
     const coreStart = await root.start();
-    await waitForFleetSetup(root);
 
     kbnServer = {
       root,
@@ -128,8 +121,8 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       knowledgeBaseContent,
     });
 
-    // Wait a moment for the documents to be indexed
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Wait a moment for the index operation to complete
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Step 2: Retrieve knowledge base content through the API
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
@@ -215,7 +208,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     });
 
     // Wait for indexing
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
 
     // Verify v1.0.0 content is present
     const v1Result = await getPackageKnowledgeBase({
@@ -238,11 +231,12 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
     // Verify that old version content is no longer available
-    const oldVersionResult = await getPackageKnowledgeBase({
+    const oldVersionResult = await getPackageKnowledgeBaseFromIndex(
       esClient,
-      pkgName: 'test-package',
-    });
-    expect(oldVersionResult).toBeUndefined();
+      'test-package',
+      '1.0.0'
+    );
+    expect(oldVersionResult).toHaveLength(0);
 
     // Verify that new version content is available
     const newVersionResult = await getPackageKnowledgeBase({
@@ -250,6 +244,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       pkgName: 'test-package',
     });
     expect(newVersionResult?.items).toHaveLength(2);
+    expect(newVersionResult?.package.version).toBe('2.0.0');
 
     const newGuide = newVersionResult?.items.find((item) => item.fileName === 'new-guide.md');
     expect(newGuide?.content).toContain('New Guide');

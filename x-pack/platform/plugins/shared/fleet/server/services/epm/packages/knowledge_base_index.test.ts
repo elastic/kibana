@@ -71,7 +71,7 @@ describe('knowledge_base_index', () => {
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
           bool: {
-            must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
+            must: [{ match: { package_name: 'test-package' } }, { match: { version: '1.0.0' } }],
           },
         },
       });
@@ -168,9 +168,8 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith({
         index: INTEGRATION_KNOWLEDGE_INDEX,
         query: {
-          term: { package_name: 'test-package' },
+          match: { package_name: 'test-package' },
         },
-        sort: [{ filename: 'asc' }],
         size: 1000,
       });
 
@@ -220,7 +219,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { package_name: 'test-package' },
+          match: { package_name: 'test-package' },
         },
       });
     });
@@ -232,7 +231,7 @@ describe('knowledge_base_index', () => {
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
           bool: {
-            must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
+            must: [{ match: { package_name: 'test-package' } }, { match: { version: '1.0.0' } }],
           },
         },
       });
@@ -265,7 +264,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { package_name: 'test-package' },
+          match: { package_name: 'test-package' },
         },
       });
 
@@ -297,7 +296,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { package_name: 'test-package' },
+          match: { package_name: 'test-package' },
         },
       });
 
@@ -328,7 +327,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { package_name: 'test-package' },
+          match: { package_name: 'test-package' },
         },
       });
 
@@ -347,7 +346,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          term: { package_name: 'test-package' },
+          match: { package_name: 'test-package' },
         },
       });
 

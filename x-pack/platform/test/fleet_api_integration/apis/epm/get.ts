@@ -364,7 +364,6 @@ export default function (providerContext: FtrProviderContext) {
         await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
-          .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
         expect(res.body).to.have.property('package.package_name');
@@ -391,17 +390,13 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('returns 404 for knowledge base of non-existent package', async function () {
-        await supertest
-          .get(`/internal/fleet/epm/packages/nonexistent/knowledge_base`)
-          .set('kbn-xsrf', 'xxxx')
-          .expect(404);
+        await supertest.get(`/internal/fleet/epm/packages/nonexistent/knowledge_base`).expect(404);
       });
 
       it('validates knowledge base content structure', async function () {
         await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
-          .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
         // Validate response structure matches schema
@@ -427,7 +422,6 @@ export default function (providerContext: FtrProviderContext) {
         await supertestWithoutAuth
           .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
           .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
-          .set('kbn-xsrf', 'xxxx')
           .expect(200);
         await uninstallPackage(testPkgName, testPkgVersion);
         await cleanupKnowledgeBase(testPkgName);
@@ -438,7 +432,6 @@ export default function (providerContext: FtrProviderContext) {
         await supertestWithoutAuth
           .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
           .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
-          .set('kbn-xsrf', 'xxxx')
           .expect(200);
         await uninstallPackage(testPkgName, testPkgVersion);
         await cleanupKnowledgeBase(testPkgName);

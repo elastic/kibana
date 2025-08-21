@@ -80,19 +80,18 @@ export async function getPackageKnowledgeBaseFromIndex(
     if (pkgVersion) {
       query = {
         bool: {
-          must: [{ term: { package_name: pkgName } }, { term: { version: pkgVersion } }],
+          must: [{ match: { package_name: pkgName } }, { match: { version: pkgVersion } }],
         },
       };
     } else {
       query = {
-        term: { package_name: pkgName },
+        match: { package_name: pkgName },
       };
     }
 
     const response = await esClient.search({
       index: INTEGRATION_KNOWLEDGE_INDEX,
       query,
-      sort: [{ filename: 'asc' }],
       size: DEFAULT_SIZE,
     });
 
@@ -121,12 +120,12 @@ export async function deletePackageKnowledgeBase(
   if (pkgVersion) {
     query = {
       bool: {
-        must: [{ term: { package_name: pkgName } }, { term: { version: pkgVersion } }],
+        must: [{ match: { package_name: pkgName } }, { match: { version: pkgVersion } }],
       },
     };
   } else {
     query = {
-      term: { package_name: pkgName },
+      match: { package_name: pkgName },
     };
   }
 
