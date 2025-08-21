@@ -150,9 +150,32 @@ const SCHEMA_DISCOVER_SESSION_TAB = schema.object({
   attributes: DISCOVER_SESSION_TAB_ATTRIBUTES,
 });
 
-export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
-export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
-
 export const SCHEMA_SEARCH_MODEL_VERSION_6 = SCHEMA_SEARCH_MODEL_VERSION_5.extends({
   tabs: schema.maybe(schema.arrayOf(SCHEMA_DISCOVER_SESSION_TAB, { minSize: 1 })),
 });
+
+export const SCHEMA_SEARCH_MODEL_VERSION_7 = SCHEMA_SEARCH_MODEL_VERSION_6.extends({
+  columns: undefined,
+  sort: undefined,
+  grid: undefined,
+  rowHeight: undefined,
+  rowsPerPage: undefined,
+  hideChart: undefined,
+  breakdownField: undefined,
+  kibanaSavedObjectMeta: undefined,
+  isTextBasedQuery: undefined,
+  usesAdHocDataView: undefined,
+  timeRestore: undefined,
+  timeRange: undefined,
+  refreshInterval: undefined,
+  viewMode: undefined,
+  hideAggregatedPreview: undefined,
+  sampleSize: undefined,
+  headerRowHeight: undefined,
+  visContext: undefined,
+  density: undefined,
+});
+
+export type DiscoverSessionTabAttributes = TypeOf<typeof DISCOVER_SESSION_TAB_ATTRIBUTES>;
+export type DiscoverSessionTab = TypeOf<typeof SCHEMA_DISCOVER_SESSION_TAB>;
+export type DiscoverSessionAttributes = TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_7>;

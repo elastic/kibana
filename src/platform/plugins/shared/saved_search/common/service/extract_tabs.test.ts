@@ -8,8 +8,8 @@
  */
 import type { SavedObjectModelTransformationContext } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
-import type { SCHEMA_SEARCH_MODEL_VERSION_5 } from '../../server/saved_objects/schema';
-import { extractTabs, extractTabsBackfillFn, SavedSearchType, VIEW_MODE } from '..';
+import type { SCHEMA_SEARCH_MODEL_VERSION_5, SCHEMA_SEARCH_MODEL_VERSION_6 } from '../../server/saved_objects/schema';
+import { extractTabs, extractTabsBackfillFn, removeTopLevelTabAttributes, SavedSearchType, VIEW_MODE } from '..';
 
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
@@ -165,6 +165,50 @@ describe('extractTabs', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('removeTopLevelTabAttributes', () => {
+    it('should return only title, description, and tabs from the attributes', () => {
+      const attributes: TypeOf<typeof SCHEMA_SEARCH_MODEL_VERSION_6> = {
+        title: 'my_title',
+        description: 'my description',
+        tabs: [
+          {
+            id: 'tab-1',
+            label: 'Tab 1',
+            attributes: {
+              columns: ['message'],
+              grid: {},
+              hideChart: false,
+              isTextBasedQuery: false,
+              kibanaSavedObjectMeta: {
+                searchSourceJSON:
+                  '{"query":{"language":"kuery","query":"service.type": \\"elasticsearch\\""},"highlightAll":true,"fields":[{"field":"*","include_unmapped":true}],"sort":[{"@timestamp":{"order":"desc","format":"strict_date_optional_time"}},{"_doc":"desc"}],"filter":[{"meta":{"disabled":false,"negate":false,"alias":null,"key":"service.type","field":"service.type","params":{"query":"elasticsearch"},"type":"phrase","indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"},"query":{"match_phrase":{"service.type":"elasticsearch"}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+              },
+              sort: [['@timestamp', 'desc']],
+              timeRestore: false,
+            },
+          },
+        ],
+        columns: ['message'],
+        grid: {},
+        hideChart: false,
+        isTextBasedQuery: false,
+        kibanaSavedObjectMeta: {
+          searchSourceJSON:
+            '{"query":{"language":"kuery","query":"service.type": \\"elasticsearch\\""},"highlightAll":true,"fields":[{"field":"*","include_unmapped":true}],"sort":[{"@timestamp":{"order":"desc","format":"strict_date_optional_time"}},{"_doc":"desc"}],"filter":[{"meta":{"disabled":false,"negate":false,"alias":null,"key":"service.type","field":"service.type","params":{"query":"elasticsearch"},"type":"phrase","indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index"},"query":{"match_phrase":{"service.type":"elasticsearch"}},"$state":{"store":"appState"}}],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+        },
+        sort: [['@timestamp', 'desc']],
+        timeRestore: false,
+      };
+
+      const result = removeTopLevelTabAttributes(attributes);
+      expect(result).toEqual({
+        title: 'my_title',
+        description: 'my description',
+        tabs: attributes.tabs,
+      });
     });
   });
 });
