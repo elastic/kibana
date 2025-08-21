@@ -13,57 +13,26 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiSwitch,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { WorkflowListItemDto } from '@kbn/workflows';
-import { ExecutionStatus } from '@kbn/workflows';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { capitalize } from 'lodash';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
 import { i18n } from '@kbn/i18n';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import type { WorkflowsSearchParams } from '../../../types';
 import { WORKFLOWS_TABLE_PAGE_SIZE_OPTIONS } from '../constants';
-
-const EXECUTION_STATUS_MAP = {
-  [ExecutionStatus.COMPLETED]: {
-    icon: 'checkInCircleFilled',
-    color: 'success',
-  },
-  [ExecutionStatus.FAILED]: {
-    icon: 'errorFilled',
-    color: 'danger',
-  },
-  [ExecutionStatus.CANCELLED]: {
-    icon: 'crossInCircle',
-    color: 'disabled',
-  },
-  [ExecutionStatus.RUNNING]: {
-    icon: 'play',
-    color: 'primary',
-  },
-  [ExecutionStatus.PENDING]: {
-    icon: 'clock',
-    color: 'subdued',
-  },
-  [ExecutionStatus.SKIPPED]: {
-    icon: 'checkInCircleFilled',
-    color: 'grey',
-  },
-  [ExecutionStatus.WAITING_FOR_INPUT]: {
-    icon: 'inputOutput',
-    color: 'warning',
-  },
-};
+import { getExecutionStatusIcon } from '../../../shared/ui';
+import { getStatusLabel } from '../../../shared/translations';
 
 interface WorkflowListProps {
   search: WorkflowsSearchParams;
@@ -71,6 +40,7 @@ interface WorkflowListProps {
 }
 
 export function WorkflowList({ search, setSearch }: WorkflowListProps) {
+  const { euiTheme } = useEuiTheme();
   const { application, notifications } = useKibana().services;
   const { data: workflows, isLoading: isLoadingWorkflows, error } = useWorkflows(search);
   const { deleteWorkflows, runWorkflow, cloneWorkflow, updateWorkflow } = useWorkflowActions();
@@ -208,11 +178,11 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         render: (value, item) => {
           if (item.history.length === 0) return;
           const lastRun = item.history[0];
-          const { icon, color } = EXECUTION_STATUS_MAP[lastRun.status];
+          const icon = getExecutionStatusIcon(euiTheme, lastRun.status);
 
           return (
             <EuiText size="s">
-              <EuiIcon type={icon} color={color} /> {capitalize(lastRun.status)}
+              {icon} {getStatusLabel(lastRun.status)}
             </EuiText>
           );
         },
@@ -294,6 +264,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
       },
     ],
     [
+      euiTheme,
       application,
       canCreateWorkflow,
       canDeleteWorkflow,
