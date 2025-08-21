@@ -33,6 +33,7 @@ export const Default: Story = {
       workflowId: 'workflow-1',
       workflowRunId: 'workflow-run-1',
       topologicalIndex: 1,
+      spaceId: 'default',
     },
   },
 };
@@ -48,6 +49,7 @@ export const Running: Story = {
       workflowId: 'workflow-1',
       workflowRunId: 'workflow-run-1',
       topologicalIndex: 1,
+      spaceId: 'default',
     },
   },
 };
@@ -63,6 +65,7 @@ export const Failed: Story = {
       workflowId: 'workflow-1',
       workflowRunId: 'workflow-run-1',
       topologicalIndex: 1,
+      spaceId: 'default',
     },
   },
 };

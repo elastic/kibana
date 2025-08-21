@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { JSONDataTable, type JSONDataTableProps } from './json_data_table';
+export { JSONDataView, type JSONDataViewProps } from './json_data_view';

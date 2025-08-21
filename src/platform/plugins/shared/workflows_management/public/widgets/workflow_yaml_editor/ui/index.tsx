@@ -265,7 +265,7 @@ export const WorkflowYAMLEditor = ({
   }, []);
 
   useEffect(() => {
-    monaco.editor.defineTheme('workflows-yaml-light', {
+    monaco.editor.defineTheme('workflows-subdued', {
       base: 'vs',
       inherit: true,
       rules: [],

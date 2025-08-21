@@ -10,4 +10,4 @@
 export { StatusBadge, getExecutionStatusColor, getExecutionStatusIcon } from './status_badge';
 export { useFormattedDate, useFormattedDateTime } from './use_formatted_date';
 export { YamlEditor } from './yaml_editor';
-export { JSONDataTable, type JSONDataTableProps } from './json_data_table/json_data_table';
+export { JSONDataTable, type JSONDataTableProps } from './json_data_view/json_data_table';

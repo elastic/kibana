@@ -47,6 +47,7 @@ import { searchWorkflowExecutions } from './lib/search_workflow_executions';
 import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type {
+  GetExecutionLogsParams,
   GetStepExecutionParams,
   GetStepLogsParams,
   GetWorkflowsParams,
@@ -567,7 +568,8 @@ export class WorkflowsService {
 
   // Direct log search methods - query ES logs index directly
   private async searchWorkflowLogs(
-    query: estypes.QueryDslQueryContainer
+    query: estypes.QueryDslQueryContainer,
+    sortOrder: estypes.SortOrder = 'desc'
   ): Promise<LogSearchResult> {
     if (!this.esClient) {
       throw new Error('Elasticsearch client not initialized');
@@ -577,7 +579,7 @@ export class WorkflowsService {
       const response = await this.esClient.search({
         index: this.workflowExecutionLogsIndex,
         query,
-        sort: [{ '@timestamp': { order: 'desc' } }],
+        sort: [{ '@timestamp': { order: sortOrder } }],
         size: 1000,
       });
 
@@ -600,13 +602,16 @@ export class WorkflowsService {
     }
   }
 
-  public async getExecutionLogs(executionId: string, spaceId: string): Promise<LogSearchResult> {
+  public async getExecutionLogs(
+    params: GetExecutionLogsParams,
+    spaceId: string
+  ): Promise<LogSearchResult> {
     const query = {
       bool: {
         must: [
           {
             match: {
-              'workflow.execution_id': executionId,
+              'workflow.execution_id': params.executionId,
             },
           },
           {
@@ -623,7 +628,7 @@ export class WorkflowsService {
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
   public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
@@ -654,7 +659,7 @@ export class WorkflowsService {
       },
     };
 
-    return this.searchWorkflowLogs(query);
+    return this.searchWorkflowLogs(query, params.sortOrder);
   }
 
   public async getWorkflowStats(): Promise<WorkflowStatsDto | null> {

@@ -71,8 +71,20 @@ export interface GetStepExecutionParams {
   stepId: string;
 }
 
+export interface GetExecutionLogsParams {
+  executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
+}
+
 export interface GetStepLogsParams {
   executionId: string;
+  limit?: number;
+  offset?: number;
+  sortField?: string;
+  sortOrder?: 'asc' | 'desc';
   stepId: string;
 }
 
@@ -209,11 +221,18 @@ export class WorkflowsManagementApi {
     let result: LogSearchResult;
     if (params.stepId) {
       result = await this.workflowsService.getStepLogs(
-        { executionId: params.executionId, stepId: params.stepId },
+        {
+          executionId: params.executionId,
+          stepId: params.stepId,
+          limit: params.limit,
+          offset: params.offset,
+          sortField: params.sortField,
+          sortOrder: params.sortOrder,
+        },
         spaceId
       );
     } else {
-      result = await this.workflowsService.getExecutionLogs(params.executionId, spaceId);
+      result = await this.workflowsService.getExecutionLogs(params, spaceId);
     }
 
     // Transform the logs to match our API format

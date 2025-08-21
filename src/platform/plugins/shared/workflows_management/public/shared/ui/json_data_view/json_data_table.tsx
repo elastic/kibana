@@ -7,12 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
-import { EuiDataGrid, type UseEuiTheme, euiFontSize, type EuiDataGridProps } from '@elastic/eui';
+import {
+  EuiDataGrid,
+  type UseEuiTheme,
+  euiFontSize,
+  type EuiDataGridProps,
+  useResizeObserver,
+  EuiEmptyPrompt,
+} from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { css } from '@emotion/react';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+const MIN_NAME_COLUMN_WIDTH = 120;
+const MAX_NAME_COLUMN_WIDTH = 300;
 
 /**
  * Infers the field type from a value to determine the field icon
@@ -55,6 +66,9 @@ const componentStyles = {
     const { euiTheme } = themeContext;
     const { fontSize } = euiFontSize(themeContext, 's');
 
+    // TODO: leave just the styles that are needed for the json data table
+    // taken from src/platform/plugins/shared/unified_doc_viewer/public/components/doc_viewer_table/table.tsx
+    // FIX: the adjust to work in our case
     return css({
       '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
         borderTop: 'none',
@@ -120,7 +134,7 @@ export interface JSONDataTableProps {
    * If an array is provided, only the first object will be displayed.
    * If a primitive value is provided, it will be wrapped in an object.
    */
-  data: Record<string, unknown> | Record<string, unknown>[] | unknown;
+  data: Record<string, unknown>;
 
   /**
    * Optional title for the data view. Defaults to 'JSON Data'
@@ -176,31 +190,13 @@ export interface JSONDataTableProps {
  * ```
  */
 export function JSONDataTable({
-  data,
+  data: jsonObject,
   title = 'JSON Data',
   columns,
   'data-test-subj': dataTestSubj = 'jsonDataTable',
 }: JSONDataTableProps) {
   const styles = useMemoCss(componentStyles);
-
-  // Convert data to object format if needed
-  const jsonObject = useMemo(() => {
-    if (Array.isArray(data)) {
-      return data[0] || {};
-    }
-
-    // If data is already an object, use it directly
-    if (data && typeof data === 'object' && data !== null) {
-      return data as Record<string, unknown>;
-    }
-
-    // For primitive values, wrap them in an object
-    if (data !== undefined && data !== null) {
-      return { value: data };
-    }
-
-    return {};
-  }, [data]);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Create DataTableRecord from JSON - each field becomes a row
   const dataTableRecords = useMemo((): DataTableRecord[] => {
@@ -258,13 +254,18 @@ export function JSONDataTable({
     });
   }, [jsonObject, title, columns]);
 
+  const { width: containerWidth } = useResizeObserver(containerRef.current);
+
   // Grid columns configuration
   const gridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
       {
         id: 'field',
         displayAsText: 'Field',
-        initialWidth: 200,
+        initialWidth: Math.min(
+          Math.max(Math.round(containerWidth * 0.3), MIN_NAME_COLUMN_WIDTH),
+          MAX_NAME_COLUMN_WIDTH
+        ),
         actions: false,
       },
       {
@@ -273,7 +274,7 @@ export function JSONDataTable({
         actions: false,
       },
     ],
-    []
+    [containerWidth]
   );
 
   // Cell renderer for the data grid
@@ -303,11 +304,28 @@ export function JSONDataTable({
   }, [dataTableRecords]);
 
   if (dataTableRecords.length === 0) {
-    return <div>No data to display</div>;
+    return (
+      <EuiEmptyPrompt
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.jsonDataTable.noData"
+              defaultMessage="No data to display"
+            />
+          </h2>
+        }
+        iconType="empty"
+      />
+    );
   }
 
   return (
-    <div className="kbnDocViewer" css={styles.fieldsGridWrapper} data-test-subj={dataTestSubj}>
+    <div
+      ref={containerRef}
+      className="kbnDocViewer"
+      css={styles.fieldsGridWrapper}
+      data-test-subj={dataTestSubj}
+    >
       <EuiDataGrid
         className="kbnDocViewer__fieldsGrid"
         css={styles.fieldsGrid}
@@ -319,12 +337,7 @@ export function JSONDataTable({
         }}
         rowCount={dataTableRecords.length}
         renderCellValue={renderCellValue}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showDisplaySelector: false,
-          showFullScreenSelector: false,
-          showSortSelector: false,
-        }}
+        toolbarVisibility={false}
         pagination={{
           pageIndex: 0,
           pageSize: Math.min(dataTableRecords.length, 10),
@@ -334,7 +347,9 @@ export function JSONDataTable({
         }}
         sorting={{ columns: [], onSort: () => {} }}
         gridStyle={{
+          header: 'underline',
           border: 'none',
+          fontSize: 's',
         }}
       />
     </div>

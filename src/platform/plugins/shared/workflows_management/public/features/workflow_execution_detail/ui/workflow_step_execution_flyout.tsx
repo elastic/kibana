@@ -24,10 +24,11 @@ import {
   EuiDescriptionList,
   EuiSkeletonText,
 } from '@elastic/eui';
-import { WorkflowExecutionLogsTable } from '../../workflow_execution_logs/ui/workflow_execution_logs_table';
-import { StatusBadge, getExecutionStatusIcon, JSONDataTable } from '../../../shared/ui';
+import { StatusBadge, getExecutionStatusIcon } from '../../../shared/ui';
 import { useStepExecution } from '../model/use_step_execution';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
+import { StepExecutionTimelineSteteful } from './step_execution_timeline_steteful';
+import { StepExecutionDataView } from './step_execution_data_view';
 
 interface WorkflowStepExecutionFlyoutProps {
   workflowExecutionId: string;
@@ -80,42 +81,36 @@ export const WorkflowStepExecutionFlyout = ({
   }, [stepId, tabs[0].id]);
 
   const renderInput = () => {
-    if (stepExecution?.input) {
-      return (
-        <JSONDataTable
-          data={stepExecution.input}
-          title="Step Input"
-          data-test-subj="stepExecutionInputTable"
-        />
-      );
-    }
-    return <EuiText>No input</EuiText>;
+    return (
+      <StepExecutionDataView
+        data={stepExecution?.input}
+        title="Step Input"
+        data-test-subj="stepExecutionInputTable"
+      />
+    );
   };
 
   const renderOutput = () => {
     if (stepExecution?.error) {
       return (
-        <JSONDataTable
-          data={stepExecution.error as any}
+        <StepExecutionDataView
+          data={{ error: stepExecution.error }}
           title="Step Error"
           data-test-subj="stepExecutionErrorTable"
         />
       );
     }
-    if (stepExecution?.output) {
-      return (
-        <JSONDataTable
-          data={stepExecution.output}
-          title="Step Output"
-          data-test-subj="stepExecutionOutputTable"
-        />
-      );
-    }
-    return <EuiText>No output</EuiText>;
+    return (
+      <StepExecutionDataView
+        data={stepExecution?.output}
+        title="Step Output"
+        data-test-subj="stepExecutionOutputTable"
+      />
+    );
   };
 
   const renderTimeline = () => {
-    return <WorkflowExecutionLogsTable executionId={workflowExecutionId} stepId={stepId} />;
+    return <StepExecutionTimelineSteteful executionId={workflowExecutionId} stepId={stepId} />;
   };
 
   return (
@@ -207,7 +202,9 @@ export const WorkflowStepExecutionFlyout = ({
           </EuiTabs>
         </div>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+
+      {/* hack to avoid white gradient overlaying the content */}
+      <EuiFlyoutBody banner={' '} css={{ padding: euiTheme.size.m }}>
         {isLoading && <EuiSkeletonText lines={2} />}
         {selectedTabId === 'input' && renderInput()}
         {selectedTabId === 'output' && renderOutput()}

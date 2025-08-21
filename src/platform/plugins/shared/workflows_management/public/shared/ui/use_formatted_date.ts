@@ -12,6 +12,7 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
+import { useCallback } from 'react';
 
 const invalidDateText = i18n.translate(
   'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',
@@ -27,15 +28,6 @@ const formatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   year: 'numeric',
   month: '2-digit',
   day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  second: '2-digit',
-});
-
-/**
- * Short formatter (time only) for DateTime
- */
-const justTimeFormatter = new Intl.DateTimeFormat(i18n.getLocale(), {
   hour: '2-digit',
   minute: '2-digit',
   second: '2-digit',
@@ -88,4 +80,27 @@ export function useFormattedDateTime(date: Date): string | undefined {
   }
 
   return invalidDateText;
+}
+
+export function useGetFormattedDateTime(): (date: Date) => string | undefined {
+  const dateFormatSetting: string = useUiSetting('dateFormat');
+  const timezoneSetting: string = useUiSetting('dateFormat:tz');
+  const usableTimezoneSetting = timezoneSetting === 'Browser' ? moment.tz.guess() : timezoneSetting;
+
+  return useCallback(
+    (date: Date) => {
+      if (!date) {
+        return undefined;
+      }
+
+      if (!Number.isFinite(date.getTime())) {
+        return invalidDateText;
+      }
+
+      return dateFormatSetting
+        ? moment.tz(date, usableTimezoneSetting).format(dateFormatSetting)
+        : formatter.format(date);
+    },
+    [dateFormatSetting, usableTimezoneSetting]
+  );
 }
