@@ -31,7 +31,7 @@ fi
 
 run_check() {
   eval "$cmd"
-  node ./scripts/validate_oas_docs.js --assert-no-error-increase
+  node ./scripts/validate_oas_docs.js --assert-no-error-increase --update-baseline
 }
 
 retry 5 15 run_check

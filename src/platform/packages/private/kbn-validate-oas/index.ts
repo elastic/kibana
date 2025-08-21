@@ -113,8 +113,10 @@ run(
         if (curr > prev) {
           increased = true;
           report += `\n${chalk.red(yamlPath)}: ${chalk.bold(curr)} errors (was ${prev})`;
+        } else if (curr === prev) {
+          report += `\n${chalk.yellow(yamlPath)}: ${chalk.bold(curr)} errors (baseline ${prev})`;
         } else {
-          report += `\n${chalk.green(yamlPath)}: ${chalk.bold(curr)} errors (baseline ${prev})`;
+          report += `\n${chalk.green(yamlPath)}: ${chalk.bold(curr)} errors (was ${prev})`;
         }
       }
       log.info('Count comparison:' + report);
@@ -130,7 +132,7 @@ run(
     }
 
     // If not baseline mode, optionally create baseline if requested
-    if (flagsReader.boolean('update-baseline') && !assertNoErrorIncrease) {
+    if (flagsReader.boolean('update-baseline')) {
       Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
       log.success('Baseline file created/updated.');
     }
