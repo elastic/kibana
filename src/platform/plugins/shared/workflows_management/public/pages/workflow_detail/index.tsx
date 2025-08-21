@@ -180,6 +180,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           filename={`${workflow?.id ?? 'unknown'}.yaml`}
           value={workflowYaml}
           onChange={(v) => handleChange(v ?? '')}
+          lastUpdatedAt={workflow?.lastUpdatedAt}
           hasChanges={hasChanges}
           highlightStep={selectedStepId}
           stepExecutions={execution?.stepExecutions}
@@ -261,6 +262,18 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               iconType="play"
               size="s"
               onClick={handleRunClick}
+              disabled={!canExecuteWorkflow || !workflow?.enabled}
+              title={
+                !canExecuteWorkflow
+                  ? i18n.translate('workflows.workflowDetail.runWorkflow.disabled', {
+                      defaultMessage: 'You are not allowed to run workflows',
+                    })
+                  : !workflow?.enabled
+                  ? i18n.translate('workflows.workflowDetail.runWorkflow.disabled', {
+                      defaultMessage: 'Enable the workflow to run it',
+                    })
+                  : undefined
+              }
             >
               <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Run" ignoreTag />
             </EuiButtonIcon>,

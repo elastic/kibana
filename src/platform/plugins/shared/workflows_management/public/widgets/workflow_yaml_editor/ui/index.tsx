@@ -8,13 +8,14 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
 import { monaco } from '@kbn/monaco';
 import { getJsonSchemaFromYamlSchema } from '@kbn/workflows';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import YAML from 'yaml';
+import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { WORKFLOW_ZOD_SCHEMA, WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../../common/schema';
 import { YamlEditor } from '../../../shared/ui/yaml_editor';
 import { useYamlValidation } from '../lib/use_yaml_validation';
@@ -27,6 +28,7 @@ import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
 import { getStepNode } from '../../../../common/lib/yaml_utils';
+import { UnsavedChangesPrompt } from '../../../shared/ui/unsaved_changes_prompt';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -90,6 +92,7 @@ export const WorkflowYAMLEditor = ({
   filename = `${workflowId}.yaml`,
   readOnly = false,
   hasChanges = false,
+  lastUpdatedAt,
   highlightStep,
   stepExecutions,
   onMount,
@@ -332,6 +335,7 @@ export const WorkflowYAMLEditor = ({
 
   return (
     <EuiFlexGroup direction="column" gutterSize="none" css={styles.container}>
+      <UnsavedChangesPrompt hasUnsavedChanges={hasChanges} />
       <EuiFlexItem
         grow={false}
         css={{ position: 'absolute', top: euiTheme.size.xxs, right: euiTheme.size.m, zIndex: 10 }}
@@ -344,17 +348,16 @@ export const WorkflowYAMLEditor = ({
               alignItems: 'center',
               gap: '4px',
               padding: '4px 6px',
+              color: euiTheme.colors.accent,
             }}
           >
-            <div
-              style={{
-                backgroundColor: 'darkorange',
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-              }}
-            />
-            <span>Unsaved changes</span>
+            <EuiIcon type="dot" />
+            <span>
+              <FormattedMessage
+                id="workflows.workflowDetail.yamlEditor.unsavedChanges"
+                defaultMessage="Unsaved changes"
+              />
+            </span>
           </div>
         ) : (
           <div
@@ -364,17 +367,17 @@ export const WorkflowYAMLEditor = ({
               alignItems: 'center',
               gap: '4px',
               padding: '4px 6px',
+              color: euiTheme.colors.textSubdued,
             }}
           >
-            <div
-              style={{
-                backgroundColor: 'green',
-                width: '12px',
-                height: '12px',
-                borderRadius: '50%',
-              }}
-            />
-            <span>Saved</span>
+            <EuiIcon type="check" />
+            <span>
+              <FormattedMessage
+                id="workflows.workflowDetail.yamlEditor.saved"
+                defaultMessage="Saved"
+              />{' '}
+              {lastUpdatedAt ? <FormattedRelative value={lastUpdatedAt} /> : null}
+            </span>
           </div>
         )}
       </EuiFlexItem>

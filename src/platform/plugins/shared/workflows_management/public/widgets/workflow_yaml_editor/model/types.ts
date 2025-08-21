@@ -25,6 +25,7 @@ export interface BaseWorkflowYAMLEditorProps {
   filename?: string;
   readOnly?: boolean;
   hasChanges?: boolean;
+  lastUpdatedAt?: Date;
   highlightStep?: string;
   stepExecutions?: EsWorkflowStepExecution[];
   'data-testid'?: string;
