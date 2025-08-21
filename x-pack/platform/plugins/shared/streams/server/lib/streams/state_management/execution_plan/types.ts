@@ -12,7 +12,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
-import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
