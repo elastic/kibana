@@ -73,7 +73,7 @@ export class WorkflowContextManager {
     const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
     directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
 
-    return stepContext;
+    return this.enrichContextAccordingToScope(stepContext);
   }
 
   public getContextKey(key: string): any {
@@ -93,5 +93,19 @@ export class WorkflowContextManager {
     }
 
     return { pathExists: true, value: result };
+  }
+
+  private enrichContextAccordingToScope(stepContext: WorkflowContext): WorkflowContext {
+    for (const nodeId of this.workflowExecutionRuntime.getWorkflowExecution().stack) {
+      const node = this.workflowExecutionGraph.node(nodeId) as any;
+      const nodeType = node?.type;
+      switch (nodeType) {
+        case 'enter-foreach':
+          stepContext.foreach = this.workflowExecutionRuntime.getStepState(nodeId) as any;
+          break;
+      }
+    }
+
+    return stepContext;
   }
 }

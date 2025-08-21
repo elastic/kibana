@@ -93,6 +93,10 @@ export class WorkflowExecutionRuntimeManager {
     return successors.map((successorId) => this.workflowExecutionGraph.node(successorId)) as any[];
   }
 
+  public getTopologicalOrder(): string[] {
+    return this.topologicalOrder;
+  }
+
   public getNode(nodeId: string): any {
     return this.workflowExecutionGraph.node(nodeId);
   }
