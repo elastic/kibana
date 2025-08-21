@@ -7,9 +7,16 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
@@ -49,7 +56,15 @@ export const AgentsList: React.FC = () => {
       {
         field: 'labels',
         name: columnNames.labels,
-        render: (labels: string[]) => <EuiText size="s">{labels.join(', ')}</EuiText>,
+        render: (labels?: string[]) => (
+          <EuiFlexGroup direction="row" wrap>
+            {labels?.map((label) => (
+              <EuiFlexItem key={label} grow={false}>
+                <EuiBadge>{label}</EuiBadge>
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGroup>
+        ),
       },
     ],
     [createOnechatUrl]
@@ -65,15 +80,32 @@ export const AgentsList: React.FC = () => {
     [error]
   );
 
+  const labelOptions = useMemo(() => {
+    const labels = agents.flatMap((agent) => agent.labels ?? []);
+    return Array.from(new Set(labels)).map((label) => ({ value: label }));
+  }, [agents]);
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiBasicTable
-        loading={isLoading}
-        columns={columns}
-        items={agents}
-        itemId="id"
-        error={errorMessage}
-      />
-    </EuiFlexGroup>
+    <EuiInMemoryTable
+      items={agents}
+      itemId="id"
+      columns={columns}
+      sorting={true}
+      selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
+      search={{
+        box: { incremental: true },
+        filters: [
+          {
+            type: 'field_value_selection',
+            name: 'Labels',
+            multiSelect: 'and',
+            options: labelOptions,
+          },
+        ],
+      }}
+      loading={isLoading}
+      error={errorMessage}
+      responsiveBreakpoint={false}
+    />
   );
 };
