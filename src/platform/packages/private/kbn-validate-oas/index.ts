@@ -13,40 +13,52 @@ import chalk from 'chalk';
 import { run } from '@kbn/dev-cli-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-const kibanaYamlPath = Path.resolve(REPO_ROOT, './oas_docs/output/kibana.yaml');
-const kibanaServerlessYamlPath = Path.resolve(
-  REPO_ROOT,
-  './oas_docs/output/kibana.serverless.yaml'
-);
+const kibanaYamlRelativePath = './oas_docs/output/kibana.yaml';
+const kibanaServerlessYamlRelativePath = './oas_docs/output/kibana.serverless.yaml';
 
 run(
   async ({ log, flagsReader }) => {
     const paths = flagsReader.arrayOfStrings('path');
     const only = flagsReader.string('only') as 'traditional' | 'serverless' | undefined;
+    const assertNoErrorIncrease = flagsReader.boolean('assert-no-error-increase');
+
     if (only && only !== 'traditional' && only !== 'serverless') {
       log.error('Invalid value for --only flag, must be "traditional" or "serverless"');
       process.exit(1);
     }
+
+    if (paths?.length && assertNoErrorIncrease) {
+      log.error(
+        'Cannot use --assert-no-error-increase with --path, please run without --path to assert no error increase.'
+      );
+      process.exit(1);
+    }
+
+    // Baseline file location
+    const baselineFile = Path.resolve(__dirname, './oas_error_baseline.json');
+
     // Load CommonJS version
     const { Validator } = await import('@seriousme/openapi-schema-validator');
     const validator = new Validator({ strict: false, allErrors: true });
 
     let invalidSpec = false;
+    const errorCounts: Record<string, number> = {};
 
     const yamlPaths: string[] = [];
-
     if (only === 'traditional') {
-      yamlPaths.push(kibanaYamlPath);
+      yamlPaths.push(kibanaYamlRelativePath);
     } else if (only === 'serverless') {
-      yamlPaths.push(kibanaServerlessYamlPath);
+      yamlPaths.push(kibanaServerlessYamlRelativePath);
     } else {
-      yamlPaths.push(kibanaYamlPath, kibanaServerlessYamlPath);
+      yamlPaths.push(kibanaYamlRelativePath, kibanaServerlessYamlRelativePath);
     }
 
     for (const yamlPath of yamlPaths) {
       log.info(`About to validate spec at ${chalk.underline(yamlPath)}`);
       await log.indent(4, async () => {
-        const result = await validator.validate(Fs.readFileSync(yamlPath).toString('utf-8'));
+        const result = await validator.validate(
+          Fs.readFileSync(Path.resolve(REPO_ROOT, yamlPath)).toString('utf-8')
+        );
         if (!result.valid) {
           log.warning(`${chalk.underline(yamlPath)} is NOT valid`);
 
@@ -75,10 +87,52 @@ run(
           log.warning('Found the following issues\n\n' + errorMessage + '\n');
           log.warning(`Found ${chalk.bold(errorCount)} errors in ${chalk.underline(yamlPath)}`);
           invalidSpec = true;
+          errorCounts[yamlPath] = errorCount;
         } else {
           log.success(`${chalk.underline(yamlPath)} is valid`);
         }
       });
+    }
+
+    if (assertNoErrorIncrease) {
+      let baseline: Record<string, number> = {};
+      if (Fs.existsSync(baselineFile)) {
+        baseline = JSON.parse(Fs.readFileSync(baselineFile, 'utf-8'));
+      } else {
+        log.error(
+          'First generate a baseline by running --update-baseline by running without --assert-no-error-increase.'
+        );
+        process.exit(1);
+      }
+
+      let increased = false;
+      let report = '';
+      for (const yamlPath of yamlPaths) {
+        const prev = baseline[yamlPath];
+        const curr = errorCounts[yamlPath];
+        if (curr > prev) {
+          increased = true;
+          report += `\n${chalk.red(yamlPath)}: ${chalk.bold(curr)} errors (was ${prev})`;
+        } else {
+          report += `\n${chalk.green(yamlPath)}: ${chalk.bold(curr)} errors (baseline ${prev})`;
+        }
+      }
+      log.info('Count comparison:' + report);
+      if (increased) {
+        log.error(
+          'Error count has increased compared to baseline, not updating the baseline count; exit(1).'
+        );
+        log.error('To investigate this further see "node ./scripts/validate_oas_docs.js --help".');
+        process.exit(1);
+      } else {
+        log.success('No error increase detected.');
+      }
+    }
+
+    // If not baseline mode, optionally create baseline if requested
+    if (flagsReader.boolean('update-baseline') && !assertNoErrorIncrease) {
+      Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
+      log.success('Baseline file created/updated.');
     }
 
     log.info('Done');
@@ -90,15 +144,19 @@ run(
     description: 'Validate Kibana OAS YAML files (in oas_docs/output)',
     usage: 'node ./scripts/validate_oas_docs.js',
     flags: {
+      boolean: ['assert-no-error-increase', 'update-baseline'],
       string: ['path', 'only'],
       help: `
-      --path             Pass in the (start of) a custom path to focus OAS validation error reporting, can be specified multiple times.
-      --only             Validate only OAS for the a specific offering, one of "traditional" or "serverless". Omitting this will validate all offerings.
+      --assert-no-error-increase  Will error if the number of errors in the OAS spec compared to the baseline has increased. Cannot be combined with other flags.
+      --update-baseline          Update or create the baseline file with current error counts.
+      --path                     Pass in the (start of) a custom path to focus OAS validation error reporting, can be specified multiple times.
+      --only                     Validate only OAS for the a specific offering, one of "traditional" or "serverless". Omitting this will validate all offerings.
 `,
       examples: `
 node ./scripts/validate_oas_docs.js
 node ./scripts/validate_oas_docs.js --path /paths/~1api~1fleet~1agent_policies --path /paths/~1api~1fleet~1agent_policies
 node ./scripts/validate_oas_docs.js --only serverless --path /paths/~1api~1fleet~1agent_policies
+node ./scripts/validate_oas_docs.js --assert-no-error-increase --update-baseline
 `,
     },
   }
