@@ -9,7 +9,7 @@
 
 import indexPatternResponse from './__fixtures__/index_pattern_response.json';
 
-import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
+import { isFilterable } from '@kbn/data-views-plugin/common';
 import type { KueryNode } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import type { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
@@ -42,7 +42,7 @@ describe('Kuery field suggestions', () => {
       mockKueryNode({ prefix, suffix })
     );
     const filterableFields = (indexPatternResponse.fields as DataViewField[]).filter(
-      indexPatternsUtils.isFilterable
+      isFilterable
     );
 
     expect(suggestions.length).toBe(filterableFields.length);

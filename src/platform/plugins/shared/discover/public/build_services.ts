@@ -29,9 +29,9 @@ import type {
 import type {
   FilterManager,
   TimefilterContract,
-  DataViewsContract,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

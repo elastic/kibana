@@ -10,8 +10,7 @@ import useMountedState from 'react-use/lib/useMountedState';
 import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { indexPatterns } from '@kbn/data-plugin/public';
-import type { DataView } from '@kbn/data-plugin/common';
+import { isNestedField } from '@kbn/data-views-plugin/common';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,
@@ -19,6 +18,7 @@ import {
 } from '../kibana_services';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../common/i18n_getters';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
+import type { DataView } from '@kbn/data-plugin/common';
 
 interface Props {
   onChange: (indexPattern: DataView) => void;
@@ -32,7 +32,7 @@ export function GeoIndexPatternSelect(props: Props) {
   const hasGeoFields = useMemo(() => {
     return props.dataView
       ? props.dataView.fields.some((field) => {
-          return !indexPatterns.isNestedField(field) && props?.isGeoPointsOnly
+          return !isNestedField(field) && props?.isGeoPointsOnly
             ? (ES_GEO_FIELD_TYPE.GEO_POINT as string) === field.type
             : ES_GEO_FIELD_TYPES.includes(field.type);
         })

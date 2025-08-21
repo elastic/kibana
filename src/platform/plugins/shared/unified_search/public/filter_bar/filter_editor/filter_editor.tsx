@@ -44,7 +44,7 @@ import React, { Component } from 'react';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getIndexPatternFromFilter } from '@kbn/data-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
 import { cx } from '@emotion/css';

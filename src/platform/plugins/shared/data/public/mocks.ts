@@ -13,7 +13,6 @@ import type { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
 import { queryServiceMock } from './query/mocks';
 import { createNowProviderMock } from './now_provider/mocks';
-import { dataViewPluginMocks } from './data_views/mocks';
 
 export type Setup = jest.Mocked<ReturnType<DataPlugin['setup']>>;
 export type Start = jest.Mocked<ReturnType<DataPlugin['start']>>;
@@ -28,7 +27,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const dataViews = dataViewPluginMocks.createStartContract();
+  const dataViewsMock = {} as any; // Mock for dataViews service
 
   return {
     actions: {
@@ -36,15 +35,12 @@ const createStartContract = (): Start => {
       createFiltersFromRangeSelectAction: jest.fn(),
       createFiltersFromMultiValueClickAction: jest.fn(),
     },
+    dataViews: dataViewsMock,
     datatableUtilities: createDatatableUtilitiesMock(),
+    indexPatterns: dataViewsMock, // Deprecated alias for dataViews
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
-    dataViews,
-    /**
-     * @deprecated Use dataViews service instead. All index pattern interfaces were renamed.
-     */
-    indexPatterns: dataViews,
     nowProvider: createNowProviderMock(),
   };
 };
