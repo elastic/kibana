@@ -6,10 +6,10 @@
  */
 
 import { CasePromptBuilder } from '../prompt_builder';
-import { buildBaseCaseSummaryPrompt } from './base_prompt';
+import { buildBaseCaseSummaryPrompt } from './base_case_summary_prompt';
 
 export class BasePromptBuilder extends CasePromptBuilder {
-  build(): string {
+  buildSummary(): string {
     const basePrompt = buildBaseCaseSummaryPrompt(this.caseData);
     return basePrompt;
   }

@@ -9,5 +9,5 @@ import type { Case } from '../../../../../common';
 
 export abstract class CasePromptBuilder {
   constructor(protected caseData: Case) {}
-  abstract build(): string;
+  abstract buildSummary(): string;
 }

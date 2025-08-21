@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { buildBaseCaseSummaryPrompt } from '../base/base_prompt';
+import { buildBaseCaseSummaryPrompt } from '../base/base_case_summary_prompt';
 import { CasePromptBuilder } from '../prompt_builder';
 
-export class StackPromptBuilder extends CasePromptBuilder {
-  build(): string {
+export class SecurityPromptBuilder extends CasePromptBuilder {
+  buildSummary(): string {
     const basePrompt = buildBaseCaseSummaryPrompt(this.caseData);
-    const stackPrompt = '';
-    return `${basePrompt}${stackPrompt}`;
+    const secPrompt = '';
+    return `${basePrompt}${secPrompt}`;
   }
 }

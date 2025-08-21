@@ -6,20 +6,20 @@
  */
 
 import type { Case } from '../../../../common';
-import { BasePromptBuilder } from './case_summary_prompt_builder/base/base_prompt_builder';
-import { ObservabilityPromptBuilder } from './case_summary_prompt_builder/obs/obs_prompt_builder';
-import { SecurityPromptBuilder } from './case_summary_prompt_builder/sec/sec_prompt_builder';
-import { StackPromptBuilder } from './case_summary_prompt_builder/stack/stack_prompt_builder';
+import { BasePromptBuilder } from './case_prompt_builder/base/base_prompt_builder';
+import { ObservabilityPromptBuilder } from './case_prompt_builder/obs/obs_prompt_builder';
+import { SecurityPromptBuilder } from './case_prompt_builder/sec/sec_prompt_builder';
+import { StackPromptBuilder } from './case_prompt_builder/stack/stack_prompt_builder';
 
 export function getCaseSummaryPrompt(caseData: Case): string {
   switch (caseData.owner) {
     case 'observability':
-      return new ObservabilityPromptBuilder(caseData).build();
+      return new ObservabilityPromptBuilder(caseData).buildSummary();
     case 'security':
-      return new SecurityPromptBuilder(caseData).build();
+      return new SecurityPromptBuilder(caseData).buildSummary();
     case 'stack':
-      return new StackPromptBuilder(caseData).build();
+      return new StackPromptBuilder(caseData).buildSummary();
     default:
-      return new BasePromptBuilder(caseData).build();
+      return new BasePromptBuilder(caseData).buildSummary();
   }
 }

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { buildBaseCaseSummaryPrompt } from '../base/base_prompt';
-import { buildObsCaseSummaryPrompt } from './obs_prompt';
+import { buildBaseCaseSummaryPrompt } from '../base/base_case_summary_prompt';
+import { buildObsCaseSummaryPrompt } from './obs_case_summary_prompt';
 import { CasePromptBuilder } from '../prompt_builder';
 
 export class ObservabilityPromptBuilder extends CasePromptBuilder {
-  build(): string {
+  buildSummary(): string {
     const basePrompt = buildBaseCaseSummaryPrompt(this.caseData);
     const obsPrompt = buildObsCaseSummaryPrompt(this.caseData);
     return `${basePrompt}${obsPrompt}`;

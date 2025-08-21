@@ -17,6 +17,9 @@ const params = {
   params: schema.object({
     case_id: schema.string(),
   }),
+  query: schema.object({
+    connectorId: schema.string(),
+  }),
 };
 
 export const getCaseSummaryRoute = createCasesRoute({
@@ -34,7 +37,7 @@ export const getCaseSummaryRoute = createCasesRoute({
 
       const inferenceClient = await caseContext.getInferenceClient();
       const caseId = request.params.case_id;
-      const connectorId = (request.query as { connectorId: string }).connectorId;
+      const connectorId = request.query.connectorId;
       const caseData = await casesClient.cases.get({ id: caseId, includeComments: true });
       const prompt = getCaseSummaryPrompt(caseData);
 
