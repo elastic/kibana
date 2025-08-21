@@ -67,7 +67,7 @@ export class EnterForeachNodeImpl implements StepImplementation {
       };
     }
 
-    this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
+    await this.wfExecutionRuntimeManager.setStepState(this.step.id, foreachState);
     this.wfExecutionRuntimeManager.goToNextStep();
   }
 
