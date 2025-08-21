@@ -13,6 +13,7 @@ export {
   builtInToolIdPrefix,
   builtinToolIds,
   builtinTags,
+  defaultAgentToolIds,
   isReservedToolId,
   isBuiltInToolId,
   type ByIdsToolSelection,

@@ -6,14 +6,7 @@
  */
 
 import type { AgentDefinition } from '@kbn/onechat-common';
-import { AgentType, oneChatDefaultAgentId, builtinToolIds as tools } from '@kbn/onechat-common';
-
-export const defaultAgentTools = [
-  tools.search,
-  tools.listIndices,
-  tools.getIndexMapping,
-  tools.executeEsql,
-];
+import { AgentType, oneChatDefaultAgentId, defaultAgentToolIds } from '@kbn/onechat-common';
 
 export const createDefaultAgentDefinition = (): AgentDefinition => {
   return {
@@ -22,7 +15,7 @@ export const createDefaultAgentDefinition = (): AgentDefinition => {
     name: 'Onechat default agent',
     description: 'The default onechat agent',
     configuration: {
-      tools: [{ tool_ids: [...defaultAgentTools] }],
+      tools: [{ tool_ids: [...defaultAgentToolIds] }],
     },
   };
 };

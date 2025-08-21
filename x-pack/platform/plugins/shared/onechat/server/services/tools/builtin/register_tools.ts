@@ -14,6 +14,7 @@ import {
   generateEsqlTool,
   getIndexMappingsTool,
   listIndicesTool,
+  indexExplorerTool,
 } from './definitions';
 
 export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegistry }) => {
@@ -24,6 +25,7 @@ export const registerBuiltinTools = ({ registry }: { registry: BuiltinToolRegist
     generateEsqlTool(),
     getIndexMappingsTool(),
     listIndicesTool(),
+    indexExplorerTool(),
   ];
 
   tools.forEach((tool) => {
