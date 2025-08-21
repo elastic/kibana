@@ -160,7 +160,6 @@ describe('AI Assistant Service', () => {
 
       expect(assistantService.isInitialized()).toEqual(true);
 
-
       const expectedTemplates = [
         '.kibana-elastic-ai-assistant-component-template-conversations',
         '.kibana-elastic-ai-assistant-component-template-knowledge-base',
@@ -170,15 +169,16 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-defend-insights',
         '.kibana-elastic-ai-assistant-component-template-alert-summary',
         '.kibana-elastic-ai-assistant-component-template-checkpoints',
-        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes'
+        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
 
       clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
         expect(call[0].name).toEqual(expectedTemplates[i]);
       });
 
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(expectedTemplates.length);
-
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(
+        expectedTemplates.length
+      );
     });
 
     test('should log error and set initialized to false if creating/updating common component template throws error', async () => {
@@ -688,15 +688,16 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-component-template-defend-insights',
         '.kibana-elastic-ai-assistant-component-template-alert-summary',
         '.kibana-elastic-ai-assistant-component-template-checkpoints',
-        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes'
+        '.kibana-elastic-ai-assistant-component-template-checkpoint-writes',
       ];
 
       clusterClient.cluster.putComponentTemplate.mock.calls.forEach((call, i) => {
         expect(call[0].name).toEqual(expectedTemplates[i]);
       });
 
-      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(expectedTemplates.length);
-
+      expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(
+        expectedTemplates.length
+      );
     });
 
     test('should retry updating index template for transient ES errors', async () => {
@@ -728,14 +729,16 @@ describe('AI Assistant Service', () => {
         '.kibana-elastic-ai-assistant-index-template-defend-insights',
         '.kibana-elastic-ai-assistant-index-template-alert-summary',
         '.kibana-elastic-ai-assistant-index-template-checkpoints',
-        '.kibana-elastic-ai-assistant-index-template-checkpoint-writes'
+        '.kibana-elastic-ai-assistant-index-template-checkpoint-writes',
       ];
 
       clusterClient.indices.putIndexTemplate.mock.calls.forEach((call, i) => {
         expect(call[0].name).toEqual(expectedTemplates[i]);
       });
 
-      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(expectedTemplates.length);
+      expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(
+        expectedTemplates.length
+      );
     });
 
     test('should retry updating index settings for existing indices for transient ES errors', async () => {
