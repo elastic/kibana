@@ -80,13 +80,15 @@ describe('updateSavedSearch', () => {
       searchSource: savedSearchMock.searchSource.createCopy(),
       timeRestore: true,
     };
-    (discoverServiceMock.timefilter.getTime as jest.Mock).mockReturnValue({
-      from: 'now-666m',
-      to: 'now',
-    });
     updateSavedSearch({
       savedSearch,
-      globalState,
+      globalState: {
+        ...globalState,
+        timeRange: {
+          from: 'now-666m',
+          to: 'now',
+        },
+      },
       services: discoverServiceMock,
       appState: {
         query,
@@ -105,13 +107,15 @@ describe('updateSavedSearch', () => {
       searchSource: savedSearchMock.searchSource.createCopy(),
       timeRestore: false,
     };
-    (discoverServiceMock.timefilter.getTime as jest.Mock).mockReturnValue({
-      from: 'now-666m',
-      to: 'now',
-    });
     updateSavedSearch({
       savedSearch,
-      globalState,
+      globalState: {
+        ...globalState,
+        timeRange: {
+          from: 'now-666m',
+          to: 'now',
+        },
+      },
       services: discoverServiceMock,
       appState: {
         query,
