@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { AddDocumentsCodeExample, exampleTexts } from './add_documents_code_example';
 import { generateSampleDocument } from '../../utils/document_generation';
-import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
 import { MemoryRouter } from 'react-router-dom';
 
 jest.mock('../../utils/language', () => ({

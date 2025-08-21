@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { ActionTypeSelectorModal } from './action_type_selector_modal';
-import { ActionType } from '@kbn/actions-plugin/common';
+import type { ActionType } from '@kbn/actions-plugin/common';
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 const actionTypes = [
   {

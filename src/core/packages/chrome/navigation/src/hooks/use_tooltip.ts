@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiToolTip } from '@elastic/eui';
+import type { EuiToolTip } from '@elastic/eui';
 import { useRef } from 'react';
 
 /**

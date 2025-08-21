@@ -11,14 +11,15 @@ import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
-import {
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server/plugin';
+import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { WorkflowExecutionEngineModel } from '@kbn/workflows';
-import { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
+import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
 
 export interface WorkflowsPluginSetup {
@@ -26,7 +27,11 @@ export interface WorkflowsPluginSetup {
 }
 
 export interface WorkflowsPluginStart {
-  runWorkflow(workflow: WorkflowExecutionEngineModel, params: Record<string, any>): Promise<string>;
+  runWorkflow(
+    workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
+    params: Record<string, any>
+  ): Promise<string>;
 }
 
 export interface WorkflowsExecutionEnginePluginStartDeps {
@@ -34,6 +39,7 @@ export interface WorkflowsExecutionEnginePluginStartDeps {
   workflowsExecutionEngine: WorkflowsExecutionEnginePluginStart;
   actions: ActionsPluginStartContract;
   security?: SecurityPluginStart;
+  spaces?: SpacesPluginStart;
 }
 
 export interface WorkflowsManagementPluginServerDependenciesSetup {
@@ -41,4 +47,5 @@ export interface WorkflowsManagementPluginServerDependenciesSetup {
   taskManager?: TaskManagerSetupContract;
   actions?: ActionsPluginSetupContract;
   alerting?: AlertingServerSetup;
+  spaces?: SpacesPluginStart;
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { settings } = getPageObjects(['settings']);
@@ -13,6 +13,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const retry = getService('retry');
 
   describe('spaces', function () {
     this.tags('skipFirefox');
@@ -35,7 +36,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await settings.clickKibanaIndexPatterns();
       await settings.createIndexPattern('log*');
 
-      await settings.clickKibanaIndexPatterns();
+      // Wait for data view creation to fully complete
+      await retry.waitForWithTimeout('data view to be created and listed', 5000, async () => {
+        await settings.clickKibanaIndexPatterns();
+        return await testSubjects.exists('indexPatternTable');
+      });
 
       // click manage spaces on first entry
       // first avatar is in header, so we want the second one
@@ -45,8 +50,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('sts-space-selector-row-custom_space');
       await testSubjects.click('sts-save-button');
 
-      // verify custom space has been added to list
-      await testSubjects.existOrFail('space-avatar-custom_space');
+      // verify custom space has been added to list with retry
+      await retry.waitForWithTimeout('custom space avatar to appear', 5000, async () => {
+        return await testSubjects.exists('space-avatar-custom_space');
+      });
     });
   });
 }

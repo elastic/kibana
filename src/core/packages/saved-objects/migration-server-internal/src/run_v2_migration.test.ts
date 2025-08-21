@@ -17,7 +17,8 @@ import {
 } from '@kbn/core-saved-objects-base-server-internal';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
-import { runV2Migration, RunV2MigrationOpts } from './run_v2_migration';
+import type { RunV2MigrationOpts } from './run_v2_migration';
+import { runV2Migration } from './run_v2_migration';
 import { DocumentMigrator } from './document_migrator';
 import { ALLOWED_CONVERT_VERSION } from './kibana_migrator_constants';
 import { buildTypesMappings, createIndexMap } from './core';

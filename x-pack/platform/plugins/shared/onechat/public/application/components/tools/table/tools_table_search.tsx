@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiSearchBar, EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
-import { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
+import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
+import { EuiSearchBar } from '@elastic/eui';
+import type { ToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { countBy } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useToolsPreferences } from '../../../context/tools_preferences_provider';

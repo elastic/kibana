@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PluginInitializer } from '@kbn/core/public';
-import {
-  CorePluginChromelessPlugin,
-  CorePluginChromelessPluginSetup,
-  CorePluginChromelessPluginStart,
-} from './plugin';
+import type { PluginInitializer } from '@kbn/core/public';
+import type { CorePluginChromelessPluginSetup, CorePluginChromelessPluginStart } from './plugin';
+import { CorePluginChromelessPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   CorePluginChromelessPluginSetup,

@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { disablePrivmonSetting, enablePrivmonSetting } from '../../utils';
 import { PrivMonUtils } from './privileged_users/utils';

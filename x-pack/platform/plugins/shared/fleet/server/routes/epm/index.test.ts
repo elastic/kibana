@@ -464,6 +464,7 @@ describe('schema validation', () => {
     const expectedResponse: GetStatsResponse = {
       response: {
         agent_policy_count: 0,
+        package_policy_count: 0,
       },
     };
     (getStatsHandler as jest.Mock).mockImplementation((ctx, request, res) => {

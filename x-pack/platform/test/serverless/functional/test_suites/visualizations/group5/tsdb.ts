@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { partition } from 'lodash';
 import moment from 'moment';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import {
   type ScenarioIndexes,
   TEST_DOC_COUNT,
@@ -72,7 +72,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await es.indices.delete({ index: [tsdbIndex] });
     });
 
-    describe('downsampling', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/232416
+    // FLAKY: https://github.com/elastic/kibana/issues/232417
+    describe.skip('downsampling', () => {
       const downsampleDataView: { index: string; dataView: string } = { index: '', dataView: '' };
       before(async () => {
         const downsampledTargetIndex = await dataStreams.downsampleTSDBIndex(tsdbIndex, {
