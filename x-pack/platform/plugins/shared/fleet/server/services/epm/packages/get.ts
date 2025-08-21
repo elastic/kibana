@@ -59,6 +59,7 @@ import {
   RegistryResponseError,
   PackageInvalidArchiveError,
   FleetUnauthorizedError,
+  FleetError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -204,6 +205,19 @@ export async function getPackages(
   return packageListWithoutStatus as PackageList;
 }
 
+function shouldIncludePackageWithDatastreamTypes(
+  pkg: Installable<any>,
+  excludeDataStreamTypes: string[] = []
+) {
+  const shouldInclude =
+    (pkg.data_streams || [])?.length === 0 ||
+    pkg.data_streams?.some((dataStream: any) => {
+      return !excludeDataStreamTypes.includes(dataStream.type);
+    });
+
+  return shouldInclude;
+}
+
 function filterOutExcludedDataStreamTypes(
   packageList: Array<Installable<any>>
 ): Array<Installable<any>> {
@@ -212,11 +226,7 @@ function filterOutExcludedDataStreamTypes(
   if (excludeDataStreamTypes.length > 0) {
     // filter out packages where all data streams have excluded types e.g. metrics
     return packageList.reduce((acc, pkg) => {
-      const shouldInclude =
-        (pkg.data_streams || [])?.length === 0 ||
-        pkg.data_streams?.some((dataStream: any) => {
-          return !excludeDataStreamTypes.includes(dataStream.type);
-        });
+      const shouldInclude = shouldIncludePackageWithDatastreamTypes(pkg, excludeDataStreamTypes);
       if (shouldInclude) {
         // filter out excluded data stream types
         const filteredDataStreams =
@@ -574,6 +584,11 @@ export async function getPackageInfo({
   const { filteredDataStreams, filteredPolicyTemplates } =
     getFilteredDataStreamsAndPolicyTemplates(packageInfo);
 
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+  if (!shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)) {
+    throw new FleetError('Package is not compatible with the current project data stream types');
+  }
   const updated = {
     ...packageInfo,
     ...additions,
