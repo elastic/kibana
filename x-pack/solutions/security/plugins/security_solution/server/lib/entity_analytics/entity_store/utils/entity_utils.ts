@@ -7,6 +7,8 @@
 
 import {
   ENTITY_LATEST,
+  ENTITY_HISTORY,
+  ENTITY_RESET,
   ENTITY_SCHEMA_VERSION_V1,
   entitiesIndexPattern,
 } from '@kbn/entities-schema';
@@ -67,12 +69,31 @@ export const getEntitiesIndexName = (entityType: EntityTypeOpenAPI, namespace: s
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
 
-export const getEntitiesSnapshotIndexName = (entityType: EntityTypeOpenAPI, snapshotDate: Date, namespace: string) =>
-  entitiesIndexPattern({
+export function getEntitiesSnapshotIndexName(entityType: EntityTypeOpenAPI, snapshotDate: Date, namespace: string) {
+  const snapshotId = `${snapshotDate.toISOString().split('T')[0]}.${buildEntityDefinitionId(entityType, namespace)}`;
+  return entitiesIndexPattern({
     schemaVersion: ENTITY_SCHEMA_VERSION_V1,
-    dataset: snapshotDate.toISOString().split('T')[0],
+    dataset: ENTITY_HISTORY,
+    definitionId: snapshotId,
+  });
+}
+
+export function getEntitiesSnapshotIndexPattern(entityType: EntityTypeOpenAPI, namespace: string) {
+  const snapshotId = `*.${buildEntityDefinitionId(entityType, namespace)}`;
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_HISTORY,
+    definitionId: snapshotId,
+  });
+}
+
+export function getEntitiesResetIndexName(entityType: EntityTypeOpenAPI, namespace: string) {
+  return entitiesIndexPattern({
+    schemaVersion: ENTITY_SCHEMA_VERSION_V1,
+    dataset: ENTITY_RESET,
     definitionId: buildEntityDefinitionId(entityType, namespace),
   });
+}
 
 export const buildEntityDefinitionId = (entityType: EntityTypeOpenAPI, space: string) => {
   return `security_${entityType}_${space}`;
