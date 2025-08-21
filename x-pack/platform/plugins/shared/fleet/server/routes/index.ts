@@ -30,9 +30,13 @@ import { registerRoutes as registerStandaloneAgentApiKeyRoutes } from './standal
 import { registerRoutes as registerDebugRoutes } from './debug';
 import { registerRoutes as registerRemoteSyncedIntegrations } from './remote_synced_integrations';
 
-export function registerRoutes(fleetAuthzRouter: FleetAuthzRouter, config: FleetConfigType) {
+export function registerRoutes(
+  fleetAuthzRouter: FleetAuthzRouter,
+  config: FleetConfigType,
+  isServerless?: boolean
+) {
   // Always register app routes for permissions checking
-  registerAppRoutes(fleetAuthzRouter, config);
+  registerAppRoutes(fleetAuthzRouter, config, isServerless);
 
   // The upload package route is only authorized for the superuser
   registerEPMRoutes(fleetAuthzRouter, config);
