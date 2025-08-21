@@ -302,6 +302,7 @@ export class WorkflowExecutionRuntimeManager {
         } as Partial<EsWorkflowStepExecution>;
 
         this.workflowExecutionState.upsertStep(stepExecutionUpdate);
+        this.logStepFail(stepId, error);
       }
     );
   }
@@ -612,6 +613,16 @@ export class WorkflowExecutionRuntimeManager {
         outcome: isSuccess ? 'success' : 'failure',
       },
       tags: ['workflow', 'step', 'complete'],
+    });
+  }
+
+  private logStepFail(stepId: string, error: Error | string): void {
+    const node = this.workflowExecutionGraph.node(stepId) as any;
+    const stepName = node?.name || stepId;
+    const _error = typeof error === 'string' ? Error(error) : error;
+    this.workflowLogger?.logError(`Step '${stepName}' failed`, _error, {
+      event: { action: 'step-fail', category: ['workflow', 'step'] },
+      tags: ['workflow', 'step', 'fail'],
     });
   }
 }

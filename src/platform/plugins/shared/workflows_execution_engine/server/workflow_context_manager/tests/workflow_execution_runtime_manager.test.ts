@@ -399,6 +399,33 @@ describe('WorkflowExecutionRuntimeManager', () => {
     });
   });
 
+  describe('failStep', () => {
+    it('should mark the step as failed', async () => {
+      const stepId = 'node1';
+      const error = new Error('Step execution failed');
+      await underTest.failStep(stepId, error);
+
+      expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
+        expect.objectContaining({
+          stepId,
+          status: ExecutionStatus.FAILED,
+          error: String(error),
+        })
+      );
+    });
+
+    it('should log the failure of the step', async () => {
+      const stepId = 'node1';
+      const error = new Error('Step execution failed');
+      await underTest.failStep(stepId, error);
+
+      expect(workflowLogger.logError).toHaveBeenCalledWith(`Step 'node1' failed`, error, {
+        event: { action: 'step-fail', category: ['workflow', 'step'] },
+        tags: ['workflow', 'step', 'fail'],
+      });
+    });
+  });
+
   describe('saveState', () => {
     it('should save the current workflow execution state', async () => {
       await underTest.saveState();
