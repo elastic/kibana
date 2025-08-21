@@ -21,6 +21,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { SchedulerService } from '../scheduler/scheduler_service';
@@ -28,9 +29,12 @@ import type { WorkflowsService } from './workflows_management_service';
 import type { LogSearchResult } from './lib/workflow_logger';
 
 export interface GetWorkflowsParams {
-  triggerType?: 'schedule' | 'event';
+  triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
-  offset: number;
+  page: number;
+  createdBy?: string[];
+  enabled?: boolean[];
+  query?: string;
   _full?: boolean;
 }
 
@@ -62,6 +66,16 @@ export interface WorkflowExecutionLogsDto {
   offset: number;
 }
 
+export interface GetStepExecutionParams {
+  executionId: string;
+  stepId: string;
+}
+
+export interface GetStepLogsParams {
+  executionId: string;
+  stepId: string;
+}
+
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
@@ -72,44 +86,78 @@ export class WorkflowsManagementApi {
     this.schedulerService = schedulerService;
   }
 
-  public async getWorkflows(params: GetWorkflowsParams): Promise<WorkflowListDto> {
-    return await this.workflowsService.searchWorkflows(params);
+  public async getWorkflows(params: GetWorkflowsParams, spaceId: string): Promise<WorkflowListDto> {
+    return await this.workflowsService.searchWorkflows(params, spaceId);
   }
 
-  public async getWorkflow(id: string): Promise<WorkflowDetailDto | null> {
-    return await this.workflowsService.getWorkflow(id);
+  public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
+    return await this.workflowsService.getWorkflow(id, spaceId);
   }
 
   public async createWorkflow(
     workflow: CreateWorkflowCommand,
+    spaceId: string,
     request: KibanaRequest
   ): Promise<WorkflowDetailDto> {
-    return await this.workflowsService.createWorkflow(workflow, request);
+    return await this.workflowsService.createWorkflow(workflow, spaceId, request);
+  }
+
+  public async cloneWorkflow(
+    workflow: WorkflowDetailDto,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
+      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+        defaultMessage: 'Copy',
+      })}`,
+    });
+    return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
   }
 
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
+    spaceId: string,
     request: KibanaRequest
-  ): Promise<UpdatedWorkflowResponseDto> {
-    return await this.workflowsService.updateWorkflow(id, workflow, request);
+  ): Promise<UpdatedWorkflowResponseDto | null> {
+    const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!originalWorkflow) {
+      throw new Error(`Workflow with id ${id} not found`);
+    }
+    return await this.workflowsService.updateWorkflow(
+      id,
+      workflow,
+      originalWorkflow,
+      spaceId,
+      request
+    );
   }
 
-  public async deleteWorkflows(workflowIds: string[], request: KibanaRequest): Promise<void> {
-    return await this.workflowsService.deleteWorkflows(workflowIds, request);
+  public async deleteWorkflows(
+    workflowIds: string[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<void> {
+    return await this.workflowsService.deleteWorkflows(workflowIds, spaceId, request);
   }
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
-    return await this.schedulerService.runWorkflow(workflow, inputs);
+    return await this.schedulerService.runWorkflow(workflow, spaceId, inputs);
   }
 
-  public async testWorkflow(workflowYaml: string, inputs: Record<string, any>): Promise<string> {
+  public async testWorkflow(
+    workflowYaml: string,
+    inputs: Record<string, any>,
+    spaceId: string
+  ): Promise<string> {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
@@ -127,33 +175,45 @@ export class WorkflowsManagementApi {
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
-        status: workflowToCreate.status,
+        enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
       },
+      spaceId,
       inputs
     );
   }
 
-  public async getWorkflowExecutions(workflowId: string): Promise<WorkflowExecutionListDto> {
-    return await this.workflowsService.searchWorkflowExecutions({
-      workflowId,
-    });
+  public async getWorkflowExecutions(
+    workflowId: string,
+    spaceId: string
+  ): Promise<WorkflowExecutionListDto> {
+    return await this.workflowsService.searchWorkflowExecutions(
+      {
+        workflowId,
+      },
+      spaceId
+    );
   }
 
   public async getWorkflowExecution(
-    workflowExecutionId: string
+    workflowExecutionId: string,
+    spaceId: string
   ): Promise<WorkflowExecutionDto | null> {
-    return await this.workflowsService.getWorkflowExecution(workflowExecutionId);
+    return await this.workflowsService.getWorkflowExecution(workflowExecutionId, spaceId);
   }
 
   public async getWorkflowExecutionLogs(
-    params: GetWorkflowExecutionLogsParams
+    params: GetWorkflowExecutionLogsParams,
+    spaceId: string
   ): Promise<WorkflowExecutionLogsDto> {
     let result: LogSearchResult;
     if (params.stepId) {
-      result = await this.workflowsService.getStepLogs(params.executionId, params.stepId);
+      result = await this.workflowsService.getStepLogs(
+        { executionId: params.executionId, stepId: params.stepId },
+        spaceId
+      );
     } else {
-      result = await this.workflowsService.getExecutionLogs(params.executionId);
+      result = await this.workflowsService.getExecutionLogs(params.executionId, spaceId);
     }
 
     // Transform the logs to match our API format
@@ -189,9 +249,17 @@ export class WorkflowsManagementApi {
   }
 
   public async getStepExecution(
-    workflowExecutionId: string,
-    stepId: string
+    params: GetStepExecutionParams,
+    spaceId: string
   ): Promise<EsWorkflowStepExecution | null> {
-    return await this.workflowsService.getStepExecution(workflowExecutionId, stepId);
+    return await this.workflowsService.getStepExecution(params, spaceId);
+  }
+
+  public async getWorkflowStats() {
+    return await this.workflowsService.getWorkflowStats();
+  }
+
+  public async getWorkflowAggs(fields: string[] = []) {
+    return await this.workflowsService.getWorkflowAggs(fields);
   }
 }

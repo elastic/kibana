@@ -182,22 +182,6 @@ export class WorkflowEventLoggerService {
     return this.searchLogs(query);
   }
 
-  public async getWorkflowLogs(workflowId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.id': workflowId,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.searchLogs(query);
-  }
-
   public async getLogsByLevel(level: string, executionId?: string): Promise<LogSearchResult> {
     const mustClauses: any[] = [
       {

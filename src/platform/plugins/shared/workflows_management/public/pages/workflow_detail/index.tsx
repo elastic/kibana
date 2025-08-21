@@ -28,7 +28,7 @@ import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
 import React, { useEffect, useMemo, useState } from 'react';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
-import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
+import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
 import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';

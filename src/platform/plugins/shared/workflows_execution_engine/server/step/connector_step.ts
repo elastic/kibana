@@ -101,7 +101,8 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       const output = await this.connectorExecutor.execute(
         stepType,
         step['connector-id']!,
-        renderedInputs
+        renderedInputs,
+        step.spaceId
       );
 
       const { data, status, message } = output;
