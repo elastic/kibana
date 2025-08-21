@@ -17,8 +17,8 @@ import {
   SOURCE_TYPES,
   STYLE_TYPE,
   COLOR_MAP_TYPE,
+  LAYER_STYLE_TYPE,
 } from '@kbn/maps-plugin/common';
-import { LAYER_STYLE_TYPE } from '@kbn/maps-plugin/common/constants';
 import type { EMSTermJoinConfig, TableSourceDescriptor } from '@kbn/maps-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useDataVisualizerKibana } from '../../../../../kibana_context';
