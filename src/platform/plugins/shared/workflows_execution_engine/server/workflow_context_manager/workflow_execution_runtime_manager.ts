@@ -139,9 +139,9 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string): void {
+  public setWorkflowError(error: Error | string | undefined): void {
     this.workflowExecutionState.updateWorkflowExecution({
-      error: String(error),
+      error: error ? String(error) : undefined,
     });
   }
 

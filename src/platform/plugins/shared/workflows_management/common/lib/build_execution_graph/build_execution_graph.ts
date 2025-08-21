@@ -22,7 +22,9 @@ import type {
   WaitGraphNode,
   WorkflowYaml,
   WaitStep,
+  RetryStep,
 } from '@kbn/workflows';
+import { EnterRetryNode, ExitRetryNode } from '@kbn/workflows/types/execution';
 import { omit } from 'lodash';
 
 function getNodeId(node: BaseStep): string {
@@ -43,6 +45,11 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
 
   if ((modifiedCurrentStep as WaitStep).type === 'wait') {
     return visitWaitStep(graph, previousStep, modifiedCurrentStep);
+  }
+
+  if ((modifiedCurrentStep as RetryStep).type === 'retry') {
+    // Retry steps are treated as atomic steps for graph purposes
+    return visitRetryStep(graph, previousStep, modifiedCurrentStep);
   }
 
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
@@ -158,6 +165,44 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   }
 
   return exitConditionNode;
+}
+
+function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+  const enterRetryNodeId = getNodeId(currentStep);
+  const retryStep = currentStep as RetryStep;
+  const retryNestedSteps: BaseStep[] = retryStep.steps || [];
+  const exitNodeId = `exitRetry(${enterRetryNodeId})`;
+  const enterRetryNode: EnterRetryNode = {
+    id: enterRetryNodeId,
+    type: 'enter-retry',
+    exitNodeId,
+    configuration: {
+      ...omit(retryStep, ['steps']), // No need to include them as they will be represented in the graph
+    },
+  };
+  const exitRetryNode: ExitRetryNode = {
+    type: 'exit-retry',
+    id: exitNodeId,
+    startNodeId: enterRetryNodeId,
+  };
+
+  let previousNodeToLink: any = enterRetryNode;
+  retryNestedSteps.forEach((step: any) => {
+    const currentNode = visitAbstractStep(graph, previousNodeToLink, step);
+    graph.setNode(getNodeId(currentNode), currentNode);
+    graph.setEdge(getNodeId(previousNodeToLink), getNodeId(currentNode));
+    previousNodeToLink = currentNode;
+  });
+
+  graph.setNode(exitRetryNode.id, exitRetryNode);
+  graph.setEdge(getNodeId(previousNodeToLink), exitRetryNode.id);
+  graph.setNode(enterRetryNodeId, enterRetryNode);
+
+  if (previousStep) {
+    graph.setEdge(getNodeId(previousStep), enterRetryNodeId);
+  }
+
+  return exitRetryNode;
 }
 
 function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {

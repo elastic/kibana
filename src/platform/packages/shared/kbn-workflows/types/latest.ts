@@ -52,6 +52,8 @@ export type {
   ExitConditionBranchNodeSchema,
   EnterForeachNode,
   ExitForeachNode,
+  EnterRetryNode,
+  ExitRetryNode,
   AtomicGraphNode,
   WaitGraphNodeSchema,
   WaitGraphNode,

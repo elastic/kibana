@@ -101,6 +101,27 @@ export const ForEachStepSchema = BaseStepSchema.extend({
 });
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
 
+export const RetryStepSchema = BaseStepSchema.extend({
+  type: z.literal('retry'),
+  attempts: z.number().int().min(1),
+  steps: z.array(BaseStepSchema).min(1),
+});
+export type RetryStep = z.infer<typeof RetryStepSchema>;
+export const getRetryStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
+  const schema = BaseStepSchema.extend({
+    type: z.literal('retry'),
+    attempts: z.number().int().min(1),
+    steps: z.array(stepSchema).min(1),
+  });
+
+  if (loose) {
+    // make all fields optional, but require type to be present for discriminated union
+    return schema.partial().required({ type: true });
+  }
+
+  return schema;
+};
+
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = BaseStepSchema.extend({
     type: z.literal('foreach'),
@@ -243,6 +264,7 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
+    RetryStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,
