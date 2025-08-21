@@ -11,6 +11,7 @@ import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SearchHit } from '@kbn/es-types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import { LOGS_ROOT_STREAM_NAME } from '../../../../lib/streams/root_stream_definition';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -182,7 +183,7 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
       // Direct writes to child streams are not allowed. This must be set to logs.
-      _index: 'logs',
+      _index: LOGS_ROOT_STREAM_NAME,
       _id: hit._id,
       _source: Object.fromEntries(
         Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
@@ -322,9 +323,21 @@ async function simulateIngest(
         },
       },
     },
-    // prevent double-processing
     pipeline_substitutions: {
       [DUMMY_PIPELINE_NAME]: {
+        // The sampleResults are already gathered directly from the child stream index. But, we can't
+        // simulate an _index other than logs, this reroutes the documents back to the child stream.
+        // After the reroute the override below ensures no double processing happens.
+        processors: [
+          {
+            reroute: {
+              destination: dataStreamName,
+            },
+          },
+        ],
+      },
+      // prevent double-processing
+      [`${dataStreamName}@stream.processing`]: {
         processors: [],
       },
     },
