@@ -37,9 +37,9 @@ export interface ReactFiberNode {
 export interface GetComponentDataOptions {
   core: CoreStart;
   fileData: FileData;
-  iconType?: string;
   target: HTMLElement | SVGElement;
   euiTheme: EuiThemeComputed;
+  iconType?: string;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }

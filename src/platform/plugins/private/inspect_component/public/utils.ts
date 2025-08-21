@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { transparentize } from '@elastic/eui';
 import type {
   FileData,
   GetElementFromPointOptions,
@@ -16,6 +17,8 @@ import type {
 } from './types';
 import { getComponentData } from './get_component_data';
 import { EUI_DATA_ICON_TYPE } from './constants';
+
+const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
 
 const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | undefined => {
   const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
@@ -65,14 +68,38 @@ export const getElementFromPoint = ({
   return undefined;
 };
 
-const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
-
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && isSingleQuote(event);
 
 export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
   .toLowerCase()
   .includes('mac');
+
+export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
+  const rect = target.getBoundingClientRect();
+  const isPortal = Boolean(target.closest('[data-euiportal="true"]'));
+
+  const overlay = document.createElement('div');
+  Object.assign(overlay.style, {
+    position: 'absolute',
+    top: `${rect.top + window.scrollY}px`,
+    left: `${rect.left + window.scrollX}px`,
+    width: `${rect.width}px`,
+    height: `${rect.height}px`,
+    background: transparentize(euiTheme.colors.primary, 0.3),
+    border: `2px solid ${euiTheme.colors.primary}`,
+    pointerEvents: 'none',
+    zIndex: isPortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout),
+  });
+
+  document.body.appendChild(overlay);
+
+  return () => {
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+  };
+};
 
 export const getInspectedElementData = async ({
   event,
@@ -112,16 +139,4 @@ export const getInspectedElementData = async ({
     setFlyoutRef,
     setIsInspecting,
   });
-};
-
-export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
-  const originalStyles = {
-    border: target.style.border,
-  };
-
-  target.style.border = `2px solid ${euiTheme.colors.primary}`;
-
-  return () => {
-    target.style.border = originalStyles.border;
-  };
 };
