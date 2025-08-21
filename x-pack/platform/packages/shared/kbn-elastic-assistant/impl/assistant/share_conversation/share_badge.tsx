@@ -54,7 +54,7 @@ const ShareBadgeComponent: React.FC<Props> = ({
         checked: conversationSharedState === ConversationSharedState.Private ? 'on' : undefined,
         key: ConversationSharedState.Private,
         data: {
-          description: i18n.ONLY_VISIBLE_TO_YOU,
+          description: i18n.VISIBLE_PRIVATE,
         },
         'data-test-subj': ConversationSharedState.Private,
         label: i18n.PRIVATE,

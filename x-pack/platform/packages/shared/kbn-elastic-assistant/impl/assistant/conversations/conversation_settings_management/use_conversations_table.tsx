@@ -14,7 +14,7 @@ import { EuiToolTip, EuiIcon, EuiBadge, EuiLink } from '@elastic/eui';
 import { FormattedDate } from '@kbn/i18n-react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import {
-  ONLY_VISIBLE_TO_YOU,
+  VISIBLE_PRIVATE,
   VISIBLE_GLOBAL,
   VISIBLE_SHARED,
 } from '../../share_conversation/translations';
@@ -115,7 +115,7 @@ export const useConversationsTable = () => {
                 ? VISIBLE_GLOBAL
                 : conversationSharedState === 'shared'
                 ? VISIBLE_SHARED
-                : ONLY_VISIBLE_TO_YOU;
+                : VISIBLE_PRIVATE;
             return (
               <EuiToolTip content={tooltipContent}>
                 <EuiIcon type={icon} />

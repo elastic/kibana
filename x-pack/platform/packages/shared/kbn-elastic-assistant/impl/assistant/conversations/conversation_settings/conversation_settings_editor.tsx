@@ -11,7 +11,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
-import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { PromptResponse, User } from '@kbn/elastic-assistant-common';
+import { getCurrentConversationOwner } from '@kbn/elastic-assistant-common';
+import { ConversationSharedState } from '../../share_conversation/utils';
+import { ShareSelect } from '../../share_conversation/share_select';
 import type { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
@@ -201,6 +204,53 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
       },
       [conversationsSettingsBulkActions, conversationUpdates, setConversationsSettingsBulkActions]
     );
+    const handleOnSharedSelectionChange = useCallback(
+      (conversationSharedState: ConversationSharedState, nextUsers?: User[]) => {
+        if (conversationUpdates != null) {
+          const newUsers = {
+            ...(conversationSharedState === ConversationSharedState.Private
+              ? { users: [getCurrentConversationOwner(selectedConversation)] }
+              : {}),
+            ...(conversationSharedState === ConversationSharedState.Global ? { users: [] } : {}),
+            ...(conversationSharedState === ConversationSharedState.Shared
+              ? {
+                  users: nextUsers,
+                }
+              : {}),
+          };
+          const updatedConversation = {
+            ...conversationUpdates,
+            ...newUsers,
+          };
+          setConversationUpdates(updatedConversation);
+          setConversationsSettingsBulkActions({
+            ...conversationsSettingsBulkActions,
+            update: {
+              ...(conversationsSettingsBulkActions.update ?? {}),
+              [updatedConversation.id]: {
+                ...(conversationsSettingsBulkActions.update
+                  ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
+                  : {}),
+                ...newUsers,
+                id: updatedConversation.id,
+              },
+            },
+          });
+        }
+      },
+      [
+        conversationUpdates,
+        selectedConversation,
+        conversationsSettingsBulkActions,
+        setConversationsSettingsBulkActions,
+      ]
+    );
+
+    const handleUsersUpdate = useCallback(
+      (users: User[]) => handleOnSharedSelectionChange(ConversationSharedState.Shared, users),
+      [handleOnSharedSelectionChange]
+    );
+
     return (
       <>
         <EuiFormRow
@@ -258,6 +308,18 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
               />
             </EuiFormRow>
           )}
+
+        <EuiFormRow
+          data-test-subj="shared-field"
+          display="rowCompressed"
+          label={i18n.SHARING_OPTIONS}
+        >
+          <ShareSelect
+            selectedConversation={selectedConversation}
+            onSharedSelectionChange={handleOnSharedSelectionChange}
+            onUsersUpdate={handleUsersUpdate}
+          />
+        </EuiFormRow>
       </>
     );
   }

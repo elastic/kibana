@@ -11,7 +11,7 @@ export const VISIBILITY = i18n.translate('xpack.elasticAssistant.assistant.visib
   defaultMessage: 'Visibility',
 });
 
-export const ONLY_VISIBLE_TO_YOU = i18n.translate(
+export const VISIBLE_PRIVATE = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.visibleToYou',
   {
     defaultMessage: 'This conversation is only visible to you.',
@@ -66,6 +66,12 @@ export const ADD = i18n.translate('xpack.elasticAssistant.assistant.visibility.a
 export const DONE = i18n.translate('xpack.elasticAssistant.assistant.visibility.done', {
   defaultMessage: 'Done',
 });
+export const SELECT_USERS = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.shareUsers',
+  {
+    defaultMessage: 'Select users to share with',
+  }
+);
 
 export const PRIVATE_SUCCESS = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.privateSuccess',
