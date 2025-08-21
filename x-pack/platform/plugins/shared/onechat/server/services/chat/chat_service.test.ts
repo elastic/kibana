@@ -23,7 +23,6 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { AgentMode } from '@kbn/onechat-common';
 import {
   createAgentsServiceStartMock,
   createConversationServiceMock,
@@ -103,7 +102,6 @@ describe('ChatService', () => {
       conversation$: expect.anything(),
       agentId: 'my-agent',
       request,
-      mode: AgentMode.normal,
       agentService,
     });
   });
