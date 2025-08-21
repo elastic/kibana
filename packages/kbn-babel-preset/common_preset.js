@@ -51,7 +51,7 @@ module.exports = (api) => ({
     },
 
     // development: true is required for @kbn/inspect-component-plugin to work
-    [require.resolve('@babel/preset-react'), { development: !api.env('production') }],
+    [require.resolve('@babel/preset-react'), { development: api.env('development') }],
 
     [
       require.resolve('@babel/preset-typescript'),
