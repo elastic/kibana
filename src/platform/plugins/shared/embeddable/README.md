@@ -59,6 +59,7 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 | PublishesSavedObjectId | Interface for surfacing saved object id | |
 | PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
+| PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
 
 ### Embeddable panel
@@ -96,6 +97,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | CONTEXT_MENU_TRIGGER | |
 | ADD_TO_EXISTING_CASE_ACTION_ID | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
 | ALERT_RULE_TRIGGER | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
+| BADGE_FILTERS_NOTIFICATION | Displays filters notification badge | PANEL_NOTIFICATION_TRIGGER | Partial<PublishesUnifiedSearch> |
 | CONVERT_LEGACY_MARKDOWN_ACTION_ID | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
 | create-ml-ad-job-action | Detect anomalies | CONTEXT_MENU_TRIGGER |  |
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
