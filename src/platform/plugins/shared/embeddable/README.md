@@ -50,7 +50,7 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
 | HasSupportedTriggers | Inteface for publishing supported triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID |
-| LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID |
+| LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID, ACTION_OPEN_IN_DISCOVER |
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
 | PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
 | PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
@@ -86,18 +86,23 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
 | ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
-| ACTION_EXPLORE_DATA | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | PublishesDataViews |
+| ACTION_EXPLORE_DATA | Explore underlying data | CONTEXT_MENU_TRIGGER | PublishesDataViews |
 | ACTION_EXPORT_CSV | Exports raw data table to CSV | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
 | ACTION_INSPECT_PANEL | Opens inspector flyout | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
+| ACTION_OPEN_IN_DISCOVER | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
 | ACTION_REMOVE_PANEL | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
 | ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
 | ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | CONTEXT_MENU_TRIGGER | |
 | ADD_TO_EXISTING_CASE_ACTION_ID | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
+| ALERT_RULE_TRIGGER | Create an alert rule from panel | CONTEXT_MENU_TRIGGER | |
 | CONVERT_LEGACY_MARKDOWN_ACTION_ID | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
+| create-ml-ad-job-action | Detect anomalies | CONTEXT_MENU_TRIGGER |  |
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
 | generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |
 | open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | CONTEXT_MENU_TRIGGER | |
+| open-in-anomaly-explorer | Open in Anomaly Explorer | CONTEXT_MENU_TRIGGER | |
+| open-in-single-metric-viewer | Open in Single Metric Viewer | CONTEXT_MENU_TRIGGER | |
 | OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
 | OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
 | SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | CONTEXT_MENU_TRIGGER | |
