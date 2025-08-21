@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
+import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { tool as toTool } from '@langchain/core/tools';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ResourceResult, TabularDataResult } from '@kbn/onechat-common/tools';
@@ -42,18 +43,24 @@ export const createRelevanceSearchTool = ({
 }) => {
   return toTool(
     async ({ term, index, size }) => {
-      const { results: rawResults } = await relevanceSearch({
-        index,
-        term,
-        size,
-        model,
-        esClient,
-      });
-      const results = rawResults.map(convertMatchResult);
+      return withExecuteToolSpan(
+        relevanceSearchToolName,
+        { tool: { input: { term, index, size } } },
+        async () => {
+          const { results: rawResults } = await relevanceSearch({
+            index,
+            term,
+            size,
+            model,
+            esClient,
+          });
+          const results = rawResults.map(convertMatchResult);
 
-      const content = JSON.stringify(results);
-      const artifact = { results };
-      return [content, artifact];
+          const content = JSON.stringify(results);
+          const artifact = { results };
+          return [content, artifact];
+        }
+      );
     },
     {
       name: relevanceSearchToolName,
@@ -100,21 +107,27 @@ export const createNaturalLanguageSearchTool = ({
 }) => {
   return toTool(
     async ({ query, index }) => {
-      const response = await naturalLanguageSearch({
-        nlQuery: query,
-        index,
-        model,
-        esClient,
-      });
+      return withExecuteToolSpan(
+        relevanceSearchToolName,
+        { tool: { input: { query, index } } },
+        async () => {
+          const response = await naturalLanguageSearch({
+            nlQuery: query,
+            index,
+            model,
+            esClient,
+          });
 
-      const result: TabularDataResult = {
-        type: ToolResultType.tabularData,
-        data: response,
-      };
+          const result: TabularDataResult = {
+            type: ToolResultType.tabularData,
+            data: response,
+          };
 
-      const content = JSON.stringify([result]);
-      const artifact = { results: [result] };
-      return [content, artifact];
+          const content = JSON.stringify([result]);
+          const artifact = { results: [result] };
+          return [content, artifact];
+        }
+      );
     },
     {
       name: naturalLanguageSearchToolName,

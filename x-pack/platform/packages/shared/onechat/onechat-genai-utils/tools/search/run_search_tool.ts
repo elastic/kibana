@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { withActiveInferenceSpan, ElasticGenAIAttributes } from '@kbn/inference-tracing';
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ToolResult } from '@kbn/onechat-common/tools';
@@ -24,19 +25,29 @@ export const runSearchTool = async ({
 }): Promise<ToolResult[]> => {
   const toolGraph = createSearchToolGraph({ model, esClient });
 
-  const outState = await toolGraph.invoke(
-    { nlQuery, index },
-    { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
-  );
-
-  if (outState.error) {
-    return [
-      {
-        type: ToolResultType.error,
-        data: { message: outState.error },
+  return withActiveInferenceSpan(
+    'SearchToolGraph',
+    {
+      attributes: {
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
       },
-    ];
-  }
+    },
+    async () => {
+      const outState = await toolGraph.invoke(
+        { nlQuery, index },
+        { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
+      );
 
-  return outState.results;
+      if (outState.error) {
+        return [
+          {
+            type: ToolResultType.error,
+            data: { message: outState.error },
+          },
+        ];
+      }
+
+      return outState.results;
+    }
+  );
 };
