@@ -2,7 +2,7 @@
 
 A set of (generally) stateless tools and utilities to ease working with Elasticsearch Data streams in TypeScript.
 
-Inspired by `@kbn/storage-adapter`
+Inspired by `@kbn/storage-adapter` and other data stream adapter-like implementations in alerting and security solution.
 
 ## Core themes
 
