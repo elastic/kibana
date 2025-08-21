@@ -11,11 +11,7 @@ import type { FieldSpec } from '@kbn/data-plugin/common';
 
 import type { GetAggregatableFields, UseInspectButtonParams } from './hooks';
 import { getAggregatableFields, useInspectButton, useStackByFields } from './hooks';
-import {
-  mockBrowserFields,
-  mockIndexFields,
-  mockIndexFieldsByName,
-} from '../../../../common/containers/source/mock';
+import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
 
