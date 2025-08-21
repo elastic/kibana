@@ -33,6 +33,7 @@ export function ViewInDiscover() {
     sampleRangeFrom,
     sampleRangeTo,
     environment,
+    dependencyName,
     // we need to convert it here since /dependencies/operation uses span instead of transaction,
     // to avoid changing the routes, we do this workaround
   } = queryParams as unknown as {
@@ -42,7 +43,9 @@ export function ViewInDiscover() {
     sampleRangeFrom: number;
     sampleRangeTo: number;
     environment: string;
+    dependencyName: string;
   };
+
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     query: {
       esql: from('traces-*')
@@ -56,15 +59,22 @@ export function ViewInDiscover() {
           transactionName
             ? where(`transaction.name == ?transactionName`, { transactionName })
             : (query) => query,
-          spanName ? where(`span.name == ?spanName`, { spanName }) : (query) => query,
           transactionType
             ? where(`transaction.type == ?transactionType`, { transactionType })
             : (query) => query,
+          spanName ? where(`span.name == ?spanName`, { spanName }) : (query) => query,
+          dependencyName
+            ? where(`span.destination.service.resource == ?dependencyName`, { dependencyName })
+            : (query) => query,
           sampleRangeFrom
-            ? where(`transaction.duration.us >= ?sampleRangeFrom`, { sampleRangeFrom })
+            ? transactionName
+              ? where(`transaction.duration.us >= ?sampleRangeFrom`, { sampleRangeFrom })
+              : where(`span.duration.us >= ?sampleRangeFrom`, { sampleRangeFrom })
             : (query) => query,
           sampleRangeTo
-            ? where(`transaction.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
+            ? transactionName
+              ? where(`transaction.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
+              : where(`span.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
             : (query) => query
         )
         .toString(),
