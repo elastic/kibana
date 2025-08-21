@@ -15,6 +15,7 @@ import {
   mergeGrokProcessors,
   groupMessagesByPattern,
   extractTokensDangerouslySlow,
+  unwrapPatternDefinitions,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
 import { get } from 'lodash';
@@ -105,7 +106,6 @@ export function useGrokPatternSuggestion() {
       const result = await Promise.allSettled(
         groupedMessages.map((group) => {
           const tokens = extractTokensDangerouslySlow(group.messages);
-          const reviewFields = getReviewFields(tokens, 10);
 
           return streamsRepositoryClient
             .fetch('POST /internal/streams/{name}/processing/_suggestions/grok', {
@@ -115,16 +115,16 @@ export function useGrokPatternSuggestion() {
                 body: {
                   connector_id: params.connectorId,
                   sample_messages: group.messages.slice(0, 10),
-                  review_fields: reviewFields,
+                  review_fields: getReviewFields(tokens, 10),
                 },
               },
             })
-            .then((response) => {
-              const grokProcessor = getGrokProcessor(tokens, response);
+            .then((reviewResult) => {
+              const grokProcessor = getGrokProcessor(tokens, reviewResult);
 
               return {
                 ...grokProcessor,
-                patterns: inlineGrokPatterns(grokProcessor),
+                patterns: unwrapPatternDefinitions(grokProcessor), // NOTE: Inline patterns until we support custom pattern definitions in Streamlang
                 pattern_definitions: {},
               };
             });
@@ -197,37 +197,4 @@ export function useGrokPatternSuggestion() {
       telemetryClient,
     ]
   );
-}
-
-function inlineGrokPatterns(grokProcessor: GrokProcessorResult): string[] {
-  // eslint-disable-next-line @typescript-eslint/naming-convention
-  const { patterns, pattern_definitions } = grokProcessor;
-
-  if (!pattern_definitions || Object.keys(pattern_definitions).length === 0) {
-    return patterns;
-  }
-
-  // Recursively inline a single pattern
-  function inlinePattern(pattern: string, seen: Set<string> = new Set()): string {
-    // Match %{PATTERN_NAME} or %{PATTERN_NAME:field}
-    return pattern.replace(/%{([A-Z0-9_]+)(:[^}]*)?}/g, (match, key, fieldName) => {
-      if (pattern_definitions && pattern_definitions[key]) {
-        if (seen.has(key)) {
-          // Prevent infinite recursion on cyclic definitions
-          return match;
-        }
-        seen.add(key);
-        const inlined = inlinePattern(pattern_definitions[key], seen);
-        seen.delete(key);
-        if (fieldName) {
-          // Named capture group
-          return `(?<${fieldName.substring(1)}>${inlined})`;
-        }
-        return `(${inlined})`;
-      }
-      return match; // Leave as is if not in patternDefs
-    });
-  }
-
-  return patterns.map((pattern) => inlinePattern(pattern));
 }

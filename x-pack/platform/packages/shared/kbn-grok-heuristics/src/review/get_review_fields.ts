@@ -19,33 +19,6 @@ export type ReviewFields = Record<
 
 /**
  * Generates an object of fields with their corresponding GROK component and example values.
- *
- * Example output:
- *
- * ```json
- * {
- *     "field_0": {
- *         "grok_component": "DAY",
- *         "example_values": ["Mon", "Tue", "Wed", "Thu", "Fri"]
- *     },
- *     "field_1": {
- *         "grok_component": "SYSLOGTIMESTAMP",
- *         "example_values": ["Jul 14 13:45:31", "Jul 14 13:45:30", "Jul 14 13:45:22", "Jul 14 13:45:21", "Jul 14 13:45:20"]
- *     },
- *     "field_2": {
- *         "grok_component": "INT",
- *         "example_values": ["2025"]
- *     },
- *     "field_3": {
- *         "grok_component": "LOGLEVEL",
- *         "example_values": ["error", "notice"]
- *     },
- *     "field_4": {
- *         "grok_component": "GREEDYDATA",
- *         "example_values": []
- *     }
- * }
- * ```
  */
 export function getReviewFields(tokens: NamedToken[], numExamples = 5) {
   return tokens.reduce<ReviewFields>((acc, token) => {

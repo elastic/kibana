@@ -10,7 +10,7 @@ import { normalizeTokens } from './normalize_tokens';
 import type { SingleLineToken, SingleLineColumn, NormalizedColumn } from '../types';
 
 /**
- * Normalize columns for each line into one single set of columns that represents a common structure.
+ * Normalizes columns for each line into one single set of columns that represents a common structure.
  *
  * @param columnsPerLine - Array of message templates, each containing columns with tokens.
  * @returns Normalized columns with whitespace stats and token patterns.

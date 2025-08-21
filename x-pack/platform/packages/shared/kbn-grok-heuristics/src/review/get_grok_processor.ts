@@ -13,67 +13,15 @@ import { sanitize, isCollapsibleToken } from './get_review_fields';
 export interface GrokProcessorResult {
   description: string;
   patterns: string[];
-  pattern_definitions: Record<string, string>;
+  pattern_definitions?: Record<string, string>;
 }
 
 /**
- * Combines extracted tokens and result from LLM review into a GROK processor definition.
- *
- * Example input:
- *
- * ```json
- * [
- *   ["[", undefined],
- *   ["DAY", "field_0"],
- *   [" ", undefined],
- *   ["SYSLOGTIMESTAMP", "field_1"],
- *   [" ", undefined],
- *   ["INT", "field_2"],
- *   ["]", undefined],
- *   [" ", undefined],
- *   ["[", undefined],
- *   ["LOGLEVEL", "field_3"],
- *   ["]", undefined],
- *   [" ", undefined],
- *   ["GREEDYDATA", "field_4"]
- * ]
- * ```
- *
- * ```json
- * {
- *     "log_source": "Apache HTTP Server Log",
- *     "fields": [
- *         {
- *             "name": "@timestamp",
- *             "columns": ["field_0", "field_1", "field_2"],
- *             "grok_components": ["DAY", "SYSLOGTIMESTAMP", "YEAR"]
- *         },
- *         {
- *             "name": "log.level",
- *             "columns": ["field_3"],
- *             "grok_components": ["LOGLEVEL"]
- *         },
- *         {
- *             "name": "message",
- *             "columns": ["field_4"],
- *             "grok_components": ["GREEDYDATA"]
- *         }
- *     ]
- * }
- * ```
- *
- * Expected output:
- * ```json
- * {
- *   "description": "Apache HTTP Server Log",
- *   "patterns": [
- *     "[%{CUSTOM_TIMESTAMP:@timestamp}] [%{LOGLEVEL:log.level}] %{GREEDYDATA:message}"
- *   ],
- *   "pattern_definitions": {
- *     "CUSTOM_TIMESTAMP": "%{DAY} %{SYSLOGTIMESTAMP} %{YEAR}"
- *   }
- * }
- * ```
+ * Generates a GROK processor definition by combining extracted tokens and
+ * the result of an LLM review. It constructs a root GROK pattern and
+ * optionally defines custom pattern definitions for fields with multiple
+ * columns, ensuring patterns are validated and adjusted based on example
+ * values.
  */
 export function getGrokProcessor(
   tokens: NamedToken[],

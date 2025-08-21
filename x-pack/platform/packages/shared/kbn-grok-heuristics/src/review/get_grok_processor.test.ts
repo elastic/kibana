@@ -18,22 +18,66 @@ import { getGrokProcessor } from './get_grok_processor';
 describe('getGrokProcessor', () => {
   it('handles review results with multiple columns for a single field', () => {
     const tokens: NamedToken[] = [
-      { id: undefined, pattern: '[', values: [] },
-      { id: 'field_1', pattern: 'DAY', values: ['Tue'] },
-      { id: undefined, pattern: ' ', values: [] },
+      {
+        id: undefined,
+        pattern: '[',
+        values: [],
+      },
+      {
+        id: 'field_1',
+        pattern: 'DAY',
+        values: ['Tue'],
+      },
+      {
+        id: undefined,
+        pattern: ' ',
+        values: [],
+      },
       {
         id: 'field_2',
         pattern: 'SYSLOGTIMESTAMP',
         values: ['Aug 12 19:19:16', 'Aug 12 19:19:20', 'Aug 12 19:19:23'],
       },
-      { id: undefined, pattern: ' ', values: [] },
-      { id: 'field_3', pattern: 'INT', values: ['2025'] },
-      { id: undefined, pattern: ']', values: [] },
-      { id: undefined, pattern: ' ', values: [] },
-      { id: undefined, pattern: '[', values: [] },
-      { id: 'field_4', pattern: 'LOGLEVEL', values: ['notice', 'error', 'notice'] },
-      { id: undefined, pattern: ']', values: [] },
-      { id: undefined, pattern: ' ', values: [] },
+      {
+        id: undefined,
+        pattern: ' ',
+        values: [],
+      },
+      {
+        id: 'field_3',
+        pattern: 'INT',
+        values: ['2025'],
+      },
+      {
+        id: undefined,
+        pattern: ']',
+        values: [],
+      },
+      {
+        id: undefined,
+        pattern: ' ',
+        values: [],
+      },
+      {
+        id: undefined,
+        pattern: '[',
+        values: [],
+      },
+      {
+        id: 'field_4',
+        pattern: 'LOGLEVEL',
+        values: ['notice', 'error', 'notice'],
+      },
+      {
+        id: undefined,
+        pattern: ']',
+        values: [],
+      },
+      {
+        id: undefined,
+        pattern: ' ',
+        values: [],
+      },
       {
         id: 'field_5',
         pattern: 'GREEDYDATA',
@@ -43,6 +87,7 @@ describe('getGrokProcessor', () => {
         ],
       },
     ];
+
     const reviewResult = {
       log_source: 'Apache HTTP Server Log',
       fields: [
@@ -63,6 +108,7 @@ describe('getGrokProcessor', () => {
         },
       ],
     };
+
     const result = getGrokProcessor(tokens, reviewResult);
     expect(result).toEqual({
       description: 'Apache HTTP Server Log',

@@ -8,6 +8,9 @@
 import type { NamedToken } from '../types';
 import { sanitize } from './get_review_fields';
 
+/*
+ * Constructs a Grok pattern string by iterating over an array of NamedToken objects.
+ */
 export function getGrokPattern(tokens: NamedToken[]) {
   return tokens.reduce((acc, token) => {
     return acc + (token.id ? `%{${token.pattern}:${token.id}}` : sanitize(token.pattern));

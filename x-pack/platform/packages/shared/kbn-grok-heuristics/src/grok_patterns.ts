@@ -123,7 +123,6 @@ export function buildResolvedPatterns(patterns: GrokPatternMap): ResolveResult {
  * definitions, or patterns that still fail to compile the function **throws**,
  * preventing Kibana from starting with an invalid pattern set.
  */
-
 export function getRawPatternMap() {
   // 1. Parse the raw file into a key → raw-regex map
   const rawMap: GrokPatternMap = {};

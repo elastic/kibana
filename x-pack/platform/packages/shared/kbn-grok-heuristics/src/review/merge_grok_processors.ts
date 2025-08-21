@@ -8,6 +8,14 @@
 import { uniq } from 'lodash';
 import type { GrokProcessorResult } from './get_grok_processor';
 
+/**
+ * Merges multiple GrokProcessorResult objects into a single result.
+ * - Combines patterns and ensures unique pattern definitions by renaming duplicates.
+ * - Merges descriptions from all processors into a single string.
+ *
+ * @param grokProcessors - Array of GrokProcessorResult objects to merge.
+ * @returns A single GrokProcessorResult with merged patterns, definitions, and descriptions.
+ */
 export function mergeGrokProcessors(grokProcessors: GrokProcessorResult[]): GrokProcessorResult {
   if (grokProcessors.length === 1) {
     return grokProcessors[0];
@@ -21,21 +29,23 @@ export function mergeGrokProcessors(grokProcessors: GrokProcessorResult[]): Grok
     const updatedPatterns = processor.patterns.map((pattern) => {
       let updatedPattern = pattern;
 
-      Object.entries(processor.pattern_definitions).forEach(([key, value]) => {
-        if (!mergedPatternDefinitions[key]) {
-          // Add the pattern definition if it doesn't exist
-          mergedPatternDefinitions[key] = value;
-          patternDefinitionCounters[key] = 1; // Initialize counter for this pattern definition
-        } else {
-          // Rename the pattern definition if it already exists
-          const newKey = `${key}${++patternDefinitionCounters[key]}`;
-          mergedPatternDefinitions[newKey] = value;
+      if (processor.pattern_definitions) {
+        Object.entries(processor.pattern_definitions).forEach(([key, value]) => {
+          if (!mergedPatternDefinitions[key]) {
+            // Add the pattern definition if it doesn't exist
+            mergedPatternDefinitions[key] = value;
+            patternDefinitionCounters[key] = 1; // Initialize counter for this pattern definition
+          } else {
+            // Rename the pattern definition if it already exists
+            const newKey = `${key}${++patternDefinitionCounters[key]}`;
+            mergedPatternDefinitions[newKey] = value;
 
-          // Update the pattern to use the renamed pattern definition
-          const regex = new RegExp(`%{${key}:`, 'g');
-          updatedPattern = updatedPattern.replace(regex, `%{${newKey}:`);
-        }
-      });
+            // Update the pattern to use the renamed pattern definition
+            const regex = new RegExp(`%{${key}:`, 'g');
+            updatedPattern = updatedPattern.replace(regex, `%{${newKey}:`);
+          }
+        });
+      }
 
       return updatedPattern;
     });

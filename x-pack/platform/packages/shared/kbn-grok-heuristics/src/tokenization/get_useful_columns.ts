@@ -10,7 +10,8 @@ import { isCollapsibleToken } from '../review/get_review_fields';
 import type { NormalizedColumn, NamedColumn } from '../types';
 
 /**
- * Determine which columns contain useful information and collapse the rest into a single GREEDYDATA column.
+ * Analyzes and processes an array of normalized columns to identify and retain
+ * columns with meaningful data, collapsing the rest into a single GREEDYDATA column.
  */
 export function getUsefulColumns(columns: NormalizedColumn[]): NamedColumn[] {
   let counter: number = 1;

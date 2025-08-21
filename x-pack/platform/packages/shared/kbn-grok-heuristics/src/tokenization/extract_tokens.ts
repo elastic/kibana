@@ -15,9 +15,25 @@ import { flattenColumns } from './flatten_columns';
 import type { NamedToken } from '../types';
 
 /**
- * Extracts structured fields from log messages.
+ * WARNING: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD
  *
- * NOTE: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD
+ * Extracts structured fields (tokens) from an array of log messages by analyzing
+ * patterns, delimiters, and column structures.
+ *
+ * This function performs multiple passes to identify consistent tokenization patterns
+ * and normalize the data into a structured format. It is computationally intensive
+ * and should not be run on the main thread.
+ *
+ * Steps:
+ * 1. Masks specific patterns (e.g. quoted strings, parentheses) in the messages.
+ * 2. Detects the most likely delimiter (e.g. whitespace, `|`, `;`).
+ * 3. Splits messages into columns using the detected delimiter and tokenizes them.
+ * 4. Identifies consistent split characters for further tokenization.
+ * 5. Refines tokenization using consistent split characters.
+ * 6. Normalizes columns into a unified structure across all messages.
+ * 7. Identifies useful columns and collapses others into a single GREEDYDATA column.
+ * 8. Flattens the structured columns into a list of tokens with delimiters inlined.
+ *
  */
 export function extractTokensDangerouslySlow(messages: string[]): NamedToken[] {
   if (!messages.length) {
@@ -45,7 +61,7 @@ export function extractTokensDangerouslySlow(messages: string[]): NamedToken[] {
   // 7. Determine which columns contain useful information and collapse the rest into a single GREEDYDATA column
   const usefulColumns = getUsefulColumns(normalizedColumns);
 
-  // 8. Flatten the columns and inline whitespace and delimiter characters
+  // 8. Flatten all columns into a single list of tokens with whitespace and delimiter characters inlined
   const tokens = flattenColumns(usefulColumns, delimiter);
 
   return tokens;

@@ -6,7 +6,12 @@
  */
 
 /**
- * Finds delimiter by checking the occurrence of known delimiters, picking the lowest value for each character, and then taking the one with the highest count.
+ * Determines the most suitable delimiter from a predefined set by analyzing
+ * the frequency of each delimiter across a list of messages. The delimiter
+ * with the highest minimum occurrence across all messages is selected.
+ *
+ * @param messages - An array of strings to analyze for delimiter patterns.
+ * @returns The most suitable delimiter
  */
 export function findDelimiter(messages: string[]): string {
   // Note: Colons can't be used as delimiters since they are already used inside capture groups (e.g. `%{WORD:0}`)
@@ -19,23 +24,24 @@ export function findDelimiter(messages: string[]): string {
   ];
 
   // Count occurrences of each delimiter for each message and pick the lowest value
-  const minOccurrences = delimiterOptions.reduce<Record<string, number>>((acc, delimiter) => {
-    acc[delimiter.id] = messages.reduce((minCount, message) => {
-      const matches = message.match(delimiter.pattern);
-      return Math.min(minCount, matches ? matches.length : 0);
-    }, Infinity);
-    return acc;
-  }, {});
+  const minOccurrences = delimiterOptions.reduce<Record<string, number>>(
+    (accumulator, delimiter) => {
+      accumulator[delimiter.id] = messages.reduce((minCount, message) => {
+        const matches = message.match(delimiter.pattern);
+        return Math.min(minCount, matches ? matches.length : 0);
+      }, Infinity);
+      return accumulator;
+    },
+    {}
+  );
 
   // Find the delimiter with the highest minimum occurrence count
   let bestDelimiter = '\\s'; // Default to whitespace if nothing better found
   let highestMinCount = 0;
-
-  delimiterOptions.forEach((delimiter) => {
-    const minCount = minOccurrences[delimiter.id];
+  Object.entries(minOccurrences).forEach(([delimiterId, minCount]) => {
     if (minCount > highestMinCount) {
+      bestDelimiter = delimiterId;
       highestMinCount = minCount;
-      bestDelimiter = delimiter.id;
     }
   });
 
