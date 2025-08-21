@@ -129,7 +129,7 @@ export interface ICommandCallbacks {
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
-  getCurrentAppId?: () => Promise<string | undefined>;
+  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
 }
 
 export interface ICommandContext {

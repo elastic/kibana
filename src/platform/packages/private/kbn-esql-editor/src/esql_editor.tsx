@@ -72,7 +72,7 @@ import type {
   ControlsContext,
 } from './types';
 import { useRestorableState, withRestorableState } from './restorable_state';
-import { useCreateLookupIndexCommand } from './custom_commands';
+import { useCanCreateLookupIndex, useCreateLookupIndexCommand } from './custom_commands';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -463,6 +463,8 @@ const ESQLEditorInternal = function ESQLEditor({
     return { cache: fn.cache, memoizedSources: fn };
   }, []);
 
+  const canCreateLookupIndex = useCanCreateLookupIndex();
+
   const esqlCallbacks = useMemo<ESQLCallbacks>(() => {
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
@@ -562,6 +564,7 @@ const ESQLEditorInternal = function ESQLEditor({
         };
       },
       getActiveProduct: () => core.pricing.getActiveProduct(),
+      canCreateLookupIndex,
     };
     return callbacks;
   }, [
@@ -582,6 +585,7 @@ const ESQLEditorInternal = function ESQLEditor({
     histogramBarTarget,
     activeSolutionId,
     application?.currentAppId$,
+    canCreateLookupIndex,
   ]);
 
   const queryRunButtonProperties = useMemo(() => {
@@ -668,22 +672,22 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const onLookupIndexCreate = useCallback(
     async (resultQuery: string) => {
-      if (esqlCallbacks?.getJoinIndices) {
+      if (kibana.services?.esql?.getJoinIndicesAutocomplete) {
         // forces refresh
-        await esqlCallbacks?.getJoinIndices({ forceRefresh: true });
+        await kibana.services?.esql?.getJoinIndicesAutocomplete({ forceRefresh: true });
       }
       onQueryUpdate(resultQuery);
       // Need to force validation, as the query might be unchanged,
       // but the lookup index was created
       await queryValidation({ active: true });
     },
-    [esqlCallbacks, onQueryUpdate, queryValidation]
+    [kibana.services?.esql, onQueryUpdate, queryValidation]
   );
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useCreateLookupIndexCommand(
     editor1,
     editorModel,
-    esqlCallbacks?.getJoinIndices,
+    kibana.services?.esql?.getJoinIndicesAutocomplete,
     query,
     onLookupIndexCreate
   );

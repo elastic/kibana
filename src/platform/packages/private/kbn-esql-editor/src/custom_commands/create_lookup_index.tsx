@@ -185,6 +185,36 @@ const hasPrivilege = (
 ): boolean => !!(privileges['*']?.[permission] || privileges[index]?.[permission]);
 
 /**
+ * Hook to determine if the current user has the necessary privileges to create a lookup index.
+ * @returns {boolean}
+ */
+export const useCanCreateLookupIndex = () => {
+  const {
+    services: { http },
+  } = useKibana<ESQLEditorDeps>();
+
+  const memoizedFetchPrivileges = useRef(
+    memoize(async (indexName: string) => {
+      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
+    })
+  );
+
+  const { run } = useDebounceFn(
+    async (indexName: string) => {
+      try {
+        const response = await memoizedFetchPrivileges.current(indexName);
+        return hasPrivilege(response, indexName, 'create_index');
+      } catch (e) {
+        return false;
+      }
+    },
+    { wait: 500 }
+  );
+
+  return run as (indexName: string) => Promise<boolean>;
+};
+
+/**
  * Hook to register a custom command and tokens for lookup indices in the ESQL editor.
  * @param editorRef
  * @param editorModel
