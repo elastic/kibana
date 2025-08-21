@@ -8,8 +8,8 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { PageAttachmentPersistedState } from '@kbn/page-attachment-schema';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { AddPageAttachmentToCaseModal } from './add_page_attachment_to_case_modal';
