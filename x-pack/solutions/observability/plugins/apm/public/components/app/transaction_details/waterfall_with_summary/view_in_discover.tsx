@@ -34,6 +34,7 @@ export function ViewInDiscover() {
     sampleRangeTo,
     environment,
     dependencyName,
+    kuery,
     // we need to convert it here since /dependencies/operation uses span instead of transaction,
     // to avoid changing the routes, we do this workaround
   } = queryParams as unknown as {
@@ -44,6 +45,7 @@ export function ViewInDiscover() {
     sampleRangeTo: number;
     environment: string;
     dependencyName: string;
+    kuery: string;
   };
 
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
@@ -75,7 +77,8 @@ export function ViewInDiscover() {
             ? transactionName
               ? where(`transaction.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
               : where(`span.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
-            : (query) => query
+            : (query) => query,
+          kuery ? where(`QSTR("${kuery.replaceAll('"', '')}")`) : (query) => query
         )
         .toString(),
     },

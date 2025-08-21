@@ -33,7 +33,6 @@ export function HelpPopoverButton({
       <EuiButtonEmpty
         data-test-subj="apmHelpPopoverButtonButton"
         className="apmHelpPopover__buttonIcon"
-        size="s"
         iconType="question"
         aria-label={buttonText}
         onClick={onClick}
@@ -47,7 +46,6 @@ export function HelpPopoverButton({
     <EuiButtonIcon
       data-test-subj="apmHelpPopoverButtonButton"
       className="apmHelpPopover__buttonIcon"
-      size="s"
       iconType="question"
       aria-label={buttonText}
       onClick={onClick}
