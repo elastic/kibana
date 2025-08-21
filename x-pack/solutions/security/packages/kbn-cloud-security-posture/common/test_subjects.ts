@@ -39,7 +39,7 @@ export const GCP_INPUT_FIELDS_TEST_SUBJECTS = {
   ORGANIZATION_ID: 'organization_id_test_id',
   CREDENTIALS_TYPE: 'credentials_type_test_id',
   CREDENTIALS_FILE: 'credentials_file_test_id',
-  CREDENTIALS_JSON: 'credentials_json_test_id',
+  CREDENTIALS_JSON: 'textAreaInput-credentials-json',
   CREDENTIALS_JSON_SECRET_PANEL: 'credentials_json_secret_panel_test_id',
 };
 

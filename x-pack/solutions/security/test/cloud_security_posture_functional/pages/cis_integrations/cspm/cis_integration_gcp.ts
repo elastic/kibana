@@ -244,7 +244,6 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/191144
     describe('CIS_GCP Single', () => {
       it('Post Installation Google Cloud Shell modal pops up after user clicks on Save button when adding integration, when there are no Project ID, it should use default value', async () => {
         await cisIntegration.clickOptionButton(GCP_PROVIDER_TEST_SUBJ);
