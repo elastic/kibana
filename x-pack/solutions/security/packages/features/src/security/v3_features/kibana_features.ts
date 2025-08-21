@@ -117,11 +117,11 @@ export const getSecurityV3BaseKibanaFeature = ({
     read: {
       replacedBy: {
         default: [
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['read'] },
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['read'] },
           { feature: RULES_FEATURE_ID, privileges: ['read'] },
         ],
         minimal: [
-          { feature: SECURITY_FEATURE_ID_V3, privileges: ['minimal_read'] },
+          { feature: SECURITY_FEATURE_ID_V4, privileges: ['minimal_read'] },
           { feature: RULES_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },

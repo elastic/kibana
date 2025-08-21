@@ -464,7 +464,7 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
       privileges: [
         {
           replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['response_actions_history_all'] },
+            { feature: SECURITY_FEATURE_ID_V4, privileges: ['actions_log_management_all'] },
           ],
           api: [`${APP_ID}-writeActionsLogManagement`, `${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_all',
@@ -478,7 +478,7 @@ const responseActionsHistorySubFeature = (): SubFeatureConfig => ({
         },
         {
           replacedBy: [
-            { feature: SECURITY_FEATURE_ID_V4, privileges: ['response_actions_history_read'] },
+            { feature: SECURITY_FEATURE_ID_V4, privileges: ['actions_log_management_read'] },
           ],
           api: [`${APP_ID}-readActionsLogManagement`],
           id: 'actions_log_management_read',
@@ -558,7 +558,7 @@ const processOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: APP_ID, privileges: ['process_operations_all'] }],
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['process_operations_all'] }],
           api: [`${APP_ID}-writeProcessOperations`],
           id: 'process_operations_all',
           includeIn: 'none',
@@ -598,7 +598,7 @@ const fileOperationsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: APP_ID, privileges: ['file_operations_all'] }],
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['file_operations_all'] }],
           api: [`${APP_ID}-writeFileOperations`],
           id: 'file_operations_all',
           includeIn: 'none',
@@ -641,7 +641,7 @@ const executeActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: APP_ID, privileges: ['execute_operations_all'] }],
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['execute_operations_all'] }],
           api: [`${APP_ID}-writeExecuteOperations`],
           id: 'execute_operations_all',
           includeIn: 'none',
@@ -683,7 +683,7 @@ const scanActionSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: APP_ID, privileges: ['scan_operations_all'] }],
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['scan_operations_all'] }],
           api: [`${APP_ID}-writeScanOperations`],
           id: 'scan_operations_all',
           includeIn: 'none',
@@ -725,7 +725,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
       groupType: 'mutually_exclusive',
       privileges: [
         {
-          replacedBy: [{ feature: APP_ID, privileges: ['workflow_insights_all'] }],
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['workflow_insights_all'] }],
           api: [`${APP_ID}-writeWorkflowInsights`, `${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_all',
           includeIn: 'none',
@@ -737,6 +737,7 @@ const workflowInsightsSubFeature = (): SubFeatureConfig => ({
           ui: ['writeWorkflowInsights', 'readWorkflowInsights'],
         },
         {
+          replacedBy: [{ feature: SECURITY_FEATURE_ID_V4, privileges: ['workflow_insights_read'] }],
           api: [`${APP_ID}-readWorkflowInsights`],
           id: 'workflow_insights_read',
           includeIn: 'none',

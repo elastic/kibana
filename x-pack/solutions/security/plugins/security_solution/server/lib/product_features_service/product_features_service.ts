@@ -248,7 +248,7 @@ export class ProductFeaturesService {
     }
 
     const rulesProductFeaturesConfig = configurator.rules();
-    this.rulesProductFeatures.setRulesConfig(rulesProductFeaturesConfig);
+    this.rulesProductFeatures.setConfig(rulesProductFeaturesConfig);
 
     this.productFeatures = new Set<ProductFeatureKeyType>(
       Object.freeze([

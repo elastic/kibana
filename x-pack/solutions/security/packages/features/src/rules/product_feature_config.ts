@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { ProductFeatureNotesFeatureKey } from '../product_features_keys';
+import { ProductFeatureRulesFeatureKey } from '../product_features_keys';
 import type { ProductFeatureKibanaConfig } from '../types';
 
 export const rulesDefaultProductFeaturesConfig: Record<
-  ProductFeatureNotesFeatureKey,
+  ProductFeatureRulesFeatureKey,
   ProductFeatureKibanaConfig
 > = {
-  [ProductFeatureNotesFeatureKey.notes]: {
+  [ProductFeatureRulesFeatureKey.rules]: {
     privileges: {
       all: {
-        api: ['notes_read', 'notes_write'],
+        api: ['rules_read', 'rules_write'],
         ui: ['read', 'crud'],
       },
       read: {
-        api: ['notes_read'],
+        api: ['rules_read'],
         ui: ['read'],
       },
     },
