@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { Writable } from '@kbn/utility-types';
+import type { Writable } from '@kbn/utility-types';
 import { CreateSourceEditor } from './create_source_editor';
 import type { LayerWizard, RenderWizardArguments } from '../../../layers';
 import { GeoJsonVectorLayer } from '../../../layers/vector_layer';

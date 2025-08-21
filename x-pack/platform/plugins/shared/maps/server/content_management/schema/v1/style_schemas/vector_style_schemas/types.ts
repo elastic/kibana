@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { Writable } from '@kbn/utility-types';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type { Writable } from '@kbn/utility-types';
+import type {
   colorDynamicSchema,
   colorStaticSchema,
   colorSchema,
@@ -16,7 +16,7 @@ import {
   ordinalColorStop,
   categoryColorStop,
 } from './color_schemas';
-import {
+import type {
   iconDynamicOptions,
   iconSchema,
   iconStaticOptions,
@@ -29,13 +29,13 @@ import {
   sizeStaticOptions,
   symbolizeAsOptions,
 } from './marker_schemas';
-import {
+import type {
   fieldMetaOptions,
   styleField,
   vectorStylePropertiesSchema,
   vectorStyleSchema,
 } from './vector_style_schemas';
-import {
+import type {
   labelBorderSizeOptions,
   labelDynamicOptions,
   labelPositionSchema,
@@ -43,7 +43,7 @@ import {
   labelStaticOptions,
   labelZoomRangeSchema,
 } from './label_schemas';
-import { STYLE_TYPE } from '../../../../../../common/constants';
+import type { STYLE_TYPE } from '../../../../../../common/constants';
 
 export type ColorStaticStylePropertyDescriptor = TypeOf<typeof colorStaticSchema>;
 export type ColorDynamicOptions = TypeOf<typeof colorDynamicOptions>;

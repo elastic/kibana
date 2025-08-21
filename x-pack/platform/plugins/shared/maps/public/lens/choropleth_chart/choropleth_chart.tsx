@@ -11,6 +11,7 @@ import type { FileLayer } from '@elastic/ems-client';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { FormatFactory } from '@kbn/field-formats-plugin/common';
+import type { LayerDescriptor } from '../../../common';
 import {
   FIELD_ORIGIN,
   LAYER_TYPE,
@@ -18,7 +19,6 @@ import {
   STYLE_TYPE,
   COLOR_MAP_TYPE,
   VECTOR_STYLES,
-  LayerDescriptor,
 } from '../../../common';
 import { emsWorldLayerId } from '../../../common/constants';
 import type { ChoroplethChartProps } from './types';
