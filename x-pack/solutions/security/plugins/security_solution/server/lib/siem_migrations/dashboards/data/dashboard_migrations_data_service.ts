@@ -66,6 +66,9 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
     fieldMap,
   }: CreateDashboardAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
+    this.logger.warn(
+      JSON.stringify({ message: 'Creating dashboard index pattern adapter', name, fieldMap })
+    );
     return this.createIndexPatternAdapter({ name, fieldMap });
   }
 
