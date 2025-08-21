@@ -26,7 +26,8 @@ import {
 } from '@kbn/esql-ast';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { debounce, isEqual, memoize } from 'lodash';
+import { isEqual, memoize } from 'lodash';
+import { useDebounceFn } from '@kbn/react-hooks';
 import type { ESQLEditorDeps } from '../types';
 
 /**
@@ -176,8 +177,6 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
   return Array.from(new Set(indexNames));
 }
 
-type FetchUserPrivileges = (indexName: string) => Promise<IndexPrivileges>;
-
 /** Helper to determine if a privilege is granted either globally (*) or for the specific index */
 const hasPrivilege = (
   privileges: IndexPrivileges,
@@ -246,19 +245,16 @@ export const useLookupIndexCommand = (
     }
   `;
 
-  const memoizedFetchPrivileges = useRef<>(
-    debounce<FetchUserPrivileges>(
-      memoize<FetchUserPrivileges>(async (indexName: string) => {
-        return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
-      }),
-      500
-    )
+  const memoizedFetchPrivileges = useRef(
+    memoize(async (indexName: string) => {
+      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
+    })
   );
 
   const fetchUserPrivileges = useCallback(async (indexNames: string[]) => {
     try {
       const response = (await Promise.all(
-        indexNames.map(memoizedFetchPrivileges.current)
+        indexNames.map((v) => memoizedFetchPrivileges.current(v))
       )) as Array<IndexPrivileges>;
       return response.reduce((acc, curr) => {
         return {
@@ -287,84 +283,86 @@ export const useLookupIndexCommand = (
 
   /**
    * Adds decorations to the editor to indicate which lookup indices are used in the query.
-   * @note Because we pass a callback once on mount, the reference has to be stable.
+   * Because we pass a callback once on mount, the reference has to be stable.
    *
    */
-  const addLookupIndicesDecorator = useCallback(async () => {
-    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
+  const { run: addLookupIndicesDecorator } = useDebounceFn(
+    async () => {
+      const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
 
-    const lookupIndices: string[] = inQueryLookupIndices.current;
+      const lookupIndices: string[] = inQueryLookupIndices.current;
+      const privileges = await fetchUserPrivileges(lookupIndices);
 
-    const privileges = await fetchUserPrivileges(lookupIndices);
-
-    // we need to remove the previous decorations first
-    const lineCount = editorModel.current?.getLineCount() || 1;
-    for (let i = 1; i <= lineCount; i++) {
-      const decorations = editorRef.current?.getLineDecorations(i) ?? [];
-      const lookupIndexDecorations = decorations.filter((decoration) =>
-        decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
-      );
-      editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
-    }
-
-    for (let i = 0; i < lookupIndices.length; i++) {
-      const lookupIndex = lookupIndices[i];
-
-      const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
-      const { canCreateIndex, canReadIndex, canEditIndex } = getIndexPrivileges(
-        lookupIndex,
-        privileges
-      );
-
-      const matches =
-        editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
-
-      let actionLabel = '';
-      if (isExistingIndex) {
-        if (canEditIndex) {
-          actionLabel = i18n.translate('esqlEditor.lookupIndex.edit', {
-            defaultMessage: 'Edit lookup index',
-          });
-        } else if (canReadIndex) {
-          actionLabel = i18n.translate('esqlEditor.lookupIndex.view', {
-            defaultMessage: 'View lookup index',
-          });
-        }
-      } else {
-        if (canCreateIndex) {
-          actionLabel = i18n.translate('esqlEditor.lookupIndex.create', {
-            defaultMessage: 'Create lookup index',
-          });
-        }
+      // we need to remove the previous decorations first
+      const lineCount = editorModel.current?.getLineCount() || 1;
+      for (let i = 1; i <= lineCount; i++) {
+        const decorations = editorRef.current?.getLineDecorations(i) ?? [];
+        const lookupIndexDecorations = decorations.filter((decoration) =>
+          decoration.options.inlineClassName?.includes(lookupIndexBaseBadgeClassName)
+        );
+        editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
       }
 
-      // Don't add decorations if the lookup index is not found in the query'
-      if (!actionLabel) continue;
+      for (let i = 0; i < lookupIndices.length; i++) {
+        const lookupIndex = lookupIndices[i];
 
-      matches.forEach((match) => {
-        editorRef?.current?.createDecorationsCollection([
-          {
-            range: match.range,
-            options: {
-              isWholeLine: false,
-              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-              hoverMessage: {
-                value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
-                  JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
-                )})`,
-                isTrusted: true,
+        const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
+        const { canCreateIndex, canReadIndex, canEditIndex } = getIndexPrivileges(
+          lookupIndex,
+          privileges
+        );
+
+        const matches =
+          editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+
+        let actionLabel = '';
+        if (isExistingIndex) {
+          if (canEditIndex) {
+            actionLabel = i18n.translate('esqlEditor.lookupIndex.edit', {
+              defaultMessage: 'Edit lookup index',
+            });
+          } else if (canReadIndex) {
+            actionLabel = i18n.translate('esqlEditor.lookupIndex.view', {
+              defaultMessage: 'View lookup index',
+            });
+          }
+        } else {
+          if (canCreateIndex) {
+            actionLabel = i18n.translate('esqlEditor.lookupIndex.create', {
+              defaultMessage: 'Create lookup index',
+            });
+          }
+        }
+
+        // Don't add decorations if the lookup index is not found in the query'
+        if (!actionLabel) continue;
+
+        matches.forEach((match) => {
+          editorRef?.current?.createDecorationsCollection([
+            {
+              range: match.range,
+              options: {
+                isWholeLine: false,
+                stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+                hoverMessage: {
+                  value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
+                    JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
+                  )})`,
+                  isTrusted: true,
+                },
+
+                inlineClassName:
+                  lookupIndexBaseBadgeClassName +
+                  ' ' +
+                  (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
               },
-
-              inlineClassName:
-                lookupIndexBaseBadgeClassName +
-                ' ' +
-                (isExistingIndex ? lookupIndexEditBadgeClassName : lookupIndexAddBadgeClassName),
             },
-          },
-        ]);
-      });
-    }
-  }, [getLookupIndices, fetchUserPrivileges, editorModel, editorRef, getIndexPrivileges]);
+          ]);
+        });
+      }
+    },
+    { wait: 500 }
+  );
 
   const onFlyoutClose = useCallback(
     async (
