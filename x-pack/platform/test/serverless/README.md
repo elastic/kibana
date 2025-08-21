@@ -26,7 +26,7 @@ x-pack/platform/test/serverless/
 │  ├─ configs
 │  ├─ services
 │  ├─ test_suites
-│  │  ├─ # Platform-shared functionality
+│  │  ├─ # Platform-shared API functionality
 ├─ functional
 │  ├─ configs
 │  ├─ page_objects
@@ -293,13 +293,13 @@ feature flags tests can be pointed to the project.
 ## Run tests
 
 Similar to how functional tests are run in other directories, you can point the
-functional tests server and test runner to config files in this `x-pack/platform/test/serverless`
+functional tests server and test runner to config files in this `x-pack/platform/test/serverless/[api_integration|functional]/configs`
 directory, e.g. from the `x-pack` directory run:
 
 ```bash
-node scripts/functional_tests_server.js --config platform/test/serverless/api_integration/config.ts
+node scripts/functional_tests_server.js --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
 
-node scripts/functional_test_runner.js --config platform/test/serverless/api_integration/config.ts
+node scripts/functional_test_runner.js --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
 ```
 
 ## Run tests on MKI
@@ -307,7 +307,7 @@ node scripts/functional_test_runner.js --config platform/test/serverless/api_int
 There is no need to start servers locally, you just need to create MKI project and copy urls for Elasticsearch and Kibana. Make sure to update urls with username/password and port 443 for Elasticsearch. FTR has no control over MKI and can't update your projects so make sure your `config.ts` does not specify any custom arguments for Kibana or Elasticsearch. Otherwise, it will be ignored. You can run the tests from the `x-pack` directory:
 
 ```bash
-TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config platform/test/serverless/api_integration/config.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://elastic:PASSWORD@ES_HOSTNAME:443" TEST_KIBANA_URL="https://elastic:PASSWORD@KIBANA_HOSTNAME" node scripts/functional_test_runner --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts --exclude-tag=skipMKI
 ```
 
 Steps to follow to run on QA environment:
@@ -348,7 +348,7 @@ Steps to follow to run on QA environment:
 - Now run the tests from the `x-pack` directory
 
 ```bash
-TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config platform/test/serverless/functional/config.ts --exclude-tag=skipMKI
+TEST_CLOUD=1 TEST_CLOUD_HOST_NAME="CLOUD_HOST_NAME" TEST_ES_URL="https://testing-internal:testing-internal_pwd@ES_HOSTNAME:443" TEST_KIBANA_URL="https://testing-internal:testing-internal_pwd@KIBANA_HOSTNAME:443" node scripts/functional_test_runner.js --config x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts --exclude-tag=skipMKI
 ```
 
 ## Skipping tests for MKI run

@@ -19,21 +19,9 @@ FTR tests are organized by type and deployment target to ensure proper test isol
 - Ensuring proper ARIA attributes and semantic HTML
 - Testing focus management and tab order
 
-**Example structure**:
-
-```
-x-pack/platform/test/accessibility/
-├── apps/
-│   ├── dashboard/
-│   ├── discover/
-│   └── visualize/
-├── services/
-└── config.ts
-```
-
 ### 2. Stateful-Only API Tests
 
-**Purpose**: API integration tests that only run against traditional stateful enviroments.
+**Purpose**: API integration tests that only run against traditional stateful environments.
 
 #### `/api_integration` - Core API Tests
 
@@ -45,10 +33,10 @@ x-pack/platform/test/accessibility/
 **Location**: `x-pack/platform/test/alerting_api_integration/`
 **Use for**: Alerting rules, connectors, and notification testing
 
-#### `/api_integration_basic` - Basic Auth API Tests
+#### `/api_integration_basic` - Basic License API Tests
 
 **Location**: `x-pack/platform/test/api_integration_basic/`
-**Use for**: APIs requiring basic authentication, security-specific endpoints
+**Use for**: API validation for Elastic Basic license
 
 #### `/automatic_import_api_integration` - Import APIs
 
@@ -137,11 +125,11 @@ Each test suite has its own `config.ts` file that defines:
 
 - **`supertest`** - HTTP API testing
 - **`es`** - Elasticsearch client
-- **`esArchiver`** - Test data management
+- **`esArchiver`** - Elasticsearch test data management
 - **`kibanaServer`** - Kibana instance management
 - **`browser`** - WebDriver browser control
-- **`find`** - Element location utilities
-- **`testSubjects`** - Test-specific element selectors
+- **`find`** - WebDriver element selectors
+- **`testSubjects`** - Element selectors for UI elements with `data-test-subj` attribute
 
 ### Page Objects
 
@@ -158,23 +146,10 @@ Reusable UI interaction patterns organized by application:
 
 ```bash
 # Start test server
-node scripts/functional_tests_server.js --config x-pack/platform/test/functional/config.ts
+node scripts/functional_tests_server.js --config x-pack/platform/test/functional/apps/advanced_settings/config.ts
 
 # Run tests
-node scripts/functional_test_runner.js --config x-pack/platform/test/functional/config.ts
-```
-
-### Specific Test Suites
-
-```bash
-# API Integration Tests
-node scripts/functional_test_runner.js --config x-pack/platform/test/api_integration/config.ts
-
-# Accessibility Tests
-node scripts/functional_test_runner.js --config x-pack/platform/test/accessibility/config.ts
-
-# Deployment Agnostic Tests
-node scripts/functional_test_runner.js --config x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful.config.ts
+node scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/advanced_settings/config.ts
 ```
 
 ## Best Practices
