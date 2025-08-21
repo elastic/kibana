@@ -94,17 +94,17 @@ export function updateSavedSearch({
     }
   }
 
-  const { from, to } = services.timefilter.getTime();
-  const refreshInterval = services.timefilter.getRefreshInterval();
+  const timeRange = globalState?.timeRange;
+  const refreshInterval = globalState?.refreshInterval;
   savedSearch.timeRange =
-    savedSearch.timeRestore || savedSearch.timeRange
+    timeRange && (savedSearch.timeRestore || savedSearch.timeRange)
       ? {
-          from,
-          to,
+          from: timeRange.from,
+          to: timeRange.to,
         }
       : undefined;
   savedSearch.refreshInterval =
-    savedSearch.timeRestore || savedSearch.refreshInterval
+    refreshInterval && (savedSearch.timeRestore || savedSearch.refreshInterval)
       ? { value: refreshInterval.value, pause: refreshInterval.pause }
       : undefined;
 

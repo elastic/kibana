@@ -165,11 +165,15 @@ describe('DiscoverSavedSearchContainer', () => {
     });
 
     it('takes care of persisting timeRestore correctly ', async () => {
-      discoverServiceMock.timefilter.getTime = jest.fn(() => ({ from: 'now-15m', to: 'now' }));
-      discoverServiceMock.timefilter.getRefreshInterval = jest.fn(() => ({
-        value: 0,
-        pause: true,
-      }));
+      internalState.dispatch(
+        internalStateActions.setGlobalState({
+          tabId: getCurrentTab().id,
+          globalState: {
+            timeRange: { from: 'now-15m', to: 'now' },
+            refreshInterval: { value: 0, pause: true },
+          },
+        })
+      );
       const savedSearchContainer = getSavedSearchContainer({
         services: discoverServiceMock,
         internalState,
@@ -181,8 +185,6 @@ describe('DiscoverSavedSearchContainer', () => {
         timeRestore: true,
       };
       await savedSearchContainer.persist(savedSearchToPersist, saveOptions);
-      expect(discoverServiceMock.timefilter.getTime).toHaveBeenCalled();
-      expect(discoverServiceMock.timefilter.getRefreshInterval).toHaveBeenCalled();
       expect(savedSearchToPersist.timeRange).toEqual({ from: 'now-15m', to: 'now' });
       expect(savedSearchToPersist.refreshInterval).toEqual({
         value: 0,
