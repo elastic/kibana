@@ -38,6 +38,7 @@ import {
   getTabContentAvailableHeight,
   DEFAULT_MARGIN_BOTTOM,
 } from '../../../doc_viewer_source/get_height';
+import { Logs } from '../components/logs';
 
 export type SpanOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -65,7 +66,7 @@ export function SpanOverview({
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: SpanOverviewProps) {
   const containerRef = useRef<HTMLElement>(null);
-  const { fieldFormats } = getUnifiedDocViewerServices();
+  const { fieldFormats, ...rest } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
       formattedDoc: getSpanDocumentOverview(hit, { dataView, fieldFormats }),
@@ -168,6 +169,9 @@ export function SpanOverview({
                   showWaterfall={showWaterfall}
                   showActions={showActions}
                 />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <Logs />
               </EuiFlexItem>
             </EuiFlexGroup>
           </FieldActionsProvider>

@@ -36,6 +36,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../../../doc_viewer_source/get_height';
+import { Logs } from '../components/logs';
 
 export type TransactionOverviewProps = DocViewRenderProps & {
   indexes: {
@@ -161,6 +162,9 @@ export function TransactionOverview({
                   />
                 </>
               )}
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <Logs />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FieldActionsProvider>

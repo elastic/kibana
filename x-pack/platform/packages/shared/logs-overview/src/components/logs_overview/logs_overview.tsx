@@ -64,6 +64,7 @@ export const LogsOverview: React.FC<LogsOverviewProps> = React.memo(
           input: {
             featureFlags,
             logsSource,
+            displayOptions: {},
           },
           inspect: consoleInspector,
         }}
@@ -91,6 +92,9 @@ export type LogsOverviewContentDependencies = LogCategoriesDependencies & LogEve
 
 export const LogsOverviewContent = React.memo<LogsOverviewContentProps>(
   ({ dependencies, documentFilters, height, timeRange }) => {
+    console.log('LogsOverviewContent rendered');
+    console.log('LogsOverviewContent timeRange', timeRange);
+    console.log('LogsOverviewContent timeRange', documentFilters);
     const logsOverviewStateActorRef = LogsOverviewStateContext.useActorRef();
 
     const logsOverviewState = LogsOverviewStateContext.useSelector(identity);

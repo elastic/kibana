@@ -50,6 +50,11 @@ export interface ObservabilityCreateSLOFeature {
   }) => React.ReactNode;
 }
 
+export interface ObservabilityLogsOverviewFeature {
+  id: 'observability-logs-overview';
+  getLogsOverview: () => React.ReactNode;
+}
+
 /** **************** Security Solution ****************/
 
 export interface SecuritySolutionCellRendererFeature {
@@ -75,7 +80,8 @@ export type DiscoverFeature =
   | ObservabilityStreamsFeature
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityCreateSLOFeature
-  | SecuritySolutionFeature;
+  | SecuritySolutionFeature
+  | ObservabilityLogsOverviewFeature;
 
 /**
  * Service types
