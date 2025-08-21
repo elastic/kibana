@@ -8,20 +8,46 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { chain } from 'lodash';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
+  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
+
+type BulkGetRequest = KibanaRequest<never, never, TypeOf<typeof BulkGetRoute.validate.body>>;
+
+export function bulkGetClientFactory(
+  { body: objects }: BulkGetRequest,
+  clientFactory: ISavedObjectsClientFactory,
+  typeRegistry: ISavedObjectTypeRegistry
+): SavedObjectsClientContract {
+  return clientFactory({
+    includedHiddenTypes: chain(objects)
+      .map(({ type }) => type)
+      .uniq()
+      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
+      .value(),
+  });
+}
+bulkGetClientFactory.inject = [
+  Request,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+] as const satisfies unknown[];
 
 @injectable()
 export class BulkGetRoute {
@@ -43,28 +69,12 @@ export class BulkGetRoute {
     ),
   };
 
-  private readonly client: SavedObjectsClientContract;
-
   constructor(
-    @inject(SavedObjectsClientFactory) clientFactory: ISavedObjectsClientFactory,
-    @inject(SavedObjectsTypeRegistry) typeRegistry: ISavedObjectTypeRegistry,
+    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
-    @inject(Request)
-    private readonly request: KibanaRequest<
-      never,
-      never,
-      TypeOf<typeof BulkGetRoute.validate.body>
-    >,
+    @inject(Request) private readonly request: BulkGetRequest,
     @inject(Response) private readonly response: KibanaResponseFactory
-  ) {
-    const objects = request.body;
-    const uniqueTypes = objects.reduce((acc, { type }) => acc.add(type), new Set<string>());
-    const includedHiddenTypes = Array.from(uniqueTypes).filter(
-      (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
-    );
-
-    this.client = clientFactory({ includedHiddenTypes });
-  }
+  ) {}
 
   async handle() {
     const response = await this.client.bulkGet<unknown>(this.request.body);

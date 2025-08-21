@@ -9,8 +9,11 @@
 
 import { inject, injectable } from 'inversify';
 import { Response, SavedObjectsTypeRegistry } from '@kbn/core-di-server';
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
-import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaResponseFactory,
+  SavedObjectsType,
+} from '@kbn/core/server';
 import type { SavedObjectManagementTypeInfo } from '../../common';
 
 function convertType(sot: SavedObjectsType): SavedObjectManagementTypeInfo {

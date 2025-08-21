@@ -8,19 +8,46 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { chain } from 'lodash';
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
+  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
+
+type FindRequest = KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>;
+
+export function findClientFactory(
+  { query: { type: types } }: FindRequest,
+  clientFactory: ISavedObjectsClientFactory,
+  typeRegistry: ISavedObjectTypeRegistry
+): SavedObjectsClientContract {
+  return clientFactory({
+    includedHiddenTypes: chain(types)
+      .castArray()
+      .uniq()
+      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
+      .value(),
+  });
+}
+findClientFactory.inject = [
+  Request,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+] as const satisfies unknown[];
 
 const referenceSchema = schema.object({
   type: schema.string(),
@@ -61,48 +88,33 @@ export class FindRoute {
   };
 
   constructor(
-    @inject(SavedObjectsClientFactory) private readonly clientFactory: ISavedObjectsClientFactory,
+    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
     @inject(SavedObjectsTypeRegistry) private readonly typeRegistry: ISavedObjectTypeRegistry,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
-    @inject(Request)
-    private readonly request: KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>,
+    @inject(Request) private readonly request: FindRequest,
     @inject(Response) private readonly response: KibanaResponseFactory
   ) {}
 
   async handle() {
     const { query } = this.request;
-    const searchTypes = Array.isArray(query.type) ? query.type : [query.type];
-    const importAndExportableTypes = searchTypes.filter((type) =>
-      this.typeRegistry.isImportableAndExportable(type)
-    );
-    const includedHiddenTypes = importAndExportableTypes.filter((type) =>
-      this.typeRegistry.isHidden(type)
-    );
-
-    const client = this.clientFactory({ includedHiddenTypes });
-    const searchFields = new Set<string>();
-
-    importAndExportableTypes.forEach((type) => {
-      const searchField = this.management.getDefaultSearchField(type);
-      if (searchField) {
-        searchFields.add(searchField);
-      }
-    });
-
-    const findResponse = await client.find<any>({
+    const searchFields = chain(query.type)
+      .castArray()
+      .filter((type) => this.typeRegistry.isImportableAndExportable(type))
+      .map((type) => this.management.getDefaultSearchField(type))
+      .filter((field): field is string => !!field)
+      .uniq()
+      .value();
+    const findResponse = await this.client.find<any>({
       ...query,
+      searchFields,
       fields: undefined,
-      searchFields: [...searchFields],
     });
-
-    const savedObjects = findResponse.saved_objects.map(toSavedObjectWithMeta);
-
+    const savedObjects = findResponse.saved_objects.map(toSavedObjectWithMeta).map((so) => ({
+      ...injectMetaAttributes(so, this.management),
+      attributes: {} as Record<string, unknown>,
+    }));
     const response: v1.FindResponseHTTP = {
-      saved_objects: savedObjects.map((so) => {
-        const obj = injectMetaAttributes(so, this.management);
-        const result = { ...obj, attributes: {} as Record<string, unknown> };
-        return result;
-      }),
+      saved_objects: savedObjects,
       total: findResponse.total,
       per_page: findResponse.per_page,
       page: findResponse.page,
