@@ -42,8 +42,11 @@ export class ControlsPlugin
 
     registerActions(startPlugins.uiActions);
 
-    startPlugins.dashboard.registerDashboardPanelPlacementSetting(OPTIONS_LIST_CONTROL, () => {
-      return { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop };
+    startPlugins.dashboard.registerDashboardPanelSettings(OPTIONS_LIST_CONTROL, () => {
+      return {
+        placementSettings: { width: 12, height: 2, strategy: PanelPlacementStrategy.placeAtTop },
+        resizeSettings: { maxHeight: 2, minHeight: 2 },
+      };
     });
   }
 
