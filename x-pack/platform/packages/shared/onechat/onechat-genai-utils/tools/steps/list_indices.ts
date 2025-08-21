@@ -23,6 +23,8 @@ export interface ListIndexDetailInfo extends ListIndexBasicInfo {
 interface ListIndicesOptions {
   pattern?: string;
   includeHidden?: boolean;
+  includeKibanaIndices?: boolean;
+  listAllIfNoResults?: boolean;
   showDetails?: boolean;
   esClient: ElasticsearchClient;
 }
@@ -31,17 +33,29 @@ type ListIndexResult<T extends ListIndicesOptions> = T['showDetails'] extends tr
   ? ListIndexDetailInfo[]
   : ListIndexBasicInfo[];
 
+const kibanaIndicesExclusionPattern = '-.*';
+
 export const listIndices = async <const T extends ListIndicesOptions>({
   pattern = '*',
   includeHidden = false,
+  includeKibanaIndices = false,
+  listAllIfNoResults = false,
   showDetails = false,
   esClient,
 }: T): Promise<ListIndexResult<T>> => {
-  const response = await esClient.cat.indices({
-    index: pattern,
+  let response = await esClient.cat.indices({
+    index: includeKibanaIndices ? [pattern] : [pattern, kibanaIndicesExclusionPattern],
     expand_wildcards: includeHidden ? ['open', 'hidden'] : ['open'],
     format: 'json',
   });
+
+  if (response.length === 0 && listAllIfNoResults) {
+    response = await esClient.cat.indices({
+      index: includeKibanaIndices ? ['*'] : ['*', kibanaIndicesExclusionPattern],
+      expand_wildcards: includeHidden ? ['open', 'hidden'] : ['open'],
+      format: 'json',
+    });
+  }
 
   if (showDetails) {
     const result = response.map(

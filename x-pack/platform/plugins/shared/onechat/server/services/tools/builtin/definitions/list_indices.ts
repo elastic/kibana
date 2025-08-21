@@ -22,11 +22,7 @@ const listIndicesSchema = z.object({
       - The wildcard '*' can only be used as the last character
       - Should only be used if you are certain of a specific index pattern to filter on. Do not try to guess.
       - Defaults to '*' to match all indices.`
-    )
-    .refine((p) => p === '*' || !p.startsWith('*'), {
-      message:
-        "Invalid pattern. A pattern cannot start with a wildcard '*' unless it is the only character.",
-    }),
+    ),
   showDetails: z
     .boolean()
     .default(false)
@@ -52,6 +48,9 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
         pattern,
         showDetails,
         includeHidden: false,
+        includeKibanaIndices: false,
+        // LLM is stupid with index patterns, this works around it
+        listAllIfNoResults: true,
         esClient: esClient.asCurrentUser,
       });
 
