@@ -17,4 +17,4 @@ export {
   type MatchResult,
 } from './perform_match_search';
 export { executeEsql, type EsqlResponse } from './execute_esql';
-export { listIndices, type ListIndexInfo } from './list_indices';
+export { listIndices, type ListIndexBasicInfo, type ListIndexDetailInfo } from './list_indices';
