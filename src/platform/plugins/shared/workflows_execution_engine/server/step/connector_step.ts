@@ -75,11 +75,7 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         // eslint-disable-next-line no-console
         console.log(withInputs.message);
         return {
-          input: {
-            condition: { if: step.if, evaluated: shouldRun },
-            with: step.with,
-            renderedWith: withInputs,
-          },
+          input: withInputs,
           output: withInputs.message,
           error: undefined,
         };
