@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { Streams } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { isRootStreamDefinition } from '@kbn/streams-schema';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
 import { SchemaEditor } from '../schema_editor';

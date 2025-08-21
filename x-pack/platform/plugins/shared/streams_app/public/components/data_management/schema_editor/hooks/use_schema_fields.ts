@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { NamedFieldDefinitionConfig, Streams } from '@kbn/streams-schema';
+import type { NamedFieldDefinitionConfig } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import { getAdvancedParameters } from '@kbn/streams-schema';
 import { isEqual, omit } from 'lodash';
 import { useMemo, useCallback } from 'react';
