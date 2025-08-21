@@ -17,6 +17,7 @@ import { createServiceError } from './utils';
 // Type for the workflows service function that should be injected
 export type WorkflowsServiceFunction = (
   workflowId: string,
+  spaceId: string,
   inputs: Record<string, unknown>,
   request: KibanaRequest
 ) => Promise<string>;
@@ -32,6 +33,7 @@ export const createExternalService = (
 ): ExternalService => {
   const runWorkflow = async ({
     workflowId,
+    spaceId,
     inputs = {},
   }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
@@ -44,7 +46,7 @@ export const createExternalService = (
       }
 
       // Use the injected service function instead of making HTTP requests
-      const workflowRunId = await runWorkflowService(workflowId, inputs, request);
+      const workflowRunId = await runWorkflowService(workflowId, spaceId, inputs, request);
 
       if (!workflowRunId) {
         throw new Error('Invalid response: missing workflowRunId');

@@ -118,7 +118,7 @@ export class SyntheticsMonitorTestService {
 
   async inspectMonitor(user: RoleCredentials, monitor: any, hideParams: boolean = true) {
     const res = await this.supertest
-      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT)
+      .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITOR_INSPECT + `?hideParams=${hideParams}`)
       .set(user.apiKeyHeader)
       .set(this.samlAuth.getInternalRequestHeader())
       .send(monitor)

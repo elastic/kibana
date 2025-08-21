@@ -203,6 +203,7 @@ async function createContainer(
   });
 
   const contextManager = new WorkflowContextManager({
+    spaceId: workflowExecution.spaceId,
     workflowRunId: workflowExecution.id,
     workflow: workflowExecution.workflowDefinition,
     event: workflowExecution.context.event,
