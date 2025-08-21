@@ -43,14 +43,23 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
+| HasDynamicActions | Intrfaceo for interacting with  | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | HasEditCapabilities | Interface for editing embeddable state | ACTION_EDIT_PANEL | 
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
-| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS |
+| HasSupportedTriggers | Inteface for publishing supported trigger types | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
+| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID |
+| LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID |
+| PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
+| PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
 | PublishesDataViews | Interface for accessing embeddable data views | Unified search bar type ahead, ACTION_CUSTOMIZE_PANEL, ACTION_EXPLORE_DATA |
+| PublishesDescription | Interface for accessing embeddable description | |
+| PublishesRendered | Interface for publishing rendered complete | |
+| PublishesSavedObjectId | Interface for surfacing saved object id | |
 | PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
+| PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
 
 ### Embeddable panel
 The `EmbeddableRenderer` React component wraps the embeddable component in an embeddable panel. The embeddable panel provides UI elements for interacting with the embeddable.
@@ -75,7 +84,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_COPY_TO_DASHBOARD | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesTitle |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
-| ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | ACTION_EDIT_PANEL |
+| ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
 | ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
 | ACTION_EXPLORE_DATA | Opens Discover application with  Lens embeddable data request context | CONTEXT_MENU_TRIGGER | PublishesDataViews |
 | ACTION_EXPORT_CSV | Exports raw data table to CSV | CONTEXT_MENU_TRIGGER | HasInspectorAdapters |
@@ -83,10 +92,16 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_REMOVE_PANEL | Removes embeddable from page | CONTEXT_MENU_TRIGGER | |
 | ACTION_SHOW_CONFIG_PANEL | Opens read-only view of embeddable configuration | CONTEXT_MENU_TRIGGER | HasReadOnlyCapabilities |
 | ACTION_UNLINK_FROM_LIBRARY | Converts by-reference panel to by-value panel | CONTEXT_MENU_TRIGGER | HasLibraryTransforms |
+| ACTION_VIEW_SAVED_SEARCH | Open in Discover session in Discover application | CONTEXT_MENU_TRIGGER | |
+| ADD_TO_EXISTING_CASE_ACTION_ID | Add to case | CONTEXT_MENU_TRIGGER | LensApiCallbacks |
+| CONVERT_LEGACY_MARKDOWN_ACTION_ID | Converts markdown visualize panel to markdown panel | CONTEXT_MENU_TRIGGER | HasVisualizeConfig | 
 | FILTER_BY_MAP_EXTENT | Filters page by map bounds | CONTEXT_MENU_TRIGGER | |
 | generateCsvReport | Starts CSV reporting job for Discover session | CONTEXT_MENU_TRIGGER | PublishesSavedSearch, PublishesTitle |
 | open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | CONTEXT_MENU_TRIGGER | |
+| OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
+| OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
 | SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | CONTEXT_MENU_TRIGGER | |
+| URL_DRILLDOWN | Go to URL | CONTEXT_MENU_TRIGGER | |
 
 ### Best practices
 
