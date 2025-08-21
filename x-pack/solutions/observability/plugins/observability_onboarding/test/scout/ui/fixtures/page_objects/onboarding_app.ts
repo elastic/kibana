@@ -12,104 +12,105 @@ export class OnboardingApp {
 
   async goto() {
     await this.page.gotoApp('observabilityOnboarding');
-    await this.page.waitForLoadState('networkidle');
     await this.page
       .getByText('What do you want to monitor?')
       .waitFor({ state: 'visible', timeout: 30000 });
   }
 
-  get hostUseCaseTile() {
+  public get hostUseCaseTile() {
     return this.page.getByTestId('observabilityOnboardingUseCaseCard-host');
   }
 
-  get kubernetesUseCaseTile() {
+  public get kubernetesUseCaseTile() {
     return this.page.getByTestId('observabilityOnboardingUseCaseCard-kubernetes');
   }
 
-  get cloudUseCaseTile() {
+  public get cloudUseCaseTile() {
     return this.page.getByTestId('observabilityOnboardingUseCaseCard-cloud');
   }
 
-  get applicationUseCaseTile() {
+  public get applicationUseCaseTile() {
     return this.page.getByTestId('observabilityOnboardingUseCaseCard-application');
   }
 
-  get autoDetectLogsCard() {
+  public get autoDetectLogsCard() {
     return this.page.getByTestId('integration-card:auto-detect-logs');
   }
 
-  get otelLogsCard() {
+  public get otelLogsCard() {
     return this.page.getByTestId('integration-card:otel-logs');
   }
 
-  get kubernetesQuickStartCard() {
+  public get kubernetesQuickStartCard() {
     return this.page.getByTestId('integration-card:kubernetes-quick-start');
   }
 
-  get otelKubernetesCard() {
+  public get otelKubernetesCard() {
     return this.page.getByTestId('integration-card:otel-kubernetes');
   }
 
-  get apmVirtualCard() {
+  public get apmVirtualCard() {
     return this.page.getByTestId('integration-card:apm-virtual');
   }
 
-  get otelVirtualCard() {
+  public get otelVirtualCard() {
     return this.page.getByTestId('integration-card:otel-virtual');
   }
 
-  get syntheticsVirtualCard() {
+  public get syntheticsVirtualCard() {
     return this.page.getByTestId('integration-card:synthetics-virtual');
   }
 
-  get awsLogsVirtualCard() {
+  public get awsLogsVirtualCard() {
     return this.page.getByTestId('integration-card:aws-logs-virtual');
   }
 
-  get azureLogsVirtualCard() {
+  public get azureLogsVirtualCard() {
     return this.page.getByTestId('integration-card:azure-logs-virtual');
   }
 
-  get gcpLogsVirtualCard() {
+  public get gcpLogsVirtualCard() {
     return this.page.getByTestId('integration-card:gcp-logs-virtual');
   }
 
-  get firehoseQuickstartCard() {
+  public get firehoseQuickstartCard() {
     return this.page.getByTestId('integration-card:firehose-quick-start');
   }
 
-  get useCaseGrid() {
-    return this.page.locator('[role="group"][aria-labelledby]').first();
+  public get useCaseGrid() {
+    return this.page.getByRole('group').filter({ has: this.page.locator('[aria-labelledby]') });
   }
 
   async selectHostUseCase() {
     const hostRadio = this.hostUseCaseTile.getByRole('radio');
     await hostRadio.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.autoDetectLogsCard.waitFor({ state: 'visible' });
   }
 
   async selectKubernetesUseCase() {
     const kubernetesRadio = this.kubernetesUseCaseTile.getByRole('radio');
     await kubernetesRadio.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.kubernetesQuickStartCard.waitFor({ state: 'visible' });
   }
 
   async selectCloudUseCase() {
     const cloudRadio = this.cloudUseCaseTile.getByRole('radio');
     await cloudRadio.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.awsLogsVirtualCard.waitFor({ state: 'visible' });
   }
 
   async selectApplicationUseCase() {
     const applicationRadio = this.applicationUseCaseTile.getByRole('radio');
     await applicationRadio.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.apmVirtualCard.waitFor({ state: 'visible' });
   }
 
   async clickIntegrationCard(cardSelector: string) {
     const card = this.page.getByTestId(cardSelector);
     await card.click();
-    await this.page.waitForLoadState('networkidle');
+    await this.page.waitForURL(
+      /.*\/(auto-detect|kubernetes|otel-logs|otel-kubernetes|apm-virtual|otel-virtual|synthetics-virtual|aws-logs-virtual|azure-logs-virtual|gcp-logs-virtual|firehose-quick-start)/
+    );
   }
 
   async getGridColumnCount() {
@@ -134,7 +135,7 @@ export class OnboardingApp {
     for (const selector of possibleSelectors) {
       const description = tile.locator(selector);
       if ((await description.count()) > 0) {
-        return await description.first().textContent();
+        return await description.textContent();
       }
     }
 
@@ -148,9 +149,8 @@ export class OnboardingApp {
   }
 
   async waitForIntegrationCards() {
-    await this.page.waitForSelector('[data-test-subj^="integration-card:"]', {
-      state: 'visible',
-      timeout: 10000,
-    });
+    await this.page
+      .locator('[data-test-subj^="integration-card:"]')
+      .waitFor({ state: 'visible', timeout: 10000 });
   }
 }
