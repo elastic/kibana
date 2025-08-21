@@ -17,6 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiPageTemplate,
   EuiSkeletonTitle,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -24,8 +25,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID } from '@kbn/workflows';
-import React, { useEffect, useMemo, useState } from 'react';
+import { WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID, type WorkflowDetailDto } from '@kbn/workflows';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
 import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
@@ -81,6 +82,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
   );
+
+  const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
+  const canExecuteWorkflow = application?.capabilities.workflowsManagement.executeWorkflow;
+  const canUpdateWorkflow = application?.capabilities.workflowsManagement.updateWorkflow;
+  const canDeleteWorkflow = application?.capabilities.workflowsManagement.deleteWorkflow;
 
   const [workflowYaml, setWorkflowYaml] = useState(workflow?.yaml ?? '');
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
@@ -140,6 +146,28 @@ export function WorkflowDetailPage({ id }: { id: string }) {
       }
     );
   };
+
+  const handleToggleWorkflow = useCallback(
+    (item: WorkflowDetailDto) => {
+      updateWorkflow.mutate(
+        {
+          id: item.id,
+          workflow: {
+            enabled: !item.enabled,
+          },
+        },
+        {
+          onError: (err: unknown) => {
+            notifications?.toasts.addError(err as Error, {
+              toastLifeTimeMs: 3000,
+              title: 'Failed to update workflow',
+            });
+          },
+        }
+      );
+    },
+    [notifications?.toasts, updateWorkflow]
+  );
 
   const renderWorkflowEditor = () => {
     if (workflow === undefined) {
@@ -218,6 +246,11 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             },
           ]}
           restrictWidth={false}
+          rightSideGroupProps={{
+            css: {
+              // alignItems: 'center',
+            },
+          }}
           rightSideItems={[
             <EuiButton color="text" size="s" onClick={handleSave} disabled={!hasChanges}>
               <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
@@ -239,6 +272,34 @@ export function WorkflowDetailPage({ id }: { id: string }) {
             >
               <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Test" ignoreTag />
             </EuiButtonIcon>,
+            ...(workflow
+              ? [
+                  <div
+                    css={{
+                      width: '1px',
+                      height: '100%',
+                      margin: '4px 0',
+                      backgroundColor: euiTheme.colors.lightShade,
+                    }}
+                  />,
+                  <div css={{ height: '100%', display: 'flex', alignItems: 'center' }}>
+                    <EuiSwitch
+                      disabled={!canUpdateWorkflow}
+                      checked={workflow.enabled}
+                      onChange={() => handleToggleWorkflow(workflow)}
+                      label={
+                        workflow.enabled
+                          ? i18n.translate('workflows.workflowDetail.enabled', {
+                              defaultMessage: 'Enabled',
+                            })
+                          : i18n.translate('workflows.workflowDetail.disabled', {
+                              defaultMessage: 'Disabled',
+                            })
+                      }
+                    />
+                  </div>,
+                ]
+              : []),
           ]}
         />
       </EuiPageTemplate>

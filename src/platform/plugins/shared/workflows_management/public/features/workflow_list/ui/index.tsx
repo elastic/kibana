@@ -28,6 +28,7 @@ import { Link } from 'react-router-dom';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { capitalize } from 'lodash';
 import type { CriteriaWithPagination } from '@elastic/eui/src/components/basic_table/basic_table';
+import { i18n } from '@kbn/i18n';
 import { useWorkflowActions } from '../../../entities/workflows/model/use_workflow_actions';
 import { useWorkflows } from '../../../entities/workflows/model/use_workflows';
 import type { WorkflowsSearchParams } from '../../../types';
@@ -151,7 +152,6 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         {
           id: item.id,
           workflow: {
-            ...item,
             enabled: !item.enabled,
           },
         },
@@ -167,6 +167,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
     },
     [notifications?.toasts, updateWorkflow]
   );
+
   const columns = useMemo<Array<EuiBasicTableColumn<WorkflowListItemDto>>>(
     () => [
       {
@@ -225,7 +226,16 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
               disabled={!canUpdateWorkflow}
               checked={item.enabled}
               onChange={() => handleToggleWorkflow(item)}
-              label={'Enabled'}
+              label={
+                item.enabled
+                  ? i18n.translate('workflows.workflowList.enabled', {
+                      defaultMessage: 'Enabled',
+                    })
+                  : i18n.translate('workflows.workflowList.disabled', {
+                      defaultMessage: 'Disabled',
+                    })
+              }
+              showLabel={false}
             />
           );
         },
