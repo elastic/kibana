@@ -58,11 +58,11 @@ export const getDashboardResourcesPerMigrationFromES = async ({
   return await es.search({
     index: RESOURCES_INDEX_PATTERN,
     size: 10000,
-    // query: {
-    //   term: {
-    //     migration_id: migrationId,
-    //   },
-    // },
+    query: {
+      term: {
+        migration_id: migrationId,
+      },
+    },
   });
 };
 
