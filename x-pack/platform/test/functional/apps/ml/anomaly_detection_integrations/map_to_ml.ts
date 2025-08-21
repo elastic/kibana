@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
@@ -17,7 +17,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const dashboardTitle = 'map_to_ml';
   const dashboardArchive =
-    'x-pack/test/functional/fixtures/kbn_archiver/ml/map_to_ml_dashboard.json';
+    'x-pack/platform/test/functional/fixtures/kbn_archives/ml/map_to_ml_dashboard.json';
 
   async function dashboardPreparation(selectedPanelTitle: string) {
     await PageObjects.dashboard.loadSavedDashboard(dashboardTitle);

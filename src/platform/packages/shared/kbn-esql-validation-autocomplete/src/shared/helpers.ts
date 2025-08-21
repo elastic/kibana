@@ -16,7 +16,7 @@ import type {
   ESQLFieldWithMetadata,
   ESQLUserDefinedColumn,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLLocation, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
+import type { ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 import { uniqBy } from 'lodash';
 
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
@@ -26,9 +26,6 @@ import { collectUserDefinedColumns } from './user_defined_columns';
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
-
-export const within = (position: number, location: ESQLLocation | undefined) =>
-  Boolean(location && location.min <= position && location.max >= position);
 
 export function isSourceCommand({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);

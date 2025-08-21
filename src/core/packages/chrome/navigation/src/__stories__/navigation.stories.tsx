@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { Meta, StoryObj } from '@storybook/react';
+import type { ComponentProps } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { Meta, StoryFn, StoryObj } from '@storybook/react';
 import { Global, css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSkipLink, useEuiTheme } from '@elastic/eui';
 import { ChromeLayout, ChromeLayoutConfigProvider } from '@kbn/core-chrome-layout-components';
 import { Box } from '@kbn/core-chrome-layout-components/__stories__/box';
 import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 
 import { Navigation } from '../components/navigation';
 import { LOGO, PRIMARY_MENU_ITEMS, PRIMARY_MENU_FOOTER_ITEMS } from '../mocks/observability';
-import { NavigationStructure } from '../../types';
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
   body {
@@ -34,14 +35,25 @@ const styles = ({ euiTheme }: UseEuiTheme) => css`
   }
 `;
 
-interface StoryArgs {
-  isCollapsed: boolean;
-  logoLabel: string;
-  logoType: string;
-  items: NavigationStructure;
-}
+type PropsAndArgs = ComponentProps<typeof Navigation>;
 
-type PropsAndArgs = React.ComponentProps<typeof Navigation> & StoryArgs;
+const PreventLinkNavigation = (Story: StoryFn) => {
+  useEffect(() => {
+    const handleClick = (e: Event) => {
+      const target = e.target as HTMLElement;
+      const anchor = target.closest('a');
+
+      if (anchor && anchor.getAttribute('href')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('click', handleClick, true);
+    return () => document.removeEventListener('click', handleClick, true);
+  }, []);
+
+  return <Story />;
+};
 
 export default {
   title: 'Chrome/Navigation',
@@ -49,29 +61,21 @@ export default {
   parameters: {
     layout: 'fullscreen',
   },
+  decorators: [PreventLinkNavigation],
   args: {
+    activeItemId: PRIMARY_MENU_ITEMS[0].id,
     isCollapsed: false,
-    logoLabel: LOGO.label,
-    logoType: LOGO.logoType,
     items: {
       primaryItems: PRIMARY_MENU_ITEMS,
       footerItems: PRIMARY_MENU_FOOTER_ITEMS,
     },
+    logo: {
+      id: 'observability',
+      href: LOGO.href,
+      label: LOGO.label,
+      iconType: LOGO.type,
+    },
     setWidth: () => {},
-  },
-  argTypes: {
-    isCollapsed: {
-      control: 'boolean',
-      description: 'Whether the navigation is collapsed',
-    },
-    logoLabel: {
-      control: 'text',
-      description: 'Logo label text',
-    },
-    logoType: {
-      control: 'text',
-      description: 'Logo type for EUI icon',
-    },
   },
 } as Meta<PropsAndArgs>;
 
@@ -211,10 +215,10 @@ const Layout = ({ ...props }: PropsAndArgs) => {
           }
           navigation={
             <Navigation
+              activeItemId={props.activeItemId}
               isCollapsed={props.isCollapsed}
               items={props.items}
-              logoLabel={props.logoLabel}
-              logoType={props.logoType}
+              logo={props.logo}
               setWidth={setNavigationWidth}
             />
           }

@@ -18,6 +18,7 @@ const _allowedExperimentalValues = {
   enableAgentMigrations: false,
   enablePackageRollback: false,
   enableAutoInstallContentPackages: false,
+  enableOtelIntegrations: false,
   enableAgentStatusAlerting: false,
 };
 

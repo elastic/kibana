@@ -13,8 +13,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 
 export interface InternalToolDefinition<
   TConfig extends object = {},
-  TSchema extends ZodObject<any> = ZodObject<any>,
-  TResult = unknown
+  TSchema extends ZodObject<any> = ZodObject<any>
 > extends ToolDefinition<TConfig> {
   /**
    * The zod schema attached to this tool.
@@ -23,7 +22,7 @@ export interface InternalToolDefinition<
   /**
    * Run handler that can be used to execute the tool.
    */
-  handler: ToolHandlerFn<z.infer<TSchema>, TResult>;
+  handler: ToolHandlerFn<z.infer<TSchema>>;
 }
 
 export interface ToolCreateParams<TConfig extends object = {}> {

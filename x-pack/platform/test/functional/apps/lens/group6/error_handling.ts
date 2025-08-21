@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { intersection, uniq } from 'lodash';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, dashboard, timePicker } = getPageObjects([
@@ -31,17 +31,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
         // loading an object without reference fails, so we load data view + lens object and then unload data view
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/errors'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/errors'
         );
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/errors2'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/errors2'
         );
       });
 
       after(async () => {
         await security.testUser.restoreDefaults();
         await kibanaServer.importExport.unload(
-          'x-pack/test/functional/fixtures/kbn_archiver/lens/errors'
+          'x-pack/platform/test/functional/fixtures/kbn_archives/lens/errors'
         );
       });
 
@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('does not block render when missing fields', async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/missing_fields'
       );
 
       await dashboard.navigateToApp();
@@ -121,13 +121,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.find('emptyPlaceholder');
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/missing_fields'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/missing_fields'
       );
     });
 
     it('displays fundamental configuration issues on dashboard', async () => {
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/fundamental_config_errors_on_dashboard'
       );
 
       await dashboard.navigateToApp();
@@ -143,7 +143,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/fundamental_config_errors_on_dashboard'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/fundamental_config_errors_on_dashboard'
       );
     });
   });

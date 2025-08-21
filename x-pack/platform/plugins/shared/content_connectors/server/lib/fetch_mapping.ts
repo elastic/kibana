@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
 export const fetchMapping = async (
   client: IScopedClusterClient,

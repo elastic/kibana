@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject } from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs';
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';

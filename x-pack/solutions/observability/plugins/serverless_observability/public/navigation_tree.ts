@@ -103,14 +103,14 @@ export const createNavigationTree = ({
               ]
             : []),
           {
-            id: 'apm',
-            link: 'apm:services',
+            id: 'applications',
             title: i18n.translate('xpack.serverlessObservability.nav.applications', {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
             children: [
               {
+                id: 'apm',
                 children: [
                   {
                     link: 'apm:services',
@@ -398,6 +398,19 @@ export const createNavigationTree = ({
                     ],
                   },
                   {
+                    title: 'AI',
+                    children: [
+                      {
+                        link: 'management:genAiSettings',
+                        breadcrumbStatus: 'hidden',
+                      },
+                      {
+                        link: 'management:observabilityAiAssistantManagement',
+                        breadcrumbStatus: 'hidden',
+                      },
+                    ],
+                  },
+                  {
                     title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
                       defaultMessage: 'Content',
                     }),
@@ -415,13 +428,7 @@ export const createNavigationTree = ({
                       defaultMessage: 'Other',
                     }),
                     breadcrumbStatus: 'hidden',
-                    children: [
-                      { link: 'management:settings', breadcrumbStatus: 'hidden' },
-                      {
-                        link: 'management:observabilityAiAssistantManagement',
-                        breadcrumbStatus: 'hidden',
-                      },
-                    ],
+                    children: [{ link: 'management:settings', breadcrumbStatus: 'hidden' }],
                   },
                 ],
               },

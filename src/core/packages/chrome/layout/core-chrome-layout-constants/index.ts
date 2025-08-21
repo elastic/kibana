@@ -30,3 +30,14 @@ export const MAIN_CONTENT_SELECTORS = [
   '[role="main"]', // Fallback for plugins using deprecated EuiPageContent
   '.kbnAppWrapper', // Last-ditch fallback for all plugins regardless of page template
 ];
+
+/**
+ * The selector for elements that should be included in the focus trap of a flyout.
+ * This will allow the flyout focus trap to include header and sidenav by default.
+ */
+export const euiIncludeSelectorInFocusTrap = {
+  prop: {
+    'data-eui-includes-in-flyout-focus-trap': true,
+  },
+  selector: `[data-eui-includes-in-flyout-focus-trap="true"]`,
+};

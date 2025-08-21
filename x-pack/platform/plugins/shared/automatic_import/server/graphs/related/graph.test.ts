@@ -23,7 +23,7 @@ import { handleReview } from './review';
 import { handleRelated } from './related';
 import { handleErrors } from './errors';
 import { testPipeline, combineProcessors } from '../../util';
-import {
+import type {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';

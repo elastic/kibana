@@ -4,12 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   AssistantMessage,
-  MessageRole,
   ToolMessage,
-  type Prompt,
-  type ToolCallsOf,
   ToolCall,
   Message,
   BoundInferenceClient,
@@ -20,6 +17,7 @@ import {
   PromptResponse,
   UnboundPromptOptions,
 } from '@kbn/inference-common';
+import { MessageRole, type Prompt, type ToolCallsOf } from '@kbn/inference-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import { partition, last, takeRightWhile } from 'lodash';
 import { createReasonToolCall } from './create_reason_tool_call';
@@ -136,10 +134,12 @@ export function executeAsReasoningAgent(
         const callback = toolCallbacks[toolCall.function.name];
 
         const response = await withExecuteToolSpan(
+          toolCall.function.name,
           {
-            name: toolCall.function.name,
-            input: 'arguments' in toolCall.function ? toolCall.function.arguments : undefined,
-            toolCallId: toolCall.toolCallId,
+            tool: {
+              input: 'arguments' in toolCall.function ? toolCall.function.arguments : undefined,
+              toolCallId: toolCall.toolCallId,
+            },
           },
           () => callback(toolCall)
         );
