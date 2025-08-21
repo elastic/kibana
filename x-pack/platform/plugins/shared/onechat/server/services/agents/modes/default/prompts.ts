@@ -6,8 +6,15 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import { builtinToolIds as toolIds } from '@kbn/onechat-common';
+import { builtinToolIds } from '@kbn/onechat-common';
+import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+
+const tools = {
+  indexExplorer: sanitizeToolId(builtinToolIds.indexExplorer),
+  listIndices: sanitizeToolId(builtinToolIds.listIndices),
+  search: sanitizeToolId(builtinToolIds.search),
+};
 
 export const getActPrompt = ({
   customInstructions,
@@ -46,18 +53,22 @@ export const getActPrompt = ({
 const indexSelectionInstructions = () => {
   return `## Index Selection Protocol
 
-Finding the correct index is your **first and most critical step**. Follow these steps in order:
+Finding the correct index to answer a specific data retrieval request is your **first and most critical step**
+and should always be done before executing any data retrieval tool requiring to specify the index,
+such as the \`${tools.search}\` tool.
+
+Follow these steps in order:
 
 **1. Check the Conversation History:**
    - If the user has already specified an index in a recent message, or you have already been working with one, use that context to proceed.
 
-**2. If available, use the Index Explorer Tool:**
-   - If the conversation history offers no clues, your next step is to use the \`${toolIds.indexExplorer}\` tool if it is available.
+**2. Use the Index Explorer Tool (if available):**
+   - If the conversation history offers no clues, your next step is to use the \`${tools.indexExplorer}\` tool if it is available.
    - This tool will suggest the best index candidates for the user's query. If it returns a high-confidence match, use it to perform the search.
 
 **3. Ask the User for Clarification:**
-   - If you have no context and the \`${toolIds.indexExplorer}\` tool is unavailable or returns ambiguous results, you **must** ask the user for guidance.
-   - When you ask, you **should** call the \`${toolIds.listIndices}\` tool to provide helpful suggestions in your question.
+   - If you have no context and the \`${tools.indexExplorer}\` tool is unavailable or returns ambiguous results, you **must** ask the user for guidance.
+   - When you ask, you **should** call the \`${tools.listIndices}\` tool to provide helpful suggestions in your question.
    - Example: "I can search for that. Which index should I use? Some likely candidates are 'logs-prod' and 'metrics-nginx'."
 `;
 };

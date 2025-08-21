@@ -54,7 +54,7 @@ export const toolsToLangchain = async ({
 };
 
 export const sanitizeToolId = (toolId: string): string => {
-  return toolId.replace(/[^a-zA-Z0-9_-]/g, '');
+  return toolId.replace('.', '_').replace(/[^a-zA-Z0-9_-]/g, '');
 };
 
 /**
