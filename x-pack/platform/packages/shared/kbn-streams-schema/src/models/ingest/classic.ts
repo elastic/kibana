@@ -15,7 +15,8 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
-import { FieldDefinition, fieldDefinitionSchema } from '../../fields';
+import type { FieldDefinition } from '../../fields';
+import { fieldDefinitionSchema } from '../../fields';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
