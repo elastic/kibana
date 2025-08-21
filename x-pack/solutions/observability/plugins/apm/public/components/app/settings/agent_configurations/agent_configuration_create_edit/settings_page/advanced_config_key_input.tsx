@@ -7,15 +7,8 @@
 
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import { useEffect, useState } from 'react';
-
-enum ErrorType {
-  None,
-  Empty,
-  AlreadyPredefined,
-  Duplicated,
-}
 
 export function AdvancedConfigKeyInput({
   configKey,
@@ -40,7 +33,7 @@ export function AdvancedConfigKeyInput({
 }) {
   // Handle key inputs with local state to avoid duplicated keys overwriting each other
   const [localKey, setLocalKey] = useState(configKey);
-  const [errorType, setErrorType] = useState<ErrorType>(ErrorType.None);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isFormInvalid, setIsFormInvalid] = useState(false);
 
   useEffect(() => {
@@ -49,48 +42,35 @@ export function AdvancedConfigKeyInput({
 
   const touched = useCallback((key: string) => key !== configKey, [configKey]);
 
-  const getErrorType = useCallback(
+  const getErrorMsg = useCallback(
     (key: string) => {
       if (key === '') {
-        return ErrorType.Empty;
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
+          defaultMessage: 'Key cannot be empty',
+        });
       }
       if (checkIfPredefinedConfigKeyExists(key)) {
-        return ErrorType.AlreadyPredefined;
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
+          defaultMessage: 'This key is already predefined in the standard configuration above',
+        });
       }
       if (touched(key) && checkIfAdvancedConfigKeyExists(key)) {
-        return ErrorType.Duplicated;
+        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
+          defaultMessage: 'This key is already used in another advanced configuration',
+        });
       }
-      return ErrorType.None;
+      return null;
     },
     [checkIfAdvancedConfigKeyExists, checkIfPredefinedConfigKeyExists, touched]
   );
 
-  const errorMsg = useMemo(() => {
-    switch (errorType) {
-      case ErrorType.Empty:
-        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyEmptyError', {
-          defaultMessage: 'Key cannot be empty',
-        });
-      case ErrorType.AlreadyPredefined:
-        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyPredefinedError', {
-          defaultMessage: 'This key is already predefined in the standard configuration above',
-        });
-      case ErrorType.Duplicated:
-        return i18n.translate('xpack.apm.agentConfig.settingsPage.keyDuplicateError', {
-          defaultMessage: 'This key is already used in another advanced configuration',
-        });
-      default:
-        return '';
-    }
-  }, [errorType]);
-
   useEffect(() => {
     const errorId = `key${id}`;
     const isTouched = touched(localKey);
-    const newErrorType = getErrorType(localKey);
-    const hasValidationErrors = newErrorType !== ErrorType.None;
+    const newErrorMsg = getErrorMsg(localKey);
+    const hasValidationErrors = newErrorMsg !== null;
 
-    setErrorType(newErrorType);
+    setErrorMsg(newErrorMsg);
     setIsFormInvalid((isTouched || revalidate) && hasValidationErrors);
 
     if (hasValidationErrors) {
@@ -98,14 +78,13 @@ export function AdvancedConfigKeyInput({
     } else {
       removeValidationError(errorId);
     }
-  }, [id, addValidationError, removeValidationError, touched, localKey, revalidate, getErrorType]);
+  }, [id, addValidationError, removeValidationError, touched, localKey, revalidate, getErrorMsg]);
 
   const handleKeyChange = (key: string) => {
-    const newErrorType = getErrorType(key);
-    const noValidationErrors = newErrorType === ErrorType.None;
+    const newErrorMsg = getErrorMsg(key);
+    const noValidationErrors = newErrorMsg === null;
 
     setLocalKey(key);
-    setErrorType(newErrorType);
 
     if (noValidationErrors) {
       onChange({ key, oldKey: configKey });
