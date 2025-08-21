@@ -109,16 +109,6 @@ export const ENDPOINT_ARTIFACT_LIST_IDS = Object.freeze(
  */
 export const ENDPOINT_LIST_ID = ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
 
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead.
- *
- * The name of the single global space agnostic endpoint list */
-export const ENDPOINT_LIST_NAME = ENDPOINT_ARTIFACT_LISTS.endpointExceptions.name;
-
-/** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead.
- *
- *  The description of the single global space agnostic endpoint list */
-export const ENDPOINT_LIST_DESCRIPTION = ENDPOINT_ARTIFACT_LISTS.endpointExceptions.description;
-
 /** @deprecated Use `ENDPOINT_ARTIFACT_LISTS` instead */
 export const ENDPOINT_TRUSTED_APPS_LIST_ID = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
 

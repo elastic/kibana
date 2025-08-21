@@ -6,17 +6,13 @@
  */
 import type { CreateExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ENDPOINT_LIST_DESCRIPTION,
-  ENDPOINT_LIST_ID,
-  ENDPOINT_LIST_NAME,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 export const ENDPOINT_EXCEPTIONS_LIST_DEFINITION: CreateExceptionListSchema = {
-  name: ENDPOINT_LIST_NAME,
+  name: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.name,
   namespace_type: 'agnostic',
-  description: ENDPOINT_LIST_DESCRIPTION,
-  list_id: ENDPOINT_LIST_ID,
+  description: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.description,
+  list_id: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
   type: ExceptionListTypeEnum.ENDPOINT,
 };
 
