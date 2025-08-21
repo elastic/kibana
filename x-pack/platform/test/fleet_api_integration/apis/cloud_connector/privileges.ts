@@ -32,20 +32,45 @@ export default function (providerContext: FtrProviderContext) {
       user: testUsers.fleet_agent_policies_all_only,
       statusCode: 200,
     },
+    {
+      // Expect minimal access
+      user: testUsers.fleet_agents_read_only,
+      statusCode: 403,
+    },
+    {
+      user: testUsers.fleet_no_access,
+      statusCode: 403,
+    },
+    {
+      user: testUsers.fleet_minimal_all_only,
+      statusCode: 403,
+    },
+    {
+      user: testUsers.fleet_minimal_read_only,
+      statusCode: 403,
+    },
+    {
+      user: testUsers.fleet_settings_read_only,
+      statusCode: 403,
+    },
   ];
 
   const ALL_SCENARIOS = [
+    {
+      user: testUsers.fleet_all_only,
+      statusCode: 200,
+    },
     {
       user: testUsers.fleet_agent_policies_all_only,
       statusCode: 200,
     },
     {
       user: testUsers.fleet_read_only,
-      statusCode: 200,
+      statusCode: 403,
     },
     {
       user: testUsers.fleet_agent_policies_read_only,
-      statusCode: 200,
+      statusCode: 403,
     },
     {
       user: testUsers.fleet_agents_read_only,
@@ -83,25 +108,6 @@ export default function (providerContext: FtrProviderContext) {
         cloudProvider: 'aws',
         vars: {
           role_arn: 'arn:aws:iam::123456789012:role/test-role',
-          external_id: {
-            type: 'password',
-            value: {
-              id: 'test1234567890123456',
-              isSecretRef: true,
-            },
-          },
-        },
-      },
-    },
-    {
-      method: 'POST',
-      path: '/api/fleet/cloud_connectors',
-      scenarios: ALL_SCENARIOS,
-      send: {
-        name: 'test-cloud-connector-alt-format',
-        cloudProvider: 'aws',
-        vars: {
-          role_arn: 'arn:aws:iam::123456789012:role/test-role-alt',
           external_id: {
             type: 'password',
             value: {

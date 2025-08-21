@@ -115,7 +115,12 @@ import {
 
 import { validateDeploymentModesForInputs } from '../../common/services/agentless_policy_helper';
 
-import { SUPPORTED_CLOUD_CONNECTOR_VARS } from '../../common/constants/cloud_connector';
+import {
+  AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME,
+  AWS_ROLE_ARN_VAR_NAME,
+  EXTERNAL_ID_VAR_NAME,
+  ROLE_ARN_VAR_NAME,
+} from '../../common/constants/cloud_connector';
 
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
@@ -244,12 +249,16 @@ const extractCloudVarsFromPackagePolicy = (
     if (input.enabled && input.streams.length > 0) {
       const vars = input.streams.find((stream) => stream.enabled)?.vars;
       if (vars) {
-        return Object.entries(vars)
-          .filter(([key, _value]) => SUPPORTED_CLOUD_CONNECTOR_VARS.includes(key))
-          .reduce((acc, [key, value]) => {
-            acc[key] = value;
-            return acc;
-          }, {} as CloudConnectorVarsRecord);
+        return Object.entries(vars).reduce((acc, [key, value]) => {
+          if (key === AWS_ROLE_ARN_VAR_NAME || key === ROLE_ARN_VAR_NAME) {
+            acc[ROLE_ARN_VAR_NAME] = value;
+          }
+
+          if (key === AWS_CREDENTIALS_EXTERNAL_ID_VAR_NAME || key === EXTERNAL_ID_VAR_NAME) {
+            acc[EXTERNAL_ID_VAR_NAME] = value;
+          }
+          return acc;
+        }, {} as CloudConnectorVarsRecord);
       }
     }
   }

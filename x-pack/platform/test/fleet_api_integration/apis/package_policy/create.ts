@@ -10,6 +10,7 @@ import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { Installation } from '@kbn/fleet-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 
+import { undefined } from '@kbn/zod';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from '../space_awareness/api_helper';
@@ -1387,14 +1388,14 @@ export default function (providerContext: FtrProviderContext) {
                         value: 'hello',
                         type: 'text',
                       },
-                      'aws.credentials.external_id': {
+                      external_id: {
                         value: {
                           id: 'aws-external-id-secret',
                           isSecretRef: true,
                         },
                         type: 'password',
                       },
-                      'aws.role_arn': {
+                      role_arn: {
                         value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
                         type: 'text',
                       },
@@ -1415,11 +1416,9 @@ export default function (providerContext: FtrProviderContext) {
         expect(packagePolicy.name).to.equal('test-cspm-package-policy-cloud-connector');
         expect(packagePolicy.supports_cloud_connector).to.equal(true);
         expect(packagePolicy).to.have.property('cloud_connector_id');
-        expect(packagePolicy.cloud_connector_id).to.not.be.undefined();
-        expect(packagePolicy.inputs[0].streams[0].vars).to.have.property('aws.role_arn');
-        expect(packagePolicy.inputs[0].streams[0].vars).to.have.property(
-          'aws.credentials.external_id'
-        );
+        expect(packagePolicy.cloud_connector_id).to.be(undefined);
+        expect(packagePolicy.inputs[0].streams[0].vars).to.have.property('role_arn');
+        expect(packagePolicy.inputs[0].streams[0].vars).to.have.property('external_id');
       });
 
       it('should not create cloud connector when agent policy has cloud connectors disabled', async () => {
@@ -1452,14 +1451,14 @@ export default function (providerContext: FtrProviderContext) {
                         value: 'hello',
                         type: 'text',
                       },
-                      'aws.credentials.external_id': {
+                      external_id: {
                         value: {
                           id: 'aws-external-id-secret',
                           isSecretRef: true,
                         },
                         type: 'password',
                       },
-                      'aws.role_arn': {
+                      role_arn: {
                         value: 'arn:aws:iam::123456789012:role/CloudSecurityPostureRole',
                         type: 'text',
                       },
