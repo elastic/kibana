@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAccordion,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
@@ -33,6 +40,8 @@ const thinkingCompletedLabel = i18n.translate('xpack.onechat.conversation.thinki
 
 export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, timer }) => {
   const { euiTheme } = useEuiTheme();
+  const thinkingAccordionId = useGeneratedHtmlId({ prefix: 'roundThinkingAccordion' });
+
   if (steps.length === 0) {
     return timer.showTimer ? (
       <EuiFlexGroup justifyContent="flexEnd">
@@ -51,7 +60,7 @@ export const RoundThinking: React.FC<RoundThinkingProps> = ({ steps, isLoading, 
 
   return (
     <EuiAccordion
-      id="round-thinking"
+      id={thinkingAccordionId}
       arrowDisplay="left"
       css={accordionStyles}
       buttonProps={{
