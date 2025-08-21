@@ -1611,7 +1611,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/adm-zip": "^0.5.0",
     "@types/archiver": "^6.0.3",
-    "@types/async": "^3.2.24",
+    "@types/async": "^3.2.25",
     "@types/aws4": "^1.5.0",
     "@types/base64-js": "^1.5.0",
     "@types/byte-size": "^8.1.2",
