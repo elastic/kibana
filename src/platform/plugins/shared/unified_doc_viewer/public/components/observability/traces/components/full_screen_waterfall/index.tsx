@@ -21,10 +21,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { getUnifiedDocViewerServices } from '../../../../../plugin';
+import { where } from '@kbn/esql-composer';
+import { SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
 import { SpanFlyout } from './span_flyout';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import { ExitFullScreenButton } from './exit_full_screen_button';
+import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 export interface FullScreenWaterfallProps {
   traceId: string;
@@ -47,39 +49,18 @@ export const FullScreenWaterfall = ({
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const overlayMaskRef = useRef<HTMLDivElement>(null);
   const { euiTheme } = useEuiTheme();
-
-  const {
-    share: {
-      url: { locators },
-    },
-    data: {
-      query: {
-        timefilter: { timefilter },
-      },
-    },
-  } = getUnifiedDocViewerServices();
   const { indexes } = useDataSourcesContext();
-
-  const discoverLocator = useMemo(() => locators.get('DISCOVER_APP_LOCATOR'), [locators]);
+  const { generateDiscoverLink } = useGetGenerateDiscoverLink({
+    indexPattern: `${indexes.apm.errors},${indexes.logs}`,
+  });
 
   const generateRelatedErrorsDiscoverUrl = useCallback(
     (docId: string) => {
-      if (!discoverLocator || !indexes.apm.errors || !indexes.logs) {
-        return null;
-      }
-
-      const url = discoverLocator.getRedirectUrl({
-        timeRange: timefilter.getAbsoluteTime(),
-        filters: [],
-        query: {
-          language: 'kuery',
-          esql: `FROM ${indexes.apm.errors},${indexes.logs} | WHERE QSTR("trace.id:${traceId} AND span.id:${docId}")`,
-        },
-      });
-
-      return url;
+      return generateDiscoverLink(
+        where(`QSTR("${TRACE_ID_FIELD}:${traceId} AND ${SPAN_ID_FIELD}:${docId}")`)
+      );
     },
-    [discoverLocator, timefilter, indexes.apm.errors, indexes.logs, traceId]
+    [generateDiscoverLink, traceId]
   );
 
   const getParentApi = useCallback(

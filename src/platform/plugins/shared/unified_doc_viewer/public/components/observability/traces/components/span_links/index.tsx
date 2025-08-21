@@ -9,7 +9,6 @@
 
 import type { EuiInMemoryTableProps, EuiSelectOption } from '@elastic/eui';
 import {
-  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
@@ -21,10 +20,23 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useMemo, useState } from 'react';
+import { where } from '@kbn/esql-composer';
+import {
+  OTEL_LINKS_SPAN_ID,
+  OTEL_LINKS_TRACE_ID,
+  SPAN_ID_FIELD,
+  SPAN_LINKS_TRACE_ID,
+  TRACE_ID_FIELD,
+} from '@kbn/discover-utils';
+import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
+import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
+import {
+  toESQLParamName,
+  useGetGenerateDiscoverLink,
+} from '../../hooks/use_get_generate_discover_link';
 import { getColumns } from './get_columns';
 import { useFetchSpanLinks } from './use_fetch_span_links';
-import { useGetGenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
 
 export interface Props {
   traceId: string;
@@ -45,8 +57,13 @@ export function SpanLinks({ docId, traceId }: Props) {
   const spanLinks = type === 'incoming' ? value.incomingSpanLinks : value.outgoingSpanLinks;
 
   useEffect(() => {
-    if (type === 'incoming' && value.incomingSpanLinks.length === 0) {
-      setType('outgoing');
+    const hasData = value.incomingSpanLinks.length > 0 || value.outgoingSpanLinks.length > 0;
+    if (hasData) {
+      if (type === 'incoming' && value.incomingSpanLinks.length === 0) {
+        setType('outgoing');
+      } else if (type === 'outgoing' && value.outgoingSpanLinks.length === 0) {
+        setType('incoming');
+      }
     }
   }, [value, type]);
 
@@ -85,6 +102,28 @@ export function SpanLinks({ docId, traceId }: Props) {
     [generateDiscoverLink, type]
   );
 
+  const openInDiscoverLink = useMemo(() => {
+    if (type === 'incoming') {
+      return generateDiscoverLink(
+        where(
+          `QSTR("${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}") OR QSTR("${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}")`
+        )
+      );
+    }
+
+    const params: Array<Record<string, any>> = [];
+    const filters = spanLinks
+      .map((link, idx) => {
+        const traceIdParamName = toESQLParamName(`${TRACE_ID_FIELD}_${idx}`);
+        const spanIdParamName = toESQLParamName(`${SPAN_ID_FIELD}_${idx}`);
+        params.push({ [traceIdParamName]: link.traceId });
+        params.push({ [spanIdParamName]: link.spanId });
+        return `(${TRACE_ID_FIELD} == ?${traceIdParamName} and ${SPAN_ID_FIELD} == ?${spanIdParamName})`;
+      })
+      .join(' OR ');
+    return generateDiscoverLink(where(filters, params));
+  }, [docId, generateDiscoverLink, spanLinks, traceId, type]);
+
   if (
     loading ||
     (!error && value.incomingSpanLinks.length === 0 && value.outgoingSpanLinks.length === 0)
@@ -93,18 +132,31 @@ export function SpanLinks({ docId, traceId }: Props) {
   }
 
   return (
-    <EuiAccordion
-      data-test-subj="unifiedDocViewerSpanLinksAccordion"
-      id="spanLinksAccordion"
-      buttonContent={
-        <strong>
-          {i18n.translate('unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks', {
-            defaultMessage: 'Span links',
-          })}
-        </strong>
+    <ContentFrameworkSection
+      id="spanLinksSection"
+      title={i18n.translate(
+        'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',
+        { defaultMessage: 'Span links' }
+      )}
+      actions={
+        openInDiscoverLink
+          ? [
+              {
+                icon: 'discoverApp',
+                label: i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.openInDiscover',
+                  { defaultMessage: 'Open in discover' }
+                ),
+                ariaLabel: i18n.translate(
+                  'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks.openInDiscover',
+                  { defaultMessage: 'Open in discover link' }
+                ),
+                href: openInDiscoverLink,
+                dataTestSubj: 'unifiedDocViewerSpanLinksRefreshButton',
+              },
+            ]
+          : undefined
       }
-      initialIsOpen
-      paddingSize="none"
     >
       <EuiSpacer size="s" />
       {error ? (
@@ -153,6 +205,6 @@ export function SpanLinks({ docId, traceId }: Props) {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-    </EuiAccordion>
+    </ContentFrameworkSection>
   );
 }
