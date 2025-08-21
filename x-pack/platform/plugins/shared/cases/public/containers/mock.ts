@@ -402,6 +402,8 @@ export const basicCommentPatch: AttachmentUI = {
 };
 
 export const alertCommentPatch = {
+  id: '56bf08d1-540d-33dr-b712-9ebface784r2',
+  version: 'test',
   type: AttachmentType.alert,
   alertId: [
     '00cea26c-4396-49ad-8e80-e32146bf2ee6',
@@ -420,8 +422,6 @@ export const alertCommentPatch = {
     name: 'Ticket Price Burn Rate rule',
   },
   owner: 'observability',
-  id: '56bf08d1-540d-33dr-b712-9ebface784r2',
-  version: 'test',
 } as AlertAttachment;
 
 export const basicCaseCommentPatch = {

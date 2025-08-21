@@ -31,7 +31,6 @@ import {
   getCaseUsersMockResponse,
   customFieldsMock,
   allCasesSnake,
-  alertCommentPatch,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -46,8 +45,8 @@ import type {
   CasePatchRequest,
   AttachmentRequest,
 } from '../../../common/types/api';
-import type { AlertAttachment } from '../../../common/types/domain';
 import { CaseStatuses } from '../../../common/types/domain';
+import type { AlertAttachment } from '../../../common/types/domain';
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import type { UserProfile } from '@kbn/security-plugin/common';
 import { userProfiles } from '../user_profiles/api.mock';
@@ -124,28 +123,12 @@ export const deleteComment = async (
   signal: AbortSignal
 ): Promise<void> => Promise.resolve(undefined);
 
-export const deleteAlertComment = async (
-  caseId: string,
-  commentId: string,
-  commentUpdate: string,
-  signal: AbortSignal
-): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
-
 export const patchComment = async (
   caseId: string,
   commentId: string,
-  commentUpdate: string,
-  version: string,
+  alertAttachment: AlertAttachment,
   signal: AbortSignal
 ): Promise<CaseUI> => Promise.resolve(basicCaseCommentPatch);
-
-export const patchAlertComment = async (
-  caseId: string,
-  commentId: string,
-  commentUpdate: AlertAttachment,
-  version: string,
-  signal: AbortSignal
-): Promise<AlertAttachment> => Promise.resolve(alertCommentPatch);
 
 export const deleteCases = async (caseIds: string[], signal: AbortSignal): Promise<boolean> =>
   Promise.resolve(true);

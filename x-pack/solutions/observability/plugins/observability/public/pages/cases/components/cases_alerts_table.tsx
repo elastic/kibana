@@ -11,20 +11,26 @@ import { useKibana } from '../../../utils/kibana_react';
 import type { GetObservabilityAlertsTableProp } from '../../..';
 import { AlertActions, ObservabilityAlertsTable } from '../../..';
 
+function AlertActionsComponent(
+  props: React.ComponentProps<
+    GetObservabilityAlertsTableProp<'renderActionsCell'> & {
+      caseData: CaseViewAlertsTableProps['caseData'];
+    }
+  >
+) {
+  return <AlertActions {...props} />;
+}
+
 export function CasesAlertsTable(props: CaseViewAlertsTableProps) {
   const { cases, data, http, notifications, fieldFormats, application, licensing, settings } =
     useKibana().services;
 
-  function AlertActionsComponent(
-    actionsProps: React.ComponentProps<GetObservabilityAlertsTableProp<'renderActionsCell'>>
-  ) {
-    return <AlertActions caseData={props.caseData} {...actionsProps} />;
-  }
-
   return (
     <ObservabilityAlertsTable
       {...props}
-      renderActionsCell={AlertActionsComponent}
+      renderActionsCell={(actionProps) => (
+        <AlertActionsComponent caseData={props.caseData} {...actionProps} />
+      )}
       services={{
         data,
         http,

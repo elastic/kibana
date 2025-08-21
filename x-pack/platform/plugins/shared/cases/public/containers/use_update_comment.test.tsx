@@ -25,6 +25,17 @@ describe('useUpdateComment', () => {
     version: basicCase.comments[0].version,
   };
 
+  const sampleUpdateCall = {
+    caseId: basicCase.id,
+    commentId: basicCase.comments[0].id,
+    patch: {
+      owner: 'securitySolution',
+      comment: 'updated comment',
+      type: 'user',
+    },
+    version: basicCase.comments[0].version,
+  };
+
   const addSuccess = jest.fn();
   const addError = jest.fn();
   (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
@@ -64,8 +75,7 @@ describe('useUpdateComment', () => {
 
     await waitFor(() =>
       expect(patchCommentSpy).toHaveBeenCalledWith({
-        ...sampleUpdate,
-        owner: 'securitySolution',
+        ...sampleUpdateCall,
       })
     );
   });

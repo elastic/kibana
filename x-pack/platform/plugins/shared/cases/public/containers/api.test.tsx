@@ -43,7 +43,7 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
-  deleteAlertComment,
+  removeAlertFromComment,
 } from './api';
 
 import {
@@ -773,19 +773,22 @@ describe('Cases API', () => {
       await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
-        commentUpdate: 'updated comment',
+        patch: {
+          comment: 'updated comment',
+          type: AttachmentType.user,
+          owner: SECURITY_SOLUTION_OWNER,
+        },
         version: basicCase.comments[0].version,
         signal: abortCtrl.signal,
-        owner: SECURITY_SOLUTION_OWNER,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(`${CASES_URL}/${basicCase.id}/comments`, {
         method: 'PATCH',
         body: JSON.stringify({
-          comment: 'updated comment',
-          type: AttachmentType.user,
           id: basicCase.comments[0].id,
           version: basicCase.comments[0].version,
+          comment: 'updated comment',
+          type: AttachmentType.user,
           owner: SECURITY_SOLUTION_OWNER,
         }),
         signal: abortCtrl.signal,
@@ -796,27 +799,15 @@ describe('Cases API', () => {
       const resp = await patchComment({
         caseId: basicCase.id,
         commentId: basicCase.comments[0].id,
-        commentUpdate: 'updated comment',
+        patch: {
+          comment: 'updated comment',
+          type: AttachmentType.user,
+          owner: SECURITY_SOLUTION_OWNER,
+        },
         version: basicCase.comments[0].version,
         signal: abortCtrl.signal,
-        owner: SECURITY_SOLUTION_OWNER,
       });
       expect(resp).toEqual(basicCase);
-    });
-
-    it('should not covert to camel case registered attachments', async () => {
-      fetchMock.mockResolvedValue(caseWithRegisteredAttachmentsSnake);
-
-      const resp = await patchComment({
-        caseId: basicCase.id,
-        commentId: basicCase.comments[0].id,
-        commentUpdate: 'updated comment',
-        version: basicCase.comments[0].version,
-        signal: abortCtrl.signal,
-        owner: SECURITY_SOLUTION_OWNER,
-      });
-
-      expect(resp).toEqual(caseWithRegisteredAttachments);
     });
   });
 
@@ -1012,7 +1003,7 @@ describe('Cases API', () => {
     });
   });
 
-  describe('deleteAlertComment', () => {
+  describe('removeAlertFromComment', () => {
     beforeEach(() => {
       fetchMock.mockClear();
     });
@@ -1024,7 +1015,7 @@ describe('Cases API', () => {
         index: alertCommentPatch.index.slice(1),
       };
       fetchMock.mockResolvedValue(updatedComment);
-      const resp = await deleteAlertComment({
+      await removeAlertFromComment({
         caseId: basicCaseId,
         alertId: alertCommentPatch.alertId[0],
         alertAttachment: alertCommentPatch,
@@ -1038,8 +1029,6 @@ describe('Cases API', () => {
         method: 'PATCH',
         signal: abortCtrl.signal,
       });
-
-      expect(resp).toEqual(updatedComment);
     });
 
     it('delete alert should be called with correct check url, method, signal', async () => {
@@ -1049,7 +1038,7 @@ describe('Cases API', () => {
         index: alertCommentPatch.index.slice(3),
       };
       fetchMock.mockResolvedValue(null);
-      const resp = await deleteAlertComment({
+      const resp = await removeAlertFromComment({
         caseId: basicCaseId,
         alertId: alertCommentPatch.alertId[3],
         alertAttachment: updatedComment,

@@ -13,6 +13,7 @@ import type {
   User,
   AlertAttachmentPayload,
   UserCommentAttachmentPayload,
+  Attachment,
 } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
@@ -417,36 +418,13 @@ export const patchComment = async ({
   patch: AlertAttachmentPayload | UserCommentAttachmentPayload;
   version: string;
   signal?: AbortSignal;
-}): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
+}): Promise<Attachment> => {
+  const response = await KibanaServices.get().http.fetch<Attachment>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
     body: JSON.stringify({ id: commentId, version, ...patch }),
     signal,
   });
-  return convertCaseToCamelCase(decodeCaseResponse(response));
-};
-
-export const patchAlertComment = async ({
-  caseId,
-  commentUpdate,
-  signal,
-}: {
-  caseId: string;
-  commentUpdate: AlertAttachment;
-  signal?: AbortSignal;
-}): Promise<AlertAttachment> => {
-  const response = await KibanaServices.get().http.fetch<AlertAttachment>(
-    getCaseCommentsUrl(caseId),
-    {
-      method: 'PATCH',
-      body: JSON.stringify({
-        ...commentUpdate,
-      }),
-      signal,
-    }
-  );
-
-  return response;
+  return convertToCamelCase(response);
 };
 
 export const removeAlertFromComment = async ({
@@ -465,21 +443,13 @@ export const removeAlertFromComment = async ({
     const alertIdx = alertId.indexOf(alertIdToRemove);
     alertId.splice(alertIdx, 1);
     index.splice(alertIdx, 1);
-    if (alertId.length === 0) {
-      deleteComment({
-        caseId,
-        commentId: alertAttachment.id,
-        signal,
-      });
-    } else {
-      patchComment({
-        caseId,
-        commentId: id,
-        version,
-        patch: { type: AttachmentType.alert, alertId, index, rule, owner },
-        signal,
-      });
-    }
+    patchComment({
+      caseId,
+      commentId: id,
+      version,
+      patch: { type: AttachmentType.alert, alertId, index, rule, owner },
+      signal,
+    });
   } else {
     deleteComment({
       caseId,

@@ -6,105 +6,106 @@
  */
 
 import React from 'react';
-import { act, waitFor, renderHook } from '@testing-library/react';
-import type { AlertAttachment } from '../../common/types/domain';
-import { alertCommentPatch } from './mock';
-import * as api from './api';
-import { useToasts } from '../common/lib/kibana';
-import { casesQueriesKeys } from './constants';
-import { TestProviders, createTestQueryClient } from '../common/mock';
+import { renderHook, act, waitFor } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useRemoveAlertFromCase } from './use_remove_alert_from_case';
+import * as api from './api';
+import * as useGetCaseModule from './use_get_case';
+import type { UseGetCase } from './use_get_case';
 
-jest.mock('./api');
-jest.mock('../common/lib/kibana');
+const mockShowErrorToast = jest.fn();
+const mockShowSuccessToast = jest.fn();
+const mockRefreshCaseViewPage = jest.fn();
+
+jest.mock('../common/use_cases_toast', () => ({
+  useCasesToast: () => ({
+    showErrorToast: mockShowErrorToast,
+    showSuccessToast: mockShowSuccessToast,
+  }),
+}));
+
+jest.mock('../components/case_view/use_on_refresh_case_view_page', () => ({
+  useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+}));
+
+const alertAttachment = {
+  id: '1',
+  type: 'alert',
+  alertId: ['alert-123'],
+  createdAt: '2023-01-01T00:00:00Z',
+  createdBy: { fullName: 'John Doe' },
+  updatedAt: '2023-01-02T00:00:00Z',
+  updatedBy: { fullName: 'Jane Doe' },
+  pushedAt: null,
+  pushedBy: null,
+};
+
+const caseData = {
+  case: {
+    comments: [alertAttachment],
+  },
+};
 
 describe('useRemoveAlertFromCase', () => {
-  const addSuccess = jest.fn();
-  const addError = jest.fn();
-  (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
+  let queryClient: QueryClient;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    queryClient = new QueryClient();
+    jest.spyOn(api, 'removeAlertFromComment').mockResolvedValue(Promise.resolve());
+    mockShowErrorToast.mockClear();
+    mockShowSuccessToast.mockClear();
+    mockRefreshCaseViewPage.mockClear();
   });
 
-  const sampleUpdate: {
-    caseId: string;
-    alertId: string;
-    alertAttachment: AlertAttachment;
-    successToasterTitle: string;
-  } = {
-    caseId: 'test-id',
-    alertId: 'test-alert-id',
-    alertAttachment: alertCommentPatch as AlertAttachment,
-    successToasterTitle: 'Done!',
-  };
+  const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
+    <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+  );
 
-  it('patch case and refresh the case page', async () => {
-    const queryClient = createTestQueryClient();
-    const queryClientSpy = jest.spyOn(queryClient, 'invalidateQueries');
+  it('shows error toast if alert attachment not found', async () => {
+    jest
+      .spyOn(useGetCaseModule, 'useGetCase')
+      .mockReturnValue({ data: { case: { comments: [] } } } as unknown as UseGetCase);
+    const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
 
-    const { result } = renderHook(() => useRemoveAlertFromCase(), {
-      wrapper: (props) => <TestProviders {...props} queryClient={queryClient} />,
+    await act(async () => {
+      result.current.mutate({ alertId: 'not-found', successToasterTitle: 'Removed!' });
     });
 
-    act(() => {
-      result.current.mutate(sampleUpdate);
-    });
-
-    await waitFor(() => {
-      expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
-    });
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.tags());
+    expect(mockShowErrorToast).toHaveBeenCalled();
+    expect(api.removeAlertFromComment).not.toHaveBeenCalled();
   });
 
-  it('calls the api when invoked with the correct parameters', async () => {
-    const deleteAlertCommentSpy = jest.spyOn(api, 'deleteAlertComment');
-    const { result } = renderHook(() => useRemoveAlertFromCase(), {
-      wrapper: TestProviders,
+  it('calls removeAlertFromComment with correct params and shows success toast', async () => {
+    jest.spyOn(useGetCaseModule, 'useGetCase').mockReturnValue({ data: caseData } as UseGetCase);
+    const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
+
+    await act(async () => {
+      result.current.mutate({ alertId: 'alert-123', successToasterTitle: 'Removed!' });
     });
 
-    act(() => {
-      result.current.mutate(sampleUpdate);
-    });
-
-    await waitFor(() =>
-      expect(deleteAlertCommentSpy).toHaveBeenCalledWith({
-        caseId: 'test-id',
-        alertId: 'test-alert-id',
-        alertAttachment: alertCommentPatch,
+    expect(api.removeAlertFromComment).toHaveBeenCalledWith(
+      expect.objectContaining({
+        caseId: 'case-1',
+        alertId: 'alert-123',
+        alertAttachment: expect.objectContaining({
+          alertId: ['alert-123'],
+        }),
       })
     );
+    await waitFor(() => expect(mockShowSuccessToast).toHaveBeenCalledWith('Removed!'));
+    expect(mockRefreshCaseViewPage).toHaveBeenCalled();
   });
 
-  it('shows a success toaster', async () => {
-    const { result } = renderHook(() => useRemoveAlertFromCase(), {
-      wrapper: TestProviders,
+  it('shows error toast if removeAlertFromComment throws', async () => {
+    jest.spyOn(useGetCaseModule, 'useGetCase').mockReturnValue({ data: caseData } as UseGetCase);
+
+    (api.removeAlertFromComment as jest.Mock).mockRejectedValueOnce(new Error('API error'));
+    const { result } = renderHook(() => useRemoveAlertFromCase('case-1'), { wrapper });
+
+    await act(async () => {
+      result.current.mutate({ alertId: 'alert-123', successToasterTitle: 'Removed!' });
     });
 
-    act(() => {
-      result.current.mutate(sampleUpdate);
-    });
-
-    await waitFor(() =>
-      expect(addSuccess).toHaveBeenCalledWith({
-        title: 'Done!',
-        className: 'eui-textBreakWord',
-      })
-    );
-  });
-
-  it('shows a toast error when the api return an error', async () => {
-    jest.spyOn(api, 'deleteAlertComment').mockRejectedValue(new Error('useUpdateCase: Test error'));
-
-    const { result } = renderHook(() => useRemoveAlertFromCase(), {
-      wrapper: TestProviders,
-    });
-
-    act(() => {
-      result.current.mutate(sampleUpdate);
-    });
-
-    await waitFor(() => expect(addError).toHaveBeenCalled());
+    await waitFor(() => expect(mockShowErrorToast).toHaveBeenCalled());
   });
 });
