@@ -92,6 +92,7 @@ export function useWorkflowUrlState() {
     (stepExecutionId: string | null) => {
       updateUrlState({
         stepExecutionId: stepExecutionId || undefined,
+        stepId: undefined,
       });
     },
     [updateUrlState]

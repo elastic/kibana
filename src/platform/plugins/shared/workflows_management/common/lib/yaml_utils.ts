@@ -124,7 +124,7 @@ export function getCurrentPath(document: Document, absolutePosition: number) {
   return path;
 }
 
-export function getStepNodeRange(document: Document, stepName: string) {
+export function getStepNode(document: Document, stepName: string): YAMLMap | null {
   let stepNode: YAMLMap | null = null;
   visit(document, {
     Scalar(key, node, ancestors) {

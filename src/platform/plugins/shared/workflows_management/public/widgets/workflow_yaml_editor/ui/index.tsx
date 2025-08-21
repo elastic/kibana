@@ -26,7 +26,7 @@ import {
 import type { WorkflowYAMLEditorProps } from '../model/types';
 import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
 import { getCompletionItemProvider } from '../lib/get_completion_item_provider';
-import { getStepNodeRange } from '../../../../common/lib/yaml_utils';
+import { getStepNode } from '../../../../common/lib/yaml_utils';
 
 const WorkflowSchemaUri = 'file:///workflow-schema.json';
 
@@ -57,6 +57,12 @@ const editorStyles = {
         opacity: 0.5,
       },
       '.step-execution-completed': {
+        backgroundColor: euiTheme.colors.backgroundLightSuccess,
+      },
+      '.step-execution-failed': {
+        backgroundColor: euiTheme.colors.backgroundLightDanger,
+      },
+      '.step-execution-completed-glyph': {
         '&:before': {
           content: '""',
           display: 'block',
@@ -66,7 +72,7 @@ const editorStyles = {
           borderRadius: '50%',
         },
       },
-      '.step-execution-failed': {
+      '.step-execution-failed-glyph': {
         '&:before': {
           content: '""',
           display: 'block',
@@ -175,7 +181,7 @@ export const WorkflowYAMLEditor = ({
       }
       return;
     }
-    const stepNode = getStepNodeRange(yamlDocumentRef.current, highlightStep);
+    const stepNode = getStepNode(yamlDocumentRef.current, highlightStep);
     if (!stepNode) {
       return;
     }
@@ -203,7 +209,7 @@ export const WorkflowYAMLEditor = ({
     const decorations = stepExecutions
       .map((stepExecution) => {
         // @ts-expect-error - TODO: fix this
-        const stepNode = getStepNodeRange(yamlDocumentRef.current, stepExecution.stepId);
+        const stepNode = getStepNode(yamlDocumentRef.current, stepExecution.stepId);
         if (!stepNode) {
           return null;
         }
@@ -219,13 +225,30 @@ export const WorkflowYAMLEditor = ({
             stepRange.endColumn
           ),
           options: {
-            glyphMarginClassName: `step-execution-${stepExecution.status} ${
+            glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
               !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
             }`,
           },
         };
-        return decoration;
+        const bgClassName = `step-execution-${stepExecution.status} ${
+          !!highlightStep && highlightStep !== stepExecution.stepId ? 'dimmed' : ''
+        }`;
+        const decoration2: monaco.editor.IModelDeltaDecoration = {
+          range: new monaco.Range(
+            stepRange.startLineNumber,
+            stepRange.startColumn,
+            stepRange.endLineNumber - 1,
+            stepRange.endColumn
+          ),
+          options: {
+            className: bgClassName,
+            marginClassName: bgClassName,
+            isWholeLine: true,
+          },
+        };
+        return [decoration, decoration2];
       })
+      .flat()
       .filter((d) => d !== null) as monaco.editor.IModelDeltaDecoration[];
     if (stepExecutionsDecorationCollectionRef.current) {
       stepExecutionsDecorationCollectionRef.current.clear();

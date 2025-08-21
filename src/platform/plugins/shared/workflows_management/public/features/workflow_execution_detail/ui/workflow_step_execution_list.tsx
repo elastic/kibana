@@ -15,6 +15,7 @@ import {
   EuiLoadingSpinner,
   EuiText,
   useEuiTheme,
+  EuiButton,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -26,6 +27,7 @@ interface WorkflowStepExecutionListProps {
   isLoading: boolean;
   error: Error | null;
   onStepExecutionClick: (stepExecutionId: string) => void;
+  onClose: () => void;
   selectedId: string | null;
 }
 
@@ -37,6 +39,7 @@ export const WorkflowStepExecutionList = ({
   execution,
   onStepExecutionClick,
   selectedId,
+  onClose,
 }: WorkflowStepExecutionListProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -108,6 +111,9 @@ export const WorkflowStepExecutionList = ({
           onClick={() => onStepExecutionClick(stepExecution.id)}
         />
       ))}
+      <EuiButton onClick={onClose} css={{ justifySelf: 'flex-end', marginTop: 'auto' }}>
+        <FormattedMessage id="workflows.workflowStepExecutionList.done" defaultMessage="Done" />
+      </EuiButton>
     </EuiFlexGroup>
   );
 };

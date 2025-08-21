@@ -50,11 +50,6 @@ export const WorkflowStepExecutionFlyout = ({
 
   const { setSelectedStep } = useWorkflowUrlState();
 
-  useEffect(() => {
-    setSelectedStep(stepId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [stepId]);
-
   const complicatedFlyoutTitleId = `Step ${stepExecution?.stepId} Execution Details`;
 
   const tabs = useMemo(
@@ -75,7 +70,14 @@ export const WorkflowStepExecutionFlyout = ({
     [stepExecution]
   );
 
-  const [selectedTabId, setSelectedTabId] = useState<string>('input');
+  const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
+
+  useEffect(() => {
+    setSelectedStep(stepId);
+    // reset the tab to the default one on step change
+    setSelectedTabId(tabs[0].id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [stepId, tabs[0].id]);
 
   const renderInput = () => {
     if (stepExecution?.input) {

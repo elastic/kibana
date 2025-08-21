@@ -265,6 +265,7 @@ export function WorkflowDetailPage({ id }: { id: string }) {
               maxWidth: '275px',
               flex: 1,
               borderLeft: `1px solid ${euiTheme.colors.lightShade}`,
+              paddingBottom: '48px', // height of the validation errors bottom bar
             }}
           >
             {workflow && (

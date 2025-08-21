@@ -42,6 +42,13 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     refetch,
   } = useWorkflowExecution(workflowExecutionId);
 
+  const { setSelectedStepExecution, selectedStepExecutionId, setSelectedExecution } =
+    useWorkflowUrlState();
+
+  const closeFlyout = useCallback(() => {
+    setSelectedStepExecution(null);
+  }, [setSelectedStepExecution]);
+
   const isVisualEditorEnabled = uiSettings?.get<boolean>(
     WORKFLOWS_UI_VISUAL_EDITOR_SETTING_ID,
     false
@@ -212,8 +219,6 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     [traceId, rangeFrom, rangeTo, entryTransactionId]
   );
 
-  const { setSelectedStepExecution, selectedStepExecutionId } = useWorkflowUrlState();
-
   const renderSelectedStepExecutionFlyout = useCallback(() => {
     if (!workflowExecution?.stepExecutions?.length) {
       return null;
@@ -252,10 +257,9 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
 
     return (
       <WorkflowStepExecutionFlyout
-        key={selectedStepExecution.id}
         workflowExecutionId={workflowExecutionId}
         stepId={selectedStepExecution.stepId}
-        closeFlyout={() => setSelectedStepExecution(null)}
+        closeFlyout={closeFlyout}
         goNext={goNext}
         goPrevious={goPrevious}
       />
@@ -265,7 +269,12 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
     workflowExecutionId,
     selectedStepExecutionId,
     setSelectedStepExecution,
+    closeFlyout,
   ]);
+
+  const closeSidePanel = useCallback(() => {
+    setSelectedExecution(null);
+  }, [setSelectedExecution]);
 
   return (
     <>
@@ -277,6 +286,7 @@ export const WorkflowExecution: React.FC<WorkflowExecutionProps> = ({
         onStepExecutionClick={(stepExecutionId) => {
           setSelectedStepExecution(stepExecutionId);
         }}
+        onClose={closeSidePanel}
         selectedId={selectedStepExecutionId ?? null}
       />
     </>
