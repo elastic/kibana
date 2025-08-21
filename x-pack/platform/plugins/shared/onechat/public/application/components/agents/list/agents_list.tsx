@@ -14,6 +14,14 @@ import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 
+const columnNames = {
+  name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
+  description: i18n.translate('xpack.onechat.agents.descriptionLabel', {
+    defaultMessage: 'Description',
+  }),
+  labels: i18n.translate('xpack.onechat.agents.labelsLabel', { defaultMessage: 'Labels' }),
+};
+
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
 
@@ -23,7 +31,7 @@ export const AgentsList: React.FC = () => {
     () => [
       {
         field: 'name',
-        name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
+        name: columnNames.name,
         valign: 'top',
         render: (name: string, item: AgentDefinition) => (
           <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
@@ -33,19 +41,14 @@ export const AgentsList: React.FC = () => {
       },
       {
         field: 'description',
-        name: i18n.translate('xpack.onechat.agents.descriptionLabel', {
-          defaultMessage: 'Description',
-        }),
+        name: columnNames.description,
         valign: 'top',
         render: (description: string) => <EuiText size="s">{description}</EuiText>,
       },
       {
-        field: 'configuration.instructions',
-        name: i18n.translate('xpack.onechat.agents.instructionsLabel', {
-          defaultMessage: 'Instructions',
-        }),
-        valign: 'top',
-        render: (instructions: string) => <EuiText size="s">{instructions}</EuiText>,
+        field: 'labels',
+        name: columnNames.labels,
+        render: (labels: string[]) => <EuiText size="s">{labels.join(', ')}</EuiText>,
       },
     ],
     [createOnechatUrl]
