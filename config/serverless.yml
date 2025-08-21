@@ -274,6 +274,7 @@ xpack.reporting.csv.maxConcurrentShardRequests: 0
 # Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
+monitoring_collection.enabled: false
 
 ## Enable uiSettings validations
 data.enableUiSettingsValidations: true
