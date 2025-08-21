@@ -58,7 +58,7 @@ export const PlaygroundsTable = ({
     () => [
       {
         name: i18n.translate('xpack.searchPlayground.playgroundsList.table.columns.name.header', {
-          defaultMessage: 'Playground',
+          defaultMessage: 'RAG Playground',
         }),
         render: ({ id, name }: PlaygroundListObject) => (
           <EuiLink
@@ -94,7 +94,7 @@ export const PlaygroundsTable = ({
               i18n.translate(
                 'xpack.searchPlayground.playgroundsList.table.columns.actions.delete.description',
                 {
-                  defaultMessage: 'Delete playground {name}',
+                  defaultMessage: 'Delete RAG playground {name}',
                   values: { name: playground.name },
                 }
               ),
