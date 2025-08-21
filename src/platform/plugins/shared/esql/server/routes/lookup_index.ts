@@ -101,9 +101,9 @@ export const registerLookupIndexRoutes = (
 
   router.get(
     {
-      path: '/internal/esql/lookup_index/privileges/{indexName}',
+      path: '/internal/esql/lookup_index/privileges/{indexName?}',
       validate: {
-        params: schema.object({ indexName: schema.string() }),
+        params: schema.object({ indexName: schema.maybe(schema.string()) }),
       },
       security: {
         authz: {
@@ -129,10 +129,14 @@ export const registerLookupIndexRoutes = (
               privileges: ['create_index', 'read', 'write'],
             },
             // Check if the user has privileges to create, read and write based on the index pattern
-            {
-              names: [`${indexName}`],
-              privileges: ['read', 'write', 'create_index'],
-            },
+            ...(indexName
+              ? [
+                  {
+                    names: [`${indexName}`],
+                    privileges: ['read', 'write', 'create_index'],
+                  },
+                ]
+              : []),
           ],
         });
 
