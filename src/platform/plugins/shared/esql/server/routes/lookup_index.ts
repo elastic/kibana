@@ -98,4 +98,51 @@ export const registerLookupIndexRoutes = (
       }
     }
   );
+
+  router.get(
+    {
+      path: '/internal/esql/lookup_index/privileges/{indexName}',
+      validate: {
+        params: schema.object({ indexName: schema.string() }),
+      },
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route delegates authorization to the scoped ES client',
+        },
+      },
+      options: {
+        description: 'Checks if the user has privileges to create, read and write to an index',
+      },
+    },
+    async (requestHandlerContext, req, res) => {
+      const { indexName } = req.params;
+
+      try {
+        const core = await requestHandlerContext.core;
+        const esClient = core.elasticsearch.client.asCurrentUser;
+        const { index: indexPrivileges = {} } = await esClient.security.hasPrivileges({
+          index: [
+            // Check if the user has privileges to create, read and write to any index
+            {
+              names: ['*'],
+              privileges: ['create_index', 'read', 'write'],
+            },
+            // Check if the user has privileges to create, read and write based on the index pattern
+            {
+              names: [`${indexName}*`],
+              privileges: ['read', 'write', 'create_index'],
+            },
+          ],
+        });
+
+        return res.ok({
+          body: indexPrivileges,
+        });
+      } catch (error) {
+        logger.get().debug(error);
+        throw error;
+      }
+    }
+  );
 };
