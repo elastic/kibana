@@ -63,18 +63,32 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const currentUser = await checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
-          const userFilter = currentUser?.username
-            ? `name: "${currentUser?.username}"`
-            : `id: "${currentUser?.profile_uid}"`;
+          const userFilter = `users:{ ${
+            currentUser?.username
+              ? `name: "${currentUser?.username}"`
+              : `id: "${currentUser?.profile_uid}"`
+          } }`;
+          const createdByFilter = `created_by.${
+            currentUser?.username
+              ? `name: "${currentUser?.username}"`
+              : `id: "${currentUser?.profile_uid}"`
+          }`;
           const sharedFilter = ` OR users: "" OR NOT users: { name: * }`;
+          const onlyOwnerFilter = `((created_by:* AND (created_by.id : "${currentUser?.profile_uid}" OR created_by.name : "${currentUser?.username}"))) OR ((NOT created_by:* AND (users.id : "${currentUser?.profile_uid}" OR users.name : "${currentUser?.username}")))`;
+          const onglyOwnerFilter = `(${createdByFilter}) OR ((NOT created_by.name:* AND NOT created_by.id:*) AND ${userFilter})`;
+          const conversationUserFilter = query.is_owner
+            ? onlyOwnerFilter
+            : `${userFilter}${sharedFilter}`;
+          console.log('conversationUserFilter ==>', conversationUserFilter);
           const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
             page: query.page,
             sortField: query.sort_field,
             sortOrder: query.sort_order,
-            filter: `users:{ ${userFilter} }${sharedFilter}${additionalFilter}`,
+            filter: `${conversationUserFilter}${additionalFilter}`,
             fields: query.fields ? transformFieldNamesToSourceScheme(query.fields) : undefined,
           });
+          console.log('result ==>', result);
 
           if (result) {
             return response.ok({

@@ -133,6 +133,11 @@ export const AssistantHeader: React.FC<Props> = ({
     [selectedConversation]
   );
 
+  const userOwnedConversations = useMemo(
+    () => conversations.filter((c) => c.isConversationOwner),
+    [conversations]
+  );
+
   return (
     <>
       <FlyoutNavigation
@@ -150,7 +155,7 @@ export const AssistantHeader: React.FC<Props> = ({
               isSettingsModalVisible={isSettingsModalVisible}
               setIsSettingsModalVisible={setIsSettingsModalVisible}
               onConversationSelected={onConversationSelected}
-              conversations={conversations}
+              conversations={userOwnedConversations}
               conversationsLoaded={conversationsLoaded}
               refetchCurrentConversation={refetchCurrentConversation}
               refetchCurrentUserConversations={refetchCurrentUserConversations}

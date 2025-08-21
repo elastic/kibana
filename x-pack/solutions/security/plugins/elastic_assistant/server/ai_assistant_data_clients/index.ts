@@ -117,6 +117,7 @@ export class AIAssistantDataClient {
     };
   }): Promise<Promise<FindResponse<TSearchSchema>>> => {
     const esClient = await this.options.elasticsearchClientPromise;
+    console.log('findDocuments ==>');
     return findDocuments<TSearchSchema>({
       esClient,
       fields,
