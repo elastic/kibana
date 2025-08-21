@@ -1,6 +1,6 @@
 # Observability Solution Test Directory
 
-This directory contains test suites specific to the Observability solution. For comprehensive FTR (Functional Test Runner) documentation, architecture details, and testing best practices, see the main platform documentation: [`x-pack/platform/test/README.md`](../../platform/test/README.md).
+This directory contains test suites specific to the Observability solution. For comprehensive FTR (Functional Test Runner) documentation, architecture details, and testing best practices, see the main platform documentation: [`x-pack/platform/test/README.md`](../../../platform/test/README.md).
 
 ## Platform Services and Page Objects Integration
 
