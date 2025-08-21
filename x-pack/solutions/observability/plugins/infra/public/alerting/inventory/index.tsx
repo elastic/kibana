@@ -81,10 +81,7 @@ export function createInventoryMetricRuleType({
     },
     ruleParamsExpression: (props: ExpressionsProps) => (
       <React.Suspense fallback={null}>
-        <LazyRuleParamsExpression
-          {...props}
-          metadata={{ ...props.metadata, hostOtelEnabled: config?.featureFlags.hostOtelEnabled }}
-        />
+        <LazyRuleParamsExpression {...props} metadata={{ ...props.metadata }} />
       </React.Suspense>
     ),
     validate: validateMetricThreshold,
