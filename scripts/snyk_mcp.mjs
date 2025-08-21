@@ -14,6 +14,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 // eslint-disable-next-line @kbn/eslint/module_migration
 import { z } from 'zod';
 import fetch from 'node-fetch';
+import path from 'path';
 
 // TODO validate config with zod
 // const ConfigSchema = z.object({
@@ -205,6 +206,14 @@ server.tool(
       const exceptionDays =
         exceptionTTLBySeverity[severity.toLowerCase()] ?? exceptionTTLBySeverity.low;
 
+      const hasSamplesForInference = Boolean(process.env.SAMPLES_PATH);
+      const triageCommentSamples = hasSamplesForInference
+        ? `Refer to samples ${path.resolve(
+            process.env.SAMPLES_PATH,
+            'triage_response.md'
+          )} for examples.`
+        : '';
+
       const plan = {
         steps: [
           {
@@ -212,14 +221,13 @@ server.tool(
             description:
               `@workspace ${vulnerability.packageName} has vulnerabilities. Severity ${severity}, CVE ID ${cveId}` +
               vulnerability.description +
-              `It was introduces through ${introducedThrough}
+              `It was introduced through ${introducedThrough}. You don't need to run any commands for dependency tree.
             You need to triage this package, extract vulnerable functions and methods from the description (if applicable).
             Find if there are any usages in the codebase (ignore tests, ignore node_modules, ignore target folders, we are interested in production application code). List the usages and check if they are vulnerable.`,
           },
           {
             id: 'make_triage_comment',
-            description:
-              'Based on the triage from previous step, make a triage comment with the justification and risk response.',
+            description: `Based on the triage from previous step, make a triage comment with the justification and risk response. ${triageCommentSamples}.`,
             tool: 'make_triage_comment',
           },
           {
