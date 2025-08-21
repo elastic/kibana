@@ -116,6 +116,7 @@ export interface DataStreamDefinition<
     };
 
     mappings?: DataStreamDefinitionMappings<Schema>;
+
     /**
      * @remark "hidden" defaults to true for the data stream and the backing indices
      */

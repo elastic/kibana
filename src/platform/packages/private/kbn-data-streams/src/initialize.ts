@@ -136,7 +136,7 @@ export async function initialize({
       return;
     } else {
       const {
-        template: { mappings, settings },
+        template: { mappings },
       } = await retryEs(() =>
         elasticsearchClient.indices.simulateIndexTemplate({ name: dataStreams.name })
       );
@@ -148,17 +148,20 @@ export async function initialize({
         })
       );
 
+      if (!dataStreams.template.settings) return;
+
       const limit = pLimit(5);
       const promises: Promise<void>[] = [];
 
       for (const index of indices)
         promises.push(
           limit(async () => {
-            logger.debug(`Applying settings to index: ${index}`);
+            logger.debug(`Applying settings to index: ${index.index_name}`);
             await retryEs(() =>
               elasticsearchClient.indices.putSettings({
                 index: index.index_name,
-                settings,
+                /** TODO: Figure out how we can incorporate the "simulated" settings */
+                settings: dataStreams.template.settings,
               })
             );
           })
