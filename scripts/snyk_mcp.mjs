@@ -155,9 +155,11 @@ server.tool(
       .string()
       .min(1, 'Expiration date cannot be empty')
       .describe('Expiration date for the exception request.'),
+    issueNumber: z.number().describe('GitHub issue number to post the security statement.'),
   },
   async (args) => {
-    const { snykIssueNumber, cveId, justification, remediationPlan, expirationDate } = args;
+    const { snykIssueNumber, cveId, justification, remediationPlan, expirationDate, issueNumber } =
+      args;
 
     const content = `
       ### Applicable artifacts
@@ -187,7 +189,8 @@ server.tool(
 
       ${expirationDate}`;
 
-    // TODO add github call to create issue
+    await writeCommentOnGitHubIssue(issueNumber, content);
+
     return {
       content: [
         {
@@ -209,9 +212,10 @@ server.tool(
     riskResponse: z
       .enum(['mitigate', 'avoid', 'accept'])
       .describe("Risk response for the vulnerability. Can be 'mitigate', 'avoid' or 'accept'."),
+    issueNumber: z.number().describe('GitHub issue number to post the security statement.'),
   },
   async (args) => {
-    const { riskResponse, justification } = args;
+    const { riskResponse, justification, issueNumber } = args;
 
     const content = `
     - **Triage:** ${justification}
@@ -219,7 +223,8 @@ server.tool(
     - **Upgrade paths:**
       - package@x.y.z -> package@x.y.z`;
 
-    // TODO add github call to create comment
+    await writeCommentOnGitHubIssue(issueNumber, content);
+
     return {
       content: [
         {
@@ -420,9 +425,12 @@ server.tool(
             description:
               `@workspace ${vulnerability.packageName} has vulnerabilities. Severity ${severity}, CVE ID ${cveId}` +
               vulnerability.description +
-              `It was introduced through ${introducedThrough}. You don't need to run any commands for dependency tree.
-            You need to triage this package, extract vulnerable functions and methods from the description (if applicable).
-            Find if there are any usages in the codebase (ignore tests, ignore node_modules, ignore target folders, we are interested in production application code). List the usages and check if they are vulnerable.`,
+              `It was introduces through ${introducedThrough}
+              You need to triage this package, extract vulnerable functions and methods from the description (if applicable).
+              This analysis should also check yarn.lock.
+              Find if there are any usages in the codebase (ignore tests, ignore target folders, we are interested in production application code).
+              List the usages and check if they are vulnerable.
+              If the package is a transitive dependency, check node_modules to see if the parent dependencies are using the vulnerable functions.`,
           },
           {
             id: 'find_github_issue',
