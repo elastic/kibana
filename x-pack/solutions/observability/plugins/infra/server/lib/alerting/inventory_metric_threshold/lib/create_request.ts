@@ -20,12 +20,14 @@ import type { InventoryMetricConditions } from '../../../../../common/alerting/m
 import { createBucketSelector } from './create_bucket_selector';
 import { KUBERNETES_POD_UID, NUMBER_OF_DOCUMENTS, termsAggField } from '../../common/utils';
 
-const METADATA_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
-const METADATA_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
+const ADDITIONAL_CONTEXT_ALLOW_LIST = ['host.*', 'labels.*', 'tags', 'cloud.*', 'orchestrator.*'];
+const ADDITIONAL_CONTEXT_BLOCKED_LIST = ['host.cpu.*', 'host.disk.*', 'host.network.*'];
 
-export const METADATA_BLOCKED_LIST_REGEX = new RegExp(
+export const ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX = new RegExp(
   '^' +
-    METADATA_BLOCKED_LIST.map((p) => p.replace(/\./g, '\\.').replace(/\*/g, '.*')).join('|') +
+    ADDITIONAL_CONTEXT_BLOCKED_LIST.map((p) => p.replace(/\./g, '\\.').replace(/\*/g, '.*')).join(
+      '|'
+    ) +
     '$'
 );
 
@@ -82,8 +84,8 @@ export const createRequest = async (
       : undefined;
 
   const allowList = !containerContextAgg
-    ? METADATA_ALLOW_LIST.concat('container.*')
-    : METADATA_ALLOW_LIST;
+    ? ADDITIONAL_CONTEXT_ALLOW_LIST.concat('container.*')
+    : ADDITIONAL_CONTEXT_ALLOW_LIST;
 
   const additionalContextAgg: Record<string, estypes.AggregationsAggregationContainer> = {
     additionalContext: {
@@ -94,7 +96,7 @@ export const createRequest = async (
             ? false
             : {
                 includes: allowList,
-                excludes: METADATA_BLOCKED_LIST,
+                excludes: ADDITIONAL_CONTEXT_BLOCKED_LIST,
               },
         // otel docs don't support _source to select fields, so we use docvalue_fields
         docvalue_fields: schema === 'semconv' ? allowList : [],

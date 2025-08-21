@@ -19,7 +19,7 @@ import type {
   SnapshotCustomMetricInput,
 } from '../../../../../common/http_api';
 import type { InfraSource } from '../../../sources';
-import { METADATA_BLOCKED_LIST_REGEX, createRequest } from './create_request';
+import { ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX, createRequest } from './create_request';
 import type { AdditionalContext } from '../../common/utils';
 import { doFieldsExist, KUBERNETES_POD_UID, termsAggField } from '../../common/utils';
 
@@ -96,7 +96,7 @@ const getMetadata = (
     }
 
     const filteredMetadata = Object.fromEntries(
-      Object.entries(metadata).filter(([key]) => !METADATA_BLOCKED_LIST_REGEX.test(key))
+      Object.entries(metadata).filter(([key]) => !ADDITIONAL_CONTEXT_BLOCKED_LIST_REGEX.test(key))
     );
 
     return unflattenKnownFields(filteredMetadata);
