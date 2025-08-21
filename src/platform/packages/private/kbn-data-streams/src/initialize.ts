@@ -147,37 +147,6 @@ export async function initialize({
           ...mappings,
         })
       );
-
-      if (!dataStreams.template.settings) return;
-
-      const limit = pLimit(5);
-      const promises: Promise<void>[] = [];
-
-      for (const index of indices)
-        promises.push(
-          limit(async () => {
-            logger.debug(`Applying settings to index: ${index.index_name}`);
-            await retryEs(() =>
-              elasticsearchClient.indices.putSettings({
-                index: index.index_name,
-                /** TODO: Figure out how we can incorporate the "simulated" settings */
-                settings: dataStreams.template.settings,
-              })
-            );
-          })
-        );
-
-      const results = await Promise.allSettled(promises);
-
-      const updateErrors: unknown[] = [];
-      for (const result of results) {
-        if (result.status === 'rejected') {
-          updateErrors.push(result.reason);
-        }
-      }
-      if (updateErrors.length) {
-        throw new Error(updateErrors.map((e) => String(e)).join('\n'));
-      }
     }
   }
 }
