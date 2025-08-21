@@ -25,7 +25,6 @@ import { useStyles } from './styles';
 import { DetailPanelAlertActions } from '../detail_panel_alert_actions';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { useDateFormat } from '../../hooks';
-import { normalizeArgsToArray } from '../../utils/normalize_args_to_array';
 import { getAlertCategoryDisplayText } from '../../utils/alert_category_display_text';
 export const ALERT_LIST_ITEM_TEST_ID = 'sessionView:detailPanelAlertListItem';
 export const ALERT_LIST_ITEM_ARGS_TEST_ID = 'sessionView:detailPanelAlertListItemArgs';
@@ -63,7 +62,6 @@ export const DetailPanelAlertListItem = ({
   const name = rule?.name || '';
 
   const { args, name: processName } = event.process ?? {};
-  const argsArr = normalizeArgsToArray(args);
   const { event: processEvent } = event;
   const forceState = !isInvestigated ? 'open' : undefined;
   const category = (
@@ -73,7 +71,7 @@ export const DetailPanelAlertListItem = ({
   const alertCategoryDetailDisplayText =
     category !== 'process'
       ? `${dataOrDash(processName)} ${getAlertCategoryDisplayText(event, category)}`
-      : dataOrDash(argsArr.join(' '));
+      : dataOrDash(args?.join(' '));
   const alertIconTooltipContent = getAlertIconTooltipContent(processEventAlertCategory);
 
   return minimal ? (
