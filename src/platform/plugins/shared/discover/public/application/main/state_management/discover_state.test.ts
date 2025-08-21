@@ -27,7 +27,7 @@ import {
 } from '../../../__mocks__/saved_search';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { getInitialState, type DiscoverAppStateContainer } from './discover_app_state_container';
+import { getInitialState } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
 import { FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
@@ -41,12 +41,6 @@ import type { HistoryLocationState } from '../../../build_services';
 import { getDiscoverStateMock } from '../../../__mocks__/discover_state.mock';
 import { updateSavedSearch } from './utils/update_saved_search';
 import { getConnectedCustomizationService } from '../../../customizations';
-
-const startSync = (appState: DiscoverAppStateContainer) => {
-  const { start, stop } = appState.syncStateForTesting();
-  start();
-  return stop;
-};
 
 let mockServices = createDiscoverServicesMock();
 
@@ -110,7 +104,7 @@ describe('Discover state', () => {
       state = getDiscoverStateMock({ history });
       state.savedSearchState.set(savedSearchMock);
       state.appState.update({}, true);
-      stopSync = startSync(state.appState);
+      stopSync = state.appState.initAndSync();
     });
 
     afterEach(() => {
@@ -124,7 +118,7 @@ describe('Discover state', () => {
       });
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
+        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
@@ -203,7 +197,7 @@ describe('Discover state', () => {
       state = getDiscoverStateMock({ stateStorageContainer: stateStorage, history });
       state.savedSearchState.set(savedSearchMock);
       state.appState.update({}, true);
-      stopSync = startSync(state.appState);
+      stopSync = state.appState.initAndSync();
     });
 
     afterEach(() => {
@@ -220,7 +214,7 @@ describe('Discover state', () => {
       await jest.runAllTimersAsync();
 
       expect(history.createHref(history.location)).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
+        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 
@@ -1413,7 +1407,7 @@ describe('Discover state', () => {
       });
       state.savedSearchState.set(savedSearchMock);
       state.appState.update({}, true);
-      stopSync = startSync(state.appState);
+      stopSync = state.appState.initAndSync();
     });
 
     afterEach(() => {
@@ -1427,7 +1421,7 @@ describe('Discover state', () => {
       });
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())"`
+        `"/?_a=(columns:!(default_column),dataSource:(dataViewId:modified,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15m,to:now))"`
       );
     });
 

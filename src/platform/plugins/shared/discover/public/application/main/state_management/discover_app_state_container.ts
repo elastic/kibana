@@ -23,7 +23,6 @@ import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type {
   IKbnUrlStateStorage,
   INullableBaseStateContainer,
-  ISyncStateRef,
 } from '@kbn/kibana-utils-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
@@ -82,10 +81,6 @@ export interface DiscoverAppStateContainer extends ReduxLikeStateContainer<Disco
    * Resets the current state to the initial state
    */
   resetInitialState: () => void;
-  /**
-   * @deprecated Do not use, this only exists for tests to start syncing the state with the URL
-   */
-  syncStateForTesting: () => ISyncStateRef;
   /**
    * Updates the state, if replace is true, a history.replace is performed instead of history.push
    * @param newPartial
@@ -263,15 +258,6 @@ export const getDiscoverAppStateContainer = ({
     }
   };
 
-  const startAppStateUrlSync = () => {
-    addLog('[appState] start syncing state with URL');
-    return syncState({
-      storageKey: APP_STATE_URL_KEY,
-      stateContainer: enhancedAppContainer,
-      stateStorage,
-    });
-  };
-
   const getGlobalState = (state: DiscoverInternalState): GlobalQueryStateFromUrl => {
     const tabState = selectTab(state, tabId);
     const { timeRange: time, refreshInterval, filters } = tabState.globalState;
@@ -301,14 +287,6 @@ export const getDiscoverAppStateContainer = ({
     state$: from(internalState).pipe(map(getGlobalState), distinctUntilChanged(isEqual)),
   };
 
-  const startGlobalStateUrlSync = () => {
-    return syncState({
-      storageKey: GLOBAL_STATE_URL_KEY,
-      stateContainer: globalStateContainer,
-      stateStorage,
-    });
-  };
-
   const updateUrlWithCurrentState = async () => {
     await Promise.all([
       replaceUrlState({}),
@@ -316,7 +294,7 @@ export const getDiscoverAppStateContainer = ({
     ]);
   };
 
-  const initializeAndSync = () => {
+  const initAndSync = () => {
     const currentSavedSearch = savedSearchContainer.getState();
 
     addLog('[appState] initialize state and sync with URL', currentSavedSearch);
@@ -369,8 +347,11 @@ export const getDiscoverAppStateContainer = ({
       }
     );
 
-    const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } =
-      startAppStateUrlSync();
+    const { start: startSyncingAppStateWithUrl, stop: stopSyncingAppStateWithUrl } = syncState({
+      storageKey: APP_STATE_URL_KEY,
+      stateContainer: enhancedAppContainer,
+      stateStorage,
+    });
 
     // syncs `_g` portion of url with query services
     const stopSyncingQueryGlobalStateWithStateContainer = connectToQueryState(
@@ -384,7 +365,11 @@ export const getDiscoverAppStateContainer = ({
     );
 
     const { start: startSyncingGlobalStateWithUrl, stop: stopSyncingGlobalStateWithUrl } =
-      startGlobalStateUrlSync();
+      syncState({
+        storageKey: GLOBAL_STATE_URL_KEY,
+        stateContainer: globalStateContainer,
+        stateStorage,
+      });
 
     // current state needs to be pushed to url
     updateUrlWithCurrentState().then(() => {
@@ -412,36 +397,15 @@ export const getDiscoverAppStateContainer = ({
 
   const getPrevious = () => previousState;
 
-  const syncStateForTesting: DiscoverAppStateContainer['syncStateForTesting'] = () => {
-    let stopSync = () => {};
-
-    return {
-      start: () => {
-        const appStateSync = startAppStateUrlSync();
-        const globalStateSync = startGlobalStateUrlSync();
-
-        stopSync = () => {
-          appStateSync.stop();
-          globalStateSync.stop();
-        };
-
-        appStateSync.start();
-        globalStateSync.start();
-      },
-      stop: () => stopSync(),
-    };
-  };
-
   return {
     ...enhancedAppContainer,
     getPrevious,
     hasChanged,
-    initAndSync: initializeAndSync,
+    initAndSync,
     resetToState,
     resetInitialState,
     updateUrlWithCurrentState,
     replaceUrlState,
-    syncStateForTesting,
     update,
     getAppStateFromSavedSearch,
   };
