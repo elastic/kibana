@@ -9,7 +9,6 @@ steps:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
-      LIMIT_SOLUTIONS: 'security'
     retry:
       automatic:
         - exit_status: '*'
