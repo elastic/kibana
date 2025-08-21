@@ -21,9 +21,9 @@ export const AWS_SINGLE_ACCOUNT_TEST_SUBJ = 'awsSingleTestId';
 export const AWS_INPUT_TEST_SUBJECTS = {
   ROLE_ARN: 'awsRoleArnInput',
   DIRECT_ACCESS_KEY_ID: 'awsDirectAccessKeyId',
-  DIRECT_ACCESS_SECRET_KEY: 'awsDirectAccessSecretKey',
+  DIRECT_ACCESS_SECRET_KEY: 'passwordInput-secret-access-key',
   TEMP_ACCESS_KEY_ID: 'awsTemporaryKeysAccessKeyId',
-  TEMP_ACCESS_SECRET_KEY: 'awsTemporaryKeysSecretAccessKey',
+  TEMP_ACCESS_SECRET_KEY: 'passwordInput-secret-access-key',
   TEMP_ACCESS_SESSION_TOKEN: 'awsTemporaryKeysSessionToken',
   SHARED_CREDENTIALS_FILE: 'awsSharedCredentialFile',
   SHARED_CREDENTIALS_PROFILE_NAME: 'awsCredentialProfileName',
