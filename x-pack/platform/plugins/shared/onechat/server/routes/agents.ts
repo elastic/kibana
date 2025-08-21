@@ -30,7 +30,7 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
 const AGENT_SCHEMA = schema.object({
   name: schema.string(),
   description: schema.string(),
-  agentColor: schema.maybe(schema.string()),
+  agent_color: schema.maybe(schema.string()),
   labels: schema.maybe(schema.arrayOf(schema.string())),
   configuration: schema.object({
     instructions: schema.maybe(schema.string()),

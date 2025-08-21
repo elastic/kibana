@@ -25,7 +25,7 @@ export const fromEs = (document: Document): AgentDefinition => {
     name: document._source.name,
     description: document._source.description,
     labels: document._source.labels,
-    agentColor: document._source.agent_color,
+    agent_color: document._source.agent_color,
     configuration: {
       instructions: document._source.configuration.instructions,
       tools: document._source.configuration.tools,
@@ -45,7 +45,7 @@ export const createRequestToEs = ({
     type: defaultAgentType,
     description: profile.description,
     labels: profile.labels,
-    agent_color: profile.agentColor,
+    agent_color: profile.agent_color,
     configuration: {
       instructions: profile.configuration.instructions,
       tools: profile.configuration.tools,

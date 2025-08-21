@@ -149,7 +149,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         })}
       >
         <Controller
-          name="agentColor"
+          name="agent_color"
           control={control}
           render={({ field }) => (
             <EuiColorPicker {...field} onChange={field.onChange} isDisabled={isFormDisabled} />

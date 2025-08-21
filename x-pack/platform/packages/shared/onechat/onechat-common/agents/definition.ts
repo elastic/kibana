@@ -57,7 +57,7 @@ export interface AgentDefinition {
   /**
    * Optional color used to represent the agent in the UI
    */
-  agentColor?: string;
+  agent_color?: string;
   /**
    * Configuration associated with this agent
    */
