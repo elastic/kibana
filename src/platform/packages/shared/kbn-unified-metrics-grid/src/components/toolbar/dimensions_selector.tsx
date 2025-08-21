@@ -50,16 +50,28 @@ export const DimensionsSelector = ({
       return new Set(allDimensions.map((d) => d.name));
     }
 
+    const fieldDimensionSets = fields.map((f) => new Set(f.dimensions.map((d) => d.name)));
+    const selectedSet = new Set(selectedDimensions);
+
     const result = new Set<string>();
 
-    for (const field of fields) {
-      if (selectedDimensions.every((sel) => field.dimensions.some((dim) => dim.name === sel))) {
-        for (const dimension of field.dimensions) {
-          result.add(dimension.name);
+    for (const dimSet of fieldDimensionSets) {
+      if (dimSet.size < selectedSet.size) {
+        continue;
+      }
+
+      let matches = true;
+      for (const sel of selectedSet) {
+        if (!dimSet.has(sel)) {
+          matches = false;
+          break;
         }
       }
-    }
 
+      if (matches) {
+        dimSet.forEach((dim) => result.add(dim));
+      }
+    }
     return result;
   }, [fields, selectedDimensions, allDimensions]);
 

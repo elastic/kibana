@@ -7,4 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedHistogramMetricsExperienceGrid as UnifiedHistogramMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
+import { useDispatch, useSelector } from 'react-redux';
+import type { TypedUseSelectorHook } from 'react-redux';
+import type { RootState, AppDispatch } from '.';
+
+// Use throughout your app instead of plain `useDispatch` and `useSelector`
+export const useAppDispatch = () => useDispatch<AppDispatch>();
+export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

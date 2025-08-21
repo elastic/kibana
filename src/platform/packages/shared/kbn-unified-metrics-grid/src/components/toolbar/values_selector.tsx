@@ -12,7 +12,7 @@ import type { SelectableEntry } from '@kbn/unified-histogram';
 import { ToolbarSelector } from '@kbn/unified-histogram';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
-import { FIELD_VALUE_SEPARATOR } from '../../../common/utils/value_formatters/constants';
+import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
 
 interface ValuesFilterProps {
@@ -44,7 +44,6 @@ export const ValuesSelector = ({
     from: timeRange?.from,
     to: timeRange?.to,
   });
-
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
     const groupedValues = new Map<string, string[]>();

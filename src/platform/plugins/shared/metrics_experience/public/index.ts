@@ -8,6 +8,10 @@
  */
 
 import { MetricsExperiencePlugin } from './plugin';
+export type {
+  MetricsExperienceRepositoryClient,
+  MetricsExperiencePluginSetup,
+  MetricsExperiencePluginStart,
+} from './types';
 
-export { LazyUnifiedHistogramMetricsExperienceGrid as UnifiedHistogramMetricsExperienceGrid } from './components/lazy_unified_metrics_experience_grid';
 export const plugin = () => new MetricsExperiencePlugin();

@@ -7,4 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedHistogramMetricsExperienceGrid as UnifiedHistogramMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
+export { useMetricDataQuery } from './use_metric_data_query';
+export { useMetricFieldsQuery } from './use_metric_fields_query';
+export { useDimensionsQuery } from './use_dimensions_query';
+export { useEsqlAst } from './use_esql_ast';
+export { useMetricsExperience } from './use_metrics_experience';

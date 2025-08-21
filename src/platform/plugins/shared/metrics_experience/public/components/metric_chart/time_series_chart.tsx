@@ -22,7 +22,7 @@ import {
 import dateMath from '@elastic/datemath';
 import { EuiFlexItem, EuiText, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import React from 'react';
-import { getValueFormatter } from '../../../common/utils';
+import { getValueFormatter } from '../../utils';
 
 interface ChartData {
   x: number;

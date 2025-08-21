@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { LazyUnifiedHistogramMetricsExperienceGrid as UnifiedHistogramMetricsExperienceGrid } from './src/components/lazy_unified_metrics_experience_grid';
+import { useContext } from 'react';
+import { MetricsExperienceContext } from '../context/metrics_experience_provider';
+
+export function useMetricsExperience() {
+  const services = useContext(MetricsExperienceContext);
+
+  if (!services) {
+    throw new Error(
+      'MetricsExperienceContext not set. Did you wrap your component in `<MetricsExperienceProvider/>`?'
+    );
+  }
+
+  return services;
+}

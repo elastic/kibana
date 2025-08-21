@@ -8,10 +8,10 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { UnifiedHistogramMetricsExperienceGrid } from '@kbn/metrics-experience-plugin/public';
 import type { DataSourceProfileProvider } from '../../../profiles';
 import { DataSourceCategory } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
+import { createChartSection } from './accessor/chart_section';
 export type MetricsExperienceDataSourceProfileProvider = DataSourceProfileProvider<{}>;
 
 const METRICS_DATA_SOURCE_PROFILE_ID = 'metrics-data-source-profile';
@@ -25,17 +25,16 @@ export const createMetricsDataSourceProfileProvider = (
       ...(prev ? prev(params) : {}),
       hideSidebar: true,
     }),
-    getChartSectionConfiguration: (prev) => () => ({
-      ...(prev ? prev() : {}),
-      Component: UnifiedHistogramMetricsExperienceGrid,
-      replaceDefaultHistogram: true,
-      localStorageKeyPrefix: 'discover:metricsExperience',
-    }),
+    getChartSectionConfiguration: createChartSection(
+      services.metricsContextService.getMetricsExperienceClient()
+    ),
   },
   resolve: (params) => {
+    const metricsClient = services.metricsContextService.getMetricsExperienceClient();
     if (
-      !isOfAggregateQueryType(params.query) ||
-      !params.query.esql.toLowerCase().includes('metrics')
+      (!isOfAggregateQueryType(params.query) ||
+        !params.query.esql.toLowerCase().includes('metrics')) &&
+      !!metricsClient
     ) {
       return {
         isMatch: false,

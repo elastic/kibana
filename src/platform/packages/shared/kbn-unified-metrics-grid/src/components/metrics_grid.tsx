@@ -16,7 +16,7 @@ interface MetricField {
   index: string;
   dimensions: Array<{ name: string; type: string; description?: string }>;
   type: string;
-  timeSeriesMetric?: string;
+  time_series_metric?: string;
   unit?: string;
   brief?: string;
   stability?: string;
@@ -29,10 +29,6 @@ type MetricsGridProps = {
   filters?: Array<{ field: string; value: string }>;
   dimensions: string[];
   displayDensity?: 'normal' | 'compact' | 'row';
-  headerActions?: {
-    hasExploreAction?: boolean;
-    hasMetricsInsightsAction?: boolean;
-  };
 } & (
   | {
       pivotOn: 'metric';
@@ -53,22 +49,23 @@ export const MetricsGrid = ({
   pivotOn,
   filters = [],
   displayDensity = 'normal',
-  headerActions,
 }: MetricsGridProps) => {
-  const getColumns = (): 1 | 2 | 3 | 4 => {
-    return Array.isArray(fields)
-      ? ((fields?.length >= 4 ? 4 : fields?.length) as 1 | 2 | 3 | 4)
-      : 1;
+  // Determine number of columns based on display density
+  const getColumns = () => {
+    switch (displayDensity) {
+      case 'compact':
+        return 4;
+      case 'row':
+        return 1;
+      case 'normal':
+      default:
+        return 3;
+    }
   };
 
   if (loading) {
     return (
-      <EuiFlexGroup
-        data-test-subj="loading-metrics-charts"
-        justifyContent="center"
-        alignItems="center"
-        style={{ minHeight: '400px' }}
-      >
+      <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '400px' }}>
         <EuiFlexItem grow={false}>
           <EuiLoadingChart size="m" />
         </EuiFlexItem>
@@ -85,18 +82,10 @@ export const MetricsGrid = ({
   }
 
   return (
-    <EuiFlexGrid
-      data-test-subj="metrics-grid"
-      columns={getColumns()}
-      gutterSize="l"
-      style={{ margin: '16px' }}
-    >
+    <EuiFlexGrid columns={getColumns()} gutterSize="s">
       {pivotOn === 'metric'
         ? fields.map((field, index) => (
-            <EuiFlexItem
-              key={`${field.name}-${displayDensity}`}
-              data-test-subj={`metric-chart-${field.name}`}
-            >
+            <EuiFlexItem key={`${field.name}-${displayDensity}`}>
               <MetricChart
                 metric={field}
                 timeRange={timeRange}
@@ -104,8 +93,6 @@ export const MetricsGrid = ({
                 filters={filters}
                 colorIndex={index}
                 displayDensity={displayDensity}
-                data-test-subj={`metric-chart-${field.name}`}
-                headerActions={headerActions}
               />
             </EuiFlexItem>
           ))
