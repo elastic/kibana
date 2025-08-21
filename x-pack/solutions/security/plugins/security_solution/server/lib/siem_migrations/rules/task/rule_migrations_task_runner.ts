@@ -94,7 +94,7 @@ export class RuleMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationRule: StoredRuleMigrationRule
   ): Promise<RuleMigrationTaskInput> {
-    const resources = await this.retriever.resources.getResources(migrationRule);
+    const resources = await this.retriever.resources.getResources(migrationRule.original_rule);
     return { id: migrationRule.id, original_rule: migrationRule.original_rule, resources };
   }
 

@@ -11,15 +11,15 @@ import type {
 } from '../model/rule_migration.gen';
 import type { VendorResourceIdentifier } from './types';
 import { splResourceIdentifier } from './splunk';
-import type { ItemDocument, SiemMigrationVendor } from '../types';
+import type { ItemDocument, OriginalItem, SiemMigrationVendor } from '../types';
 
 export const identifiers: Record<SiemMigrationVendor, VendorResourceIdentifier> = {
   splunk: splResourceIdentifier,
 };
 
 // Type for a class that extends the ResourceIdentifier abstract class
-export type ResourceIdentifierClass<I extends ItemDocument = ItemDocument> = new (
-  item: I
+export type ResourceIdentifierConstructor<I extends ItemDocument = ItemDocument> = new (
+  vendor: SiemMigrationVendor
 ) => ResourceIdentifier<I>;
 
 export abstract class ResourceIdentifier<I> {
@@ -29,9 +29,9 @@ export abstract class ResourceIdentifier<I> {
     this.identifier = identifiers[this.vendor];
   }
 
-  public abstract fromOriginal(item?: I): RuleMigrationResourceBase[];
+  public abstract fromOriginal(item?: OriginalItem<I>): RuleMigrationResourceBase[];
 
-  public fromOriginals(item: I[]): RuleMigrationResourceBase[] {
+  public fromOriginals(item: OriginalItem<I>[]): RuleMigrationResourceBase[] {
     const lookups = new Set<string>();
     const macros = new Set<string>();
     item.forEach((rule) => {
