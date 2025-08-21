@@ -193,9 +193,8 @@ describe('extractTokensDangerouslySlow', () => {
     let generators: StreamLogGenerator[];
 
     beforeAll(async () => {
-      jest.setTimeout(10_000); // Ensure there's enough time to gather sample logs
       generators = await client.getLogGenerators({ rpm: 16 * 2000, distribution: 'uniform' });
-    });
+    }, 10_000); // Ensure there's enough time to gather sample logs
 
     async function getLogsFrom(name: string) {
       const generator = generators.find((gen) => gen.name === name);
@@ -333,13 +332,6 @@ describe('extractTokensDangerouslySlow', () => {
 
       // Jul  8 07:29:50 authorMacBook-Pro Dock[307]: -[UABestAppSuggestionManager notifyBestAppChanged:type:options:bundleIdentifier:activityType:dynamicIdentifier:when:confidence:deviceName:deviceIdentifier:deviceType:] (null) UASuggestedActionType=0 (null)/(null) opts=(null) when=2017-07-08 14:29:50 +0000 confidence=1 from=(null)/(null) (UABestAppSuggestionManager.m #319)
       // Jul  1 09:29:02 calvisitor-10-105-160-95 sandboxd[129] ([31211]): com.apple.Addres(31211) deny network-outbound /private/var/run/mDNSResponder
-
-      // expect(result2.formatted.display).toBe(
-      //   '<SYSLOGTIMESTAMP>\\s<NOTSPACE>\\s<NOTSPACE>\\s+<GREEDYDATA>'
-      // );
-      // expect(result2.formatted.grok).toBe(
-      //   '%{SYSLOGTIMESTAMP:field_1}\\s%{NOTSPACE:field_2}\\s%{NOTSPACE:field_3}\\s+%{GREEDYDATA:field_4}'
-      // );
 
       expect(tokens.map(({ pattern }) => pattern)).toEqual([
         'SYSLOGTIMESTAMP',
