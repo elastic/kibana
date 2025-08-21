@@ -13,18 +13,18 @@ import { KeyValueDataGrid } from '.';
 import { buildHitMock, mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
+import userEvent from '@testing-library/user-event';
 
 const mockFields = {
   fieldA: {
     name: 'fieldA',
     value: 'valueA',
-    nameCellContent: <span>Field A Name</span>,
     valueCellContent: <span>Field A Value</span>,
   },
   fieldB: {
     name: 'fieldB',
     value: 'valueB',
-    nameCellContent: <span>Field B Name</span>,
+    description: 'Field B description',
     valueCellContent: <span>Field B Value</span>,
   },
 };
@@ -61,10 +61,22 @@ describe('KeyValueDataGrid', () => {
 
   it('renders name and value cell content', () => {
     render(<KeyValueDataGrid {...defaultProps} />);
-    expect(screen.getByText('Field A Name')).toBeInTheDocument();
+    expect(screen.getByText('fieldA')).toBeInTheDocument();
     expect(screen.getByText('Field A Value')).toBeInTheDocument();
-    expect(screen.getByText('Field B Name')).toBeInTheDocument();
+    expect(screen.getByText('fieldB')).toBeInTheDocument();
     expect(screen.getByText('Field B Value')).toBeInTheDocument();
+  });
+
+  it('renders field name and description in name column popover', async () => {
+    render(<KeyValueDataGrid {...defaultProps} />);
+    const cell = screen.getByText('fieldB');
+    await userEvent.hover(cell);
+    const expandButton = screen.getByTestId('euiDataGridCellExpandButton');
+    await userEvent.click(expandButton);
+    const popoverContent = screen.getByTestId('euiDataGridExpansionPopover');
+
+    expect(popoverContent.textContent).toContain('fieldB');
+    expect(popoverContent.textContent).toContain('Field B description');
   });
 
   it('returns null for unknown columnId in renderCellValue', () => {

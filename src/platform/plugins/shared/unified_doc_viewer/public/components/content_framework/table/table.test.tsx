@@ -104,14 +104,6 @@ describe('ContentFrameworkTable', () => {
     expect(screen.getByText('formattedB')).toBeInTheDocument();
   });
 
-  it('renders field name and description in nameCellValue', async () => {
-    render(<ContentFrameworkTable {...defaultProps} />);
-    expect(screen.getByText('Field A Title')).toBeInTheDocument();
-    expect(screen.getByText('fieldA: Custom description A')).toBeInTheDocument();
-    expect(screen.getByText('Field B Title')).toBeInTheDocument();
-    expect(screen.getByText('fieldB: Short desc B')).toBeInTheDocument();
-  });
-
   it('does not render fields without value', () => {
     const props = {
       ...defaultProps,

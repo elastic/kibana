@@ -7,10 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiDataGridProps } from '@elastic/eui';
-import { EuiDataGrid } from '@elastic/eui';
+import type {
+  EuiDataGridCellPopoverElementProps,
+  EuiDataGridProps,
+  EuiThemeFontSize,
+} from '@elastic/eui';
+import { EuiDataGrid, EuiSpacer, EuiText, useEuiFontSize } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FieldRow } from '../../../../doc_viewer_table/field_row';
 import {
@@ -46,10 +50,57 @@ const dataGridStaticProps: Pick<
   inMemory: { level: 'enhancements' },
 };
 
+function renderNamePopover(
+  fieldName: string,
+  fieldConfig: KeyValueDataGridField,
+  cellActions: React.ReactNode
+) {
+  return (
+    <>
+      <EuiText size="s" className="eui-textTruncate">
+        {fieldName}
+      </EuiText>
+      {fieldConfig?.description && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" className="eui-textTruncate">
+            {fieldConfig.description}
+          </EuiText>
+        </>
+      )}
+      {cellActions}
+    </>
+  );
+}
+
+function renderValuePopover(
+  fieldConfig: KeyValueDataGridField,
+  cellActions: React.ReactNode,
+  fontSize: EuiThemeFontSize['fontSize']
+) {
+  return (
+    <>
+      <EuiText
+        css={
+          fontSize
+            ? css`
+                * {
+                  font-size: ${fontSize} !important;
+                }
+              `
+            : undefined
+        }
+      >
+        {fieldConfig?.valueCellContent}
+      </EuiText>
+      {cellActions}
+    </>
+  );
+}
 export interface KeyValueDataGridField {
   name: string;
   value: unknown;
-  nameCellContent?: React.ReactNode;
+  description?: string;
   valueCellContent?: React.ReactNode;
 }
 
@@ -76,6 +127,7 @@ export const KeyValueDataGrid = ({
   title,
 }: KeyValueDataGridProps) => {
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
+  const { fontSize: smallFontSize } = useEuiFontSize('s');
 
   const onToggleColumn = useMemo(() => {
     if (!onRemoveColumn || !onAddColumn || !columns) {
@@ -116,22 +168,33 @@ export const KeyValueDataGrid = ({
     [rows, toasts, filter, isEsqlMode]
   );
 
-  const dataGridRenderCellValue = ({
-    rowIndex,
-    columnId,
-  }: {
-    rowIndex: number;
-    columnId: string;
-  }) => {
-    const fieldName = rows[rowIndex]?.name;
-    const fieldConfig = fields[fieldName];
+  const dataGridRenderCellValue = useCallback(
+    ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+      const fieldName = rows[rowIndex]?.name;
+      const fieldConfig = fields[fieldName];
 
-    if (!fieldConfig) return null;
-    if (columnId === 'name') {
-      return fieldConfig.nameCellContent;
-    }
-    return fieldConfig.valueCellContent;
-  };
+      if (!fieldConfig) return null;
+      if (columnId === 'name') {
+        return fieldConfig.name;
+      }
+      return fieldConfig.valueCellContent;
+    },
+    [rows, fields]
+  );
+
+  const dataGridRenderCellPopover = useCallback(
+    (props: EuiDataGridCellPopoverElementProps) => {
+      const { columnId, cellActions, rowIndex } = props;
+      const fieldName = rows[rowIndex]?.name;
+      const fieldConfig = fields[fieldName];
+      if (!fieldConfig) return null;
+      if (columnId === 'name') {
+        return renderNamePopover(fieldName, fieldConfig, cellActions);
+      }
+      return renderValuePopover(fieldConfig, cellActions, smallFontSize);
+    },
+    [rows, fields, smallFontSize]
+  );
 
   const dataGridColumns: EuiDataGridProps['columns'] = useMemo(
     () => [
@@ -147,6 +210,7 @@ export const KeyValueDataGrid = ({
       columns={dataGridColumns}
       rowCount={rows.length}
       renderCellValue={dataGridRenderCellValue}
+      renderCellPopover={dataGridRenderCellPopover}
       columnVisibility={dataGridColumnVisibility}
       {...dataGridStaticProps}
       toolbarVisibility={false}

@@ -9,8 +9,7 @@
 
 import React, { useMemo } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { EuiText } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { getUnifiedDocViewerServices } from '../../../plugin';
@@ -47,8 +46,6 @@ export function ContentFrameworkTable({
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
-  const { euiTheme } = useEuiTheme();
-
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
@@ -65,39 +62,6 @@ export function ContentFrameworkTable({
     }),
     [dataView, fieldFormats, hit, fieldNames]
   );
-
-  const nameCellValue = ({
-    id,
-    name,
-    description,
-  }: {
-    id: string;
-    name: string;
-    description?: string;
-  }) => {
-    return (
-      <EuiFlexGroup gutterSize="xs" responsive={false}>
-        <EuiFlexItem
-          grow={false}
-          css={css`
-            font-weight: ${euiTheme.font.weight.semiBold};
-          `}
-        >
-          {name}
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            title={id}
-            content={description ? <>{description}</> : null}
-            size="s"
-            color="subdued"
-            aria-label={description ? `${id}: ${description}` : id}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-  };
 
   if (Object.keys(hit.flattened).length === 0) {
     return null;
@@ -125,11 +89,7 @@ export function ContentFrameworkTable({
     acc[fieldName] = {
       name: fieldConfiguration?.title || fieldName,
       value,
-      nameCellContent: nameCellValue({
-        id: fieldName,
-        name: fieldConfiguration?.title || fieldName,
-        ...(fieldDescription && { description: fieldDescription }),
-      }),
+      description: fieldDescription,
       valueCellContent: fieldConfiguration?.formatter ? (
         <>{fieldConfiguration?.formatter(value, formattedValue)}</>
       ) : (
