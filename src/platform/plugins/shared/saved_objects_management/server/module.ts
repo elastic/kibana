@@ -10,7 +10,13 @@
 import { ContainerModule } from 'inversify';
 import { CapabilitiesProvider, Route } from '@kbn/core-di-server';
 import { capabilitiesProvider } from './capabilities_provider';
-import { BulkDeleteRoute, BulkGetRoute, GetAllowedTypesRoute, ScrollCountRoute } from './routes';
+import {
+  BulkDeleteRoute,
+  BulkGetRoute,
+  FindRoute,
+  GetAllowedTypesRoute,
+  ScrollCountRoute,
+} from './routes';
 import { SavedObjectsManagement } from './services';
 
 export const module = new ContainerModule(({ bind }) => {
@@ -18,6 +24,7 @@ export const module = new ContainerModule(({ bind }) => {
   bind(SavedObjectsManagement).toSelf().inSingletonScope();
   bind(Route).toConstantValue(BulkDeleteRoute);
   bind(Route).toConstantValue(BulkGetRoute);
+  bind(Route).toConstantValue(FindRoute);
   bind(Route).toConstantValue(GetAllowedTypesRoute);
   bind(Route).toConstantValue(ScrollCountRoute);
 });
