@@ -31,6 +31,7 @@ If you are unsure whether a field is sensitive, flag it for manual review.
 
 ## What to Look For
 
+
 ### 1. Identify All ESO Type Registrations
 - **Locate all code changes** where a new encrypted saved object type is registered, or where an existing registration is modified.
 - Registration is performed by calling the function defined in `x-pack/platform/plugins/shared/encrypted_saved_objects/server/plugin.ts` (see `registerType` of the `EncryptedSavedObjectsPluginSetup` interface).
@@ -44,6 +45,12 @@ If you are unsure whether a field is sensitive, flag it for manual review.
   });
   ```
 - For each identified code change, remember the file path and applicable line number.
+
+### 2. Identify Corresponding Saved Object Type Model Version Changes
+- For each encrypted saved object type registration identified above, also check for changes to the corresponding saved object type registration.
+- The saved object type registration function is defined in `src/core/packages/saved-objects/server/src/contracts.ts` as part of the `SavedObjectsServiceSetup` interface.
+- Specifically, look for changes to the `modelVersions` property of the `SavedObjectsType` object for the same `type` as registered with `EncryptedSavedObjectsPluginSetup.registerType`.
+- If any model version changes are present for a matching type, include the file path and line number, and summarize the nature of the change (e.g., new version added, migration modified, etc.).
 
 ### 2. For Each Registration or Change, Check:
 - **Type Name**: Is the `type` property consistent with the saved object definition?
