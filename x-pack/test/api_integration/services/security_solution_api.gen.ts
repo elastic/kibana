@@ -170,6 +170,7 @@ import type { ReadAlertsMigrationStatusRequestQueryInput } from '@kbn/security-s
 import {} from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/read_signals_migration_status/read_signals_migration_status.gen';
 import type { ReadRuleRequestQueryInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/read_rule/read_rule_route.gen';
 import type { ResolveTimelineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/timeline/resolve_timeline/resolve_timeline_route.gen';
+import type { RiskScoreSummaryRequestBodyInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/risk_engine/risk_score_summary.gen';
 import type {
   RulePreviewRequestQueryInput,
   RulePreviewRequestBodyInput,
@@ -1802,6 +1803,17 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
+    /**
+     * Explain the risk score for a given entity using an LLM connector.
+     */
+    riskScoreSummary(props: RiskScoreSummaryProps, kibanaSpace: string = 'default') {
+      return supertest
+        .post(getRouteUrlForSpace('/internal/risk_score/risk_summary', kibanaSpace))
+        .set('kbn-xsrf', 'true')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
+    },
     rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
       return supertest
         .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
@@ -2399,6 +2411,9 @@ export interface ReadRuleProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RiskScoreSummaryProps {
+  body: RiskScoreSummaryRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;

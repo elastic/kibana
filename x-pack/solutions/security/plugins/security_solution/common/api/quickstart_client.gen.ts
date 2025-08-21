@@ -330,6 +330,10 @@ import type {
   PreviewRiskScoreResponse,
 } from './entity_analytics/risk_engine/preview_route.gen';
 import type {
+  RiskScoreSummaryRequestBodyInput,
+  RiskScoreSummaryResponse,
+} from './entity_analytics/risk_engine/risk_score_summary.gen';
+import type {
   CleanDraftTimelinesRequestBodyInput,
   CleanDraftTimelinesResponse,
 } from './timeline/clean_draft_timelines/clean_draft_timelines_route.gen';
@@ -2458,6 +2462,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Explain the risk score for a given entity using an LLM connector.
+   */
+  async riskScoreSummary(props: RiskScoreSummaryProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RiskScoreSummary`);
+    return this.kbnClient
+      .request<RiskScoreSummaryResponse>({
+        path: '/internal/risk_score/risk_summary',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -3121,6 +3141,9 @@ export interface ReadRuleProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RiskScoreSummaryProps {
+  body: RiskScoreSummaryRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;

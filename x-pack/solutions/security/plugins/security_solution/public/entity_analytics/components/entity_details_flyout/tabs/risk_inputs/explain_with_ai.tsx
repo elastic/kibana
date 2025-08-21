@@ -22,16 +22,6 @@ import {
 } from '@elastic/eui';
 import { useRiskScoreAiSummary } from '../../../../api/hooks/use_risk_summary';
 
-// replaces a space followed by numbers followed by a closing bracket ) with a newline and a dash followed by the numbers for
-// better readability e,g  1) becomes \n - 1
-const constConvertNumbersToLists = (str: string) => {
-  const regex = /(\s\d+\))/g;
-  return str.replace(regex, (match) => {
-    const number = match.trim();
-    return `<br/><br/> - ${number}`;
-  });
-};
-
 export interface ExplainWithAIProps extends Record<string, unknown> {
   identifier: string;
   identifierKey: string;
@@ -114,7 +104,7 @@ export const ExplainWithAI = ({ identifier, identifierKey }: ExplainWithAIProps)
                     <span
                       // eslint-disable-next-line react/no-danger
                       dangerouslySetInnerHTML={{
-                        __html: constConvertNumbersToLists(data.summary),
+                        __html: data.summary,
                       }}
                     />
                   </EuiText>
@@ -134,7 +124,7 @@ export const ExplainWithAI = ({ identifier, identifierKey }: ExplainWithAIProps)
                     <span
                       // eslint-disable-next-line react/no-danger
                       dangerouslySetInnerHTML={{
-                        __html: constConvertNumbersToLists(data.detailedExplanation),
+                        __html: data.detailedExplanation,
                       }}
                     />
                   </EuiText>
@@ -154,7 +144,7 @@ export const ExplainWithAI = ({ identifier, identifierKey }: ExplainWithAIProps)
                     <span
                       // eslint-disable-next-line react/no-danger
                       dangerouslySetInnerHTML={{
-                        __html: constConvertNumbersToLists(data.recommendations),
+                        __html: data.recommendations,
                       }}
                     />
                   </EuiText>

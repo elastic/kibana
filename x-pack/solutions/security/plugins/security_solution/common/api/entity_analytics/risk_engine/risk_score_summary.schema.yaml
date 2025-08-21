@@ -1,14 +1,14 @@
 openapi: 3.0.0
 info:
-  title: Post Entity Search discovery API endpoint
+  title: Risk Score Summary API
   version: '1'
 paths:
-  /internal/elastic_assistant/risk_summary:
+  /internal/risk_score/risk_summary:
     post:
-      operationId: RiskScoreSummaryPost
+      operationId: RiskScoreSummary
       x-codegen-enabled: true
-      description: Find matching entity suggestions
-      summary: Generate matching entity suggestions for the given entity via the Elastic Assistant
+      description: Explain the risk score for a given entity using an LLM connector.
+      summary: Generate a textual explanation of how the risk score was calculate for a given entity
       tags:
         - entity_analytics
       requestBody:
@@ -18,25 +18,17 @@ paths:
             schema:
               type: object
               required:
-                - apiConfig
                 - identifier
                 - identifierKey
+                - connectorId
               properties:
                 identifier:
                   type: string
                 identifierKey:
                   type: string
-                apiConfig:
-                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/ApiConfig'
-                  description: LLM API configuration.
-                langSmithProject:
-                  description: used for development
+                connectorId:
                   type: string
-                langSmithApiKey:
-                  description: used for development
-                  type: string
-                model:
-                  type: string
+                  description: LLM API connector.                                
       responses:
         '200':
           description: Successful response

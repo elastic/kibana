@@ -7,9 +7,9 @@
 
 import { useMemo } from 'react';
 import type {
-  RiskScoreSummaryPostResponse,
   RiskScoreSummaryPostRequestBody,
-} from '@kbn/elastic-assistant-common';
+  RiskScoreSummaryPostResponse,
+} from '../../../common/api/entity_analytics/risk_engine/risk_score_summary.gen';
 import type { PrivMonPrivilegesResponse } from '../../../common/api/entity_analytics/privilege_monitoring/privileges.gen';
 import type {
   CreateEntitySourceResponse,
@@ -464,7 +464,7 @@ export const useEntityAnalyticsRoutes = () => {
       });
 
     const fetchRiskScoreAiSummary = (params: RiskScoreSummaryPostRequestBody) =>
-      http.fetch<RiskScoreSummaryPostResponse>('/internal/elastic_assistant/risk_summary', {
+      http.fetch<RiskScoreSummaryPostResponse>('/internal/risk_score/risk_summary', {
         version: API_VERSIONS.internal.v1,
         method: 'POST',
         body: JSON.stringify(params),
