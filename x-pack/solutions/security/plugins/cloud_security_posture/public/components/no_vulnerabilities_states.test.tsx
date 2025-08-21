@@ -87,6 +87,16 @@ describe('NoVulnerabilitiesStates - using mock server', () => {
         'href',
         '/app/fleet/integrations/m365_defender/add-integration'
       );
+      expect(screen.getByTestId('integrationOption-microsoft_defender_for_cloud')).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/microsoft_defender_cloud/add-integration'
+      );
+      expect(
+        screen.getByTestId('integrationOption-microsoft_defender_for_endpoint')
+      ).toHaveAttribute(
+        'href',
+        '/app/fleet/integrations/microsoft_defender_endpoint/add-integration'
+      );
       expect(screen.getByTestId('integrationOption-aws_security_hub')).toHaveAttribute(
         'href',
         '/app/fleet/integrations/aws/add-integration/securityhub'

@@ -12,6 +12,8 @@ export type ThirdPartyIntegrationId =
   | 'aws_security_hub'
   | 'aws_inspector'
   | 'microsoft_365_defender'
+  | 'microsoft_defender_for_cloud'
+  | 'microsoft_defender_for_endpoint'
   | 'google_scc'
   | 'tenable'
   | 'qualys'
@@ -33,6 +35,8 @@ export const useThirdPartyIntegrationLinks = (
     qualys: useAdd3PIntegrationRoute('qualys_vmdr'),
     rapid7: useAdd3PIntegrationRoute('rapid7_insightvm'),
     microsoft_365_defender: useAdd3PIntegrationRoute('m365_defender'),
+    microsoft_defender_for_cloud: useAdd3PIntegrationRoute('microsoft_defender_cloud'),
+    microsoft_defender_for_endpoint: useAdd3PIntegrationRoute('microsoft_defender_endpoint'),
     aws_security_hub: useAdd3PIntegrationRoute('aws', 'securityhub'),
     aws_inspector: useAdd3PIntegrationRoute('aws', 'inspector'),
   };
@@ -43,7 +47,7 @@ export const useThirdPartyIntegrationLinks = (
       { id: 'aws_security_hub', label: 'AWS Security Hub', href: links.aws_security_hub },
       {
         id: 'microsoft_365_defender',
-        label: 'Microsoft 365 Defender',
+        label: 'Microsoft Defender XDR',
         href: links.microsoft_365_defender,
       },
     ],
@@ -57,8 +61,18 @@ export const useThirdPartyIntegrationLinks = (
       { id: 'google_scc', label: 'Google SCC', href: links.google_scc },
       {
         id: 'microsoft_365_defender',
-        label: 'Microsoft 365 Defender',
+        label: 'Microsoft Defender XDR',
         href: links.microsoft_365_defender,
+      },
+      {
+        id: 'microsoft_defender_for_cloud',
+        label: 'Microsoft Defender for Cloud',
+        href: links.microsoft_defender_for_cloud,
+      },
+      {
+        id: 'microsoft_defender_for_endpoint',
+        label: 'Microsoft Defender for Endpoint',
+        href: links.microsoft_defender_for_endpoint,
       },
     ],
   };
