@@ -462,7 +462,7 @@ describe('Discover state', () => {
       expect(newSavedSearch?.id).toBeUndefined();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
+        `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       const { searchSource, ...savedSearch } = state.savedSearchState.getState();
@@ -503,7 +503,7 @@ describe('Discover state', () => {
       expect(newSavedSearch?.id).toBeUndefined();
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
+        `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),interval:auto,sort:!())"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       state.actions.stopSyncing();
@@ -585,7 +585,7 @@ describe('Discover state', () => {
       await new Promise(process.nextTick);
       expect(newSavedSearch?.id).toBe('the-saved-search-id');
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
+        `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())"`
       );
       expect(state.savedSearchState.getHasChanged$().getValue()).toBe(false);
       state.actions.stopSyncing();
@@ -1315,7 +1315,7 @@ describe('Discover state', () => {
       );
       await new Promise(process.nextTick);
       const initialUrlState =
-        '/#?_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))';
+        '/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),dataSource:(dataViewId:the-data-view-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!())';
       expect(getCurrentUrl()).toBe(initialUrlState);
       expect(
         selectTabRuntimeState(
@@ -1328,7 +1328,7 @@ describe('Discover state', () => {
       await state.actions.onChangeDataView(dataViewComplexMock.id!);
       await new Promise(process.nextTick);
       expect(getCurrentUrl()).toMatchInlineSnapshot(
-        `"/#?_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!(!(data,desc)))&_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))"`
+        `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),dataSource:(dataViewId:data-view-with-various-field-types-id,type:dataView),grid:(),hideChart:!f,interval:auto,sort:!(!(data,desc)))"`
       );
       await waitFor(() => {
         expect(state.dataState.fetch).toHaveBeenCalledTimes(2);

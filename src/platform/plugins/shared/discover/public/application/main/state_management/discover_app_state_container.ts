@@ -289,8 +289,8 @@ export const getDiscoverAppStateContainer = ({
 
   const updateUrlWithCurrentState = async () => {
     await Promise.all([
-      replaceUrlState({}),
       stateStorage.set(GLOBAL_STATE_URL_KEY, globalStateContainer.get(), { replace: true }),
+      replaceUrlState({}),
     ]);
   };
 
