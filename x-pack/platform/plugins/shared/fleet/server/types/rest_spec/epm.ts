@@ -8,7 +8,6 @@
 import { schema } from '@kbn/config-schema';
 
 import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
-import { version } from 'yargs';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
