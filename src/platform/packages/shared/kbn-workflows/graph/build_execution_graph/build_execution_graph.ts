@@ -8,10 +8,16 @@
  */
 
 import { graphlib } from '@dagrejs/dagre';
+import { omit } from 'lodash';
 import type {
   BaseStep,
   IfStep,
   ForEachStep,
+  WorkflowYaml,
+  WaitStep,
+  WorkflowRetry,
+} from '../../spec/schema';
+import type {
   EnterIfNode,
   ExitIfNode,
   EnterForeachNode,
@@ -20,12 +26,9 @@ import type {
   ExitConditionBranchNode,
   AtomicGraphNode,
   WaitGraphNode,
-  WorkflowYaml,
-  WaitStep,
-  WorkflowRetry,
-} from '@kbn/workflows';
-import type { EnterRetryNode, ExitRetryNode } from '@kbn/workflows/types/execution';
-import { omit } from 'lodash';
+  EnterRetryNode,
+  ExitRetryNode,
+} from '../../types/execution';
 
 interface RetryStep extends BaseStep {
   type: 'retry';
@@ -55,7 +58,7 @@ function visitAbstractStep(graph: graphlib.Graph, previousStep: any, currentStep
 
   if ((modifiedCurrentStep as RetryStep).type === 'retry') {
     // Retry steps are treated as atomic steps for graph purposes
-    return visitRetryStep(graph, previousStep, modifiedCurrentStep);
+    return visitRetryStep(graph, previousStep, modifiedCurrentStep as RetryStep);
   }
 
   return visitAtomicStep(graph, previousStep, modifiedCurrentStep);
