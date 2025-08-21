@@ -58,6 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/232481
+    // FLAKY: https://github.com/elastic/kibana/issues/232496
     describe.skip('search', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
