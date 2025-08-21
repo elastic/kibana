@@ -59,6 +59,7 @@
     "@kbn/logging-mocks",
     "@kbn/grok-heuristics",
     "@kbn/streamlang",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/sse-utils"
   ]
 }
