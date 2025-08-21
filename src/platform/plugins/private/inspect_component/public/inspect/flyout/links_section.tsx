@@ -8,79 +8,167 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { css } from '@emotion/react';
+import { EuiPanel, EuiTitle, EuiSpacer, EuiCard, EuiIcon, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import { useEuiTheme } from '@elastic/eui';
 import type { ComponentData } from '../../types';
+
+interface ActionLink {
+  external: boolean;
+  href: string;
+  i18nId: string;
+  icon: string;
+  id: string;
+  label: string;
+}
 
 interface Props {
   componentData: ComponentData;
 }
 
 export const LinksSection = ({ componentData }: Props) => {
+  const { euiTheme } = useEuiTheme();
+
   if (!componentData) return null;
 
-  const { fileName, lineNumber, columnNumber, relativePath } = componentData;
+  const { columnNumber, fileName, lineNumber, relativePath } = componentData;
 
   const CURSOR_LINK = `cursor://file/${fileName}:${lineNumber}:${columnNumber}`;
-  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
   const GITHUB_DEV_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
+  const GITHUB_LINK = `https://github.com/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
   const VSCODE_LINK = `vscode://file/${fileName}:${lineNumber}:${columnNumber}`;
   const WEBSTORM_LINK = `webstorm://open?file=/${fileName}&line=${lineNumber}&column=${columnNumber}`;
 
+  const ACTIONS: ActionLink[] = [
+    {
+      external: true,
+      href: GITHUB_LINK,
+      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubButtonText',
+      icon: 'logoGithub',
+      id: 'github',
+      label: 'GitHub',
+    },
+    {
+      external: true,
+      href: GITHUB_DEV_LINK,
+      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubDevButtonText',
+      icon: 'logoGithub',
+      id: 'githubDev',
+      label: 'GitHub.dev',
+    },
+    {
+      external: false,
+      href: VSCODE_LINK,
+      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText',
+      icon: 'code',
+      id: 'vscode',
+      label: 'VSCode',
+    },
+    {
+      external: false,
+      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInWebStormButtonText',
+      href: WEBSTORM_LINK,
+      icon: 'code',
+      id: 'webstorm',
+      label: 'WebStorm',
+    },
+    {
+      external: false,
+      href: CURSOR_LINK,
+      i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInCursorButtonText',
+      icon: 'code',
+      id: 'cursor',
+      label: 'Cursor',
+    },
+  ];
+
+  const styles = css({
+    '.linksGrid': {
+      display: 'flex',
+      flexWrap: 'wrap',
+      gap: euiTheme.size.m,
+    },
+
+    '.linkCard': {
+      textAlign: 'center',
+
+      '.euiCard__title': {
+        fontSize: euiTheme.size.m,
+        fontWeight: euiTheme.font.weight.bold,
+      },
+
+      '.euiIcon': {
+        marginBlockEnd: euiTheme.size.s,
+      },
+    },
+
+    '.linksGrid .linkCard': {
+      flex: '1 1 100%',
+      maxWidth: '100%',
+    },
+
+    [`@media (min-width: ${euiTheme.breakpoint.m}px)`]: {
+      '.linksGrid .linkCard': {
+        flex: `0 1 calc(50% - ${euiTheme.size.m})`,
+        maxWidth: `calc(50% - ${euiTheme.size.m})`,
+      },
+
+      '.linksGrid .linkCard:last-child:nth-child(odd)': {
+        marginLeft: 'auto',
+        marginRight: 'auto',
+      },
+    },
+  });
+
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPanel hasShadow={false} hasBorder={true}>
-        <EuiTitle size="xs">
+    <EuiFlexItem css={styles} grow={false}>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
+        <EuiTitle size="s">
           <h3>
             <FormattedMessage
               id="kbnInspectComponent.inspectFlyout.linksSection.title"
-              defaultMessage="Links"
+              defaultMessage="Actions"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
+        <EuiTitle css={{ color: euiTheme.colors.textParagraph }} size="xxs">
+          <h3>
+            <FormattedMessage
+              id="kbnInspectComponent.inspectFlyout.linksSection.subtitle"
+              defaultMessage="Open in ..."
             />
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        <EuiFlexGroup direction="column" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiButton href={GITHUB_LINK} target="_blank" size="s" iconType="logoGithub" fill>
-              <FormattedMessage
-                id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubButtonText"
-                defaultMessage="Open on GitHub"
+        <div className="linksGrid">
+          {ACTIONS.map(({ external, href, icon, id, i18nId, label }) => {
+            const ariaLabel = i18n.translate(
+              'kbnInspectComponent.inspectFlyout.linksSection.openFileInAriaLabel',
+              {
+                defaultMessage: 'Open file in {target}',
+                values: { target: label },
+              }
+            );
+
+            return (
+              <EuiCard
+                aria-label={ariaLabel}
+                description=""
+                className="linkCard"
+                href={href}
+                icon={<EuiIcon type={icon} size="xxl" />}
+                key={id}
+                layout="vertical"
+                title={<FormattedMessage id={i18nId} defaultMessage={label} />}
+                titleSize="s"
+                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton href={GITHUB_DEV_LINK} target="_blank" size="s" iconType="logoGithub">
-              <FormattedMessage
-                id="kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubDevButtonText"
-                defaultMessage="Open on GitHub.dev"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton href={VSCODE_LINK} target="_blank" size="s" iconType="code" fill>
-              <FormattedMessage
-                id="kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText"
-                defaultMessage="Open in VSCode"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton href={WEBSTORM_LINK} target="_blank" size="s" iconType="code">
-              <FormattedMessage
-                id="kbnInspectComponent.inspectFlyout.linksSection.openInWebStormButtonText"
-                defaultMessage="Open in WebStorm"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton href={CURSOR_LINK} target="_blank" size="s" iconType="code">
-              <FormattedMessage
-                id="kbnInspectComponent.inspectFlyout.linksSection.openInCursorButtonText"
-                defaultMessage="Open in Cursor"
-              />
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+            );
+          })}
+        </div>
       </EuiPanel>
     </EuiFlexItem>
   );
