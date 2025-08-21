@@ -6,23 +6,11 @@
  */
 
 import { setTimeout } from 'timers/promises';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
+import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 import { EntitySecurityException } from '../errors/entity_security_exception';
 
 const MAX_ATTEMPTS = 5;
-
-const retryResponseStatuses = [
-  503, // ServiceUnavailable
-  408, // RequestTimeout
-  410, // Gone
-];
-
-const isRetryableError = (e: any) =>
-  e instanceof EsErrors.NoLivingConnectionsError ||
-  e instanceof EsErrors.ConnectionError ||
-  e instanceof EsErrors.TimeoutError ||
-  (e instanceof EsErrors.ResponseError && retryResponseStatuses.includes(e?.statusCode!));
 
 /**
  * Retries any transient network or configuration issues encountered from Elasticsearch with an exponential backoff.
@@ -35,7 +23,7 @@ export const retryTransientEsErrors = async <T>(
   try {
     return await esCall();
   } catch (e) {
-    if (attempt < MAX_ATTEMPTS && isRetryableError(e)) {
+    if (attempt < MAX_ATTEMPTS && isRetryableEsClientError(e)) {
       const retryCount = attempt + 1;
       const retryDelaySec = Math.min(Math.pow(2, retryCount), 64); // 2s, 4s, 8s, 16s, 32s, 64s, 64s, 64s ...
 
