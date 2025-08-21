@@ -21,11 +21,13 @@ const StateAnnotation = Annotation.Root({
   nlQuery: Annotation<string>(),
   index: Annotation<string>(),
   // inner
+  indexIsValid: Annotation<boolean>(),
   messages: Annotation<BaseMessage[]>({
     reducer: messagesStateReducer,
     default: () => [],
   }),
   // outputs
+  error: Annotation<string>(),
   results: Annotation<ToolResult[]>({
     reducer: (a, b) => [...a, ...b],
     default: () => [],
@@ -47,6 +49,41 @@ export const createSearchToolGraph = ({
   ];
 
   const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
+
+  const checkIndex = async (state: StateType) => {
+    let index = state.index;
+    if (!index.startsWith('*')) {
+      index = `*${index}`;
+    }
+    if (!index.endsWith('*')) {
+      index = `${index}*`;
+    }
+
+    const response = await esClient.indices.resolveIndex({
+      name: index,
+      allow_no_indices: true,
+    });
+
+    const exists =
+      response.indices.length > 0 ||
+      response.aliases.length > 0 ||
+      response.data_streams.length > 0;
+
+    if (exists) {
+      return {
+        indexIsValid: true,
+      };
+    } else {
+      return {
+        indexIsValid: false,
+        error: `No index, alias or data streams found for '${state.index}'`,
+      };
+    }
+  };
+
+  const terminateIfInvalidIndex = async (state: StateType) => {
+    return state.indexIsValid ? 'agent' : '__end__';
+  };
 
   const searchModel = model.chatModel.bindTools(tools).withConfig({
     tags: ['onechat-search-tool'],
@@ -76,11 +113,17 @@ export const createSearchToolGraph = ({
     };
   };
 
-  // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
+    // nodes
+    .addNode('check_index', checkIndex)
     .addNode('agent', callSearchAgent)
     .addNode('execute_tool', executeTool)
-    .addEdge('__start__', 'agent')
+    // edges
+    .addEdge('__start__', 'check_index')
+    .addConditionalEdges('check_index', terminateIfInvalidIndex, {
+      agent: 'agent',
+      __end__: '__end__',
+    })
     .addEdge('agent', 'execute_tool')
     .addConditionalEdges('execute_tool', decideContinueOrEnd, {
       agent: 'agent',

@@ -8,6 +8,7 @@
 import type { ScopedModel } from '@kbn/onechat-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ToolResult } from '@kbn/onechat-common/tools';
+import { ToolResultType } from '@kbn/onechat-common/tools';
 import { createSearchToolGraph } from './graph';
 
 export const runSearchTool = async ({
@@ -27,6 +28,15 @@ export const runSearchTool = async ({
     { nlQuery, index },
     { tags: ['search_tool'], metadata: { graphName: 'search_tool' } }
   );
+
+  if (outState.error) {
+    return [
+      {
+        type: ToolResultType.error,
+        data: { message: outState.error },
+      },
+    ];
+  }
 
   return outState.results;
 };
