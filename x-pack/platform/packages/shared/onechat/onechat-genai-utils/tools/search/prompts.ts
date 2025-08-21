@@ -19,7 +19,8 @@ export const getSearchPrompt = ({
   nlQuery: string;
   index: string;
 }): BaseMessageLike[] => {
-  const systemPrompt = `You are an expert search dispatcher. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it. You **must** call one of the available tools. Do not answer the user directly or ask clarifying questions.
+  const systemPrompt = `You are an expert search dispatcher. Your sole task is to analyze a user's request and call the single most appropriate tool to answer it.
+You **must** call **one** of the available tools. Do not answer the user directly or ask clarifying questions.
 
 ## Available Tools
 

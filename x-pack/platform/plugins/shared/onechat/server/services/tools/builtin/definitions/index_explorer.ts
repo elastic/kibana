@@ -57,9 +57,6 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
             type: ToolResultType.other,
             data: {
               indices: result,
-              nlQuery,
-              index_pattern: indexPattern,
-              limit,
             },
           },
         ],

@@ -16,7 +16,6 @@ export const builtinToolIds = {
   getDocumentById: '.get_document_by_id',
   generateEsql: '.generate_esql',
   executeEsql: '.execute_esql',
-  researcherAgent: '.researcher_agent',
 } as const;
 
 export const builtInToolIdPrefix = '.';

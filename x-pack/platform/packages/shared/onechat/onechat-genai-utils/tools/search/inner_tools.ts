@@ -42,17 +42,22 @@ export const createRelevanceSearchTool = ({
 }) => {
   return toTool(
     async ({ term, index, size }) => {
-      const { results } = await relevanceSearch({
+      const { results: rawResults } = await relevanceSearch({
         index,
         term,
         size,
         model,
         esClient,
       });
-      return results.map(convertMatchResult);
+      const results = rawResults.map(convertMatchResult);
+
+      const content = JSON.stringify(results);
+      const artifact = { results };
+      return [content, artifact];
     },
     {
       name: relevanceSearchToolName,
+      responseFormat: 'content_and_artifact',
       schema: z.object({
         term: z.string().describe('Term to search for'),
         index: z
@@ -107,10 +112,13 @@ export const createNaturalLanguageSearchTool = ({
         data: response,
       };
 
-      return [result];
+      const content = JSON.stringify([result]);
+      const artifact = { results: [result] };
+      return [content, artifact];
     },
     {
       name: naturalLanguageSearchToolName,
+      responseFormat: 'content_and_artifact',
       schema: z.object({
         query: z.string().describe('A natural language query expressing the search request'),
         index: z.string().describe('Index to search against'),

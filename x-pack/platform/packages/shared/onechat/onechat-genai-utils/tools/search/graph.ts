@@ -6,7 +6,8 @@
  */
 
 import { StateGraph, Annotation } from '@langchain/langgraph';
-import type { BaseMessage, AIMessage } from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
+import { isToolMessage } from '@langchain/core/messages';
 import { messagesStateReducer } from '@langchain/langgraph';
 import { ToolNode } from '@langchain/langgraph/prebuilt';
 import type { ScopedModel } from '@kbn/onechat-server';
@@ -48,10 +49,10 @@ export const createSearchToolGraph = ({
   const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
 
   const searchModel = model.chatModel.bindTools(tools).withConfig({
-    tags: ['onechat-agent'],
+    tags: ['onechat-search-tool'],
   });
 
-  const callModel = async (state: StateType) => {
+  const callSearchAgent = async (state: StateType) => {
     const response = await searchModel.invoke(
       getSearchPrompt({ nlQuery: state.nlQuery, index: state.index })
     );
@@ -60,34 +61,40 @@ export const createSearchToolGraph = ({
     };
   };
 
-  const shouldContinue = async (state: StateType) => {
-    const messages = state.messages;
-    const lastMessage: AIMessage = messages[messages.length - 1];
-    if (lastMessage && lastMessage.tool_calls?.length) {
-      return 'tools';
-    }
+  const decideContinueOrEnd = async (state: StateType) => {
+    // only one call for now
     return '__end__';
   };
 
-  const toolHandler = async (state: StateType) => {
+  const executeTool = async (state: StateType) => {
     const toolNodeResult = await toolNode.invoke(state.messages);
+    const toolResults = extractToolResults(toolNodeResult[toolNodeResult.length - 1]);
 
     return {
       messages: [...toolNodeResult],
+      results: [...toolResults],
     };
   };
 
   // note: the node names are used in the event convertion logic, they should *not* be changed
   const graph = new StateGraph(StateAnnotation)
-    .addNode('agent', callModel)
-    .addNode('tools', toolHandler)
+    .addNode('agent', callSearchAgent)
+    .addNode('execute_tool', executeTool)
     .addEdge('__start__', 'agent')
-    .addEdge('tools', 'agent')
-    .addConditionalEdges('agent', shouldContinue, {
-      tools: 'tools',
+    .addEdge('agent', 'execute_tool')
+    .addConditionalEdges('execute_tool', decideContinueOrEnd, {
+      agent: 'agent',
       __end__: '__end__',
     })
     .compile();
 
   return graph;
+};
+
+const extractToolResults = (message: BaseMessage): ToolResult[] => {
+  if (!isToolMessage(message) || !message.artifact || !Array.isArray(message.artifact.results)) {
+    throw new Error('No artifact attached to tool message');
+  }
+
+  return message.artifact.results as ToolResult[];
 };
