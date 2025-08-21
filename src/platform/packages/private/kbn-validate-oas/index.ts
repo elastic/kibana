@@ -140,7 +140,7 @@ run(
       } else {
         log.success('No error increase detected.');
         updateBaselineFile();
-        return;
+        process.exit(0);
       }
     }
 
