@@ -72,7 +72,7 @@ To make sure that your PR is included in the Release Notes, add the right label.
     * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `main`.
 
 ### Note on contributing AI-enabled code
-We are excited that you are interested in contributing to the codebase and while you are welcome to use any process that works for you, the resulting PR is your contribution and we assume you have reviewed and tested the code and are confident in the changes you are proposing.
+We are excited that you are interested in contributing to Kibana! While you are welcome to use any development process that works for you, the resulting PR is fully your contribution. By opening a PR, we assume you have reviewed and tested all of the code and are confident in the changes you are proposing.
 
 
 
