@@ -16,7 +16,9 @@ export function EsProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
 
-  return createEsClientForFtrConfig(
+  const lifecycle = getService('lifecycle');
+
+  const client = createEsClientForFtrConfig(
     config,
     isServerless
       ? {}
@@ -25,4 +27,45 @@ export function EsProvider({ getService }: FtrProviderContext): Client {
           authOverride: systemIndicesSuperuser,
         }
   );
+
+  const idxPatterns = ['.kibana*', '.internal*'];
+
+  lifecycle.beforeTests.add(async () => {
+    client.indices.putIndexTemplate({
+      name: 'refresh-1ms-default',
+      index_patterns: idxPatterns,
+      priority: 0,
+      template: {
+        settings: {
+          index: {
+            refresh_interval: '1ms',
+          },
+        },
+      },
+    });
+
+    const { indices: internalIndices } = await client.indices.resolveIndex({
+      name: idxPatterns,
+      allow_no_indices: true,
+    });
+
+    await Promise.all(
+      internalIndices.map(async ({ name: index }) => {
+        const settings = (await client.indices.getSettings({ index }))[index].settings ?? {};
+
+        if (settings.refresh_interval === '1ms') {
+          return;
+        }
+
+        await client.indices.putSettings({
+          index,
+          settings: {
+            refresh_interval: '1ms',
+          },
+        });
+      })
+    );
+  });
+
+  return client;
 }

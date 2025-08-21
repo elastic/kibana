@@ -17,6 +17,7 @@
     "@kbn/std",
     "@kbn/telemetry-config",
     "@kbn/metrics-config",
+    "@kbn/repo-info"
   ],
   "exclude": [
     "target/**/*",
