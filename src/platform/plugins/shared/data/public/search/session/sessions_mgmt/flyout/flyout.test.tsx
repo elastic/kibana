@@ -42,6 +42,7 @@ const setup = () => {
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
 
   const onClose = jest.fn();
