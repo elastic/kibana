@@ -78,7 +78,7 @@ export class OnboardingApp {
   }
 
   public get useCaseGrid() {
-    return this.page.getByRole('group').filter({ has: this.page.locator('[aria-labelledby]') });
+    return this.page.getByRole('group', { name: 'What do you want to monitor?' });
   }
 
   async selectHostUseCase() {
@@ -149,8 +149,9 @@ export class OnboardingApp {
   }
 
   async waitForIntegrationCards() {
-    await this.page
-      .locator('[data-test-subj^="integration-card:"]')
-      .waitFor({ state: 'visible', timeout: 10000 });
+    await this.page.waitForFunction(
+      () => document.querySelectorAll('[data-test-subj^="integration-card:"]').length > 0,
+      { timeout: 10000 }
+    );
   }
 }
