@@ -485,7 +485,8 @@ export type RegistryVarType =
   | 'yaml'
   | 'string'
   | 'textarea'
-  | 'duration';
+  | 'duration'
+  | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -502,6 +503,7 @@ export enum RegistryVarsEntryKeys {
   full_width = 'full_width',
   min_duration = 'min_duration',
   max_duration = 'max_duration',
+  url_allowed_schemes = 'url_allowed_schemes',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -527,6 +529,7 @@ export interface RegistryVarsEntry {
   [RegistryVarsEntryKeys.full_width]?: boolean;
   [RegistryVarsEntryKeys.min_duration]?: string;
   [RegistryVarsEntryKeys.max_duration]?: string;
+  [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -699,6 +702,7 @@ export interface Installation {
 
 export interface PackageUsageStats {
   agent_policy_count: number;
+  package_policy_count: number;
 }
 
 export type Installable<T> =
