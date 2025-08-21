@@ -1,12 +1,11 @@
 ### Table of Contents
 
 - [Guiding principles](#guiding-principles)
+- [Embeddable overview](#embeddable-overview)
 - [Publishing packages](#publishing-packages)
 - [Embeddable panel](#embeddable-panel)
 - [Best practices](#best-practices)
 - [Examples](#examples)
-
-Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 ### Guiding principles
 
@@ -20,6 +19,21 @@ Rather than an inheritance-based system with classes, imperative APIs are plain 
 Each embeddable manages its own state. This is because the embeddable system allows a page to render a registry of embeddable types that can change over time. This makes it untenable for a single page to manage state for every type of embeddable. The page is only responsible for persisting and providing the last persisted state to the embeddable on startup. For implementation details, see [Embeddable state management example](https://github.com/elastic/kibana/blob/main/examples/embeddable_examples/public/app/state_management_example/state_management_example.tsx).
 
 An embeddable API shares state via a publishing subject, a read only RxJS Observable. An embeddable API shares setter methods for updating state.
+
+### Embeddable overview
+Embeddables manage their own state, can be serialized and deserialized and have 2 parts.
+1) React component 
+2) an API that can be used to interact with them imperatively
+
+Plugins register new embeddable types.
+```
+embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
+  const { myEmbeddableFactory } = await import('./embeddable_module');
+  return myEmbeddableFactory;
+});
+```
+
+Embeddables rendered with `EmbeddableRenderer` React component.
 
 ### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
