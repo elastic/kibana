@@ -478,12 +478,17 @@ export class IndexUpdateService {
       return dataView;
     }
 
-    return await this.data.dataViews.create({
+    const newDataView = await this.data.dataViews.create({
       title: indexName,
       name: indexName,
       // The index might not exist yet
       allowNoIndex: true,
     });
+
+    // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
+    await this.data.dataViews.refreshFields(newDataView, false, true);
+
+    return newDataView;
   }
 
   private listenForUpdates() {

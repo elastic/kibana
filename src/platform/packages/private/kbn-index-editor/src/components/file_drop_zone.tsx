@@ -52,7 +52,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 }) => {
   const { services } = useKibana<KibanaContextExtra>();
   const { indexUpdateService } = services;
-  const { fileUploadManager, filesStatus, uploadStatus } = useFileUploadContext();
+  const { fileUploadManager, filesStatus, uploadStatus, indexName } = useFileUploadContext();
 
   const isSaving = useObservable(indexUpdateService.isSaving$, false);
 
@@ -183,14 +183,18 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
 
   const showLoadingOverlay = isUploading || isAnalyzing;
 
-  return (
-    <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
-      <div {...getRootProps({ css: { height: '100%', cursor: 'default' } })}>
-        {isDragActive ? <div css={overlayDraggingFile} /> : null}
-        {showLoadingOverlay ? loadingIndicator : null}
-        <input {...getInputProps()} />
-        {content}
-      </div>
-    </FileSelectorContext.Provider>
-  );
+  if (indexName) {
+    return (
+      <FileSelectorContext.Provider value={{ onFileSelectorClick }}>
+        <div {...getRootProps({ css: { height: '100%', cursor: 'default' } })}>
+          {isDragActive ? <div css={overlayDraggingFile} /> : null}
+          {showLoadingOverlay ? loadingIndicator : null}
+          <input {...getInputProps()} />
+          {content}
+        </div>
+      </FileSelectorContext.Provider>
+    );
+  } else {
+    return null;
+  }
 };
