@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiPanel,
@@ -17,6 +17,10 @@ import {
   EuiIcon,
   EuiFlexItem,
   EuiText,
+  EuiToolTip,
+  EuiButtonIcon,
+  copyToClipboard,
+  EuiFlexGroup,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -28,11 +32,12 @@ interface Props {
 }
 
 export const LinksSection = ({ componentData }: Props) => {
+  const [isTextCopied, setTextCopied] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   if (!componentData) return null;
 
-  const { columnNumber, fileName, lineNumber, relativePath } = componentData;
+  const { columnNumber, fileName, lineNumber, relativePath, baseFileName } = componentData;
 
   const CURSOR_LINK = `cursor://file/${fileName}:${lineNumber}:${columnNumber}`;
   const GITHUB_DEV_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
@@ -116,6 +121,15 @@ export const LinksSection = ({ componentData }: Props) => {
     },
   });
 
+  const onClick = () => {
+    copyToClipboard(relativePath);
+    setTextCopied(true);
+  };
+
+  const onBlur = () => {
+    setTextCopied(false);
+  };
+
   return (
     <EuiFlexItem css={styles} grow={false}>
       <EuiPanel hasBorder={false} hasShadow={false} paddingSize="none">
@@ -128,21 +142,60 @@ export const LinksSection = ({ componentData }: Props) => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <EuiTitle css={{ color: euiTheme.colors.textParagraph }} size="xxs">
-          <h4>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiText size="s">
             <FormattedMessage
               id="kbnInspectComponent.inspectFlyout.linksSection.subtitle"
-              defaultMessage="Open in ..."
+              defaultMessage="Open {baseFileName}"
+              values={{
+                baseFileName: (
+                  <EuiText
+                    size="s"
+                    component="span"
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.bold};
+                    `}
+                  >
+                    {baseFileName}
+                  </EuiText>
+                ),
+              }}
             />
-          </h4>
-        </EuiTitle>
+          </EuiText>
+          <EuiToolTip
+            content={
+              isTextCopied
+                ? i18n.translate(
+                    'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathCopiedTooltip',
+                    { defaultMessage: 'Relative file path copied' }
+                  )
+                : i18n.translate(
+                    'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathActionTooltip',
+                    { defaultMessage: 'Copy relative file path' }
+                  )
+            }
+          >
+            <EuiButtonIcon
+              aria-label={i18n.translate(
+                'kbnInspectComponent.inspectFlyout.linksSection.copyFileNameAriaLabel',
+                {
+                  defaultMessage: 'Copy file name',
+                }
+              )}
+              color="text"
+              iconType="copy"
+              onClick={onClick}
+              onBlur={onBlur}
+            />
+          </EuiToolTip>
+        </EuiFlexGroup>
         <EuiSpacer size="m" />
         <div className="linksGrid">
           {ACTIONS.map(({ href, icon, id, i18nId, label }) => {
             const ariaLabel = i18n.translate(
               'kbnInspectComponent.inspectFlyout.linksSection.openFileInAriaLabel',
               {
-                defaultMessage: 'Open file in {target}',
+                defaultMessage: 'Open file using {target}',
                 values: { target: label },
               }
             );

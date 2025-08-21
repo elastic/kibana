@@ -20,18 +20,17 @@ export const getComponentData = async ({
   setIsInspecting,
 }: GetComponentDataOptions) => {
   try {
-    const { codeowners, relativePath }: InspectComponentResponse = await core.http.post(
-      '/internal/inspect_component/inspect',
-      {
+    const { codeowners, relativePath, baseFileName }: InspectComponentResponse =
+      await core.http.post('/internal/inspect_component/inspect', {
         body: JSON.stringify({ path: fileData.fileName }),
-      }
-    );
+      });
 
     const componentData = {
       ...fileData,
       iconType,
       relativePath,
       codeowners,
+      baseFileName,
     };
 
     const flyout = core.overlays.openFlyout(

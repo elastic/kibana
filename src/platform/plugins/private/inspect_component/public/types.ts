@@ -23,8 +23,9 @@ export interface FileData {
 
 export interface ComponentData extends FileData {
   iconType?: string;
-  relativePath?: string;
+  relativePath: string;
   codeowners: string[];
+  baseFileName: string;
 }
 
 export interface ReactFiberNode {
@@ -51,6 +52,7 @@ export interface GetInspectedElementOptions {
 export interface InspectComponentResponse {
   codeowners: string[];
   relativePath: string;
+  baseFileName: string;
 }
 
 export interface ActionLink {

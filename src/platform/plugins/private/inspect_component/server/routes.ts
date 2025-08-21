@@ -48,10 +48,11 @@ export const registerInspectComponentRoutes = ({ http, logger }: InspectComponen
       logger.debug(`Inspecting component at path: ${path}`);
 
       const relativePath = path.slice(REPO_ROOT.length + sep.length);
+      const baseFileName = relativePath.split(sep).pop();
 
       const codeowners = getComponentCodeowners(relativePath);
 
-      return res.ok({ body: { codeowners, relativePath } });
+      return res.ok({ body: { codeowners, relativePath, baseFileName } });
     }
   );
 };

@@ -30,7 +30,7 @@ export const InspectFlyout = ({ componentData }: Props) => {
       <InspectHeader />
       <EuiFlyoutBody>
         <DataSection componentData={componentData} />
-        <EuiSpacer size="xl" />
+        <EuiSpacer size="xxl" />
         <LinksSection componentData={componentData} />
       </EuiFlyoutBody>
     </>

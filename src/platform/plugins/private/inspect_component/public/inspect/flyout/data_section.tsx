@@ -28,8 +28,11 @@ interface Props {
 }
 
 export const DataSection = ({ componentData }: Props) => {
-  const { codeowners, iconType } = componentData;
   const { euiTheme } = useEuiTheme();
+
+  if (!componentData) return null;
+
+  const { codeowners, iconType } = componentData;
 
   const listItem: EuiListGroupItemProps[] = codeowners.map((codeowner) => ({
     label: codeowner,
@@ -40,10 +43,6 @@ export const DataSection = ({ componentData }: Props) => {
       margin-left: -${euiTheme.size.s};
     `,
   }));
-
-  const boldTextCss = css`
-    font-weight: ${euiTheme.font.weight.semiBold};
-  `;
 
   return (
     <>
@@ -56,7 +55,12 @@ export const DataSection = ({ componentData }: Props) => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiText color={euiTheme.colors.textSubdued} size="s" css={boldTextCss}>
+      <EuiText
+        size="s"
+        css={css`
+          font-weight: ${euiTheme.font.weight.bold};
+        `}
+      >
         <FormattedMessage
           id="kbnInspectComponent.inspectFlyout.codeownersTitle"
           defaultMessage="Codeowners:"
@@ -65,13 +69,18 @@ export const DataSection = ({ componentData }: Props) => {
       <EuiListGroup listItems={listItem} color="primary" size="s" flush={true} />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiText color={euiTheme.colors.textSubdued} size="s" css={boldTextCss}>
+        <EuiText
+          size="s"
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+        >
           <FormattedMessage
             id="kbnInspectComponent.inspectFlyout.iconTypeLabel"
             defaultMessage="Icon:"
           />
         </EuiText>
-        <EuiText color={euiTheme.colors.textSubdued} size="s">
+        <EuiText size="s">
           {iconType ? (
             capitalize(iconType)
           ) : (
