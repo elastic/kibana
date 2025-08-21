@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { OverviewPageFooter } from '@kbn/kibana-react-plugin/public';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core/public';
-import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiTabs, EuiTab, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
 import {
   FavoritesClient,
@@ -38,6 +38,7 @@ import { PersonalizedDashboardsCreatedByUser } from './personalization/created_b
 import { HomeFavoriteDashboards } from './personalization/favorite_dashboards';
 
 export const KEY_ENABLE_WELCOME = 'home:welcome:show';
+const HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY = 'home:solutions:hide';
 
 export interface HomeProps {
   addBasePath: (url: string) => string;
@@ -56,6 +57,7 @@ interface State {
   isNewKibanaInstance: boolean;
   isWelcomeEnabled: boolean;
   selectedTabId: string;
+  hideSolutionsSection: boolean;
 }
 
 export class Home extends Component<HomeProps, State> {
@@ -81,6 +83,8 @@ export class Home extends Component<HomeProps, State> {
       isNewKibanaInstance: false,
       isWelcomeEnabled,
       selectedTabId: 'recentlyViewed', // <-- default tab id
+      hideSolutionsSection:
+        props.localStorage.getItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY) === 'true',
     };
   }
 
@@ -158,8 +162,8 @@ export class Home extends Component<HomeProps, State> {
   private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
     const { selectedTabId } = this.state;
     return (
-      <KibanaPageTemplate.Section>
-        <EuiFlexGroup gutterSize="none">
+      <KibanaPageTemplate.Section bottomBorder paddingSize="s">
+        <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiTabs
               css={css`
@@ -187,6 +191,11 @@ export class Home extends Component<HomeProps, State> {
       </KibanaPageTemplate.Section>
     );
   }
+
+  private hideSolutions = () => {
+    this.props.localStorage.setItem(HIDE_SOLUTIONS_SECTION_LOCAL_STORAGE_KEY, 'true');
+    this.setState({ hideSolutionsSection: false });
+  };
 
   private renderNormal() {
     const { addBasePath, solutions, isCloudEnabled, userId, dashboards, recentlyAccessed } =
@@ -257,17 +266,25 @@ export class Home extends Component<HomeProps, State> {
         data-test-subj="homeApp"
         pageHeader={{
           bottomBorder: false,
-          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home" />,
+          pageTitle: <FormattedMessage id="home.header.title" defaultMessage="Welcome home!" />,
+          paddingSize: 's',
         }}
         panelled={false}
       >
-        <SolutionsSection addBasePath={addBasePath} solutions={solutions} />
         {this.renderTabs(tabs)}
+
         <AddData
           addBasePath={addBasePath}
           application={application}
           isDarkMode={isDarkMode}
           isCloudEnabled={isCloudEnabled}
+        />
+
+        <SolutionsSection
+          addBasePath={addBasePath}
+          solutions={solutions}
+          onHideSolutionsSection={this.hideSolutions}
+          hideSolutionsSection={this.state.hideSolutionsSection}
         />
 
         <ManageData

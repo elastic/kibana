@@ -50,99 +50,90 @@ export const ContentByTagTable = () => {
   );
 
   return (
-    <KibanaPageTemplate.Section
-      bottomBorder
-      paddingSize="xl"
-      aria-labelledby="homeSolutions__title"
-    >
-      <EuiPanel>
-        <EuiTitle size="s">
-          <h3>
-            {i18n.translate('home.contentByTagsTable.title', {
-              defaultMessage: 'Content for ',
-            })}
-            <EuiPopover
-              button={tagButtonAnchor}
-              closePopover={closePopover}
-              isOpen={isPopoverOpen}
-              panelStyle={{ minWidth: 300 }}
-            >
-              {TagsSelector ? (
-                <TagsSelector
-                  selected={tagId ? [tagId] : []}
-                  onTagsSelected={([selectedTag, newTag = '']) => {
-                    localStorage.setItem(
-                      HOME_SELECTED_TAG_LOCAL_STORAGE_KEY,
-                      newTag || selectedTag
-                    );
-                    setTagId(newTag || selectedTag);
-                  }}
-                />
-              ) : null}
-            </EuiPopover>
-          </h3>
-        </EuiTitle>
-        <EuiSpacer size="m" />
-        <ContentClientProvider contentClient={contentClient}>
-          <I18nProvider>
-            <SavedObjectFinder
-              id="homeContentByTagsTable"
-              showFilter={false}
-              showSearch={false}
-              services={{
-                savedObjectsTagging: savedObjectsTagging.getTaggingApi(),
-                contentClient,
-                uiSettings,
-              }}
-              initialTag={tag?.name}
-              onChoose={(id, type, name, savedObject, editUrl) => {
-                const savedObjectEditUrl = editUrl
-                  ? editUrl
-                  : `/app/management/kibana/objects/${type}/${id}`;
-                application.navigateToUrl(http.basePath.prepend(savedObjectEditUrl));
-              }}
-              savedObjectMetaData={[
-                {
-                  type: `search`,
-                  getIconForSavedObject: () => 'discoverApp',
-                  name: 'Discover session',
-                  getEditUrl: (savedObject) => `/app/discover/view/${savedObject.id}`,
-                },
-                {
-                  type: 'index-pattern',
-                  getIconForSavedObject: () => 'indexPatternApp',
-                  name: 'Data view',
-                  getEditUrl: (savedObject) => `/app/management/data_views/edit/${savedObject.id}`,
-                },
-                {
-                  type: `visualization`,
-                  getIconForSavedObject: () => 'visualizeApp',
-                  name: 'Visualization',
-                  getEditUrl: (savedObject) => `/app/visualize#/edit/${savedObject.id}`,
-                },
-                {
-                  type: 'lens',
-                  getIconForSavedObject: () => 'lensApp',
-                  name: 'Lens',
-                  getEditUrl: (savedObject) => `/app/lens#/edit/${savedObject.id}`,
-                },
-                {
-                  type: 'map',
-                  getIconForSavedObject: () => 'logoMaps',
-                  name: 'Map',
-                  getEditUrl: (savedObject) => `/app/maps/map/${savedObject.id}`,
-                },
-                {
-                  type: 'dashboard',
-                  getIconForSavedObject: () => 'dashboardApp',
-                  name: 'Dashboard',
-                  getEditUrl: (savedObject) => `/app/dashboards/view/${savedObject.id}`,
-                },
-              ]}
-            />
-          </I18nProvider>
-        </ContentClientProvider>
-      </EuiPanel>
-    </KibanaPageTemplate.Section>
+    <EuiPanel>
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('home.contentByTagsTable.title', {
+            defaultMessage: 'Content for ',
+          })}
+          <EuiPopover
+            button={tagButtonAnchor}
+            closePopover={closePopover}
+            isOpen={isPopoverOpen}
+            panelStyle={{ minWidth: 300 }}
+          >
+            {TagsSelector ? (
+              <TagsSelector
+                selected={tagId ? [tagId] : []}
+                onTagsSelected={([selectedTag, newTag = '']) => {
+                  localStorage.setItem(HOME_SELECTED_TAG_LOCAL_STORAGE_KEY, newTag || selectedTag);
+                  setTagId(newTag || selectedTag);
+                }}
+              />
+            ) : null}
+          </EuiPopover>
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+      <ContentClientProvider contentClient={contentClient}>
+        <I18nProvider>
+          <SavedObjectFinder
+            id="homeContentByTagsTable"
+            showFilter={false}
+            showSearch={false}
+            services={{
+              savedObjectsTagging: savedObjectsTagging.getTaggingApi(),
+              contentClient,
+              uiSettings,
+            }}
+            initialTag={tag?.name}
+            onChoose={(id, type, name, savedObject, editUrl) => {
+              const savedObjectEditUrl = editUrl
+                ? editUrl
+                : `/app/management/kibana/objects/${type}/${id}`;
+              application.navigateToUrl(http.basePath.prepend(savedObjectEditUrl));
+            }}
+            savedObjectMetaData={[
+              {
+                type: `search`,
+                getIconForSavedObject: () => 'discoverApp',
+                name: 'Discover session',
+                getEditUrl: (savedObject) => `/app/discover/view/${savedObject.id}`,
+              },
+              {
+                type: 'index-pattern',
+                getIconForSavedObject: () => 'indexPatternApp',
+                name: 'Data view',
+                getEditUrl: (savedObject) => `/app/management/data_views/edit/${savedObject.id}`,
+              },
+              {
+                type: `visualization`,
+                getIconForSavedObject: () => 'visualizeApp',
+                name: 'Visualization',
+                getEditUrl: (savedObject) => `/app/visualize#/edit/${savedObject.id}`,
+              },
+              {
+                type: 'lens',
+                getIconForSavedObject: () => 'lensApp',
+                name: 'Lens',
+                getEditUrl: (savedObject) => `/app/lens#/edit/${savedObject.id}`,
+              },
+              {
+                type: 'map',
+                getIconForSavedObject: () => 'logoMaps',
+                name: 'Map',
+                getEditUrl: (savedObject) => `/app/maps/map/${savedObject.id}`,
+              },
+              {
+                type: 'dashboard',
+                getIconForSavedObject: () => 'dashboardApp',
+                name: 'Dashboard',
+                getEditUrl: (savedObject) => `/app/dashboards/view/${savedObject.id}`,
+              },
+            ]}
+          />
+        </I18nProvider>
+      </ContentClientProvider>
+    </EuiPanel>
   );
 };
