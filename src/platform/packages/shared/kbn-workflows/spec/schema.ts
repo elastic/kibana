@@ -62,10 +62,11 @@ export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
   delay: z.number().min(0),
 });
+export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 export const WorkflowOnFailureSchema = z.object({
   retry: WorkflowRetrySchema,
-  'fallback-step': z.string().min(1),
+  'fallback-step': z.string().min(1).optional(),
   continue: z.boolean().optional(),
 });
 
@@ -100,27 +101,6 @@ export const ForEachStepSchema = BaseStepSchema.extend({
   steps: z.array(BaseStepSchema).min(1),
 });
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
-
-export const RetryStepSchema = BaseStepSchema.extend({
-  type: z.literal('retry'),
-  attempts: z.number().int().min(1),
-  steps: z.array(BaseStepSchema).min(1),
-});
-export type RetryStep = z.infer<typeof RetryStepSchema>;
-export const getRetryStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
-  const schema = BaseStepSchema.extend({
-    type: z.literal('retry'),
-    attempts: z.number().int().min(1),
-    steps: z.array(stepSchema).min(1),
-  });
-
-  if (loose) {
-    // make all fields optional, but require type to be present for discriminated union
-    return schema.partial().required({ type: true });
-  }
-
-  return schema;
-};
 
 export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = false) => {
   const schema = BaseStepSchema.extend({
@@ -264,7 +244,6 @@ const StepSchema = z.lazy(() =>
     ForEachStepSchema,
     IfStepSchema,
     WaitStepSchema,
-    RetryStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
     BaseConnectorStepSchema,

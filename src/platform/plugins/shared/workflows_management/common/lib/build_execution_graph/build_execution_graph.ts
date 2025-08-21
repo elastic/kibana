@@ -22,10 +22,16 @@ import type {
   WaitGraphNode,
   WorkflowYaml,
   WaitStep,
-  RetryStep,
+  WorkflowRetry,
 } from '@kbn/workflows';
-import { EnterRetryNode, ExitRetryNode } from '@kbn/workflows/types/execution';
+import type { EnterRetryNode, ExitRetryNode } from '@kbn/workflows/types/execution';
 import { omit } from 'lodash';
+
+interface RetryStep extends BaseStep {
+  type: 'retry';
+  steps: BaseStep[];
+  retry: WorkflowRetry;
+}
 
 function getNodeId(node: BaseStep): string {
   // TODO: This is a workaround for the fact that some steps do not have an `id` field.
@@ -167,18 +173,15 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   return exitConditionNode;
 }
 
-function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: any): any {
+function visitRetryStep(graph: graphlib.Graph, previousStep: any, currentStep: RetryStep): any {
   const enterRetryNodeId = getNodeId(currentStep);
-  const retryStep = currentStep as RetryStep;
-  const retryNestedSteps: BaseStep[] = retryStep.steps || [];
+  const retryNestedSteps: BaseStep[] = currentStep.steps || [];
   const exitNodeId = `exitRetry(${enterRetryNodeId})`;
   const enterRetryNode: EnterRetryNode = {
     id: enterRetryNodeId,
     type: 'enter-retry',
     exitNodeId,
-    configuration: {
-      ...omit(retryStep, ['steps']), // No need to include them as they will be represented in the graph
-    },
+    configuration: currentStep.retry,
   };
   const exitRetryNode: ExitRetryNode = {
     type: 'exit-retry',
@@ -282,6 +285,21 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
       foreach: currentStep.foreach,
       steps: [handleStepLevelOperations(modifiedStep)],
     } as ForEachStep;
+  }
+
+  if ((currentStep as BaseStep)?.['on-failure']?.retry) {
+    // Retry steps are treated as atomic steps for graph purposes
+    return {
+      name: `retry_${getNodeId(currentStep)}`,
+      type: 'retry',
+      steps: [
+        handleStepLevelOperations({
+          ...currentStep,
+          'on-failure': omit(currentStep['on-failure'], ['retry']) as any,
+        }),
+      ],
+      retry: (currentStep as BaseStep)['on-failure']?.retry,
+    } as RetryStep;
   }
 
   return currentStep;

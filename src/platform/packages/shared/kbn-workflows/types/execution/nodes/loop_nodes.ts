@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ForEachStepSchema, RetryStepSchema } from '../../../spec/schema';
+import { ForEachStepSchema, WorkflowRetrySchema } from '../../../spec/schema';
 
 export const EnterForeachNodeSchema = z.object({
   id: z.string(),
@@ -34,9 +34,7 @@ export const EnterRetryNodeSchema = z.object({
   id: z.string(),
   type: z.literal('enter-retry'),
   exitNodeId: z.string(),
-  configuration: RetryStepSchema.omit({
-    steps: true,
-  }),
+  configuration: WorkflowRetrySchema,
 });
 export type EnterRetryNode = z.infer<typeof EnterRetryNodeSchema>;
 

@@ -11,26 +11,23 @@ import type { EnterRetryNode } from '@kbn/workflows';
 import type { StepErrorCatcher, StepImplementation } from '../step_base';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 
 export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher {
   constructor(
     private step: EnterRetryNode,
     private workflowRuntime: WorkflowExecutionRuntimeManager,
-    private contextManager: WorkflowContextManager,
     private workflowLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
     this.workflowRuntime.enterScope();
 
-    if (this.workflowRuntime.getStepState(this.step.id)) {
+    if (!this.workflowRuntime.getStepState(this.step.id)) {
       // If retry state exists, it means we are re-entering the retry step
-      await this.advanceRetryAttempt();
+      await this.initializeRetry();
       return;
     }
-
-    await this.initializeRetry();
+    await this.advanceRetryAttempt();
   }
 
   private async initializeRetry(): Promise<void> {
@@ -47,6 +44,10 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
     this.workflowLogger.logDebug(
       `Child step. Retrying the chain of steps for retry step "${this.step.id}" (attempt ${attempt}).`
     );
+
+    // TODO: Implement delay logic between retries
+    // It must work similar way as WaitStepImpl
+
     await this.workflowRuntime.setStepState(this.step.id, { attempt });
     this.workflowRuntime.goToNextStep();
   }
@@ -54,7 +55,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
   public async catchError(): Promise<void> {
     const retryState = this.workflowRuntime.getStepState(this.step.id)!;
 
-    if (retryState.attempt <= this.step.configuration.attempts) {
+    if (retryState.attempt <= this.step.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step
       // Call setWorkflowError with undefined to exit catchError loop and continue execution
       this.workflowRuntime.setWorkflowError(undefined);
