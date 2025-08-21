@@ -26,6 +26,7 @@ import type {
 } from '../services';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { AttachmentSuggestionRegistry } from '../attachment_framework/suggestion_registry';
 import type { LicensingService } from '../services/licensing';
 import type { NotificationService } from '../services/notifications/types';
 import type { User } from '../common/types/user';
@@ -54,6 +55,7 @@ export interface CasesClientArgs {
   readonly actionsClient: PublicMethodsOf<ActionsClient>;
   readonly persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   readonly externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
+  readonly attachmentSuggestionRegistry: PublicMethodsOf<AttachmentSuggestionRegistry>;
   readonly securityStartPlugin: SecurityPluginStart;
   readonly spaceId: string;
   readonly savedObjectsSerializer: ISavedObjectsSerializer;

@@ -61,8 +61,15 @@ export {
   ASSIGN_CASE_CAPABILITY,
 } from './constants';
 
-export type { AttachmentAttributes } from './types/domain';
-export { ConnectorTypes, AttachmentType, ExternalReferenceStorageType } from './types/domain';
+export type { AttachmentAttributes, CaseAttachmentWithoutOwner } from './types/domain';
+export {
+  ConnectorTypes,
+  AttachmentType,
+  ExternalReferenceStorageType,
+  type SuggestionResponse,
+  type SuggestionContext,
+  type SuggestionItem,
+} from './types/domain';
 export { getCasesFromAlertsUrl, getCaseFindUserActionsUrl, throwErrors } from './api';
 export { createUICapabilities, type CasesUiCapabilities } from './utils/capabilities';
 export { getApiTags, type CasesApiTags } from './utils/api_tags';

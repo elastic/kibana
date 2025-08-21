@@ -16,6 +16,7 @@ export const config: PluginConfigDescriptor<ConfigType> = {
     markdownPlugins: true,
     files: { maxSize: true, allowedMimeTypes: true },
     stack: { enabled: true },
+    unsafe: { enableCaseSuggestions: true },
   },
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.case.enabled', 'xpack.cases.enabled', { level: 'critical' }),
@@ -27,3 +28,4 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
 };
 
 export type { CasesServerSetup, CasesServerStart } from './types';
+export type { SuggestionType, SuggestionHandlerParams } from './attachment_framework/types';

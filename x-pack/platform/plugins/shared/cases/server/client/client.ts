@@ -18,6 +18,8 @@ import type { ConfigureSubClient } from './configure/client';
 import { createConfigurationSubClient } from './configure/client';
 import type { MetricsSubClient } from './metrics/client';
 import { createMetricsSubClient } from './metrics/client';
+import type { AttachmentSuggestionsSubClient } from './suggestions/client';
+import { createAttachmentSuggestionsSubClient } from './suggestions/client';
 
 /**
  * Client wrapper that contains accessor methods for individual entities within the cases system.
@@ -29,6 +31,7 @@ export class CasesClient {
   private readonly _userActions: UserActionsSubClient;
   private readonly _configure: ConfigureSubClient;
   private readonly _metrics: MetricsSubClient;
+  private readonly _suggestions: AttachmentSuggestionsSubClient;
 
   constructor(args: CasesClientArgs) {
     this._casesClientInternal = createCasesClientInternal(args);
@@ -37,6 +40,7 @@ export class CasesClient {
     this._userActions = createUserActionsSubClient(args, this);
     this._configure = createConfigurationSubClient(args, this._casesClientInternal);
     this._metrics = createMetricsSubClient(args, this);
+    this._suggestions = createAttachmentSuggestionsSubClient(args);
   }
 
   /**
@@ -72,6 +76,13 @@ export class CasesClient {
    */
   public get metrics() {
     return this._metrics;
+  }
+
+  /**
+   * Retrieves an interface for interacting with the suggestions associated with attachment entities.
+   */
+  public get suggestions() {
+    return this._suggestions;
   }
 }
 

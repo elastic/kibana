@@ -97,6 +97,7 @@ describe('Cases Ui Plugin', () => {
           "attachmentFramework": Object {
             "registerExternalReference": [Function],
             "registerPersistableState": [Function],
+            "registerSuggestion": [Function],
           },
         }
     `);

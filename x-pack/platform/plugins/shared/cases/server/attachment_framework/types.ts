@@ -5,8 +5,15 @@
  * 2.0.
  */
 
+import type { ToolDefinition } from '@kbn/inference-common';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { PersistableState, PersistableStateDefinition } from '@kbn/kibana-utils-plugin/common';
-import type { PersistableStateAttachmentPayload } from '../../common/types/domain';
+import type {
+  PersistableStateAttachmentPayload,
+  SuggestionOwner,
+  SuggestionContext,
+  SuggestionResponse,
+} from '../../common/types/domain';
 
 export type PersistableStateAttachmentState = Pick<
   PersistableStateAttachmentPayload,
@@ -32,11 +39,40 @@ export interface ExternalReferenceAttachmentType {
   schemaValidator?: (data: unknown) => void;
 }
 
+export interface SuggestionType<TPayload extends {} = {}> {
+  /* Unique identifier for the suggestion type */
+  id: string;
+  /* Unique identifier for the type of attachment the suggestion is for */
+  attachmentTypeId: string;
+  /* The owner of the suggestion. Dictates which solutions can use this suggestion */
+  owner: SuggestionOwner;
+  // Handlers and tools associated with each handler. Can be called programmatically or used with tool calling
+  handlers: Record<
+    string,
+    {
+      handler: SuggestionHandler<TPayload>;
+      tool: ToolDefinition;
+    }
+  >;
+}
+
+export type SuggestionHandler<TPayload extends {} = {}> = (
+  params: SuggestionHandlerParams
+) => Promise<SuggestionResponse<TPayload>>;
+
+export interface SuggestionHandlerParams {
+  request: KibanaRequest;
+  context: SuggestionContext;
+}
+
 export interface AttachmentFramework {
   registerExternalReference: (
     externalReferenceAttachmentType: ExternalReferenceAttachmentType
   ) => void;
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
+  ) => void;
+  registerSuggestion: <TPayload extends {} = {}>(
+    attachmentSuggestion: SuggestionType<TPayload>
   ) => void;
 }
