@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { type IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import useLatest from 'react-use/lib/useLatest';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import useMount from 'react-use/lib/useMount';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
@@ -71,7 +70,8 @@ export const SingleTabView = ({
 }: SingleTabViewProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { getScopedHistory } = services;
+
+  const initializationState = useInternalStateSelector((state) => state.initializationState);
   const currentTabId = useCurrentTabSelector((tab) => tab.id);
   const currentStateContainer = useCurrentTabRuntimeState(
     runtimeStateManager,
@@ -81,6 +81,20 @@ export const SingleTabView = ({
     runtimeStateManager,
     (tab) => tab.customizationService$
   );
+  const scopedProfilesManager = useCurrentTabRuntimeState(
+    runtimeStateManager,
+    (tab) => tab.scopedProfilesManager$
+  );
+  const scopedEbtManager = useCurrentTabRuntimeState(
+    runtimeStateManager,
+    (tab) => tab.scopedEbtManager$
+  );
+  const currentDataView = useCurrentTabRuntimeState(
+    runtimeStateManager,
+    (tab) => tab.currentDataView$
+  );
+  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
+
   const initializeSingleTab = useCurrentTabAction(internalStateActions.initializeSingleTab);
   const [initializeTabState, initializeTab] = useAsyncFunction<InitializeSingleSession>(
     async ({ dataViewSpec, defaultUrlState } = {}) => {
@@ -112,33 +126,17 @@ export const SingleTabView = ({
       ? { loading: false, value: { showNoDataPage: false } }
       : { loading: true }
   );
-  const initializeTabWithDefaultLocationState = useLatest(() => {
-    const historyLocationState = getScopedHistory<
-      MainHistoryLocationState & { defaultState?: DiscoverAppState }
-    >()?.location.state;
-    initializeTab({
-      dataViewSpec: historyLocationState?.dataViewSpec,
-      defaultUrlState: historyLocationState?.defaultState,
-    });
-  });
-  const initializationState = useInternalStateSelector((state) => state.initializationState);
-  const scopedProfilesManager = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.scopedProfilesManager$
-  );
-  const scopedEbtManager = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.scopedEbtManager$
-  );
-  const currentDataView = useCurrentTabRuntimeState(
-    runtimeStateManager,
-    (tab) => tab.currentDataView$
-  );
-  const adHocDataViews = useRuntimeState(runtimeStateManager.adHocDataViews$);
 
   useMount(() => {
     if (!currentStateContainer || !currentCustomizationService) {
-      initializeTabWithDefaultLocationState.current();
+      const historyLocationState = services.getScopedHistory<
+        MainHistoryLocationState & { defaultState?: DiscoverAppState }
+      >()?.location.state;
+
+      initializeTab({
+        dataViewSpec: historyLocationState?.dataViewSpec,
+        defaultUrlState: historyLocationState?.defaultState,
+      });
     }
   });
 
