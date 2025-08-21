@@ -13,6 +13,7 @@ import type {
   SuggestionOwner,
   SuggestionContext,
   SuggestionResponse,
+  GenericSuggestionPayload,
 } from '../../common/types/domain';
 
 export type PersistableStateAttachmentState = Pick<
@@ -39,7 +40,9 @@ export interface ExternalReferenceAttachmentType {
   schemaValidator?: (data: unknown) => void;
 }
 
-export interface SuggestionType<TPayload extends {} = {}> {
+export interface SuggestionType<
+  TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
+> {
   /* Unique identifier for the suggestion type */
   id: string;
   /* Unique identifier for the type of attachment the suggestion is for */
@@ -56,9 +59,9 @@ export interface SuggestionType<TPayload extends {} = {}> {
   >;
 }
 
-export type SuggestionHandler<TPayload extends {} = {}> = (
-  params: SuggestionHandlerParams
-) => Promise<SuggestionResponse<TPayload>>;
+export type SuggestionHandler<
+  TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
+> = (params: SuggestionHandlerParams) => Promise<SuggestionResponse<TPayload>>;
 
 export interface SuggestionHandlerParams {
   request: KibanaRequest;
@@ -72,7 +75,7 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentTypeSetup
   ) => void;
-  registerSuggestion: <TPayload extends {} = {}>(
+  registerSuggestion: <TPayload extends GenericSuggestionPayload = GenericSuggestionPayload>(
     attachmentSuggestion: SuggestionType<TPayload>
   ) => void;
 }
