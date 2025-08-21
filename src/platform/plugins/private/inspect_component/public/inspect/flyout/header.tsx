@@ -8,21 +8,18 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const Header = () => (
-  <>
-    <EuiFlexItem grow={false}>
-      <EuiTitle size="s">
-        <h2>
-          <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.title"
-            defaultMessage="Inspect component"
-          />
-        </h2>
-      </EuiTitle>
-    </EuiFlexItem>
-    <EuiSpacer size="m" />
-  </>
+  <EuiFlyoutHeader hasBorder>
+    <EuiTitle size="s">
+      <h2>
+        <FormattedMessage
+          id="kbnInspectComponent.inspectFlyout.title"
+          defaultMessage="Inspect component"
+        />
+      </h2>
+    </EuiTitle>
+  </EuiFlyoutHeader>
 );

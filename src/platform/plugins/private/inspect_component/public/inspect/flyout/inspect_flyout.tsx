@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { css } from '@emotion/react';
 import { LinksSection } from './links_section';
 import { ComponentDataSection } from './component_data_section';
 import { Header } from './header';
@@ -26,21 +25,25 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
 };
 
 export const InspectFlyout = ({ componentData }: Props) => {
-  const { euiTheme } = useEuiTheme();
-
-  const flyoutCss = css`
-    padding: ${euiTheme.size.l};
-  `;
-
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" css={flyoutCss}>
+    <EuiFlyout
+      aria-labelledby="inspectComponentFlyoutHeader"
+      data-test-subj="inspectComponentFlyout"
+      onClose={() => null}
+      ownFocus
+      size="s"
+    >
       <Header />
-      <EuiFlexItem grow={false}>
+      <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="l">
-          <ComponentDataSection componentData={componentData} />
-          <LinksSection componentData={componentData} />
+          <EuiFlexItem grow={false}>
+            <ComponentDataSection componentData={componentData} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <LinksSection componentData={componentData} />
+          </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </EuiFlyoutBody>
+    </EuiFlyout>
   );
 };
