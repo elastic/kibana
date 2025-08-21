@@ -66,12 +66,6 @@ export function SettingsPage() {
     capabilities.actions?.delete === true &&
     capabilities.actions?.save === true;
 
-  const hasConnectorsAllPrivilege =
-    capabilities.actions?.show === true &&
-    capabilities.actions?.execute === true &&
-    capabilities.actions?.delete === true &&
-    capabilities.actions?.save === true;
-
   const {
     query: { tab },
   } = useObservabilityAIAssistantManagementRouterParams('/');
@@ -157,9 +151,6 @@ export function SettingsPage() {
   const onSelectedTabChanged = (id: TabsRt) => {
     router.push('/', { path: '/', query: { tab: id } });
   };
-
-  const headerIconShadow = useEuiShadow('s');
-  const { euiTheme } = useEuiTheme();
 
   return (
     <div data-test-subj="aiAssistantSettingsPage">
