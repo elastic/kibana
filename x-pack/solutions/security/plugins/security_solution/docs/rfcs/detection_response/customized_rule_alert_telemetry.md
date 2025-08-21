@@ -117,11 +117,14 @@ This solution would have compared a hash of functional fields (most notably quer
 ### Approach and technical details
 At its core, this solution is pretty simple: adding a new field to the rule schema that would keep track of which field(s) were customized on the rule object. This would allow us to write the customized field list to the alert object at rule execution the same as we do any rule field, without any runtime calculations that'd slow down rule execution. The field would be updated in the same places `rule_source` is currently updated (basically any CRUD operation on the rule object), and would be either omitted or defaulted to an empty array if a rule's base version didn't exist as there'd be no way to accurately calculate the field list.
 
-This field would be an array and it would contain a list of objects that have . It was considered to have this field be a key/value pair with the key being the field name and the value be the original, unmodified rule field but was rejected. Having the original values would no doubt be helpful in some cases but would also introduce a whole host of new edge cases and potentially double the size of the rule object if most fields were customized. Having the names of the fields customized and whether or not they're functional fields is all we'd need for our use case and some of the previously linked telemetry tickets. Furthermore, the querying of an array within the alerts telemetry cluster would be far more straightforward than querying for keys on an object, as KQL doesn't support the direct querying of object keys and we'd have to rely on wildcard queries or some other syntax. Arrays also allow us to easily chain together multiple clauses in order to be extremely granular with our telemetry analysis. I've listed some example KQL queries below. The addition of the `is_functional` field in the object would be there primarily for filtering purposes. Having a way to easily filter out all alerts from rules with customized functional fields makes for a better, less error prone method for writing queries than having to chain potentially 20+ field names together. It also helps with the extensibility of these queries, as anytime we add a field to the rule object we wouldn't have to update the telemetry and related dashboards to account for the rule, we'd just have to set it properly on rule update.
+This field would be an array and it would contain a list of objects that have . It was considered to have this field be a key/value pair with the key being the field name and the value be the original, unmodified rule field but was rejected. Having the original values would no doubt be helpful in some cases but would also introduce a whole host of new edge cases and potentially double the size of the rule object if most fields were customized. Having the names of the fields customized and whether or not they're functional fields is all we'd need for our use case and some of the previously linked telemetry tickets. Furthermore, the querying of an array within the alerts telemetry cluster would be far more straightforward than querying for keys on an object, as KQL doesn't support the direct querying of object keys and we'd have to rely on wildcard queries or some other syntax. Arrays also allow us to easily chain together multiple clauses in order to be extremely granular with our telemetry analysis. I've listed some example KQL queries below. 
 
 This field would live under the `rule_source` field object. Given its relation to the other fields in this object, it would make sense to consolidate all this logic into one area.
 
 A good name for this field would be `customized_fields` because of the existing language we have in `rule_source` with `is_customized`. It's also a fairly good descriptor of exactly what the field contains.
+
+### Missing base versions
+We would also add a boolean field to the `rule_source` object that would specify whether or not the base version of the rule existed during rule source calculation. This would be used to explicitly determine whether or not the rule had all data available to it during calculation or if we were defaulting to the `is_customized: true` state that we do currently when a base version doesn't exist. This field could also be used to filter out telemetry alerts we couldn't determine to have functional changes or not.
 
 ### Rule customization diff return value proposal
 The value we currently return from the `calculateRuleDiff` function is based off the `DiffableRule` schema - a schema that is similar to our overall detection rule schema but groups certain fields into one (for instance: `query`, `filters`, and `language` become `kql_query`) and omits other fields that we don't intend on diffing (e.g. `exception_list`, `actions`, etc.). This is the implementation currently used for the existing endpoints that run the `calculateRuleDiff` function, most notably the `upgrade/_review` and `upgrade/_perform` routes, but would not be a good return structure for our use case. The grouped fields are essentially an implementation detail and the mixing of the two schemas could cause lots of maintenance pain as well as confusion for consumers of the data on the telemetry side of things. Instead we will need to divide this data up into its original one-to-one field name match with our detection rule schema. 
@@ -129,6 +132,13 @@ The value we currently return from the `calculateRuleDiff` function is based off
 This work has been done before on the front-end for our per-field rule diff flyout, but proved to be pretty difficult to write due to typing conflicts. Furthermore, extracting the individual fields from the nested, post-diff structure we return from the `calculateRuleDiff` function requires us to essentially compare these grouped fields twice - one during the diffing and then another to know how to extract them out of the diffed result.
 
 In order to properly return these fields I believe some refactoring of the `calculateRuleDiff` will need to be done to somehow return these ungrouped fields during the diffing process so that we aren't repeating comparisions needlessly. This work shouldn't need to change the underlying implemetation of the function in any of these endpoints, and with our current test coverage, I think it would be safe enough to refactor this isolated step within the rule diffing process.
+
+### Functional field definition
+A functional field is defined as a field that, when modified, has the ability to change whether or not an alert is generated for the purpose of analyzing how often a rule is generating alerts. There are fields that fully meet these criteria (`query`, `filters`, etc.) but also fields that partially meet this criteria - for instance, the `index` field would obviously change how an alert is written, and changing it would have an impact on what events are queried on, but it's more about changing the rule to suit a user's environment rather than changing the output of the rule itself. For fields like these in this "gray area" between a functional field and a definitively non-functional field (something like `description` which has absolutely no impact on alert generation), we can define as supporting fields: fields that affect rule behavior and operation, but don't change the execution outcome. 
+
+With this definition, we will be conservative in the fields we are defining as "functional" and only the 100%, unarguable fields will be labeled as such. Given we have a list of fields to query on in the telemetry data, alerts can be filtered upon in a more nuanced way on the telemetry side of things if needed.
+
+A full list of fields we diff on with their functional classification is located in the RFC appendix.
 
 ### Schema definitions
 
@@ -144,12 +154,16 @@ rule_source: {
     is_customized: boolean;
     customized_fields: Array<{
         field_name: string;
-        is_functional: boolean;
     }>;
+    missing_base_version: boolean;
 };
 ```
 
-The mapping for our detection rules is carried over onto the alert document schema as the flattened `kibana.alert.rule.parameters` field. Changing the rule schema here should carry the same change to the detection alert schema on both the kibana side and telemetry side of things.
+The mapping for our detection rules is carried over onto the alert document schema as the flattened `kibana.alert.rule.parameters` field. Changing the rule schema here should carry the same change to the detection alert schema on the kibana side of things.
+
+**Alert telemetry schema**
+
+We will want to enrich this data in the telemetry pipeline with functional field markers so that we can easily filter on this data on the telemetry side of things. We wait till the telemetry endpoint to do this comparison and enrichment because the information is not needed on the rule object or alert documents themselves - we could always calculate it on the fly if need be later on.
 
 The current implementation of the prebuilt rule alert schema uses [this list](https://github.com/elastic/kibana/blob/0ad59fab8835d67b476ffbdb82850649e70ab4d9/x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/filterlists/prebuilt_rules_alerts.ts) to include alert fields onto the sanitized alert documents. In order to include the `rule_source` object and *not* the rest of the `kibana.alert.rule.parameters` field we would need to include the following mapping:
 
@@ -158,6 +172,20 @@ The current implementation of the prebuilt rule alert schema uses [this list](ht
   rule_source: true,
 }
 ```
+
+We also want to add a field to the alert telemetry schema to contain this enriched data with the functional field comparison. Placing it at the alert framework level as `kibana.alert.rule.customizations` would be a good option. We could define this enriched telemetry-specific schema as such:
+
+```js
+"customizations": {
+  "customized_fields": ["query", "filters", "name"],
+  "num_functional_fields": 2,
+  "missing_base_version": false,
+}
+```
+
+As stated above, the addition of the `num_functional_fields` field in the object would be there primarily for filtering purposes. Having a way to easily filter out all alerts from rules with customized functional fields makes for a better, less error prone method for writing queries than having to chain potentially 20+ field names together. It also helps with the extensibility of these queries, as anytime we add a field to the rule object we wouldn't have to update the telemetry and related dashboards to account for the rule, we'd just have to set it properly on rule update.
+
+We could also add more field counters in the future (e.g. `num_non_functional_fields`) to filter this data in more granular ways. Given the current structure, and the fact it's all implemented entirely within the telemetry pipeline, this work would be fairly straightforward and wouldn't involve any changes to the rule or alert schema.
 
 ### Examples
 
@@ -171,10 +199,11 @@ The current implementation of the prebuilt rule alert schema uses [this list](ht
         "is_customized": true,
         // New field
         "customized_fields": [
-            { "field_name": 'query', "is_functional": true },
-            { "field_name": 'note', "is_functional": false },
-            { "field_name": 'tags', "is_functional": false },
-        ]
+            { "field_name": 'query' },
+            { "field_name": 'note' },
+            { "field_name": 'tags' },
+        ],
+        "missing_base_version": false,
     },
     ...
 }
@@ -183,10 +212,9 @@ The current implementation of the prebuilt rule alert schema uses [this list](ht
 **Example KQL queries in the alerts telemetry cluster**
 
 ```
-not kibana.alert.rule.params.rule_customizations.is_functional : true
+not (kibana.alert.rule.customizations.num_functional_fields : 0 and kibana.alert.rule.customizations.missing_base_version : false)
 ```
-A query we could use to filter out any alerts generated by prebuilt rules that have functional fields customized.
-
+A query we could use to filter out any alerts generated by prebuilt rules that have functional fields customized and rules that have a missing base version.
 
 ### Pros  
 - Would have a negligible effect on performance
@@ -220,11 +248,11 @@ This is all in addition to the then-unblocked telemetry work that could take pla
 |---------------------------------------|-------------------|
 | `name`                                | no                |
 | `description`                         | no                |
-| `risk_score`                          | yes               |
-| `severity`                            | yes               |
-| `rule_name_override`                  | yes               |
-| `timestamp_override`                  | yes               |
-| `timestamp_override_fallback_disabled`| yes               |
+| `risk_score`                          | no                |
+| `severity`                            | no                |
+| `rule_name_override`                  | no                |
+| `timestamp_override`                  | no                |
+| `timestamp_override_fallback_disabled`| no                |
 | `timeline_id`                         | no                |
 | `timeline_title`                      | no                |
 | `license`                             | no                |
@@ -233,15 +261,15 @@ This is all in addition to the then-unblocked telemetry work that could take pla
 | `investigation_fields`                | no                |
 | `version`                             | no                |
 | `tags`                                | no                |
-| `risk_score_mapping`                  | yes               |
-| `severity_mapping`                    | yes               |
-| `interval`                            | yes               |
-| `from`                                | yes               |
-| `to`                                  | yes               |
+| `risk_score_mapping`                  | no                |
+| `severity_mapping`                    | no                |
+| `interval`                            | no                |
+| `from`                                | no                |
+| `to`                                  | no                |
 | `author`                              | no                |
 | `false_positives`                     | no                |
 | `references`                          | no                |
-| `max_signals`                         | yes               |
+| `max_signals`                         | no                |
 | `threat`                              | no                |
 | `setup`                               | no                |
 | `related_integrations`                | no                |
@@ -249,8 +277,8 @@ This is all in addition to the then-unblocked telemetry work that could take pla
 | `query`                               | yes               |
 | `type`                                | yes               |
 | `language`                            | yes               |
-| `index`                               | yes               |
-| `data_view_id`                        | yes               |
+| `index`                               | no                |
+| `data_view_id`                        | no                |
 | `filters`                             | yes               |
 | `event_category_override`             | yes               |
 | `tiebreaker_field`                    | yes               |
@@ -260,12 +288,10 @@ This is all in addition to the then-unblocked telemetry work that could take pla
 | `threshold`                           | yes               |
 | `threat_query`                        | yes               |
 | `threat_mapping`                      | yes               |
-| `threat_index`                        | yes               |
+| `threat_index`                        | no                |
 | `threat_filters`                      | yes               |
-| `threat_indicator_path`               | yes               |
+| `threat_indicator_path`               | no                |
 | `threat_language`                     | yes               |
-| `concurrent_searches`                 | yes               |
-| `items_per_search`                    | yes               |
 | `anomaly_threshold`                   | yes               |
 | `machine_learning_job_id`             | yes               |
 | `new_terms_fields`                    | yes               |
