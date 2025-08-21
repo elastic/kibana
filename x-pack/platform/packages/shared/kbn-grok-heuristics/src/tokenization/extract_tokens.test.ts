@@ -316,7 +316,7 @@ describe('extractTokensDangerouslySlow', () => {
         '\\s+',
         '[',
         'DATA',
-        'DATA',
+        '@',
         'INT',
         ']',
         '\\s',
@@ -338,7 +338,7 @@ describe('extractTokensDangerouslySlow', () => {
         '\\s',
         'NOTSPACE',
         '\\s',
-        'DATA',
+        'NOTSPACE',
         '\\s+',
         'GREEDYDATA',
       ]);

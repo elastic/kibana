@@ -12,10 +12,7 @@ import { findMatchingPatterns } from './tokenize_lines';
 import { uniq } from 'lodash';
 
 const formatTokens = (tokens: NormalizedToken[]) => {
-  const formatted = tokens
-    .concat()
-    .map((token) => [PATTERN_PRECEDENCE[token.patterns[0]], uniq(token.values)]);
-  return formatted;
+  return tokens.map((token) => [PATTERN_PRECEDENCE[token.patterns[0]], uniq(token.values)]);
 };
 
 describe('normalizeTokensForColumn', () => {
@@ -36,7 +33,7 @@ describe('normalizeTokensForColumn', () => {
   };
 
   const createTokenList = (values: string[]) => {
-    return values.map((value) => createToken(value));
+    return values.map(createToken);
   };
 
   describe('Longest Common Prefix (LCP) detection', () => {
@@ -296,8 +293,7 @@ describe('normalizeTokensForColumn', () => {
       ]);
     });
 
-    // TODO: Regression
-    it.skip('merges prefix and suffixes', () => {
+    it('merges prefix and suffixes', () => {
       const tokenLists = [
         createTokenList([
           '[',

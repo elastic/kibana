@@ -34,12 +34,14 @@ const intersectPatternsBy = (
 ) => {
   const first = accessor(lists[0]);
   if (!first) return { patterns: [DATA_IDX], excludedPatterns: [] };
+  // Get intersection of patterns across all rows
   const patterns = first.patterns.filter((p) =>
     lists.every((row) => {
       const tok = accessor(row);
       return tok ? tok.patterns.includes(p) : false;
     })
   );
+  // Get union of excluded patterns across all rows
   const excludedPatterns: Set<number> = new Set();
   lists.forEach((row) => {
     const tok = accessor(row);
@@ -61,7 +63,9 @@ const isCommonTokenBy = (
     const tok = accessor(row);
     if (!tok) return false;
     const valuesEqual = tok.value === firstTok.value;
-    const patternsOverlap = firstTok.patterns.some((p) => tok.patterns.includes(p));
+    const patternsOverlap = firstTok.patterns.some(
+      (p) => p < NOTSPACE_IDX && tok.patterns.includes(p)
+    );
     return valuesEqual || patternsOverlap;
   });
 };
