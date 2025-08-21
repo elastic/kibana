@@ -291,7 +291,7 @@ export const WorkflowYAMLEditor = ({
       wordWrap: 'on',
       wordWrapColumn: 80,
       wrappingIndent: 'indent',
-      theme: 'workflows-yaml-light',
+      theme: 'workflows-subdued',
       padding: {
         top: 24,
         bottom: 64,
