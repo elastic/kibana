@@ -392,13 +392,13 @@ _meta:
             priority: 250,
             template: {
               mappings: undefined,
-                settings: {
-                  index: {
-                    mapping: {
-                      ignore_malformed: true,
-                    },
+              settings: {
+                index: {
+                  mapping: {
+                    ignore_malformed: true,
                   },
                 },
+              },
             },
             ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
@@ -685,13 +685,13 @@ _meta:
             priority: 250,
             template: {
               mappings: undefined,
-                settings: {
-                  index: {
-                    mapping: {
-                      ignore_malformed: true,
-                    },
+              settings: {
+                index: {
+                  mapping: {
+                    ignore_malformed: true,
                   },
                 },
+              },
             },
             ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
@@ -955,13 +955,13 @@ _meta:
             priority: 250,
             template: {
               mappings: undefined,
-                settings: {
-                  index: {
-                    mapping: {
-                      ignore_malformed: true,
-                    },
+              settings: {
+                index: {
+                  mapping: {
+                    ignore_malformed: true,
                   },
                 },
+              },
             },
             ignore_missing_component_templates: ['logs-endpoint.metadata_current-template@custom'],
           },
