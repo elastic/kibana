@@ -36,7 +36,6 @@ import type { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_
 import type { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import type { PublicAlertFactory } from '../alert/create_alert_factory';
-import type { MaintenanceWindow } from '../application/maintenance_window/types';
 
 export interface AlertRuleData {
   consumer: string;
@@ -213,7 +212,7 @@ export type GetSummarizedAlertsParams = {
 export interface GetMaintenanceWindowScopedQueryAlertsParams {
   ruleId: string;
   spaceId: string;
-  maintenanceWindows: MaintenanceWindow[];
+  activeAlertsToIndex: any[];
   executionUuid: string;
 }
 
@@ -235,22 +234,6 @@ export interface GetLifecycleAlertsQueryByExecutionUuidParams {
 
 export interface GetQueryByExecutionUuidParams
   extends GetLifecycleAlertsQueryByExecutionUuidParams {
-  action?: string;
-}
-
-export interface GetQueryByScopedQueriesParams {
-  ruleId: string;
-  executionUuid: string;
-  maintenanceWindows: MaintenanceWindow[];
-  maxAlertLimit: number;
-  action?: string;
-}
-
-export interface GetMaintenanceWindowAlertsQueryParams {
-  ruleId: string;
-  maintenanceWindows: MaintenanceWindow[];
-  executionUuid: string;
-  maxAlertLimit: number;
   action?: string;
 }
 

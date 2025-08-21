@@ -655,6 +655,7 @@ export class AlertingPlugin {
       savedObjectsService: core.savedObjects,
       securityService: core.security,
       uiSettings: core.uiSettings,
+      elasticsearch: core.elasticsearch,
     });
 
     const getRulesClientWithRequest = async (request: KibanaRequest) => {

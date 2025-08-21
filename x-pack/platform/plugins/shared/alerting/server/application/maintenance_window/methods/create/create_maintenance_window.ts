@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
-import type { Filter } from '@kbn/es-query';
+import type { Filter, BoolQuery } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '../../../../lib/get_es_query_config';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
@@ -28,7 +28,7 @@ export async function createMaintenanceWindow(
   params: CreateMaintenanceWindowParams
 ): Promise<MaintenanceWindow> {
   const { data } = params;
-  const { savedObjectsClient, getModificationMetadata, logger, uiSettings } = context;
+  const { savedObjectsClient, getModificationMetadata, logger, uiSettings, esClient } = context;
   const { title, duration, rRule, categoryIds, scopedQuery, enabled = true } = data;
   const esQueryConfig = await getEsQueryConfig(uiSettings);
 
@@ -39,17 +39,17 @@ export async function createMaintenanceWindow(
   }
 
   let scopedQueryWithGeneratedValue = scopedQuery;
+  let query: { bool: BoolQuery } | undefined = undefined;
 
   try {
     if (scopedQuery) {
-      const dsl = JSON.stringify(
-        buildEsQuery(
-          undefined,
-          [{ query: scopedQuery.kql, language: 'kuery' }],
-          scopedQuery.filters as Filter[],
-          esQueryConfig
-        )
+      query = buildEsQuery(
+        undefined,
+        [{ query: scopedQuery.kql, language: 'kuery' }],
+        scopedQuery.filters as Filter[],
+        esQueryConfig
       );
+      const dsl = JSON.stringify(query);
 
       scopedQueryWithGeneratedValue = {
         ...scopedQuery,
@@ -92,6 +92,27 @@ export async function createMaintenanceWindow(
       maintenanceWindowAttributes,
       savedObjectsCreateOptions: {
         id,
+      },
+    });
+
+    const dateQuery = events.map((event) => ({ range: { '@timestamp': event } }));
+    await esClient.index({
+      index: '.alerts-mw-queries',
+      document: {
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: dateQuery,
+                  minimum_should_match: 1,
+                },
+              },
+              query ? query : {},
+            ],
+            _name: id,
+          },
+        },
       },
     });
 

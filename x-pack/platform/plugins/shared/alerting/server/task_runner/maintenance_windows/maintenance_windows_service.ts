@@ -7,7 +7,6 @@
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { MaintenanceWindow } from '../../application/maintenance_window/types';
-import { filterMaintenanceWindowsIds } from './get_maintenance_windows';
 import type { MaintenanceWindowClientApi } from '../../types';
 import type { AlertingEventLogger } from '../../lib/alerting_event_logger/alerting_event_logger';
 import { withAlertingSpan } from '../lib';
@@ -18,11 +17,6 @@ interface MaintenanceWindowServiceOpts {
   cacheInterval?: number;
   getMaintenanceWindowClientWithRequest(request: KibanaRequest): MaintenanceWindowClientApi;
   logger: Logger;
-}
-
-interface MaintenanceWindowData {
-  maintenanceWindows: MaintenanceWindow[];
-  maintenanceWindowsWithoutScopedQueryIds: string[];
 }
 
 interface LoadMaintenanceWindowsOpts {
@@ -53,7 +47,7 @@ export class MaintenanceWindowsService {
 
   public async getMaintenanceWindows(
     opts: GetMaintenanceWindowsOpts
-  ): Promise<MaintenanceWindowData> {
+  ): Promise<MaintenanceWindow[]> {
     const activeMaintenanceWindows = await this.loadMaintenanceWindows({
       request: opts.request,
       spaceId: opts.spaceId,
@@ -81,16 +75,8 @@ export class MaintenanceWindowsService {
     });
 
     // Set the event log MW Id field the first time with MWs without scoped queries
-    const maintenanceWindowsWithoutScopedQueryIds = filterMaintenanceWindowsIds({
-      maintenanceWindows,
-      withScopedQuery: false,
-    });
 
-    if (maintenanceWindowsWithoutScopedQueryIds.length) {
-      opts.eventLogger.setMaintenanceWindowIds(maintenanceWindowsWithoutScopedQueryIds);
-    }
-
-    return { maintenanceWindows, maintenanceWindowsWithoutScopedQueryIds };
+    return maintenanceWindows;
   }
 
   private async loadMaintenanceWindows(

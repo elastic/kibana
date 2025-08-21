@@ -4,7 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  IUiSettingsClient,
+  Logger,
+  SavedObjectsClientContract,
+  ElasticsearchClient,
+} from '@kbn/core/server';
 import type { FilterStateStore } from '@kbn/es-query';
 import type { RRuleParams } from './rrule_type';
 
@@ -80,6 +85,7 @@ export interface MaintenanceWindowClientContext {
   getModificationMetadata: () => Promise<MaintenanceWindowModificationMetadata>;
   savedObjectsClient: SavedObjectsClientContract;
   logger: Logger;
+  esClient: ElasticsearchClient;
 }
 
 export const MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE = 'maintenance-window';
