@@ -6,7 +6,7 @@
  */
 import { useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../plugin';
+import type { ClientPluginsStart } from '../../../plugin';
 
 export const useScreenContext = ({ screenDescription }: { screenDescription: string }) => {
   const services = useKibana<ClientPluginsStart>().services;

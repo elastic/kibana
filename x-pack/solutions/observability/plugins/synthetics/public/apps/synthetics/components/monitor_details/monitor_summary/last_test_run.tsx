@@ -108,11 +108,13 @@ export const LastTestRunComponent = ({
     stateStartedAt && stateEndsAt
       ? getErrorDuration(moment(stateStartedAt), moment(stateEndsAt))
       : 0;
+  const location = latestPing?.observer?.geo?.name || '';
 
   useScreenContext({
     screenDescription: dedent(`The user is viewing the last test run for monitor "${monitor.name}". 
-    The last test run ${status} and was executed at ${lastRunTimestamp} (${lastRunTimestampUTC} UTC).
-    
+    The last test run ${status} and was executed at ${lastRunTimestamp} (${lastRunTimestampUTC} UTC)
+    from location "${location}".
+
     ${errorMessage ? `The latest error was: ${errorMessage}` : ''}. 
 
     ${

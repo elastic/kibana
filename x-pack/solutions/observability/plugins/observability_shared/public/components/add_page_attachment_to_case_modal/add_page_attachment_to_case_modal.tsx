@@ -122,6 +122,8 @@ function AddToCaseButtonContent({
   const useCasesAddToExistingCaseModal = cases.hooks.useCasesAddToExistingCaseModal!;
   const { screenContexts } = usePageSummary({
     observabilityAIAssistant,
+    appInstructions:
+      'When referring to Synthetics monitors, include the monitor name, test run timestamp, and test run location.',
   });
   const casesModal = useCasesAddToExistingCaseModal({
     onClose: onCloseModal,

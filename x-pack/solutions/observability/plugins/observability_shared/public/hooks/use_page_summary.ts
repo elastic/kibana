@@ -18,12 +18,14 @@ interface UsePageSummaryProps {
   onChunk?: (chunk: string) => void;
   isLoading?: boolean;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
+  appInstructions?: string;
 }
 
 export const usePageSummary = ({
   onSuccess,
   onChunk,
   observabilityAIAssistant,
+  appInstructions,
 }: UsePageSummaryProps = {}) => {
   const [errors, setErrors] = useState<Error[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
@@ -78,13 +80,19 @@ export const usePageSummary = ({
               content:
                 dedent(`Create a 1 sentence summary of the current page.  State facts directly without descriptive phrases like "shows," "indicates," or "reveals." 
 
-                Include specific numbers, percentages, error counts, response times, and exact timestamps when available.
+                Include specific numbers, percentages, error counts, response times, exact timestamps, and locations when available.
                 
                 Report anomalies, spikes, drops, or failures with their precise timing and impact.
 
                 Use both UTC and local timestamps if provided. Use the date format provided - do not convert times yourself. When both local and UTC times are available, include the local time first and the UTC time in parentheses.
 
-                Begin immediately with the most urgent findings.`),
+                Begin immediately with the most urgent findings.
+
+                ${
+                  appInstructions
+                    ? `Here are some additional instructions for the current page: ${appInstructions}.`
+                    : ''
+                }`),
             },
           },
         ],
@@ -118,6 +126,7 @@ export const usePageSummary = ({
     onSuccess,
     selectedConnector,
     chatServiceErrors,
+    appInstructions,
   ]);
 
   return {
