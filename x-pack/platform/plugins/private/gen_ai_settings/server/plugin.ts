@@ -76,10 +76,9 @@ export class GenAiSettingsPlugin
     core.uiSettings.register({
       /**
        * TODO:
-       * Once assistants changes have been made, change this setting to the following:
+       * Once assistants changes have been made that watch this uiSetting, 
+       * change the bellow configuration to the following:
        * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
-       * https://github.com/elastic/obs-ai-assistant-team/issues/277
-       * https://github.com/elastic/security-team/issues/12955
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
         readonlyMode: 'strict',
@@ -92,10 +91,9 @@ export class GenAiSettingsPlugin
     core.uiSettings.register({
       /**
        * TODO:
-       * Once assistants changes have been made, change this setting to the following:
+       * Once assistants changes have been made that watch this uiSetting, 
+       * change the bellow configuration to the following:
        * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
-       * https://github.com/elastic/obs-ai-assistant-team/issues/277
-       * https://github.com/elastic/security-team/issues/12955
        */
       [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY]: {
         readonlyMode: 'ui',
