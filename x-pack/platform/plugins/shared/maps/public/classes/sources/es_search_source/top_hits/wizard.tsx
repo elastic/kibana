@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { Writable } from '@kbn/utility-types';
 import { CreateSourceEditor } from './create_source_editor';
-import { LayerWizard, RenderWizardArguments } from '../../../layers';
+import type { LayerWizard, RenderWizardArguments } from '../../../layers';
 import { GeoJsonVectorLayer } from '../../../layers/vector_layer';
 import {
   LAYER_WIZARD_CATEGORY,
@@ -18,7 +18,7 @@ import {
   WIZARD_ID,
 } from '../../../../../common/constants';
 import { TopHitsLayerIcon } from '../../../layers/wizards/icons/top_hits_layer_icon';
-import {
+import type {
   ESSearchSourceDescriptor,
   VectorStylePropertiesDescriptor,
 } from '../../../../../common/descriptor_types';

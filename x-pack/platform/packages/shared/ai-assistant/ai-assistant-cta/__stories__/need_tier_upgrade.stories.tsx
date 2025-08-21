@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { Meta, StoryFn } from '@storybook/react';
+import type { Meta, StoryFn } from '@storybook/react';
 
 import { NeedTierUpgrade as Component } from '../need_tier_upgrade';
 

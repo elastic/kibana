@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
-import { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
-import { AppPluginDependencies } from './with_data_services/types';
+import type { AppMountParameters, CoreSetup, Plugin } from '@kbn/core/public';
+import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
+import type { AppPluginDependencies } from './with_data_services/types';
 import image from './state_sync.png';
 
 interface SetupDeps {

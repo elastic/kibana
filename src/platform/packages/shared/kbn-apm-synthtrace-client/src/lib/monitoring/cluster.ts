@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Entity, Fields } from '../entity';
+import type { Fields } from '../entity';
+import { Entity } from '../entity';
 import { generateShortId } from '../utils/generate_id';
 import { clusterStats } from './cluster_stats';
 import { kibana } from './kibana';

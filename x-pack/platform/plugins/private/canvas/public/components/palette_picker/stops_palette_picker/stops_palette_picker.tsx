@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { flowRight, identity } from 'lodash';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { i18n } from '@kbn/i18n';
-import { ColorStop, CustomColorPalette, StopsPalettePickerProps } from '../types';
+import type { ColorStop, CustomColorPalette, StopsPalettePickerProps } from '../types';
 import { PalettePicker } from '../palette_picker';
 import { StopColorPicker } from './stop_color_picker';
-import { Palette } from './types';
+import type { Palette } from './types';
 import {
   reduceColorsByStopsSize,
   transformPaletteToColorStops,
@@ -23,7 +24,7 @@ import {
   addNewColorStop,
   getOverridenPaletteOptions,
 } from './utils';
-import { ColorPalette } from '../../../../common/lib/palettes';
+import type { ColorPalette } from '../../../../common/lib/palettes';
 
 const strings = {
   getAddColorStopLabel: () =>

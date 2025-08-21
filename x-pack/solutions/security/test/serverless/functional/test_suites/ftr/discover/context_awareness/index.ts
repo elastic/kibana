@@ -8,7 +8,7 @@
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SECURITY_ES_ARCHIVES_DIR } from '../../../constants';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
