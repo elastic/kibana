@@ -1,6 +1,6 @@
 # Search Solution Serverless Tests
 
-This directory contains **Search-specific** serverless test scenarios. For detailed serverless testing guidelines, authentication setup, role-based testing, and MKI configuration, refer to the comprehensive platform documentation: [`x-pack/platform/test/serverless/README.md`](../../../platform/test/serverless/README.md).
+This directory contains **Search-specific** serverless test scenarios. For detailed serverless testing guidelines, authentication setup, role-based testing, and MKI configuration, refer to the comprehensive platform documentation: [`x-pack/platform/test/serverless/README.md`](../../../../platform/test/serverless/README.md).
 
 **Important**: Platform-shared serverless functionality that works across all project types (Security, Observability, Search) is located in `x-pack/platform/test/serverless`. Only Search-unique serverless test scenarios should be added here.
 
