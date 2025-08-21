@@ -16,9 +16,9 @@ import {
   EuiText,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiBasicTable,
   EuiLink,
+  EuiSpacer,
 } from '@elastic/eui';
 import type { EuiPanelProps, EuiBasicTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -40,6 +40,7 @@ export interface RecentlyAccessedItemsPanelProps {
   maxWidth?: number;
   width?: number;
   hideTitle?: boolean;
+  showPanelWrapper?: boolean; // Controls whether to wrap content in EuiPanel
   // EuiPanel props
   color?: EuiPanelProps['color'];
   hasBorder?: EuiPanelProps['hasBorder'];
@@ -61,6 +62,7 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
   maxWidth,
   width,
   hideTitle = false,
+  showPanelWrapper = true, // Default to showing panel wrapper
   color = 'subdued',
   hasBorder,
   hasShadow,
@@ -219,6 +221,53 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
     return <EuiBasicTable {...tableProps} />;
   };
 
+  const content = (
+    <>
+      {!hideTitle && (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="clock" size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xxs">
+              <h3>
+                {title || (
+                  <FormattedMessage
+                    id="contentManagement.recentlyAccessedItems.title"
+                    defaultMessage="Recently viewed items"
+                  />
+                )}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {!hideTitle && <EuiSpacer size="m" />}
+      <EuiPanel hasBorder paddingSize="m">
+        {renderPanelContent()}
+      </EuiPanel>
+    </>
+  );
+
+  if (!showPanelWrapper) {
+    return (
+      <div
+        className={className}
+        style={
+          maxWidth || width
+            ? {
+                ...(maxWidth && { maxWidth: `${maxWidth}px` }),
+                ...(width && { width: `${width}px` }),
+              }
+            : undefined
+        }
+        data-test-subj={dataTestSubj}
+      >
+        {content}
+      </div>
+    );
+  }
+
   return (
     <EuiPanel
       className={className}
@@ -238,27 +287,7 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
       }
       data-test-subj={dataTestSubj}
     >
-      {!hideTitle && (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="clock" size="m" />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xs">
-              <h3>
-                {title || (
-                  <FormattedMessage
-                    id="contentManagement.recentlyAccessedItems.title"
-                    defaultMessage="Recently viewed items"
-                  />
-                )}
-              </h3>
-            </EuiTitle>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-      {!hideTitle && <EuiHorizontalRule margin="s" />}
-      {renderPanelContent()}
+      {content}
     </EuiPanel>
   );
 };

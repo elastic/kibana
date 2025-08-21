@@ -177,6 +177,7 @@ export const HomeContentPanels: React.FC = () => {
           hasBorder
           paddingSize="m"
           hideTitle
+          showPanelWrapper={false}
         />
       ),
     },

@@ -318,10 +318,10 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
       )}
 
       {items.length === 0 ? (
-        <EuiText color="subdued" textAlign="center">
+        <EuiText color="subdued" textAlign="center" size="xs">
           <FormattedMessage
             id="contentManagement.tableListView.noTaggedItems"
-            defaultMessage="No tagged items found"
+            defaultMessage="Select a tag to display tagged items"
           />
         </EuiText>
       ) : (

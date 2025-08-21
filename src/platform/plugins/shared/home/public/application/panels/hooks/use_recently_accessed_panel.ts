@@ -9,7 +9,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { getServices } from '../../kibana_services';
-import type { RecentlyAccessedItem, RecentlyAccessedFilter } from '@kbn/content-management-table-list-view-common';
+import type {
+  RecentlyAccessedItem,
+  RecentlyAccessedFilter,
+} from '@kbn/content-management-table-list-view-common';
 
 export interface UseRecentlyAccessedPanelOptions {
   limit?: number;
@@ -59,34 +62,32 @@ export const useRecentlyAccessedPanel = (
       }
 
       // Take the limit (most recent first since they're already ordered)
-      const limitedItems = filteredItems
-        .slice(0, limit)
-        .map((item) => {
-          // Determine the actual type from the URL
-          const link = item.link.toLowerCase();
-          let type = 'unknown';
-          
-          if (link.includes('/app/discover') || link.includes('/discover')) {
-            type = 'discover';
-          } else if (link.includes('/app/dashboard') || link.includes('/dashboards')) {
-            type = 'dashboard';
-          } else if (link.includes('/app/visualize') || link.includes('/visualize')) {
-            type = 'visualize';
-          } else if (link.includes('/app/maps') || link.includes('/maps')) {
-            type = 'maps';
-          } else if (link.includes('/app/canvas') || link.includes('/canvas')) {
-            type = 'canvas';
-          } else if (link.includes('/app/ml') || link.includes('/machine-learning')) {
-            type = 'ml';
-          }
-          
-          return {
-            id: item.id,
-            title: item.label,
-            link: item.link,
-            type,
-          };
-        });
+      const limitedItems = filteredItems.slice(0, limit).map((item) => {
+        // Determine the actual type from the URL
+        const link = item.link.toLowerCase();
+        let type = 'unknown';
+
+        if (link.includes('/app/discover') || link.includes('/discover')) {
+          type = 'discover';
+        } else if (link.includes('/app/dashboard') || link.includes('/dashboards')) {
+          type = 'dashboard';
+        } else if (link.includes('/app/visualize') || link.includes('/visualize')) {
+          type = 'visualize';
+        } else if (link.includes('/app/maps') || link.includes('/maps')) {
+          type = 'maps';
+        } else if (link.includes('/app/canvas') || link.includes('/canvas')) {
+          type = 'canvas';
+        } else if (link.includes('/app/ml') || link.includes('/machine-learning')) {
+          type = 'ml';
+        }
+
+        return {
+          id: item.id,
+          title: item.label,
+          link: item.link,
+          type,
+        };
+      });
 
       setItems(limitedItems);
     } catch (err) {
