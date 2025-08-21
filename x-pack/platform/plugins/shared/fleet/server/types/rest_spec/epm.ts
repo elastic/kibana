@@ -70,6 +70,7 @@ export const EsAssetReferenceSchema = schema.object({
     schema.literal('data_stream_ilm_policy'),
     schema.literal('transform'),
     schema.literal('ml_model'),
+    schema.literal('knowledge_base'),
   ]),
   deferred: schema.maybe(schema.boolean()),
   version: schema.maybe(schema.string()),

@@ -15,10 +15,14 @@ import {
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
+import { ElasticsearchAssetType } from '../../../../../../common/types/models/epm';
+import { updateEsAssetReferences } from '../../es_assets_reference';
 
 export async function stepSaveKnowledgeBase(context: InstallContext): Promise<void> {
-  const { packageInstallContext, esClient, installedPkg } = context;
+  const { packageInstallContext, esClient, installedPkg, savedObjectsClient } = context;
   const { packageInfo } = packageInstallContext;
+
+  let esReferences = context.esReferences ?? [];
 
   // Save knowledge base content if present
   if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
@@ -50,6 +54,22 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
             knowledgeBaseContent: packageInfo.knowledge_base,
           });
         }
+
+        // Add knowledge base asset references to esReferences
+        const knowledgeBaseAssetRefs = packageInfo.knowledge_base.map((item) => ({
+          id: `${packageInfo.name}-${item.fileName}`,
+          type: ElasticsearchAssetType.knowledgeBase,
+        }));
+
+        // Update ES asset references to include knowledge base assets
+        esReferences = await updateEsAssetReferences(
+          savedObjectsClient,
+          packageInfo.name,
+          esReferences,
+          {
+            assetsToAdd: knowledgeBaseAssetRefs,
+          }
+        );
       }
     } catch (error) {
       throw new FleetError(`Error saving knowledge base content: ${error}`);

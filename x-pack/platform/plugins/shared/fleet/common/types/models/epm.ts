@@ -97,6 +97,7 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   transform = 'transform',
   mlModel = 'ml_model',
+  knowledgeBase = 'knowledge_base',
 }
 export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
