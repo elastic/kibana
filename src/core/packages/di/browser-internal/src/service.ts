@@ -7,4 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CoreInjectionService } from './src/service';
+import { CoreInjectionService as BaseService } from '@kbn/core-di-internal';
+import { core } from './modules';
+
+/** @internal */
+export class CoreInjectionService extends BaseService {
+  public setup() {
+    const contract = super.setup();
+    const container = contract.getContainer();
+
+    container.loadSync(core);
+
+    return contract;
+  }
+}
