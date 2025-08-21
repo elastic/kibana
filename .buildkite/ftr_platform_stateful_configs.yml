@@ -243,6 +243,7 @@ enabled:
   - x-pack/platform/test/functional/apps/ml/memory_usage/config.ts
   - x-pack/platform/test/functional/apps/monitoring/config.ts
   - x-pack/platform/test/functional/apps/painless_lab/config.ts
+  - x-pack/platform/test/functional/apps/product_intercept/config.ts
   - x-pack/platform/test/functional/apps/remote_clusters/config.ts
   - x-pack/platform/test/functional/apps/reporting_management/config.ts
   - x-pack/platform/test/functional/apps/rollup_job/config.ts
@@ -269,6 +270,7 @@ enabled:
   - x-pack/platform/test/functional/config.upgrade_assistant.ts
   - x-pack/platform/test/functional_cloud/config.ts
   - x-pack/platform/test/functional_cloud/saml.config.ts
+  - x-pack/platform/test/functional_cloud/intercepts.config.ts
   - x-pack/platform/test/licensing_plugin/config.public.ts
   - x-pack/platform/test/licensing_plugin/config.ts
   - x-pack/platform/test/plugin_functional/config.ts

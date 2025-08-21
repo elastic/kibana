@@ -183,7 +183,9 @@ export const reportingCsvExportProvider = ({
 
       const licenseHasCsvReporting = licenseCheck.showLinks;
 
-      const capabilityHasCsvReporting = capabilities.discover_v2?.generateCsv === true;
+      const capabilityHasCsvReporting =
+        capabilities.discover_v2?.generateCsv === true ||
+        capabilities.reportingLegacy?.generateReport === true;
 
       if (!(licenseHasCsvReporting && capabilityHasCsvReporting)) {
         return false;

@@ -30,7 +30,7 @@ info:
 
     ## Documentation source and versions
 
-    This documentation is derived from the `main` branch of the [kibana](https://github.com/elastic/kibana) repository.
+    This documentation is derived from the `9.1` branch of the [kibana](https://github.com/elastic/kibana) repository.
     It is provided under license [Attribution-NonCommercial-NoDerivatives 4.0 International](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
     This documentation contains work-in-progress information for future Elastic Stack releases.
@@ -4804,14 +4804,16 @@ paths:
             required:
               - type
               - id
-        - in: query
+        - description: The fields to return in the `attributes` key of the response.
+          in: query
           name: fields
           required: false
           schema:
-            items:
-              description: The fields to return in the `attributes` key of the response.
-              type: string
-            type: array
+            anyOf:
+              - items:
+                  type: string
+                type: array
+              - type: string
         - description: 'A KQL string that you filter with an attribute from your saved object. It should look like `savedObjectType.attributes.title: "myTitle"`. However, if you used a direct attribute of a saved object, such as `updatedAt`, you must define your filter, for example, `savedObjectType.updatedAt > 2018-12-22`.'
           in: query
           name: filter
@@ -8751,7 +8753,7 @@ paths:
 
         The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PatchRule
@@ -8873,7 +8875,7 @@ paths:
       description: |
         Create a new detection rule.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
@@ -9562,7 +9564,7 @@ paths:
 
         The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: UpdateRule
@@ -9735,7 +9737,7 @@ paths:
         The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
         The edit action is idempotent, meaning that if you add a tag to a rule that already has that tag, no changes are made. The same is true for other edit actions, for example removing an index pattern that is not specified in a rule will not result in any changes. The only exception is the `add_rule_actions` and `set_rule_actions` action, which is non-idempotent. This means that if you add or set a rule action to a rule that already has that action, a new action is created with a new unique ID.
         > warn
-        > When used with  [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
       operationId: PerformRulesBulkAction
@@ -11032,7 +11034,7 @@ paths:
         - The `Content-Type: multipart/form-data` HTTP header.
         - A link to the `.ndjson` file containing the rules.
         > warn
-        > When used with [API key](https://www.elastic.co/guide/en/kibana/current/api-keys.html) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
+        > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
 
         > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
         > info
@@ -12838,7 +12840,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}:
     get:
-      description: Get information for the specified file using the file ID.
+      description: |
+        Get information for the specified file using the file ID.
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileInfo
       parameters:
         - in: path
@@ -12863,7 +12869,11 @@ paths:
         - Security Endpoint Management API
   /api/endpoint/action/{action_id}/file/{file_id}/download:
     get:
-      description: Download a file from an endpoint.
+      description: |
+        Download a file from an endpoint. 
+        > info
+        > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
+        > {`file_id`} = {`action_id`}`.`{`agent_id`}
       operationId: EndpointFileDownload
       parameters:
         - in: path
@@ -13378,11 +13388,7 @@ paths:
                     required:
                       - status
                   status:
-                    oneOf:
-                      - $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
-                      - enum:
-                          - not_found
-                        type: string
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus'
                 required:
                   - status
           description: Successful response
@@ -76891,12 +76897,10 @@ components:
         - status
     Security_Entity_Analytics_API_PrivilegeMonitoringEngineStatus:
       enum:
-        - installing
         - started
-        - stopped
-        - updating
         - error
         - disabled
+        - not_installed
       type: string
     Security_Entity_Analytics_API_PrivmonUserCsvUploadErrorItem:
       type: object

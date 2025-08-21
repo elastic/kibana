@@ -21,6 +21,10 @@ import type {
 } from '../indices.metadata.types';
 import type { NodeIngestPipelinesStats } from '../ingest_pipelines_stats.types';
 import { SiemMigrationsEventTypes } from './types';
+import type {
+  HealthDiagnosticQueryResult,
+  HealthDiagnosticQueryStats,
+} from '../diagnostic/health_diagnostic_service.types';
 
 export const RISK_SCORE_EXECUTION_SUCCESS_EVENT: EventTypeOpts<{
   scoresWritten: number;
@@ -874,6 +878,115 @@ export const TELEMETRY_NODE_INGEST_PIPELINES_STATS_EVENT: EventTypeOpts<NodeInge
     },
   };
 
+export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT: EventTypeOpts<HealthDiagnosticQueryResult> =
+  {
+    eventType: 'telemetry_health_diagnostic_query_result_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Identifier for the executed query.' },
+      },
+      queryId: {
+        type: 'keyword',
+        _meta: { description: 'Unique identifier for the specific query.' },
+      },
+      traceId: {
+        type: 'keyword',
+        _meta: { description: 'Unique trace ID for correlating a single query execution.' },
+      },
+      page: {
+        type: 'integer',
+        _meta: { description: 'Page number of the query result.' },
+      },
+      data: {
+        type: 'pass_through',
+        _meta: { description: 'Raw query result payload.' },
+      },
+    },
+  };
+export const TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT: EventTypeOpts<HealthDiagnosticQueryStats> =
+  {
+    eventType: 'telemetry_health_diagnostic_query_stats_event',
+    schema: {
+      name: {
+        type: 'keyword',
+        _meta: { description: 'Identifier for the executed query.' },
+      },
+      traceId: {
+        type: 'keyword',
+        _meta: { description: 'Unique trace ID for correlating a single query execution.' },
+      },
+      numDocs: {
+        type: 'integer',
+        _meta: { description: 'Number of documents returned by the query.' },
+      },
+      passed: {
+        type: 'boolean',
+        _meta: { description: 'Indicates whether the query completed successfully.' },
+      },
+      started: {
+        type: 'keyword',
+        _meta: { description: 'When the query started execution.' },
+      },
+      finished: {
+        type: 'keyword',
+        _meta: { description: 'When the query finished execution.' },
+      },
+      failure: {
+        properties: {
+          message: {
+            type: 'keyword',
+            _meta: { description: 'A high-level failure message describing the error.' },
+          },
+          reason: {
+            properties: {
+              circuitBreaker: {
+                type: 'keyword',
+                _meta: {
+                  description: 'The name of the circuit breaker that triggered the failure.',
+                },
+              },
+              valid: {
+                type: 'boolean',
+                _meta: {
+                  description: 'Indicates whether the query execution was considered valid.',
+                },
+              },
+              message: {
+                type: 'keyword',
+                _meta: {
+                  optional: true,
+                  description:
+                    'A detailed reason or message explaining why the circuit breaker was triggered.',
+                },
+              },
+            },
+          },
+        },
+        _meta: {
+          optional: true,
+          description: 'Details about the failure if the operation was unsuccessful.',
+        },
+      },
+      fieldNames: {
+        type: 'array',
+        items: {
+          type: 'keyword',
+          _meta: {
+            description: 'Field names in the query result.',
+          },
+        },
+      },
+      circuitBreakers: {
+        type: 'pass_through',
+        _meta: {
+          optional: true,
+          description: 'Circuit breaker metrics such as execution time and memory usage.',
+        },
+      },
+    },
+  };
+
 interface CreateAssetCriticalityProcessedFileEvent {
   result?: BulkUpsertAssetCriticalityRecordsResponse['stats'];
   startTime: Date;
@@ -1454,6 +1567,55 @@ export const ENDPOINT_WORKFLOW_INSIGHTS_REMEDIATED_EVENT: EventTypeOpts<{
   },
 };
 
+export const GAP_DETECTED_EVENT: EventTypeOpts<{
+  gapDuration: number;
+  intervalDuration: number;
+  intervalAndLookbackDuration: number;
+  ruleType: string;
+  ruleSource: string;
+  isCustomized: boolean;
+}> = {
+  eventType: 'gap_detected_event',
+  schema: {
+    gapDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the gap',
+      },
+    },
+    intervalDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the interval',
+      },
+    },
+    intervalAndLookbackDuration: {
+      type: 'long',
+      _meta: {
+        description: 'The duration of the interval and lookback',
+      },
+    },
+    ruleType: {
+      type: 'keyword',
+      _meta: {
+        description: 'The type of the rule',
+      },
+    },
+    ruleSource: {
+      type: 'keyword',
+      _meta: {
+        description: 'The source of the rule',
+      },
+    },
+    isCustomized: {
+      type: 'boolean',
+      _meta: {
+        description: 'Whether the prebuilt rule is customized',
+      },
+    },
+  },
+};
+
 export const events = [
   RISK_SCORE_EXECUTION_SUCCESS_EVENT,
   RISK_SCORE_EXECUTION_ERROR_EVENT,
@@ -1472,6 +1634,8 @@ export const events = [
   PRIVMON_ENGINE_INITIALIZATION_EVENT,
   PRIVMON_ENGINE_RESOURCE_INIT_FAILURE_EVENT,
   TELEMETRY_DATA_STREAM_EVENT,
+  TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_RESULT_EVENT,
+  TELEMETRY_HEALTH_DIAGNOSTIC_QUERY_STATS_EVENT,
   TELEMETRY_ILM_POLICY_EVENT,
   TELEMETRY_ILM_STATS_EVENT,
   TELEMETRY_INDEX_SETTINGS_EVENT,
@@ -1485,4 +1649,5 @@ export const events = [
   SIEM_MIGRATIONS_RULE_TRANSLATION_FAILURE,
   SIEM_MIGRATIONS_PREBUILT_RULES_MATCH,
   SIEM_MIGRATIONS_INTEGRATIONS_MATCH,
+  GAP_DETECTED_EVENT,
 ];

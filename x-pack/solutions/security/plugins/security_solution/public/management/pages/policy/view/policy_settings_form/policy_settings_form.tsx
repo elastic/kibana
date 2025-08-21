@@ -19,7 +19,7 @@ import { LinuxEventCollectionCard } from './components/cards/linux_event_collect
 import { MacEventCollectionCard } from './components/cards/mac_event_collection_card';
 import { WindowsEventCollectionCard } from './components/cards/windows_event_collection_card';
 import { AttackSurfaceReductionCard } from './components/cards/attack_surface_reduction_card';
-import { BehaviourProtectionCard } from './components/cards/protection_seetings_card/behaviour_protection_card';
+import { BehaviourProtectionCard } from './components/cards/protection_settings_card/behaviour_protection_card';
 import { MemoryProtectionCard } from './components/cards/memory_protection_card';
 import { RelatedDetectionRulesCallout } from './components/related_detection_rules_callout';
 import { RansomwareProtectionCard } from './components/cards/ransomware_protection_card';

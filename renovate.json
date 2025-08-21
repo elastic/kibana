@@ -175,9 +175,6 @@
     {
       "groupName": "@elastic/appex-ai-infra dependencies",
       "matchDepNames": [
-        "@aws-crypto/sha256-js",
-        "@aws-crypto/util",
-        "@langtrase/trace-attributes",
         "@arizeai/openinference-semantic-conventions",
         "@smithy/eventstream-serde-node",
         "@smithy/node-http-handler",
@@ -509,11 +506,9 @@
         "prop-types",
         "react",
         "react-dom",
-        "react-is",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
-        "@types/react-is",
         "csstype"
       ],
       "reviewers": [
@@ -529,6 +524,8 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
+        "effort:high",
+        "risk:high",
         "backport:all-open"
       ],
       "enabled": true
@@ -593,7 +590,9 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high",
+        "risk:high"
       ],
       "enabled": true
     },
@@ -756,7 +755,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "@paralleldrive/cuid2",
         "isbinaryfile",
         "js-search",
         "openpgp",
@@ -862,8 +860,6 @@
       "matchDepNames": [
         "@formatjs/icu-messageformat-parser",
         "@formatjs/intl",
-        "@formatjs/intl-pluralrules",
-        "@formatjs/intl-relativetimeformat",
         "@formatjs/intl-utils",
         "@formatjs/ts-transformer"
       ],
@@ -926,7 +922,6 @@
     {
       "groupName": "ansi related",
       "matchDepNames": [
-        "ansi-regex",
         "has-ansi",
         "strip-ansi",
         "@types/has-ansi"
@@ -1555,26 +1550,6 @@
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
-    },
-    {
-      "groupName": "bazel",
-      "matchDepNames": [],
-      "matchDepPatterns": [
-        "^@bazel"
-      ],
-      "reviewers": [
-        "team:kibana-operations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Operations",
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": false
     },
     {
       "groupName": "typescript",
@@ -2246,8 +2221,6 @@
         "@types/d3-interpolate",
         "@types/d3-scale",
         "@types/d3-selection",
-        "@types/d3-shape",
-        "@types/d3-time",
         "@types/d3-transition",
         "d3",
         "d3-array",
@@ -2255,8 +2228,6 @@
         "d3-interpolate",
         "d3-scale",
         "d3-selection",
-        "d3-shape",
-        "d3-time",
         "d3-transition"
       ],
       "reviewers": [
@@ -2333,7 +2304,8 @@
         "release_note:skip",
         "Team:Search",
         "Team:Enterprise Search",
-        "backport:all-open"
+        "backport:all-open",
+        "effort:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3248,7 +3220,6 @@
         "css-box-model",
         "i18n-iso-countries",
         "node-diff3",
-        "re-resizable",
         "react-diff-view",
         "reduce-reducers",
         "snakecase-keys",
@@ -3938,7 +3909,9 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "ci:all-cypress-suites"
+        "ci:all-cypress-suites",
+        "effort:high",
+        "risk:high"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -3968,25 +3941,6 @@
         "@types/cytoscape",
         "cytoscape",
         "cytoscape-dagre"
-      ],
-      "reviewers": [
-        "team:obs-ux-infra_services-team"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "fnv-plus",
-      "matchDepNames": [
-        "fnv-plus",
-        "@types/fnv-plus"
       ],
       "reviewers": [
         "team:obs-ux-infra_services-team"
@@ -4523,25 +4477,6 @@
         "Team:Visualizations",
         "release_note:skip",
         "backport:prev-minor"
-      ],
-      "enabled": true
-    },
-    {
-      "groupName": "set-value",
-      "matchDepNames": [
-        "set-value",
-        "@types/set-value"
-      ],
-      "reviewers": [
-        "team:visualizations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
       ],
       "enabled": true
     },
