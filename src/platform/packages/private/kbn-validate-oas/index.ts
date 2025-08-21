@@ -39,8 +39,10 @@ run(
     // Baseline file location
     const baselineFile = Path.resolve(__dirname, './oas_error_baseline.json');
     function updateBaselineFile() {
-      Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
-      log.success('Baseline file updated.');
+      if (updateBaseline) {
+        Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
+        log.success('Baseline file updated.');
+      }
     }
 
     // Load CommonJS version
@@ -142,7 +144,7 @@ run(
       }
     }
 
-    if (updateBaseline) updateBaselineFile();
+    updateBaselineFile();
 
     log.info('Done');
     if (invalidSpec) {
