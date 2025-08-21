@@ -8,6 +8,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type { IEsSearchResponse } from '@kbn/search-types';
+import { type DataView } from '@kbn/data-views-plugin/public';
 import { useToasts, KibanaServices } from '../common/lib/kibana';
 import type { ServerError } from '../types';
 import { casesQueriesKeys } from './constants';
@@ -15,19 +16,19 @@ import * as i18n from './translations';
 
 export const useGetEvents = (
   caseId: string,
-  pattern: string[],
+  dataView: DataView | undefined,
   columns: string[],
   eventIds: string[]
 ) => {
   const toasts = useToasts();
   return useQuery(
-    casesQueriesKeys.caseEvents(caseId, [...eventIds, ...columns]),
+    casesQueriesKeys.caseEvents(caseId, [dataView?.getIndexPattern(), ...eventIds, ...columns]),
     ({ signal }) => {
       const { data } = KibanaServices.get();
 
       const observable = data.search.search({
         params: {
-          index: pattern,
+          index: dataView?.getIndexPattern(),
           body: {
             query: {
               ids: {

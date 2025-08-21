@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 
-import { UnifiedDataTable } from '@kbn/unified-data-table';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -38,14 +38,8 @@ export interface EventsTableProps {
   caseData: CaseUI;
 }
 
-const columns = ['_id', 'event.kind', 'host.name'];
 export const EventsTable = ({ caseData }: EventsTableProps) => {
-  const filesTableRowProps = useCallback(
-    (event: EventAttachment) => ({
-      'data-test-subj': `cases-events-table-row-${event.eventId}`,
-    }),
-    []
-  );
+  const [columns, setColumns] = useState<string[]>(['_id', 'event.kind', 'host.name']);
 
   const events = useMemo(
     () =>
@@ -57,21 +51,26 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
 
   const { services } = useKibana();
 
-  const dataView = useMemo(() => {
-    const title = events.map((event) => event.index).join(',');
+  const [dataView, setDataView] = useState<DataView>();
 
-    return new DataView({
-      fieldFormats: services.fieldFormats,
-      spec: {
+  useEffect(() => {
+    const createDataView = async () => {
+      const title = events.map((event) => event.index).join(',');
+
+      const adhocDataView = await services.data.dataViews.create({
         title,
         id: 'adhoc_case_events',
-      },
-    });
-  }, [events, services.fieldFormats]);
+      });
+
+      setDataView(adhocDataView);
+    };
+
+    createDataView();
+  }, [events, services.data.dataViews, services.fieldFormats]);
 
   const eventsResponse = useGetEvents(
     caseData.id,
-    dataView.getIndexPattern().split(','),
+    dataView,
     columns,
     events.flatMap((event) => event.eventId)
   );
@@ -88,19 +87,30 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
       return <></>;
     }
 
+    if (!dataView) {
+      return <></>;
+    }
+
     return (
       <UnifiedDocViewerFlyout
         onClose={() => setExpandedDoc(undefined)}
-        columns={[]}
+        columns={columns}
+        onRemoveColumn={(column) =>
+          setColumns((previousColumns) =>
+            previousColumns.filter((previousColumn) => previousColumn !== column)
+          )
+        }
+        setExpandedDoc={setExpandedDoc}
         dataView={dataView}
         isEsqlQuery={false}
         hit={expandedDoc}
         services={services}
+        onAddColumn={(column) => setColumns((previousColumns) => [...previousColumns, column])}
       />
     );
-  }, [dataView, expandedDoc, services]);
+  }, [columns, dataView, expandedDoc, services]);
 
-  return eventsResponse.isFetching ? (
+  return !dataView || eventsResponse.isFetching ? (
     <>
       <EuiSpacer size="l" />
       <EuiSkeletonText data-test-subj="cases-events-table-loading" lines={10} />
@@ -120,8 +130,13 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
         getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
       >
         <UnifiedDataTable
+          onSetColumns={(newColumns) => setColumns(newColumns)}
           visibleCellActions={3}
           dataView={dataView}
+          sampleSizeState={1000}
+          ariaLabelledBy="Events Table"
+          loadingState={DataLoadingState.loaded}
+          showTimeCol={true}
           columns={columns}
           sort={[]}
           isSortEnabled={false}

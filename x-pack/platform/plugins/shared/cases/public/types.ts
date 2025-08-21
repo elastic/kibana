@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CoreStart, NotificationsStart } from '@kbn/core/public';
+import type { CoreStart, IToasts, NotificationsStart } from '@kbn/core/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { ReactElement, PropsWithChildren } from 'react';
 import type React from 'react';
@@ -95,6 +95,7 @@ export interface CasesPublicStartDependencies {
   triggersActionsUi: TriggersActionsStart;
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
+  toastNotifications: IToasts;
 }
 
 /**
