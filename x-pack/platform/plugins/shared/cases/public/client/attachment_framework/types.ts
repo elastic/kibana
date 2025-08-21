@@ -12,6 +12,8 @@ import type {
   PersistableStateAttachmentPayload,
   SuggestionOwner,
   SuggestionItem,
+  GenericSuggestionPayload,
+  AttachmentItem,
 } from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 
@@ -80,12 +82,16 @@ interface BaseSuggestionType {
   owner: SuggestionOwner;
 }
 
-export type SuggestionType<TPayload extends {} = {}> = BaseSuggestionType & {
-  children: React.LazyExoticComponent<React.FC<SuggestionChildrenProps<TPayload>>>;
-};
+export type SuggestionType<TPayload extends GenericSuggestionPayload = GenericSuggestionPayload> =
+  BaseSuggestionType & {
+    children: React.LazyExoticComponent<React.FC<SuggestionChildrenProps<TPayload>>>;
+  };
 
-export interface SuggestionChildrenProps<TPayload extends {} = {}> {
+export interface SuggestionChildrenProps<
+  TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
+> {
   suggestion: SuggestionItem<TPayload>;
+  attachment: AttachmentItem<TPayload>;
 }
 
 export interface AttachmentFramework {
@@ -95,5 +101,7 @@ export interface AttachmentFramework {
   registerPersistableState: (
     persistableStateAttachmentType: PersistableStateAttachmentType
   ) => void;
-  registerSuggestion: <TPayload extends {} = {}>(suggestionType: SuggestionType<TPayload>) => void;
+  registerSuggestion: <TPayload extends GenericSuggestionPayload = GenericSuggestionPayload>(
+    suggestionType: SuggestionType<TPayload>
+  ) => void;
 }
