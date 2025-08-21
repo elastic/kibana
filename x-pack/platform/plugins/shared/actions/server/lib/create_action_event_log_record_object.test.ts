@@ -6,8 +6,11 @@
  */
 
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { asHttpRequestExecutionSource } from './action_execution_source';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
+import {
+  asHttpRequestExecutionSource,
+  asSavedObjectExecutionSource,
+} from './action_execution_source';
 
 describe('createActionEventLogRecordObject', () => {
   test('created action event "execute-start"', async () => {
@@ -34,12 +37,16 @@ describe('createActionEventLogRecordObject', () => {
         name: 'test name',
         actionExecutionId: '123abc',
         actionTypeId: '.slack',
+        source: asSavedObjectExecutionSource({ type: 'alert', id: '234' }),
       })
     ).toStrictEqual({
       '@timestamp': '1970-01-01T00:00:00.000Z',
       event: {
         action: 'execute-start',
         kind: 'action',
+      },
+      rule: {
+        id: '234',
       },
       kibana: {
         alert: {
@@ -68,6 +75,7 @@ describe('createActionEventLogRecordObject', () => {
           type_id: '.slack',
           id: '1',
           execution: {
+            source: 'alert',
             uuid: '123abc',
           },
         },
@@ -95,11 +103,15 @@ describe('createActionEventLogRecordObject', () => {
         ],
         actionExecutionId: '123abc',
         actionTypeId: '.slack',
+        source: asSavedObjectExecutionSource({ type: 'alert', id: '234' }),
       })
     ).toStrictEqual({
       event: {
         action: 'execute',
         kind: 'action',
+      },
+      rule: {
+        id: '234',
       },
       kibana: {
         alert: {
@@ -124,6 +136,7 @@ describe('createActionEventLogRecordObject', () => {
           type_id: '.slack',
           id: '1',
           execution: {
+            source: 'alert',
             uuid: '123abc',
           },
         },
@@ -199,11 +212,15 @@ describe('createActionEventLogRecordObject', () => {
         name: 'test name',
         actionExecutionId: '123abc',
         actionTypeId: '.slack',
+        source: asSavedObjectExecutionSource({ type: 'alert', id: '234' }),
       })
     ).toStrictEqual({
       event: {
         action: 'execute-timeout',
         kind: 'action',
+      },
+      rule: {
+        id: '234',
       },
       kibana: {
         alert: {
@@ -230,6 +247,7 @@ describe('createActionEventLogRecordObject', () => {
           type_id: '.slack',
           id: '1',
           execution: {
+            source: 'alert',
             uuid: '123abc',
           },
         },
@@ -264,11 +282,15 @@ describe('createActionEventLogRecordObject', () => {
         ],
         actionExecutionId: '123abc',
         actionTypeId: '.slack',
+        source: asSavedObjectExecutionSource({ type: 'alert', id: '123' }),
       })
     ).toStrictEqual({
       event: {
         action: 'execute',
         kind: 'action',
+      },
+      rule: {
+        id: '123',
       },
       kibana: {
         alert: {
@@ -301,6 +323,7 @@ describe('createActionEventLogRecordObject', () => {
           type_id: '.slack',
           id: '1',
           execution: {
+            source: 'alert',
             uuid: '123abc',
           },
         },
@@ -317,8 +340,6 @@ describe('createActionEventLogRecordObject', () => {
         action: 'execute',
         message: 'action execution start',
         namespace: 'default',
-        executionId: '123abc',
-        consumer: 'test-consumer',
         savedObjects: [
           {
             id: '2',
@@ -337,14 +358,6 @@ describe('createActionEventLogRecordObject', () => {
         kind: 'action',
       },
       kibana: {
-        alert: {
-          rule: {
-            consumer: 'test-consumer',
-            execution: {
-              uuid: '123abc',
-            },
-          },
-        },
         saved_objects: [
           {
             id: '2',
@@ -376,8 +389,6 @@ describe('createActionEventLogRecordObject', () => {
         action: 'execute',
         message: 'action execution start',
         namespace: 'default',
-        executionId: '123abc',
-        consumer: 'test-consumer',
         savedObjects: [
           {
             id: '2',
@@ -387,7 +398,7 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         actionExecutionId: '123abc',
-        source: asHttpRequestExecutionSource(httpServerMock.createKibanaRequest()),
+        source: asSavedObjectExecutionSource({ type: 'foo', id: '123' }),
         actionTypeId: '.slack',
       })
     ).toStrictEqual({
@@ -396,14 +407,6 @@ describe('createActionEventLogRecordObject', () => {
         kind: 'action',
       },
       kibana: {
-        alert: {
-          rule: {
-            consumer: 'test-consumer',
-            execution: {
-              uuid: '123abc',
-            },
-          },
-        },
         saved_objects: [
           {
             id: '2',
@@ -418,7 +421,7 @@ describe('createActionEventLogRecordObject', () => {
           type_id: '.slack',
           id: '1',
           execution: {
-            source: 'http_request',
+            source: 'foo',
             uuid: '123abc',
           },
         },
@@ -448,11 +451,15 @@ describe('createActionEventLogRecordObject', () => {
         actionExecutionId: '123abc',
         isInMemory: true,
         actionTypeId: '.slack',
+        source: asSavedObjectExecutionSource({ type: 'alert', id: '234' }),
       })
     ).toStrictEqual({
       event: {
         action: 'execute',
         kind: 'action',
+      },
+      rule: {
+        id: '234',
       },
       kibana: {
         alert: {
@@ -478,6 +485,58 @@ describe('createActionEventLogRecordObject', () => {
           type_id: '.slack',
           id: '1',
           execution: {
+            source: 'alert',
+            uuid: '123abc',
+          },
+        },
+      },
+      message: 'action execution start',
+    });
+  });
+
+  test(`doesn't define kibana.alert* and rule.* when the source isn't an alert`, async () => {
+    expect(
+      createActionEventLogRecordObject({
+        actionId: '1',
+        name: 'test name',
+        action: 'execute',
+        message: 'action execution start',
+        namespace: 'default',
+        executionId: '123abc',
+        consumer: 'test-consumer',
+        savedObjects: [
+          {
+            id: '2',
+            type: 'action',
+            typeId: '.email',
+            relation: 'primary',
+          },
+        ],
+        actionExecutionId: '123abc',
+        actionTypeId: '.slack',
+        source: asSavedObjectExecutionSource({ type: 'foo', id: '123' }),
+      })
+    ).toStrictEqual({
+      event: {
+        action: 'execute',
+        kind: 'action',
+      },
+      kibana: {
+        saved_objects: [
+          {
+            id: '2',
+            namespace: 'default',
+            rel: 'primary',
+            type: 'action',
+            type_id: '.email',
+          },
+        ],
+        action: {
+          name: 'test name',
+          type_id: '.slack',
+          id: '1',
+          execution: {
+            source: 'foo',
             uuid: '123abc',
           },
         },

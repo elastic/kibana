@@ -60,16 +60,17 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
     actionTypeId,
   } = params;
 
-  const kibanaAlertRule = {
-    ...(consumer ? { consumer } : {}),
-    ...(executionId
-      ? {
-          execution: {
-            uuid: executionId,
-          },
-        }
-      : {}),
-  };
+  let ruleId: undefined | string;
+  const kibanaAlertRule: { consumer?: string; execution?: { uuid?: string } } = {};
+  if (isSavedObjectExecutionSource(source) && source.source.type === 'alert') {
+    ruleId = source.source.id;
+    if (consumer) {
+      kibanaAlertRule.consumer = consumer;
+    }
+    if (executionId) {
+      kibanaAlertRule.execution = { uuid: executionId };
+    }
+  }
 
   const event: Event = {
     ...(params.timestamp ? { '@timestamp': params.timestamp } : {}),
@@ -77,6 +78,7 @@ export function createActionEventLogRecordObject(params: CreateActionEventLogRec
       action,
       kind: 'action',
     },
+    ...(ruleId ? { rule: { id: ruleId } } : {}),
     kibana: {
       ...(!isEmpty(kibanaAlertRule) ? { alert: { rule: kibanaAlertRule } } : {}),
       saved_objects: params.savedObjects.map((so) => ({
