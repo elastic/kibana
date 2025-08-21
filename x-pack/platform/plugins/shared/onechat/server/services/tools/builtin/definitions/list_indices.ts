@@ -17,10 +17,8 @@ const listIndicesSchema = z.object({
     .default('*')
     .describe(
       `Index pattern to match Elasticsearch index names.
-      - Correct examples: '.logs-*', 'metrics-prod-*', 'my-specific-index', '*'
-      - Invalid examples: '*logs*', 'da*ta', 'da*ta*'
-      - The wildcard '*' can only be used as the last character
-      - Should only be used if you are certain of a specific index pattern to filter on. Do not try to guess.
+      - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
+      - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
       - Defaults to '*' to match all indices.`
     ),
   showDetails: z
@@ -37,11 +35,8 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
     description: `List the indices in the Elasticsearch cluster the current user has access to.
 
     The 'pattern' optional parameter is an index pattern which can be used to filter indices.
-    It follows the Elasticsearch index pattern format (* accepted as last character only).
-    **Important**: this parameter should only be used when you already know of a specific pattern
-    to filter on, e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.
-
-    `,
+    This parameter should only be used when you already know of a specific pattern to filter on,
+    e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
     handler: async ({ pattern, showDetails }, { esClient }) => {
       const result = await listIndices({

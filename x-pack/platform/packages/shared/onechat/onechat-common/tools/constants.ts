@@ -18,7 +18,11 @@ export const builtinToolIds = {
   executeEsql: '.execute_esql',
 } as const;
 
-export const defaultAgentToolIds = [builtinToolIds.search, builtinToolIds.listIndices];
+export const defaultAgentToolIds = [
+  builtinToolIds.search,
+  builtinToolIds.listIndices,
+  builtinToolIds.indexExplorer,
+];
 
 export const builtInToolIdPrefix = '.';
 export const reservedKeywords = ['new'];
