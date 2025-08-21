@@ -89,7 +89,7 @@ export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOpt
     background: transparentize(euiTheme.colors.primary, 0.3),
     border: `2px solid ${euiTheme.colors.primary}`,
     pointerEvents: 'none',
-    zIndex: isPortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout),
+    zIndex: isPortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout) - 1,
   });
 
   document.body.appendChild(overlay);
