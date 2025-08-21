@@ -6,23 +6,23 @@
  */
 
 export interface DataTypeDefinition {
-  id: number;
+  id: string;
   name: string;
   description?: string;
 }
 
-export interface DataTypeRegistry {
-  get(dataTypeId: number): DataTypeDefinition | undefined;
+export interface DataCatalog {
+  get(dataTypeId: string): DataTypeDefinition | undefined;
   list(): DataTypeDefinition[];
   register(dataType: DataTypeDefinition): void;
 }
 
-class DataTypeRegistryImpl implements DataTypeRegistry {
-  private dataTypes: Map<number, DataTypeDefinition> = new Map();
+class DataCatalogImpl implements DataCatalog {
+  private dataTypes: Map<string, DataTypeDefinition> = new Map();
 
   constructor() {}
 
-  get(dataTypeId: number) {
+  get(dataTypeId: string) {
     if (!this.dataTypes.has(dataTypeId)) {
       throw new Error(`Unknown data type: ${dataTypeId}`);
     }
@@ -41,6 +41,6 @@ class DataTypeRegistryImpl implements DataTypeRegistry {
   }
 }
 
-export const createDataTypeRegistry = (): DataTypeRegistry => {
-  return new DataTypeRegistryImpl();
+export const createDataCatalog = (): DataCatalog => {
+  return new DataCatalogImpl();
 };

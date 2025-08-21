@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { DataCatalog } from '../components/data/data_type_registry';
+import { DataCatalog } from '../components/data_catalog/data_catalog';
 
 export const OnechatDataCatalogPage = () => {
   return <DataCatalog />;

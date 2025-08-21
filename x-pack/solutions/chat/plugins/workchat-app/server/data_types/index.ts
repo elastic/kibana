@@ -5,30 +5,26 @@
  * 2.0.
  */
 
-import type { DataTypeDefinition } from '@kbn/onechat-plugin/server/services/data';
+import type { DataTypeDefinition } from '@kbn/onechat-plugin/server/services/data_catalog';
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 
 export const workChatDataTypes: DataTypeDefinition[] = [
   {
-    id: 1,
-    name: 'Index',
-  },
-  {
-    id: 2,
+    id: '1',
     name: 'WebCrawler',
   },
   {
-    id: 3,
+    id: '2',
     name: 'Content Connector',
   },
   {
-    id: 4,
+    id: '3',
     name: 'Federated Content Connector',
   },
 ];
 
 export const registerWorkChatDataTypes = ({ oneChat }: { oneChat: OnechatPluginSetup }) => {
   workChatDataTypes.forEach((dataType) => {
-    oneChat.data.register(dataType);
+    oneChat.data_catalog.register(dataType);
   });
 };

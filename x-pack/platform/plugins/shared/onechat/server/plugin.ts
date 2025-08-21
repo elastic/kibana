@@ -69,8 +69,8 @@ export class OnechatPlugin
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
-      data: {
-        register: serviceSetups.data.register.bind(serviceSetups.data),
+      data_catalog: {
+        register: serviceSetups.dataCatalog.register.bind(serviceSetups.dataCatalog),
       },
     };
   }
@@ -87,7 +87,7 @@ export class OnechatPlugin
       inference,
     });
 
-    const { tools, agents, runnerFactory, data } = startServices;
+    const { tools, agents, runnerFactory, dataCatalog } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
@@ -101,8 +101,8 @@ export class OnechatPlugin
           return agents.execute(args);
         },
       },
-      data: {
-        getRegistry: () => data.getRegistry(),
+      data_catalog: {
+        getCatalog: () => dataCatalog.getCatalog(),
       },
     };
   }

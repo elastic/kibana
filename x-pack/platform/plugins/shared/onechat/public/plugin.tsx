@@ -12,7 +12,6 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
-import { DataService } from './services/data';
 import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 import { registerAnalytics, registerApp } from './register';
 import type { OnechatInternalService } from './services';
@@ -66,14 +65,12 @@ export class OnechatPlugin
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
-    const dataService = new DataService({ http });
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
       toolsService,
-      dataService,
     };
 
     return {};
