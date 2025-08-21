@@ -24,6 +24,7 @@ import {
 } from './constants';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { InMemoryMetrics } from './monitoring';
+import { ModuleSetup } from './module_setup';
 
 export type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
 export { UnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
