@@ -275,7 +275,7 @@ export const getDiscoverAppStateContainer = ({
     // Set the default profile state only if not loading a saved search,
     // to avoid overwriting saved search state
     if (!currentSavedSearch.id) {
-      const { breakdownField, columns, rowHeight, hideChart, hideSidebar } = getCurrentUrlState(
+      const { breakdownField, columns, rowHeight, hideChart } = getCurrentUrlState(
         stateStorage,
         services
       );
