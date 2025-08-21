@@ -182,7 +182,7 @@ export const useLookupIndexCommand = (
     }
 
     .${lookupIndexEditBadgeClassName} {
-      text-decoration: underline dotted ${euiTheme.colors.textParagraph};
+      border-bottom: ${euiTheme.border.width.thick} dotted ${euiTheme.colors.textParagraph};
     }
   `;
 
