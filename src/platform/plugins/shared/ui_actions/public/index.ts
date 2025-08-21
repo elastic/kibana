@@ -23,6 +23,10 @@ export type {
   Action,
   ActionDefinition as UiActionsActionDefinition,
   ActionDefinitionContext,
+  ActionExecutionContext,
+  ActionExecutionMeta,
+  ActionMenuItemProps,
+  FrequentCompatibilityChangeAction,
 } from '@kbn/ui-actions-browser/src/actions';
 export type {
   Presentable as UiActionsPresentable,
@@ -31,9 +35,3 @@ export type {
 } from '@kbn/ui-actions-browser/src/types';
 export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
 export type { VisualizeFieldContext } from '@kbn/ui-actions-browser/src/types';
-export type {
-  ActionExecutionContext,
-  ActionExecutionMeta,
-  ActionMenuItemProps,
-  FrequentCompatibilityChangeAction,
-} from '@kbn/ui-actions-browser/src/actions';

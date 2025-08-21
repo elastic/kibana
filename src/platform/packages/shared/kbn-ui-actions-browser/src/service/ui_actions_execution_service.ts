@@ -125,7 +125,11 @@ export class UiActionsExecutionService {
       throw new Error('UiActionsExecutionService is not started. Call start() first.');
     }
 
-    const { buildContextMenuForActions, openContextMenu } = await import('../context_menu');
+    // Lazy load both modules and extract their default exports
+    const [{ buildContextMenuForActions }, { openContextMenu }] = await Promise.all([
+      import('../context_menu/build_eui_context_menu_panels'),
+      import('../context_menu/open_context_menu'),
+    ]);
 
     const panels = await buildContextMenuForActions({
       actions: tasks.map(({ action, context, trigger }) => ({

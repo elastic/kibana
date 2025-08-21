@@ -12,7 +12,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Trigger } from '../triggers';
 import type { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
-import { ActionInternal } from '../actions';
+import { ActionInternal } from '../actions/action_internal';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import type { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';

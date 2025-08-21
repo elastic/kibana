@@ -14,7 +14,8 @@ import type {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '../triggers';
-import type { Action, ActionExecutionContext, ActionInternal } from '../actions';
+import type { Action, ActionExecutionContext } from '../actions';
+import type { ActionInternal } from '../actions/action_internal';
 
 export const defaultTitle = i18n.translate('uiActions.actionPanel.title', {
   defaultMessage: 'Options',

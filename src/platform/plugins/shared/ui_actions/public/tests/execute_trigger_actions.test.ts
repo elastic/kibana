@@ -8,7 +8,7 @@
  */
 
 import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
-import { openContextMenu } from '@kbn/ui-actions-browser/src/context_menu';
+import { openContextMenu } from '@kbn/ui-actions-browser/src/context_menu/open_context_menu';
 import { uiActionsPluginMock } from '../mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
 import { waitFor } from '@testing-library/react';

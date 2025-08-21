@@ -8,7 +8,7 @@
  */
 
 import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
-import { ActionInternal } from '@kbn/ui-actions-browser/src/actions';
+import { ActionInternal } from '@kbn/ui-actions-browser/src/actions/action_internal';
 import { uiActionsPluginMock } from '../mocks';
 
 const action1: ActionDefinition = {

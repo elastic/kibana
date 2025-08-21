@@ -12,7 +12,7 @@ import type { ReactWrapper } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import { ActionInternal } from '@kbn/ui-actions-browser/src/actions';
+import { ActionInternal } from '@kbn/ui-actions-browser/src/actions/action_internal';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
