@@ -17,7 +17,7 @@ export function buildBaseCaseSummaryPrompt(caseData: Case): string {
 }
 
 function getOpeningInstructions() {
-  return `You are an expert Site Reliability Engineering (SRE) specialized in incident investigation.
+  return `You are an expert Site Reliability Engineer (SRE) specialized in incident investigation.
   Create a structured summary of the following case for your fellow Site Reliability Engineers.\n\n`;
 }
 

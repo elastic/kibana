@@ -65,7 +65,7 @@ export const CaseSummaryContents: React.FC<CaseSummaryContentsProps> = ({
                     defaultMessage="Generated on {date} at {time}"
                     values={{
                       date: moment(summaryGeneratedAt).format('MMM DD, yyyy'),
-                      time: moment(summaryGeneratedAt).format('hh:mm'),
+                      time: moment(summaryGeneratedAt).format('HH:mm'),
                     }}
                   />
                 </EuiText>

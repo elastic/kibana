@@ -7,8 +7,8 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import * as i18n from '../translations';
 import { useGetCaseSummary } from '../hooks/use_get_case_summary';
 import { useGetConnectors } from '../hooks/use_get_connectors';
 import { CaseSummaryContents } from './case_summary_contents';
@@ -37,9 +37,7 @@ export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseId }) => {
   return (
     <EuiFlexItem grow={false} data-test-subj="caseSummary">
       <CaseSummaryContents
-        title={i18n.translate('xpack.cases.caseSummary.title', {
-          defaultMessage: 'Case summary',
-        })}
+        title={i18n.CASE_SUMMARY}
         onToggle={(isOpen) => {
           setIsSummaryOpen(isOpen);
           if (isOpen && !summary) {
