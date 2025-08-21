@@ -10,20 +10,39 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { from, where } from '@kbn/esql-composer';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
   ENVIRONMENT_ALL_VALUE,
   ENVIRONMENT_NOT_DEFINED_VALUE,
 } from '../../../../../common/environment_filter_values';
-import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
 export function ViewInDiscover() {
   const { share } = useApmPluginContext();
+  const { serviceName } = useApmServiceContext();
+  const { query: queryParams } = useAnyOfApmParams(
+    '/services/{serviceName}/transactions/view',
+    '/mobile-services/{serviceName}/transactions/view',
+    '/dependencies/operation'
+  );
   const {
-    query: { transactionName, transactionType, sampleRangeFrom, sampleRangeTo, environment },
-    path: { serviceName },
-  } = useApmParams('/services/{serviceName}/transactions/view');
-
+    transactionName,
+    transactionType,
+    spanName,
+    sampleRangeFrom,
+    sampleRangeTo,
+    environment,
+    // we need to convert it here since /dependencies/operation uses span instead of transaction,
+    // to avoid changing the routes, we do this workaround
+  } = queryParams as unknown as {
+    transactionName: string;
+    transactionType: string;
+    spanName: string;
+    sampleRangeFrom: number;
+    sampleRangeTo: number;
+    environment: string;
+  };
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     query: {
       esql: from('traces-*')
@@ -37,6 +56,7 @@ export function ViewInDiscover() {
           transactionName
             ? where(`transaction.name == ?transactionName`, { transactionName })
             : (query) => query,
+          spanName ? where(`span.name == ?spanName`, { spanName }) : (query) => query,
           transactionType
             ? where(`transaction.type == ?transactionType`, { transactionType })
             : (query) => query,
