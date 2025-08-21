@@ -8,18 +8,25 @@
 import React, { useEffect } from 'react';
 import { EuiCallOut, EuiFlexItem, EuiMarkdownFormat, EuiProgress, EuiSpacer } from '@elastic/eui';
 import { useGetCaseSummary } from '../hooks/use_get_case_summary';
+import { useGetConnectors } from '../hooks/use_get_connectors';
 
 interface CaseSummaryProps {
   caseId: string;
 }
 
 export const CaseSummary: React.FC<CaseSummaryProps> = ({ caseId }) => {
+  const { connectors, getConnectors } = useGetConnectors();
   const { isLoading, summary, error, getCaseSummary } = useGetCaseSummary();
 
   useEffect(() => {
-    // TODO: update connectorId
-    getCaseSummary({ caseId, connectorId: 'azure-gpt4o' });
-  }, [getCaseSummary, caseId]);
+    getConnectors();
+  }, [getConnectors]);
+
+  useEffect(() => {
+    if (connectors.length > 0) {
+      getCaseSummary({ caseId, connectorId: connectors[0].connectorId });
+    }
+  }, [getCaseSummary, connectors, caseId]);
 
   return (
     <EuiFlexItem grow={false} data-test-subj="case-summary">

@@ -26,12 +26,12 @@ export function useGetCaseSummary() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await http.get(apiPath, {
+        const response = await http.get<string>(apiPath, {
           query: {
             connectorId,
           },
         });
-        setSummary(response as string);
+        setSummary(response);
       } catch (err) {
         setError(err as Error);
         setSummary('');
