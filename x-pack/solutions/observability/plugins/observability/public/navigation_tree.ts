@@ -107,7 +107,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             children: [
               {
                 id: 'apm',
-                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:services',
