@@ -16,7 +16,14 @@ import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
-
+jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: {
+      id: 'apm_0',
+      getIndexPattern: () => 'traces-*',
+    },
+  }),
+}));
 const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
   typeof useApmServiceContext
 >;

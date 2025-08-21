@@ -20,6 +20,7 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
   ENVIRONMENT_ALL_VALUE,
@@ -31,6 +32,8 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 export function ViewInDiscover() {
   const { share } = useApmPluginContext();
   const { serviceName } = useApmServiceContext();
+  const { dataView } = useAdHocApmDataView();
+
   const { query: queryParams } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
     '/mobile-services/{serviceName}/transactions/view',
@@ -61,7 +64,7 @@ export function ViewInDiscover() {
 
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     query: {
-      esql: from('traces-*')
+      esql: from(dataView?.getIndexPattern() ?? 'traces-*')
         .pipe(
           serviceName
             ? where(`${SERVICE_NAME} == ?serviceName`, { serviceName })
