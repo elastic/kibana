@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
-import { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 
-import { DashboardSavedObjectAttributes, SavedDashboardPanel } from '../dashboard_saved_object';
+import type {
+  DashboardSavedObjectAttributes,
+  SavedDashboardPanel,
+} from '../dashboard_saved_object';
 import { TASK_ID } from './dashboard_telemetry_collection_task';
 import { emptyState, type LatestTaskStateSchema } from './task_state';
 

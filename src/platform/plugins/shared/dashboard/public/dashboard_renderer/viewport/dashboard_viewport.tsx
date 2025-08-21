@@ -10,7 +10,7 @@
 import classNames from 'classnames';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiPortal, UseEuiTheme } from '@elastic/eui';
+import { EuiPortal, type UseEuiTheme } from '@elastic/eui';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';

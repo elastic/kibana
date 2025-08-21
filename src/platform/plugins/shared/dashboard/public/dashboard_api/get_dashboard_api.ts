@@ -8,17 +8,18 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, debounceTime } from 'rxjs';
 import { v4 } from 'uuid';
-import { DASHBOARD_APP_ID } from '../../common/constants';
 import { getReferencesForPanelId } from '../../common';
+import { DASHBOARD_APP_ID } from '../../common/constants';
 import type { DashboardState } from '../../common/types';
 import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
+import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import { initializeDataLoadingManager } from './data_loading_manager';
 import { initializeDataViewsManager } from './data_views_manager';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
+import { initializeFiltersManager } from './filters_manager';
 import { getSerializedState } from './get_serialized_state';
 import { initializeLayoutManager } from './layout_manager';
 import { openSaveModal } from './save_modal/open_save_modal';
@@ -27,16 +28,11 @@ import { initializeSettingsManager } from './settings_manager';
 import { initializeTrackContentfulRender } from './track_contentful_render';
 import { initializeTrackOverlay } from './track_overlay';
 import { initializeTrackPanel } from './track_panel';
-import {
-  DASHBOARD_API_TYPE,
-  DashboardApi,
-  DashboardCreationOptions,
-  DashboardInternalApi,
-} from './types';
+import type { DashboardApi, DashboardCreationOptions, DashboardInternalApi } from './types';
+import { DASHBOARD_API_TYPE } from './types';
 import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
-import { initializeFiltersManager } from './filters_manager';
 
 export function getDashboardApi({
   creationOptions,
@@ -83,8 +79,8 @@ export function getDashboardApi({
   );
   const filterManager = initializeFiltersManager(unifiedSearchManager, layoutManager);
   const unsavedChangesManager = initializeUnsavedChangesManager({
-    viewModeManager,
-    creationOptions,
+    viewMode$: viewModeManager.api.viewMode$,
+    storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
@@ -218,6 +214,7 @@ export function getDashboardApi({
       searchSessionManager.cleanup();
       unifiedSearchManager.cleanup();
       unsavedChangesManager.cleanup();
+      layoutManager.cleanup();
     },
   };
 }

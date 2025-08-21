@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { PublishesESQLVariables } from '@kbn/esql-types';
-import { Filter } from '@kbn/es-query';
-import {
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { Filter } from '@kbn/es-query';
+import type {
   HasLastSavedChildState,
   HasSerializedChildState,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import {
+import type {
   HasEditCapabilities,
   HasParentApi,
   PublishesDisabledActionIds,
@@ -24,15 +24,15 @@ import {
   PublishesUnsavedChanges,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
+import type { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
+import type { PublishesDataViews } from '@kbn/presentation-publishing/interfaces/publishes_data_views';
 
 import type {
   ControlsGroupState,
   ControlsIgnoreParentSettings,
   ControlsLabelPosition,
 } from '@kbn/controls-schemas';
-import {
+import type {
   ControlGroupEditorConfig,
   ControlGroupRuntimeState,
   ControlPanelState,

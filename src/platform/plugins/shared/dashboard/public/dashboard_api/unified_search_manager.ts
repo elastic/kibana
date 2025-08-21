@@ -8,27 +8,32 @@
  */
 
 import {
-  GlobalQueryStateFromUrl,
-  RefreshInterval,
   connectToQueryState,
   syncGlobalQueryStateWithUrl,
+  type GlobalQueryStateFromUrl,
+  type RefreshInterval,
 } from '@kbn/data-plugin/public';
 import {
   COMPARE_ALL_OPTIONS,
-  Filter,
-  Query,
-  TimeRange,
   compareFilters,
   isFilterPinned,
+  type Filter,
+  type Query,
+  type TimeRange,
 } from '@kbn/es-query';
-import { ESQLControlVariable } from '@kbn/esql-types';
-import { PublishingSubject, StateComparators, diffComparators } from '@kbn/presentation-publishing';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import {
+  diffComparators,
+  type PublishingSubject,
+  type StateComparators,
+} from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
-  Observable,
   Subject,
   Subscription,
   combineLatest,
@@ -40,11 +45,11 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
-import { DashboardState, cleanFiltersForSerialize } from '../../common';
+import { type DashboardState, cleanFiltersForSerialize } from '../../common';
 import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import { DEFAULT_DASHBOARD_STATE } from './default_dashboard_state';
-import { DashboardCreationOptions } from './types';
+import type { DashboardCreationOptions } from './types';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,

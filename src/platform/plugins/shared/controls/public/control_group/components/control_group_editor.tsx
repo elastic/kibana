@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 import type { ControlsLabelPosition, ControlsIgnoreParentSettings } from '@kbn/controls-schemas';
 import { CONTROL_LAYOUT_OPTIONS } from '../../controls/data_controls/editor_constants';
 import { ControlGroupStrings } from '../control_group_strings';

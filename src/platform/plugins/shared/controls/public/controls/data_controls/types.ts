@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
-import {
+import type { DataViewField } from '@kbn/data-views-plugin/common';
+import type { FieldFormatConvertFunction } from '@kbn/field-formats-plugin/common';
+import type {
   AppliesFilters,
   HasEditCapabilities,
   PublishesBlockingError,
@@ -18,7 +18,7 @@ import {
   PublishesTitle,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { DefaultDataControlState } from '../../../common';
+import type { DefaultDataControlState } from '../../../common';
 
 export type DataControlFieldFormatter = FieldFormatConvertFunction | ((toFormat: any) => string);
 

@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Serializable } from '@kbn/utility-types';
-import { SavedObjectMigrationFn } from '@kbn/core/server';
-import { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
+import type { Serializable } from '@kbn/utility-types';
+import type { SavedObjectMigrationFn } from '@kbn/core/server';
+import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
 import {
   convertPanelStateToSavedDashboardPanel,
   convertSavedDashboardPanelToPanelState,
 } from './dashboard_panel_converters';
-import { SavedDashboardPanel } from '../schema/v2';
+import type { SavedDashboardPanel } from '../schema/v2';
 
 interface ValueOrReferenceInput {
   attributes?: Serializable;

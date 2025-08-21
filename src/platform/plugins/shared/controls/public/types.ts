@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
-import { PublishingSubject } from '@kbn/presentation-publishing';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 export interface CanClearSelections {
   clearSelections: () => void;

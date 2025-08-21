@@ -9,8 +9,9 @@
 
 import { useState, useCallback, useEffect } from 'react';
 
-import { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
-import { InitialMenuState, getInitialActiveItems } from '../utils/get_initial_active_items';
+import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import type { InitialMenuState } from '../utils/get_initial_active_items';
+import { getInitialActiveItems } from '../utils/get_initial_active_items';
 
 interface NavigationState {
   activePageId: string | undefined;

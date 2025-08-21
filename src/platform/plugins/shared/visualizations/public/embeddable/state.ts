@@ -9,14 +9,10 @@
 
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import { extractSearchSourceReferences } from '@kbn/data-plugin/public';
-import {
-  SerializedTitles,
-  SerializedPanelState,
-  findSavedObjectRef,
-  SAVED_OBJECT_REF_NAME,
-} from '@kbn/presentation-publishing';
+import type { SerializedTitles, SerializedPanelState } from '@kbn/presentation-publishing';
+import { findSavedObjectRef, SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 import { cloneDeep, isEmpty, omit } from 'lodash';
-import { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
+import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public';
 import type { Reference } from '@kbn/content-management-utils';
 import {
   getAnalytics,
@@ -35,7 +31,7 @@ import {
 } from '../utils/saved_visualization_references';
 import { getSavedVisualization } from '../utils/saved_visualize_utils';
 import type { SerializedVis } from '../vis';
-import {
+import type {
   VisualizeSavedObjectInputState,
   VisualizeSerializedState,
   VisualizeRuntimeState,

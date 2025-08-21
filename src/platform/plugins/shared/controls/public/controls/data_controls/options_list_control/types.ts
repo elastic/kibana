@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
-import { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
-import { DefaultDataControlState } from '../../../../common';
+import type { SettersOf, SubjectsOf } from '@kbn/presentation-publishing/state_manager/types';
+import type { DefaultDataControlState } from '../../../../common';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -21,9 +21,9 @@ import type {
   OptionsListSuggestions,
 } from '../../../../common/options_list';
 import type { DataControlApi, PublishesField } from '../types';
-import { EditorState } from './editor_state_manager';
-import { SelectionsState } from './selections_manager';
-import { TemporaryState } from './temporay_state_manager';
+import type { EditorState } from './editor_state_manager';
+import type { SelectionsState } from './selections_manager';
+import type { TemporaryState } from './temporay_state_manager';
 
 export type OptionsListControlApi = DefaultEmbeddableApi<OptionsListControlState> &
   DataControlApi & {

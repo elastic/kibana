@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { act, render, screen } from '@testing-library/react';
@@ -19,18 +19,20 @@ import { LocaleWrapper } from '../__mocks__';
 import { SearchSessionsMgmtMain } from './main';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { createSearchUsageCollectorMock } from '../../../collectors/mocks';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
-jest.mock('../../constants', () => ({
-  BACKGROUND_SEARCH_ENABLED: false,
-}));
-
-const setup = async () => {
+const setup = async ({ backgroundSearchEnabled }: { backgroundSearchEnabled: boolean }) => {
   const mockCoreSetup = coreMock.createSetup();
   mockCoreSetup.uiSettings.get.mockImplementation((key: string) => {
     return key === 'dateFormat:tz' ? 'UTC' : null;
   });
 
   const mockCoreStart = coreMock.createStart();
+  mockCoreStart.featureFlags.getBooleanValue.mockImplementation((flag) => {
+    if (flag === BACKGROUND_SEARCH_FEATURE_FLAG_KEY) return backgroundSearchEnabled;
+    return false;
+  });
+
   const mockShareStart = sharePluginMock.createStartContract();
   const mockSearchUsageCollector = createSearchUsageCollectorMock();
   const mockConfig = {
@@ -48,6 +50,7 @@ const setup = async () => {
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
 
   const docLinks: DocLinksStart = {
@@ -85,24 +88,41 @@ const setup = async () => {
 };
 
 describe('<SearchSessionsMgmtMain />', () => {
-  describe('when Background Search is disabled', () => {
-    it('should render the page title', async () => {
-      await setup();
-      expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Search Sessions');
-    });
+  describe.each([
+    { backgroundSearchEnabled: false, expectedName: 'Search Sessions' },
+    { backgroundSearchEnabled: true, expectedName: 'Background Search' },
+  ])(
+    'when background search is $backgroundSearchEnabled',
+    ({ backgroundSearchEnabled, expectedName }) => {
+      it('should render the page title', async () => {
+        await setup({ backgroundSearchEnabled });
+        expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent(expectedName);
+      });
 
+      it('should render the table', async () => {
+        await setup({ backgroundSearchEnabled });
+
+        const table = screen.getByTestId('searchSessionsMgmtUiTable');
+        expect(table).toBeVisible();
+      });
+    }
+  );
+
+  describe('when background search is true', () => {
+    it('should NOT render the documentation link', async () => {
+      await setup({ backgroundSearchEnabled: true });
+
+      const docLink = screen.queryByText('Documentation');
+      expect(docLink).not.toBeInTheDocument();
+    });
+  });
+
+  describe('when background search is false', () => {
     it('should render the documentation link', async () => {
-      await setup();
+      await setup({ backgroundSearchEnabled: false });
 
       const docLink = screen.getByText('Documentation');
-      expect(docLink).toBeVisible();
-    });
-
-    it('should render the table', async () => {
-      await setup();
-
-      const table = screen.getByTestId('searchSessionsMgmtUiTable');
-      expect(table).toBeVisible();
+      expect(docLink).toBeInTheDocument();
     });
   });
 });

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ValueListMetricsSchema } from '@kbn/security-solution-plugin/server/usage/value_lists/types';
+import type { ValueListMetricsSchema } from '@kbn/security-solution-plugin/server/usage/value_lists/types';
 
 /**
  * Given a body this will return the value list metrics from it.

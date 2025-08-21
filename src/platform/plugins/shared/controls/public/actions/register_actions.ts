@@ -7,16 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import {
-  ACTION_CLEAR_CONTROL,
-  ACTION_CREATE_CONTROL,
-  ACTION_DELETE_CONTROL,
-  ACTION_EDIT_CONTROL,
-  OPTIONS_LIST_ACTION,
-} from './constants';
-import { CONTROL_MENU_TRIGGER } from './control_panel_actions';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ACTION_CLEAR_CONTROL, ACTION_DELETE_CONTROL, ACTION_EDIT_CONTROL } from './constants';
 import { CONTROL_HOVER_TRIGGER, controlHoverTrigger } from './controls_hover_trigger';
 
 export function registerActions(uiActions: UiActionsStart) {

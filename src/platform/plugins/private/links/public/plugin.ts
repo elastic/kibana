@@ -8,20 +8,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
+import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
-import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public/plugin';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { SerializedPanelState } from '@kbn/presentation-publishing';
+import type { LinksEmbeddableState } from '../common';
 import {
   APP_ICON,
   APP_NAME,
@@ -29,9 +30,8 @@ import {
   LATEST_VERSION,
   LINKS_EMBEDDABLE_TYPE,
   LINKS_SAVED_OBJECT_TYPE,
-  LinksEmbeddableState,
 } from '../common';
-import { LinksCrudTypes } from '../common/content_management';
+import type { LinksCrudTypes } from '../common/content_management';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { setKibanaServices } from './services/kibana_services';
 import { ADD_LINKS_PANEL_ACTION_ID } from './actions/constants';
@@ -149,11 +149,12 @@ export class LinksPlugin
       }
     );
 
-    plugins.dashboard.registerDashboardPanelPlacementSetting(
+    plugins.dashboard.registerDashboardPanelSettings(
       LINKS_EMBEDDABLE_TYPE,
       async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');
-        return await getPanelPlacement(serializedState);
+        const placementSettings = await getPanelPlacement(serializedState);
+        return { placementSettings };
       }
     );
 

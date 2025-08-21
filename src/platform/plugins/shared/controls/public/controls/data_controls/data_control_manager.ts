@@ -10,15 +10,15 @@
 import type { Reference } from '@kbn/content-management-utils';
 import {
   DATA_VIEW_SAVED_OBJECT_TYPE,
-  DataView,
-  DataViewField,
+  type DataView,
+  type DataViewField,
 } from '@kbn/data-views-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { StateComparators } from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeStateManager } from '@kbn/presentation-publishing/state_manager';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
-import { BehaviorSubject, Observable, combineLatest, switchMap, tap } from 'rxjs';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import { BehaviorSubject, combineLatest, switchMap, tap, type Observable } from 'rxjs';
 import type { DefaultDataControlState } from '../../../common';
 import { dataViewsService } from '../../services/kibana_services';
 import { defaultControlComparators, defaultControlDefaultValues } from '../default_control_manager';

@@ -8,14 +8,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHorizontalRule } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n as I18n } from '@kbn/i18n';
-import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import type { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
 import { SelectedPromptContextEditorModal } from '../context_editor_modal';
 import { SelectedPromptContextPreview } from '../context_preview';
 import { getStats } from '../get_stats';
 import { AllowedStat } from '../stats/allowed_stat';
 import { AnonymizedStat } from '../stats/anonymized_stat';
-import { SelectedPromptContext } from '../../assistant/prompt_context/types';
-import { BatchUpdateListItem } from '../context_editor/types';
+import type { SelectedPromptContext } from '../../assistant/prompt_context/types';
+import type { BatchUpdateListItem } from '../context_editor/types';
 
 interface ContextEditorFlyoutComponentProps {
   selectedPromptContext: SelectedPromptContext;

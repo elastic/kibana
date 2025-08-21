@@ -8,24 +8,24 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { HasLastSavedChildState, childrenUnsavedChanges$ } from '@kbn/presentation-containers';
-import {
+import type { HasLastSavedChildState } from '@kbn/presentation-containers';
+import { childrenUnsavedChanges$ } from '@kbn/presentation-containers';
+import type {
   PublishesSavedObjectId,
   PublishingSubject,
-  apiHasSerializableState,
+  ViewMode,
 } from '@kbn/presentation-publishing';
+import { apiHasSerializableState } from '@kbn/presentation-publishing';
 import { omit } from 'lodash';
-import { BehaviorSubject, Observable, combineLatest, debounceTime, map, tap } from 'rxjs';
+import { combineLatest, debounceTime, map, tap, BehaviorSubject, type Observable } from 'rxjs';
+import type { DashboardState } from '../../common';
 import {
-  DashboardBackupState,
   getDashboardBackupService,
+  type DashboardBackupState,
 } from '../services/dashboard_backup_service';
-import { initializeLayoutManager } from './layout_manager';
-import { initializeSettingsManager } from './settings_manager';
-import { DashboardCreationOptions } from './types';
-import { DashboardState } from '../../common';
-import { initializeUnifiedSearchManager } from './unified_search_manager';
-import { initializeViewModeManager } from './view_mode_manager';
+import type { initializeLayoutManager } from './layout_manager';
+import type { initializeSettingsManager } from './settings_manager';
+import type { initializeUnifiedSearchManager } from './unified_search_manager';
 
 const DEBOUNCE_TIME = 100;
 
@@ -34,17 +34,17 @@ export function initializeUnsavedChangesManager({
   savedObjectId$,
   lastSavedState,
   settingsManager,
-  viewModeManager,
-  creationOptions,
+  viewMode$,
+  storeUnsavedChanges,
   getReferences,
   unifiedSearchManager,
 }: {
   lastSavedState: DashboardState;
-  creationOptions?: DashboardCreationOptions;
+  storeUnsavedChanges?: boolean;
   getReferences: (id: string) => Reference[];
   savedObjectId$: PublishesSavedObjectId['savedObjectId$'];
   layoutManager: ReturnType<typeof initializeLayoutManager>;
-  viewModeManager: ReturnType<typeof initializeViewModeManager>;
+  viewMode$: PublishingSubject<ViewMode>;
   settingsManager: ReturnType<typeof initializeSettingsManager>;
   unifiedSearchManager: ReturnType<typeof initializeUnifiedSearchManager>;
 }): {
@@ -62,7 +62,7 @@ export function initializeUnsavedChangesManager({
 
   const lastSavedState$ = new BehaviorSubject<DashboardState>(lastSavedState);
 
-  const hasPanelChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
+  const hasChildrenUnsavedChanges$ = childrenUnsavedChanges$(layoutManager.api.children$).pipe(
     tap((childrenWithChanges) => {
       // propagate the latest serialized state back to the layout manager.
       for (const { uuid, hasUnsavedChanges } of childrenWithChanges) {
@@ -88,21 +88,21 @@ export function initializeUnsavedChangesManager({
   );
 
   const unsavedChangesSubscription = combineLatest([
-    viewModeManager.api.viewMode$,
+    viewMode$,
     dashboardStateChanges$,
-    hasPanelChanges$,
+    hasChildrenUnsavedChanges$,
   ])
     .pipe(debounceTime(DEBOUNCE_TIME))
-    .subscribe(([viewMode, dashboardChanges, hasPanelChanges]) => {
+    .subscribe(([viewMode, dashboardChanges, hasChildrenUnsavedChanges]) => {
       const hasDashboardChanges = Object.keys(dashboardChanges ?? {}).length > 0;
-      const hasUnsavedChanges = hasDashboardChanges || hasPanelChanges;
+      const hasLayoutChanges = dashboardChanges.panels;
+      const hasUnsavedChanges = hasDashboardChanges || hasChildrenUnsavedChanges;
 
       if (hasUnsavedChanges !== hasUnsavedChanges$.value) {
         hasUnsavedChanges$.next(hasUnsavedChanges);
       }
 
-      // backup unsaved changes if configured to do so
-      if (creationOptions?.useSessionStorageIntegration) {
+      if (storeUnsavedChanges) {
         const dashboardBackupState: DashboardBackupState = omit(dashboardChanges ?? {}, [
           'timeRange',
           'refreshInterval',
@@ -111,13 +111,13 @@ export function initializeUnsavedChangesManager({
         // always back up view mode. This allows us to know which Dashboards were last changed while in edit mode.
         dashboardBackupState.viewMode = viewMode;
         // Backup latest state from children that have unsaved changes
-        if (hasPanelChanges) {
+        if (hasChildrenUnsavedChanges || hasLayoutChanges) {
           const { panels, references } = layoutManager.internalApi.serializeLayout();
           // dashboardStateToBackup.references will be used instead of savedObjectResult.references
           // To avoid missing references, make sure references contains all references
           // even if panels or control group does not have unsaved changes
           dashboardBackupState.references = references ?? [];
-          if (hasPanelChanges) dashboardBackupState.panels = panels;
+          if (hasChildrenUnsavedChanges) dashboardBackupState.panels = panels;
         }
 
         getDashboardBackupService().setState(savedObjectId$.value, dashboardBackupState);

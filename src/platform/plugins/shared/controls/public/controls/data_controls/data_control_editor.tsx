@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, useRef, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiButtonGroup,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
@@ -28,12 +27,9 @@ import {
   EuiKeyPadMenuItem,
   EuiSkeletonRectangle,
   EuiSpacer,
-  EuiSwitch,
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { ControlWidth } from '@kbn/controls-schemas';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   LazyDataViewPicker,
@@ -42,17 +38,16 @@ import {
 } from '@kbn/presentation-util-plugin/public';
 import { asyncForEach } from '@kbn/std';
 
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DefaultDataControlState } from '../../../common';
 import {
   CONTROL_MENU_TRIGGER,
-  ControlTypeAction,
   addControlMenuTrigger,
+  type ControlTypeAction,
 } from '../../actions/control_panel_actions';
 import { confirmDeleteControl } from '../../common';
 import { dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditorStrings } from './data_control_constants';
-import { CONTROL_WIDTH_OPTIONS } from './editor_constants';
-import { DataViewField } from '@kbn/data-views-plugin/common';
 
 export interface ControlEditorProps<
   State extends DefaultDataControlState = DefaultDataControlState

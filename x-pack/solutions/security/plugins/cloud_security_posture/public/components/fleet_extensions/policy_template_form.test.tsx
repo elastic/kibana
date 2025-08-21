@@ -121,7 +121,9 @@ describe('<CspPolicyTemplateForm />', () => {
   const WrappedComponent = ({
     newPolicy,
     edit = false,
-    packageInfo = {} as PackageInfo,
+    packageInfo = {
+      version: '3.0.0',
+    } as PackageInfo,
     isAgentlessEnabled,
     integrationToEnable,
     defaultSetupTechnology = SetupTechnology.AGENT_BASED,
@@ -245,7 +247,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // It should ensure the initial state is valid.
     expect(onChange).toHaveBeenNthCalledWith(1, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...policy,
         namespace: 'default',
@@ -265,7 +267,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, name: `${policy.name}1` },
       });
     });
@@ -282,7 +284,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, description: `${policy.description}1` },
       });
     });
@@ -312,7 +314,7 @@ describe('<CspPolicyTemplateForm />', () => {
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: eksPolicy,
       });
     });
@@ -405,14 +407,14 @@ describe('<CspPolicyTemplateForm />', () => {
     render(
       <WrappedComponent
         newPolicy={policy}
-        packageInfo={{ name: 'kspm' } as PackageInfo}
+        packageInfo={{ name: 'kspm', version: '3.0.0' } as PackageInfo}
         onChange={onChange}
       />
     );
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -426,7 +428,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         name: 'cloud_security_posture-1',
@@ -436,7 +438,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments kspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -493,7 +495,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).nthCalledWith(1, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         name: 'cloud_security_posture-1',
@@ -503,7 +505,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments kspm template enabled input
     expect(onChange).nthCalledWith(2, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -520,7 +522,7 @@ describe('<CspPolicyTemplateForm />', () => {
     */
     expect(onChange).nthCalledWith(3, {
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyK8s(),
         inputs: policy.inputs.map((input) => ({
@@ -575,7 +577,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyVulnMgmtAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -589,7 +591,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the default policy template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyVulnMgmtAWS(),
         name: 'vuln_mgmt-2',
@@ -599,7 +601,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments vuln_mgmt template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyVulnMgmtAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -658,7 +660,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 1st call happens on mount and selects the CloudFormation template
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         name: 'cloud_security_posture-1',
@@ -677,7 +679,7 @@ describe('<CspPolicyTemplateForm />', () => {
     // 2nd call happens on mount and increments cspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => {
@@ -696,7 +698,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     onChange({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -709,7 +711,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
+
       updatedPolicy: {
         ...getMockPolicyAWS(),
         inputs: policy.inputs.map((input) => ({
@@ -778,7 +780,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -816,7 +818,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -829,7 +831,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -868,7 +870,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -881,7 +883,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -894,7 +896,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -930,7 +932,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -943,7 +945,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1081,7 +1083,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1121,7 +1123,7 @@ describe('<CspPolicyTemplateForm />', () => {
       // Ignore 1st call triggered on mount to ensure initial state is valid
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1134,7 +1136,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1171,13 +1173,13 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1190,7 +1192,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1203,7 +1205,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1240,7 +1242,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1253,7 +1255,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1292,7 +1294,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: expectedUpdatedPolicy,
       });
     });
@@ -1383,7 +1385,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1470,7 +1472,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -1515,7 +1517,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, name: 'cspm-1' },
       });
 
@@ -1535,7 +1537,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: { ...policy, name: 'cspm-1' },
       });
     });
@@ -1576,7 +1578,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1591,7 +1593,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
 
@@ -1606,7 +1608,7 @@ describe('<CspPolicyTemplateForm />', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         isExtensionLoaded: true,
-        isValid: true,
+
         updatedPolicy: policy,
       });
     });
@@ -2218,7 +2220,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2233,7 +2234,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2248,7 +2248,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2263,7 +2262,6 @@ describe('<CspPolicyTemplateForm />', () => {
 
     expect(onChange).toHaveBeenCalledWith({
       isExtensionLoaded: true,
-      isValid: true,
       updatedPolicy: policy,
     });
   });
@@ -2327,7 +2325,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2341,7 +2338,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2355,7 +2351,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
 
@@ -2369,7 +2364,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
       updatedPolicy: policy,
     });
   });

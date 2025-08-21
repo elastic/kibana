@@ -6,7 +6,7 @@
  */
 
 import type { LogMeta, Logger } from '@kbn/logging';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import sinon from 'sinon';
 
 export const createFakeLogger = (log: ToolingLog) => {

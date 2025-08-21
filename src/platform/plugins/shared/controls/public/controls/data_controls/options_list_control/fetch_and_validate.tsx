@@ -7,27 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  BehaviorSubject,
-  combineLatest,
-  debounceTime,
-  Observable,
-  startWith,
-  switchMap,
-  tap,
-  withLatestFrom,
-} from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
+import { combineLatest, debounceTime, startWith, switchMap, tap, withLatestFrom } from 'rxjs';
 
-import { PublishingSubject, fetch$ } from '@kbn/presentation-publishing';
-import {
+import { fetch$, type PublishingSubject } from '@kbn/presentation-publishing';
+import type {
   OptionsListSearchTechnique,
   OptionsListSortingType,
 } from '../../../../common/options_list';
-import { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { isValidSearch } from '../../../../common/options_list/is_valid_search';
-import { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import type { OptionsListSelection } from '../../../../common/options_list/options_list_selections';
+import type { OptionsListSuccessResponse } from '../../../../common/options_list/types';
 import { OptionsListFetchCache } from './options_list_fetch_cache';
-import { OptionsListComponentApi, OptionsListControlApi } from './types';
+import type { OptionsListComponentApi, OptionsListControlApi } from './types';
 
 export function fetchAndValidate$({
   api,

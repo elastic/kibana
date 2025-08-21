@@ -8,18 +8,24 @@
  */
 
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import {
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  type Filter,
+} from '@kbn/es-query';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   initializeTitleManager,
-  PublishingSubject,
   titleComparators,
+  type PublishingSubject,
 } from '@kbn/presentation-publishing';
-import { DataView } from '@kbn/data-views-plugin/common';
 import React, { useEffect } from 'react';
 import {
   BehaviorSubject,
+  Subject,
   combineLatest,
   debounceTime,
   distinctUntilChanged,
@@ -27,7 +33,6 @@ import {
   map,
   merge,
   skip,
-  Subject,
 } from 'rxjs';
 import type {
   OptionsListControlState,
@@ -48,8 +53,8 @@ import {
 } from './constants';
 import {
   editorComparators,
-  EditorState,
   initializeEditorStateManager,
+  type EditorState,
 } from './editor_state_manager';
 import { fetchAndValidate$ } from './fetch_and_validate';
 import { OptionsListControlContext } from './options_list_context_provider';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IntegrationType } from '@kbn/wci-common';
+import type { IntegrationType } from '@kbn/wci-common';
 import type { IntegrationComponentDescriptor } from '@kbn/wci-browser';
 
 export class IntegrationRegistry {
