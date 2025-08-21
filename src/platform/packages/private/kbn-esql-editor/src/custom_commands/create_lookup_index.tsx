@@ -26,6 +26,7 @@ import {
 } from '@kbn/esql-ast';
 import type { IndexAutocompleteItem } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
+import { debounce, isEqual, memoize } from 'lodash';
 import type { ESQLEditorDeps } from '../types';
 
 /**
@@ -175,6 +176,8 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
   return Array.from(new Set(indexNames));
 }
 
+type FetchUserPrivileges = (indexName: string) => Promise<IndexPrivileges>;
+
 /** Helper to determine if a privilege is granted either globally (*) or for the specific index */
 const hasPrivilege = (
   privileges: IndexPrivileges,
@@ -206,7 +209,10 @@ export const useLookupIndexCommand = (
 
   useEffect(
     function parseIndicesOnChange() {
-      inQueryLookupIndices.current = getLookupIndicesFromQuery(query.esql);
+      const updated = getLookupIndicesFromQuery(query.esql);
+      if (!isEqual(updated, inQueryLookupIndices.current)) {
+        inQueryLookupIndices.current = updated;
+      }
     },
     [query.esql]
   );
@@ -240,23 +246,32 @@ export const useLookupIndexCommand = (
     }
   `;
 
-  const fetchUserPrivileges = useCallback(
-    async (indexNames: string[]) => {
-      const response = await Promise.all(
-        indexNames.map((indexName) => {
-          return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
-        })
-      );
+  const memoizedFetchPrivileges = useRef<>(
+    debounce<FetchUserPrivileges>(
+      memoize<FetchUserPrivileges>(async (indexName: string) => {
+        return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
+      }),
+      500
+    )
+  );
 
+  const fetchUserPrivileges = useCallback(async (indexNames: string[]) => {
+    try {
+      const response = (await Promise.all(
+        indexNames.map(memoizedFetchPrivileges.current)
+      )) as Array<IndexPrivileges>;
       return response.reduce((acc, curr) => {
         return {
           ...acc,
           ...curr,
         };
-      }, {});
-    },
-    [http]
-  );
+      }, {} as IndexPrivileges);
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error fetching user privileges:', error);
+      return {};
+    }
+  }, []);
 
   // TODO: Replace with the actual lookup index docs URL once it's available
   // @ts-ignore
