@@ -245,7 +245,7 @@ export const getAwsCredentialsFormOptions = (
         [secretAccessKey]: {
           label: AWS_FIELD_LABEL.secret_access_key,
           type: 'password',
-          dataTestSubj: AWS_INPUT_TEST_SUBJECTS.TEMP_ACCESS_SECRET_KEY,
+          dataTestSubj: AWS_INPUT_TEST_SUBJECTS.DIRECT_ACCESS_SECRET_KEY,
           isSecret: true,
         },
         [sessionToken]: {

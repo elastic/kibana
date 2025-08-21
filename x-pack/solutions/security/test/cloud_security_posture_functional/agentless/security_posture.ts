@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public/services/setup_technology_selector';
 import { CLOUD_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
@@ -23,6 +22,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const KSPM_RADIO_OPTION = 'policy-template-radio-button-kspm';
   const CSPM_RADIO_OPTION = 'policy-template-radio-button-cspm';
   const CNVM_RADIO_OPTION = 'policy-template-radio-button-vuln_mgmt';
+
+  const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
 
