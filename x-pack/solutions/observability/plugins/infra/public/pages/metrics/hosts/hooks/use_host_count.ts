@@ -34,6 +34,8 @@ export const useHostCount = () => {
     [buildQuery, parsedDateRange.from, parsedDateRange.to, searchCriteria?.preferredSchema]
   );
 
+  console.log('useHostCount payload', payload);
+
   const schemas: DataSchemaFormat[] = useMemo(
     () => timeRangeMetadata?.schemas || [],
     [timeRangeMetadata?.schemas]
