@@ -12,7 +12,7 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
-import { render, waitFor, screen, act } from '@testing-library/react';
+import { render, waitFor, screen, act, within } from '@testing-library/react';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
@@ -658,23 +658,23 @@ describe('AlertsTable', () => {
 
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(<TestComponent {...tableProps} />);
-      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
+      render(<TestComponent {...tableProps} />);
+      await userEvent.click(screen.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
-      const result = await wrapper.findAllByTestId('alertsFlyout');
+      const result = await screen.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+      expect(screen.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+      expect(screen.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
 
       // Should paginate too
-      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
+      await userEvent.click(screen.queryAllByTestId('pagination-button-next')[0]);
+      expect(screen.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
+      expect(screen.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
 
-      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
+      await userEvent.click(screen.queryAllByTestId('pagination-button-previous')[0]);
+      expect(screen.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
+      expect(screen.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
     });
 
     it('should refetch data if flyout pagination exceeds the current page', async () => {
@@ -801,33 +801,35 @@ describe('AlertsTable', () => {
       await userEvent.click(fieldCheckbox);
       await userEvent.click(screen.getByTestId('close'));
 
+      expect(await screen.findByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
+
       await waitFor(() => {
-        expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.name}`)).not.toBe(null);
-        const titles: string[] = [];
-        screen
-          .getByTestId('dataGridHeader')
-          .querySelectorAll('.euiDataGridHeaderCell__content')
-          .forEach((n) => titles.push(n?.getAttribute('title') ?? ''));
+        const header = screen.getByTestId('dataGridHeader');
+        const headerCells = within(header).getAllByText(/.*/);
+
+        const titles: string[] = headerCells.map((cell) => cell.getAttribute('title') ?? '');
+
         expect(titles).toContain('Name');
       });
     });
 
     it('should insert a new field as column when its not a default one', async () => {
-      const { getByTestId, queryByTestId } = render(<TestComponent {...tableProps} />);
+      render(<TestComponent {...tableProps} />);
 
-      expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
-      await userEvent.click(getByTestId('show-field-browser'));
-      const fieldCheckbox = getByTestId(`field-${AlertsField.uuid}-checkbox`);
+      expect(screen.queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).toBe(null);
+      await userEvent.click(screen.getByTestId('show-field-browser'));
+      const fieldCheckbox = screen.getByTestId(`field-${AlertsField.uuid}-checkbox`);
       await userEvent.click(fieldCheckbox);
-      await userEvent.click(getByTestId('close'));
+      await userEvent.click(screen.getByTestId('close'));
+
+      expect(await screen.findByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
 
       await waitFor(() => {
-        expect(queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)).not.toBe(null);
-        expect(
-          queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`)!
-            .querySelector('.euiDataGridHeaderCell__content')!
-            .getAttribute('title')
-        ).toBe(AlertsField.uuid);
+        const headerCell = screen.queryByTestId(`dataGridHeaderCell-${AlertsField.uuid}`);
+
+        expect(within(headerCell!).getByText(AlertsField.uuid)!.getAttribute('title')).toBe(
+          AlertsField.uuid
+        );
       });
     });
 

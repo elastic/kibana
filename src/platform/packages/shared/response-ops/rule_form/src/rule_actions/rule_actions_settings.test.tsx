@@ -230,7 +230,7 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    expect(screen.queryByText('showMinimumThrottleUnitWarning')).toBeInTheDocument();
+    expect(screen.getByText('showMinimumThrottleUnitWarning')).toBeInTheDocument();
     expect(screen.queryByText('showMinimumThrottleWarning')).not.toBeInTheDocument();
   });
 
@@ -266,7 +266,7 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    expect(screen.queryByText('showMinimumThrottleWarning')).toBeInTheDocument();
+    expect(screen.getByText('showMinimumThrottleWarning')).toBeInTheDocument();
     expect(screen.queryByText('showMinimumThrottleUnitWarning')).not.toBeInTheDocument();
   });
 
@@ -343,8 +343,8 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    expect(screen.queryByText('RuleActionsAlertsFilter')).toBeInTheDocument();
-    expect(screen.queryByText('RuleActionsAlertsFilterTimeframe')).toBeInTheDocument();
+    expect(screen.getByText('RuleActionsAlertsFilter')).toBeInTheDocument();
+    expect(screen.getByText('RuleActionsAlertsFilterTimeframe')).toBeInTheDocument();
   });
 
   test('should call filter and filter timeframe onChange', async () => {
@@ -418,7 +418,7 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    expect(screen.queryByText('filter query error')).toBeInTheDocument();
+    expect(screen.getByText('filter query error')).toBeInTheDocument();
   });
 
   test('should show the rule actions filter for siem rule types', () => {
@@ -455,6 +455,6 @@ describe('ruleActionsSettings', () => {
       />
     );
 
-    expect(screen.queryByText('RuleActionsAlertsFilter')).toBeInTheDocument();
+    expect(screen.getByText('RuleActionsAlertsFilter')).toBeInTheDocument();
   });
 });

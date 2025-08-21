@@ -47,7 +47,7 @@ describe('DefaultCellValue', () => {
 
   it('should render the rule name as a link', () => {
     render(<TestComponent {...props} columnId={ALERT_RULE_NAME} />);
-    expect(screen.queryByRole('link')).toBeInTheDocument();
+    expect(screen.getByRole('link')).toBeInTheDocument();
   });
 
   it('should render the alert duration in milliseconds', () => {
@@ -73,7 +73,7 @@ describe('DefaultCellValue', () => {
           }}
         />
       );
-      expect(screen.queryByText('Observability')).toBeInTheDocument();
+      expect(screen.getByText('Observability')).toBeInTheDocument();
     });
 
     it.each(['alerts', 'stackAlerts', 'discover'])(
@@ -90,7 +90,7 @@ describe('DefaultCellValue', () => {
             }}
           />
         );
-        expect(screen.queryByText('Machine Learning')).toBeInTheDocument();
+        expect(screen.getByText('Machine Learning')).toBeInTheDocument();
       }
     );
   });
@@ -107,6 +107,6 @@ describe('DefaultCellValue', () => {
         }}
       />
     );
-    expect(screen.queryByText('test-consumer')).toBeInTheDocument();
+    expect(screen.getByText('test-consumer')).toBeInTheDocument();
   });
 });

@@ -137,10 +137,12 @@ describe('AlertsDataGrid', () => {
 
   describe('Alerts table UI', () => {
     it('should support sorting', async () => {
-      const { container } = render(<TestComponent {...mockDataGridProps} />);
-      await userEvent.click(container.querySelector('.euiDataGridHeaderCell__button')!, {
-        pointerEventsCheck: 0,
-      });
+      render(<TestComponent {...mockDataGridProps} />);
+      const buttons = screen.getAllByRole('button');
+      const headerButton = buttons.find((btn) =>
+        btn.classList.contains('euiDataGridHeaderCell__button')
+      );
+      await userEvent.click(headerButton!, { pointerEventsCheck: 0 });
 
       await waitForEuiPopoverOpen();
 
@@ -253,8 +255,8 @@ describe('AlertsDataGrid', () => {
             }}
           />
         );
-        expect(screen.queryByTestId('testAction')).toBeInTheDocument();
-        expect(screen.queryByTestId('testAction2')).toBeInTheDocument();
+        expect(screen.getByTestId('testAction')).toBeInTheDocument();
+        expect(screen.getByTestId('testAction2')).toBeInTheDocument();
         expect(screen.queryByTestId('expandColumnCellOpenFlyoutButton-0')).not.toBeInTheDocument();
       });
 
@@ -516,12 +518,14 @@ describe('AlertsDataGrid', () => {
       it('should render a non-virtualized grid body when the dynamicRowHeight option is on', async () => {
         const { container } = render(<TestComponent {...mockDataGridProps} dynamicRowHeight />);
 
+        // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
         expect(container.querySelector('.euiDataGrid__customRenderBody')).toBeTruthy();
       });
 
       it('should render a virtualized grid body when the dynamicRowHeight option is off', async () => {
         const { container } = render(<TestComponent {...mockDataGridProps} />);
 
+        // eslint-disable-next-line testing-library/no-container, testing-library/no-node-access
         expect(container.querySelector('.euiDataGrid__virtualized')).toBeTruthy();
       });
     });
