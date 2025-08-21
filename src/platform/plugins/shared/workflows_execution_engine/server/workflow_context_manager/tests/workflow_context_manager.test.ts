@@ -42,6 +42,95 @@ describe('WorkflowContextManager', () => {
     };
   }
 
+  describe('workflow context', () => {
+    let testContainer: ReturnType<typeof createTestContainer>;
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+    };
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
+        id: 'testStep',
+      });
+      testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+        workflowId: 'fake-workflow-id',
+        spaceId: 'fake-space-id',
+        stack: [] as string[],
+      } as EsWorkflowExecution);
+    });
+
+    it('should return workflow id in workflow context', () => {
+      const context = testContainer.underTest.getContext();
+      expect(context.workflow.id).toBe('fake-workflow-id');
+    });
+
+    it('should return spaceId in workflow context', () => {
+      const context = testContainer.underTest.getContext();
+      expect(context.workflow.spaceId).toBe('fake-space-id');
+    });
+
+    it('should return workflow name in workflow context', () => {
+      const context = testContainer.underTest.getContext();
+      expect(context.workflow.name).toBe('Test Workflow');
+    });
+
+    describe('enabled flag', () => {
+      it('should return true in enabled flag if workflow is enabled', () => {
+        workflow.enabled = true;
+        const context = testContainer.underTest.getContext();
+        expect(context.workflow.enabled).toBe(true);
+      });
+
+      it('should return false in enabled flag if workflow is disabled', () => {
+        workflow.enabled = false;
+        const context = testContainer.underTest.getContext();
+        expect(context.workflow.enabled).toBe(false);
+      });
+    });
+  });
+
+  describe('execution context', () => {
+    let testContainer: ReturnType<typeof createTestContainer>;
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+    };
+
+    beforeEach(() => {
+      testContainer = createTestContainer(workflow);
+      testContainer.workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
+        id: 'testStep',
+      });
+      testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+        id: 'fake-execution-id',
+        stack: [] as string[],
+        startedAt: new Date('2023-01-01T00:00:00Z').toISOString(),
+      } as EsWorkflowExecution);
+    });
+
+    it('should return execution id in execution context', () => {
+      const context = testContainer.underTest.getContext();
+      expect(context.execution.id).toBe('fake-execution-id');
+    });
+
+    it('should return startedAt', () => {
+      const context = testContainer.underTest.getContext();
+      expect(context.execution.startedAt).toEqual(new Date('2023-01-01T00:00:00Z'));
+    });
+  });
+
   describe('foreach scope state', () => {
     const workflow: WorkflowYaml = {
       name: 'Test Workflow',
