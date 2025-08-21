@@ -15,6 +15,8 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import fetch from 'node-fetch';
 import path from 'path';
+import { pathToFileURL } from 'url';
+import fs from 'fs/promises';
 
 // TODO validate config with zod
 // const ConfigSchema = z.object({
@@ -317,6 +319,32 @@ server.tool(
   }
 );
 
+server.registerResource(
+  'sample.snyk-triage-response',
+  pathToFileURL(path.resolve('./samples/triage_response.md')).href,
+  {
+    description: 'Few-shot examples of how to make triage comments for Snyk issues',
+    mimeType: 'text/markdown',
+  },
+  async (uri) => {
+    try {
+      const fileContent = await fs.readFile(path.resolve('./samples/triage_response.md'), 'utf-8');
+
+      return {
+        contents: [
+          {
+            uri: uri.href,
+            text: fileContent,
+          },
+        ],
+      };
+    } catch (error) {
+      console.error(`Failed to read resource ${uri.href}:`, error);
+      return { contents: [] };
+    }
+  }
+);
+
 server.tool(
   'triage_snyk_issue',
   'Triage the snyk issue',
@@ -385,14 +413,6 @@ server.tool(
       const exceptionDays =
         exceptionTTLBySeverity[severity.toLowerCase()] ?? exceptionTTLBySeverity.low;
 
-      const hasSamplesForInference = Boolean(process.env.SAMPLES_PATH);
-      const triageCommentSamples = hasSamplesForInference
-        ? `Refer to samples ${path.resolve(
-            process.env.SAMPLES_PATH,
-            'triage_response.md'
-          )} for examples.`
-        : '';
-
       const plan = {
         steps: [
           {
@@ -412,8 +432,17 @@ server.tool(
           },
           {
             id: 'make_triage_comment',
-            description: `Based on the triage from previous step, make a triage comment with the justification and risk response. ${triageCommentSamples}.`,
+            description: `Based on the triage from previous step, make a triage comment with the justification and risk response.`,
             tool: 'make_triage_comment',
+            structuredContent: {
+              samples: [
+                {
+                  resource: 'sample.snyk-triage-response',
+                  purpose: 'guidance',
+                  mimeType: 'text/markdown',
+                },
+              ],
+            },
           },
           {
             id: 'determine_kibana_latest_versions',
