@@ -22,6 +22,7 @@ run(
     const only = flagsReader.string('only') as 'traditional' | 'serverless' | undefined;
     const assertNoErrorIncrease = flagsReader.boolean('assert-no-error-increase');
     const skipPrintingIssues = flagsReader.boolean('skip-printing-issues');
+    const updateBaseline = flagsReader.boolean('update-baseline');
 
     if (only && only !== 'traditional' && only !== 'serverless') {
       log.error('Invalid value for --only flag, must be "traditional" or "serverless"');
@@ -37,6 +38,10 @@ run(
 
     // Baseline file location
     const baselineFile = Path.resolve(__dirname, './oas_error_baseline.json');
+    function updateBaselineFile() {
+      Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
+      log.success('Baseline file updated.');
+    }
 
     // Load CommonJS version
     const { Validator } = await import('@seriousme/openapi-schema-validator');
@@ -132,14 +137,12 @@ run(
         process.exit(1);
       } else {
         log.success('No error increase detected.');
+        updateBaselineFile();
+        return;
       }
     }
 
-    // If not baseline mode, optionally create baseline if requested
-    if (flagsReader.boolean('update-baseline')) {
-      Fs.writeFileSync(baselineFile, JSON.stringify(errorCounts, null, 2));
-      log.success('Baseline file created/updated.');
-    }
+    if (updateBaseline) updateBaselineFile();
 
     log.info('Done');
     if (invalidSpec) {
