@@ -46,7 +46,7 @@ export const searchStepExecutions = async ({
           ],
         },
       },
-      sort: 'startedAt:dsc',
+      sort: 'startedAt:desc',
       from: 0,
       size: 1000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
