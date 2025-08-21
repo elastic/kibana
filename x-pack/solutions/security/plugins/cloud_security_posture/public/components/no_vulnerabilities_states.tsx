@@ -22,6 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { IndexDetails } from '@kbn/cloud-security-posture-common';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
 import { useLocation } from 'react-router-dom';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
@@ -39,7 +40,8 @@ import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate
 import type { PostureTypes } from '../../common/types_old';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
-import vulnerabilitiesVendorsSVG from '../assets/illustrations/vulnerabilities_vendors.svg';
+import vulnerabilityVendorDarkSVG from '../assets/illustrations/vulnerability_vendor_dark.svg';
+import vulnerabilityVendorBrightSVG from '../assets/illustrations/vulnerability_vendor_bright.svg';
 import { ThirdPartyIntegrationsPopover } from './third_party_integration_popover';
 
 const REFETCH_INTERVAL_MS = 20000;
@@ -76,6 +78,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
   const location = useLocation();
   const { euiTheme } = useEuiTheme();
   const is3PSupportedPage = location.pathname.includes(findingsNavigation.vulnerabilities.path);
+  const isDarkMode = useKibanaIsDarkMode();
 
   return (
     <EuiFlexGroup>
@@ -149,8 +152,8 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
               <EmptyStatesIllustrationContainer>
                 <EuiImage
                   size="fullWidth"
-                  src={vulnerabilitiesVendorsSVG}
-                  alt="vulnerabilitiesVendorsSVG"
+                  src={isDarkMode ? vulnerabilityVendorDarkSVG : vulnerabilityVendorBrightSVG}
+                  alt={isDarkMode ? 'vulnerabilityVendorDarkSVG' : 'vulnerabilityVendorBrightSVG'}
                   role="presentation"
                 />
               </EmptyStatesIllustrationContainer>
