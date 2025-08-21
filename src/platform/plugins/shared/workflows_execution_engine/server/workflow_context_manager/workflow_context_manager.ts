@@ -13,6 +13,7 @@ import type { z } from '@kbn/zod';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
+  spaceId: string;
   workflow: z.infer<typeof WorkflowSchema>;
   event: any;
   // New properties for logging
@@ -28,6 +29,7 @@ export class WorkflowContextManager {
 
   constructor(init: ContextManagerInit) {
     this.context = {
+      spaceId: init.spaceId,
       event: init.event,
       consts: init.workflow.consts || {},
       steps: {},

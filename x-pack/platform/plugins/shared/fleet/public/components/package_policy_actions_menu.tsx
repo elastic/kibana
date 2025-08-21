@@ -48,6 +48,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   const isManaged = Boolean(packagePolicy.is_managed);
   const agentPolicyIsManaged = Boolean(agentPolicy?.is_managed);
   const isOrphanedPolicy = !agentPolicy && packagePolicy.policy_ids.length === 0;
+  const isAgentlessPolicy = packagePolicy.supports_agentless;
 
   const isAddAgentVisible =
     showAddAgent && agentPolicy && !agentPolicyIsManaged && !agentPolicy?.supports_agentless;
@@ -92,7 +93,7 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       disabled={!canWriteIntegrationPolicies || (!agentPolicy && !isOrphanedPolicy)}
       icon="pencil"
       href={`${
-        isOrphanedPolicy
+        isOrphanedPolicy || isAgentlessPolicy
           ? getHref('integration_policy_edit', {
               packagePolicyId: packagePolicy.id,
             })

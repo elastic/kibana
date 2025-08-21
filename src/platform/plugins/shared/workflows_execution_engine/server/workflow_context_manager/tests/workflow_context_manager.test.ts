@@ -27,6 +27,7 @@ describe('WorkflowContextManager', () => {
     workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
 
     underTest = new WorkflowContextManager({
+      spaceId: 'default',
       workflow,
       event,
       workflowExecutionGraph,
