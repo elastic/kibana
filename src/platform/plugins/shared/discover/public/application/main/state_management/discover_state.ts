@@ -81,25 +81,6 @@ export interface DiscoverStateContainerParams {
   runtimeStateManager: RuntimeStateManager;
 }
 
-export interface LoadParams {
-  /**
-   * the id of the saved search to load, if undefined, a new saved search will be created
-   */
-  savedSearchId?: string;
-  /**
-   * the data view to use, if undefined, the saved search's data view will be used
-   */
-  dataView?: DataView;
-  /**
-   * Custom initial app state for loading a saved search
-   */
-  initialAppState?: DiscoverAppState;
-  /**
-   * the data view spec to use, if undefined, the saved search's data view will be used
-   */
-  dataViewSpec?: DataViewSpec;
-}
-
 export interface DiscoverStateContainer {
   /**
    * App state, the _a part of the URL
@@ -441,6 +422,7 @@ export function getDiscoverStateContainer({
   const initializeAndSync = () => {
     const syncLocallyPersistedTabState = () =>
       internalState.dispatch(injectCurrentTab(internalStateActions.syncLocallyPersistedTabState)());
+
     // This needs to be the first thing that's wired up because initAndSync is pulling the current state from the URL which
     // might change the time filter and thus needs to re-check whether the saved search has changed.
     const timefilerUnsubscribe = merge(
