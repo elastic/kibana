@@ -6,8 +6,9 @@
  */
 
 import { uniq } from 'lodash';
-import type { NamedToken } from '../types';
+import type { GrokPatternNode } from '../types';
 import { COLLAPSIBLE_PATTERNS } from '../constants';
+import { isNamedField } from '../utils';
 
 export type ReviewFields = Record<
   string,
@@ -20,15 +21,15 @@ export type ReviewFields = Record<
 /**
  * Generates an object of fields with their corresponding GROK component and example values.
  */
-export function getReviewFields(tokens: NamedToken[], numExamples = 5) {
-  return tokens.reduce<ReviewFields>((acc, token) => {
-    if (token.id) {
-      acc[token.id] = {
-        grok_component: token.pattern,
-        example_values: uniq(token.values).slice(0, numExamples),
+export function getReviewFields(nodes: GrokPatternNode[], numExamples = 5) {
+  return nodes.reduce<ReviewFields>((reviewFields, node) => {
+    if (isNamedField(node)) {
+      reviewFields[node.id] = {
+        grok_component: node.component,
+        example_values: uniq(node.values).slice(0, numExamples),
       };
     }
-    return acc;
+    return reviewFields;
   }, {});
 }
 
@@ -69,8 +70,8 @@ export interface NormalizedReviewResult {
   }>;
 }
 
-export function isCollapsibleToken(token: string) {
-  return COLLAPSIBLE_PATTERNS.includes(token);
+export function isCollapsiblePattern(pattern: string) {
+  return COLLAPSIBLE_PATTERNS.includes(pattern);
 }
 
 export function sanitize(value: string) {

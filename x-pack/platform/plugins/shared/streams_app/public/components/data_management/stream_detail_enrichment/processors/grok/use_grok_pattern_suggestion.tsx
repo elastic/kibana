@@ -14,7 +14,7 @@ import {
   getGrokProcessor,
   mergeGrokProcessors,
   groupMessagesByPattern,
-  extractTokensDangerouslySlow,
+  extractGrokPatternDangerouslySlow,
   unwrapPatternDefinitions,
   type GrokProcessorResult,
 } from '@kbn/grok-heuristics';
@@ -105,7 +105,7 @@ export function useGrokPatternSuggestion() {
 
       const result = await Promise.allSettled(
         groupedMessages.map((group) => {
-          const tokens = extractTokensDangerouslySlow(group.messages);
+          const grokPatternNodes = extractGrokPatternDangerouslySlow(group.messages);
 
           return streamsRepositoryClient
             .fetch('POST /internal/streams/{name}/processing/_suggestions/grok', {
@@ -115,12 +115,12 @@ export function useGrokPatternSuggestion() {
                 body: {
                   connector_id: params.connectorId,
                   sample_messages: group.messages.slice(0, 10),
-                  review_fields: getReviewFields(tokens, 10),
+                  review_fields: getReviewFields(grokPatternNodes, 10),
                 },
               },
             })
             .then((reviewResult) => {
-              const grokProcessor = getGrokProcessor(tokens, reviewResult);
+              const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult);
 
               return {
                 ...grokProcessor,

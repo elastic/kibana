@@ -12,75 +12,43 @@
  * 2.0.
  */
 
-import type { NamedToken } from '../types';
+import type { GrokPatternNode } from '../types';
 import { getGrokProcessor } from './get_grok_processor';
 
 describe('getGrokProcessor', () => {
   it('handles review results with multiple columns for a single field', () => {
-    const tokens: NamedToken[] = [
-      {
-        id: undefined,
-        pattern: '[',
-        values: [],
-      },
+    const grokPatternNodes: GrokPatternNode[] = [
+      { pattern: '[' },
       {
         id: 'field_1',
-        pattern: 'DAY',
+        component: 'DAY',
         values: ['Tue'],
       },
-      {
-        id: undefined,
-        pattern: ' ',
-        values: [],
-      },
+      { pattern: ' ' },
       {
         id: 'field_2',
-        pattern: 'SYSLOGTIMESTAMP',
+        component: 'SYSLOGTIMESTAMP',
         values: ['Aug 12 19:19:16', 'Aug 12 19:19:20', 'Aug 12 19:19:23'],
       },
-      {
-        id: undefined,
-        pattern: ' ',
-        values: [],
-      },
+      { pattern: ' ' },
       {
         id: 'field_3',
-        pattern: 'INT',
+        component: 'INT',
         values: ['2025'],
       },
-      {
-        id: undefined,
-        pattern: ']',
-        values: [],
-      },
-      {
-        id: undefined,
-        pattern: ' ',
-        values: [],
-      },
-      {
-        id: undefined,
-        pattern: '[',
-        values: [],
-      },
+      { pattern: ']' },
+      { pattern: ' ' },
+      { pattern: '[' },
       {
         id: 'field_4',
-        pattern: 'LOGLEVEL',
+        component: 'LOGLEVEL',
         values: ['notice', 'error', 'notice'],
       },
-      {
-        id: undefined,
-        pattern: ']',
-        values: [],
-      },
-      {
-        id: undefined,
-        pattern: ' ',
-        values: [],
-      },
+      { pattern: ']' },
+      { pattern: ' ' },
       {
         id: 'field_5',
-        pattern: 'GREEDYDATA',
+        component: 'GREEDYDATA',
         values: [
           'mod_jk child workerEnv in error state 6',
           'workerEnv.init() ok /etc/httpd/conf/workers2.properties',
@@ -109,8 +77,8 @@ describe('getGrokProcessor', () => {
       ],
     };
 
-    const result = getGrokProcessor(tokens, reviewResult);
-    expect(result).toEqual({
+    const grokProcessor = getGrokProcessor(grokPatternNodes, reviewResult);
+    expect(grokProcessor).toEqual({
       description: 'Apache HTTP Server Log',
       pattern_definitions: {
         CUSTOM_TIMESTAMP: '%{DAY} %{SYSLOGTIMESTAMP} %{YEAR}',

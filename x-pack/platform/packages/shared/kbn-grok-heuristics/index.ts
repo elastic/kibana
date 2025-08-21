@@ -11,5 +11,5 @@ export { unwrapPatternDefinitions } from './src/review/unwrap_pattern_definition
 export { getGrokProcessor, type GrokProcessorResult } from './src/review/get_grok_processor';
 export { mergeGrokProcessors } from './src/review/merge_grok_processors';
 export { groupMessagesByPattern } from './src/group_messages';
-export { extractTokensDangerouslySlow } from './src/tokenization/extract_tokens';
+export { extractGrokPatternDangerouslySlow } from './src/tokenization/extract_grok_pattern';
 export { ReviewFieldsPrompt } from './src/review/review_fields_prompt';

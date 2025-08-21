@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NamedColumn, NamedToken } from '../types';
+import type { GrokPatternGroup, GrokPatternNode } from '../types';
 
 /**
  * Flattens an array of `NamedColumn` objects into a single list of `NamedToken` objects.
@@ -17,13 +17,13 @@ import type { NamedColumn, NamedToken } from '../types';
  * @param delimiter - The delimiter string to use between columns.
  * @returns A flattened array of `NamedToken` objects.
  */
-export function flattenColumns(columns: NamedColumn[], delimiter: string): NamedToken[] {
-  return columns.reduce<NamedToken[]>((accumulator, column, index) => {
+export function flattenGroups(columns: GrokPatternGroup[], delimiter: string): GrokPatternNode[] {
+  return columns.reduce<GrokPatternNode[]>((accumulator, column, index) => {
     let { minLeading, maxLeading } = column.whitespace;
 
     if (index > 0) {
       if (delimiter !== '\\s') {
-        accumulator.push({ pattern: delimiter, id: undefined, values: [] });
+        accumulator.push({ pattern: delimiter });
       } else {
         // Increment leading whitespace by one to account for the delimiter. This simplifies the GROK pattern by combining the delimiter and leading whitespace into a single token.
         minLeading += 1;
@@ -32,21 +32,21 @@ export function flattenColumns(columns: NamedColumn[], delimiter: string): Named
     }
 
     if (minLeading === 1 && maxLeading === 1) {
-      accumulator.push({ pattern: '\\s', id: undefined, values: [] });
+      accumulator.push({ pattern: '\\s' });
     } else if (minLeading >= 1) {
-      accumulator.push({ pattern: '\\s+', id: undefined, values: [] });
+      accumulator.push({ pattern: '\\s+' });
     } else if (maxLeading >= 1) {
-      accumulator.push({ pattern: '\\s*', id: undefined, values: [] });
+      accumulator.push({ pattern: '\\s*' });
     }
 
     accumulator.push(...column.tokens);
 
     if (column.whitespace.minTrailing === 1 && column.whitespace.maxTrailing === 1) {
-      accumulator.push({ pattern: '\\s', id: undefined, values: [] });
+      accumulator.push({ pattern: '\\s' });
     } else if (column.whitespace.minTrailing >= 1) {
-      accumulator.push({ pattern: '\\s+', id: undefined, values: [] });
+      accumulator.push({ pattern: '\\s+' });
     } else if (column.whitespace.maxTrailing >= 1) {
-      accumulator.push({ pattern: '\\s*', id: undefined, values: [] });
+      accumulator.push({ pattern: '\\s*' });
     }
 
     return accumulator;

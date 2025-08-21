@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import type { NamedToken } from '../types';
+import type { GrokPatternNode } from '../types';
 import { GROK_REGEX_MAP } from '../constants';
 import type { NormalizedReviewResult } from './get_review_fields';
-import { sanitize, isCollapsibleToken } from './get_review_fields';
+import { sanitize, isCollapsiblePattern } from './get_review_fields';
+import { isNamedField } from '../utils';
 
 export interface GrokProcessorResult {
   description: string;
@@ -24,21 +25,25 @@ export interface GrokProcessorResult {
  * values.
  */
 export function getGrokProcessor(
-  tokens: NamedToken[],
+  nodes: GrokPatternNode[],
   reviewResult: NormalizedReviewResult
 ): GrokProcessorResult {
   let rootPattern = '';
   const patternDefinitions: Record<string, string> = {};
   let targetDefinition: string | undefined;
 
-  const appendToken = (token: string, id: string | undefined) => {
+  const appendNode = (node: GrokPatternNode) => {
     if (targetDefinition) {
       if (!patternDefinitions[targetDefinition]) {
         patternDefinitions[targetDefinition] = '';
       }
-      patternDefinitions[targetDefinition] += id ? `%{${token}}` : sanitize(token);
+      patternDefinitions[targetDefinition] += isNamedField(node)
+        ? `%{${node.component}}`
+        : sanitize(node.pattern);
     } else {
-      rootPattern += id ? `%{${token}:${id}}` : sanitize(token);
+      rootPattern += isNamedField(node)
+        ? `%{${node.component}:${node.id}}`
+        : sanitize(node.pattern);
     }
   };
 
@@ -48,7 +53,7 @@ export function getGrokProcessor(
     exampleValues: string[]
   ) => {
     // If the suggested pattern is a collapsible token, return the original pattern. These have been vetted by the heuristics to not be unecessarily greedy, something the LLM does not do well, so should not be changed
-    if (isCollapsibleToken(suggestedPattern)) {
+    if (isCollapsiblePattern(suggestedPattern)) {
       return originalPattern;
     }
     // If the suggested pattern does not match any of the example values, return the original pattern
@@ -64,31 +69,36 @@ export function getGrokProcessor(
     return suggestedPattern;
   };
 
-  tokens.forEach((token) => {
-    if (token.id) {
-      const match = reviewResult.fields.find((field) => field.columns.includes(token.id!));
+  nodes.forEach((node) => {
+    if (isNamedField(node)) {
+      const match = reviewResult.fields.find((field) => field.columns.includes(node.id));
       if (match) {
         if (match.columns.length >= 2) {
-          // Token is part of a field with multiple columns, create a custom pattern definition and add the token to it
-          const index = match.columns.indexOf(token.id);
-          const patternDefinition = `CUSTOM_${match.name
+          // Node is part of a group with multiple columns, create a custom pattern definition and add the token to it
+          const index = match.columns.indexOf(node.id);
+          const patternDefinitionName = `CUSTOM_${match.name
             .replace(/^(resource\.)?(attributes\.)?(custom_)?/g, '')
             .toUpperCase()
             .replace(/\W+/g, '_')
             .replace(/^_|_$/g, '')}`;
 
           if (index === 0) {
-            appendToken(patternDefinition, match.name);
+            appendNode({
+              id: match.name,
+              component: patternDefinitionName,
+              values: [],
+            });
 
             // Change destination to custom pattern destination
-            targetDefinition = patternDefinition;
+            targetDefinition = patternDefinitionName;
           }
 
           // Append the token to the current pattern definition
-          appendToken(
-            pickValidPattern(match.grok_components[index], token.pattern, token.values),
-            match.name
-          );
+          appendNode({
+            id: match.name,
+            component: pickValidPattern(match.grok_components[index], node.component, node.values),
+            values: node.values,
+          });
 
           if (index === match.columns.length - 1) {
             // Change destination back after the last column
@@ -96,18 +106,19 @@ export function getGrokProcessor(
           }
         } else {
           // Token is part of a single column field, change the token according to the feedback and add to the root pattern
-          appendToken(
-            pickValidPattern(match.grok_components[0], token.pattern, token.values),
-            match.name
-          );
+          appendNode({
+            id: match.name,
+            component: pickValidPattern(match.grok_components[0], node.component, node.values),
+            values: node.values,
+          });
         }
       } else {
         // Token is a field but did not get reviewed, keep as is and add the token to the current pattern definition
-        appendToken(token.pattern, token.id);
+        appendNode(node);
       }
     } else {
       // Token is a separator character, keep as is and add to the current pattern definition
-      appendToken(token.pattern, token.id);
+      appendNode(node);
     }
   });
 

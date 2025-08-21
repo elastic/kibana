@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import type { NamedToken } from '../types';
+import type { GrokPatternNode } from '../types';
+import { isNamedField } from '../utils';
 import { sanitize } from './get_review_fields';
 
 /*
  * Constructs a Grok pattern string by iterating over an array of NamedToken objects.
  */
-export function getGrokPattern(tokens: NamedToken[]) {
-  return tokens.reduce((acc, token) => {
-    return acc + (token.id ? `%{${token.pattern}:${token.id}}` : sanitize(token.pattern));
+export function getGrokPattern(nodes: GrokPatternNode[]) {
+  return nodes.reduce((acc, node) => {
+    return acc + (isNamedField(node) ? `%{${node.component}:${node.id}}` : sanitize(node.pattern));
   }, '');
 }

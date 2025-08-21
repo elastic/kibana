@@ -12,30 +12,26 @@
  * 2.0.
  */
 
-import type { NamedToken } from '../types';
+import type { GrokPatternNode } from '../types';
 import { getReviewFields } from './get_review_fields';
 
 describe('getReviewFields', () => {
   it('returns only named fields without literal values', () => {
-    const tokens: NamedToken[] = [
+    const grokPatternNodes: GrokPatternNode[] = [
       {
         id: 'field_1',
-        pattern: 'WORD',
+        component: 'WORD',
         values: ['value1', 'value2', 'value3'],
       },
-      {
-        id: undefined,
-        pattern: '-',
-        values: ['-', '-', '-'],
-      },
+      { pattern: '-' },
       {
         id: 'field_2',
-        pattern: 'INT',
+        component: 'INT',
         values: ['1', '2', '3'],
       },
     ];
-    const result = getReviewFields(tokens, 5);
-    expect(result).toEqual({
+    const reviewFields = getReviewFields(grokPatternNodes, 5);
+    expect(reviewFields).toEqual({
       field_1: { grok_component: 'WORD', example_values: ['value1', 'value2', 'value3'] },
       field_2: { grok_component: 'INT', example_values: ['1', '2', '3'] },
     });

@@ -31,9 +31,9 @@ export interface SingleLineColumn {
 export interface SingleLineToken {
   /** The raw content of the token. */
   value: string;
-  /** GROK patterns that match the token. */
+  /** Indices of GROK components that match the token. */
   patterns: number[];
-  /** GROK patterns explicitly excluded from matching the token. */
+  /** Indices of GROK components explicitly excluded from matching the token. */
   excludedPatterns: number[];
 }
 
@@ -62,25 +62,38 @@ export interface NormalizedColumn<T = NormalizedToken> {
 export interface NormalizedToken {
   /** All unique values observed for this token. */
   values: string[];
-  /** GROK patterns that match all observed values. */
+  /** Indices of GROK components that match all observed values. */
   patterns: number[];
-  /** GROK patterns that do not match any observed values. */
+  /** Indices of GROK components that do not match any observed values. */
   excludedPatterns: number[];
 }
 
 /**
- * Represents a column of named tokens.
+ * Represents a group of pattern nodes derived from normalized columns.
  */
-export type NamedColumn = NormalizedColumn<NamedToken>;
+export type GrokPatternGroup = NormalizedColumn<GrokPatternNode>;
 
 /**
- * Represents a named token.
+ * Represents a node in a pattern group, which can be either a named field or a literal value.
  */
-export interface NamedToken {
-  /** Unique identifier for the named field, or undefined for literal values. */
-  id: string | undefined;
-  /** GROK pattern that can extract all observed values. */
-  pattern: string;
-  /** All unique values observed for this token. */
+export type GrokPatternNode = NamedFieldNode | LiteralValueNode;
+
+/**
+ * Represents a named field in a Grok pattern.
+ */
+export interface NamedFieldNode {
+  /** Unique identifier for the field. */
+  id: string;
+  /** GROK component that can extract all observed values. (e.g. `YEAR`) */
+  component: string;
+  /** All unique values observed for this field. */
   values: string[];
+}
+
+/**
+ * Represents a literal value in a Grok pattern.
+ */
+export interface LiteralValueNode {
+  /** GROK pattern that can extract all observed values. (e.g. ` `, `\s+`, `\t`, `,`) */
+  pattern: string;
 }

@@ -10,14 +10,14 @@ import { tokenizeLines } from './tokenize_lines';
 import { maskFirstPassPatterns } from './mask_first_pass_patterns';
 import { findDelimiter } from './find_delimiter';
 import { findConsistentSplitChars } from './find_consistent_split_chars';
-import { getUsefulColumns } from './get_useful_columns';
-import { flattenColumns } from './flatten_columns';
-import type { NamedToken } from '../types';
+import { getUsefulGroups } from './get_useful_groups';
+import { flattenGroups } from './flatten_groups';
+import type { GrokPatternNode } from '../types';
 
 /**
  * WARNING: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD
  *
- * Extracts structured fields (tokens) from an array of log messages by analyzing
+ * Extracts structured fields (nodes) from an array of log messages by analyzing
  * patterns, delimiters, and column structures.
  *
  * This function performs multiple passes to identify consistent tokenization patterns
@@ -33,9 +33,8 @@ import type { NamedToken } from '../types';
  * 6. Normalizes columns into a unified structure across all messages.
  * 7. Identifies useful columns and collapses others into a single GREEDYDATA column.
  * 8. Flattens the structured columns into a list of tokens with delimiters inlined.
- *
  */
-export function extractTokensDangerouslySlow(messages: string[]): NamedToken[] {
+export function extractGrokPatternDangerouslySlow(messages: string[]): GrokPatternNode[] {
   if (!messages.length) {
     return [];
   }
@@ -59,10 +58,10 @@ export function extractTokensDangerouslySlow(messages: string[]): NamedToken[] {
   const normalizedColumns = normalizeColumns(columnsPerLine);
 
   // 7. Determine which columns contain useful information and collapse the rest into a single GREEDYDATA column
-  const usefulColumns = getUsefulColumns(normalizedColumns);
+  const groups = getUsefulGroups(normalizedColumns);
 
   // 8. Flatten all columns into a single list of tokens with whitespace and delimiter characters inlined
-  const tokens = flattenColumns(usefulColumns, delimiter);
+  const nodes = flattenGroups(groups, delimiter);
 
-  return tokens;
+  return nodes;
 }

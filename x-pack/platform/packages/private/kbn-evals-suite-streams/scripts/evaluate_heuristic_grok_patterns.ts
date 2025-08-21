@@ -34,7 +34,7 @@ import {
   getReviewFields,
   getGrokProcessor,
   getGrokPattern,
-  extractTokensDangerouslySlow,
+  extractGrokPatternDangerouslySlow,
 } from '@kbn/grok-heuristics';
 import { getLogGroups } from '@kbn/streams-plugin/server/routes/internal/streams/processing/get_log_groups';
 
@@ -204,13 +204,13 @@ export async function evaluateGrokSuggestions() {
         return acc;
       }, []);
 
-      const tokens = extractTokensDangerouslySlow(messages);
-      const grokPattern = getGrokPattern(tokens);
-      const reviewFields = getReviewFields(tokens, 10);
+      const grokPatternNodes = extractGrokPatternDangerouslySlow(messages);
+      const grokPattern = getGrokPattern(grokPatternNodes);
+      const reviewFields = getReviewFields(grokPatternNodes, 10);
       console.log(`- ${stream}: ${chalk.dim(grokPattern)}`);
 
       const suggestion = await getSuggestions(stream, connector, messages, reviewFields);
-      const grokProcessor = getGrokProcessor(tokens, suggestion);
+      const grokProcessor = getGrokProcessor(grokPatternNodes, suggestion);
       if (!grokProcessor) {
         throw new Error('No grokProcessor returned');
       }
