@@ -8,7 +8,6 @@
  */
 
 import objectHash from 'object-hash';
-import pLimit from 'p-limit';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
