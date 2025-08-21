@@ -62,6 +62,7 @@ const Component = ({
   const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
     notifications: mockCoreStart.notifications,
     application: mockCoreStart.application,
+    featureFlags: mockCoreStart.featureFlags,
   });
   api.fetchTableData = async () => {
     return {
