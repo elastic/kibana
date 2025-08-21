@@ -1363,7 +1363,7 @@ describe('utils', () => {
           monthly: 4,
           maxOnACase: 1,
         },
-        cases: {
+        main: {
           total: 4,
           daily: 4,
           weekly: 4,
