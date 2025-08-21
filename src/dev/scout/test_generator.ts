@@ -9,9 +9,11 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import { callLLM } from './llm_client';
 import { stripComments, truncate } from './code_utils';
 import { findSourceFileRecursive, parseKibanaJsonc } from './file_utils';
+import { callLLM } from './llm_client';
+import type { PluginDetails } from './multi_step_prompting';
+import { MultiStepTestGenerator } from './multi_step_prompting';
 
 const exampleApiTest = `
 import type { RoleApiCredentials } from '@kbn/scout';
@@ -77,15 +79,98 @@ export async function generateTestForFile(
   sourceFilePath: string,
   testDirPath: string,
   pluginMeta: any,
+  testType: 'ui' | 'api',
+  pluginDetails?: PluginDetails
+) {
+  if (pluginDetails) {
+    // Use new multi-step approach that generates multiple files
+    const generator = new MultiStepTestGenerator(model);
+    try {
+      const testFiles = await generator.generateFullTest(pluginDetails, pluginMeta, testType);
+      // Create test directory
+      try {
+        await fs.mkdir(testDirPath, { recursive: true });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to create test directory: ${testDirPath}`, error);
+        return;
+      }
+
+      // Write each test file separately
+      for (const testFile of testFiles) {
+        const testFilePath = path.join(testDirPath, `${testFile.name}.spec.ts`);
+        try {
+          await fs.writeFile(testFilePath, testFile.code, 'utf-8');
+          // eslint-disable-next-line no-console
+          console.log(`Test generated and saved to: ${testFilePath}`);
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(`Failed to write test file: ${testFilePath}`, error);
+        }
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error with multi-step generation, falling back to legacy approach:', error);
+      await generateLegacySingleFile(model, sourceFilePath, testDirPath, pluginMeta, testType);
+    }
+  } else {
+    // Fallback to legacy approach
+    await generateLegacySingleFile(model, sourceFilePath, testDirPath, pluginMeta, testType);
+  }
+}
+
+// Legacy test generation for backward compatibility (single file)
+async function generateLegacySingleFile(
+  model: string,
+  sourceFilePath: string,
+  testDirPath: string,
+  pluginMeta: any,
   testType: 'ui' | 'api'
 ) {
+  const testCode = await generateLegacyTest(model, sourceFilePath, pluginMeta, testType);
+
+  if (!testCode) {
+    // eslint-disable-next-line no-console
+    console.warn('Warning: No test code generated.');
+    return;
+  }
+
+  try {
+    await fs.mkdir(testDirPath, { recursive: true });
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to create test directory: ${testDirPath}`, error);
+    return;
+  }
+
+  const origExt = testType === 'ui' ? /\.(jsx?|tsx?)$/ : /\.(js|ts)$/;
+  const baseName = path.basename(sourceFilePath).replace(origExt, `.spec.ts`);
+  const testFilePath = path.join(testDirPath, baseName);
+
+  try {
+    await fs.writeFile(testFilePath, testCode, 'utf-8');
+    // eslint-disable-next-line no-console
+    console.log(`Test generated and saved to: ${testFilePath}`);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to write test file: ${testFilePath}`, error);
+  }
+}
+
+// Legacy test generation for backward compatibility
+async function generateLegacyTest(
+  model: string,
+  sourceFilePath: string,
+  pluginMeta: any,
+  testType: 'ui' | 'api'
+): Promise<string> {
   let sourceCode: string;
   try {
     sourceCode = await fs.readFile(sourceFilePath, 'utf-8');
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error(`Failed to read source file: ${sourceFilePath}`, error);
-    return;
+    return '';
   }
 
   sourceCode = stripComments(sourceCode);
@@ -134,46 +219,17 @@ Provide only the TypeScript code inside a markdown code block with triple backti
 `;
   }
 
-  let testCodeRaw: string;
   try {
-    testCodeRaw = await callLLM(model, prompt);
+    const testCodeRaw = await callLLM(model, prompt);
+    return removeCodeFence(testCodeRaw).trim();
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error generating test code with LLM:', error);
-    return;
-  }
-
-  const testCode = removeCodeFence(testCodeRaw).trim();
-
-  if (!testCode) {
-    // eslint-disable-next-line no-console
-    console.warn('Warning: Extracted test code is empty.');
-    return;
-  }
-
-  try {
-    await fs.mkdir(testDirPath, { recursive: true });
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`Failed to create test directory: ${testDirPath}`, error);
-    return;
-  }
-
-  const origExt = testType === 'ui' ? /\.(jsx?|tsx?)$/ : /\.(js|ts)$/;
-  const baseName = path.basename(sourceFilePath).replace(origExt, `.spec.ts`);
-  const testFilePath = path.join(testDirPath, baseName);
-
-  try {
-    await fs.writeFile(testFilePath, testCode, 'utf-8');
-    // eslint-disable-next-line no-console
-    console.log(`Test generated and saved to: ${testFilePath}`);
-  } catch (error) {
-    // eslint-disable-next-line no-console
-    console.error(`Failed to write test file: ${testFilePath}`, error);
+    return '';
   }
 }
 
-export async function analyzeAndGenerate(pluginPath: string) {
+export async function analyzeAndGenerate(pluginPath: string, pluginDetails?: PluginDetails) {
   let pluginMeta: any;
   try {
     pluginMeta = await parseKibanaJsonc(pluginPath);
@@ -183,7 +239,15 @@ export async function analyzeAndGenerate(pluginPath: string) {
     return;
   }
 
-  if (pluginMeta?.plugin?.browser) {
+  // Determine which test types to generate
+  const shouldGenerateUI = pluginDetails
+    ? pluginDetails.testTypes.includes('ui')
+    : pluginMeta?.plugin?.browser;
+  const shouldGenerateAPI = pluginDetails
+    ? pluginDetails.testTypes.includes('api')
+    : pluginMeta?.plugin?.server;
+
+  if (shouldGenerateUI) {
     const publicDir = path.join(pluginPath, 'public');
     const testUIPath = path.join(pluginPath, 'test', 'scout', 'ui');
     try {
@@ -194,7 +258,14 @@ export async function analyzeAndGenerate(pluginPath: string) {
       } else {
         const sourceFile = await findSourceFileRecursive(publicDir, ['.tsx', '.jsx']);
         if (sourceFile) {
-          await generateTestForFile('codellama', sourceFile, testUIPath, pluginMeta, 'ui');
+          await generateTestForFile(
+            'codellama',
+            sourceFile,
+            testUIPath,
+            pluginMeta,
+            'ui',
+            pluginDetails
+          );
         } else {
           // eslint-disable-next-line no-console
           console.log(`No UI (.tsx/.jsx) source files found in ${publicDir}`);
@@ -206,10 +277,10 @@ export async function analyzeAndGenerate(pluginPath: string) {
     }
   } else {
     // eslint-disable-next-line no-console
-    console.log('browser:false in kibana.jsonc; skipping UI test generation.');
+    console.log('UI test generation skipped (not requested or browser:false in kibana.jsonc).');
   }
 
-  if (pluginMeta?.plugin?.server) {
+  if (shouldGenerateAPI) {
     const serverDir = path.join(pluginPath, 'server');
     const testApiPath = path.join(pluginPath, 'test', 'scout', 'api');
     try {
@@ -220,7 +291,14 @@ export async function analyzeAndGenerate(pluginPath: string) {
       } else {
         const sourceFile = await findSourceFileRecursive(serverDir, ['.ts', '.js']);
         if (sourceFile) {
-          await generateTestForFile('codellama', sourceFile, testApiPath, pluginMeta, 'api');
+          await generateTestForFile(
+            'codellama',
+            sourceFile,
+            testApiPath,
+            pluginMeta,
+            'api',
+            pluginDetails
+          );
         } else {
           // eslint-disable-next-line no-console
           console.log(`No API (.ts/.js) source files found in ${serverDir}`);
@@ -232,6 +310,6 @@ export async function analyzeAndGenerate(pluginPath: string) {
     }
   } else {
     // eslint-disable-next-line no-console
-    console.log('server:false in kibana.jsonc; skipping API test generation.');
+    console.log('API test generation skipped (not requested or server:false in kibana.jsonc).');
   }
 }
