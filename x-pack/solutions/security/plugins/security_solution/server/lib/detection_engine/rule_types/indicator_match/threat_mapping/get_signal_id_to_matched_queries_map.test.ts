@@ -185,8 +185,6 @@ describe('getSignalIdToMatchedQueriesMap', () => {
               threatHit: threatHit1,
               query: {
                 threatMappingIndex: 0,
-                id: 'threat-id-1',
-                index: 'threats-01',
                 queryType: ThreatMatchQueryType.match,
               },
             },
@@ -194,8 +192,6 @@ describe('getSignalIdToMatchedQueriesMap', () => {
               threatHit: threatHit2,
               query: {
                 threatMappingIndex: 0,
-                id: 'threat-id-2',
-                index: 'threats-01',
                 queryType: ThreatMatchQueryType.match,
               },
             },
@@ -203,8 +199,6 @@ describe('getSignalIdToMatchedQueriesMap', () => {
               threatHit: threatHit3,
               query: {
                 threatMappingIndex: 0,
-                id: 'threat-id-3',
-                index: 'threats-01',
                 queryType: ThreatMatchQueryType.match,
               },
             },
@@ -217,8 +211,6 @@ describe('getSignalIdToMatchedQueriesMap', () => {
               threatHit: threatHit2,
               query: {
                 threatMappingIndex: 0,
-                id: 'threat-id-2',
-                index: 'threats-01',
                 queryType: ThreatMatchQueryType.match,
               },
             },
@@ -341,8 +333,6 @@ describe('getSignalIdToMatchedQueriesMap', () => {
 
     const query = {
       threatMappingIndex: 0,
-      id: 'threat-id-1',
-      index: 'threats-01',
       queryType: ThreatMatchQueryType.term,
     };
     expect(signalIdToMatchedQueriesMap).toEqual(
@@ -401,8 +391,6 @@ describe('getSignalIdToMatchedQueriesMap', () => {
 
     const query = {
       threatMappingIndex: 0,
-      id: 'threat-id-1',
-      index: 'threats-01',
       queryType: ThreatMatchQueryType.term,
     };
     expect(signalIdToMatchedQueriesMap).toEqual(
