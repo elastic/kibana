@@ -27,7 +27,7 @@ export class OnboardingApp {
   }
 
   get cloudUseCaseTile() {
-    return this.page.getByTestId('observabilityOnboardingUseCaseCard-clous');
+    return this.page.getByTestId('observabilityOnboardingUseCaseCard-cloud');
   }
 
   get applicationUseCaseTile() {
