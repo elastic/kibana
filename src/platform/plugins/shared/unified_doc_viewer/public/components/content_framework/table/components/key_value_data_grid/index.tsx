@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGrid, EuiDataGridProps } from '@elastic/eui';
+import type { EuiDataGridProps } from '@elastic/eui';
+import { EuiDataGrid } from '@elastic/eui';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
@@ -18,24 +19,51 @@ import {
 } from '../../../../doc_viewer_table/table_cell_actions';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
-export interface DataGridField {
+const dataGridColumnVisibility: EuiDataGridProps['columnVisibility'] = {
+  visibleColumns: ['name', 'value'],
+  setVisibleColumns: () => null,
+};
+
+const dataGridStaticProps: Pick<
+  EuiDataGridProps,
+  'css' | 'gridStyle' | 'rowHeightsOptions' | 'inMemory'
+> = {
+  css: css`
+    .euiDataGridHeader {
+      height: 20px;
+    }
+    .euiDataGridHeaderCell {
+      display: none;
+    }
+  `,
+  gridStyle: {
+    border: 'horizontal',
+    rowHover: 'none',
+    cellPadding: 'm',
+    fontSize: 's',
+  },
+  rowHeightsOptions: { defaultHeight: 'auto' },
+  inMemory: { level: 'enhancements' },
+};
+
+export interface KeyValueDataGridField {
   name: string;
   value: unknown;
   nameCellContent?: React.ReactNode;
   valueCellContent?: React.ReactNode;
 }
 
-interface DataGridProps
+interface KeyValueDataGridProps
   extends Pick<
     DocViewRenderProps,
     'hit' | 'dataView' | 'columnsMeta' | 'filter' | 'onAddColumn' | 'onRemoveColumn' | 'columns'
   > {
-  fields: Record<string, DataGridField>;
+  fields: Record<string, KeyValueDataGridField>;
   isEsqlMode: boolean;
   title: string;
 }
 
-export const DataGrid = ({
+export const KeyValueDataGrid = ({
   hit,
   dataView,
   columnsMeta,
@@ -46,7 +74,7 @@ export const DataGrid = ({
   onRemoveColumn,
   isEsqlMode,
   title,
-}: DataGridProps) => {
+}: KeyValueDataGridProps) => {
   const { fieldFormats, toasts } = getUnifiedDocViewerServices();
 
   const onToggleColumn = useMemo(() => {
@@ -99,9 +127,10 @@ export const DataGrid = ({
     const fieldConfig = fields[fieldName];
 
     if (!fieldConfig) return null;
-    if (columnId === 'name') return fieldConfig.nameCellContent;
-    if (columnId === 'value') return fieldConfig.valueCellContent;
-    return null;
+    if (columnId === 'name') {
+      return fieldConfig.nameCellContent;
+    }
+    return fieldConfig.valueCellContent;
   };
 
   const dataGridColumns: EuiDataGridProps['columns'] = useMemo(
@@ -111,38 +140,6 @@ export const DataGrid = ({
     ],
     [fieldCellActions, fieldValueCellActions]
   );
-
-  const dataGridColumnVisibility: EuiDataGridProps['columnVisibility'] = useMemo(
-    () => ({
-      visibleColumns: ['name', 'value'],
-      setVisibleColumns: () => null,
-    }),
-    []
-  );
-
-  const dataGridStaticProps: {
-    css: EuiDataGridProps['css'];
-    gridStyle: EuiDataGridProps['gridStyle'];
-    rowHeightsOptions: EuiDataGridProps['rowHeightsOptions'];
-    inMemory: EuiDataGridProps['inMemory'];
-  } = {
-    css: css`
-      .euiDataGridHeader {
-        height: 20px;
-      }
-      .euiDataGridHeaderCell {
-        display: none;
-      }
-    `,
-    gridStyle: {
-      border: 'horizontal',
-      rowHover: 'none',
-      cellPadding: 'm',
-      fontSize: 's',
-    },
-    rowHeightsOptions: { defaultHeight: 'auto' },
-    inMemory: { level: 'enhancements' },
-  };
 
   return (
     <EuiDataGrid

@@ -14,8 +14,8 @@ import { css } from '@emotion/react';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
 import { getUnifiedDocViewerServices } from '../../../plugin';
-import type { DataGridField } from './components/data_grid';
-import { DataGrid } from './components/data_grid';
+import type { KeyValueDataGridField } from './components/key_value_data_grid';
+import { KeyValueDataGrid } from './components/key_value_data_grid';
 
 export interface ContentFrameworkTableProps
   extends Pick<
@@ -112,38 +112,37 @@ export function ContentFrameworkTable({
     />
   );
 
-  const fields: Record<string, DataGridField> = fieldNames.reduce<Record<string, DataGridField>>(
-    (acc, fieldName) => {
-      const value = flattenedHit[fieldName];
-      const fieldConfiguration = fieldConfigurations?.[fieldName];
-      const fieldDescription = fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
-      const formattedValue = formattedHit[fieldName];
+  const fields: Record<string, KeyValueDataGridField> = fieldNames.reduce<
+    Record<string, KeyValueDataGridField>
+  >((acc, fieldName) => {
+    const value = flattenedHit[fieldName];
+    const fieldConfiguration = fieldConfigurations?.[fieldName];
+    const fieldDescription = fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
+    const formattedValue = formattedHit[fieldName];
 
-      if (!value) return acc;
+    if (!value) return acc;
 
-      acc[fieldName] = {
+    acc[fieldName] = {
+      name: fieldConfiguration?.title || fieldName,
+      value,
+      nameCellContent: nameCellValue({
+        id: fieldName,
         name: fieldConfiguration?.title || fieldName,
-        value,
-        nameCellContent: nameCellValue({
-          id: fieldName,
-          name: fieldConfiguration?.title || fieldName,
-          ...(fieldDescription && { description: fieldDescription }),
-        }),
-        valueCellContent: fieldConfiguration?.formatter ? (
-          <>{fieldConfiguration?.formatter(value, formattedValue)}</>
-        ) : (
-          <FormattedValue value={formattedValue} />
-        ),
-      };
+        ...(fieldDescription && { description: fieldDescription }),
+      }),
+      valueCellContent: fieldConfiguration?.formatter ? (
+        <>{fieldConfiguration?.formatter(value, formattedValue)}</>
+      ) : (
+        <FormattedValue value={formattedValue} />
+      ),
+    };
 
-      return acc;
-    },
-    {}
-  );
+    return acc;
+  }, {});
 
   return (
     <div>
-      <DataGrid
+      <KeyValueDataGrid
         hit={hit}
         fields={fields}
         dataView={dataView}
@@ -154,7 +153,7 @@ export function ContentFrameworkTable({
         filter={filter}
         isEsqlMode={false}
         title={title}
-        data-test-subj="ContentFrameworkTableDataGrid"
+        data-test-subj="ContentFrameworkTableKeyValueDataGrid"
       />
     </div>
   );

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { DataGrid } from '.';
+import { KeyValueDataGrid } from '.';
 import { buildHitMock, mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 import { buildDataViewMock, shallowMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import { setUnifiedDocViewerServices } from '../../../../../plugin';
@@ -49,18 +49,18 @@ const defaultProps = {
   title: 'Test Grid',
 };
 
-describe('DataGrid', () => {
+describe('KeyValueDataGrid', () => {
   beforeAll(() => {
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
   });
 
   it('renders the grid with correct aria-label', () => {
-    render(<DataGrid {...defaultProps} />);
+    render(<KeyValueDataGrid {...defaultProps} />);
     expect(screen.getByLabelText('Test Grid')).toBeInTheDocument();
   });
 
   it('renders name and value cell content', () => {
-    render(<DataGrid {...defaultProps} />);
+    render(<KeyValueDataGrid {...defaultProps} />);
     expect(screen.getByText('Field A Name')).toBeInTheDocument();
     expect(screen.getByText('Field A Value')).toBeInTheDocument();
     expect(screen.getByText('Field B Name')).toBeInTheDocument();
@@ -68,12 +68,12 @@ describe('DataGrid', () => {
   });
 
   it('returns null for unknown columnId in renderCellValue', () => {
-    render(<DataGrid {...defaultProps} columns={['unknown']} />);
+    render(<KeyValueDataGrid {...defaultProps} columns={['unknown']} />);
     expect(screen.getByLabelText('Test Grid')).toBeInTheDocument();
   });
 
   it('does not break if fields is empty', () => {
-    render(<DataGrid {...defaultProps} fields={{}} />);
+    render(<KeyValueDataGrid {...defaultProps} fields={{}} />);
     expect(screen.getByLabelText('Test Grid')).toBeInTheDocument();
   });
 
@@ -82,7 +82,7 @@ describe('DataGrid', () => {
     const onAddColumn = jest.fn();
     const columns = ['name', 'value'];
 
-    render(<DataGrid {...defaultProps} />);
+    render(<KeyValueDataGrid {...defaultProps} />);
 
     const fieldName = 'name';
     const onToggleColumn = (field: string) => {
@@ -103,7 +103,7 @@ describe('DataGrid', () => {
     const onAddColumn = jest.fn();
     const columns = ['name'];
 
-    render(<DataGrid {...defaultProps} />);
+    render(<KeyValueDataGrid {...defaultProps} />);
 
     const fieldName = 'value';
     const onToggleColumn = (field: string) => {
