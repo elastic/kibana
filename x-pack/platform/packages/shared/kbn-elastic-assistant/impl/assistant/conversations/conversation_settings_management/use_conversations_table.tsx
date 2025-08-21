@@ -9,10 +9,16 @@ import React, { useCallback } from 'react';
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiToolTip, EuiIcon, EuiBadge, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import {
+  ONLY_VISIBLE_TO_YOU,
+  VISIBLE_GLOBAL,
+  VISIBLE_SHARED,
+} from '../../share_conversation/translations';
+import { getConversationSharedState, getSharedIcon } from '../../share_conversation/utils';
 import type { Conversation } from '../../../assistant_context/types';
 import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
@@ -97,8 +103,26 @@ export const useConversationsTable = () => {
               totalItemCount={totalItemCount}
             />
           ),
-          width: '70px',
+          width: '40px',
           sortable: false,
+        },
+        {
+          render: (conversation: ConversationTableItem) => {
+            const conversationSharedState = getConversationSharedState(conversation);
+            const icon = getSharedIcon(conversationSharedState);
+            const tooltipContent =
+              conversationSharedState === 'global'
+                ? VISIBLE_GLOBAL
+                : conversationSharedState === 'shared'
+                ? VISIBLE_SHARED
+                : ONLY_VISIBLE_TO_YOU;
+            return (
+              <EuiToolTip content={tooltipContent}>
+                <EuiIcon type={icon} />
+              </EuiToolTip>
+            );
+          },
+          width: '30px',
         },
         {
           name: i18n.CONVERSATIONS_TABLE_COLUMN_TITLE,
