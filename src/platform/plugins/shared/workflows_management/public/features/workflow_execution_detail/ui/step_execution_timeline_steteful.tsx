@@ -9,14 +9,7 @@
 
 import React from 'react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
-import {
-  EuiEmptyPrompt,
-  EuiIcon,
-  EuiLoadingSpinner,
-  EuiSpacer,
-  EuiText,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useWorkflowExecutionLogs } from '../../../entities/workflows/api/use_workflow_execution_logs';
 import { StepExecutionTimeline } from './step_execution_timeline';
