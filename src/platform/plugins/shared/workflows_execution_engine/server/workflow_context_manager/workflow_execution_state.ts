@@ -94,39 +94,9 @@ export class WorkflowExecutionState {
 
   public upsertStep(step: Partial<EsWorkflowStepExecution>): void {
     if (!step.id) {
-      const stepExecutionId = generateUuid();
-      const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
-      if (!stepExecutions.length) {
-        this.stepIdExecutionIdIndex.set(step.stepId as string, []);
-      }
-      this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(stepExecutionId as string);
-      this.stepExecutions.set(
-        stepExecutionId as string,
-        {
-          ...step,
-          id: stepExecutionId,
-          executionIndex: stepExecutions.length,
-          workflowRunId: this.workflowExecution.id,
-          workflowId: this.workflowExecution.workflowId,
-        } as EsWorkflowStepExecution
-      );
-      this.stepChanges.set(stepExecutionId, {
-        objectId: stepExecutionId,
-        changeType: 'create',
-      });
+      this.createStep(step);
     } else {
-      this.stepExecutions.set(step.id, {
-        ...this.stepExecutions.get(step.id),
-        ...step,
-      } as EsWorkflowStepExecution);
-
-      // only update if the step is not in changes
-      if (!this.stepChanges.has(step.id)) {
-        this.stepChanges.set(step.id, {
-          objectId: step.id,
-          changeType: 'update',
-        });
-      }
+      this.updateStep(step);
     }
   }
 
@@ -170,6 +140,44 @@ export class WorkflowExecutionState {
 
     this.workflowChanges.clear();
     this.stepChanges.clear();
+  }
+
+  private createStep(step: Partial<EsWorkflowStepExecution>) {
+    const stepExecutionId = generateUuid();
+    const stepExecutions = this.getStepExecutionsByStepId(step.stepId as string) || [];
+    if (!stepExecutions.length) {
+      this.stepIdExecutionIdIndex.set(step.stepId as string, []);
+    }
+    this.stepIdExecutionIdIndex.get(step.stepId as string)!.push(stepExecutionId as string);
+    this.stepExecutions.set(
+      stepExecutionId as string,
+      {
+        ...step,
+        id: stepExecutionId,
+        executionIndex: stepExecutions.length,
+        workflowRunId: this.workflowExecution.id,
+        workflowId: this.workflowExecution.workflowId,
+      } as EsWorkflowStepExecution
+    );
+    this.stepChanges.set(stepExecutionId, {
+      objectId: stepExecutionId,
+      changeType: 'create',
+    });
+  }
+
+  private updateStep(step: Partial<EsWorkflowStepExecution>) {
+    this.stepExecutions.set(step.id!, {
+      ...this.stepExecutions.get(step.id!),
+      ...step,
+    } as EsWorkflowStepExecution);
+
+    // only update if the step is not in changes
+    if (!this.stepChanges.has(step.id!)) {
+      this.stepChanges.set(step.id!, {
+        objectId: step.id!,
+        changeType: 'update',
+      });
+    }
   }
 
   private buildStepIdExecutionIdIndex(): void {
