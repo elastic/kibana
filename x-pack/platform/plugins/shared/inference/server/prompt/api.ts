@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  getConnectorProvider,
-  getConnectorFamily,
-  PromptOptions,
-  PromptAPI,
-  getConnectorModel,
-} from '@kbn/inference-common';
-import { CreateChatCompleteApiOptions } from '../chat_complete/types';
+import type { PromptOptions, PromptAPI } from '@kbn/inference-common';
+import { getConnectorProvider, getConnectorFamily, getConnectorModel } from '@kbn/inference-common';
+import type { CreateChatCompleteApiOptions } from '../chat_complete/types';
 import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 

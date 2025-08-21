@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
@@ -36,12 +36,7 @@ export function useStreamsDetailManagementTabs({
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {
-            content: (
-              <StreamDetailSignificantEventsView
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
+            content: <StreamDetailSignificantEventsView definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
               defaultMessage: 'Significant events',
             }),

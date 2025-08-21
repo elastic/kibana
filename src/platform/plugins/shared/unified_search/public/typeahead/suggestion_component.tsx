@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, UseEuiTheme, euiFontSize } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiIcon, euiFontSize } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
-import { EmotionStyles, useMemoCss } from '../use_memo_css';
-import { QuerySuggestion } from '../autocomplete';
-import { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
+import type { EmotionStyles } from '../use_memo_css';
+import { useMemoCss } from '../use_memo_css';
+import type { QuerySuggestion } from '../autocomplete';
+import type { SuggestionOnClick, SuggestionOnMouseEnter } from './types';
 
 function getEuiIconType(type: string) {
   switch (type) {

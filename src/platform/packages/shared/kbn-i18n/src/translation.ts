@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IntlShape, CustomFormats } from '@formatjs/intl';
+import type { IntlShape, CustomFormats } from '@formatjs/intl';
 
 export interface TranslationInput {
   /**

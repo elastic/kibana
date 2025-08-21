@@ -351,6 +351,23 @@ describe('utils', () => {
       expect(tuples.length).toEqual(1);
       expect(warningStatusMessage).toEqual(undefined);
     });
+
+    test('should return originalFrom and originalTo in response', async () => {
+      const { originalFrom, originalTo } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
+
+      expect(originalFrom).toBeDefined();
+      expect(originalTo).toBeDefined();
+      expect(moment.duration(originalTo.diff(originalFrom)).asSeconds()).toEqual(30);
+    });
   });
 
   describe('calculateFromValue', () => {

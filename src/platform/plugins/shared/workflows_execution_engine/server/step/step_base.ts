@@ -9,10 +9,10 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
-import { ConnectorExecutor } from '../connector_executor';
+import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
-import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   output: any;
@@ -26,6 +26,7 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
@@ -72,6 +73,8 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
     } finally {
       await this.workflowExecutionRuntime.finishStep(stepId);
     }
+
+    this.workflowExecutionRuntime.goToNextStep();
   }
 
   // Subclasses implement this to execute the step logic

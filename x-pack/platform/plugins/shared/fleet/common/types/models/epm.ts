@@ -484,7 +484,8 @@ export type RegistryVarType =
   | 'text'
   | 'yaml'
   | 'string'
-  | 'textarea';
+  | 'textarea'
+  | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -499,6 +500,7 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  url_allowed_schemes = 'url_allowed_schemes',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -522,6 +524,7 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -694,6 +697,7 @@ export interface Installation {
 
 export interface PackageUsageStats {
   agent_policy_count: number;
+  package_policy_count: number;
 }
 
 export type Installable<T> =
@@ -768,6 +772,13 @@ export interface IndexTemplate {
   composed_of: string[];
   ignore_missing_component_templates?: string[];
   _meta: object;
+
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
 }
 
 export interface ESAssetMetadata {
