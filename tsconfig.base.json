@@ -2330,6 +2330,7 @@
       "@kbn/workchat-framework-plugin/*": ["x-pack/solutions/chat/plugins/workchat-framework/*"],
       "@kbn/workflows": ["src/platform/packages/shared/kbn-workflows"],
       "@kbn/workflows/*": ["src/platform/packages/shared/kbn-workflows/*"],
+      "@kbn/workflows/graph": ["src/platform/packages/shared/kbn-workflows/graph"],
       "@kbn/workflows-execution-engine": ["src/platform/plugins/shared/workflows_execution_engine"],
       "@kbn/workflows-execution-engine/*": ["src/platform/plugins/shared/workflows_execution_engine/*"],
       "@kbn/workflows-management-plugin": ["src/platform/plugins/shared/workflows_management"],
