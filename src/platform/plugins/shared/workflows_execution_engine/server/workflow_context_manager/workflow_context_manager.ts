@@ -8,19 +8,14 @@
  */
 
 import type { graphlib } from '@dagrejs/dagre';
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowContext, WorkflowSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
-  workflowRunId: string;
   workflow: z.infer<typeof WorkflowSchema>;
   event: any;
   // New properties for logging
-  logger?: Logger;
-  workflowEventLoggerIndex?: string;
-  esClient?: ElasticsearchClient;
   workflowExecutionGraph: graphlib.Graph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 }
@@ -33,11 +28,10 @@ export class WorkflowContextManager {
 
   constructor(init: ContextManagerInit) {
     this.context = {
-      workflowRunId: init.workflowRunId,
       event: init.event,
       consts: init.workflow.consts || {},
       steps: {},
-    };
+    } as Partial<typeof this.context> as WorkflowContext;
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
@@ -46,6 +40,7 @@ export class WorkflowContextManager {
   public getContext() {
     const stepContext: WorkflowContext = {
       ...this.context,
+      workflowRunId: this.workflowExecutionRuntime.getWorkflowExecution().id,
     };
 
     const visited = new Set<string>();
@@ -56,12 +51,18 @@ export class WorkflowContextManager {
       stepContext.steps[nodeId] = {};
       const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
       if (stepResult) {
-        stepContext.steps[nodeId] = stepResult;
+        stepContext.steps[nodeId] = {
+          ...stepContext.steps[nodeId],
+          ...stepResult,
+        };
       }
 
       const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
       if (stepState) {
-        stepContext.steps[nodeId] = stepState;
+        stepContext.steps[nodeId] = {
+          ...stepContext.steps[nodeId],
+          ...stepState,
+        };
       }
 
       const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];

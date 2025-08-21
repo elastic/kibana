@@ -204,12 +204,8 @@ async function createContainer(
   });
 
   const contextManager = new WorkflowContextManager({
-    workflowRunId: workflowExecution.id,
     workflow: workflowExecution.workflowDefinition,
     event: workflowExecution.context.event,
-    logger,
-    workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
-    esClient,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
   });
