@@ -83,7 +83,6 @@ export const ContentByTagTable = () => {
           </h3>
         </EuiTitle>
         <EuiSpacer size="m" />
-        {/* <EuiText size="xs">Showing {resultsCount}</EuiText> */}
         <ContentClientProvider contentClient={contentClient}>
           <I18nProvider>
             <SavedObjectFinder
@@ -95,7 +94,7 @@ export const ContentByTagTable = () => {
                 contentClient,
                 uiSettings,
               }}
-              initialTag={tag?.name || ''}
+              initialTag={tag?.name}
               onChoose={(id, type, name, savedObject, editUrl) => {
                 const savedObjectEditUrl = editUrl
                   ? editUrl

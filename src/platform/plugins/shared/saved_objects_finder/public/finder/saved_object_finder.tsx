@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { debounce, initial } from 'lodash';
+import { debounce } from 'lodash';
 import PropTypes from 'prop-types';
 import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
@@ -196,7 +196,7 @@ class SavedObjectFinderUiClass extends React.Component<
     this.state = {
       items: [],
       isFetchingItems: false,
-      query: Query.parse(props.initialTag ? `tag:(${props.initialTag})` : ''),
+      query: Query.parse(props.initialTag ? `tag:("${props.initialTag}")` : ''),
     };
   }
 
@@ -214,9 +214,18 @@ class SavedObjectFinderUiClass extends React.Component<
     prevProps: SavedObjectFinderProps & EuiTablePersistInjectedProps<SavedObjectFinderItem>
   ) {
     if (this.props.initialTag && prevProps.initialTag !== this.props.initialTag) {
-      this.setState({
-        query: Query.parse(`tag:(${this.props.initialTag})`),
-      });
+      const newQueryString = `tag:(${this.props.initialTag})`;
+
+      console.log({ newQueryString, prevQuery: this.state.query.text });
+
+      if (this.state.query.text !== newQueryString) {
+        this.setState(
+          {
+            query: Query.parse(`tag:("${this.props.initialTag}")`),
+          },
+          this.fetchItems
+        );
+      }
     }
   }
 
@@ -237,6 +246,7 @@ class SavedObjectFinderUiClass extends React.Component<
   };
 
   public render() {
+    console.log({ query: this.state.query });
     const {
       onChoose,
       savedObjectMetaData,
