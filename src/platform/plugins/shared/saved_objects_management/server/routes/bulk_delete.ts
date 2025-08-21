@@ -10,8 +10,11 @@
 import { inject, injectable } from 'inversify';
 import { schema, type TypeOf } from '@kbn/config-schema';
 import { Request, Response, SavedObjectsClient } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 
 @injectable()
 export class BulkDeleteRoute {

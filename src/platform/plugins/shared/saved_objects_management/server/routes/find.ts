@@ -8,19 +8,45 @@
  */
 
 import { inject, injectable } from 'inversify';
+import { chain } from 'lodash';
 import { schema, type Type, type TypeOf } from '@kbn/config-schema';
 import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
+  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { v1 } from '../../common';
 import { injectMetaAttributes, toSavedObjectWithMeta } from '../lib';
 import { SavedObjectsManagement, type ISavedObjectsManagement } from '../services';
+
+type FindRequest = KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>;
+
+export function findClientFactory(
+  { query: { type: types } }: FindRequest,
+  clientFactory: ISavedObjectsClientFactory,
+  typeRegistry: ISavedObjectTypeRegistry
+): SavedObjectsClientContract {
+  return clientFactory({
+    includedHiddenTypes: chain(types)
+      .uniq()
+      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
+      .value(),
+  });
+}
+findClientFactory.inject = [
+  Request,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+] as const satisfies unknown[];
 
 const referenceSchema = schema.object({
   type: schema.string(),
@@ -61,11 +87,10 @@ export class FindRoute {
   };
 
   constructor(
-    @inject(SavedObjectsClientFactory) private readonly clientFactory: ISavedObjectsClientFactory,
+    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
     @inject(SavedObjectsTypeRegistry) private readonly typeRegistry: ISavedObjectTypeRegistry,
     @inject(SavedObjectsManagement) private readonly management: ISavedObjectsManagement,
-    @inject(Request)
-    private readonly request: KibanaRequest<never, TypeOf<typeof FindRoute.validate.query>>,
+    @inject(Request) private readonly request: FindRequest,
     @inject(Response) private readonly response: KibanaResponseFactory
   ) {}
 
@@ -75,11 +100,6 @@ export class FindRoute {
     const importAndExportableTypes = searchTypes.filter((type) =>
       this.typeRegistry.isImportableAndExportable(type)
     );
-    const includedHiddenTypes = importAndExportableTypes.filter((type) =>
-      this.typeRegistry.isHidden(type)
-    );
-
-    const client = this.clientFactory({ includedHiddenTypes });
     const searchFields = new Set<string>();
 
     importAndExportableTypes.forEach((type) => {
@@ -89,7 +109,7 @@ export class FindRoute {
       }
     });
 
-    const findResponse = await client.find<any>({
+    const findResponse = await this.client.find<any>({
       ...query,
       fields: undefined,
       searchFields: [...searchFields],
