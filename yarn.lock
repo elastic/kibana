@@ -2116,10 +2116,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@9.1.0":
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.1.0.tgz#897de05ea96bb515ac6841ea38636df8bf04c322"
-  integrity sha512-lV5uZlzBuXSkn7KdYaArqN3PJEO98bAKaSIO4Fh2B565/bJcnLLP3zbGX/h2cn2CbdfmLnoOczgzQ0H09KDuWQ==
+"@elastic/elasticsearch@9.1.1":
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-9.1.1.tgz#b51cf99664f930dd598490917684e4b7687273f6"
+  integrity sha512-s/JZtHZjtbAYC2gdSzm4LLOSReR724e7cf7ZauIAZlGvAyMgZPZCJpq7xHazSy4rZZhule4ubMs4vepBgWvKQA==
   dependencies:
     "@elastic/transport" "^9.0.1"
     apache-arrow "18.x - 20.x"
