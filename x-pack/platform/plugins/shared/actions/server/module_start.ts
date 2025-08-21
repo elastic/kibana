@@ -4,66 +4,53 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { injectable, inject } from 'inversify';
 import type {
-  Logger,
-  SavedObjectsServiceStart,
   ElasticsearchServiceStart,
+  ISavedObjectsRepository,
   KibanaRequest,
   SavedObjectsBulkGetObject,
-  ISavedObjectsRepository,
   SavedObjectsClientContract,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
-import type { IEventLogService, IEventLogger } from '@kbn/event-log-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
+import { SECURITY_EXTENSION_ID, type Logger } from '@kbn/core/server';
+import { inject, injectable } from 'inversify';
+import { PluginStart, Setup } from '@kbn/core-di';
+import { CoreStart } from '@kbn/core-di-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { ActionsConfig } from './config';
-import { AllowedHosts } from './config';
-import type { InMemoryConnector, PluginStartContract } from '.';
-import { UnsecuredActionsClient } from '.';
-import {
-  ACTION_SAVED_OBJECT_TYPE,
-  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
-  ALERT_SAVED_OBJECT_TYPE,
-  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
-} from './constants/saved_objects';
-import type {
-  ActionExecutionSource,
-  ILicenseState,
-  ActionExecutor,
-  TaskRunnerFactory,
-} from './lib';
-import { spaceIdToNamespace } from './lib';
-import { getActionsConfigurationUtilities } from './actions_config';
-import type { ActionTypeRegistry } from './action_type_registry';
-
 import type {
   ActionTypeParams,
-  ActionsPluginSetupDeps,
   ActionsPluginStartDeps,
+  InMemoryConnector,
   Services,
   UnsecuredServices,
 } from './types';
-import { ActionsClient } from './actions_client';
-import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
-import { ConnectorTokenClient } from './lib/connector_token_client';
-import { ActionsAuthorization } from './authorization/actions_authorization';
-import { scheduleActionsTelemetry } from './usage/task';
-import type { ConnectorUsageReportingTask } from './usage/connector_usage_reporting_task';
-import { createSystemConnectors } from './create_system_actions';
-import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
-import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import { renderMustacheObject } from './lib/mustache_renderer';
-import type { ActionsPluginsStart } from './plugin';
+import type { ActionsConfig } from './config';
 import {
   ACTIONS_CONFIG,
   IN_MEMORY_CONNECTORS_SERVICE,
   LOGGER,
   TELEMETRY_LOGGER,
 } from './constants';
+import { UnsecuredActionsClient, type PluginStartContract } from '.';
+import type { ModuleSetup } from './module_setup';
+import {
+  ACTION_SAVED_OBJECT_TYPE,
+  ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+  ALERT_SAVED_OBJECT_TYPE,
+  CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
+} from './constants/saved_objects';
+import { AllowedHosts, getActionsConfigurationUtilities } from './actions_config';
+import { createSystemConnectors } from './create_system_actions';
+import { spaceIdToNamespace } from './lib';
+import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
+import { ConnectorTokenClient } from './lib/connector_token_client';
+import { ActionsClient } from './actions_client';
+import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
+import { scheduleActionsTelemetry } from './usage/task';
+import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
+import type { ActionsPluginsStart } from './plugin';
+import type { ActionTypeRegistry } from './action_type_registry';
+import { renderMustacheObject } from './lib/mustache_renderer';
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
@@ -73,59 +60,62 @@ const includedHiddenTypes = [
 ];
 
 @injectable()
-export class Actions {
-  private licenseState: ILicenseState | null = null;
-  private isESOCanEncrypt?: boolean;
-  private eventLogService?: IEventLogService;
-  private eventLogger?: IEventLogger;
-  private taskRunnerFactory?: TaskRunnerFactory;
-  private actionTypeRegistry?: ActionTypeRegistry;
-  private actionExecutor?: ActionExecutor;
-  private security?: SecurityPluginSetup;
-  private usageCounter?: UsageCounter;
-  private connectorUsageReportingTask: ConnectorUsageReportingTask | undefined;
+export class ModuleStart implements PluginStartContract {
+  public getActionsClientWithRequest: PluginStartContract['getActionsClientWithRequest'];
+  public getUnsecuredActionsClient: PluginStartContract['getUnsecuredActionsClient'];
 
   constructor(
     @inject(LOGGER) private logger: Logger,
     @inject(TELEMETRY_LOGGER) private telemetryLogger: Logger,
     @inject(ACTIONS_CONFIG) private actionsConfig: ActionsConfig,
-    @inject(IN_MEMORY_CONNECTORS_SERVICE) private inMemoryConnectors: InMemoryConnector[]
-  ) {}
+    @inject(IN_MEMORY_CONNECTORS_SERVICE) public inMemoryConnectors: InMemoryConnector[],
+    @inject(CoreStart('savedObjects'))
+    private savedObjects: ActionsPluginStartDeps['core']['savedObjects'],
+    @inject(CoreStart('elasticsearch'))
+    private elasticsearch: ActionsPluginStartDeps['core']['elasticsearch'],
+    @inject(CoreStart('security'))
+    private security: ActionsPluginStartDeps['core']['security'],
+    @inject(CoreStart('analytics'))
+    private analytics: ActionsPluginStartDeps['core']['analytics'],
+    @inject(CoreStart('http'))
+    private http: ActionsPluginStartDeps['core']['http'],
 
-  public setup({ plugins, core }: ActionsPluginSetupDeps) {
-    // this.licenseState = moduleSetup.licenseState!;
-    // this.isESOCanEncrypt = moduleSetup.isESOCanEncrypt!;
-    // this.eventLogService = moduleSetup.eventLogService!;
-    // this.eventLogger = moduleSetup.eventLogger!;
-    // this.taskRunnerFactory = moduleSetup.taskRunnerFactory!;
-    // this.actionTypeRegistry = moduleSetup.actionTypeRegistry!;
-    // this.actionExecutor = moduleSetup.actionExecutor!;
-    // this.security = plugins.security;
-  }
+    @inject(PluginStart('licensing'))
+    private licensing: ActionsPluginStartDeps['plugins']['licensing'],
+    @inject(PluginStart('taskManager'))
+    private taskManager: ActionsPluginStartDeps['plugins']['taskManager'],
+    @inject(PluginStart('encryptedSavedObjects'))
+    private encryptedSavedObjects: ActionsPluginStartDeps['plugins']['encryptedSavedObjects'],
+    @inject(PluginStart('eventLog'))
+    private eventLog: ActionsPluginStartDeps['plugins']['eventLog'],
+    @inject(PluginStart('spaces'))
+    private spaces: ActionsPluginStartDeps['plugins']['spaces'],
+    @inject(Setup) private setup: ModuleSetup
+  ) {
+    const plugins = {
+      licensing: this.licensing,
+      encryptedSavedObjects: this.encryptedSavedObjects,
+      taskManager: this.taskManager,
+      eventLog: this.eventLog,
+      spaces: this.spaces,
+    };
 
-  public start({ plugins, core }: ActionsPluginStartDeps): PluginStartContract {
-    const {
-      logger,
-      licenseState,
-      actionExecutor,
-      actionTypeRegistry,
-      taskRunnerFactory,
-      isESOCanEncrypt,
-      instantiateAuthorization,
-      getUnsecuredSavedObjectsClient,
-      actionsConfig,
-    } = this;
+    const core = {
+      savedObjects: this.savedObjects,
+      elasticsearch: this.elasticsearch,
+      security: this.security,
+      analytics: this.analytics,
+      http: this.http,
+    };
+    const actionsConfigUtils = getActionsConfigurationUtilities(this.actionsConfig);
 
-    const actionsConfigUtils = getActionsConfigurationUtilities(actionsConfig);
-
-    licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
+    this.setup.licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes,
     });
 
     this.throwIfSystemActionsInConfig();
-
     /**
      * Warning: this call mutates the inMemory collection
      *
@@ -136,17 +126,14 @@ export class Actions {
      */
     this.setSystemActions();
 
-    const getActionsClientWithRequest = async (
-      request: KibanaRequest,
-      authorizationContext?: ActionExecutionSource<unknown>
-    ) => {
-      if (isESOCanEncrypt !== true) {
+    this.getActionsClientWithRequest = async (request: KibanaRequest) => {
+      if (this.setup.isESOCanEncrypt !== true) {
         throw new Error(
           `Unable to create actions client because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
         );
       }
 
-      const unsecuredSavedObjectsClient = getUnsecuredSavedObjectsClient(
+      const unsecuredSavedObjectsClient = this.getUnsecuredSavedObjectsClient(
         core.savedObjects,
         request
       );
@@ -154,23 +141,23 @@ export class Actions {
       return new ActionsClient({
         logger,
         unsecuredSavedObjectsClient,
-        actionTypeRegistry: actionTypeRegistry!,
+        actionTypeRegistry: this.setup.actionTypeRegistry!,
         kibanaIndices: core.savedObjects.getAllIndices(),
         scopedClusterClient: core.elasticsearch.client.asScoped(request),
         inMemoryConnectors: this.inMemoryConnectors,
         request,
-        authorization: instantiateAuthorization(request),
-        actionExecutor: actionExecutor!,
+        authorization: this.setup.instantiateAuthorization(request),
+        actionExecutor: this.setup.actionExecutor!,
         bulkExecutionEnqueuer: createBulkExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
-          actionTypeRegistry: actionTypeRegistry!,
-          isESOCanEncrypt: isESOCanEncrypt!,
+          actionTypeRegistry: this.setup.actionTypeRegistry!,
+          isESOCanEncrypt: this.setup.isESOCanEncrypt!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
           logger,
         }),
-        auditLogger: this.security?.audit.asScoped(request),
-        usageCounter: this.usageCounter,
+        auditLogger: this.setup.security?.audit.asScoped(request),
+        usageCounter: this.setup.usageCounter,
         connectorTokenClient: new ConnectorTokenClient({
           unsecuredSavedObjectsClient,
           encryptedSavedObjectsClient,
@@ -182,18 +169,18 @@ export class Actions {
       });
     };
 
-    const getUnsecuredActionsClient = () => {
+    this.getUnsecuredActionsClient = () => {
       const internalSavedObjectsRepository = core.savedObjects.createInternalRepository([
         ACTION_SAVED_OBJECT_TYPE,
         ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
       ]);
 
       return new UnsecuredActionsClient({
-        actionExecutor: actionExecutor!,
+        actionExecutor: this.setup.actionExecutor!,
         clusterClient: core.elasticsearch.client,
         executionEnqueuer: createBulkUnsecuredExecutionEnqueuerFunction({
           taskManager: plugins.taskManager,
-          connectorTypeRegistry: actionTypeRegistry!,
+          connectorTypeRegistry: this.setup.actionTypeRegistry!,
           inMemoryConnectors: this.inMemoryConnectors,
           configurationUtilities: actionsConfigUtils,
         }),
@@ -204,11 +191,8 @@ export class Actions {
       });
     };
 
-    const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
-      getActionsClientWithRequest(request);
-
-    this.eventLogService!.registerSavedObjectProvider('action', (request) => {
-      const client = secureGetActionsClientWithRequest(request);
+    this.setup.eventLogService!.registerSavedObjectProvider('action', (request) => {
+      const client = this.getActionsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
         objects
           ? Promise.all(
@@ -229,9 +213,9 @@ export class Actions {
     const getInternalSavedObjectsRepositoryWithoutAccessToActions = () =>
       core.savedObjects.createInternalRepository();
 
-    actionExecutor!.initialize({
+    this.setup.actionExecutor!.initialize({
       logger,
-      eventLogger: this.eventLogger!,
+      eventLogger: this.setup.eventLogger!,
       spaces: plugins.spaces?.spacesService,
       security: core.security,
       getServices: this.getServicesFactory(
@@ -247,17 +231,17 @@ export class Actions {
         () => this.getUnsecuredSavedObjectsClientWithFakeRequest(core.savedObjects)
       ),
       encryptedSavedObjectsClient,
-      actionTypeRegistry: actionTypeRegistry!,
+      actionTypeRegistry: this.setup.actionTypeRegistry!,
       inMemoryConnectors: this.inMemoryConnectors,
-      getActionsAuthorizationWithRequest(request: KibanaRequest) {
-        return instantiateAuthorization(request);
+      getActionsAuthorizationWithRequest: (request: KibanaRequest) => {
+        return this.setup.instantiateAuthorization(request);
       },
       analyticsService: core.analytics,
     });
 
-    taskRunnerFactory!.initialize({
+    this.setup.taskRunnerFactory!.initialize({
       logger,
-      actionTypeRegistry: actionTypeRegistry!,
+      actionTypeRegistry: this.setup.actionTypeRegistry!,
       encryptedSavedObjectsClient,
       basePathService: core.http.basePath,
       spaceIdToNamespace: (spaceId?: string) => spaceIdToNamespace(plugins.spaces, spaceId),
@@ -266,7 +250,8 @@ export class Actions {
       ]),
     });
 
-    this.eventLogService!.isEsContextReady()
+    this.setup
+      .eventLogService!.isEsContextReady()
       .then(() => {
         scheduleActionsTelemetry(this.telemetryLogger, plugins.taskManager);
       })
@@ -281,58 +266,8 @@ export class Actions {
 
     this.validateEnabledConnectorTypes(plugins);
 
-    this.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
-
-    return {
-      isActionTypeEnabled: (id, options = { notifyUsage: false }) => {
-        return this.actionTypeRegistry!.isActionTypeEnabled(id, options);
-      },
-      isActionExecutable: (
-        actionId: string,
-        actionTypeId: string,
-        options = { notifyUsage: false }
-      ) => {
-        return this.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
-      },
-      getAllTypes: actionTypeRegistry!.getAllTypes.bind(actionTypeRegistry),
-      getActionsAuthorizationWithRequest(request: KibanaRequest) {
-        return instantiateAuthorization(request);
-      },
-      getActionsClientWithRequest: secureGetActionsClientWithRequest,
-      getUnsecuredActionsClient,
-      inMemoryConnectors: this.inMemoryConnectors,
-      renderActionParameterTemplates: (...args) =>
-        renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
-      isSystemActionConnector: (connectorId: string): boolean => {
-        return this.inMemoryConnectors.some(
-          (inMemoryConnector) =>
-            inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
-        );
-      },
-    };
+    this.setup.connectorUsageReportingTask?.start(plugins.taskManager).catch(() => {});
   }
-
-  private instantiateAuthorization = (request: KibanaRequest) => {
-    return new ActionsAuthorization({
-      request,
-      authorization: this.security?.authz,
-    });
-  };
-
-  private throwIfSystemActionsInConfig = () => {
-    const hasSystemActionAsPreconfiguredInConfig = this.inMemoryConnectors
-      .filter((connector) => connector.isPreconfigured)
-      .some((connector) => this.actionTypeRegistry!.isSystemActionType(connector.actionTypeId));
-
-    if (hasSystemActionAsPreconfiguredInConfig) {
-      throw new Error('Setting system action types in preconfigured connectors are not allowed');
-    }
-  };
-
-  private setSystemActions = () => {
-    const systemConnectors = createSystemConnectors(this.actionTypeRegistry?.list() ?? []);
-    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
-  };
 
   private getUnsecuredSavedObjectsClient = (
     savedObjects: SavedObjectsServiceStart,
@@ -343,22 +278,21 @@ export class Actions {
       includedHiddenTypes,
     });
 
-  // replace when https://github.com/elastic/kibana/issues/209413 is resolved
-  private getUnsecuredSavedObjectsClientWithFakeRequest = (
-    savedObjects: SavedObjectsServiceStart
-  ) => {
-    const fakeRequest = {
-      headers: {},
-      getBasePath: () => '',
-      path: '/',
-      route: { settings: {} },
-      url: { href: {} },
-      raw: { req: { url: '/' } },
-    } as unknown as KibanaRequest;
-    return savedObjects.getScopedClient(fakeRequest, {
-      excludedExtensions: [SECURITY_EXTENSION_ID],
-      includedHiddenTypes,
-    });
+  private throwIfSystemActionsInConfig = () => {
+    const hasSystemActionAsPreconfiguredInConfig = this.inMemoryConnectors
+      .filter((connector) => connector.isPreconfigured)
+      .some((connector) =>
+        this.setup.actionTypeRegistry!.isSystemActionType(connector.actionTypeId)
+      );
+
+    if (hasSystemActionAsPreconfiguredInConfig) {
+      throw new Error('Setting system action types in preconfigured connectors are not allowed');
+    }
+  };
+
+  private setSystemActions = () => {
+    const systemConnectors = createSystemConnectors(this.setup.actionTypeRegistry?.list() ?? []);
+    this.inMemoryConnectors = [...this.inMemoryConnectors, ...systemConnectors];
   };
 
   private getServicesFactory(
@@ -399,6 +333,24 @@ export class Actions {
     };
   }
 
+  // replace when https://github.com/elastic/kibana/issues/209413 is resolved
+  private getUnsecuredSavedObjectsClientWithFakeRequest = (
+    savedObjects: SavedObjectsServiceStart
+  ) => {
+    const fakeRequest = {
+      headers: {},
+      getBasePath: () => '',
+      path: '/',
+      route: { settings: {} },
+      url: { href: {} },
+      raw: { req: { url: '/' } },
+    } as unknown as KibanaRequest;
+    return savedObjects.getScopedClient(fakeRequest, {
+      excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes,
+    });
+  };
+
   private validateEnabledConnectorTypes = (plugins: ActionsPluginsStart) => {
     if (
       !!plugins.serverless &&
@@ -407,9 +359,38 @@ export class Actions {
     ) {
       this.actionsConfig.enabledActionTypes.forEach((connectorType) => {
         // Throws error if action type doesn't exist
-        this.actionTypeRegistry?.get(connectorType);
+        this.setup.actionTypeRegistry?.get(connectorType);
       });
     }
+  };
+
+  public isActionTypeEnabled = (id: string, options = { notifyUsage: false }) => {
+    return this.setup.actionTypeRegistry!.isActionTypeEnabled(id, options);
+  };
+
+  public isActionExecutable = (
+    actionId: string,
+    actionTypeId: string,
+    options = { notifyUsage: false }
+  ) => {
+    return this.setup.actionTypeRegistry!.isActionExecutable(actionId, actionTypeId, options);
+  };
+
+  public getAllTypes = () => this.setup.actionTypeRegistry!.getAllTypes();
+
+  public getActionsAuthorizationWithRequest = (request: KibanaRequest) => {
+    return this.setup.instantiateAuthorization(request);
+  };
+
+  public renderActionParameterTemplates: PluginStartContract['renderActionParameterTemplates'] = (
+    ...args
+  ) => renderActionParameterTemplates(this.logger, this.setup.actionTypeRegistry, ...args);
+
+  public isSystemActionConnector = (connectorId: string): boolean => {
+    return this.inMemoryConnectors.some(
+      (inMemoryConnector) =>
+        inMemoryConnector.isSystemAction && inMemoryConnector.id === connectorId
+    );
   };
 }
 

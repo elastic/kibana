@@ -13,8 +13,9 @@ import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
-import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
+import { inject, injectable } from 'inversify';
+import { PluginSetup } from '@kbn/core-di';
+import { CoreSetup } from '@kbn/core-di-server';
 import type { ActionType, PluginSetupContract } from '.';
 import { CaseConnector, SubActionConnector } from '.';
 import { ActionExecutor, LicenseState, TaskRunnerFactory } from './lib';
@@ -63,6 +64,13 @@ import { defineRoutes } from './routes';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import type { SubActionConnectorType } from './sub_action_framework/types';
 import { AllowedHosts } from './config';
+import {
+  ACTIONS_CONFIG,
+  IN_MEMORY_CONNECTORS_SERVICE,
+  IN_MEMORY_METRICS_SERVICE,
+  LOGGER,
+  TELEMETRY_LOGGER,
+} from './constants';
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
@@ -71,6 +79,7 @@ const includedHiddenTypes = [
   CONNECTOR_TOKEN_SAVED_OBJECT_TYPE,
 ];
 
+@injectable()
 export class ModuleSetup implements PluginSetupContract {
   public licenseState: ILicenseState | null = null;
   public isESOCanEncrypt?: boolean;
@@ -82,42 +91,63 @@ export class ModuleSetup implements PluginSetupContract {
   public actionTypeRegistry?: ActionTypeRegistry;
   public connectorUsageReportingTask?: ConnectorUsageReportingTask | undefined;
   public usageCounter?: UsageCounter;
-  public security?: SecurityPluginSetup;
-  private logger: Logger;
-  private telemetryLogger: Logger;
-  private actionsConfig: ActionsConfig;
-  private inMemoryMetrics: InMemoryMetrics;
-  private inMemoryConnectors: InMemoryConnector[];
   private subActionFramework: {
     registerConnector: <Config extends ActionTypeConfig, Secrets extends ActionTypeSecrets>(
       connector: SubActionConnectorType<Config, Secrets>
     ) => void;
   };
-  private encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
 
-  constructor({
-    core,
-    plugins,
-    logger,
-    actionsConfig,
-    inMemoryMetrics,
-    inMemoryConnectors,
-    telemetryLogger,
-  }: ActionsPluginSetupDeps & {
-    logger: Logger;
-    actionsConfig: ActionsConfig;
-    inMemoryMetrics: InMemoryMetrics;
-    inMemoryConnectors: InMemoryConnector[];
-    telemetryLogger: Logger;
-  }) {
+  constructor(
+    @inject(LOGGER) private logger: Logger,
+    @inject(TELEMETRY_LOGGER) private telemetryLogger: Logger,
+    @inject(ACTIONS_CONFIG) private actionsConfig: ActionsConfig,
+    @inject(IN_MEMORY_METRICS_SERVICE) private inMemoryMetrics: InMemoryMetrics,
+    @inject(IN_MEMORY_CONNECTORS_SERVICE) private inMemoryConnectors: InMemoryConnector[],
+    @inject(CoreSetup('http')) private http: ActionsPluginSetupDeps['core']['http'],
+    @inject(CoreSetup('analytics')) private analytics: ActionsPluginSetupDeps['core']['analytics'],
+    @inject(CoreSetup('savedObjects'))
+    private savedObjects: ActionsPluginSetupDeps['core']['savedObjects'],
+    @inject(CoreSetup('getStartServices'))
+    private getStartServices: ActionsPluginSetupDeps['core']['getStartServices'],
+    @inject(PluginSetup('licensing'))
+    private licensing: ActionsPluginSetupDeps['plugins']['licensing'],
+    @inject(PluginSetup('security')) public security: ActionsPluginSetupDeps['plugins']['security'],
+    @inject(PluginSetup('features'))
+    private features: ActionsPluginSetupDeps['plugins']['features'],
+    @inject(PluginSetup('eventLog'))
+    private eventLog: ActionsPluginSetupDeps['plugins']['eventLog'],
+    @inject(PluginSetup('encryptedSavedObjects'))
+    private encryptedSavedObjects: ActionsPluginSetupDeps['plugins']['encryptedSavedObjects'],
+    @inject(PluginSetup('taskManager'))
+    private taskManagerPlugin: ActionsPluginSetupDeps['plugins']['taskManager'],
+    @inject(PluginSetup('usageCollection'))
+    private usageCollection: ActionsPluginSetupDeps['plugins']['usageCollection'],
+    @inject(PluginSetup('monitoringCollection'))
+    private monitoringCollection: ActionsPluginSetupDeps['plugins']['monitoringCollection'],
+    @inject(PluginSetup('cloud'))
+    private cloud: ActionsPluginSetupDeps['plugins']['cloud']
+  ) {
+    const plugins = {
+      licensing: this.licensing,
+      encryptedSavedObjects: this.encryptedSavedObjects,
+      security: this.security,
+      features: this.features,
+      eventLog: this.eventLog,
+      taskManager: this.taskManagerPlugin,
+      usageCollection: this.usageCollection,
+      monitoringCollection: this.monitoringCollection,
+      cloud: this.cloud,
+    };
+    const core = {
+      analytics: this.analytics,
+      savedObjects: this.savedObjects,
+      getStartServices: this.getStartServices,
+      http: this.http,
+    };
+
     this.licenseState = new LicenseState(plugins.licensing.license$);
     this.isESOCanEncrypt = plugins.encryptedSavedObjects.canEncrypt;
-    this.logger = logger;
-    this.actionsConfig = actionsConfig;
-    this.inMemoryMetrics = inMemoryMetrics;
-    this.inMemoryConnectors = inMemoryConnectors;
-    this.telemetryLogger = telemetryLogger;
-    this.security = plugins.security;
+    // this.security = plugins.security;
     this.encryptedSavedObjects = plugins.encryptedSavedObjects;
 
     if (!this.isESOCanEncrypt) {
@@ -184,10 +214,9 @@ export class ModuleSetup implements PluginSetupContract {
       this.inMemoryConnectors
     );
 
-    const usageCollection = plugins.usageCollection;
-    if (usageCollection) {
+    if (plugins.usageCollection) {
       registerActionsUsageCollector(
-        usageCollection,
+        plugins.usageCollection,
         this.actionsConfig,
         core.getStartServices().then(([_, { taskManager }]) => taskManager)
       );
@@ -198,7 +227,7 @@ export class ModuleSetup implements PluginSetupContract {
       this.createRouteHandlerContext(core, this.actionsConfigUtils)
     );
 
-    if (usageCollection) {
+    if (plugins.usageCollection) {
       const eventLogIndex = this.eventLogService.getIndexPattern();
 
       initializeActionsTelemetry(
@@ -250,7 +279,7 @@ export class ModuleSetup implements PluginSetupContract {
 
   private getInMemoryConnectors = () => this.inMemoryConnectors;
 
-  private instantiateAuthorization = (request: KibanaRequest) => {
+  public instantiateAuthorization = (request: KibanaRequest) => {
     return new ActionsAuthorization({
       request,
       authorization: this.security?.authz,
