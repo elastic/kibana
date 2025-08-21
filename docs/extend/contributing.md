@@ -7,7 +7,7 @@ mapped_pages:
 
 Whether you want to fix a bug, implement a feature, add an improvement, or add APIs, the following sections will guide you on the process. After committing your code, check out the [Elastic Contributor Program](https://www.elastic.co/community/contributor) where you can earn points and rewards for your contributions.
 
-Read [*Getting started*](/extend/development-getting-started.md) to get your environment up and running, then read [*Best practices*](/extend/development-best-practices.md).
+Read [*Getting started*](/extend/development-getting-started.md) to get your environment up and running, then read [*Best practices*](/extend/development-best-practices.md). And don't forget that [Elastic's Open Source Community Code of Conduct](https://www.elastic.co/community/codeofconduct) applies to code contributions too.
 
 * [Testing](/extend/development-tests.md)
 * [How we use Git and GitHub](/extend/development-github.md)
@@ -71,8 +71,8 @@ To make sure that your PR is included in the Release Notes, add the right label.
     * `release_note:breaking` — Breaking changes that weren’t present in previous releases.
     * `release_note:skip` — Changes that should not appear in the Release Notes. For example, docs, build, and test fixes, or unreleased issues that are only in `main`.
 
-
-
+### Note on contributing AI-enabled code
+We are excited that you are interested in contributing to the codebase and while you are welcome to use any process that works for you, the resulting PR is your contribution and we assume you have reviewed and tested the code and are confident in the changes you are proposing.
 
 
 
