@@ -48,19 +48,36 @@ export interface ResolvedSemconvYaml {
 }
 
 /**
- * Interface representing the flattened field definitions
+ * Interface representing a single semantic convention field metadata
+ */
+export interface SemconvFieldMetadata {
+  name: string;
+  description: string;
+  type: string;
+  example?: string;
+}
+
+/**
+ * Interface representing the flattened field definitions (legacy - for backward compatibility)
  */
 export interface SemconvFieldDefinitions {
   [fieldName: string]: string; // fieldName -> description
 }
 
 /**
+ * Interface representing the structured field definitions
+ */
+export interface SemconvStructuredFieldDefinitions {
+  [fieldName: string]: SemconvFieldMetadata;
+}
+
+/**
  * Processing result interface
  */
 export interface ProcessingResult {
-  registryFields: SemconvFieldDefinitions;
-  metricFields: SemconvFieldDefinitions;
-  totalFields: SemconvFieldDefinitions;
+  registryFields: SemconvStructuredFieldDefinitions;
+  metricFields: SemconvStructuredFieldDefinitions;
+  totalFields: SemconvStructuredFieldDefinitions;
   stats: {
     registryGroups: number;
     metricGroups: number;
@@ -77,3 +94,30 @@ export interface ProcessingOptions {
   cleanBriefText?: boolean;
   validateOutput?: boolean;
 }
+
+// Public API type aliases for external consumption
+// These provide stable interfaces that don't depend on generated files
+
+/**
+ * Public type for OpenTelemetry semantic convention fields
+ * Alias for SemconvStructuredFieldDefinitions to provide stable public API
+ */
+export type TSemconvFields = SemconvStructuredFieldDefinitions;
+
+/**
+ * Public type for OpenTelemetry field names
+ * Provides type-safe field name access
+ */
+export type SemconvFieldName = keyof TSemconvFields;
+
+/**
+ * Public alias for field definition structure
+ * Provides a more descriptive name for external consumers
+ */
+export type OtelFieldDefinition = SemconvFieldMetadata;
+
+/**
+ * Public alias for field collection structure
+ * Provides a more descriptive name for external consumers
+ */
+export type OtelFieldsCollection = SemconvStructuredFieldDefinitions;

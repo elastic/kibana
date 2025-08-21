@@ -8,1399 +8,5727 @@
  */
 
 // This file is auto-generated. Do not edit manually.
-// Generated on: 2025-08-20T16:07:17.881Z
+// Generated on: 2025-08-21T15:19:33.230Z
 // Source: resolved-semconv.yaml
 // Registry groups: 132
 // Metric groups: 347
-// Total fields: 956
+// Total fields: 963
 
-export const semconvFlat = {
-  'webengine.name': 'The name of the web engine.',
-  'webengine.version': 'The version of the web engine.',
-  'webengine.description':
-    'Additional description of the web engine (e.g. detailed version and edition information).',
-  'oci.manifest.digest':
-    'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
-  'destination.address':
-    'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-  'destination.port': 'Destination port number',
-  'browser.brands': 'Array of brand name and version separated by a space',
-  'browser.platform': 'The platform on which the browser is running',
-  'browser.mobile': 'A boolean that is true if the browser is running on a mobile device',
-  'browser.language': 'Preferred language of the user using the browser',
-  'cassandra.coordinator.dc': 'The data center of the coordinating node for a query.',
-  'cassandra.coordinator.id': 'The ID of the coordinating node for a query.',
-  'cassandra.consistency.level':
-    'The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html).',
-  'cassandra.query.idempotent': 'Whether or not the query is idempotent.',
-  'cassandra.page.size':
-    'The fetch size used for paging, i.e. how many rows will be returned at once.',
-  'cassandra.speculative_execution.count':
-    'The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively.',
-  'mainframe.lpar.name':
-    'Name of the logical partition that hosts a systems with a mainframe operating system.',
-  'rpc.connect_rpc.error_code':
-    'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
-  'rpc.connect_rpc.request.metadata':
-    'Connect request metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
-  'rpc.connect_rpc.response.metadata':
-    'Connect response metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
-  'rpc.grpc.status_code':
-    'The gRPC status code of the last gRPC requests performed in scope of this export call.',
-  'rpc.grpc.request.metadata':
-    'gRPC request metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
-  'rpc.grpc.response.metadata':
-    'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
-  'rpc.jsonrpc.error_code': '`error.code` property of response if it is an error response.',
-  'rpc.jsonrpc.error_message': '`error.message` property of response if it is an error response.',
-  'rpc.jsonrpc.request_id':
-    '`id` property of request or response. Since protocol allows id to be int, string, `null` or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of `null` value. Omit entirely if this is a notification.',
-  'rpc.jsonrpc.version':
-    "Protocol version as in `jsonrpc` property of request/response. Since JSON-RPC 1.0 doesn't specify this, the value can be omitted.",
-  'rpc.method':
-    'The name of the (logical) method being called, must be equal to the $method part in the span name.',
-  'rpc.service':
-    'The full (logical) name of the service being called, including its package name, if applicable.',
-  'rpc.system':
-    'A string identifying the remoting system. See below for a list of well-known identifiers.',
-  'rpc.message.type': 'Whether this is a received or sent message.',
-  'rpc.message.id':
-    'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
-  'rpc.message.compressed_size': 'Compressed size of the message in bytes.',
-  'rpc.message.uncompressed_size': 'Uncompressed size of the message in bytes.',
-  'openai.request.service_tier':
-    'The service tier requested. May be a specific tier, default, or auto.',
-  'openai.response.service_tier': 'The service tier used for the response.',
-  'openai.response.system_fingerprint':
-    'A fingerprint to track any eventual change in the Generative AI environment.',
-  'opentracing.ref_type': 'Parent-child Reference type',
-  'cloudfoundry.system.id': 'A guid or another name describing the event source.',
-  'cloudfoundry.system.instance.id': 'A guid describing the concrete instance of the event source.',
-  'cloudfoundry.app.name': 'The name of the application.',
-  'cloudfoundry.app.id': 'The guid of the application.',
-  'cloudfoundry.app.instance.id':
-    'The index of the application instance. 0 when just one instance is active.',
-  'cloudfoundry.space.name': 'The name of the CloudFoundry space the application is running in.',
-  'cloudfoundry.space.id': 'The guid of the CloudFoundry space the application is running in.',
-  'cloudfoundry.org.name': 'The name of the CloudFoundry organization the app is running in.',
-  'cloudfoundry.org.id': 'The guid of the CloudFoundry org the application is running in.',
-  'cloudfoundry.process.id': 'The UID identifying the process.',
-  'cloudfoundry.process.type': 'The type of process.',
-  'server.address':
-    'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-  'server.port': 'Server port number.',
-  'system.cpu.logical_number': 'Deprecated, use `cpu.logical_number` instead.',
-  'vcs.repository.url.full':
-    'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
-  'vcs.repository.name':
-    'The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.',
-  'vcs.ref.base.name':
-    'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
-  'vcs.ref.base.type':
-    'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
-  'vcs.ref.base.revision':
-    'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
-  'vcs.ref.head.name':
-    'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
-  'vcs.ref.head.type':
-    'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
-  'vcs.ref.head.revision':
-    'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
-  'vcs.ref.type':
-    'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
-  'vcs.revision_delta.direction': 'The type of revision comparison.',
-  'vcs.line_change.type': 'The type of line change being measured on a branch or change.',
-  'vcs.change.title':
-    'The human readable title of the change (pull request/merge request/changelist). This title is often a brief summary of the change and may get merged in to a ref as the commit summary.',
-  'vcs.change.id':
-    'The ID of the change (pull request/merge request/changelist) if applicable. This is usually a unique (within repository) identifier generated by the VCS system.',
-  'vcs.change.state': 'The state of the change (pull request/merge request/changelist).',
-  'vcs.owner.name': 'The group owner within the version control system.',
-  'vcs.provider.name': 'The name of the version control system provider.',
-  'android.os.api_level':
-    'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found [here](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
-  'android.app.state': 'This attribute represents the state of the application.',
-  'telemetry.sdk.name': 'The name of the telemetry SDK as defined above.',
-  'telemetry.sdk.language': 'The language of the telemetry SDK.',
-  'telemetry.sdk.version': 'The version string of the telemetry SDK.',
-  'telemetry.distro.name': 'The name of the auto instrumentation agent or distribution, if used.',
-  'telemetry.distro.version':
-    'The version string of the auto instrumentation agent or distribution, if used.',
-  'error.type': 'Describes a class of error the operation ended with.',
-  'error.message': 'A message providing more detail about an error in human-readable form.',
-  'go.memory.type': 'The type of memory.',
-  'heroku.release.creation_timestamp': 'Time and date the release was created',
-  'heroku.release.commit': 'Commit hash for the current release',
-  'heroku.app.id': 'Unique identifier for the application',
-  'signalr.connection.status': 'SignalR HTTP connection closure status.',
-  'signalr.transport':
-    '[SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)',
-  'code.function.name':
-    "The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-  'code.file.path':
-    "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-  'code.line.number':
-    "The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-  'code.column.number':
-    "The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-  'code.stacktrace':
-    "A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`](/docs/exceptions/exceptions-spans.md#stacktrace-representation). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Location'. This constraint is imposed to prevent redundancy and maintain data integrity.",
-  'url.domain': 'Domain extracted from the `url.full`, such as "opentelemetry.io".',
-  'url.extension': 'The file extension extracted from the `url.full`, excluding the leading dot.',
-  'url.fragment':
-    'The [URI fragment](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) component',
-  'url.full':
-    'Absolute URL describing a network resource according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986)',
-  'url.original': 'Unmodified original URL as seen in the event source.',
-  'url.path': 'The [URI path](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) component',
-  'url.port': 'Port extracted from the `url.full`',
-  'url.query': 'The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component',
-  'url.registered_domain': 'The highest registered url domain, stripped of the subdomain.',
-  'url.scheme':
-    'The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.',
-  'url.subdomain':
-    'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
-  'url.template':
-    'The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).',
-  'url.top_level_domain':
-    'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.',
-  'system.device': 'The device identifier',
-  'system.memory.state': 'The memory state',
-  'system.paging.state': 'The memory paging state',
-  'system.paging.type': 'The memory paging type',
-  'system.paging.direction': 'The paging access direction',
-  'system.filesystem.state': 'The filesystem state',
-  'system.filesystem.type': 'The filesystem type',
-  'system.filesystem.mode': 'The filesystem mode',
-  'system.filesystem.mountpoint': 'The filesystem mount path',
-  'system.process.status':
-    'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
-  'gen_ai.provider.name':
-    'The Generative AI provider as identified by the client or server instrumentation.',
-  'gen_ai.request.model': 'The name of the GenAI model a request is being made to.',
-  'gen_ai.request.max_tokens': 'The maximum number of tokens the model generates for a request.',
-  'gen_ai.request.choice.count': 'The target number of candidate completions to return.',
-  'gen_ai.request.temperature': 'The temperature setting for the GenAI request.',
-  'gen_ai.request.top_p': 'The top_p sampling setting for the GenAI request.',
-  'gen_ai.request.top_k': 'The top_k sampling setting for the GenAI request.',
-  'gen_ai.request.stop_sequences':
-    'List of sequences that the model will use to stop generating further tokens.',
-  'gen_ai.request.frequency_penalty': 'The frequency penalty setting for the GenAI request.',
-  'gen_ai.request.presence_penalty': 'The presence penalty setting for the GenAI request.',
-  'gen_ai.request.encoding_formats':
-    'The encoding formats requested in an embeddings operation, if specified.',
-  'gen_ai.request.seed': 'Requests with same seed value more likely to return same result.',
-  'gen_ai.response.id': 'The unique identifier for the completion.',
-  'gen_ai.response.model': 'The name of the model that generated the response.',
-  'gen_ai.response.finish_reasons':
-    'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
-  'gen_ai.usage.input_tokens': 'The number of tokens used in the GenAI input (prompt).',
-  'gen_ai.usage.output_tokens': 'The number of tokens used in the GenAI response (completion).',
-  'gen_ai.token.type': 'The type of token being counted.',
-  'gen_ai.conversation.id':
-    'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
-  'gen_ai.agent.id': 'The unique identifier of the GenAI agent.',
-  'gen_ai.agent.name': 'Human-readable name of the GenAI agent provided by the application.',
-  'gen_ai.agent.description':
-    'Free-form description of the GenAI agent provided by the application.',
-  'gen_ai.tool.name': 'Name of the tool utilized by the agent.',
-  'gen_ai.tool.call.id': 'The tool call identifier.',
-  'gen_ai.tool.description': 'The tool description.',
-  'gen_ai.tool.type': 'Type of the tool utilized by the agent',
-  'gen_ai.data_source.id': 'The data source identifier.',
-  'gen_ai.operation.name': 'The name of the operation being performed.',
-  'gen_ai.output.type': 'Represents the content type requested by the client.',
-  'host.id':
-    'Unique host ID. For Cloud, this must be the instance_id assigned by the cloud provider. For non-containerized systems, this should be the `machine-id`. See the table below for the sources to use to determine the `machine-id` based on operating system.',
-  'host.name':
-    'Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
-  'host.type': 'Type of host. For Cloud, this must be the machine type.',
-  'host.arch': 'The CPU architecture the host system is running on.',
-  'host.image.name': 'Name of the VM image or OS install the host was instantiated from.',
-  'host.image.id': 'VM image ID or host OS image ID. For Cloud, this value is from the provider.',
-  'host.image.version':
-    'The version string of the VM image or host OS as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
-  'host.ip': 'Available IP addresses of the host, excluding loopback interfaces.',
-  'host.mac': 'Available MAC addresses of the host, excluding loopback interfaces.',
-  'host.cpu.vendor.id': 'Processor manufacturer identifier. A maximum 12-character string.',
-  'host.cpu.family': 'Family or generation of the CPU.',
-  'host.cpu.model.id':
-    'Model identifier. It provides more granular information about the CPU, distinguishing it from other CPUs within the same family.',
-  'host.cpu.model.name': 'Model designation of the processor.',
-  'host.cpu.stepping': 'Stepping or core revisions.',
-  'host.cpu.cache.l2.size':
-    'The amount of level 2 memory cache available to the processor (in Bytes).',
-  'enduser.id':
-    'Unique identifier of an end user in the system. It maybe a username, email address, or other identifier.',
-  'enduser.pseudo.id':
-    "Pseudonymous identifier of an end user. This identifier should be a random value that is not directly linked or associated with the end user's actual identity.",
-  'network.carrier.icc':
-    'The ISO 3166-1 alpha-2 2-character country code associated with the mobile carrier network.',
-  'network.carrier.mcc': 'The mobile carrier country code.',
-  'network.carrier.mnc': 'The mobile carrier network code.',
-  'network.carrier.name': 'The name of the mobile carrier.',
-  'network.connection.subtype':
-    'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.',
-  'network.connection.type': 'The internet connection type.',
-  'network.local.address':
-    'Local address of the network connection - IP address or Unix domain socket name.',
-  'network.local.port': 'Local port number of the network connection.',
-  'network.peer.address':
-    'Peer address of the network connection - IP address or Unix domain socket name.',
-  'network.peer.port': 'Peer port number of the network connection.',
-  'network.protocol.name':
-    '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.',
-  'network.protocol.version': 'The actual version of the protocol used for network communication.',
-  'network.transport':
-    '[OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).',
-  'network.type':
-    '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.',
-  'network.io.direction': 'The network IO operation direction.',
-  'network.interface.name': 'The network interface name.',
-  'network.connection.state': 'The state of network connection',
-  'profile.frame.type': 'Describes the interpreter or compiler of a single frame.',
-  'cloud.provider': 'Name of the cloud provider.',
-  'cloud.account.id': 'The cloud account ID the resource is assigned to.',
-  'cloud.region':
-    'The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.',
-  'cloud.resource_id':
-    'Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) on AWS, a [fully qualified resource ID](https://learn.microsoft.com/rest/api/resources/resources/get-by-id) on Azure, a [full resource name](https://google.aip.dev/122#full-resource-names) on GCP)',
-  'cloud.availability_zone':
-    'Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.',
-  'cloud.platform': 'The cloud platform in use.',
-  'session.id': 'A unique id to identify a session.',
-  'session.previous_id': 'The previous `session.id` for this user, when known.',
-  'cloudevents.event_id':
-    'The [event_id](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id) uniquely identifies the event.',
-  'cloudevents.event_source':
-    'The [source](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1) identifies the context in which an event happened.',
-  'cloudevents.event_spec_version':
-    'The [version of the CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion) which the event uses.',
-  'cloudevents.event_type':
-    'The [event_type](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type) contains a value describing the type of event related to the originating occurrence.',
-  'cloudevents.event_subject':
-    'The [subject](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject) of the event in the context of the event producer (identified by source).',
-  'test.suite.name':
-    'The human readable name of a [test suite](https://wikipedia.org/wiki/Test_suite).',
-  'test.suite.run.status': 'The status of the test suite run.',
-  'test.case.name':
-    'The fully qualified human readable name of the [test case](https://wikipedia.org/wiki/Test_case).',
-  'test.case.result.status': 'The status of the actual test case result from test execution.',
-  'geo.locality.name':
-    'Locality name. Represents the name of a city, town, village, or similar populated place.',
-  'geo.continent.code': 'Two-letter code representing continent’s name.',
-  'geo.country.iso_code':
-    'Two-letter ISO Country Code ([ISO 3166-1 alpha2](https://wikipedia.org/wiki/ISO_3166-1#Codes)).',
-  'geo.location.lon':
-    'Longitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
-  'geo.location.lat':
-    'Latitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
-  'geo.postal_code':
-    'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
-  'geo.region.iso_code': 'Region ISO code ([ISO 3166-2](https://wikipedia.org/wiki/ISO_3166-2)).',
-  'process.pid': 'Process identifier (PID).',
-  'process.parent_pid': 'Parent Process identifier (PPID).',
-  'process.vpid': 'Virtual process identifier.',
-  'process.session_leader.pid':
-    "The PID of the process's session leader. This is also the session ID (SID) of the process.",
-  'process.group_leader.pid':
-    "The PID of the process's group leader. This is also the process group ID (PGID) of the process.",
-  'process.executable.build_id.gnu':
-    'The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string).',
-  'process.executable.build_id.go':
-    'The Go build ID as retrieved by `go tool buildid <go executable>`.',
-  'process.executable.build_id.htlhash':
-    'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
-  'process.executable.name':
-    'The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.',
-  'process.executable.path':
-    'The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.',
-  'process.command':
-    'The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.',
-  'process.command_line':
-    'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
-  'process.command_args':
-    'All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
-  'process.args_count': 'Length of the process.command_args array',
-  'process.owner': 'The username of the user that owns the process.',
-  'process.user.id': 'The effective user ID (EUID) of the process.',
-  'process.user.name': 'The username of the effective user of the process.',
-  'process.real_user.id': 'The real user ID (RUID) of the process.',
-  'process.real_user.name': 'The username of the real user of the process.',
-  'process.saved_user.id': 'The saved user ID (SUID) of the process.',
-  'process.saved_user.name': 'The username of the saved user.',
-  'process.runtime.name': 'The name of the runtime of this process.',
-  'process.runtime.version':
-    'The version of the runtime of this process, as returned by the runtime without modification.',
-  'process.runtime.description':
-    'An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.',
-  'process.title': 'Process title (proctitle)',
-  'process.creation.time': 'The date and time the process was created, in ISO 8601 format.',
-  'process.exit.time': 'The date and time the process exited, in ISO 8601 format.',
-  'process.exit.code': 'The exit code of the process.',
-  'process.interactive': 'Whether the process is connected to an interactive shell.',
-  'process.working_directory': 'The working directory of the process.',
-  'process.context_switch_type':
-    'Specifies whether the context switches for this data point were voluntary or involuntary.',
-  'process.paging.fault_type':
-    'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
-  'process.environment_variable':
-    'Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.',
-  'process.linux.cgroup': 'The control group associated with the process.',
-  'aspnetcore.rate_limiting.policy': 'Rate limiting policy name.',
-  'aspnetcore.rate_limiting.result':
-    'Rate-limiting result, shows whether the lease was acquired or contains a rejection reason',
-  'aspnetcore.routing.is_fallback':
-    'A value that indicates whether the matched route is a fallback route.',
-  'aspnetcore.diagnostics.handler.type':
-    'Full type name of the [`IExceptionHandler`](https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) implementation that handled the exception.',
-  'aspnetcore.request.is_unhandled':
-    'Flag indicating if request was handled by the application pipeline.',
-  'aspnetcore.routing.match_status': 'Match result - success or failure',
-  'aspnetcore.diagnostics.exception.result': 'ASP.NET Core exception middleware handling result',
-  'file.accessed': 'Time when the file was last accessed, in ISO 8601 format.',
-  'file.attributes': 'Array of file attributes.',
-  'file.created': 'Time when the file was created, in ISO 8601 format.',
-  'file.changed': 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
-  'file.directory':
-    'Directory where the file is located. It should include the drive letter, when appropriate.',
-  'file.extension': 'File extension, excluding the leading dot.',
-  'file.fork_name':
-    'Name of the fork. A fork is additional data associated with a filesystem object.',
-  'file.group.id': 'Primary Group ID (GID) of the file.',
-  'file.group.name': 'Primary group name of the file.',
-  'file.inode': 'Inode representing the file in the filesystem.',
-  'file.mode': 'Mode of the file in octal representation.',
-  'file.modified': 'Time when the file content was last modified, in ISO 8601 format.',
-  'file.name': 'Name of the file including the extension, without the directory.',
-  'file.owner.id': 'The user ID (UID) or security identifier (SID) of the file owner.',
-  'file.owner.name': 'Username of the file owner.',
-  'file.path':
-    'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
-  'file.size': 'File size in bytes.',
-  'file.symbolic_link.target_path': 'Path to the target of a symbolic link.',
-  'graphql.operation.name': 'The name of the operation being executed.',
-  'graphql.operation.type': 'The type of the operation being executed.',
-  'graphql.document': 'The GraphQL document being executed.',
-  'os.type': 'The operating system type.',
-  'os.description':
-    'Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands.',
-  'os.name': 'Human readable operating system name.',
-  'os.version':
-    'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
-  'os.build_id': 'Unique identifier for a particular build or compilation of the operating system.',
-  'client.address':
-    'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-  'client.port': 'Client port number.',
-  'db.collection.name': 'Cosmos DB container name.',
-  'db.namespace': 'The name of the database, fully qualified within the server address and port.',
-  'db.operation.name': 'The name of the operation or command being executed.',
-  'db.query.text': 'The database query being executed.',
-  'db.query.parameter':
-    'A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
-  'db.query.summary': 'Low cardinality summary of a database query.',
-  'db.stored_procedure.name': 'The name of a stored procedure within the database.',
-  'db.operation.parameter':
-    'A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
-  'db.operation.batch.size': 'The number of queries included in a batch operation.',
-  'db.response.status_code': 'Database response status code.',
-  'db.response.returned_rows': 'Number of rows returned by the operation.',
-  'db.system.name':
-    'The database management system (DBMS) product as identified by the client instrumentation.',
-  'db.client.connection.state': 'The state of a connection in the pool',
-  'db.client.connection.pool.name':
-    "The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.",
-  'feature_flag.key': 'The lookup key of the feature flag.',
-  'feature_flag.provider.name': 'Identifies the feature flag provider.',
-  'feature_flag.result.variant': 'A semantic identifier for an evaluated flag value.',
-  'feature_flag.context.id':
-    'The unique identifier for the flag evaluation context. For example, the targeting key.',
-  'feature_flag.version':
-    'The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset.',
-  'feature_flag.set.id':
-    'The identifier of the [flag set](https://openfeature.dev/specification/glossary/#flag-set) to which the feature flag belongs.',
-  'feature_flag.result.reason':
-    'The reason code which shows how a feature flag value was determined.',
-  'feature_flag.result.value': 'The evaluated value of the feature flag.',
-  'security_rule.category':
-    'A categorization value keyword used by the entity using the rule for detection of this event',
-  'security_rule.description': 'The description of the rule generating the event.',
-  'security_rule.license':
-    'Name of the license under which the rule used to generate this event is made available.',
-  'security_rule.name': 'The name of the rule or signature generating the event.',
-  'security_rule.reference':
-    'Reference URL to additional information about the rule used to generate this event.',
-  'security_rule.ruleset.name':
-    'Name of the ruleset, policy, group, or parent category in which the rule used to generate this event is a member.',
-  'security_rule.uuid':
-    'A rule ID that is unique within the scope of a set or group of agents, observers, or other entities using the rule for detection of this event.',
-  'security_rule.version': 'The version / revision of the rule being used for analysis.',
-  'cicd.pipeline.name': 'The human readable name of the pipeline within a CI/CD system.',
-  'cicd.pipeline.run.id': 'The unique identifier of a pipeline run within a CI/CD system.',
-  'cicd.pipeline.run.url.full':
-    'The [URL](https://wikipedia.org/wiki/URL) of the pipeline run, providing the complete address in order to locate and identify the pipeline run.',
-  'cicd.pipeline.run.state': 'The pipeline run goes through these states during its lifecycle.',
-  'cicd.pipeline.task.name':
-    'The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process](https://wikipedia.org/wiki/Pipeline_(computing)) in a pipeline. Other terms for tasks include commands, steps, and procedures.',
-  'cicd.pipeline.task.run.id': 'The unique identifier of a task run within a pipeline.',
-  'cicd.pipeline.task.run.url.full':
-    'The [URL](https://wikipedia.org/wiki/URL) of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run.',
-  'cicd.pipeline.task.run.result': 'The result of a task run.',
-  'cicd.pipeline.task.type': 'The type of the task within a pipeline.',
-  'cicd.pipeline.result': 'The result of a pipeline run.',
-  'cicd.pipeline.action.name': 'The kind of action a pipeline run is performing.',
-  'cicd.worker.id': 'The unique identifier of a worker within a CICD system.',
-  'cicd.worker.name': 'The name of a worker within a CICD system.',
-  'cicd.worker.url.full':
-    'The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.',
-  'cicd.worker.state': 'The state of a CICD worker / agent.',
-  'cicd.system.component': 'The name of a component of the CICD system.',
-  'linux.memory.slab.state': 'The Linux Slab memory state',
-  'log.iostream': 'The stream associated with the log. See below for a list of well-known values.',
-  'log.file.name': 'The basename of the file.',
-  'log.file.path': 'The full path to the file.',
-  'log.file.name_resolved': 'The basename of the file, with symlinks resolved.',
-  'log.file.path_resolved': 'The full path to the file, with symlinks resolved.',
-  'log.record.uid': 'A unique identifier for the Log Record.',
-  'log.record.original': 'The complete original Log Record.',
-  'aws.request_id':
-    'The AWS request ID as returned in the response headers `x-amzn-requestid`, `x-amzn-request-id` or `x-amz-request-id`.',
-  'aws.extended_request_id':
-    'The AWS extended request ID as returned in the response header `x-amz-id-2`.',
-  'aws.dynamodb.table_names': 'The keys in the `RequestItems` object field.',
-  'aws.dynamodb.consumed_capacity':
-    'The JSON-serialized value of each item in the `ConsumedCapacity` response field.',
-  'aws.dynamodb.item_collection_metrics':
-    'The JSON-serialized value of the `ItemCollectionMetrics` response field.',
-  'aws.dynamodb.provisioned_read_capacity':
-    'The value of the `ProvisionedThroughput.ReadCapacityUnits` request parameter.',
-  'aws.dynamodb.provisioned_write_capacity':
-    'The value of the `ProvisionedThroughput.WriteCapacityUnits` request parameter.',
-  'aws.dynamodb.consistent_read': 'The value of the `ConsistentRead` request parameter.',
-  'aws.dynamodb.projection': 'The value of the `ProjectionExpression` request parameter.',
-  'aws.dynamodb.limit': 'The value of the `Limit` request parameter.',
-  'aws.dynamodb.attributes_to_get': 'The value of the `AttributesToGet` request parameter.',
-  'aws.dynamodb.index_name': 'The value of the `IndexName` request parameter.',
-  'aws.dynamodb.select': 'The value of the `Select` request parameter.',
-  'aws.dynamodb.global_secondary_indexes':
-    'The JSON-serialized value of each item of the `GlobalSecondaryIndexes` request field',
-  'aws.dynamodb.local_secondary_indexes':
-    'The JSON-serialized value of each item of the `LocalSecondaryIndexes` request field.',
-  'aws.dynamodb.exclusive_start_table':
-    'The value of the `ExclusiveStartTableName` request parameter.',
-  'aws.dynamodb.table_count': 'The number of items in the `TableNames` response parameter.',
-  'aws.dynamodb.scan_forward': 'The value of the `ScanIndexForward` request parameter.',
-  'aws.dynamodb.segment': 'The value of the `Segment` request parameter.',
-  'aws.dynamodb.total_segments': 'The value of the `TotalSegments` request parameter.',
-  'aws.dynamodb.count': 'The value of the `Count` response parameter.',
-  'aws.dynamodb.scanned_count': 'The value of the `ScannedCount` response parameter.',
-  'aws.dynamodb.attribute_definitions':
-    'The JSON-serialized value of each item in the `AttributeDefinitions` request field.',
-  'aws.dynamodb.global_secondary_index_updates':
-    'The JSON-serialized value of each item in the `GlobalSecondaryIndexUpdates` request field.',
-  'aws.ecs.container.arn':
-    'The Amazon Resource Name (ARN) of an [ECS container instance](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_instances.html).',
-  'aws.ecs.cluster.arn':
-    'The ARN of an [ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html).',
-  'aws.ecs.launchtype':
-    'The [launch type](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html) for an ECS task.',
-  'aws.ecs.task.arn':
-    'The ARN of a running [ECS task](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-account-settings.html#ecs-resource-ids).',
-  'aws.ecs.task.family':
-    'The family name of the [ECS task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html) used to create the ECS task.',
-  'aws.ecs.task.id': 'The ID of a running ECS task. The ID MUST be extracted from `task.arn`.',
-  'aws.ecs.task.revision': 'The revision for the task definition used to create the ECS task.',
-  'aws.eks.cluster.arn': 'The ARN of an EKS cluster.',
-  'aws.log.group.names': 'The name(s) of the AWS log group(s) an application is writing to.',
-  'aws.log.group.arns': 'The Amazon Resource Name(s) (ARN) of the AWS log group(s).',
-  'aws.log.stream.names': 'The name(s) of the AWS log stream(s) an application is writing to.',
-  'aws.log.stream.arns': 'The ARN(s) of the AWS log stream(s).',
-  'aws.lambda.invoked_arn':
-    'The full invoked ARN as provided on the `Context` passed to the function (`Lambda-Runtime-Invoked-Function-Arn` header on the `/runtime/invocation/next` applicable).',
-  'aws.lambda.resource_mapping.id':
-    "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
-  'aws.s3.bucket':
-    'The S3 bucket name the request refers to. Corresponds to the `--bucket` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
-  'aws.s3.key':
-    'The S3 object key the request refers to. Corresponds to the `--key` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
-  'aws.s3.copy_source': 'The source object (in the form `bucket`/`key`) for the copy operation.',
-  'aws.s3.upload_id': 'Upload ID that identifies the multipart upload.',
-  'aws.s3.delete': 'The delete request container that specifies the objects to be deleted.',
-  'aws.s3.part_number':
-    'The part number of the part being uploaded in a multipart-upload operation. This is a positive integer between 1 and 10,000.',
-  'aws.sqs.queue.url':
-    "The URL of the AWS SQS Queue. It's a unique identifier for a queue in Amazon Simple Queue Service (SQS) and is used to access the queue and perform actions on it.",
-  'aws.sns.topic.arn':
-    'The ARN of the AWS SNS Topic. An Amazon SNS [topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) is a logical access point that acts as a communication channel.',
-  'aws.kinesis.stream_name':
-    'The name of the AWS Kinesis [stream](https://docs.aws.amazon.com/streams/latest/dev/introduction.html) the request refers to. Corresponds to the `--stream-name` parameter of the Kinesis [describe-stream](https://docs.aws.amazon.com/cli/latest/reference/kinesis/describe-stream.html) operation.',
-  'aws.step_functions.activity.arn': 'The ARN of the AWS Step Functions Activity.',
-  'aws.step_functions.state_machine.arn': 'The ARN of the AWS Step Functions State Machine.',
-  'aws.secretsmanager.secret.arn': 'The ARN of the Secret stored in the Secrets Mangger',
-  'aws.bedrock.guardrail.id':
-    'The unique identifier of the AWS Bedrock Guardrail. A [guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) helps safeguard and prevent unwanted behavior from model responses or user messages.',
-  'aws.bedrock.knowledge_base.id':
-    'The unique identifier of the AWS Bedrock Knowledge base. A [knowledge base](https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html) is a bank of information that can be queried by models to generate more relevant responses and augment prompts.',
-  'app.installation.id':
-    'A unique identifier representing the installation of an application on a specific device',
-  'app.screen.coordinate.x':
-    'The x (horizontal) coordinate of a screen coordinate, in screen pixels.',
-  'app.screen.coordinate.y': 'The y (vertical) component of a screen coordinate, in screen pixels.',
-  'app.widget.id':
-    'An identifier that uniquely differentiates this widget from other widgets in the same application.',
-  'app.widget.name': 'The name of an application widget.',
-  'app.build_id': 'Unique identifier for a particular build or compilation of the application.',
-  'k8s.cluster.name': 'The name of the cluster.',
-  'k8s.cluster.uid': 'A pseudo-ID for the cluster, set to the UID of the `kube-system` namespace.',
-  'k8s.node.name': 'The name of the Node.',
-  'k8s.node.uid': 'The UID of the Node.',
-  'k8s.node.label':
-    'The label placed on the Node, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.node.annotation':
-    'The annotation placed on the Node, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.namespace.name': 'The name of the namespace that the pod is running in.',
-  'k8s.namespace.label':
-    'The label placed on the Namespace, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.namespace.annotation':
-    'The annotation placed on the Namespace, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.pod.uid': 'The UID of the Pod.',
-  'k8s.pod.name': 'The name of the Pod.',
-  'k8s.pod.label':
-    'The label placed on the Pod, the `<key>` being the label name, the value being the label value.',
-  'k8s.pod.annotation':
-    'The annotation placed on the Pod, the `<key>` being the annotation name, the value being the annotation value.',
-  'k8s.container.name':
-    'The name of the Container from Pod specification, must be unique within a Pod. Container runtime usually uses different globally unique name (`container.name`).',
-  'k8s.container.restart_count':
-    'Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.',
-  'k8s.container.status.last_terminated_reason': 'Last terminated reason of the Container.',
-  'k8s.replicaset.uid': 'The UID of the ReplicaSet.',
-  'k8s.replicaset.name': 'The name of the ReplicaSet.',
-  'k8s.replicaset.label':
-    'The label placed on the ReplicaSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.replicaset.annotation':
-    'The annotation placed on the ReplicaSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.replicationcontroller.uid': 'The UID of the replication controller.',
-  'k8s.replicationcontroller.name': 'The name of the replication controller.',
-  'k8s.resourcequota.uid': 'The UID of the resource quota.',
-  'k8s.resourcequota.name': 'The name of the resource quota.',
-  'k8s.deployment.uid': 'The UID of the Deployment.',
-  'k8s.deployment.name': 'The name of the Deployment.',
-  'k8s.deployment.label':
-    'The label placed on the Deployment, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.deployment.annotation':
-    'The annotation placed on the Deployment, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.statefulset.uid': 'The UID of the StatefulSet.',
-  'k8s.statefulset.name': 'The name of the StatefulSet.',
-  'k8s.statefulset.label':
-    'The label placed on the StatefulSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.statefulset.annotation':
-    'The annotation placed on the StatefulSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.daemonset.uid': 'The UID of the DaemonSet.',
-  'k8s.daemonset.name': 'The name of the DaemonSet.',
-  'k8s.daemonset.label':
-    'The label placed on the DaemonSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.daemonset.annotation':
-    'The annotation placed on the DaemonSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.hpa.uid': 'The UID of the horizontal pod autoscaler.',
-  'k8s.hpa.name': 'The name of the horizontal pod autoscaler.',
-  'k8s.hpa.scaletargetref.kind':
-    'The kind of the target resource to scale for the HorizontalPodAutoscaler.',
-  'k8s.hpa.scaletargetref.name':
-    'The name of the target resource to scale for the HorizontalPodAutoscaler.',
-  'k8s.hpa.scaletargetref.api_version':
-    'The API version of the target resource to scale for the HorizontalPodAutoscaler.',
-  'k8s.hpa.metric.type': 'The type of metric source for the horizontal pod autoscaler.',
-  'k8s.job.uid': 'The UID of the Job.',
-  'k8s.job.name': 'The name of the Job.',
-  'k8s.job.label':
-    'The label placed on the Job, the `<key>` being the label name, the value being the label value, even if the value is empty.',
-  'k8s.job.annotation':
-    'The annotation placed on the Job, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
-  'k8s.cronjob.uid': 'The UID of the CronJob.',
-  'k8s.cronjob.name': 'The name of the CronJob.',
-  'k8s.cronjob.label':
-    'The label placed on the CronJob, the `<key>` being the label name, the value being the label value.',
-  'k8s.cronjob.annotation':
-    'The cronjob annotation placed on the CronJob, the `<key>` being the annotation name, the value being the annotation value.',
-  'k8s.volume.name': 'The name of the K8s volume.',
-  'k8s.volume.type': 'The type of the K8s volume.',
-  'k8s.namespace.phase': 'The phase of the K8s namespace.',
-  'k8s.node.condition.type': 'The condition type of a K8s Node.',
-  'k8s.node.condition.status': 'The status of the condition, one of True, False, Unknown.',
-  'k8s.container.status.state':
-    'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core)',
-  'k8s.container.status.reason':
-    'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core)',
-  'k8s.hugepage.size': 'The size (identifier) of the K8s huge page.',
-  'k8s.storageclass.name':
-    'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.',
-  'k8s.resourcequota.resource_name': 'The name of the K8s resource a resource quota defines.',
-  'dotnet.gc.heap.generation': 'Name of the garbage collector managed heap generation.',
-  'cpython.gc.generation': 'Value of the garbage collector collection generation.',
-  'disk.io.direction': 'The disk IO operation direction.',
-  'otel.status_code':
-    'Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET.',
-  'otel.status_description': 'Description of the Status if it has a value, otherwise not set.',
-  'otel.span.sampling_result': 'The result value of the sampler for this span',
-  'otel.span.parent.origin':
-    'Determines whether the span has a parent span, and if so, [whether it is a remote parent](https://opentelemetry.io/docs/specs/otel/trace/api/#isremote)',
-  'otel.scope.name':
-    'The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP).',
-  'otel.scope.version':
-    'The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP).',
-  'otel.scope.schema_url': 'The schema URL of the instrumentation scope.',
-  'otel.component.type': 'A name identifying the type of the OpenTelemetry component.',
-  'otel.component.name':
-    'A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.',
-  'zos.smf.id':
-    'The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.',
-  'zos.sysplex.name': 'The name of the SYSPLEX to which the z/OS system belongs too.',
-  'device.id': 'A unique identifier representing the device',
-  'device.manufacturer': 'The name of the device manufacturer',
-  'device.model.identifier': 'The model identifier for the device',
-  'device.model.name': 'The marketing name for the device model',
-  'thread.id': 'Current "managed" thread ID (as opposed to OS thread ID).',
-  'thread.name': 'Current thread name.',
-  'messaging.batch.message_count':
-    'The number of messages sent, received, or processed in the scope of the batching operation.',
-  'messaging.client.id': 'A unique identifier for the client that consumes or produces a message.',
-  'messaging.consumer.group.name':
-    'The name of the consumer group with which a consumer is associated.',
-  'messaging.destination.name': 'The message destination name',
-  'messaging.destination.subscription.name':
-    'The name of the destination subscription from which a message is consumed.',
-  'messaging.destination.template':
-    'Low cardinality representation of the messaging destination name',
-  'messaging.destination.anonymous':
-    'A boolean that is true if the message destination is anonymous (could be unnamed or have auto-generated name).',
-  'messaging.destination.temporary':
-    'A boolean that is true if the message destination is temporary and might not exist anymore after messages are processed.',
-  'messaging.destination.partition.id':
-    'The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.',
-  'messaging.message.conversation_id':
-    'The conversation ID identifying the conversation to which the message belongs, represented as a string. Sometimes called "Correlation ID".',
-  'messaging.message.envelope.size': 'The size of the message body and metadata in bytes.',
-  'messaging.message.id':
-    'A value used by the messaging system as an identifier for the message, represented as a string.',
-  'messaging.message.body.size': 'The size of the message body in bytes.',
-  'messaging.operation.type': 'A string identifying the type of the messaging operation.',
-  'messaging.operation.name': 'The system-specific name of the messaging operation.',
-  'messaging.system': 'The messaging system as identified by the client instrumentation.',
-  'messaging.kafka.message.key':
-    "Message keys in Kafka are used for grouping alike messages to ensure they're processed on the same partition. They differ from `messaging.message.id` in that they're not unique. If the key is `null`, the attribute MUST NOT be set.",
-  'messaging.kafka.offset': 'The offset of a record in the corresponding Kafka partition.',
-  'messaging.kafka.message.tombstone': 'A boolean that is true if the message is a tombstone.',
-  'messaging.rabbitmq.destination.routing_key': 'RabbitMQ message routing key.',
-  'messaging.rabbitmq.message.delivery_tag': 'RabbitMQ message delivery tag',
-  'messaging.rocketmq.consumption_model':
-    'Model of message consumption. This only applies to consumer spans.',
-  'messaging.rocketmq.message.delay_time_level':
-    'The delay time level for delay message, which determines the message delay time.',
-  'messaging.rocketmq.message.delivery_timestamp':
-    'The timestamp in milliseconds that the delay message is expected to be delivered to consumer.',
-  'messaging.rocketmq.message.group':
-    'It is essential for FIFO message. Messages that belong to the same message group are always processed one by one within the same consumer group.',
-  'messaging.rocketmq.message.keys':
-    'Key(s) of message, another way to mark message besides message id.',
-  'messaging.rocketmq.message.tag': 'The secondary classifier of message besides topic.',
-  'messaging.rocketmq.message.type': 'Type of message.',
-  'messaging.rocketmq.namespace':
-    'Namespace of RocketMQ resources, resources in different namespaces are individual.',
-  'messaging.gcp_pubsub.message.ordering_key':
-    'The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.',
-  'messaging.gcp_pubsub.message.ack_id': 'The ack id for a given message.',
-  'messaging.gcp_pubsub.message.ack_deadline':
-    'The ack deadline in seconds set for the modify ack deadline request.',
-  'messaging.gcp_pubsub.message.delivery_attempt': 'The delivery attempt for a given message.',
-  'messaging.servicebus.message.delivery_count':
-    'Number of deliveries that have been attempted for this message.',
-  'messaging.servicebus.message.enqueued_time':
-    'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
-  'messaging.servicebus.disposition_status':
-    'Describes the [settlement type](https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock).',
-  'messaging.eventhubs.message.enqueued_time':
-    'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
-  'cpu.mode': 'The mode of the CPU',
-  'cpu.logical_number': 'The logical CPU number [0..n-1]',
-  'user_agent.original':
-    'Value of the [HTTP User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#field.user-agent) header sent by the client.',
-  'user_agent.name':
-    "Name of the user-agent extracted from original. Usually refers to the browser's name.",
-  'user_agent.version':
-    "Version of the user-agent extracted from original. Usually refers to the browser's version",
-  'user_agent.os.name': 'Human readable operating system name.',
-  'user_agent.os.version':
-    'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
-  'user_agent.synthetic.type':
-    'Specifies the category of synthetic traffic, such as tests or bots.',
-  'v8js.gc.type': 'The type of garbage collection.',
-  'v8js.heap.space.name': 'The name of the space type of heap memory.',
-  'source.address':
-    'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
-  'source.port': 'Source port number',
-  'faas.name': 'The name of the single function that this runtime instance executes.',
-  'faas.version': 'The immutable version of the function being executed.',
-  'faas.instance':
-    'The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.',
-  'faas.max_memory':
-    'The amount of memory available to the serverless function converted to Bytes.',
-  'faas.trigger': 'Type of the trigger which caused this function invocation.',
-  'faas.invoked_name': 'The name of the invoked function.',
-  'faas.invoked_provider': 'The cloud provider of the invoked function.',
-  'faas.invoked_region': 'The cloud region of the invoked function.',
-  'faas.invocation_id': 'The invocation ID of the current function invocation.',
-  'faas.time':
-    'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
-  'faas.cron':
-    'A string containing the schedule period as [Cron Expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm).',
-  'faas.coldstart':
-    'A boolean that is true if the serverless function is executed for the first time (aka cold-start).',
-  'faas.document.collection':
-    'The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name.',
-  'faas.document.operation': 'Describes the type of the operation that was performed on the data.',
-  'faas.document.time':
-    'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
-  'faas.document.name':
-    'The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name.',
-  'user.email': 'User email address.',
-  'user.full_name': "User's full name",
-  'user.hash': 'Unique user hash to correlate information for a user in anonymized form.',
-  'user.id': 'Unique identifier of the user.',
-  'user.name': 'Short name or login/username of the user.',
-  'user.roles': 'Array of user roles at the time of the event.',
-  'gcp.client.service':
-    'Identifies the Google Cloud service for which the official client library is intended.',
-  'gcp.cloud_run.job.execution':
-    'The name of the Cloud Run [execution](https://cloud.google.com/run/docs/managing/job-executions) being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
-  'gcp.cloud_run.job.task_index':
-    'The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
-  'gcp.apphub.application.container':
-    'The container within GCP where the AppHub application is defined.',
-  'gcp.apphub.application.location': 'The GCP zone or region where the application is defined.',
-  'gcp.apphub.application.id': 'The name of the application as configured in AppHub.',
-  'gcp.apphub.service.id': 'The name of the service as configured in AppHub.',
-  'gcp.apphub.service.environment_type':
-    'Environment of a service is the stage of a software lifecycle.',
-  'gcp.apphub.service.criticality_type':
-    'Criticality of a service indicates its importance to the business.',
-  'gcp.apphub.workload.id': 'The name of the workload as configured in AppHub.',
-  'gcp.apphub.workload.environment_type':
-    'Environment of a workload is the stage of a software lifecycle.',
-  'gcp.apphub.workload.criticality_type':
-    'Criticality of a workload indicates its importance to the business.',
-  'gcp.gce.instance.name':
-    'The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name](https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).',
-  'gcp.gce.instance.hostname':
-    'The hostname of a GCE instance. This is the full value of the default or [custom hostname](https://cloud.google.com/compute/docs/instances/custom-hostname-vm).',
-  'container.name': 'Container name used by container runtime.',
-  'container.id':
-    'Container ID. Usually a UUID, as for example used to [identify Docker containers](https://docs.docker.com/engine/containers/run/#container-identification). The UUID might be abbreviated.',
-  'container.runtime.name': 'The container runtime managing this container.',
-  'container.runtime.version':
-    'The version of the runtime of this process, as returned by the runtime without modification.',
-  'container.runtime.description':
-    'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
-  'container.image.name': 'Name of the image the container was built on.',
-  'container.image.tags':
-    'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
-  'container.image.id':
-    'Runtime specific image identifier. Usually a hash algorithm followed by a UUID.',
-  'container.image.repo_digests':
-    'Repo digests of the container image as provided by the container runtime.',
-  'container.command': 'The command used to run the container (i.e. the command name).',
-  'container.command_line':
-    'The full command run by the container as a single string representing the full command.',
-  'container.command_args':
-    'All the command arguments (including the command/executable itself) run by the container.',
-  'container.label':
-    'Container labels, `<key>` being the label name, the value being the label value.',
-  'container.csi.plugin.name':
-    'The name of the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin used by the volume.',
-  'container.csi.volume.id':
-    'The unique volume ID returned by the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin.',
-  'tls.cipher':
-    'String indicating the [cipher](https://datatracker.ietf.org/doc/html/rfc5246#appendix-A.5) used during the current connection.',
-  'tls.client.certificate':
-    'PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list.',
-  'tls.client.certificate_chain':
-    'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
-  'tls.client.hash.md5':
-    'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
-  'tls.client.hash.sha1':
-    'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
-  'tls.client.hash.sha256':
-    'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
-  'tls.client.issuer':
-    'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
-  'tls.client.ja3':
-    'A hash that identifies clients based on how they perform an SSL/TLS handshake.',
-  'tls.client.not_after':
-    'Date/Time indicating when client certificate is no longer considered valid.',
-  'tls.client.not_before':
-    'Date/Time indicating when client certificate is first considered valid.',
-  'tls.client.subject':
-    'Distinguished name of subject of the x.509 certificate presented by the client.',
-  'tls.client.supported_ciphers': 'Array of ciphers offered by the client during the client hello.',
-  'tls.curve': 'String indicating the curve used for the given cipher, when applicable',
-  'tls.established':
-    'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
-  'tls.next_protocol':
-    'String indicating the protocol being tunneled. Per the values in the [IANA registry](https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids), this string should be lower case.',
-  'tls.protocol.name':
-    'Normalized lowercase protocol name parsed from original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
-  'tls.protocol.version':
-    'Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
-  'tls.resumed':
-    'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
-  'tls.server.certificate':
-    'PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list.',
-  'tls.server.certificate_chain':
-    'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
-  'tls.server.hash.md5':
-    'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
-  'tls.server.hash.sha1':
-    'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
-  'tls.server.hash.sha256':
-    'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
-  'tls.server.issuer':
-    'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
-  'tls.server.ja3s':
-    'A hash that identifies servers based on how they perform an SSL/TLS handshake.',
-  'tls.server.not_after':
-    'Date/Time indicating when server certificate is no longer considered valid.',
-  'tls.server.not_before':
-    'Date/Time indicating when server certificate is first considered valid.',
-  'tls.server.subject':
-    'Distinguished name of subject of the x.509 certificate presented by the server.',
-  'deployment.name': 'The name of the deployment.',
-  'deployment.id': 'The id of the deployment.',
-  'deployment.status': 'The status of the deployment.',
-  'deployment.environment.name':
-    'Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).',
-  'peer.service':
-    'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
-  'ios.app.state': 'This attribute represents the state of the application.',
-  'http.request.body.size':
-    'The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
-  'http.request.header':
-    'HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
-  'http.request.method': 'HTTP request method.',
-  'http.request.method_original': 'Original HTTP method sent by the client in the request line.',
-  'http.request.resend_count':
-    'The ordinal number of request resending attempt (for any reason, including redirects).',
-  'http.request.size':
-    'The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.',
-  'http.response.body.size':
-    'The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
-  'http.response.header':
-    'HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
-  'http.response.size':
-    'The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.',
-  'http.response.status_code':
-    '[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).',
-  'http.route':
-    'The matched route, that is, the path template in the format used by the respective server framework.',
-  'http.connection.state': 'State of the HTTP connection in the HTTP connection pool.',
-  'elasticsearch.node.name':
-    'Represents the human-readable identifier of the node/instance to which a request was routed.',
-  'nodejs.eventloop.state': 'The state of event loop time.',
-  'hw.id': 'An identifier for the hardware component, unique within the monitored host',
-  'hw.name': 'An easily-recognizable name for the hardware component',
-  'hw.parent':
-    'Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)',
-  'hw.type': 'Type of the component',
-  'hw.state': 'The current state of the component',
-  'azure.service.request.id':
-    "The unique identifier of the service request. It's generated by the Azure service and returned with the response.",
-  'azure.resource_provider.namespace':
-    '[Azure Resource Provider Namespace](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) as recognized by the client.',
-  'azure.client.id': 'The unique identifier of the client instance.',
-  'azure.cosmosdb.connection.mode': 'Cosmos client connection mode.',
-  'azure.cosmosdb.operation.request_charge':
-    'The number of request units consumed by the operation.',
-  'azure.cosmosdb.request.body.size': 'Request payload size in bytes.',
-  'azure.cosmosdb.operation.contacted_regions':
-    'List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.',
-  'azure.cosmosdb.response.sub_status_code': 'Cosmos DB sub status code.',
-  'azure.cosmosdb.consistency.level':
-    'Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).',
-  'jvm.gc.action': 'Name of the garbage collector action.',
-  'jvm.gc.cause': 'Name of the garbage collector cause.',
-  'jvm.gc.name': 'Name of the garbage collector.',
-  'jvm.memory.type': 'The type of memory.',
-  'jvm.memory.pool.name': 'Name of the memory pool.',
-  'jvm.thread.daemon': 'Whether the thread is daemon or not.',
-  'jvm.thread.state': 'State of the thread.',
-  'jvm.buffer.pool.name': 'Name of the buffer pool.',
-  'exception.type':
-    'The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.',
-  'exception.message': 'The exception message.',
-  'exception.stacktrace':
-    'A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.',
-  'artifact.filename':
-    'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
-  'artifact.version': 'The version of the artifact.',
-  'artifact.purl':
-    'The [Package URL](https://github.com/package-url/purl-spec) of the [package artifact](https://slsa.dev/spec/v1.0/terminology#package-model) provides a standard way to identify and locate the packaged artifact.',
-  'artifact.hash':
-    'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), often found in checksum.txt on a release of the artifact and used to verify package integrity.',
-  'artifact.attestation.id':
-    'The id of the build [software attestation](https://slsa.dev/attestation-model).',
-  'artifact.attestation.filename':
-    'The provenance filename of the built attestation which directly relates to the build artifact filename. This filename SHOULD accompany the artifact at publish time. See the [SLSA Relationship](https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations) specification for more information.',
-  'artifact.attestation.hash':
-    'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), of the built attestation. Some envelopes in the [software attestation space](https://github.com/in-toto/attestation/tree/main/spec) also refer to this as the **digest**.',
-  'service.name': 'Logical name of the service.',
-  'service.version':
-    'The version string of the service API or implementation. The format is not defined by these conventions.',
-  'service.namespace': 'A namespace for `service.name`.',
-  'service.instance.id': 'The string ID of the service instance.',
-  'dns.question.name': 'The name being queried.',
-  'dns.answers': 'The list of IPv4 or IPv6 addresses resolved during DNS lookup.',
-  'go.memory.used': 'Memory used by the Go runtime.',
-  'go.memory.limit': 'Go runtime memory limit configured by the user, if a limit exists.',
-  'go.memory.allocated': 'Memory allocated to the heap by the application.',
-  'go.memory.allocations': 'Count of allocations to the heap by the application.',
-  'go.memory.gc.goal': 'Heap size target for the end of the GC cycle.',
-  'go.goroutine.count': 'Count of live goroutines.',
-  'go.processor.limit':
-    'The number of OS threads that can execute user-level Go code simultaneously.',
-  'go.schedule.duration':
-    'The time goroutines have spent in the scheduler in a runnable state before actually running.',
-  'go.config.gogc': 'Heap size target percentage configured by the user, otherwise 100.',
-  'cicd.pipeline.run.duration': 'Duration of a pipeline run grouped by pipeline, state and result.',
-  'cicd.pipeline.run.active':
-    'The number of pipeline runs currently active in the system by state.',
-  'cicd.worker.count': 'The number of workers on the CICD system by state.',
-  'cicd.pipeline.run.errors':
-    'The number of errors encountered in pipeline runs (eg. compile, test failures).',
-  'cicd.system.errors':
-    'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
-  'nodejs.eventloop.delay.min': 'Event loop minimum delay.',
-  'nodejs.eventloop.delay.max': 'Event loop maximum delay.',
-  'nodejs.eventloop.delay.mean': 'Event loop mean delay.',
-  'nodejs.eventloop.delay.stddev': 'Event loop standard deviation delay.',
-  'nodejs.eventloop.delay.p50': 'Event loop 50 percentile delay.',
-  'nodejs.eventloop.delay.p90': 'Event loop 90 percentile delay.',
-  'nodejs.eventloop.delay.p99': 'Event loop 99 percentile delay.',
-  'nodejs.eventloop.utilization': 'Event loop utilization.',
-  'nodejs.eventloop.time': 'Cumulative duration of time the event loop has been in each state.',
-  'v8js.gc.duration': 'Garbage collection duration.',
-  'v8js.memory.heap.limit': 'Total heap memory size pre-allocated.',
-  'v8js.memory.heap.used': 'Heap Memory size allocated.',
-  'v8js.heap.space.available_size': 'Heap space available size.',
-  'v8js.heap.space.physical_size': 'Committed size of a heap space.',
-  'otel.sdk.span.live':
-    'The number of created spans with `recording=true` for which the end operation has not been called yet.',
-  'otel.sdk.span.started': 'The number of created spans.',
-  'otel.sdk.processor.span.queue.size':
-    'The number of spans in the queue of a given instance of an SDK span processor.',
-  'otel.sdk.processor.span.queue.capacity':
-    'The maximum number of spans the queue of a given instance of an SDK span processor can hold.',
-  'otel.sdk.processor.span.processed':
-    'The number of spans for which the processing has finished, either successful or failed.',
-  'otel.sdk.exporter.span.inflight':
-    'The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
-  'otel.sdk.exporter.span.exported':
-    'The number of spans for which the export has finished, either successful or failed.',
-  'otel.sdk.log.created': 'The number of logs submitted to enabled SDK Loggers.',
-  'otel.sdk.processor.log.queue.size':
-    'The number of log records in the queue of a given instance of an SDK log processor.',
-  'otel.sdk.processor.log.queue.capacity':
-    'The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold.',
-  'otel.sdk.processor.log.processed':
-    'The number of log records for which the processing has finished, either successful or failed.',
-  'otel.sdk.exporter.log.inflight':
-    'The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
-  'otel.sdk.exporter.log.exported':
-    'The number of log records for which the export has finished, either successful or failed.',
-  'otel.sdk.exporter.metric_data_point.inflight':
-    'The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
-  'otel.sdk.exporter.metric_data_point.exported':
-    'The number of metric data points for which the export has finished, either successful or failed.',
-  'otel.sdk.metric_reader.collection.duration':
-    'The duration of the collect operation of the metric reader.',
-  'otel.sdk.exporter.operation.duration': 'The duration of exporting a batch of telemetry records.',
-  'dns.lookup.duration': 'Measures the time taken to perform a DNS lookup.',
-  'aspnetcore.routing.match_attempts':
-    'Number of requests that were attempted to be matched to an endpoint.',
-  'aspnetcore.diagnostics.exceptions':
-    'Number of exceptions caught by exception handling middleware.',
-  'aspnetcore.rate_limiting.active_request_leases':
-    'Number of requests that are currently active on the server that hold a rate limiting lease.',
-  'aspnetcore.rate_limiting.request_lease.duration':
-    'The duration of rate limiting lease held by requests on the server.',
-  'aspnetcore.rate_limiting.request.time_in_queue':
-    'The time the request spent in a queue waiting to acquire a rate limiting lease.',
-  'aspnetcore.rate_limiting.queued_requests':
-    'Number of requests that are currently queued, waiting to acquire a rate limiting lease.',
-  'aspnetcore.rate_limiting.requests':
-    'Number of requests that tried to acquire a rate limiting lease.',
-  'db.client.operation.duration': 'Duration of database client operations.',
-  'db.client.connection.count':
-    'The number of connections that are currently in state described by the `state` attribute.',
-  'db.client.connection.idle.max': 'The maximum number of idle open connections allowed.',
-  'db.client.connection.idle.min': 'The minimum number of idle open connections allowed.',
-  'db.client.connection.max': 'The maximum number of open connections allowed.',
-  'db.client.connection.pending_requests':
-    'The number of current pending requests for an open connection.',
-  'db.client.connection.timeouts':
-    'The number of connection timeouts that have occurred trying to obtain a connection from the pool.',
-  'db.client.connection.create_time': 'The time it took to create a new connection.',
-  'db.client.connection.wait_time': 'The time it took to obtain an open connection from the pool.',
-  'db.client.connection.use_time':
-    'The time between borrowing a connection and returning it to the pool.',
-  'db.client.response.returned_rows':
-    'The actual number of records returned by the database operation.',
-  'hw.host.ambient_temperature': 'Ambient (external) temperature of the physical host.',
-  'hw.host.energy': 'Total energy consumed by the entire physical host, in joules.',
-  'hw.host.heating_margin':
-    'By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors.',
-  'hw.host.power':
-    'Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred).',
-  'signalr.server.connection.duration': 'The duration of connections on the server.',
-  'signalr.server.active_connections':
-    'Number of connections that are currently active on the server.',
-  'jvm.memory.used': 'Measure of memory used.',
-  'jvm.memory.committed': 'Measure of memory committed.',
-  'jvm.memory.limit': 'Measure of max obtainable memory.',
-  'jvm.memory.used_after_last_gc':
-    'Measure of memory used, as measured after the most recent garbage collection event on this pool.',
-  'jvm.gc.duration': 'Duration of JVM garbage collection actions.',
-  'jvm.thread.count': 'Number of executing platform threads.',
-  'jvm.class.loaded': 'Number of classes loaded since JVM start.',
-  'jvm.class.unloaded': 'Number of classes unloaded since JVM start.',
-  'jvm.class.count': 'Number of classes currently loaded.',
-  'jvm.cpu.count': 'Number of processors available to the Java virtual machine.',
-  'jvm.cpu.time': 'CPU time used by the process as reported by the JVM.',
-  'jvm.cpu.recent_utilization': 'Recent CPU utilization for the process as reported by the JVM.',
-  'system.uptime': 'The time the system has been running.',
-  'system.cpu.physical.count':
-    'Reports the number of actual physical processor cores on the hardware.',
-  'system.cpu.logical.count':
-    'Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking.',
-  'system.cpu.time': 'Seconds each logical CPU spent on each mode.',
-  'system.cpu.utilization':
-    'For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.',
-  'system.cpu.frequency': 'Operating frequency of the logical CPU in Hertz.',
-  'system.memory.usage': 'Reports memory in use by state.',
-  'system.memory.limit': 'Total virtual memory available in the system.',
-  'system.memory.shared': 'Shared memory used (mostly by tmpfs).',
-  'system.memory.utilization': 'TODO.',
-  'system.paging.usage': 'Unix swap or windows pagefile usage.',
-  'system.paging.utilization': 'TODO.',
-  'system.paging.faults': 'TODO.',
-  'system.paging.operations': 'TODO.',
-  'system.disk.io': 'TODO.',
-  'system.disk.operations': 'TODO.',
-  'system.disk.io_time': 'Time disk spent activated.',
-  'system.disk.operation_time': 'Sum of the time each operation took to complete.',
-  'system.disk.merged': 'TODO.',
-  'system.disk.limit': 'The total storage capacity of the disk.',
-  'system.filesystem.usage': "Reports a filesystem's space usage across different states.",
-  'system.filesystem.utilization': 'TODO.',
-  'system.filesystem.limit': 'The total storage capacity of the filesystem.',
-  'system.network.dropped':
-    'Count of packets that are dropped or discarded even though there was no error.',
-  'system.network.packets': 'TODO.',
-  'system.network.errors': 'Count of network errors detected.',
-  'system.network.io': 'TODO.',
-  'system.network.connection.count': 'TODO.',
-  'system.process.count': 'Total number of processes in each state.',
-  'system.process.created': 'Total number of processes created over uptime of the host.',
-  'system.linux.memory.available':
-    'An estimate of how much memory is available for starting new applications, without causing swapping.',
-  'system.linux.memory.slab.usage':
-    'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
-  'rpc.server.duration': 'Measures the duration of inbound RPC.',
-  'rpc.server.request.size': 'Measures the size of RPC request messages (uncompressed).',
-  'rpc.server.response.size': 'Measures the size of RPC response messages (uncompressed).',
-  'rpc.server.requests_per_rpc': 'Measures the number of messages received per RPC.',
-  'rpc.server.responses_per_rpc': 'Measures the number of messages sent per RPC.',
-  'rpc.client.duration': 'Measures the duration of outbound RPC.',
-  'rpc.client.request.size': 'Measures the size of RPC request messages (uncompressed).',
-  'rpc.client.response.size': 'Measures the size of RPC response messages (uncompressed).',
-  'rpc.client.requests_per_rpc': 'Measures the number of messages received per RPC.',
-  'rpc.client.responses_per_rpc': 'Measures the number of messages sent per RPC.',
-  'k8s.pod.uptime': 'The time the Pod has been running.',
-  'k8s.pod.cpu.time': 'Total CPU time consumed.',
-  'k8s.pod.cpu.usage':
-    "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
-  'k8s.pod.memory.usage': 'Memory usage of the Pod.',
-  'k8s.pod.network.io': 'Network bytes for the Pod.',
-  'k8s.pod.network.errors': 'Pod network errors.',
-  'k8s.pod.filesystem.available': 'Pod filesystem available bytes.',
-  'k8s.pod.filesystem.capacity': 'Pod filesystem capacity.',
-  'k8s.pod.filesystem.usage': 'Pod filesystem usage.',
-  'k8s.pod.volume.available': 'Pod volume storage space available.',
-  'k8s.pod.volume.capacity': 'Pod volume total capacity.',
-  'k8s.pod.volume.usage': 'Pod volume usage.',
-  'k8s.pod.volume.inode.count': "The total inodes in the filesystem of the Pod's volume.",
-  'k8s.pod.volume.inode.used': "The inodes used by the filesystem of the Pod's volume.",
-  'k8s.pod.volume.inode.free': "The free inodes in the filesystem of the Pod's volume.",
-  'k8s.node.uptime': 'The time the Node has been running.',
-  'k8s.node.allocatable.cpu': 'Amount of cpu allocatable on the node.',
-  'k8s.node.allocatable.ephemeral_storage': 'Amount of ephemeral-storage allocatable on the node.',
-  'k8s.node.allocatable.memory': 'Amount of memory allocatable on the node.',
-  'k8s.node.allocatable.pods': 'Amount of pods allocatable on the node.',
-  'k8s.node.cpu.time': 'Total CPU time consumed.',
-  'k8s.node.cpu.usage':
-    "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
-  'k8s.node.filesystem.available': 'Node filesystem available bytes.',
-  'k8s.node.filesystem.capacity': 'Node filesystem capacity.',
-  'k8s.node.filesystem.usage': 'Node filesystem usage.',
-  'k8s.node.memory.usage': 'Memory usage of the Node.',
-  'k8s.node.network.io': 'Network bytes for the Node.',
-  'k8s.node.network.errors': 'Node network errors.',
-  'k8s.deployment.desired_pods': 'Number of desired replica pods in this deployment.',
-  'k8s.deployment.available_pods':
-    'Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment.',
-  'k8s.replicaset.desired_pods': 'Number of desired replica pods in this replicaset.',
-  'k8s.replicaset.available_pods':
-    'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset.',
-  'k8s.replicationcontroller.desired_pods':
-    'Number of desired replica pods in this replication controller.',
-  'k8s.replicationcontroller.available_pods':
-    'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller.',
-  'k8s.statefulset.desired_pods': 'Number of desired replica pods in this statefulset.',
-  'k8s.statefulset.ready_pods':
-    'The number of replica pods created for this statefulset with a Ready Condition.',
-  'k8s.statefulset.current_pods':
-    'The number of replica pods created by the statefulset controller from the statefulset version indicated by currentRevision.',
-  'k8s.statefulset.updated_pods':
-    'Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.',
-  'k8s.hpa.desired_pods':
-    'Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.',
-  'k8s.hpa.current_pods':
-    'Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.',
-  'k8s.hpa.max_pods':
-    'The upper limit for the number of replica pods to which the autoscaler can scale up.',
-  'k8s.hpa.min_pods':
-    'The lower limit for the number of replica pods to which the autoscaler can scale down.',
-  'k8s.hpa.metric.target.cpu.value': 'Target value for CPU resource in HPA config.',
-  'k8s.hpa.metric.target.cpu.average_value': 'Target average value for CPU resource in HPA config.',
-  'k8s.hpa.metric.target.cpu.average_utilization':
-    'Target average utilization, in percentage, for CPU resource in HPA config.',
-  'k8s.daemonset.current_scheduled_nodes':
-    'Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.',
-  'k8s.daemonset.desired_scheduled_nodes':
-    'Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).',
-  'k8s.daemonset.misscheduled_nodes':
-    'Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod.',
-  'k8s.daemonset.ready_nodes':
-    'Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.',
-  'k8s.job.active_pods': 'The number of pending and actively running pods for a job.',
-  'k8s.job.failed_pods': 'The number of pods which reached phase Failed for a job.',
-  'k8s.job.successful_pods': 'The number of pods which reached phase Succeeded for a job.',
-  'k8s.job.desired_successful_pods':
-    'The desired number of successfully finished pods the job should be run with.',
-  'k8s.job.max_parallel_pods':
-    'The max desired number of pods the job should run at any given time.',
-  'k8s.cronjob.active_jobs': 'The number of actively running jobs for a cronjob.',
-  'k8s.container.cpu.limit': 'Maximum CPU resource limit set for the container.',
-  'k8s.container.cpu.request': 'CPU resource requested for the container.',
-  'k8s.container.memory.limit': 'Maximum memory resource limit set for the container.',
-  'k8s.container.memory.request': 'Memory resource requested for the container.',
-  'k8s.container.storage.limit': 'Maximum storage resource limit set for the container.',
-  'k8s.container.storage.request': 'Storage resource requested for the container.',
-  'k8s.container.ephemeral_storage.limit':
-    'Maximum ephemeral storage resource limit set for the container.',
-  'k8s.container.ephemeral_storage.request':
-    'Ephemeral storage resource requested for the container.',
-  'k8s.container.restart.count':
-    'Describes how many times the container has restarted (since the last counter reset).',
-  'k8s.container.ready':
-    'Indicates whether the container is currently marked as ready to accept traffic, based on its readiness probe (1 = ready, 0 = not ready).',
-  'k8s.resourcequota.cpu.limit.hard':
-    'The CPU limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.cpu.limit.used':
-    'The CPU limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.cpu.request.hard':
-    'The CPU requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.cpu.request.used':
-    'The CPU requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.memory.limit.hard':
-    'The memory limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.memory.limit.used':
-    'The memory limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.memory.request.hard':
-    'The memory requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.memory.request.used':
-    'The memory requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.hugepage_count.request.hard':
-    'The huge page requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.hugepage_count.request.used':
-    'The huge page requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.storage.request.hard':
-    'The storage requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.storage.request.used':
-    'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.persistentvolumeclaim_count.hard':
-    'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.persistentvolumeclaim_count.used':
-    'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.ephemeral_storage.request.hard':
-    'The sum of local ephemeral storage requests in the namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.ephemeral_storage.request.used':
-    'The sum of local ephemeral storage requests in the namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.ephemeral_storage.limit.hard':
-    'The sum of local ephemeral storage limits in the namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.ephemeral_storage.limit.used':
-    'The sum of local ephemeral storage limits in the namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'k8s.resourcequota.object_count.hard':
-    'The object count limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
-  'k8s.resourcequota.object_count.used':
-    'The object count limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
-  'azure.cosmosdb.client.operation.request_charge':
-    '[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation.',
-  'azure.cosmosdb.client.active_instance.count': 'Number of active client instances.',
-  'container.uptime': 'The time the container has been running.',
-  'container.cpu.time': 'Total CPU time consumed.',
-  'container.cpu.usage':
-    "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
-  'container.memory.usage': 'Memory usage of the container.',
-  'container.disk.io': 'Disk bytes for the container.',
-  'container.network.io': 'Network bytes for the container.',
-  'container.filesystem.available': 'Container filesystem available bytes.',
-  'container.filesystem.capacity': 'Container filesystem capacity.',
-  'container.filesystem.usage': 'Container filesystem usage.',
-  'faas.invoke_duration': "Measures the duration of the function's logic execution.",
-  'faas.init_duration':
-    "Measures the duration of the function's initialization, such as a cold start.",
-  'faas.coldstarts': 'Number of invocation cold starts.',
-  'faas.errors': 'Number of invocation errors.',
-  'faas.invocations': 'Number of successful invocations.',
-  'faas.timeouts': 'Number of invocation timeouts.',
-  'faas.mem_usage': 'Distribution of max memory usage per invocation.',
-  'faas.cpu_usage': 'Distribution of CPU usage per invocation.',
-  'faas.net_io': 'Distribution of net I/O usage per invocation.',
-  'vcs.change.count':
-    'The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged).',
-  'vcs.change.duration':
-    'The time duration a change (pull request/merge request/changelist) has been in a given state.',
-  'vcs.change.time_to_approval':
-    'The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.',
-  'vcs.change.time_to_merge':
-    'The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.',
-  'vcs.repository.count': 'The number of repositories in an organization.',
-  'vcs.ref.count': 'The number of refs of type branch or tag in a repository.',
-  'vcs.ref.lines_delta':
-    'The number of lines added/removed in a ref (branch) relative to the ref from the `vcs.ref.base.name` attribute.',
-  'vcs.ref.revisions_delta':
-    'The number of revisions (commits) a ref (branch) is ahead/behind the branch from the `vcs.ref.base.name` attribute.',
-  'vcs.ref.time':
-    'Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`.',
-  'vcs.contributor.count': 'The number of unique contributors to a repository.',
-  'gen_ai.client.token.usage': 'Number of input and output tokens used.',
-  'gen_ai.client.operation.duration': 'GenAI operation duration.',
-  'gen_ai.server.request.duration':
-    'Generative AI server request duration such as time-to-last byte or last output token.',
-  'gen_ai.server.time_per_output_token':
-    'Time per output token generated after the first token for successful responses.',
-  'gen_ai.server.time_to_first_token': 'Time to generate first token for successful responses.',
-  'hw.energy': 'Energy consumed by the component.',
-  'hw.errors': 'Number of errors encountered by the component.',
-  'hw.power': 'Instantaneous power consumed by the component.',
-  'hw.status': 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
-  'kestrel.active_connections': 'Number of connections that are currently active on the server.',
-  'kestrel.connection.duration': 'The duration of connections on the server.',
-  'kestrel.rejected_connections': 'Number of connections rejected by the server.',
-  'kestrel.queued_connections':
-    'Number of connections that are currently queued and are waiting to start.',
-  'kestrel.queued_requests':
-    'Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.',
-  'kestrel.upgraded_connections':
-    'Number of connections that are currently upgraded (WebSockets). .',
-  'kestrel.tls_handshake.duration': 'The duration of TLS handshakes on the server.',
-  'kestrel.active_tls_handshakes':
-    'Number of TLS handshakes that are currently in progress on the server.',
-  'process.cpu.time': 'Total CPU seconds broken down by different states.',
-  'process.cpu.utilization':
-    'Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.',
-  'process.memory.usage': 'The amount of physical memory in use.',
-  'process.memory.virtual': 'The amount of committed virtual memory.',
-  'process.disk.io': 'Disk bytes transferred.',
-  'process.network.io': 'Network bytes transferred.',
-  'process.thread.count': 'Process threads count.',
-  'process.open_file_descriptor.count': 'Number of file descriptors in use by the process.',
-  'process.context_switches': 'Number of times the process has been context switched.',
-  'process.paging.faults': 'Number of page faults the process has made.',
-  'process.uptime': 'The time the process has been running.',
-  'jvm.memory.init': 'Measure of initial memory requested.',
-  'jvm.system.cpu.utilization':
-    'Recent CPU utilization for the whole system as reported by the JVM.',
-  'jvm.system.cpu.load_1m':
-    'Average CPU load of the whole system for the last minute as reported by the JVM.',
-  'jvm.buffer.memory.used': 'Measure of memory used by buffers.',
-  'jvm.buffer.memory.limit': 'Measure of total memory capacity of buffers.',
-  'jvm.buffer.count': 'Number of buffers in the pool.',
-  'jvm.file_descriptor.count': 'Number of open file descriptors as reported by the JVM.',
-  'cpython.gc.collections':
-    'The number of times a generation was collected since interpreter start.',
-  'cpython.gc.collected_objects':
-    'The total number of objects collected inside a generation since interpreter start.',
-  'cpython.gc.uncollectable_objects':
-    'The total number of objects which were found to be uncollectable inside a generation since interpreter start.',
-  'dotnet.process.cpu.count': 'The number of processors available to the process.',
-  'dotnet.process.cpu.time': 'CPU time used by the process.',
-  'dotnet.process.memory.working_set':
-    'The number of bytes of physical memory mapped to the process context.',
-  'dotnet.gc.collections':
-    'The number of garbage collections that have occurred since the process has started.',
-  'dotnet.gc.heap.total_allocated':
-    'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
-  'dotnet.gc.last_collection.memory.committed_size':
-    'The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.',
-  'dotnet.gc.last_collection.heap.size':
-    'The managed GC heap size (including fragmentation), as observed during the latest garbage collection.',
-  'dotnet.gc.last_collection.heap.fragmentation.size':
-    'The heap fragmentation, as observed during the latest garbage collection.',
-  'dotnet.gc.pause.time': 'The total amount of time paused in GC since the process has started.',
-  'dotnet.jit.compiled_il.size':
-    'Count of bytes of intermediate language that have been compiled since the process has started.',
-  'dotnet.jit.compiled_methods':
-    'The number of times the JIT compiler (re)compiled methods since the process has started.',
-  'dotnet.jit.compilation.time':
-    'The amount of time the JIT compiler has spent compiling methods since the process has started.',
-  'dotnet.monitor.lock_contentions':
-    'The number of times there was contention when trying to acquire a monitor lock since the process has started.',
-  'dotnet.thread_pool.thread.count': 'The number of thread pool threads that currently exist.',
-  'dotnet.thread_pool.work_item.count':
-    'The number of work items that the thread pool has completed since the process has started.',
-  'dotnet.thread_pool.queue.length':
-    'The number of work items that are currently queued to be processed by the thread pool.',
-  'dotnet.timer.count': 'The number of timer instances that are currently active.',
-  'dotnet.assembly.count': 'The number of .NET assemblies that are currently loaded.',
-  'dotnet.exceptions': 'The number of exceptions that have been thrown in managed code.',
-  'http.server.request.duration': 'Duration of HTTP server requests.',
-  'http.server.active_requests': 'Number of active HTTP server requests.',
-  'http.server.request.body.size': 'Size of HTTP server request bodies.',
-  'http.server.response.body.size': 'Size of HTTP server response bodies.',
-  'http.client.request.duration': 'Duration of HTTP client requests.',
-  'http.client.request.body.size': 'Size of HTTP client request bodies.',
-  'http.client.response.body.size': 'Size of HTTP client response bodies.',
-  'http.client.open_connections':
-    'Number of outbound HTTP connections that are currently active or idle on the client.',
-  'http.client.connection.duration':
-    'The duration of the successfully established outbound HTTP connections.',
-  'http.client.active_requests': 'Number of active HTTP requests.',
-  'messaging.client.operation.duration':
-    'Duration of messaging operation initiated by a producer or consumer client.',
-  'messaging.process.duration': 'Duration of processing operation.',
-  'messaging.client.sent.messages': 'Number of messages producer attempted to send to the broker.',
-  'messaging.client.consumed.messages':
-    'Number of messages that were delivered to the application.',
-} as const;
+import type { TSemconvFields } from '../types/semconv_types';
 
-export type SemconvFieldName = keyof typeof semconvFlat;
-export type TSemconvFields = typeof semconvFlat;
-
-// Statistics about the generated data
-export const semconvStats = {
-  registryGroups: 132,
-  metricGroups: 347,
-  totalGroups: 479,
-  totalFields: 956,
-  generatedAt: '2025-08-20T16:07:17.881Z',
-} as const;
+export const semconvFlat: TSemconvFields = {
+  'webengine.name': {
+    name: 'webengine.name',
+    description: 'The name of the web engine.',
+    type: 'keyword',
+    example: 'WildFly',
+  },
+  'webengine.version': {
+    name: 'webengine.version',
+    description: 'The version of the web engine.',
+    type: 'keyword',
+    example: '21.0.0',
+  },
+  'webengine.description': {
+    name: 'webengine.description',
+    description:
+      'Additional description of the web engine (e.g. detailed version and edition information).',
+    type: 'keyword',
+    example: 'WildFly Full 21.0.0.Final (WildFly Core 13.0.1.Final) - 2.2.2.Final',
+  },
+  'oci.manifest.digest': {
+    name: 'oci.manifest.digest',
+    description:
+      'The digest of the OCI image manifest. For container images specifically is the digest by which the container image is known.',
+    type: 'keyword',
+    example: 'sha256:e4ca62c0d62f3e886e684806dfe9d4e0cda60d54986898173c1083856cfda0f4',
+  },
+  'destination.address': {
+    name: 'destination.address',
+    description:
+      'Destination address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'destination.example.com',
+  },
+  'destination.port': {
+    name: 'destination.port',
+    description: 'Destination port number',
+    type: 'long',
+    example: '3389',
+  },
+  'browser.brands': {
+    name: 'browser.brands',
+    description: 'Array of brand name and version separated by a space',
+    type: 'keyword',
+    example: ' Not A;Brand 99,Chromium 99,Chrome 99',
+  },
+  'browser.platform': {
+    name: 'browser.platform',
+    description: 'The platform on which the browser is running',
+    type: 'keyword',
+    example: 'Windows',
+  },
+  'browser.mobile': {
+    name: 'browser.mobile',
+    description: 'A boolean that is true if the browser is running on a mobile device',
+    type: 'boolean',
+  },
+  'browser.language': {
+    name: 'browser.language',
+    description: 'Preferred language of the user using the browser',
+    type: 'keyword',
+    example: 'en',
+  },
+  'cassandra.coordinator.dc': {
+    name: 'cassandra.coordinator.dc',
+    description: 'The data center of the coordinating node for a query.',
+    type: 'keyword',
+    example: 'u',
+  },
+  'cassandra.coordinator.id': {
+    name: 'cassandra.coordinator.id',
+    description: 'The ID of the coordinating node for a query.',
+    type: 'keyword',
+    example: 'b',
+  },
+  'cassandra.consistency.level': {
+    name: 'cassandra.consistency.level',
+    description:
+      'The consistency level of the query. Based on consistency values from [CQL](https://docs.datastax.com/en/cassandra-oss/3.0/cassandra/dml/dmlConfigConsistency.html).',
+    type: 'keyword',
+  },
+  'cassandra.query.idempotent': {
+    name: 'cassandra.query.idempotent',
+    description: 'Whether or not the query is idempotent.',
+    type: 'boolean',
+  },
+  'cassandra.page.size': {
+    name: 'cassandra.page.size',
+    description: 'The fetch size used for paging, i.e. how many rows will be returned at once.',
+    type: 'long',
+    example: '5000',
+  },
+  'cassandra.speculative_execution.count': {
+    name: 'cassandra.speculative_execution.count',
+    description:
+      'The number of times a query was speculatively executed. Not set or `0` if the query was not executed speculatively.',
+    type: 'long',
+    example: '0',
+  },
+  'mainframe.lpar.name': {
+    name: 'mainframe.lpar.name',
+    description:
+      'Name of the logical partition that hosts a systems with a mainframe operating system.',
+    type: 'keyword',
+    example: 'LPAR01',
+  },
+  'rpc.connect_rpc.error_code': {
+    name: 'rpc.connect_rpc.error_code',
+    description:
+      'The [error codes](https://connectrpc.com//docs/protocol/#error-codes) of the Connect request. Error codes are always string values.',
+    type: 'keyword',
+  },
+  'rpc.connect_rpc.request.metadata': {
+    name: 'rpc.connect_rpc.request.metadata',
+    description:
+      'Connect request metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: '1.2.3.4,1.2.3.5',
+  },
+  'rpc.connect_rpc.response.metadata': {
+    name: 'rpc.connect_rpc.response.metadata',
+    description:
+      'Connect response metadata, `<key>` being the normalized Connect Metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: 'attribute_value',
+  },
+  'rpc.grpc.status_code': {
+    name: 'rpc.grpc.status_code',
+    description:
+      'The gRPC status code of the last gRPC requests performed in scope of this export call.',
+    type: 'keyword',
+  },
+  'rpc.grpc.request.metadata': {
+    name: 'rpc.grpc.request.metadata',
+    description:
+      'gRPC request metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: '1.2.3.4,1.2.3.5',
+  },
+  'rpc.grpc.response.metadata': {
+    name: 'rpc.grpc.response.metadata',
+    description:
+      'gRPC response metadata, `<key>` being the normalized gRPC Metadata key (lowercase), the value being the metadata values.',
+    type: 'keyword',
+    example: 'attribute_value',
+  },
+  'rpc.jsonrpc.error_code': {
+    name: 'rpc.jsonrpc.error_code',
+    description: '`error.code` property of response if it is an error response.',
+    type: 'long',
+    example: '-32700',
+  },
+  'rpc.jsonrpc.error_message': {
+    name: 'rpc.jsonrpc.error_message',
+    description: '`error.message` property of response if it is an error response.',
+    type: 'keyword',
+    example: 'Parse error',
+  },
+  'rpc.jsonrpc.request_id': {
+    name: 'rpc.jsonrpc.request_id',
+    description:
+      '`id` property of request or response. Since protocol allows id to be int, string, `null` or missing (for notifications), value is expected to be cast to string for simplicity. Use empty string in case of `null` value. Omit entirely if this is a notification.',
+    type: 'keyword',
+    example: '10',
+  },
+  'rpc.jsonrpc.version': {
+    name: 'rpc.jsonrpc.version',
+    description:
+      "Protocol version as in `jsonrpc` property of request/response. Since JSON-RPC 1.0 doesn't specify this, the value can be omitted.",
+    type: 'keyword',
+    example: '2.0',
+  },
+  'rpc.method': {
+    name: 'rpc.method',
+    description:
+      'The name of the (logical) method being called, must be equal to the $method part in the span name.',
+    type: 'keyword',
+    example: 'e',
+  },
+  'rpc.service': {
+    name: 'rpc.service',
+    description:
+      'The full (logical) name of the service being called, including its package name, if applicable.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'rpc.system': {
+    name: 'rpc.system',
+    description:
+      'A string identifying the remoting system. See below for a list of well-known identifiers.',
+    type: 'keyword',
+  },
+  'rpc.message.type': {
+    name: 'rpc.message.type',
+    description: 'Whether this is a received or sent message.',
+    type: 'keyword',
+  },
+  'rpc.message.id': {
+    name: 'rpc.message.id',
+    description:
+      'MUST be calculated as two different counters starting from `1` one for sent messages and one for received message.',
+    type: 'long',
+  },
+  'rpc.message.compressed_size': {
+    name: 'rpc.message.compressed_size',
+    description: 'Compressed size of the message in bytes.',
+    type: 'long',
+  },
+  'rpc.message.uncompressed_size': {
+    name: 'rpc.message.uncompressed_size',
+    description: 'Uncompressed size of the message in bytes.',
+    type: 'long',
+  },
+  'openai.request.service_tier': {
+    name: 'openai.request.service_tier',
+    description: 'The service tier requested. May be a specific tier, default, or auto.',
+    type: 'keyword',
+    example: 'auto',
+  },
+  'openai.response.service_tier': {
+    name: 'openai.response.service_tier',
+    description: 'The service tier used for the response.',
+    type: 'keyword',
+    example: 'scale',
+  },
+  'openai.response.system_fingerprint': {
+    name: 'openai.response.system_fingerprint',
+    description: 'A fingerprint to track any eventual change in the Generative AI environment.',
+    type: 'keyword',
+    example: 'fp_44709d6fcb',
+  },
+  'opentracing.ref_type': {
+    name: 'opentracing.ref_type',
+    description: 'Parent-child Reference type',
+    type: 'keyword',
+  },
+  'cloudfoundry.system.id': {
+    name: 'cloudfoundry.system.id',
+    description: 'A guid or another name describing the event source.',
+    type: 'keyword',
+    example: 'cf/gorouter',
+  },
+  'cloudfoundry.system.instance.id': {
+    name: 'cloudfoundry.system.instance.id',
+    description: 'A guid describing the concrete instance of the event source.',
+    type: 'keyword',
+    example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
+  },
+  'cloudfoundry.app.name': {
+    name: 'cloudfoundry.app.name',
+    description: 'The name of the application.',
+    type: 'keyword',
+    example: 'my-app-name',
+  },
+  'cloudfoundry.app.id': {
+    name: 'cloudfoundry.app.id',
+    description: 'The guid of the application.',
+    type: 'keyword',
+    example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
+  },
+  'cloudfoundry.app.instance.id': {
+    name: 'cloudfoundry.app.instance.id',
+    description: 'The index of the application instance. 0 when just one instance is active.',
+    type: 'keyword',
+    example: '0',
+  },
+  'cloudfoundry.space.name': {
+    name: 'cloudfoundry.space.name',
+    description: 'The name of the CloudFoundry space the application is running in.',
+    type: 'keyword',
+    example: 'my-space-name',
+  },
+  'cloudfoundry.space.id': {
+    name: 'cloudfoundry.space.id',
+    description: 'The guid of the CloudFoundry space the application is running in.',
+    type: 'keyword',
+    example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
+  },
+  'cloudfoundry.org.name': {
+    name: 'cloudfoundry.org.name',
+    description: 'The name of the CloudFoundry organization the app is running in.',
+    type: 'keyword',
+    example: 'my-org-name',
+  },
+  'cloudfoundry.org.id': {
+    name: 'cloudfoundry.org.id',
+    description: 'The guid of the CloudFoundry org the application is running in.',
+    type: 'keyword',
+    example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
+  },
+  'cloudfoundry.process.id': {
+    name: 'cloudfoundry.process.id',
+    description: 'The UID identifying the process.',
+    type: 'keyword',
+    example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
+  },
+  'cloudfoundry.process.type': {
+    name: 'cloudfoundry.process.type',
+    description: 'The type of process.',
+    type: 'keyword',
+    example: 'web',
+  },
+  'server.address': {
+    name: 'server.address',
+    description:
+      'Server domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'server.port': {
+    name: 'server.port',
+    description: 'Server port number.',
+    type: 'long',
+    example: '80',
+  },
+  'system.cpu.logical_number': {
+    name: 'system.cpu.logical_number',
+    description: 'Deprecated, use `cpu.logical_number` instead.',
+    type: 'long',
+    example: '1',
+  },
+  'vcs.repository.url.full': {
+    name: 'vcs.repository.url.full',
+    description:
+      'The [canonical URL](https://support.google.com/webmasters/answer/10347851?hl=en#:~:text=A%20canonical%20URL%20is%20the,Google%20chooses%20one%20as%20canonical.) of the repository providing the complete HTTP(S) address in order to locate and identify the repository through a browser.',
+    type: 'keyword',
+    example: 'https://github.com/opentelemetry/open-telemetry-collector-contrib',
+  },
+  'vcs.repository.name': {
+    name: 'vcs.repository.name',
+    description:
+      'The human readable name of the repository. It SHOULD NOT include any additional identifier like Group/SubGroup in GitLab or organization in GitHub.',
+    type: 'keyword',
+    example: 'semantic-conventions',
+  },
+  'vcs.ref.base.name': {
+    name: 'vcs.ref.base.name',
+    description:
+      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
+    type: 'keyword',
+    example: 'my-feature-branch',
+  },
+  'vcs.ref.base.type': {
+    name: 'vcs.ref.base.type',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    type: 'keyword',
+    example: 'branch',
+  },
+  'vcs.ref.base.revision': {
+    name: 'vcs.ref.base.revision',
+    description:
+      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
+    type: 'keyword',
+    example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
+  },
+  'vcs.ref.head.name': {
+    name: 'vcs.ref.head.name',
+    description:
+      'The name of the [reference](https://git-scm.com/docs/gitglossary#def_ref) such as **branch** or **tag** in the repository.',
+    type: 'keyword',
+    example: 'my-feature-branch',
+  },
+  'vcs.ref.head.type': {
+    name: 'vcs.ref.head.type',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    type: 'keyword',
+    example: 'branch',
+  },
+  'vcs.ref.head.revision': {
+    name: 'vcs.ref.head.revision',
+    description:
+      'The revision, literally [revised version](https://www.merriam-webster.com/dictionary/revision), The revision most often refers to a commit object in Git, or a revision number in SVN.',
+    type: 'keyword',
+    example: '9d59409acf479dfa0df1aa568182e43e43df8bbe28d60fcf2bc52e30068802cc',
+  },
+  'vcs.ref.type': {
+    name: 'vcs.ref.type',
+    description:
+      'The type of the [reference](https://git-scm.com/docs/gitglossary#def_ref) in the repository.',
+    type: 'keyword',
+    example: 'branch',
+  },
+  'vcs.revision_delta.direction': {
+    name: 'vcs.revision_delta.direction',
+    description: 'The type of revision comparison.',
+    type: 'keyword',
+    example: 'ahead',
+  },
+  'vcs.line_change.type': {
+    name: 'vcs.line_change.type',
+    description: 'The type of line change being measured on a branch or change.',
+    type: 'keyword',
+    example: 'added',
+  },
+  'vcs.change.title': {
+    name: 'vcs.change.title',
+    description:
+      'The human readable title of the change (pull request/merge request/changelist). This title is often a brief summary of the change and may get merged in to a ref as the commit summary.',
+    type: 'keyword',
+    example: 'Fixes broken thing',
+  },
+  'vcs.change.id': {
+    name: 'vcs.change.id',
+    description:
+      'The ID of the change (pull request/merge request/changelist) if applicable. This is usually a unique (within repository) identifier generated by the VCS system.',
+    type: 'keyword',
+    example: '123',
+  },
+  'vcs.change.state': {
+    name: 'vcs.change.state',
+    description: 'The state of the change (pull request/merge request/changelist).',
+    type: 'keyword',
+    example: 'open',
+  },
+  'vcs.owner.name': {
+    name: 'vcs.owner.name',
+    description: 'The group owner within the version control system.',
+    type: 'keyword',
+    example: 'my-org',
+  },
+  'vcs.provider.name': {
+    name: 'vcs.provider.name',
+    description: 'The name of the version control system provider.',
+    type: 'keyword',
+    example: 'github',
+  },
+  'android.os.api_level': {
+    name: 'android.os.api_level',
+    description:
+      'Uniquely identifies the framework API revision offered by a version (`os.version`) of the android operating system. More information can be found [here](https://developer.android.com/guide/topics/manifest/uses-sdk-element#ApiLevels).',
+    type: 'keyword',
+    example: '33',
+  },
+  'android.app.state': {
+    name: 'android.app.state',
+    description: 'This attribute represents the state of the application.',
+    type: 'keyword',
+    example: 'created',
+  },
+  'telemetry.sdk.name': {
+    name: 'telemetry.sdk.name',
+    description: 'The name of the telemetry SDK as defined above.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'telemetry.sdk.language': {
+    name: 'telemetry.sdk.language',
+    description: 'The language of the telemetry SDK.',
+    type: 'keyword',
+  },
+  'telemetry.sdk.version': {
+    name: 'telemetry.sdk.version',
+    description: 'The version string of the telemetry SDK.',
+    type: 'keyword',
+    example: '1.2.3',
+  },
+  'telemetry.distro.name': {
+    name: 'telemetry.distro.name',
+    description: 'The name of the auto instrumentation agent or distribution, if used.',
+    type: 'keyword',
+    example: 'parts-unlimited-java',
+  },
+  'telemetry.distro.version': {
+    name: 'telemetry.distro.version',
+    description: 'The version string of the auto instrumentation agent or distribution, if used.',
+    type: 'keyword',
+    example: '1.2.3',
+  },
+  'error.type': {
+    name: 'error.type',
+    description: 'Describes a class of error the operation ended with.',
+    type: 'keyword',
+    example: 'amqp:decode-error',
+  },
+  'error.message': {
+    name: 'error.message',
+    description: 'A message providing more detail about an error in human-readable form.',
+    type: 'keyword',
+    example: 'Unexpected input type: string',
+  },
+  'go.memory.type': {
+    name: 'go.memory.type',
+    description: 'The type of memory.',
+    type: 'keyword',
+    example: 'other',
+  },
+  'heroku.release.creation_timestamp': {
+    name: 'heroku.release.creation_timestamp',
+    description: 'Time and date the release was created',
+    type: 'keyword',
+    example: 'Sun Oct 23 2022 20:00:42 GMT+0200 (Central European Summer Time)',
+  },
+  'heroku.release.commit': {
+    name: 'heroku.release.commit',
+    description: 'Commit hash for the current release',
+    type: 'keyword',
+    example: 'e6134959463efd8966b20e75b913cafe3f5ec',
+  },
+  'heroku.app.id': {
+    name: 'heroku.app.id',
+    description: 'Unique identifier for the application',
+    type: 'keyword',
+    example: '2daa2797-e42b-4624-9322-ec3f968df4da',
+  },
+  'signalr.connection.status': {
+    name: 'signalr.connection.status',
+    description: 'SignalR HTTP connection closure status.',
+    type: 'keyword',
+    example: 'app_shutdown',
+  },
+  'signalr.transport': {
+    name: 'signalr.transport',
+    description:
+      '[SignalR transport type](https://github.com/dotnet/aspnetcore/blob/main/src/SignalR/docs/specs/TransportProtocols.md)',
+    type: 'keyword',
+    example: 'web_sockets',
+  },
+  'code.function.name': {
+    name: 'code.function.name',
+    description:
+      "The method or function fully-qualified name without arguments. The value should fit the natural representation of the language runtime, which is also likely the same used within `code.stacktrace` attribute value. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'keyword',
+    example: 'com.example.MyHttpService.serveRequest',
+  },
+  'code.file.path': {
+    name: 'code.file.path',
+    description:
+      "The source code file name that identifies the code unit as uniquely as possible (preferably an absolute file path). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Function'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'keyword',
+    example: '/',
+  },
+  'code.line.number': {
+    name: 'code.line.number',
+    description:
+      "The line number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'long',
+  },
+  'code.column.number': {
+    name: 'code.column.number',
+    description:
+      "The column number in `code.file.path` best representing the operation. It SHOULD point within the code unit named in `code.function.name`. This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Line'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'long',
+  },
+  'code.stacktrace': {
+    name: 'code.stacktrace',
+    description:
+      "A stacktrace as a string in the natural representation for the language runtime. The representation is identical to [`exception.stacktrace`](/docs/exceptions/exceptions-spans.md#stacktrace-representation). This attribute MUST NOT be used on the Profile signal since the data is already captured in 'message Location'. This constraint is imposed to prevent redundancy and maintain data integrity.",
+    type: 'keyword',
+    example: 'a',
+  },
+  'url.domain': {
+    name: 'url.domain',
+    description: 'Domain extracted from the `url.full`, such as "opentelemetry.io".',
+    type: 'keyword',
+    example: 'www.foo.bar',
+  },
+  'url.extension': {
+    name: 'url.extension',
+    description: 'The file extension extracted from the `url.full`, excluding the leading dot.',
+    type: 'keyword',
+    example: 'png',
+  },
+  'url.fragment': {
+    name: 'url.fragment',
+    description: 'The [URI fragment](https://www.rfc-editor.org/rfc/rfc3986#section-3.5) component',
+    type: 'keyword',
+    example: 'SemConv',
+  },
+  'url.full': {
+    name: 'url.full',
+    description:
+      'Absolute URL describing a network resource according to [RFC3986](https://www.rfc-editor.org/rfc/rfc3986)',
+    type: 'keyword',
+    example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
+  },
+  'url.original': {
+    name: 'url.original',
+    description: 'Unmodified original URL as seen in the event source.',
+    type: 'keyword',
+    example: 'https://www.foo.bar/search?q=OpenTelemetry#SemConv',
+  },
+  'url.path': {
+    name: 'url.path',
+    description: 'The [URI path](https://www.rfc-editor.org/rfc/rfc3986#section-3.3) component',
+    type: 'keyword',
+    example: '/search',
+  },
+  'url.port': {
+    name: 'url.port',
+    description: 'Port extracted from the `url.full`',
+    type: 'long',
+    example: '443',
+  },
+  'url.query': {
+    name: 'url.query',
+    description: 'The [URI query](https://www.rfc-editor.org/rfc/rfc3986#section-3.4) component',
+    type: 'keyword',
+    example: 'q=OpenTelemetry',
+  },
+  'url.registered_domain': {
+    name: 'url.registered_domain',
+    description: 'The highest registered url domain, stripped of the subdomain.',
+    type: 'keyword',
+    example: 'example.com',
+  },
+  'url.scheme': {
+    name: 'url.scheme',
+    description:
+      'The [URI scheme](https://www.rfc-editor.org/rfc/rfc3986#section-3.1) component identifying the used protocol.',
+    type: 'keyword',
+    example: 'http',
+  },
+  'url.subdomain': {
+    name: 'url.subdomain',
+    description:
+      'The subdomain portion of a fully qualified domain name includes all of the names except the host name under the registered_domain. In a partially qualified domain, or if the qualification level of the full name cannot be determined, subdomain contains all of the names below the registered domain.',
+    type: 'keyword',
+    example: 'east',
+  },
+  'url.template': {
+    name: 'url.template',
+    description:
+      'The low-cardinality template of an [absolute path reference](https://www.rfc-editor.org/rfc/rfc3986#section-4.2).',
+    type: 'keyword',
+    example: '/users/{id}',
+  },
+  'url.top_level_domain': {
+    name: 'url.top_level_domain',
+    description:
+      'The effective top level domain (eTLD), also known as the domain suffix, is the last part of the domain name. For example, the top level domain for example.com is `com`.',
+    type: 'keyword',
+    example: 'com',
+  },
+  'system.device': {
+    name: 'system.device',
+    description: 'The device identifier',
+    type: 'keyword',
+    example: '(identifier)',
+  },
+  'system.memory.state': {
+    name: 'system.memory.state',
+    description: 'The memory state',
+    type: 'keyword',
+    example: 'free',
+  },
+  'system.paging.state': {
+    name: 'system.paging.state',
+    description: 'The memory paging state',
+    type: 'keyword',
+    example: 'free',
+  },
+  'system.paging.type': {
+    name: 'system.paging.type',
+    description: 'The memory paging type',
+    type: 'keyword',
+    example: 'minor',
+  },
+  'system.paging.direction': {
+    name: 'system.paging.direction',
+    description: 'The paging access direction',
+    type: 'keyword',
+    example: 'in',
+  },
+  'system.filesystem.state': {
+    name: 'system.filesystem.state',
+    description: 'The filesystem state',
+    type: 'keyword',
+    example: 'used',
+  },
+  'system.filesystem.type': {
+    name: 'system.filesystem.type',
+    description: 'The filesystem type',
+    type: 'keyword',
+    example: 'ext4',
+  },
+  'system.filesystem.mode': {
+    name: 'system.filesystem.mode',
+    description: 'The filesystem mode',
+    type: 'keyword',
+    example: 'rw, ro',
+  },
+  'system.filesystem.mountpoint': {
+    name: 'system.filesystem.mountpoint',
+    description: 'The filesystem mount path',
+    type: 'keyword',
+    example: '/mnt/data',
+  },
+  'system.process.status': {
+    name: 'system.process.status',
+    description:
+      'The process state, e.g., [Linux Process State Codes](https://man7.org/linux/man-pages/man1/ps.1.html#PROCESS_STATE_CODES)',
+    type: 'keyword',
+    example: 'running',
+  },
+  'gen_ai.provider.name': {
+    name: 'gen_ai.provider.name',
+    description:
+      'The Generative AI provider as identified by the client or server instrumentation.',
+    type: 'keyword',
+  },
+  'gen_ai.request.model': {
+    name: 'gen_ai.request.model',
+    description: 'The name of the GenAI model a request is being made to.',
+    type: 'keyword',
+    example: 'g',
+  },
+  'gen_ai.request.max_tokens': {
+    name: 'gen_ai.request.max_tokens',
+    description: 'The maximum number of tokens the model generates for a request.',
+    type: 'long',
+    example: '100',
+  },
+  'gen_ai.request.choice.count': {
+    name: 'gen_ai.request.choice.count',
+    description: 'The target number of candidate completions to return.',
+    type: 'long',
+    example: '3',
+  },
+  'gen_ai.request.temperature': {
+    name: 'gen_ai.request.temperature',
+    description: 'The temperature setting for the GenAI request.',
+    type: 'double',
+    example: '0',
+  },
+  'gen_ai.request.top_p': {
+    name: 'gen_ai.request.top_p',
+    description: 'The top_p sampling setting for the GenAI request.',
+    type: 'double',
+    example: '1',
+  },
+  'gen_ai.request.top_k': {
+    name: 'gen_ai.request.top_k',
+    description: 'The top_k sampling setting for the GenAI request.',
+    type: 'double',
+    example: '1',
+  },
+  'gen_ai.request.stop_sequences': {
+    name: 'gen_ai.request.stop_sequences',
+    description: 'List of sequences that the model will use to stop generating further tokens.',
+    type: 'keyword',
+    example: 'forest,lived',
+  },
+  'gen_ai.request.frequency_penalty': {
+    name: 'gen_ai.request.frequency_penalty',
+    description: 'The frequency penalty setting for the GenAI request.',
+    type: 'double',
+    example: '0.1',
+  },
+  'gen_ai.request.presence_penalty': {
+    name: 'gen_ai.request.presence_penalty',
+    description: 'The presence penalty setting for the GenAI request.',
+    type: 'double',
+    example: '0.1',
+  },
+  'gen_ai.request.encoding_formats': {
+    name: 'gen_ai.request.encoding_formats',
+    description: 'The encoding formats requested in an embeddings operation, if specified.',
+    type: 'keyword',
+    example: 'base64',
+  },
+  'gen_ai.request.seed': {
+    name: 'gen_ai.request.seed',
+    description: 'Requests with same seed value more likely to return same result.',
+    type: 'long',
+    example: '100',
+  },
+  'gen_ai.response.id': {
+    name: 'gen_ai.response.id',
+    description: 'The unique identifier for the completion.',
+    type: 'keyword',
+    example: 'chatcmpl-123',
+  },
+  'gen_ai.response.model': {
+    name: 'gen_ai.response.model',
+    description: 'The name of the model that generated the response.',
+    type: 'keyword',
+    example: 'gpt-4-0613',
+  },
+  'gen_ai.response.finish_reasons': {
+    name: 'gen_ai.response.finish_reasons',
+    description:
+      'Array of reasons the model stopped generating tokens, corresponding to each generation received.',
+    type: 'keyword',
+    example: 'stop',
+  },
+  'gen_ai.usage.input_tokens': {
+    name: 'gen_ai.usage.input_tokens',
+    description: 'The number of tokens used in the GenAI input (prompt).',
+    type: 'long',
+    example: '100',
+  },
+  'gen_ai.usage.output_tokens': {
+    name: 'gen_ai.usage.output_tokens',
+    description: 'The number of tokens used in the GenAI response (completion).',
+    type: 'long',
+    example: '180',
+  },
+  'gen_ai.token.type': {
+    name: 'gen_ai.token.type',
+    description: 'The type of token being counted.',
+    type: 'keyword',
+    example: 'input',
+  },
+  'gen_ai.conversation.id': {
+    name: 'gen_ai.conversation.id',
+    description:
+      'The unique identifier for a conversation (session, thread), used to store and correlate messages within this conversation.',
+    type: 'keyword',
+    example: 'conv_5j66UpCpwteGg4YSxUnt7lPY',
+  },
+  'gen_ai.agent.id': {
+    name: 'gen_ai.agent.id',
+    description: 'The unique identifier of the GenAI agent.',
+    type: 'keyword',
+    example: 'asst_5j66UpCpwteGg4YSxUnt7lPY',
+  },
+  'gen_ai.agent.name': {
+    name: 'gen_ai.agent.name',
+    description: 'Human-readable name of the GenAI agent provided by the application.',
+    type: 'keyword',
+    example: 'Math Tutor',
+  },
+  'gen_ai.agent.description': {
+    name: 'gen_ai.agent.description',
+    description: 'Free-form description of the GenAI agent provided by the application.',
+    type: 'keyword',
+    example: 'Helps with math problems',
+  },
+  'gen_ai.tool.name': {
+    name: 'gen_ai.tool.name',
+    description: 'Name of the tool utilized by the agent.',
+    type: 'keyword',
+    example: 'Flights',
+  },
+  'gen_ai.tool.call.id': {
+    name: 'gen_ai.tool.call.id',
+    description: 'The tool call identifier.',
+    type: 'keyword',
+    example: 'call_mszuSIzqtI65i1wAUOE8w5H4',
+  },
+  'gen_ai.tool.description': {
+    name: 'gen_ai.tool.description',
+    description: 'The tool description.',
+    type: 'keyword',
+    example: 'Multiply two numbers',
+  },
+  'gen_ai.tool.type': {
+    name: 'gen_ai.tool.type',
+    description: 'Type of the tool utilized by the agent',
+    type: 'keyword',
+    example: 'function',
+  },
+  'gen_ai.data_source.id': {
+    name: 'gen_ai.data_source.id',
+    description: 'The data source identifier.',
+    type: 'keyword',
+    example: 'H7STPQYOND',
+  },
+  'gen_ai.operation.name': {
+    name: 'gen_ai.operation.name',
+    description: 'The name of the operation being performed.',
+    type: 'keyword',
+  },
+  'gen_ai.output.type': {
+    name: 'gen_ai.output.type',
+    description: 'Represents the content type requested by the client.',
+    type: 'keyword',
+  },
+  'host.id': {
+    name: 'host.id',
+    description:
+      'Unique host ID. For Cloud, this must be the instance_id assigned by the cloud provider. For non-containerized systems, this should be the `machine-id`. See the table below for the sources to use to determine the `machine-id` based on operating system.',
+    type: 'keyword',
+    example: 'fdbf79e8af94cb7f9e8df36789187052',
+  },
+  'host.name': {
+    name: 'host.name',
+    description:
+      'Name of the host. On Unix systems, it may contain what the hostname command returns, or the fully qualified hostname, or another name specified by the user.',
+    type: 'keyword',
+    example: 'opentelemetry-test',
+  },
+  'host.type': {
+    name: 'host.type',
+    description: 'Type of host. For Cloud, this must be the machine type.',
+    type: 'keyword',
+    example: 'n1-standard-1',
+  },
+  'host.arch': {
+    name: 'host.arch',
+    description: 'The CPU architecture the host system is running on.',
+    type: 'keyword',
+  },
+  'host.image.name': {
+    name: 'host.image.name',
+    description: 'Name of the VM image or OS install the host was instantiated from.',
+    type: 'keyword',
+    example: 'infra-ami-eks-worker-node-7d4ec78312',
+  },
+  'host.image.id': {
+    name: 'host.image.id',
+    description: 'VM image ID or host OS image ID. For Cloud, this value is from the provider.',
+    type: 'keyword',
+    example: 'ami-07b06b442921831e5',
+  },
+  'host.image.version': {
+    name: 'host.image.version',
+    description:
+      'The version string of the VM image or host OS as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    type: 'keyword',
+    example: '0.1',
+  },
+  'host.ip': {
+    name: 'host.ip',
+    description: 'Available IP addresses of the host, excluding loopback interfaces.',
+    type: 'keyword',
+    example: '192.168.1.140,fe80::abc2:4a28:737a:609e',
+  },
+  'host.mac': {
+    name: 'host.mac',
+    description: 'Available MAC addresses of the host, excluding loopback interfaces.',
+    type: 'keyword',
+    example: 'AC-DE-48-23-45-67,AC-DE-48-23-45-67-01-9F',
+  },
+  'host.cpu.vendor.id': {
+    name: 'host.cpu.vendor.id',
+    description: 'Processor manufacturer identifier. A maximum 12-character string.',
+    type: 'keyword',
+    example: 'GenuineIntel',
+  },
+  'host.cpu.family': {
+    name: 'host.cpu.family',
+    description: 'Family or generation of the CPU.',
+    type: 'keyword',
+    example: '6',
+  },
+  'host.cpu.model.id': {
+    name: 'host.cpu.model.id',
+    description:
+      'Model identifier. It provides more granular information about the CPU, distinguishing it from other CPUs within the same family.',
+    type: 'keyword',
+    example: '6',
+  },
+  'host.cpu.model.name': {
+    name: 'host.cpu.model.name',
+    description: 'Model designation of the processor.',
+    type: 'keyword',
+    example: '11th Gen Intel(R) Core(TM) i7-1185G7 @ 3.00GHz',
+  },
+  'host.cpu.stepping': {
+    name: 'host.cpu.stepping',
+    description: 'Stepping or core revisions.',
+    type: 'keyword',
+    example: '1',
+  },
+  'host.cpu.cache.l2.size': {
+    name: 'host.cpu.cache.l2.size',
+    description: 'The amount of level 2 memory cache available to the processor (in Bytes).',
+    type: 'long',
+    example: '12288000',
+  },
+  'enduser.id': {
+    name: 'enduser.id',
+    description:
+      'Unique identifier of an end user in the system. It maybe a username, email address, or other identifier.',
+    type: 'keyword',
+    example: 'username',
+  },
+  'enduser.pseudo.id': {
+    name: 'enduser.pseudo.id',
+    description:
+      "Pseudonymous identifier of an end user. This identifier should be a random value that is not directly linked or associated with the end user's actual identity.",
+    type: 'keyword',
+    example: 'QdH5CAWJgqVT4rOr0qtumf',
+  },
+  'network.carrier.icc': {
+    name: 'network.carrier.icc',
+    description:
+      'The ISO 3166-1 alpha-2 2-character country code associated with the mobile carrier network.',
+    type: 'keyword',
+    example: 'D',
+  },
+  'network.carrier.mcc': {
+    name: 'network.carrier.mcc',
+    description: 'The mobile carrier country code.',
+    type: 'keyword',
+    example: '3',
+  },
+  'network.carrier.mnc': {
+    name: 'network.carrier.mnc',
+    description: 'The mobile carrier network code.',
+    type: 'keyword',
+    example: '0',
+  },
+  'network.carrier.name': {
+    name: 'network.carrier.name',
+    description: 'The name of the mobile carrier.',
+    type: 'keyword',
+    example: 's',
+  },
+  'network.connection.subtype': {
+    name: 'network.connection.subtype',
+    description:
+      'This describes more details regarding the connection.type. It may be the type of cell technology connection, but it could be used for describing details about a wifi connection.',
+    type: 'keyword',
+    example: 'L',
+  },
+  'network.connection.type': {
+    name: 'network.connection.type',
+    description: 'The internet connection type.',
+    type: 'keyword',
+    example: 'w',
+  },
+  'network.local.address': {
+    name: 'network.local.address',
+    description: 'Local address of the network connection - IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: '10.1.2.80',
+  },
+  'network.local.port': {
+    name: 'network.local.port',
+    description: 'Local port number of the network connection.',
+    type: 'long',
+    example: '65123',
+  },
+  'network.peer.address': {
+    name: 'network.peer.address',
+    description: 'Peer address of the network connection - IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: '10.1.2.80',
+  },
+  'network.peer.port': {
+    name: 'network.peer.port',
+    description: 'Peer port number of the network connection.',
+    type: 'long',
+    example: '65123',
+  },
+  'network.protocol.name': {
+    name: 'network.protocol.name',
+    description:
+      '[OSI application layer](https://wikipedia.org/wiki/Application_layer) or non-OSI equivalent.',
+    type: 'keyword',
+    example: 'http',
+  },
+  'network.protocol.version': {
+    name: 'network.protocol.version',
+    description: 'The actual version of the protocol used for network communication.',
+    type: 'keyword',
+    example: '1.1',
+  },
+  'network.transport': {
+    name: 'network.transport',
+    description:
+      '[OSI transport layer](https://wikipedia.org/wiki/Transport_layer) or [inter-process communication method](https://wikipedia.org/wiki/Inter-process_communication).',
+    type: 'keyword',
+    example: 'tcp',
+  },
+  'network.type': {
+    name: 'network.type',
+    description:
+      '[OSI network layer](https://wikipedia.org/wiki/Network_layer) or non-OSI equivalent.',
+    type: 'keyword',
+    example: 'ipv4',
+  },
+  'network.io.direction': {
+    name: 'network.io.direction',
+    description: 'The network IO operation direction.',
+    type: 'keyword',
+    example: 'transmit',
+  },
+  'network.interface.name': {
+    name: 'network.interface.name',
+    description: 'The network interface name.',
+    type: 'keyword',
+    example: 'lo',
+  },
+  'network.connection.state': {
+    name: 'network.connection.state',
+    description: 'The state of network connection',
+    type: 'keyword',
+    example: 'close_wait',
+  },
+  'profile.frame.type': {
+    name: 'profile.frame.type',
+    description: 'Describes the interpreter or compiler of a single frame.',
+    type: 'keyword',
+    example: 'cpython',
+  },
+  'cloud.provider': {
+    name: 'cloud.provider',
+    description: 'Name of the cloud provider.',
+    type: 'keyword',
+  },
+  'cloud.account.id': {
+    name: 'cloud.account.id',
+    description: 'The cloud account ID the resource is assigned to.',
+    type: 'keyword',
+    example: '111111111111',
+  },
+  'cloud.region': {
+    name: 'cloud.region',
+    description:
+      'The geographical region within a cloud provider. When associated with a resource, this attribute specifies the region where the resource operates. When calling services or APIs deployed on a cloud, this attribute identifies the region where the called destination is deployed.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'cloud.resource_id': {
+    name: 'cloud.resource_id',
+    description:
+      'Cloud provider-specific native identifier of the monitored cloud resource (e.g. an [ARN](https://docs.aws.amazon.com/general/latest/gr/aws-arns-and-namespaces.html) on AWS, a [fully qualified resource ID](https://learn.microsoft.com/rest/api/resources/resources/get-by-id) on Azure, a [full resource name](https://google.aip.dev/122#full-resource-names) on GCP)',
+    type: 'keyword',
+    example: 'arn:aws:lambda:REGION:ACCOUNT_ID:function:my-function',
+  },
+  'cloud.availability_zone': {
+    name: 'cloud.availability_zone',
+    description:
+      'Cloud regions often have multiple, isolated locations known as zones to increase availability. Availability zone represents the zone where the resource is running.',
+    type: 'keyword',
+    example: 'us-east-1c',
+  },
+  'cloud.platform': {
+    name: 'cloud.platform',
+    description: 'The cloud platform in use.',
+    type: 'keyword',
+  },
+  'session.id': {
+    name: 'session.id',
+    description: 'A unique id to identify a session.',
+    type: 'keyword',
+    example: '0',
+  },
+  'session.previous_id': {
+    name: 'session.previous_id',
+    description: 'The previous `session.id` for this user, when known.',
+    type: 'keyword',
+    example: '0',
+  },
+  'cloudevents.event_id': {
+    name: 'cloudevents.event_id',
+    description:
+      'The [event_id](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#id) uniquely identifies the event.',
+    type: 'keyword',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  },
+  'cloudevents.event_source': {
+    name: 'cloudevents.event_source',
+    description:
+      'The [source](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#source-1) identifies the context in which an event happened.',
+    type: 'keyword',
+    example: 'https://github.com/cloudevents',
+  },
+  'cloudevents.event_spec_version': {
+    name: 'cloudevents.event_spec_version',
+    description:
+      'The [version of the CloudEvents specification](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#specversion) which the event uses.',
+    type: 'keyword',
+    example: '1',
+  },
+  'cloudevents.event_type': {
+    name: 'cloudevents.event_type',
+    description:
+      'The [event_type](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#type) contains a value describing the type of event related to the originating occurrence.',
+    type: 'keyword',
+    example: 'com.github.pull_request.opened',
+  },
+  'cloudevents.event_subject': {
+    name: 'cloudevents.event_subject',
+    description:
+      'The [subject](https://github.com/cloudevents/spec/blob/v1.0.2/cloudevents/spec.md#subject) of the event in the context of the event producer (identified by source).',
+    type: 'keyword',
+    example: 'm',
+  },
+  'test.suite.name': {
+    name: 'test.suite.name',
+    description:
+      'The human readable name of a [test suite](https://wikipedia.org/wiki/Test_suite).',
+    type: 'keyword',
+    example: 'TestSuite1',
+  },
+  'test.suite.run.status': {
+    name: 'test.suite.run.status',
+    description: 'The status of the test suite run.',
+    type: 'keyword',
+    example: 'success',
+  },
+  'test.case.name': {
+    name: 'test.case.name',
+    description:
+      'The fully qualified human readable name of the [test case](https://wikipedia.org/wiki/Test_case).',
+    type: 'keyword',
+    example: 'org.example.TestCase1.test1',
+  },
+  'test.case.result.status': {
+    name: 'test.case.result.status',
+    description: 'The status of the actual test case result from test execution.',
+    type: 'keyword',
+    example: 'pass',
+  },
+  'geo.locality.name': {
+    name: 'geo.locality.name',
+    description:
+      'Locality name. Represents the name of a city, town, village, or similar populated place.',
+    type: 'keyword',
+    example: 'Montreal',
+  },
+  'geo.continent.code': {
+    name: 'geo.continent.code',
+    description: 'Two-letter code representing continent’s name.',
+    type: 'keyword',
+  },
+  'geo.country.iso_code': {
+    name: 'geo.country.iso_code',
+    description:
+      'Two-letter ISO Country Code ([ISO 3166-1 alpha2](https://wikipedia.org/wiki/ISO_3166-1#Codes)).',
+    type: 'keyword',
+    example: 'CA',
+  },
+  'geo.location.lon': {
+    name: 'geo.location.lon',
+    description:
+      'Longitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
+    type: 'double',
+    example: '-73.61483',
+  },
+  'geo.location.lat': {
+    name: 'geo.location.lat',
+    description:
+      'Latitude of the geo location in [WGS84](https://wikipedia.org/wiki/World_Geodetic_System#WGS84).',
+    type: 'double',
+    example: '45.505918',
+  },
+  'geo.postal_code': {
+    name: 'geo.postal_code',
+    description:
+      'Postal code associated with the location. Values appropriate for this field may also be known as a postcode or ZIP code and will vary widely from country to country.',
+    type: 'keyword',
+    example: '94040',
+  },
+  'geo.region.iso_code': {
+    name: 'geo.region.iso_code',
+    description: 'Region ISO code ([ISO 3166-2](https://wikipedia.org/wiki/ISO_3166-2)).',
+    type: 'keyword',
+    example: 'CA-QC',
+  },
+  'process.pid': {
+    name: 'process.pid',
+    description: 'Process identifier (PID).',
+    type: 'long',
+    example: '1234',
+  },
+  'process.parent_pid': {
+    name: 'process.parent_pid',
+    description: 'Parent Process identifier (PPID).',
+    type: 'long',
+    example: '111',
+  },
+  'process.vpid': {
+    name: 'process.vpid',
+    description: 'Virtual process identifier.',
+    type: 'long',
+    example: '12',
+  },
+  'process.session_leader.pid': {
+    name: 'process.session_leader.pid',
+    description:
+      "The PID of the process's session leader. This is also the session ID (SID) of the process.",
+    type: 'long',
+    example: '14',
+  },
+  'process.group_leader.pid': {
+    name: 'process.group_leader.pid',
+    description:
+      "The PID of the process's group leader. This is also the process group ID (PGID) of the process.",
+    type: 'long',
+    example: '23',
+  },
+  'process.executable.build_id.gnu': {
+    name: 'process.executable.build_id.gnu',
+    description: 'The GNU build ID as found in the `.note.gnu.build-id` ELF section (hex string).',
+    type: 'keyword',
+    example: 'c89b11207f6479603b0d49bf291c092c2b719293',
+  },
+  'process.executable.build_id.go': {
+    name: 'process.executable.build_id.go',
+    description: 'The Go build ID as retrieved by `go tool buildid <go executable>`.',
+    type: 'keyword',
+    example: 'foh3mEXu7BLZjsN9pOwG/kATcXlYVCDEFouRMQed_/WwRFB1hPo9LBkekthSPG/x8hMC8emW2cCjXD0_1aY',
+  },
+  'process.executable.build_id.htlhash': {
+    name: 'process.executable.build_id.htlhash',
+    description:
+      'Profiling specific build ID for executables. See the OTel specification for Profiles for more information.',
+    type: 'keyword',
+    example: '600DCAFE4A110000F2BF38C493F5FB92',
+  },
+  'process.executable.name': {
+    name: 'process.executable.name',
+    description:
+      'The name of the process executable. On Linux based systems, this SHOULD be set to the base name of the target of `/proc/[pid]/exe`. On Windows, this SHOULD be set to the base name of `GetProcessImageFileNameW`.',
+    type: 'keyword',
+    example: 'otelcol',
+  },
+  'process.executable.path': {
+    name: 'process.executable.path',
+    description:
+      'The full path to the process executable. On Linux based systems, can be set to the target of `proc/[pid]/exe`. On Windows, can be set to the result of `GetProcessImageFileNameW`.',
+    type: 'keyword',
+    example: '/usr/bin/cmd/otelcol',
+  },
+  'process.command': {
+    name: 'process.command',
+    description:
+      'The command used to launch the process (i.e. the command name). On Linux based systems, can be set to the zeroth string in `proc/[pid]/cmdline`. On Windows, can be set to the first parameter extracted from `GetCommandLineW`.',
+    type: 'keyword',
+    example: 'cmd/otelcol',
+  },
+  'process.command_line': {
+    name: 'process.command_line',
+    description:
+      'The full command used to launch the process as a single string representing the full command. On Windows, can be set to the result of `GetCommandLineW`. Do not set this if you have to assemble it just for monitoring; use `process.command_args` instead. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
+    type: 'keyword',
+    example: 'C:cmdotecol --config="my directoryconfig.yaml"',
+  },
+  'process.command_args': {
+    name: 'process.command_args',
+    description:
+      'All the command arguments (including the command/executable itself) as received by the process. On Linux-based systems (and some other Unixoid systems supporting procfs), can be set according to the list of null-delimited strings extracted from `proc/[pid]/cmdline`. For libc-based executables, this would be the full argv vector passed to `main`. SHOULD NOT be collected by default unless there is sanitization that excludes sensitive data.',
+    type: 'keyword',
+    example: 'cmd/otecol,--config=config.yaml',
+  },
+  'process.args_count': {
+    name: 'process.args_count',
+    description: 'Length of the process.command_args array',
+    type: 'long',
+    example: '4',
+  },
+  'process.owner': {
+    name: 'process.owner',
+    description: 'The username of the user that owns the process.',
+    type: 'keyword',
+    example: 'root',
+  },
+  'process.user.id': {
+    name: 'process.user.id',
+    description: 'The effective user ID (EUID) of the process.',
+    type: 'long',
+    example: '1001',
+  },
+  'process.user.name': {
+    name: 'process.user.name',
+    description: 'The username of the effective user of the process.',
+    type: 'keyword',
+    example: 'root',
+  },
+  'process.real_user.id': {
+    name: 'process.real_user.id',
+    description: 'The real user ID (RUID) of the process.',
+    type: 'long',
+    example: '1000',
+  },
+  'process.real_user.name': {
+    name: 'process.real_user.name',
+    description: 'The username of the real user of the process.',
+    type: 'keyword',
+    example: 'operator',
+  },
+  'process.saved_user.id': {
+    name: 'process.saved_user.id',
+    description: 'The saved user ID (SUID) of the process.',
+    type: 'long',
+    example: '1002',
+  },
+  'process.saved_user.name': {
+    name: 'process.saved_user.name',
+    description: 'The username of the saved user.',
+    type: 'keyword',
+    example: 'operator',
+  },
+  'process.runtime.name': {
+    name: 'process.runtime.name',
+    description: 'The name of the runtime of this process.',
+    type: 'keyword',
+    example: 'OpenJDK Runtime Environment',
+  },
+  'process.runtime.version': {
+    name: 'process.runtime.version',
+    description:
+      'The version of the runtime of this process, as returned by the runtime without modification.',
+    type: 'keyword',
+    example: '1',
+  },
+  'process.runtime.description': {
+    name: 'process.runtime.description',
+    description:
+      'An additional description about the runtime of the process, for example a specific vendor customization of the runtime environment.',
+    type: 'keyword',
+    example: 'E',
+  },
+  'process.title': {
+    name: 'process.title',
+    description: 'Process title (proctitle)',
+    type: 'keyword',
+    example: 'cat /etc/hostname',
+  },
+  'process.creation.time': {
+    name: 'process.creation.time',
+    description: 'The date and time the process was created, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Tue Nov 21 2023 10:25:34 GMT+0100 (Central European Standard Time)',
+  },
+  'process.exit.time': {
+    name: 'process.exit.time',
+    description: 'The date and time the process exited, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Tue Nov 21 2023 10:26:12 GMT+0100 (Central European Standard Time)',
+  },
+  'process.exit.code': {
+    name: 'process.exit.code',
+    description: 'The exit code of the process.',
+    type: 'long',
+    example: '127',
+  },
+  'process.interactive': {
+    name: 'process.interactive',
+    description: 'Whether the process is connected to an interactive shell.',
+    type: 'boolean',
+  },
+  'process.working_directory': {
+    name: 'process.working_directory',
+    description: 'The working directory of the process.',
+    type: 'keyword',
+    example: '/root',
+  },
+  'process.context_switch_type': {
+    name: 'process.context_switch_type',
+    description:
+      'Specifies whether the context switches for this data point were voluntary or involuntary.',
+    type: 'keyword',
+  },
+  'process.paging.fault_type': {
+    name: 'process.paging.fault_type',
+    description:
+      'The type of page fault for this data point. Type `major` is for major/hard page faults, and `minor` is for minor/soft page faults.',
+    type: 'keyword',
+  },
+  'process.environment_variable': {
+    name: 'process.environment_variable',
+    description:
+      'Process environment variables, `<key>` being the environment variable name, the value being the environment variable value.',
+    type: 'keyword',
+    example: 'ubuntu',
+  },
+  'process.linux.cgroup': {
+    name: 'process.linux.cgroup',
+    description: 'The control group associated with the process.',
+    type: 'keyword',
+    example: '1:name=systemd:/user.slice/user-1000.slice/session-3.scope',
+  },
+  'aspnetcore.rate_limiting.policy': {
+    name: 'aspnetcore.rate_limiting.policy',
+    description: 'Rate limiting policy name.',
+    type: 'keyword',
+    example: 'fixed',
+  },
+  'aspnetcore.rate_limiting.result': {
+    name: 'aspnetcore.rate_limiting.result',
+    description:
+      'Rate-limiting result, shows whether the lease was acquired or contains a rejection reason',
+    type: 'keyword',
+    example: 'acquired',
+  },
+  'aspnetcore.routing.is_fallback': {
+    name: 'aspnetcore.routing.is_fallback',
+    description: 'A value that indicates whether the matched route is a fallback route.',
+    type: 'boolean',
+    example: 'true',
+  },
+  'aspnetcore.diagnostics.handler.type': {
+    name: 'aspnetcore.diagnostics.handler.type',
+    description:
+      'Full type name of the [`IExceptionHandler`](https://learn.microsoft.com/dotnet/api/microsoft.aspnetcore.diagnostics.iexceptionhandler) implementation that handled the exception.',
+    type: 'keyword',
+    example: 'Contoso.MyHandler',
+  },
+  'aspnetcore.request.is_unhandled': {
+    name: 'aspnetcore.request.is_unhandled',
+    description: 'Flag indicating if request was handled by the application pipeline.',
+    type: 'boolean',
+    example: 'true',
+  },
+  'aspnetcore.routing.match_status': {
+    name: 'aspnetcore.routing.match_status',
+    description: 'Match result - success or failure',
+    type: 'keyword',
+    example: 'success',
+  },
+  'aspnetcore.diagnostics.exception.result': {
+    name: 'aspnetcore.diagnostics.exception.result',
+    description: 'ASP.NET Core exception middleware handling result',
+    type: 'keyword',
+    example: 'handled',
+  },
+  'file.accessed': {
+    name: 'file.accessed',
+    description: 'Time when the file was last accessed, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'file.attributes': {
+    name: 'file.attributes',
+    description: 'Array of file attributes.',
+    type: 'keyword',
+    example: 'readonly,hidden',
+  },
+  'file.created': {
+    name: 'file.created',
+    description: 'Time when the file was created, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'file.changed': {
+    name: 'file.changed',
+    description: 'Time when the file attributes or metadata was last changed, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'file.directory': {
+    name: 'file.directory',
+    description:
+      'Directory where the file is located. It should include the drive letter, when appropriate.',
+    type: 'keyword',
+    example: '/home/user',
+  },
+  'file.extension': {
+    name: 'file.extension',
+    description: 'File extension, excluding the leading dot.',
+    type: 'keyword',
+    example: 'png',
+  },
+  'file.fork_name': {
+    name: 'file.fork_name',
+    description: 'Name of the fork. A fork is additional data associated with a filesystem object.',
+    type: 'keyword',
+    example: 'Zone.Identifier',
+  },
+  'file.group.id': {
+    name: 'file.group.id',
+    description: 'Primary Group ID (GID) of the file.',
+    type: 'keyword',
+    example: '1000',
+  },
+  'file.group.name': {
+    name: 'file.group.name',
+    description: 'Primary group name of the file.',
+    type: 'keyword',
+    example: 'users',
+  },
+  'file.inode': {
+    name: 'file.inode',
+    description: 'Inode representing the file in the filesystem.',
+    type: 'keyword',
+    example: '256383',
+  },
+  'file.mode': {
+    name: 'file.mode',
+    description: 'Mode of the file in octal representation.',
+    type: 'keyword',
+    example: '0640',
+  },
+  'file.modified': {
+    name: 'file.modified',
+    description: 'Time when the file content was last modified, in ISO 8601 format.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 13:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'file.name': {
+    name: 'file.name',
+    description: 'Name of the file including the extension, without the directory.',
+    type: 'keyword',
+    example: 'example.png',
+  },
+  'file.owner.id': {
+    name: 'file.owner.id',
+    description: 'The user ID (UID) or security identifier (SID) of the file owner.',
+    type: 'keyword',
+    example: '1000',
+  },
+  'file.owner.name': {
+    name: 'file.owner.name',
+    description: 'Username of the file owner.',
+    type: 'keyword',
+    example: 'root',
+  },
+  'file.path': {
+    name: 'file.path',
+    description:
+      'Full path to the file, including the file name. It should include the drive letter, when appropriate.',
+    type: 'keyword',
+    example: '/home/alice/example.png',
+  },
+  'file.size': {
+    name: 'file.size',
+    description: 'File size in bytes.',
+    type: 'long',
+  },
+  'file.symbolic_link.target_path': {
+    name: 'file.symbolic_link.target_path',
+    description: 'Path to the target of a symbolic link.',
+    type: 'keyword',
+    example: '/usr/bin/python3',
+  },
+  'graphql.operation.name': {
+    name: 'graphql.operation.name',
+    description: 'The name of the operation being executed.',
+    type: 'keyword',
+    example: 'f',
+  },
+  'graphql.operation.type': {
+    name: 'graphql.operation.type',
+    description: 'The type of the operation being executed.',
+    type: 'keyword',
+    example: 'query',
+  },
+  'graphql.document': {
+    name: 'graphql.document',
+    description: 'The GraphQL document being executed.',
+    type: 'keyword',
+    example: 'q',
+  },
+  'os.type': {
+    name: 'os.type',
+    description: 'The operating system type.',
+    type: 'keyword',
+  },
+  'os.description': {
+    name: 'os.description',
+    description:
+      'Human readable (not intended to be parsed) OS version information, like e.g. reported by `ver` or `lsb_release -a` commands.',
+    type: 'keyword',
+    example: 'Microsoft Windows [Version 10.0.18363.778]',
+  },
+  'os.name': {
+    name: 'os.name',
+    description: 'Human readable operating system name.',
+    type: 'keyword',
+    example: 'iOS',
+  },
+  'os.version': {
+    name: 'os.version',
+    description:
+      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    type: 'keyword',
+    example: '14.2.1',
+  },
+  'os.build_id': {
+    name: 'os.build_id',
+    description: 'Unique identifier for a particular build or compilation of the operating system.',
+    type: 'keyword',
+    example: 'TQ3C.230805.001.B2',
+  },
+  'client.address': {
+    name: 'client.address',
+    description:
+      'Client address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'client.example.com',
+  },
+  'client.port': {
+    name: 'client.port',
+    description: 'Client port number.',
+    type: 'long',
+    example: '65123',
+  },
+  'db.collection.name': {
+    name: 'db.collection.name',
+    description: 'Cosmos DB container name.',
+    type: 'keyword',
+    example: 'public.users',
+  },
+  'db.namespace': {
+    name: 'db.namespace',
+    description: 'The name of the database, fully qualified within the server address and port.',
+    type: 'keyword',
+    example: 'customers',
+  },
+  'db.operation.name': {
+    name: 'db.operation.name',
+    description: 'The name of the operation or command being executed.',
+    type: 'keyword',
+    example: 'findAndModify',
+  },
+  'db.query.text': {
+    name: 'db.query.text',
+    description: 'The database query being executed.',
+    type: 'keyword',
+    example: 'SELECT * FROM wuser_table where username = ?',
+  },
+  'db.query.parameter': {
+    name: 'db.query.parameter',
+    description:
+      'A database query parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+    type: 'keyword',
+    example: 'someval',
+  },
+  'db.query.summary': {
+    name: 'db.query.summary',
+    description: 'Low cardinality summary of a database query.',
+    type: 'keyword',
+    example: 'SELECT wuser_table',
+  },
+  'db.stored_procedure.name': {
+    name: 'db.stored_procedure.name',
+    description: 'The name of a stored procedure within the database.',
+    type: 'keyword',
+    example: 'GetCustomer',
+  },
+  'db.operation.parameter': {
+    name: 'db.operation.parameter',
+    description:
+      'A database operation parameter, with `<key>` being the parameter name, and the attribute value being a string representation of the parameter value.',
+    type: 'keyword',
+    example: 'someval',
+  },
+  'db.operation.batch.size': {
+    name: 'db.operation.batch.size',
+    description: 'The number of queries included in a batch operation.',
+    type: 'long',
+    example: '2',
+  },
+  'db.response.status_code': {
+    name: 'db.response.status_code',
+    description: 'Database response status code.',
+    type: 'keyword',
+    example: '102',
+  },
+  'db.response.returned_rows': {
+    name: 'db.response.returned_rows',
+    description: 'Number of rows returned by the operation.',
+    type: 'long',
+    example: '10',
+  },
+  'db.system.name': {
+    name: 'db.system.name',
+    description:
+      'The database management system (DBMS) product as identified by the client instrumentation.',
+    type: 'keyword',
+  },
+  'db.client.connection.state': {
+    name: 'db.client.connection.state',
+    description: 'The state of a connection in the pool',
+    type: 'keyword',
+    example: 'idle',
+  },
+  'db.client.connection.pool.name': {
+    name: 'db.client.connection.pool.name',
+    description:
+      "The name of the connection pool; unique within the instrumented application. In case the connection pool implementation doesn't provide a name, instrumentation SHOULD use a combination of parameters that would make the name unique, for example, combining attributes `server.address`, `server.port`, and `db.namespace`, formatted as `server.address:server.port/db.namespace`. Instrumentations that generate connection pool name following different patterns SHOULD document it.",
+    type: 'keyword',
+    example: 'myDataSource',
+  },
+  'feature_flag.key': {
+    name: 'feature_flag.key',
+    description: 'The lookup key of the feature flag.',
+    type: 'keyword',
+    example: 'logo-color',
+  },
+  'feature_flag.provider.name': {
+    name: 'feature_flag.provider.name',
+    description: 'Identifies the feature flag provider.',
+    type: 'keyword',
+    example: 'Flag Manager',
+  },
+  'feature_flag.result.variant': {
+    name: 'feature_flag.result.variant',
+    description: 'A semantic identifier for an evaluated flag value.',
+    type: 'keyword',
+    example: 'red',
+  },
+  'feature_flag.context.id': {
+    name: 'feature_flag.context.id',
+    description:
+      'The unique identifier for the flag evaluation context. For example, the targeting key.',
+    type: 'keyword',
+    example: '5157782b-2203-4c80-a857-dbbd5e7761db',
+  },
+  'feature_flag.version': {
+    name: 'feature_flag.version',
+    description:
+      'The version of the ruleset used during the evaluation. This may be any stable value which uniquely identifies the ruleset.',
+    type: 'keyword',
+    example: '1',
+  },
+  'feature_flag.set.id': {
+    name: 'feature_flag.set.id',
+    description:
+      'The identifier of the [flag set](https://openfeature.dev/specification/glossary/#flag-set) to which the feature flag belongs.',
+    type: 'keyword',
+    example: 'proj-1',
+  },
+  'feature_flag.result.reason': {
+    name: 'feature_flag.result.reason',
+    description: 'The reason code which shows how a feature flag value was determined.',
+    type: 'keyword',
+    example: 'static',
+  },
+  'feature_flag.result.value': {
+    name: 'feature_flag.result.value',
+    description: 'The evaluated value of the feature flag.',
+    type: 'keyword',
+    example: '#ff0000',
+  },
+  'security_rule.category': {
+    name: 'security_rule.category',
+    description:
+      'A categorization value keyword used by the entity using the rule for detection of this event',
+    type: 'keyword',
+    example: 'Attempted Information Leak',
+  },
+  'security_rule.description': {
+    name: 'security_rule.description',
+    description: 'The description of the rule generating the event.',
+    type: 'keyword',
+    example: 'Block requests to public DNS over HTTPS / TLS protocols',
+  },
+  'security_rule.license': {
+    name: 'security_rule.license',
+    description:
+      'Name of the license under which the rule used to generate this event is made available.',
+    type: 'keyword',
+    example: 'Apache 2.0',
+  },
+  'security_rule.name': {
+    name: 'security_rule.name',
+    description: 'The name of the rule or signature generating the event.',
+    type: 'keyword',
+    example: 'BLOCK_DNS_over_TLS',
+  },
+  'security_rule.reference': {
+    name: 'security_rule.reference',
+    description:
+      'Reference URL to additional information about the rule used to generate this event.',
+    type: 'keyword',
+    example: 'https://en.wikipedia.org/wiki/DNS_over_TLS',
+  },
+  'security_rule.ruleset.name': {
+    name: 'security_rule.ruleset.name',
+    description:
+      'Name of the ruleset, policy, group, or parent category in which the rule used to generate this event is a member.',
+    type: 'keyword',
+    example: 'Standard_Protocol_Filters',
+  },
+  'security_rule.uuid': {
+    name: 'security_rule.uuid',
+    description:
+      'A rule ID that is unique within the scope of a set or group of agents, observers, or other entities using the rule for detection of this event.',
+    type: 'keyword',
+    example: '550e8400-e29b-41d4-a716-446655440000',
+  },
+  'security_rule.version': {
+    name: 'security_rule.version',
+    description: 'The version / revision of the rule being used for analysis.',
+    type: 'keyword',
+    example: '1.0.0',
+  },
+  'cicd.pipeline.name': {
+    name: 'cicd.pipeline.name',
+    description: 'The human readable name of the pipeline within a CI/CD system.',
+    type: 'keyword',
+    example: 'Build and Test',
+  },
+  'cicd.pipeline.run.id': {
+    name: 'cicd.pipeline.run.id',
+    description: 'The unique identifier of a pipeline run within a CI/CD system.',
+    type: 'keyword',
+    example: '120912',
+  },
+  'cicd.pipeline.run.url.full': {
+    name: 'cicd.pipeline.run.url.full',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline run, providing the complete address in order to locate and identify the pipeline run.',
+    type: 'keyword',
+    example:
+      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763?pr=1075',
+  },
+  'cicd.pipeline.run.state': {
+    name: 'cicd.pipeline.run.state',
+    description: 'The pipeline run goes through these states during its lifecycle.',
+    type: 'keyword',
+    example: 'pending',
+  },
+  'cicd.pipeline.task.name': {
+    name: 'cicd.pipeline.task.name',
+    description:
+      'The human readable name of a task within a pipeline. Task here most closely aligns with a [computing process](https://wikipedia.org/wiki/Pipeline_(computing)) in a pipeline. Other terms for tasks include commands, steps, and procedures.',
+    type: 'keyword',
+    example: 'Run GoLang Linter',
+  },
+  'cicd.pipeline.task.run.id': {
+    name: 'cicd.pipeline.task.run.id',
+    description: 'The unique identifier of a task run within a pipeline.',
+    type: 'keyword',
+    example: '12097',
+  },
+  'cicd.pipeline.task.run.url.full': {
+    name: 'cicd.pipeline.task.run.url.full',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the pipeline task run, providing the complete address in order to locate and identify the pipeline task run.',
+    type: 'keyword',
+    example:
+      'https://github.com/open-telemetry/semantic-conventions/actions/runs/9753949763/job/26920038674?pr=1075',
+  },
+  'cicd.pipeline.task.run.result': {
+    name: 'cicd.pipeline.task.run.result',
+    description: 'The result of a task run.',
+    type: 'keyword',
+    example: 'success',
+  },
+  'cicd.pipeline.task.type': {
+    name: 'cicd.pipeline.task.type',
+    description: 'The type of the task within a pipeline.',
+    type: 'keyword',
+    example: 'build',
+  },
+  'cicd.pipeline.result': {
+    name: 'cicd.pipeline.result',
+    description: 'The result of a pipeline run.',
+    type: 'keyword',
+    example: 'success',
+  },
+  'cicd.pipeline.action.name': {
+    name: 'cicd.pipeline.action.name',
+    description: 'The kind of action a pipeline run is performing.',
+    type: 'keyword',
+    example: 'BUILD',
+  },
+  'cicd.worker.id': {
+    name: 'cicd.worker.id',
+    description: 'The unique identifier of a worker within a CICD system.',
+    type: 'keyword',
+    example: 'abc123',
+  },
+  'cicd.worker.name': {
+    name: 'cicd.worker.name',
+    description: 'The name of a worker within a CICD system.',
+    type: 'keyword',
+    example: 'agent-abc',
+  },
+  'cicd.worker.url.full': {
+    name: 'cicd.worker.url.full',
+    description:
+      'The [URL](https://wikipedia.org/wiki/URL) of the worker, providing the complete address in order to locate and identify the worker.',
+    type: 'keyword',
+    example: 'https://cicd.example.org/worker/abc123',
+  },
+  'cicd.worker.state': {
+    name: 'cicd.worker.state',
+    description: 'The state of a CICD worker / agent.',
+    type: 'keyword',
+    example: 'idle',
+  },
+  'cicd.system.component': {
+    name: 'cicd.system.component',
+    description: 'The name of a component of the CICD system.',
+    type: 'keyword',
+    example: 'controller',
+  },
+  'linux.memory.slab.state': {
+    name: 'linux.memory.slab.state',
+    description: 'The Linux Slab memory state',
+    type: 'keyword',
+    example: 'reclaimable',
+  },
+  'log.iostream': {
+    name: 'log.iostream',
+    description: 'The stream associated with the log. See below for a list of well-known values.',
+    type: 'keyword',
+  },
+  'log.file.name': {
+    name: 'log.file.name',
+    description: 'The basename of the file.',
+    type: 'keyword',
+    example: 'audit.log',
+  },
+  'log.file.path': {
+    name: 'log.file.path',
+    description: 'The full path to the file.',
+    type: 'keyword',
+    example: '/var/log/mysql/audit.log',
+  },
+  'log.file.name_resolved': {
+    name: 'log.file.name_resolved',
+    description: 'The basename of the file, with symlinks resolved.',
+    type: 'keyword',
+    example: 'uuid.log',
+  },
+  'log.file.path_resolved': {
+    name: 'log.file.path_resolved',
+    description: 'The full path to the file, with symlinks resolved.',
+    type: 'keyword',
+    example: '/var/lib/docker/uuid.log',
+  },
+  'log.record.uid': {
+    name: 'log.record.uid',
+    description: 'A unique identifier for the Log Record.',
+    type: 'keyword',
+    example: '01ARZ3NDEKTSV4RRFFQ69G5FAV',
+  },
+  'log.record.original': {
+    name: 'log.record.original',
+    description: 'The complete original Log Record.',
+    type: 'keyword',
+    example: '77 <86>1 2015-08-06T21:58:59.694Z 192.168.2.133 inactive - - - Something happened',
+  },
+  'aws.request_id': {
+    name: 'aws.request_id',
+    description:
+      'The AWS request ID as returned in the response headers `x-amzn-requestid`, `x-amzn-request-id` or `x-amz-request-id`.',
+    type: 'keyword',
+    example: '79b9da39-b7ae-508a-a6bc-864b2829c622',
+  },
+  'aws.extended_request_id': {
+    name: 'aws.extended_request_id',
+    description: 'The AWS extended request ID as returned in the response header `x-amz-id-2`.',
+    type: 'keyword',
+    example: 'wzHcyEWfmOGDIE5QOhTAqFDoDWP3y8IUvpNINCwL9N4TEHbUw0/gZJ+VZTmCNCWR7fezEN3eCiQ=',
+  },
+  'aws.dynamodb.table_names': {
+    name: 'aws.dynamodb.table_names',
+    description: 'The keys in the `RequestItems` object field.',
+    type: 'keyword',
+    example: 'Users,Cats',
+  },
+  'aws.dynamodb.consumed_capacity': {
+    name: 'aws.dynamodb.consumed_capacity',
+    description: 'The JSON-serialized value of each item in the `ConsumedCapacity` response field.',
+    type: 'keyword',
+    example:
+      '{ "CapacityUnits": number, "GlobalSecondaryIndexes": { "string" : { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number } }, "LocalSecondaryIndexes": { "string" : { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number } }, "ReadCapacityUnits": number, "Table": { "CapacityUnits": number, "ReadCapacityUnits": number, "WriteCapacityUnits": number }, "TableName": "string", "WriteCapacityUnits": number }',
+  },
+  'aws.dynamodb.item_collection_metrics': {
+    name: 'aws.dynamodb.item_collection_metrics',
+    description: 'The JSON-serialized value of the `ItemCollectionMetrics` response field.',
+    type: 'keyword',
+    example:
+      '{ "string" : [ { "ItemCollectionKey": { "string" : { "B": blob, "BOOL": boolean, "BS": [ blob ], "L": [ "AttributeValue" ], "M": { "string" : "AttributeValue" }, "N": "string", "NS": [ "string" ], "NULL": boolean, "S": "string", "SS": [ "string" ] } }, "SizeEstimateRangeGB": [ number ] } ] }',
+  },
+  'aws.dynamodb.provisioned_read_capacity': {
+    name: 'aws.dynamodb.provisioned_read_capacity',
+    description: 'The value of the `ProvisionedThroughput.ReadCapacityUnits` request parameter.',
+    type: 'double',
+    example: '1',
+  },
+  'aws.dynamodb.provisioned_write_capacity': {
+    name: 'aws.dynamodb.provisioned_write_capacity',
+    description: 'The value of the `ProvisionedThroughput.WriteCapacityUnits` request parameter.',
+    type: 'double',
+    example: '1',
+  },
+  'aws.dynamodb.consistent_read': {
+    name: 'aws.dynamodb.consistent_read',
+    description: 'The value of the `ConsistentRead` request parameter.',
+    type: 'boolean',
+  },
+  'aws.dynamodb.projection': {
+    name: 'aws.dynamodb.projection',
+    description: 'The value of the `ProjectionExpression` request parameter.',
+    type: 'keyword',
+    example: 'Title',
+  },
+  'aws.dynamodb.limit': {
+    name: 'aws.dynamodb.limit',
+    description: 'The value of the `Limit` request parameter.',
+    type: 'long',
+    example: '10',
+  },
+  'aws.dynamodb.attributes_to_get': {
+    name: 'aws.dynamodb.attributes_to_get',
+    description: 'The value of the `AttributesToGet` request parameter.',
+    type: 'keyword',
+    example: 'lives,id',
+  },
+  'aws.dynamodb.index_name': {
+    name: 'aws.dynamodb.index_name',
+    description: 'The value of the `IndexName` request parameter.',
+    type: 'keyword',
+    example: 'name_to_group',
+  },
+  'aws.dynamodb.select': {
+    name: 'aws.dynamodb.select',
+    description: 'The value of the `Select` request parameter.',
+    type: 'keyword',
+    example: 'ALL_ATTRIBUTES',
+  },
+  'aws.dynamodb.global_secondary_indexes': {
+    name: 'aws.dynamodb.global_secondary_indexes',
+    description:
+      'The JSON-serialized value of each item of the `GlobalSecondaryIndexes` request field',
+    type: 'keyword',
+    example:
+      '{ "IndexName": "string", "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" }, "ProvisionedThroughput": { "ReadCapacityUnits": number, "WriteCapacityUnits": number } }',
+  },
+  'aws.dynamodb.local_secondary_indexes': {
+    name: 'aws.dynamodb.local_secondary_indexes',
+    description:
+      'The JSON-serialized value of each item of the `LocalSecondaryIndexes` request field.',
+    type: 'keyword',
+    example:
+      '{ "IndexArn": "string", "IndexName": "string", "IndexSizeBytes": number, "ItemCount": number, "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" } }',
+  },
+  'aws.dynamodb.exclusive_start_table': {
+    name: 'aws.dynamodb.exclusive_start_table',
+    description: 'The value of the `ExclusiveStartTableName` request parameter.',
+    type: 'keyword',
+    example: 'Users',
+  },
+  'aws.dynamodb.table_count': {
+    name: 'aws.dynamodb.table_count',
+    description: 'The number of items in the `TableNames` response parameter.',
+    type: 'long',
+    example: '20',
+  },
+  'aws.dynamodb.scan_forward': {
+    name: 'aws.dynamodb.scan_forward',
+    description: 'The value of the `ScanIndexForward` request parameter.',
+    type: 'boolean',
+  },
+  'aws.dynamodb.segment': {
+    name: 'aws.dynamodb.segment',
+    description: 'The value of the `Segment` request parameter.',
+    type: 'long',
+    example: '10',
+  },
+  'aws.dynamodb.total_segments': {
+    name: 'aws.dynamodb.total_segments',
+    description: 'The value of the `TotalSegments` request parameter.',
+    type: 'long',
+    example: '100',
+  },
+  'aws.dynamodb.count': {
+    name: 'aws.dynamodb.count',
+    description: 'The value of the `Count` response parameter.',
+    type: 'long',
+    example: '10',
+  },
+  'aws.dynamodb.scanned_count': {
+    name: 'aws.dynamodb.scanned_count',
+    description: 'The value of the `ScannedCount` response parameter.',
+    type: 'long',
+    example: '50',
+  },
+  'aws.dynamodb.attribute_definitions': {
+    name: 'aws.dynamodb.attribute_definitions',
+    description:
+      'The JSON-serialized value of each item in the `AttributeDefinitions` request field.',
+    type: 'keyword',
+    example: '{ "AttributeName": "string", "AttributeType": "string" }',
+  },
+  'aws.dynamodb.global_secondary_index_updates': {
+    name: 'aws.dynamodb.global_secondary_index_updates',
+    description:
+      'The JSON-serialized value of each item in the `GlobalSecondaryIndexUpdates` request field.',
+    type: 'keyword',
+    example:
+      '{ "Create": { "IndexName": "string", "KeySchema": [ { "AttributeName": "string", "KeyType": "string" } ], "Projection": { "NonKeyAttributes": [ "string" ], "ProjectionType": "string" }, "ProvisionedThroughput": { "ReadCapacityUnits": number, "WriteCapacityUnits": number } }',
+  },
+  'aws.ecs.container.arn': {
+    name: 'aws.ecs.container.arn',
+    description:
+      'The Amazon Resource Name (ARN) of an [ECS container instance](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ECS_instances.html).',
+    type: 'keyword',
+    example: 'arn:aws:ecs:us-west-1:123456789123:container/32624152-9086-4f0e-acae-1a75b14fe4d9',
+  },
+  'aws.ecs.cluster.arn': {
+    name: 'aws.ecs.cluster.arn',
+    description:
+      'The ARN of an [ECS cluster](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/clusters.html).',
+    type: 'keyword',
+    example: 'arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster',
+  },
+  'aws.ecs.launchtype': {
+    name: 'aws.ecs.launchtype',
+    description:
+      'The [launch type](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/launch_types.html) for an ECS task.',
+    type: 'keyword',
+  },
+  'aws.ecs.task.arn': {
+    name: 'aws.ecs.task.arn',
+    description:
+      'The ARN of a running [ECS task](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/ecs-account-settings.html#ecs-resource-ids).',
+    type: 'keyword',
+    example: 'arn:aws:ecs:us-west-1:123456789123:task/10838bed-421f-43ef-870a-f43feacbbb5b',
+  },
+  'aws.ecs.task.family': {
+    name: 'aws.ecs.task.family',
+    description:
+      'The family name of the [ECS task definition](https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task_definitions.html) used to create the ECS task.',
+    type: 'keyword',
+    example: 'opentelemetry-family',
+  },
+  'aws.ecs.task.id': {
+    name: 'aws.ecs.task.id',
+    description: 'The ID of a running ECS task. The ID MUST be extracted from `task.arn`.',
+    type: 'keyword',
+    example: '10838bed-421f-43ef-870a-f43feacbbb5b',
+  },
+  'aws.ecs.task.revision': {
+    name: 'aws.ecs.task.revision',
+    description: 'The revision for the task definition used to create the ECS task.',
+    type: 'keyword',
+    example: '8',
+  },
+  'aws.eks.cluster.arn': {
+    name: 'aws.eks.cluster.arn',
+    description: 'The ARN of an EKS cluster.',
+    type: 'keyword',
+    example: 'arn:aws:ecs:us-west-2:123456789123:cluster/my-cluster',
+  },
+  'aws.log.group.names': {
+    name: 'aws.log.group.names',
+    description: 'The name(s) of the AWS log group(s) an application is writing to.',
+    type: 'keyword',
+    example: '/aws/lambda/my-function,opentelemetry-service',
+  },
+  'aws.log.group.arns': {
+    name: 'aws.log.group.arns',
+    description: 'The Amazon Resource Name(s) (ARN) of the AWS log group(s).',
+    type: 'keyword',
+    example: 'arn:aws:logs:us-west-1:123456789012:log-group:/aws/my/group:*',
+  },
+  'aws.log.stream.names': {
+    name: 'aws.log.stream.names',
+    description: 'The name(s) of the AWS log stream(s) an application is writing to.',
+    type: 'keyword',
+    example: 'logs/main/10838bed-421f-43ef-870a-f43feacbbb5b',
+  },
+  'aws.log.stream.arns': {
+    name: 'aws.log.stream.arns',
+    description: 'The ARN(s) of the AWS log stream(s).',
+    type: 'keyword',
+    example:
+      'arn:aws:logs:us-west-1:123456789012:log-group:/aws/my/group:log-stream:logs/main/10838bed-421f-43ef-870a-f43feacbbb5b',
+  },
+  'aws.lambda.invoked_arn': {
+    name: 'aws.lambda.invoked_arn',
+    description:
+      'The full invoked ARN as provided on the `Context` passed to the function (`Lambda-Runtime-Invoked-Function-Arn` header on the `/runtime/invocation/next` applicable).',
+    type: 'keyword',
+    example: 'arn:aws:lambda:us-east-1:123456:function:myfunction:myalias',
+  },
+  'aws.lambda.resource_mapping.id': {
+    name: 'aws.lambda.resource_mapping.id',
+    description:
+      "The UUID of the [AWS Lambda EvenSource Mapping](https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/aws-resource-lambda-eventsourcemapping.html). An event source is mapped to a lambda function. It's contents are read by Lambda and used to trigger a function. This isn't available in the lambda execution context or the lambda runtime environtment. This is going to be populated by the AWS SDK for each language when that UUID is present. Some of these operations are Create/Delete/Get/List/Update EventSourceMapping.",
+    type: 'keyword',
+    example: '587ad24b-03b9-4413-8202-bbd56b36e5b7',
+  },
+  'aws.s3.bucket': {
+    name: 'aws.s3.bucket',
+    description:
+      'The S3 bucket name the request refers to. Corresponds to the `--bucket` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
+    type: 'keyword',
+    example: 'some-bucket-name',
+  },
+  'aws.s3.key': {
+    name: 'aws.s3.key',
+    description:
+      'The S3 object key the request refers to. Corresponds to the `--key` parameter of the [S3 API](https://docs.aws.amazon.com/cli/latest/reference/s3api/index.html) operations.',
+    type: 'keyword',
+    example: 'someFile.yml',
+  },
+  'aws.s3.copy_source': {
+    name: 'aws.s3.copy_source',
+    description: 'The source object (in the form `bucket`/`key`) for the copy operation.',
+    type: 'keyword',
+    example: 'someFile.yml',
+  },
+  'aws.s3.upload_id': {
+    name: 'aws.s3.upload_id',
+    description: 'Upload ID that identifies the multipart upload.',
+    type: 'keyword',
+    example: 'dfRtDYWFbkRONycy.Yxwh66Yjlx.cph0gtNBtJ',
+  },
+  'aws.s3.delete': {
+    name: 'aws.s3.delete',
+    description: 'The delete request container that specifies the objects to be deleted.',
+    type: 'keyword',
+    example: 'Objects=[{Key=string,VersionId=string},{Key=string,VersionId=string}],Quiet=boolean',
+  },
+  'aws.s3.part_number': {
+    name: 'aws.s3.part_number',
+    description:
+      'The part number of the part being uploaded in a multipart-upload operation. This is a positive integer between 1 and 10,000.',
+    type: 'long',
+    example: '3456',
+  },
+  'aws.sqs.queue.url': {
+    name: 'aws.sqs.queue.url',
+    description:
+      "The URL of the AWS SQS Queue. It's a unique identifier for a queue in Amazon Simple Queue Service (SQS) and is used to access the queue and perform actions on it.",
+    type: 'keyword',
+    example: 'https://sqs.us-east-1.amazonaws.com/123456789012/MyQueue',
+  },
+  'aws.sns.topic.arn': {
+    name: 'aws.sns.topic.arn',
+    description:
+      'The ARN of the AWS SNS Topic. An Amazon SNS [topic](https://docs.aws.amazon.com/sns/latest/dg/sns-create-topic.html) is a logical access point that acts as a communication channel.',
+    type: 'keyword',
+    example: 'arn:aws:sns:us-east-1:123456789012:mystack-mytopic-NZJ5JSMVGFIE',
+  },
+  'aws.kinesis.stream_name': {
+    name: 'aws.kinesis.stream_name',
+    description:
+      'The name of the AWS Kinesis [stream](https://docs.aws.amazon.com/streams/latest/dev/introduction.html) the request refers to. Corresponds to the `--stream-name` parameter of the Kinesis [describe-stream](https://docs.aws.amazon.com/cli/latest/reference/kinesis/describe-stream.html) operation.',
+    type: 'keyword',
+    example: 'some-stream-name',
+  },
+  'aws.step_functions.activity.arn': {
+    name: 'aws.step_functions.activity.arn',
+    description: 'The ARN of the AWS Step Functions Activity.',
+    type: 'keyword',
+    example: 'arn:aws:states:us-east-1:123456789012:activity:get-greeting',
+  },
+  'aws.step_functions.state_machine.arn': {
+    name: 'aws.step_functions.state_machine.arn',
+    description: 'The ARN of the AWS Step Functions State Machine.',
+    type: 'keyword',
+    example: 'arn:aws:states:us-east-1:123456789012:stateMachine:myStateMachine:1',
+  },
+  'aws.secretsmanager.secret.arn': {
+    name: 'aws.secretsmanager.secret.arn',
+    description: 'The ARN of the Secret stored in the Secrets Mangger',
+    type: 'keyword',
+    example: 'arn:aws:secretsmanager:us-east-1:123456789012:secret:SecretName-6RandomCharacters',
+  },
+  'aws.bedrock.guardrail.id': {
+    name: 'aws.bedrock.guardrail.id',
+    description:
+      'The unique identifier of the AWS Bedrock Guardrail. A [guardrail](https://docs.aws.amazon.com/bedrock/latest/userguide/guardrails.html) helps safeguard and prevent unwanted behavior from model responses or user messages.',
+    type: 'keyword',
+    example: 'sgi5gkybzqak',
+  },
+  'aws.bedrock.knowledge_base.id': {
+    name: 'aws.bedrock.knowledge_base.id',
+    description:
+      'The unique identifier of the AWS Bedrock Knowledge base. A [knowledge base](https://docs.aws.amazon.com/bedrock/latest/userguide/knowledge-base.html) is a bank of information that can be queried by models to generate more relevant responses and augment prompts.',
+    type: 'keyword',
+    example: 'XFWUPB9PAW',
+  },
+  'app.installation.id': {
+    name: 'app.installation.id',
+    description:
+      'A unique identifier representing the installation of an application on a specific device',
+    type: 'keyword',
+    example: '2ab2916d-a51f-4ac8-80ee-45ac31a28092',
+  },
+  'app.screen.coordinate.x': {
+    name: 'app.screen.coordinate.x',
+    description: 'The x (horizontal) coordinate of a screen coordinate, in screen pixels.',
+    type: 'long',
+    example: '0',
+  },
+  'app.screen.coordinate.y': {
+    name: 'app.screen.coordinate.y',
+    description: 'The y (vertical) component of a screen coordinate, in screen pixels.',
+    type: 'long',
+    example: '12',
+  },
+  'app.widget.id': {
+    name: 'app.widget.id',
+    description:
+      'An identifier that uniquely differentiates this widget from other widgets in the same application.',
+    type: 'keyword',
+    example: 'f9bc787d-ff05-48ad-90e1-fca1d46130b3',
+  },
+  'app.widget.name': {
+    name: 'app.widget.name',
+    description: 'The name of an application widget.',
+    type: 'keyword',
+    example: 'submit',
+  },
+  'app.build_id': {
+    name: 'app.build_id',
+    description: 'Unique identifier for a particular build or compilation of the application.',
+    type: 'keyword',
+    example: '6cff0a7e-cefc-4668-96f5-1273d8b334d0',
+  },
+  'k8s.cluster.name': {
+    name: 'k8s.cluster.name',
+    description: 'The name of the cluster.',
+    type: 'keyword',
+    example: 'opentelemetry-cluster',
+  },
+  'k8s.cluster.uid': {
+    name: 'k8s.cluster.uid',
+    description: 'A pseudo-ID for the cluster, set to the UID of the `kube-system` namespace.',
+    type: 'keyword',
+    example: '218fc5a9-a5f1-4b54-aa05-46717d0ab26d',
+  },
+  'k8s.node.name': {
+    name: 'k8s.node.name',
+    description: 'The name of the Node.',
+    type: 'keyword',
+    example: 'node-1',
+  },
+  'k8s.node.uid': {
+    name: 'k8s.node.uid',
+    description: 'The UID of the Node.',
+    type: 'keyword',
+    example: '1eb3a0c6-0477-4080-a9cb-0cb7db65c6a2',
+  },
+  'k8s.node.label': {
+    name: 'k8s.node.label',
+    description:
+      'The label placed on the Node, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'arm64',
+  },
+  'k8s.node.annotation': {
+    name: 'k8s.node.annotation',
+    description:
+      'The annotation placed on the Node, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '0',
+  },
+  'k8s.namespace.name': {
+    name: 'k8s.namespace.name',
+    description: 'The name of the namespace that the pod is running in.',
+    type: 'keyword',
+    example: 'default',
+  },
+  'k8s.namespace.label': {
+    name: 'k8s.namespace.label',
+    description:
+      'The label placed on the Namespace, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'default',
+  },
+  'k8s.namespace.annotation': {
+    name: 'k8s.namespace.annotation',
+    description:
+      'The annotation placed on the Namespace, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '0',
+  },
+  'k8s.pod.uid': {
+    name: 'k8s.pod.uid',
+    description: 'The UID of the Pod.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.pod.name': {
+    name: 'k8s.pod.name',
+    description: 'The name of the Pod.',
+    type: 'keyword',
+    example: 'opentelemetry-pod-autoconf',
+  },
+  'k8s.pod.label': {
+    name: 'k8s.pod.label',
+    description:
+      'The label placed on the Pod, the `<key>` being the label name, the value being the label value.',
+    type: 'keyword',
+    example: 'my-app',
+  },
+  'k8s.pod.annotation': {
+    name: 'k8s.pod.annotation',
+    description:
+      'The annotation placed on the Pod, the `<key>` being the annotation name, the value being the annotation value.',
+    type: 'keyword',
+    example: 'true',
+  },
+  'k8s.container.name': {
+    name: 'k8s.container.name',
+    description:
+      'The name of the Container from Pod specification, must be unique within a Pod. Container runtime usually uses different globally unique name (`container.name`).',
+    type: 'keyword',
+    example: 'redis',
+  },
+  'k8s.container.restart_count': {
+    name: 'k8s.container.restart_count',
+    description:
+      'Number of times the container was restarted. This attribute can be used to identify a particular container (running or stopped) within a container spec.',
+    type: 'long',
+  },
+  'k8s.container.status.last_terminated_reason': {
+    name: 'k8s.container.status.last_terminated_reason',
+    description: 'Last terminated reason of the Container.',
+    type: 'keyword',
+    example: 'Evicted',
+  },
+  'k8s.replicaset.uid': {
+    name: 'k8s.replicaset.uid',
+    description: 'The UID of the ReplicaSet.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.replicaset.name': {
+    name: 'k8s.replicaset.name',
+    description: 'The name of the ReplicaSet.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.replicaset.label': {
+    name: 'k8s.replicaset.label',
+    description:
+      'The label placed on the ReplicaSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'guestbook',
+  },
+  'k8s.replicaset.annotation': {
+    name: 'k8s.replicaset.annotation',
+    description:
+      'The annotation placed on the ReplicaSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '0',
+  },
+  'k8s.replicationcontroller.uid': {
+    name: 'k8s.replicationcontroller.uid',
+    description: 'The UID of the replication controller.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.replicationcontroller.name': {
+    name: 'k8s.replicationcontroller.name',
+    description: 'The name of the replication controller.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.resourcequota.uid': {
+    name: 'k8s.resourcequota.uid',
+    description: 'The UID of the resource quota.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.resourcequota.name': {
+    name: 'k8s.resourcequota.name',
+    description: 'The name of the resource quota.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.deployment.uid': {
+    name: 'k8s.deployment.uid',
+    description: 'The UID of the Deployment.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.deployment.name': {
+    name: 'k8s.deployment.name',
+    description: 'The name of the Deployment.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.deployment.label': {
+    name: 'k8s.deployment.label',
+    description:
+      'The label placed on the Deployment, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'guestbook',
+  },
+  'k8s.deployment.annotation': {
+    name: 'k8s.deployment.annotation',
+    description:
+      'The annotation placed on the Deployment, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '1',
+  },
+  'k8s.statefulset.uid': {
+    name: 'k8s.statefulset.uid',
+    description: 'The UID of the StatefulSet.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.statefulset.name': {
+    name: 'k8s.statefulset.name',
+    description: 'The name of the StatefulSet.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.statefulset.label': {
+    name: 'k8s.statefulset.label',
+    description:
+      'The label placed on the StatefulSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'guestbook',
+  },
+  'k8s.statefulset.annotation': {
+    name: 'k8s.statefulset.annotation',
+    description:
+      'The annotation placed on the StatefulSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '1',
+  },
+  'k8s.daemonset.uid': {
+    name: 'k8s.daemonset.uid',
+    description: 'The UID of the DaemonSet.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.daemonset.name': {
+    name: 'k8s.daemonset.name',
+    description: 'The name of the DaemonSet.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.daemonset.label': {
+    name: 'k8s.daemonset.label',
+    description:
+      'The label placed on the DaemonSet, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'guestbook',
+  },
+  'k8s.daemonset.annotation': {
+    name: 'k8s.daemonset.annotation',
+    description:
+      'The annotation placed on the DaemonSet, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '1',
+  },
+  'k8s.hpa.uid': {
+    name: 'k8s.hpa.uid',
+    description: 'The UID of the horizontal pod autoscaler.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.hpa.name': {
+    name: 'k8s.hpa.name',
+    description: 'The name of the horizontal pod autoscaler.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.hpa.scaletargetref.kind': {
+    name: 'k8s.hpa.scaletargetref.kind',
+    description: 'The kind of the target resource to scale for the HorizontalPodAutoscaler.',
+    type: 'keyword',
+    example: 'Deployment',
+  },
+  'k8s.hpa.scaletargetref.name': {
+    name: 'k8s.hpa.scaletargetref.name',
+    description: 'The name of the target resource to scale for the HorizontalPodAutoscaler.',
+    type: 'keyword',
+    example: 'my-deployment',
+  },
+  'k8s.hpa.scaletargetref.api_version': {
+    name: 'k8s.hpa.scaletargetref.api_version',
+    description: 'The API version of the target resource to scale for the HorizontalPodAutoscaler.',
+    type: 'keyword',
+    example: 'apps/v1',
+  },
+  'k8s.hpa.metric.type': {
+    name: 'k8s.hpa.metric.type',
+    description: 'The type of metric source for the horizontal pod autoscaler.',
+    type: 'keyword',
+    example: 'Resource',
+  },
+  'k8s.job.uid': {
+    name: 'k8s.job.uid',
+    description: 'The UID of the Job.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.job.name': {
+    name: 'k8s.job.name',
+    description: 'The name of the Job.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.job.label': {
+    name: 'k8s.job.label',
+    description:
+      'The label placed on the Job, the `<key>` being the label name, the value being the label value, even if the value is empty.',
+    type: 'keyword',
+    example: 'ci',
+  },
+  'k8s.job.annotation': {
+    name: 'k8s.job.annotation',
+    description:
+      'The annotation placed on the Job, the `<key>` being the annotation name, the value being the annotation value, even if the value is empty.',
+    type: 'keyword',
+    example: '1',
+  },
+  'k8s.cronjob.uid': {
+    name: 'k8s.cronjob.uid',
+    description: 'The UID of the CronJob.',
+    type: 'keyword',
+    example: '275ecb36-5aa8-4c2a-9c47-d8bb681b9aff',
+  },
+  'k8s.cronjob.name': {
+    name: 'k8s.cronjob.name',
+    description: 'The name of the CronJob.',
+    type: 'keyword',
+    example: 'opentelemetry',
+  },
+  'k8s.cronjob.label': {
+    name: 'k8s.cronjob.label',
+    description:
+      'The label placed on the CronJob, the `<key>` being the label name, the value being the label value.',
+    type: 'keyword',
+    example: 'weekly',
+  },
+  'k8s.cronjob.annotation': {
+    name: 'k8s.cronjob.annotation',
+    description:
+      'The cronjob annotation placed on the CronJob, the `<key>` being the annotation name, the value being the annotation value.',
+    type: 'keyword',
+    example: '4',
+  },
+  'k8s.volume.name': {
+    name: 'k8s.volume.name',
+    description: 'The name of the K8s volume.',
+    type: 'keyword',
+    example: 'volume0',
+  },
+  'k8s.volume.type': {
+    name: 'k8s.volume.type',
+    description: 'The type of the K8s volume.',
+    type: 'keyword',
+    example: 'emptyDir',
+  },
+  'k8s.namespace.phase': {
+    name: 'k8s.namespace.phase',
+    description: 'The phase of the K8s namespace.',
+    type: 'keyword',
+    example: 'active',
+  },
+  'k8s.node.condition.type': {
+    name: 'k8s.node.condition.type',
+    description: 'The condition type of a K8s Node.',
+    type: 'keyword',
+    example: 'Ready',
+  },
+  'k8s.node.condition.status': {
+    name: 'k8s.node.condition.status',
+    description: 'The status of the condition, one of True, False, Unknown.',
+    type: 'keyword',
+    example: 'true',
+  },
+  'k8s.container.status.state': {
+    name: 'k8s.container.status.state',
+    description:
+      'The state of the container. [K8s ContainerState](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstate-v1-core)',
+    type: 'keyword',
+    example: 'terminated',
+  },
+  'k8s.container.status.reason': {
+    name: 'k8s.container.status.reason',
+    description:
+      'The reason for the container state. Corresponds to the `reason` field of the: [K8s ContainerStateWaiting](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstatewaiting-v1-core) or [K8s ContainerStateTerminated](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#containerstateterminated-v1-core)',
+    type: 'keyword',
+    example: 'ContainerCreating',
+  },
+  'k8s.hugepage.size': {
+    name: 'k8s.hugepage.size',
+    description: 'The size (identifier) of the K8s huge page.',
+    type: 'keyword',
+    example: '2Mi',
+  },
+  'k8s.storageclass.name': {
+    name: 'k8s.storageclass.name',
+    description:
+      'The name of K8s [StorageClass](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#storageclass-v1-storage-k8s-io) object.',
+    type: 'keyword',
+    example: 'gold.storageclass.storage.k8s.io',
+  },
+  'k8s.resourcequota.resource_name': {
+    name: 'k8s.resourcequota.resource_name',
+    description: 'The name of the K8s resource a resource quota defines.',
+    type: 'keyword',
+    example: 'count/replicationcontrollers',
+  },
+  'dotnet.gc.heap.generation': {
+    name: 'dotnet.gc.heap.generation',
+    description: 'Name of the garbage collector managed heap generation.',
+    type: 'keyword',
+    example: 'gen0',
+  },
+  'cpython.gc.generation': {
+    name: 'cpython.gc.generation',
+    description: 'Value of the garbage collector collection generation.',
+    type: 'keyword',
+    example: '0',
+  },
+  'disk.io.direction': {
+    name: 'disk.io.direction',
+    description: 'The disk IO operation direction.',
+    type: 'keyword',
+    example: 'read',
+  },
+  'otel.status_code': {
+    name: 'otel.status_code',
+    description:
+      'Name of the code, either "OK" or "ERROR". MUST NOT be set if the status code is UNSET.',
+    type: 'keyword',
+  },
+  'otel.status_description': {
+    name: 'otel.status_description',
+    description: 'Description of the Status if it has a value, otherwise not set.',
+    type: 'keyword',
+    example: 'resource not found',
+  },
+  'otel.span.sampling_result': {
+    name: 'otel.span.sampling_result',
+    description: 'The result value of the sampler for this span',
+    type: 'keyword',
+  },
+  'otel.span.parent.origin': {
+    name: 'otel.span.parent.origin',
+    description:
+      'Determines whether the span has a parent span, and if so, [whether it is a remote parent](https://opentelemetry.io/docs/specs/otel/trace/api/#isremote)',
+    type: 'keyword',
+  },
+  'otel.scope.name': {
+    name: 'otel.scope.name',
+    description: 'The name of the instrumentation scope - (`InstrumentationScope.Name` in OTLP).',
+    type: 'keyword',
+    example: 'io.opentelemetry.contrib.mongodb',
+  },
+  'otel.scope.version': {
+    name: 'otel.scope.version',
+    description:
+      'The version of the instrumentation scope - (`InstrumentationScope.Version` in OTLP).',
+    type: 'keyword',
+    example: '1.0.0',
+  },
+  'otel.scope.schema_url': {
+    name: 'otel.scope.schema_url',
+    description: 'The schema URL of the instrumentation scope.',
+    type: 'keyword',
+    example: 'https://opentelemetry.io/schemas/1.31.0',
+  },
+  'otel.component.type': {
+    name: 'otel.component.type',
+    description: 'A name identifying the type of the OpenTelemetry component.',
+    type: 'keyword',
+    example: 'otlp_grpc_span_exporter',
+  },
+  'otel.component.name': {
+    name: 'otel.component.name',
+    description:
+      'A name uniquely identifying the instance of the OpenTelemetry component within its containing SDK instance.',
+    type: 'keyword',
+    example: 'otlp_grpc_span_exporter/0',
+  },
+  'zos.smf.id': {
+    name: 'zos.smf.id',
+    description:
+      'The System Management Facility (SMF) Identifier uniquely identified a z/OS system within a SYSPLEX or mainframe environment and is used for system and performance analysis.',
+    type: 'keyword',
+    example: 'SYS1',
+  },
+  'zos.sysplex.name': {
+    name: 'zos.sysplex.name',
+    description: 'The name of the SYSPLEX to which the z/OS system belongs too.',
+    type: 'keyword',
+    example: 'SYSPLEX1',
+  },
+  'device.id': {
+    name: 'device.id',
+    description: 'A unique identifier representing the device',
+    type: 'keyword',
+    example: '123456789012345',
+  },
+  'device.manufacturer': {
+    name: 'device.manufacturer',
+    description: 'The name of the device manufacturer',
+    type: 'keyword',
+    example: 'Apple',
+  },
+  'device.model.identifier': {
+    name: 'device.model.identifier',
+    description: 'The model identifier for the device',
+    type: 'keyword',
+    example: 'iPhone3,4',
+  },
+  'device.model.name': {
+    name: 'device.model.name',
+    description: 'The marketing name for the device model',
+    type: 'keyword',
+    example: 'iPhone 6s Plus',
+  },
+  'thread.id': {
+    name: 'thread.id',
+    description: 'Current "managed" thread ID (as opposed to OS thread ID).',
+    type: 'long',
+  },
+  'thread.name': {
+    name: 'thread.name',
+    description: 'Current thread name.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'messaging.batch.message_count': {
+    name: 'messaging.batch.message_count',
+    description:
+      'The number of messages sent, received, or processed in the scope of the batching operation.',
+    type: 'long',
+    example: '0',
+  },
+  'messaging.client.id': {
+    name: 'messaging.client.id',
+    description: 'A unique identifier for the client that consumes or produces a message.',
+    type: 'keyword',
+    example: 'client-5',
+  },
+  'messaging.consumer.group.name': {
+    name: 'messaging.consumer.group.name',
+    description: 'The name of the consumer group with which a consumer is associated.',
+    type: 'keyword',
+    example: 'my-group',
+  },
+  'messaging.destination.name': {
+    name: 'messaging.destination.name',
+    description: 'The message destination name',
+    type: 'keyword',
+    example: 'MyQueue',
+  },
+  'messaging.destination.subscription.name': {
+    name: 'messaging.destination.subscription.name',
+    description: 'The name of the destination subscription from which a message is consumed.',
+    type: 'keyword',
+    example: 'subscription-a',
+  },
+  'messaging.destination.template': {
+    name: 'messaging.destination.template',
+    description: 'Low cardinality representation of the messaging destination name',
+    type: 'keyword',
+    example: '/customers/{customerId}',
+  },
+  'messaging.destination.anonymous': {
+    name: 'messaging.destination.anonymous',
+    description:
+      'A boolean that is true if the message destination is anonymous (could be unnamed or have auto-generated name).',
+    type: 'boolean',
+  },
+  'messaging.destination.temporary': {
+    name: 'messaging.destination.temporary',
+    description:
+      'A boolean that is true if the message destination is temporary and might not exist anymore after messages are processed.',
+    type: 'boolean',
+  },
+  'messaging.destination.partition.id': {
+    name: 'messaging.destination.partition.id',
+    description:
+      'The identifier of the partition messages are sent to or received from, unique within the `messaging.destination.name`.',
+    type: 'keyword',
+    example: '1',
+  },
+  'messaging.message.conversation_id': {
+    name: 'messaging.message.conversation_id',
+    description:
+      'The conversation ID identifying the conversation to which the message belongs, represented as a string. Sometimes called "Correlation ID".',
+    type: 'keyword',
+    example: 'M',
+  },
+  'messaging.message.envelope.size': {
+    name: 'messaging.message.envelope.size',
+    description: 'The size of the message body and metadata in bytes.',
+    type: 'long',
+  },
+  'messaging.message.id': {
+    name: 'messaging.message.id',
+    description:
+      'A value used by the messaging system as an identifier for the message, represented as a string.',
+    type: 'keyword',
+    example: '4',
+  },
+  'messaging.message.body.size': {
+    name: 'messaging.message.body.size',
+    description: 'The size of the message body in bytes.',
+    type: 'long',
+  },
+  'messaging.operation.type': {
+    name: 'messaging.operation.type',
+    description: 'A string identifying the type of the messaging operation.',
+    type: 'keyword',
+  },
+  'messaging.operation.name': {
+    name: 'messaging.operation.name',
+    description: 'The system-specific name of the messaging operation.',
+    type: 'keyword',
+    example: 'receive',
+  },
+  'messaging.system': {
+    name: 'messaging.system',
+    description: 'The messaging system as identified by the client instrumentation.',
+    type: 'keyword',
+  },
+  'messaging.kafka.message.key': {
+    name: 'messaging.kafka.message.key',
+    description:
+      "Message keys in Kafka are used for grouping alike messages to ensure they're processed on the same partition. They differ from `messaging.message.id` in that they're not unique. If the key is `null`, the attribute MUST NOT be set.",
+    type: 'keyword',
+    example: 'm',
+  },
+  'messaging.kafka.offset': {
+    name: 'messaging.kafka.offset',
+    description: 'The offset of a record in the corresponding Kafka partition.',
+    type: 'long',
+  },
+  'messaging.kafka.message.tombstone': {
+    name: 'messaging.kafka.message.tombstone',
+    description: 'A boolean that is true if the message is a tombstone.',
+    type: 'boolean',
+  },
+  'messaging.rabbitmq.destination.routing_key': {
+    name: 'messaging.rabbitmq.destination.routing_key',
+    description: 'RabbitMQ message routing key.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'messaging.rabbitmq.message.delivery_tag': {
+    name: 'messaging.rabbitmq.message.delivery_tag',
+    description: 'RabbitMQ message delivery tag',
+    type: 'long',
+  },
+  'messaging.rocketmq.consumption_model': {
+    name: 'messaging.rocketmq.consumption_model',
+    description: 'Model of message consumption. This only applies to consumer spans.',
+    type: 'keyword',
+  },
+  'messaging.rocketmq.message.delay_time_level': {
+    name: 'messaging.rocketmq.message.delay_time_level',
+    description: 'The delay time level for delay message, which determines the message delay time.',
+    type: 'long',
+  },
+  'messaging.rocketmq.message.delivery_timestamp': {
+    name: 'messaging.rocketmq.message.delivery_timestamp',
+    description:
+      'The timestamp in milliseconds that the delay message is expected to be delivered to consumer.',
+    type: 'long',
+  },
+  'messaging.rocketmq.message.group': {
+    name: 'messaging.rocketmq.message.group',
+    description:
+      'It is essential for FIFO message. Messages that belong to the same message group are always processed one by one within the same consumer group.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'messaging.rocketmq.message.keys': {
+    name: 'messaging.rocketmq.message.keys',
+    description: 'Key(s) of message, another way to mark message besides message id.',
+    type: 'keyword',
+    example: 'keyA,keyB',
+  },
+  'messaging.rocketmq.message.tag': {
+    name: 'messaging.rocketmq.message.tag',
+    description: 'The secondary classifier of message besides topic.',
+    type: 'keyword',
+    example: 't',
+  },
+  'messaging.rocketmq.message.type': {
+    name: 'messaging.rocketmq.message.type',
+    description: 'Type of message.',
+    type: 'keyword',
+  },
+  'messaging.rocketmq.namespace': {
+    name: 'messaging.rocketmq.namespace',
+    description:
+      'Namespace of RocketMQ resources, resources in different namespaces are individual.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'messaging.gcp_pubsub.message.ordering_key': {
+    name: 'messaging.gcp_pubsub.message.ordering_key',
+    description:
+      'The ordering key for a given message. If the attribute is not present, the message does not have an ordering key.',
+    type: 'keyword',
+    example: 'o',
+  },
+  'messaging.gcp_pubsub.message.ack_id': {
+    name: 'messaging.gcp_pubsub.message.ack_id',
+    description: 'The ack id for a given message.',
+    type: 'keyword',
+    example: 'a',
+  },
+  'messaging.gcp_pubsub.message.ack_deadline': {
+    name: 'messaging.gcp_pubsub.message.ack_deadline',
+    description: 'The ack deadline in seconds set for the modify ack deadline request.',
+    type: 'long',
+  },
+  'messaging.gcp_pubsub.message.delivery_attempt': {
+    name: 'messaging.gcp_pubsub.message.delivery_attempt',
+    description: 'The delivery attempt for a given message.',
+    type: 'long',
+  },
+  'messaging.servicebus.message.delivery_count': {
+    name: 'messaging.servicebus.message.delivery_count',
+    description: 'Number of deliveries that have been attempted for this message.',
+    type: 'long',
+  },
+  'messaging.servicebus.message.enqueued_time': {
+    name: 'messaging.servicebus.message.enqueued_time',
+    description:
+      'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
+    type: 'long',
+  },
+  'messaging.servicebus.disposition_status': {
+    name: 'messaging.servicebus.disposition_status',
+    description:
+      'Describes the [settlement type](https://learn.microsoft.com/azure/service-bus-messaging/message-transfers-locks-settlement#peeklock).',
+    type: 'keyword',
+  },
+  'messaging.eventhubs.message.enqueued_time': {
+    name: 'messaging.eventhubs.message.enqueued_time',
+    description:
+      'The UTC epoch seconds at which the message has been accepted and stored in the entity.',
+    type: 'long',
+  },
+  'cpu.mode': {
+    name: 'cpu.mode',
+    description: 'The mode of the CPU',
+    type: 'keyword',
+    example: 'user',
+  },
+  'cpu.logical_number': {
+    name: 'cpu.logical_number',
+    description: 'The logical CPU number [0..n-1]',
+    type: 'long',
+    example: '1',
+  },
+  'user_agent.original': {
+    name: 'user_agent.original',
+    description:
+      'Value of the [HTTP User-Agent](https://www.rfc-editor.org/rfc/rfc9110.html#field.user-agent) header sent by the client.',
+    type: 'keyword',
+    example: 'CERN-LineMode/2.15 libwww/2.17b3',
+  },
+  'user_agent.name': {
+    name: 'user_agent.name',
+    description:
+      "Name of the user-agent extracted from original. Usually refers to the browser's name.",
+    type: 'keyword',
+    example: 'Safari',
+  },
+  'user_agent.version': {
+    name: 'user_agent.version',
+    description:
+      "Version of the user-agent extracted from original. Usually refers to the browser's version",
+    type: 'keyword',
+    example: '14.1.2',
+  },
+  'user_agent.os.name': {
+    name: 'user_agent.os.name',
+    description: 'Human readable operating system name.',
+    type: 'keyword',
+    example: 'iOS',
+  },
+  'user_agent.os.version': {
+    name: 'user_agent.os.version',
+    description:
+      'The version string of the operating system as defined in [Version Attributes](/docs/resource/README.md#version-attributes).',
+    type: 'keyword',
+    example: '14.2.1',
+  },
+  'user_agent.synthetic.type': {
+    name: 'user_agent.synthetic.type',
+    description: 'Specifies the category of synthetic traffic, such as tests or bots.',
+    type: 'keyword',
+  },
+  'v8js.gc.type': {
+    name: 'v8js.gc.type',
+    description: 'The type of garbage collection.',
+    type: 'keyword',
+  },
+  'v8js.heap.space.name': {
+    name: 'v8js.heap.space.name',
+    description: 'The name of the space type of heap memory.',
+    type: 'keyword',
+  },
+  'source.address': {
+    name: 'source.address',
+    description:
+      'Source address - domain name if available without reverse DNS lookup; otherwise, IP address or Unix domain socket name.',
+    type: 'keyword',
+    example: 'source.example.com',
+  },
+  'source.port': {
+    name: 'source.port',
+    description: 'Source port number',
+    type: 'long',
+    example: '3389',
+  },
+  'faas.name': {
+    name: 'faas.name',
+    description: 'The name of the single function that this runtime instance executes.',
+    type: 'keyword',
+    example: 'my-function',
+  },
+  'faas.version': {
+    name: 'faas.version',
+    description: 'The immutable version of the function being executed.',
+    type: 'keyword',
+    example: '26',
+  },
+  'faas.instance': {
+    name: 'faas.instance',
+    description:
+      'The execution environment ID as a string, that will be potentially reused for other invocations to the same function/function version.',
+    type: 'keyword',
+    example: '2021/06/28/[$LATEST]2f399eb14537447da05ab2a2e39309de',
+  },
+  'faas.max_memory': {
+    name: 'faas.max_memory',
+    description: 'The amount of memory available to the serverless function converted to Bytes.',
+    type: 'long',
+  },
+  'faas.trigger': {
+    name: 'faas.trigger',
+    description: 'Type of the trigger which caused this function invocation.',
+    type: 'keyword',
+  },
+  'faas.invoked_name': {
+    name: 'faas.invoked_name',
+    description: 'The name of the invoked function.',
+    type: 'keyword',
+    example: 'm',
+  },
+  'faas.invoked_provider': {
+    name: 'faas.invoked_provider',
+    description: 'The cloud provider of the invoked function.',
+    type: 'keyword',
+  },
+  'faas.invoked_region': {
+    name: 'faas.invoked_region',
+    description: 'The cloud region of the invoked function.',
+    type: 'keyword',
+    example: 'e',
+  },
+  'faas.invocation_id': {
+    name: 'faas.invocation_id',
+    description: 'The invocation ID of the current function invocation.',
+    type: 'keyword',
+    example: 'a',
+  },
+  'faas.time': {
+    name: 'faas.time',
+    description:
+      'A string containing the function invocation time in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
+    type: 'keyword',
+  },
+  'faas.cron': {
+    name: 'faas.cron',
+    description:
+      'A string containing the schedule period as [Cron Expression](https://docs.oracle.com/cd/E12058_01/doc/doc.1014/e12030/cron_expressions.htm).',
+    type: 'keyword',
+    example: '0',
+  },
+  'faas.coldstart': {
+    name: 'faas.coldstart',
+    description:
+      'A boolean that is true if the serverless function is executed for the first time (aka cold-start).',
+    type: 'boolean',
+  },
+  'faas.document.collection': {
+    name: 'faas.document.collection',
+    description:
+      'The name of the source on which the triggering operation was performed. For example, in Cloud Storage or S3 corresponds to the bucket name, and in Cosmos DB to the database name.',
+    type: 'keyword',
+    example: 'myBucketName',
+  },
+  'faas.document.operation': {
+    name: 'faas.document.operation',
+    description: 'Describes the type of the operation that was performed on the data.',
+    type: 'keyword',
+  },
+  'faas.document.time': {
+    name: 'faas.document.time',
+    description:
+      'A string containing the time when the data was accessed in the [ISO 8601](https://www.iso.org/iso-8601-date-and-time-format.html) format expressed in [UTC](https://www.w3.org/TR/NOTE-datetime).',
+    type: 'keyword',
+  },
+  'faas.document.name': {
+    name: 'faas.document.name',
+    description:
+      'The document name/table subjected to the operation. For example, in Cloud Storage or S3 is the name of the file, and in Cosmos DB the table name.',
+    type: 'keyword',
+    example: 'myFile.txt',
+  },
+  'user.email': {
+    name: 'user.email',
+    description: 'User email address.',
+    type: 'keyword',
+    example: 'a.einstein@example.com',
+  },
+  'user.full_name': {
+    name: 'user.full_name',
+    description: "User's full name",
+    type: 'keyword',
+    example: 'Albert Einstein',
+  },
+  'user.hash': {
+    name: 'user.hash',
+    description: 'Unique user hash to correlate information for a user in anonymized form.',
+    type: 'keyword',
+    example: '364fc68eaf4c8acec74a4e52d7d1feaa',
+  },
+  'user.id': {
+    name: 'user.id',
+    description: 'Unique identifier of the user.',
+    type: 'keyword',
+    example: 'S-1-5-21-202424912787-2692429404-2351956786-1000',
+  },
+  'user.name': {
+    name: 'user.name',
+    description: 'Short name or login/username of the user.',
+    type: 'keyword',
+    example: 'a.einstein',
+  },
+  'user.roles': {
+    name: 'user.roles',
+    description: 'Array of user roles at the time of the event.',
+    type: 'keyword',
+    example: 'admin,reporting_user',
+  },
+  'gcp.client.service': {
+    name: 'gcp.client.service',
+    description:
+      'Identifies the Google Cloud service for which the official client library is intended.',
+    type: 'keyword',
+    example: 'appengine',
+  },
+  'gcp.cloud_run.job.execution': {
+    name: 'gcp.cloud_run.job.execution',
+    description:
+      'The name of the Cloud Run [execution](https://cloud.google.com/run/docs/managing/job-executions) being run for the Job, as set by the [`CLOUD_RUN_EXECUTION`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
+    type: 'keyword',
+    example: 'job-name-xxxx',
+  },
+  'gcp.cloud_run.job.task_index': {
+    name: 'gcp.cloud_run.job.task_index',
+    description:
+      'The index for a task within an execution as provided by the [`CLOUD_RUN_TASK_INDEX`](https://cloud.google.com/run/docs/container-contract#jobs-env-vars) environment variable.',
+    type: 'long',
+    example: '0',
+  },
+  'gcp.apphub.application.container': {
+    name: 'gcp.apphub.application.container',
+    description: 'The container within GCP where the AppHub application is defined.',
+    type: 'keyword',
+    example: 'projects/my-container-project',
+  },
+  'gcp.apphub.application.location': {
+    name: 'gcp.apphub.application.location',
+    description: 'The GCP zone or region where the application is defined.',
+    type: 'keyword',
+    example: 'us-central1',
+  },
+  'gcp.apphub.application.id': {
+    name: 'gcp.apphub.application.id',
+    description: 'The name of the application as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-application',
+  },
+  'gcp.apphub.service.id': {
+    name: 'gcp.apphub.service.id',
+    description: 'The name of the service as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-service',
+  },
+  'gcp.apphub.service.environment_type': {
+    name: 'gcp.apphub.service.environment_type',
+    description: 'Environment of a service is the stage of a software lifecycle.',
+    type: 'keyword',
+  },
+  'gcp.apphub.service.criticality_type': {
+    name: 'gcp.apphub.service.criticality_type',
+    description: 'Criticality of a service indicates its importance to the business.',
+    type: 'keyword',
+  },
+  'gcp.apphub.workload.id': {
+    name: 'gcp.apphub.workload.id',
+    description: 'The name of the workload as configured in AppHub.',
+    type: 'keyword',
+    example: 'my-workload',
+  },
+  'gcp.apphub.workload.environment_type': {
+    name: 'gcp.apphub.workload.environment_type',
+    description: 'Environment of a workload is the stage of a software lifecycle.',
+    type: 'keyword',
+  },
+  'gcp.apphub.workload.criticality_type': {
+    name: 'gcp.apphub.workload.criticality_type',
+    description: 'Criticality of a workload indicates its importance to the business.',
+    type: 'keyword',
+  },
+  'gcp.gce.instance.name': {
+    name: 'gcp.gce.instance.name',
+    description:
+      'The instance name of a GCE instance. This is the value provided by `host.name`, the visible name of the instance in the Cloud Console UI, and the prefix for the default hostname of the instance as defined by the [default internal DNS name](https://cloud.google.com/compute/docs/internal-dns#instance-fully-qualified-domain-names).',
+    type: 'keyword',
+    example: 'instance-1',
+  },
+  'gcp.gce.instance.hostname': {
+    name: 'gcp.gce.instance.hostname',
+    description:
+      'The hostname of a GCE instance. This is the full value of the default or [custom hostname](https://cloud.google.com/compute/docs/instances/custom-hostname-vm).',
+    type: 'keyword',
+    example: 'my-host1234.example.com',
+  },
+  'container.name': {
+    name: 'container.name',
+    description: 'Container name used by container runtime.',
+    type: 'keyword',
+    example: 'opentelemetry-autoconf',
+  },
+  'container.id': {
+    name: 'container.id',
+    description:
+      'Container ID. Usually a UUID, as for example used to [identify Docker containers](https://docs.docker.com/engine/containers/run/#container-identification). The UUID might be abbreviated.',
+    type: 'keyword',
+    example: 'a3bf90e006b2',
+  },
+  'container.runtime.name': {
+    name: 'container.runtime.name',
+    description: 'The container runtime managing this container.',
+    type: 'keyword',
+    example: 'docker',
+  },
+  'container.runtime.version': {
+    name: 'container.runtime.version',
+    description:
+      'The version of the runtime of this process, as returned by the runtime without modification.',
+    type: 'keyword',
+    example: '1',
+  },
+  'container.runtime.description': {
+    name: 'container.runtime.description',
+    description:
+      'A description about the runtime which could include, for example details about the CRI/API version being used or other customisations.',
+    type: 'keyword',
+    example: 'docker://19.3.1 - CRI: 1.22.0',
+  },
+  'container.image.name': {
+    name: 'container.image.name',
+    description: 'Name of the image the container was built on.',
+    type: 'keyword',
+    example: 'gcr.io/opentelemetry/operator',
+  },
+  'container.image.tags': {
+    name: 'container.image.tags',
+    description:
+      'Container image tags. An example can be found in [Docker Image Inspect](https://docs.docker.com/engine/api/v1.43/#tag/Image/operation/ImageInspect). Should be only the `<tag>` section of the full name for example from `registry.example.com/my-org/my-image:<tag>`.',
+    type: 'keyword',
+    example: 'v1.27.1,3.5.7-0',
+  },
+  'container.image.id': {
+    name: 'container.image.id',
+    description: 'Runtime specific image identifier. Usually a hash algorithm followed by a UUID.',
+    type: 'keyword',
+    example: 'sha256:19c92d0a00d1b66d897bceaa7319bee0dd38a10a851c60bcec9474aa3f01e50f',
+  },
+  'container.image.repo_digests': {
+    name: 'container.image.repo_digests',
+    description: 'Repo digests of the container image as provided by the container runtime.',
+    type: 'keyword',
+    example:
+      'example@sha256:afcc7f1ac1b49db317a7196c902e61c6c3c4607d63599ee1a82d702d249a0ccb,internal.registry.example.com:5000/example@sha256:b69959407d21e8a062e0416bf13405bb2b71ed7a84dde4158ebafacfa06f5578',
+  },
+  'container.command': {
+    name: 'container.command',
+    description: 'The command used to run the container (i.e. the command name).',
+    type: 'keyword',
+    example: 'otelcontribcol',
+  },
+  'container.command_line': {
+    name: 'container.command_line',
+    description:
+      'The full command run by the container as a single string representing the full command.',
+    type: 'keyword',
+    example: 'otelcontribcol --config config.yaml',
+  },
+  'container.command_args': {
+    name: 'container.command_args',
+    description:
+      'All the command arguments (including the command/executable itself) run by the container.',
+    type: 'keyword',
+    example: 'otelcontribcol,--config,config.yaml',
+  },
+  'container.label': {
+    name: 'container.label',
+    description: 'Container labels, `<key>` being the label name, the value being the label value.',
+    type: 'keyword',
+    example: 'nginx',
+  },
+  'container.csi.plugin.name': {
+    name: 'container.csi.plugin.name',
+    description:
+      'The name of the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin used by the volume.',
+    type: 'keyword',
+    example: 'pd.csi.storage.gke.io',
+  },
+  'container.csi.volume.id': {
+    name: 'container.csi.volume.id',
+    description:
+      'The unique volume ID returned by the CSI ([Container Storage Interface](https://github.com/container-storage-interface/spec)) plugin.',
+    type: 'keyword',
+    example: 'projects/my-gcp-project/zones/my-gcp-zone/disks/my-gcp-disk',
+  },
+  'tls.cipher': {
+    name: 'tls.cipher',
+    description:
+      'String indicating the [cipher](https://datatracker.ietf.org/doc/html/rfc5246#appendix-A.5) used during the current connection.',
+    type: 'keyword',
+    example: 'TLS_RSA_WITH_3DES_EDE_CBC_SHA',
+  },
+  'tls.client.certificate': {
+    name: 'tls.client.certificate',
+    description:
+      'PEM-encoded stand-alone certificate offered by the client. This is usually mutually-exclusive of `client.certificate_chain` since this value also exists in that list.',
+    type: 'keyword',
+    example: 'MII...',
+  },
+  'tls.client.certificate_chain': {
+    name: 'tls.client.certificate_chain',
+    description:
+      'Array of PEM-encoded certificates that make up the certificate chain offered by the client. This is usually mutually-exclusive of `client.certificate` since that value should be the first certificate in the chain.',
+    type: 'keyword',
+    example: 'MII...,MI...',
+  },
+  'tls.client.hash.md5': {
+    name: 'tls.client.hash.md5',
+    description:
+      'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    type: 'keyword',
+    example: '0F76C7F2C55BFD7D8E8B8F4BFBF0C9EC',
+  },
+  'tls.client.hash.sha1': {
+    name: 'tls.client.hash.sha1',
+    description:
+      'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    type: 'keyword',
+    example: '9E393D93138888D288266C2D915214D1D1CCEB2A',
+  },
+  'tls.client.hash.sha256': {
+    name: 'tls.client.hash.sha256',
+    description:
+      'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the client. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    type: 'keyword',
+    example: '0687F666A054EF17A08E2F2162EAB4CBC0D265E1D7875BE74BF3C712CA92DAF0',
+  },
+  'tls.client.issuer': {
+    name: 'tls.client.issuer',
+    description:
+      'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
+    type: 'keyword',
+    example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
+  },
+  'tls.client.ja3': {
+    name: 'tls.client.ja3',
+    description: 'A hash that identifies clients based on how they perform an SSL/TLS handshake.',
+    type: 'keyword',
+    example: 'd4e5b18d6b55c71272893221c96ba240',
+  },
+  'tls.client.not_after': {
+    name: 'tls.client.not_after',
+    description: 'Date/Time indicating when client certificate is no longer considered valid.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'tls.client.not_before': {
+    name: 'tls.client.not_before',
+    description: 'Date/Time indicating when client certificate is first considered valid.',
+    type: 'keyword',
+    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'tls.client.subject': {
+    name: 'tls.client.subject',
+    description: 'Distinguished name of subject of the x.509 certificate presented by the client.',
+    type: 'keyword',
+    example: 'CN=myclient, OU=Documentation Team, DC=example, DC=com',
+  },
+  'tls.client.supported_ciphers': {
+    name: 'tls.client.supported_ciphers',
+    description: 'Array of ciphers offered by the client during the client hello.',
+    type: 'keyword',
+    example: 'TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384',
+  },
+  'tls.curve': {
+    name: 'tls.curve',
+    description: 'String indicating the curve used for the given cipher, when applicable',
+    type: 'keyword',
+    example: 'secp256r1',
+  },
+  'tls.established': {
+    name: 'tls.established',
+    description:
+      'Boolean flag indicating if the TLS negotiation was successful and transitioned to an encrypted tunnel.',
+    type: 'boolean',
+    example: 'true',
+  },
+  'tls.next_protocol': {
+    name: 'tls.next_protocol',
+    description:
+      'String indicating the protocol being tunneled. Per the values in the [IANA registry](https://www.iana.org/assignments/tls-extensiontype-values/tls-extensiontype-values.xhtml#alpn-protocol-ids), this string should be lower case.',
+    type: 'keyword',
+    example: 'http/1.1',
+  },
+  'tls.protocol.name': {
+    name: 'tls.protocol.name',
+    description:
+      'Normalized lowercase protocol name parsed from original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
+    type: 'keyword',
+  },
+  'tls.protocol.version': {
+    name: 'tls.protocol.version',
+    description:
+      'Numeric part of the version parsed from the original string of the negotiated [SSL/TLS protocol version](https://docs.openssl.org/1.1.1/man3/SSL_get_version/#return-values)',
+    type: 'keyword',
+    example: '1.2',
+  },
+  'tls.resumed': {
+    name: 'tls.resumed',
+    description:
+      'Boolean flag indicating if this TLS connection was resumed from an existing TLS negotiation.',
+    type: 'boolean',
+    example: 'true',
+  },
+  'tls.server.certificate': {
+    name: 'tls.server.certificate',
+    description:
+      'PEM-encoded stand-alone certificate offered by the server. This is usually mutually-exclusive of `server.certificate_chain` since this value also exists in that list.',
+    type: 'keyword',
+    example: 'MII...',
+  },
+  'tls.server.certificate_chain': {
+    name: 'tls.server.certificate_chain',
+    description:
+      'Array of PEM-encoded certificates that make up the certificate chain offered by the server. This is usually mutually-exclusive of `server.certificate` since that value should be the first certificate in the chain.',
+    type: 'keyword',
+    example: 'MII...,MI...',
+  },
+  'tls.server.hash.md5': {
+    name: 'tls.server.hash.md5',
+    description:
+      'Certificate fingerprint using the MD5 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    type: 'keyword',
+    example: '0F76C7F2C55BFD7D8E8B8F4BFBF0C9EC',
+  },
+  'tls.server.hash.sha1': {
+    name: 'tls.server.hash.sha1',
+    description:
+      'Certificate fingerprint using the SHA1 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    type: 'keyword',
+    example: '9E393D93138888D288266C2D915214D1D1CCEB2A',
+  },
+  'tls.server.hash.sha256': {
+    name: 'tls.server.hash.sha256',
+    description:
+      'Certificate fingerprint using the SHA256 digest of DER-encoded version of certificate offered by the server. For consistency with other hash values, this value should be formatted as an uppercase hash.',
+    type: 'keyword',
+    example: '0687F666A054EF17A08E2F2162EAB4CBC0D265E1D7875BE74BF3C712CA92DAF0',
+  },
+  'tls.server.issuer': {
+    name: 'tls.server.issuer',
+    description:
+      'Distinguished name of [subject](https://datatracker.ietf.org/doc/html/rfc5280#section-4.1.2.6) of the issuer of the x.509 certificate presented by the client.',
+    type: 'keyword',
+    example: 'CN=Example Root CA, OU=Infrastructure Team, DC=example, DC=com',
+  },
+  'tls.server.ja3s': {
+    name: 'tls.server.ja3s',
+    description: 'A hash that identifies servers based on how they perform an SSL/TLS handshake.',
+    type: 'keyword',
+    example: 'd4e5b18d6b55c71272893221c96ba240',
+  },
+  'tls.server.not_after': {
+    name: 'tls.server.not_after',
+    description: 'Date/Time indicating when server certificate is no longer considered valid.',
+    type: 'keyword',
+    example: 'Fri Jan 01 2021 01:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'tls.server.not_before': {
+    name: 'tls.server.not_before',
+    description: 'Date/Time indicating when server certificate is first considered valid.',
+    type: 'keyword',
+    example: 'Thu Jan 01 1970 01:00:00 GMT+0100 (Central European Standard Time)',
+  },
+  'tls.server.subject': {
+    name: 'tls.server.subject',
+    description: 'Distinguished name of subject of the x.509 certificate presented by the server.',
+    type: 'keyword',
+    example: 'CN=myserver, OU=Documentation Team, DC=example, DC=com',
+  },
+  'deployment.name': {
+    name: 'deployment.name',
+    description: 'The name of the deployment.',
+    type: 'keyword',
+    example: 'deploy my app',
+  },
+  'deployment.id': {
+    name: 'deployment.id',
+    description: 'The id of the deployment.',
+    type: 'keyword',
+    example: '1208',
+  },
+  'deployment.status': {
+    name: 'deployment.status',
+    description: 'The status of the deployment.',
+    type: 'keyword',
+  },
+  'deployment.environment.name': {
+    name: 'deployment.environment.name',
+    description:
+      'Name of the [deployment environment](https://wikipedia.org/wiki/Deployment_environment) (aka deployment tier).',
+    type: 'keyword',
+    example: 'staging',
+  },
+  'peer.service': {
+    name: 'peer.service',
+    description:
+      'The [`service.name`](/docs/resource/README.md#service) of the remote service. SHOULD be equal to the actual `service.name` resource attribute of the remote service if any.',
+    type: 'keyword',
+    example: 'A',
+  },
+  'ios.app.state': {
+    name: 'ios.app.state',
+    description: 'This attribute represents the state of the application.',
+    type: 'keyword',
+  },
+  'http.request.body.size': {
+    name: 'http.request.body.size',
+    description:
+      'The size of the request payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
+    type: 'long',
+  },
+  'http.request.header': {
+    name: 'http.request.header',
+    description:
+      'HTTP request headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
+    type: 'keyword',
+    example: 'application/json',
+  },
+  'http.request.method': {
+    name: 'http.request.method',
+    description: 'HTTP request method.',
+    type: 'keyword',
+    example: 'GET',
+  },
+  'http.request.method_original': {
+    name: 'http.request.method_original',
+    description: 'Original HTTP method sent by the client in the request line.',
+    type: 'keyword',
+    example: 'GeT',
+  },
+  'http.request.resend_count': {
+    name: 'http.request.resend_count',
+    description:
+      'The ordinal number of request resending attempt (for any reason, including redirects).',
+    type: 'long',
+  },
+  'http.request.size': {
+    name: 'http.request.size',
+    description:
+      'The total size of the request in bytes. This should be the total number of bytes sent over the wire, including the request line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and request body if any.',
+    type: 'long',
+  },
+  'http.response.body.size': {
+    name: 'http.response.body.size',
+    description:
+      'The size of the response payload body in bytes. This is the number of bytes transferred excluding headers and is often, but not always, present as the [Content-Length](https://www.rfc-editor.org/rfc/rfc9110.html#field.content-length) header. For requests using transport encoding, this should be the compressed size.',
+    type: 'long',
+  },
+  'http.response.header': {
+    name: 'http.response.header',
+    description:
+      'HTTP response headers, `<key>` being the normalized HTTP Header name (lowercase), the value being the header values.',
+    type: 'keyword',
+    example: 'application/json',
+  },
+  'http.response.size': {
+    name: 'http.response.size',
+    description:
+      'The total size of the response in bytes. This should be the total number of bytes sent over the wire, including the status line (HTTP/1.1), framing (HTTP/2 and HTTP/3), headers, and response body and trailers if any.',
+    type: 'long',
+  },
+  'http.response.status_code': {
+    name: 'http.response.status_code',
+    description: '[HTTP response status code](https://tools.ietf.org/html/rfc7231#section-6).',
+    type: 'long',
+    example: '200',
+  },
+  'http.route': {
+    name: 'http.route',
+    description:
+      'The matched route, that is, the path template in the format used by the respective server framework.',
+    type: 'keyword',
+    example: '/users/:userID?',
+  },
+  'http.connection.state': {
+    name: 'http.connection.state',
+    description: 'State of the HTTP connection in the HTTP connection pool.',
+    type: 'keyword',
+    example: 'active',
+  },
+  'elasticsearch.node.name': {
+    name: 'elasticsearch.node.name',
+    description:
+      'Represents the human-readable identifier of the node/instance to which a request was routed.',
+    type: 'keyword',
+    example: 'instance-0000000001',
+  },
+  'nodejs.eventloop.state': {
+    name: 'nodejs.eventloop.state',
+    description: 'The state of event loop time.',
+    type: 'keyword',
+  },
+  'hw.id': {
+    name: 'hw.id',
+    description: 'An identifier for the hardware component, unique within the monitored host',
+    type: 'keyword',
+    example: 'win32battery_battery_testsysa33_1',
+  },
+  'hw.name': {
+    name: 'hw.name',
+    description: 'An easily-recognizable name for the hardware component',
+    type: 'keyword',
+    example: 'eth0',
+  },
+  'hw.parent': {
+    name: 'hw.parent',
+    description:
+      'Unique identifier of the parent component (typically the `hw.id` attribute of the enclosure, or disk controller)',
+    type: 'keyword',
+    example: 'dellStorage_perc_0',
+  },
+  'hw.type': {
+    name: 'hw.type',
+    description: 'Type of the component',
+    type: 'keyword',
+  },
+  'hw.state': {
+    name: 'hw.state',
+    description: 'The current state of the component',
+    type: 'keyword',
+  },
+  'azure.service.request.id': {
+    name: 'azure.service.request.id',
+    description:
+      "The unique identifier of the service request. It's generated by the Azure service and returned with the response.",
+    type: 'keyword',
+    example: '00000000-0000-0000-0000-000000000000',
+  },
+  'azure.resource_provider.namespace': {
+    name: 'azure.resource_provider.namespace',
+    description:
+      '[Azure Resource Provider Namespace](https://learn.microsoft.com/azure/azure-resource-manager/management/azure-services-resource-providers) as recognized by the client.',
+    type: 'keyword',
+    example: 'Microsoft.Storage',
+  },
+  'azure.client.id': {
+    name: 'azure.client.id',
+    description: 'The unique identifier of the client instance.',
+    type: 'keyword',
+    example: '3ba4827d-4422-483f-b59f-85b74211c11d',
+  },
+  'azure.cosmosdb.connection.mode': {
+    name: 'azure.cosmosdb.connection.mode',
+    description: 'Cosmos client connection mode.',
+    type: 'keyword',
+  },
+  'azure.cosmosdb.operation.request_charge': {
+    name: 'azure.cosmosdb.operation.request_charge',
+    description: 'The number of request units consumed by the operation.',
+    type: 'double',
+    example: '46.18',
+  },
+  'azure.cosmosdb.request.body.size': {
+    name: 'azure.cosmosdb.request.body.size',
+    description: 'Request payload size in bytes.',
+    type: 'long',
+  },
+  'azure.cosmosdb.operation.contacted_regions': {
+    name: 'azure.cosmosdb.operation.contacted_regions',
+    description:
+      'List of regions contacted during operation in the order that they were contacted. If there is more than one region listed, it indicates that the operation was performed on multiple regions i.e. cross-regional call.',
+    type: 'keyword',
+    example: 'North Central US,Australia East,Australia Southeast',
+  },
+  'azure.cosmosdb.response.sub_status_code': {
+    name: 'azure.cosmosdb.response.sub_status_code',
+    description: 'Cosmos DB sub status code.',
+    type: 'long',
+    example: '1000',
+  },
+  'azure.cosmosdb.consistency.level': {
+    name: 'azure.cosmosdb.consistency.level',
+    description:
+      'Account or request [consistency level](https://learn.microsoft.com/azure/cosmos-db/consistency-levels).',
+    type: 'keyword',
+    example: 'Eventual',
+  },
+  'jvm.gc.action': {
+    name: 'jvm.gc.action',
+    description: 'Name of the garbage collector action.',
+    type: 'keyword',
+    example: 'end of minor GC',
+  },
+  'jvm.gc.cause': {
+    name: 'jvm.gc.cause',
+    description: 'Name of the garbage collector cause.',
+    type: 'keyword',
+    example: 'System.gc()',
+  },
+  'jvm.gc.name': {
+    name: 'jvm.gc.name',
+    description: 'Name of the garbage collector.',
+    type: 'keyword',
+    example: 'G1 Young Generation',
+  },
+  'jvm.memory.type': {
+    name: 'jvm.memory.type',
+    description: 'The type of memory.',
+    type: 'keyword',
+    example: 'heap',
+  },
+  'jvm.memory.pool.name': {
+    name: 'jvm.memory.pool.name',
+    description: 'Name of the memory pool.',
+    type: 'keyword',
+    example: 'G1 Old Gen',
+  },
+  'jvm.thread.daemon': {
+    name: 'jvm.thread.daemon',
+    description: 'Whether the thread is daemon or not.',
+    type: 'boolean',
+  },
+  'jvm.thread.state': {
+    name: 'jvm.thread.state',
+    description: 'State of the thread.',
+    type: 'keyword',
+    example: 'runnable',
+  },
+  'jvm.buffer.pool.name': {
+    name: 'jvm.buffer.pool.name',
+    description: 'Name of the buffer pool.',
+    type: 'keyword',
+    example: 'mapped',
+  },
+  'exception.type': {
+    name: 'exception.type',
+    description:
+      'The type of the exception (its fully-qualified class name, if applicable). The dynamic type of the exception should be preferred over the static type in languages that support it.',
+    type: 'keyword',
+    example: 'java.net.ConnectException',
+  },
+  'exception.message': {
+    name: 'exception.message',
+    description: 'The exception message.',
+    type: 'keyword',
+    example: 'Division by zero',
+  },
+  'exception.stacktrace': {
+    name: 'exception.stacktrace',
+    description:
+      'A stacktrace as a string in the natural representation for the language runtime. The representation is to be determined and documented by each language SIG.',
+    type: 'keyword',
+    example: 'E',
+  },
+  'artifact.filename': {
+    name: 'artifact.filename',
+    description:
+      'The human readable file name of the artifact, typically generated during build and release processes. Often includes the package name and version in the file name.',
+    type: 'keyword',
+    example: 'golang-binary-amd64-v0.1.0',
+  },
+  'artifact.version': {
+    name: 'artifact.version',
+    description: 'The version of the artifact.',
+    type: 'keyword',
+    example: 'v0.1.0',
+  },
+  'artifact.purl': {
+    name: 'artifact.purl',
+    description:
+      'The [Package URL](https://github.com/package-url/purl-spec) of the [package artifact](https://slsa.dev/spec/v1.0/terminology#package-model) provides a standard way to identify and locate the packaged artifact.',
+    type: 'keyword',
+    example: 'pkg:github/package-url/purl-spec@1209109710924',
+  },
+  'artifact.hash': {
+    name: 'artifact.hash',
+    description:
+      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), often found in checksum.txt on a release of the artifact and used to verify package integrity.',
+    type: 'keyword',
+    example: '9ff4c52759e2c4ac70b7d517bc7fcdc1cda631ca0045271ddd1b192544f8a3e9',
+  },
+  'artifact.attestation.id': {
+    name: 'artifact.attestation.id',
+    description: 'The id of the build [software attestation](https://slsa.dev/attestation-model).',
+    type: 'keyword',
+    example: '123',
+  },
+  'artifact.attestation.filename': {
+    name: 'artifact.attestation.filename',
+    description:
+      'The provenance filename of the built attestation which directly relates to the build artifact filename. This filename SHOULD accompany the artifact at publish time. See the [SLSA Relationship](https://slsa.dev/spec/v1.0/distributing-provenance#relationship-between-artifacts-and-attestations) specification for more information.',
+    type: 'keyword',
+    example: 'golang-binary-amd64-v0.1.0.attestation',
+  },
+  'artifact.attestation.hash': {
+    name: 'artifact.attestation.hash',
+    description:
+      'The full [hash value (see glossary)](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.186-5.pdf), of the built attestation. Some envelopes in the [software attestation space](https://github.com/in-toto/attestation/tree/main/spec) also refer to this as the **digest**.',
+    type: 'keyword',
+    example: '1b31dfcd5b7f9267bf2ff47651df1cfb9147b9e4df1f335accf65b4cda498408',
+  },
+  'service.name': {
+    name: 'service.name',
+    description: 'Logical name of the service.',
+    type: 'keyword',
+    example: 'shoppingcart',
+  },
+  'service.version': {
+    name: 'service.version',
+    description:
+      'The version string of the service API or implementation. The format is not defined by these conventions.',
+    type: 'keyword',
+    example: '2.0.0',
+  },
+  'service.namespace': {
+    name: 'service.namespace',
+    description: 'A namespace for `service.name`.',
+    type: 'keyword',
+    example: 'Shop',
+  },
+  'service.instance.id': {
+    name: 'service.instance.id',
+    description: 'The string ID of the service instance.',
+    type: 'keyword',
+    example: '627cc493-f310-47de-96bd-71410b7dec09',
+  },
+  'dns.question.name': {
+    name: 'dns.question.name',
+    description: 'The name being queried.',
+    type: 'keyword',
+    example: 'www.example.com',
+  },
+  'dns.answers': {
+    name: 'dns.answers',
+    description: 'The list of IPv4 or IPv6 addresses resolved during DNS lookup.',
+    type: 'keyword',
+    example: '10.0.0.1,2001:0db8:85a3:0000:0000:8a2e:0370:7334',
+  },
+  'metrics.go.memory.used': {
+    name: 'metrics.go.memory.used',
+    description: 'Memory used by the Go runtime.',
+    type: 'double',
+  },
+  'metrics.go.memory.limit': {
+    name: 'metrics.go.memory.limit',
+    description: 'Go runtime memory limit configured by the user, if a limit exists.',
+    type: 'double',
+  },
+  'metrics.go.memory.allocated': {
+    name: 'metrics.go.memory.allocated',
+    description: 'Memory allocated to the heap by the application.',
+    type: 'double',
+  },
+  'metrics.go.memory.allocations': {
+    name: 'metrics.go.memory.allocations',
+    description: 'Count of allocations to the heap by the application.',
+    type: 'double',
+  },
+  'metrics.go.memory.gc.goal': {
+    name: 'metrics.go.memory.gc.goal',
+    description: 'Heap size target for the end of the GC cycle.',
+    type: 'double',
+  },
+  'metrics.go.goroutine.count': {
+    name: 'metrics.go.goroutine.count',
+    description: 'Count of live goroutines.',
+    type: 'double',
+  },
+  'metrics.go.processor.limit': {
+    name: 'metrics.go.processor.limit',
+    description: 'The number of OS threads that can execute user-level Go code simultaneously.',
+    type: 'double',
+  },
+  'metrics.go.schedule.duration': {
+    name: 'metrics.go.schedule.duration',
+    description:
+      'The time goroutines have spent in the scheduler in a runnable state before actually running.',
+    type: 'double',
+  },
+  'metrics.go.config.gogc': {
+    name: 'metrics.go.config.gogc',
+    description: 'Heap size target percentage configured by the user, otherwise 100.',
+    type: 'double',
+  },
+  'metrics.cicd.pipeline.run.duration': {
+    name: 'metrics.cicd.pipeline.run.duration',
+    description: 'Duration of a pipeline run grouped by pipeline, state and result.',
+    type: 'double',
+  },
+  'metrics.cicd.pipeline.run.active': {
+    name: 'metrics.cicd.pipeline.run.active',
+    description: 'The number of pipeline runs currently active in the system by state.',
+    type: 'double',
+  },
+  'metrics.cicd.worker.count': {
+    name: 'metrics.cicd.worker.count',
+    description: 'The number of workers on the CICD system by state.',
+    type: 'double',
+  },
+  'metrics.cicd.pipeline.run.errors': {
+    name: 'metrics.cicd.pipeline.run.errors',
+    description: 'The number of errors encountered in pipeline runs (eg. compile, test failures).',
+    type: 'double',
+  },
+  'metrics.cicd.system.errors': {
+    name: 'metrics.cicd.system.errors',
+    description:
+      'The number of errors in a component of the CICD system (eg. controller, scheduler, agent).',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.min': {
+    name: 'metrics.nodejs.eventloop.delay.min',
+    description: 'Event loop minimum delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.max': {
+    name: 'metrics.nodejs.eventloop.delay.max',
+    description: 'Event loop maximum delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.mean': {
+    name: 'metrics.nodejs.eventloop.delay.mean',
+    description: 'Event loop mean delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.stddev': {
+    name: 'metrics.nodejs.eventloop.delay.stddev',
+    description: 'Event loop standard deviation delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.p50': {
+    name: 'metrics.nodejs.eventloop.delay.p50',
+    description: 'Event loop 50 percentile delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.p90': {
+    name: 'metrics.nodejs.eventloop.delay.p90',
+    description: 'Event loop 90 percentile delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.delay.p99': {
+    name: 'metrics.nodejs.eventloop.delay.p99',
+    description: 'Event loop 99 percentile delay.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.utilization': {
+    name: 'metrics.nodejs.eventloop.utilization',
+    description: 'Event loop utilization.',
+    type: 'double',
+  },
+  'metrics.nodejs.eventloop.time': {
+    name: 'metrics.nodejs.eventloop.time',
+    description: 'Cumulative duration of time the event loop has been in each state.',
+    type: 'double',
+  },
+  'metrics.v8js.gc.duration': {
+    name: 'metrics.v8js.gc.duration',
+    description: 'Garbage collection duration.',
+    type: 'double',
+  },
+  'metrics.v8js.memory.heap.limit': {
+    name: 'metrics.v8js.memory.heap.limit',
+    description: 'Total heap memory size pre-allocated.',
+    type: 'double',
+  },
+  'metrics.v8js.memory.heap.used': {
+    name: 'metrics.v8js.memory.heap.used',
+    description: 'Heap Memory size allocated.',
+    type: 'double',
+  },
+  'metrics.v8js.heap.space.available_size': {
+    name: 'metrics.v8js.heap.space.available_size',
+    description: 'Heap space available size.',
+    type: 'double',
+  },
+  'metrics.v8js.heap.space.physical_size': {
+    name: 'metrics.v8js.heap.space.physical_size',
+    description: 'Committed size of a heap space.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.span.live': {
+    name: 'metrics.otel.sdk.span.live',
+    description:
+      'The number of created spans with `recording=true` for which the end operation has not been called yet.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.span.started': {
+    name: 'metrics.otel.sdk.span.started',
+    description: 'The number of created spans.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.span.queue.size': {
+    name: 'metrics.otel.sdk.processor.span.queue.size',
+    description: 'The number of spans in the queue of a given instance of an SDK span processor.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.span.queue.capacity': {
+    name: 'metrics.otel.sdk.processor.span.queue.capacity',
+    description:
+      'The maximum number of spans the queue of a given instance of an SDK span processor can hold.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.span.processed': {
+    name: 'metrics.otel.sdk.processor.span.processed',
+    description:
+      'The number of spans for which the processing has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.span.inflight': {
+    name: 'metrics.otel.sdk.exporter.span.inflight',
+    description:
+      'The number of spans which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.span.exported': {
+    name: 'metrics.otel.sdk.exporter.span.exported',
+    description:
+      'The number of spans for which the export has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.log.created': {
+    name: 'metrics.otel.sdk.log.created',
+    description: 'The number of logs submitted to enabled SDK Loggers.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.log.queue.size': {
+    name: 'metrics.otel.sdk.processor.log.queue.size',
+    description:
+      'The number of log records in the queue of a given instance of an SDK log processor.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.log.queue.capacity': {
+    name: 'metrics.otel.sdk.processor.log.queue.capacity',
+    description:
+      'The maximum number of log records the queue of a given instance of an SDK Log Record processor can hold.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.processor.log.processed': {
+    name: 'metrics.otel.sdk.processor.log.processed',
+    description:
+      'The number of log records for which the processing has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.log.inflight': {
+    name: 'metrics.otel.sdk.exporter.log.inflight',
+    description:
+      'The number of log records which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.log.exported': {
+    name: 'metrics.otel.sdk.exporter.log.exported',
+    description:
+      'The number of log records for which the export has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.metric_data_point.inflight': {
+    name: 'metrics.otel.sdk.exporter.metric_data_point.inflight',
+    description:
+      'The number of metric data points which were passed to the exporter, but that have not been exported yet (neither successful, nor failed).',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.metric_data_point.exported': {
+    name: 'metrics.otel.sdk.exporter.metric_data_point.exported',
+    description:
+      'The number of metric data points for which the export has finished, either successful or failed.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.metric_reader.collection.duration': {
+    name: 'metrics.otel.sdk.metric_reader.collection.duration',
+    description: 'The duration of the collect operation of the metric reader.',
+    type: 'double',
+  },
+  'metrics.otel.sdk.exporter.operation.duration': {
+    name: 'metrics.otel.sdk.exporter.operation.duration',
+    description: 'The duration of exporting a batch of telemetry records.',
+    type: 'double',
+  },
+  'metrics.dns.lookup.duration': {
+    name: 'metrics.dns.lookup.duration',
+    description: 'Measures the time taken to perform a DNS lookup.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.routing.match_attempts': {
+    name: 'metrics.aspnetcore.routing.match_attempts',
+    description: 'Number of requests that were attempted to be matched to an endpoint.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.diagnostics.exceptions': {
+    name: 'metrics.aspnetcore.diagnostics.exceptions',
+    description: 'Number of exceptions caught by exception handling middleware.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.active_request_leases': {
+    name: 'metrics.aspnetcore.rate_limiting.active_request_leases',
+    description:
+      'Number of requests that are currently active on the server that hold a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.request_lease.duration': {
+    name: 'metrics.aspnetcore.rate_limiting.request_lease.duration',
+    description: 'The duration of rate limiting lease held by requests on the server.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.request.time_in_queue': {
+    name: 'metrics.aspnetcore.rate_limiting.request.time_in_queue',
+    description: 'The time the request spent in a queue waiting to acquire a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.queued_requests': {
+    name: 'metrics.aspnetcore.rate_limiting.queued_requests',
+    description:
+      'Number of requests that are currently queued, waiting to acquire a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.aspnetcore.rate_limiting.requests': {
+    name: 'metrics.aspnetcore.rate_limiting.requests',
+    description: 'Number of requests that tried to acquire a rate limiting lease.',
+    type: 'double',
+  },
+  'metrics.db.client.operation.duration': {
+    name: 'metrics.db.client.operation.duration',
+    description: 'Duration of database client operations.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.count': {
+    name: 'metrics.db.client.connection.count',
+    description:
+      'The number of connections that are currently in state described by the `state` attribute.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.idle.max': {
+    name: 'metrics.db.client.connection.idle.max',
+    description: 'The maximum number of idle open connections allowed.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.idle.min': {
+    name: 'metrics.db.client.connection.idle.min',
+    description: 'The minimum number of idle open connections allowed.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.max': {
+    name: 'metrics.db.client.connection.max',
+    description: 'The maximum number of open connections allowed.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.pending_requests': {
+    name: 'metrics.db.client.connection.pending_requests',
+    description: 'The number of current pending requests for an open connection.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.timeouts': {
+    name: 'metrics.db.client.connection.timeouts',
+    description:
+      'The number of connection timeouts that have occurred trying to obtain a connection from the pool.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.create_time': {
+    name: 'metrics.db.client.connection.create_time',
+    description: 'The time it took to create a new connection.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.wait_time': {
+    name: 'metrics.db.client.connection.wait_time',
+    description: 'The time it took to obtain an open connection from the pool.',
+    type: 'double',
+  },
+  'metrics.db.client.connection.use_time': {
+    name: 'metrics.db.client.connection.use_time',
+    description: 'The time between borrowing a connection and returning it to the pool.',
+    type: 'double',
+  },
+  'metrics.db.client.response.returned_rows': {
+    name: 'metrics.db.client.response.returned_rows',
+    description: 'The actual number of records returned by the database operation.',
+    type: 'double',
+  },
+  'metrics.hw.host.ambient_temperature': {
+    name: 'metrics.hw.host.ambient_temperature',
+    description: 'Ambient (external) temperature of the physical host.',
+    type: 'double',
+  },
+  'metrics.hw.host.energy': {
+    name: 'metrics.hw.host.energy',
+    description: 'Total energy consumed by the entire physical host, in joules.',
+    type: 'double',
+  },
+  'metrics.hw.host.heating_margin': {
+    name: 'metrics.hw.host.heating_margin',
+    description:
+      'By how many degrees Celsius the temperature of the physical host can be increased, before reaching a warning threshold on one of the internal sensors.',
+    type: 'double',
+  },
+  'metrics.hw.host.power': {
+    name: 'metrics.hw.host.power',
+    description:
+      'Instantaneous power consumed by the entire physical host in Watts (`hw.host.energy` is preferred).',
+    type: 'double',
+  },
+  'metrics.signalr.server.connection.duration': {
+    name: 'metrics.signalr.server.connection.duration',
+    description: 'The duration of connections on the server.',
+    type: 'double',
+  },
+  'metrics.signalr.server.active_connections': {
+    name: 'metrics.signalr.server.active_connections',
+    description: 'Number of connections that are currently active on the server.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.used': {
+    name: 'metrics.jvm.memory.used',
+    description: 'Measure of memory used.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.committed': {
+    name: 'metrics.jvm.memory.committed',
+    description: 'Measure of memory committed.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.limit': {
+    name: 'metrics.jvm.memory.limit',
+    description: 'Measure of max obtainable memory.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.used_after_last_gc': {
+    name: 'metrics.jvm.memory.used_after_last_gc',
+    description:
+      'Measure of memory used, as measured after the most recent garbage collection event on this pool.',
+    type: 'double',
+  },
+  'metrics.jvm.gc.duration': {
+    name: 'metrics.jvm.gc.duration',
+    description: 'Duration of JVM garbage collection actions.',
+    type: 'double',
+  },
+  'metrics.jvm.thread.count': {
+    name: 'metrics.jvm.thread.count',
+    description: 'Number of executing platform threads.',
+    type: 'double',
+  },
+  'metrics.jvm.class.loaded': {
+    name: 'metrics.jvm.class.loaded',
+    description: 'Number of classes loaded since JVM start.',
+    type: 'double',
+  },
+  'metrics.jvm.class.unloaded': {
+    name: 'metrics.jvm.class.unloaded',
+    description: 'Number of classes unloaded since JVM start.',
+    type: 'double',
+  },
+  'metrics.jvm.class.count': {
+    name: 'metrics.jvm.class.count',
+    description: 'Number of classes currently loaded.',
+    type: 'double',
+  },
+  'metrics.jvm.cpu.count': {
+    name: 'metrics.jvm.cpu.count',
+    description: 'Number of processors available to the Java virtual machine.',
+    type: 'double',
+  },
+  'metrics.jvm.cpu.time': {
+    name: 'metrics.jvm.cpu.time',
+    description: 'CPU time used by the process as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.jvm.cpu.recent_utilization': {
+    name: 'metrics.jvm.cpu.recent_utilization',
+    description: 'Recent CPU utilization for the process as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.system.uptime': {
+    name: 'metrics.system.uptime',
+    description: 'The time the system has been running.',
+    type: 'double',
+  },
+  'metrics.system.cpu.physical.count': {
+    name: 'metrics.system.cpu.physical.count',
+    description: 'Reports the number of actual physical processor cores on the hardware.',
+    type: 'double',
+  },
+  'metrics.system.cpu.logical.count': {
+    name: 'metrics.system.cpu.logical.count',
+    description:
+      'Reports the number of logical (virtual) processor cores created by the operating system to manage multitasking.',
+    type: 'double',
+  },
+  'metrics.system.cpu.time': {
+    name: 'metrics.system.cpu.time',
+    description: 'Seconds each logical CPU spent on each mode.',
+    type: 'double',
+  },
+  'metrics.system.cpu.utilization': {
+    name: 'metrics.system.cpu.utilization',
+    description:
+      'For each logical CPU, the utilization is calculated as the change in cumulative CPU time (cpu.time) over a measurement interval, divided by the elapsed time.',
+    type: 'double',
+  },
+  'metrics.system.cpu.frequency': {
+    name: 'metrics.system.cpu.frequency',
+    description: 'Operating frequency of the logical CPU in Hertz.',
+    type: 'double',
+  },
+  'metrics.system.memory.usage': {
+    name: 'metrics.system.memory.usage',
+    description: 'Reports memory in use by state.',
+    type: 'double',
+  },
+  'metrics.system.memory.limit': {
+    name: 'metrics.system.memory.limit',
+    description: 'Total virtual memory available in the system.',
+    type: 'double',
+  },
+  'metrics.system.memory.shared': {
+    name: 'metrics.system.memory.shared',
+    description: 'Shared memory used (mostly by tmpfs).',
+    type: 'double',
+  },
+  'metrics.system.memory.utilization': {
+    name: 'metrics.system.memory.utilization',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.paging.usage': {
+    name: 'metrics.system.paging.usage',
+    description: 'Unix swap or windows pagefile usage.',
+    type: 'double',
+  },
+  'metrics.system.paging.utilization': {
+    name: 'metrics.system.paging.utilization',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.paging.faults': {
+    name: 'metrics.system.paging.faults',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.paging.operations': {
+    name: 'metrics.system.paging.operations',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.io': {
+    name: 'metrics.system.disk.io',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.operations': {
+    name: 'metrics.system.disk.operations',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.io_time': {
+    name: 'metrics.system.disk.io_time',
+    description: 'Time disk spent activated.',
+    type: 'double',
+  },
+  'metrics.system.disk.operation_time': {
+    name: 'metrics.system.disk.operation_time',
+    description: 'Sum of the time each operation took to complete.',
+    type: 'double',
+  },
+  'metrics.system.disk.merged': {
+    name: 'metrics.system.disk.merged',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.disk.limit': {
+    name: 'metrics.system.disk.limit',
+    description: 'The total storage capacity of the disk.',
+    type: 'double',
+  },
+  'metrics.system.filesystem.usage': {
+    name: 'metrics.system.filesystem.usage',
+    description: "Reports a filesystem's space usage across different states.",
+    type: 'double',
+  },
+  'metrics.system.filesystem.utilization': {
+    name: 'metrics.system.filesystem.utilization',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.filesystem.limit': {
+    name: 'metrics.system.filesystem.limit',
+    description: 'The total storage capacity of the filesystem.',
+    type: 'double',
+  },
+  'metrics.system.network.dropped': {
+    name: 'metrics.system.network.dropped',
+    description: 'Count of packets that are dropped or discarded even though there was no error.',
+    type: 'double',
+  },
+  'metrics.system.network.packets': {
+    name: 'metrics.system.network.packets',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.network.errors': {
+    name: 'metrics.system.network.errors',
+    description: 'Count of network errors detected.',
+    type: 'double',
+  },
+  'metrics.system.network.io': {
+    name: 'metrics.system.network.io',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.network.connection.count': {
+    name: 'metrics.system.network.connection.count',
+    description: 'TODO.',
+    type: 'double',
+  },
+  'metrics.system.process.count': {
+    name: 'metrics.system.process.count',
+    description: 'Total number of processes in each state.',
+    type: 'double',
+  },
+  'metrics.system.process.created': {
+    name: 'metrics.system.process.created',
+    description: 'Total number of processes created over uptime of the host.',
+    type: 'double',
+  },
+  'metrics.system.linux.memory.available': {
+    name: 'metrics.system.linux.memory.available',
+    description:
+      'An estimate of how much memory is available for starting new applications, without causing swapping.',
+    type: 'double',
+  },
+  'metrics.system.linux.memory.slab.usage': {
+    name: 'metrics.system.linux.memory.slab.usage',
+    description:
+      'Reports the memory used by the Linux kernel for managing caches of frequently used objects.',
+    type: 'double',
+  },
+  'metrics.rpc.server.duration': {
+    name: 'metrics.rpc.server.duration',
+    description: 'Measures the duration of inbound RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.server.request.size': {
+    name: 'metrics.rpc.server.request.size',
+    description: 'Measures the size of RPC request messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.server.response.size': {
+    name: 'metrics.rpc.server.response.size',
+    description: 'Measures the size of RPC response messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.server.requests_per_rpc': {
+    name: 'metrics.rpc.server.requests_per_rpc',
+    description: 'Measures the number of messages received per RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.server.responses_per_rpc': {
+    name: 'metrics.rpc.server.responses_per_rpc',
+    description: 'Measures the number of messages sent per RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.client.duration': {
+    name: 'metrics.rpc.client.duration',
+    description: 'Measures the duration of outbound RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.client.request.size': {
+    name: 'metrics.rpc.client.request.size',
+    description: 'Measures the size of RPC request messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.client.response.size': {
+    name: 'metrics.rpc.client.response.size',
+    description: 'Measures the size of RPC response messages (uncompressed).',
+    type: 'double',
+  },
+  'metrics.rpc.client.requests_per_rpc': {
+    name: 'metrics.rpc.client.requests_per_rpc',
+    description: 'Measures the number of messages received per RPC.',
+    type: 'double',
+  },
+  'metrics.rpc.client.responses_per_rpc': {
+    name: 'metrics.rpc.client.responses_per_rpc',
+    description: 'Measures the number of messages sent per RPC.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.uptime': {
+    name: 'metrics.k8s.pod.uptime',
+    description: 'The time the Pod has been running.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.time': {
+    name: 'metrics.k8s.pod.cpu.time',
+    description: 'Total CPU time consumed.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.cpu.usage': {
+    name: 'metrics.k8s.pod.cpu.usage',
+    description:
+      "Pod's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+    type: 'double',
+  },
+  'metrics.k8s.pod.memory.usage': {
+    name: 'metrics.k8s.pod.memory.usage',
+    description: 'Memory usage of the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.network.io': {
+    name: 'metrics.k8s.pod.network.io',
+    description: 'Network bytes for the Pod.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.network.errors': {
+    name: 'metrics.k8s.pod.network.errors',
+    description: 'Pod network errors.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.filesystem.available': {
+    name: 'metrics.k8s.pod.filesystem.available',
+    description: 'Pod filesystem available bytes.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.filesystem.capacity': {
+    name: 'metrics.k8s.pod.filesystem.capacity',
+    description: 'Pod filesystem capacity.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.filesystem.usage': {
+    name: 'metrics.k8s.pod.filesystem.usage',
+    description: 'Pod filesystem usage.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.volume.available': {
+    name: 'metrics.k8s.pod.volume.available',
+    description: 'Pod volume storage space available.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.volume.capacity': {
+    name: 'metrics.k8s.pod.volume.capacity',
+    description: 'Pod volume total capacity.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.volume.usage': {
+    name: 'metrics.k8s.pod.volume.usage',
+    description: 'Pod volume usage.',
+    type: 'double',
+  },
+  'metrics.k8s.pod.volume.inode.count': {
+    name: 'metrics.k8s.pod.volume.inode.count',
+    description: "The total inodes in the filesystem of the Pod's volume.",
+    type: 'double',
+  },
+  'metrics.k8s.pod.volume.inode.used': {
+    name: 'metrics.k8s.pod.volume.inode.used',
+    description: "The inodes used by the filesystem of the Pod's volume.",
+    type: 'double',
+  },
+  'metrics.k8s.pod.volume.inode.free': {
+    name: 'metrics.k8s.pod.volume.inode.free',
+    description: "The free inodes in the filesystem of the Pod's volume.",
+    type: 'double',
+  },
+  'metrics.k8s.container.status.state': {
+    name: 'metrics.k8s.container.status.state',
+    description: 'Describes the number of K8s containers that are currently in a given state.',
+    type: 'double',
+  },
+  'metrics.k8s.container.status.reason': {
+    name: 'metrics.k8s.container.status.reason',
+    description:
+      'Describes the number of K8s containers that are currently in a state for a given reason.',
+    type: 'double',
+  },
+  'metrics.k8s.node.uptime': {
+    name: 'metrics.k8s.node.uptime',
+    description: 'The time the Node has been running.',
+    type: 'double',
+  },
+  'metrics.k8s.node.allocatable.cpu': {
+    name: 'metrics.k8s.node.allocatable.cpu',
+    description: 'Amount of cpu allocatable on the node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.allocatable.ephemeral_storage': {
+    name: 'metrics.k8s.node.allocatable.ephemeral_storage',
+    description: 'Amount of ephemeral-storage allocatable on the node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.allocatable.memory': {
+    name: 'metrics.k8s.node.allocatable.memory',
+    description: 'Amount of memory allocatable on the node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.allocatable.pods': {
+    name: 'metrics.k8s.node.allocatable.pods',
+    description: 'Amount of pods allocatable on the node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.condition.status': {
+    name: 'metrics.k8s.node.condition.status',
+    description: 'Describes the condition of a particular Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.cpu.time': {
+    name: 'metrics.k8s.node.cpu.time',
+    description: 'Total CPU time consumed.',
+    type: 'double',
+  },
+  'metrics.k8s.node.cpu.usage': {
+    name: 'metrics.k8s.node.cpu.usage',
+    description:
+      "Node's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+    type: 'double',
+  },
+  'metrics.k8s.node.filesystem.available': {
+    name: 'metrics.k8s.node.filesystem.available',
+    description: 'Node filesystem available bytes.',
+    type: 'double',
+  },
+  'metrics.k8s.node.filesystem.capacity': {
+    name: 'metrics.k8s.node.filesystem.capacity',
+    description: 'Node filesystem capacity.',
+    type: 'double',
+  },
+  'metrics.k8s.node.filesystem.usage': {
+    name: 'metrics.k8s.node.filesystem.usage',
+    description: 'Node filesystem usage.',
+    type: 'double',
+  },
+  'metrics.k8s.node.memory.usage': {
+    name: 'metrics.k8s.node.memory.usage',
+    description: 'Memory usage of the Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.network.io': {
+    name: 'metrics.k8s.node.network.io',
+    description: 'Network bytes for the Node.',
+    type: 'double',
+  },
+  'metrics.k8s.node.network.errors': {
+    name: 'metrics.k8s.node.network.errors',
+    description: 'Node network errors.',
+    type: 'double',
+  },
+  'metrics.k8s.deployment.desired_pods': {
+    name: 'metrics.k8s.deployment.desired_pods',
+    description: 'Number of desired replica pods in this deployment.',
+    type: 'double',
+  },
+  'metrics.k8s.deployment.available_pods': {
+    name: 'metrics.k8s.deployment.available_pods',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this deployment.',
+    type: 'double',
+  },
+  'metrics.k8s.replicaset.desired_pods': {
+    name: 'metrics.k8s.replicaset.desired_pods',
+    description: 'Number of desired replica pods in this replicaset.',
+    type: 'double',
+  },
+  'metrics.k8s.replicaset.available_pods': {
+    name: 'metrics.k8s.replicaset.available_pods',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replicaset.',
+    type: 'double',
+  },
+  'metrics.k8s.replicationcontroller.desired_pods': {
+    name: 'metrics.k8s.replicationcontroller.desired_pods',
+    description: 'Number of desired replica pods in this replication controller.',
+    type: 'double',
+  },
+  'metrics.k8s.replicationcontroller.available_pods': {
+    name: 'metrics.k8s.replicationcontroller.available_pods',
+    description:
+      'Total number of available replica pods (ready for at least minReadySeconds) targeted by this replication controller.',
+    type: 'double',
+  },
+  'metrics.k8s.statefulset.desired_pods': {
+    name: 'metrics.k8s.statefulset.desired_pods',
+    description: 'Number of desired replica pods in this statefulset.',
+    type: 'double',
+  },
+  'metrics.k8s.statefulset.ready_pods': {
+    name: 'metrics.k8s.statefulset.ready_pods',
+    description: 'The number of replica pods created for this statefulset with a Ready Condition.',
+    type: 'double',
+  },
+  'metrics.k8s.statefulset.current_pods': {
+    name: 'metrics.k8s.statefulset.current_pods',
+    description:
+      'The number of replica pods created by the statefulset controller from the statefulset version indicated by currentRevision.',
+    type: 'double',
+  },
+  'metrics.k8s.statefulset.updated_pods': {
+    name: 'metrics.k8s.statefulset.updated_pods',
+    description:
+      'Number of replica pods created by the statefulset controller from the statefulset version indicated by updateRevision.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.desired_pods': {
+    name: 'metrics.k8s.hpa.desired_pods',
+    description:
+      'Desired number of replica pods managed by this horizontal pod autoscaler, as last calculated by the autoscaler.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.current_pods': {
+    name: 'metrics.k8s.hpa.current_pods',
+    description:
+      'Current number of replica pods managed by this horizontal pod autoscaler, as last seen by the autoscaler.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.max_pods': {
+    name: 'metrics.k8s.hpa.max_pods',
+    description:
+      'The upper limit for the number of replica pods to which the autoscaler can scale up.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.min_pods': {
+    name: 'metrics.k8s.hpa.min_pods',
+    description:
+      'The lower limit for the number of replica pods to which the autoscaler can scale down.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.metric.target.cpu.value': {
+    name: 'metrics.k8s.hpa.metric.target.cpu.value',
+    description: 'Target value for CPU resource in HPA config.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.metric.target.cpu.average_value': {
+    name: 'metrics.k8s.hpa.metric.target.cpu.average_value',
+    description: 'Target average value for CPU resource in HPA config.',
+    type: 'double',
+  },
+  'metrics.k8s.hpa.metric.target.cpu.average_utilization': {
+    name: 'metrics.k8s.hpa.metric.target.cpu.average_utilization',
+    description: 'Target average utilization, in percentage, for CPU resource in HPA config.',
+    type: 'double',
+  },
+  'metrics.k8s.daemonset.current_scheduled_nodes': {
+    name: 'metrics.k8s.daemonset.current_scheduled_nodes',
+    description:
+      'Number of nodes that are running at least 1 daemon pod and are supposed to run the daemon pod.',
+    type: 'double',
+  },
+  'metrics.k8s.daemonset.desired_scheduled_nodes': {
+    name: 'metrics.k8s.daemonset.desired_scheduled_nodes',
+    description:
+      'Number of nodes that should be running the daemon pod (including nodes currently running the daemon pod).',
+    type: 'double',
+  },
+  'metrics.k8s.daemonset.misscheduled_nodes': {
+    name: 'metrics.k8s.daemonset.misscheduled_nodes',
+    description:
+      'Number of nodes that are running the daemon pod, but are not supposed to run the daemon pod.',
+    type: 'double',
+  },
+  'metrics.k8s.daemonset.ready_nodes': {
+    name: 'metrics.k8s.daemonset.ready_nodes',
+    description:
+      'Number of nodes that should be running the daemon pod and have one or more of the daemon pod running and ready.',
+    type: 'double',
+  },
+  'metrics.k8s.job.active_pods': {
+    name: 'metrics.k8s.job.active_pods',
+    description: 'The number of pending and actively running pods for a job.',
+    type: 'double',
+  },
+  'metrics.k8s.job.failed_pods': {
+    name: 'metrics.k8s.job.failed_pods',
+    description: 'The number of pods which reached phase Failed for a job.',
+    type: 'double',
+  },
+  'metrics.k8s.job.successful_pods': {
+    name: 'metrics.k8s.job.successful_pods',
+    description: 'The number of pods which reached phase Succeeded for a job.',
+    type: 'double',
+  },
+  'metrics.k8s.job.desired_successful_pods': {
+    name: 'metrics.k8s.job.desired_successful_pods',
+    description: 'The desired number of successfully finished pods the job should be run with.',
+    type: 'double',
+  },
+  'metrics.k8s.job.max_parallel_pods': {
+    name: 'metrics.k8s.job.max_parallel_pods',
+    description: 'The max desired number of pods the job should run at any given time.',
+    type: 'double',
+  },
+  'metrics.k8s.cronjob.active_jobs': {
+    name: 'metrics.k8s.cronjob.active_jobs',
+    description: 'The number of actively running jobs for a cronjob.',
+    type: 'double',
+  },
+  'metrics.k8s.namespace.phase': {
+    name: 'metrics.k8s.namespace.phase',
+    description: 'Describes number of K8s namespaces that are currently in a given phase.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.limit': {
+    name: 'metrics.k8s.container.cpu.limit',
+    description: 'Maximum CPU resource limit set for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.cpu.request': {
+    name: 'metrics.k8s.container.cpu.request',
+    description: 'CPU resource requested for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.limit': {
+    name: 'metrics.k8s.container.memory.limit',
+    description: 'Maximum memory resource limit set for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.memory.request': {
+    name: 'metrics.k8s.container.memory.request',
+    description: 'Memory resource requested for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.storage.limit': {
+    name: 'metrics.k8s.container.storage.limit',
+    description: 'Maximum storage resource limit set for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.storage.request': {
+    name: 'metrics.k8s.container.storage.request',
+    description: 'Storage resource requested for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.ephemeral_storage.limit': {
+    name: 'metrics.k8s.container.ephemeral_storage.limit',
+    description: 'Maximum ephemeral storage resource limit set for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.ephemeral_storage.request': {
+    name: 'metrics.k8s.container.ephemeral_storage.request',
+    description: 'Ephemeral storage resource requested for the container.',
+    type: 'double',
+  },
+  'metrics.k8s.container.restart.count': {
+    name: 'metrics.k8s.container.restart.count',
+    description:
+      'Describes how many times the container has restarted (since the last counter reset).',
+    type: 'double',
+  },
+  'metrics.k8s.container.ready': {
+    name: 'metrics.k8s.container.ready',
+    description:
+      'Indicates whether the container is currently marked as ready to accept traffic, based on its readiness probe (1 = ready, 0 = not ready).',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.cpu.limit.hard': {
+    name: 'metrics.k8s.resourcequota.cpu.limit.hard',
+    description:
+      'The CPU limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.cpu.limit.used': {
+    name: 'metrics.k8s.resourcequota.cpu.limit.used',
+    description:
+      'The CPU limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.cpu.request.hard': {
+    name: 'metrics.k8s.resourcequota.cpu.request.hard',
+    description:
+      'The CPU requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.cpu.request.used': {
+    name: 'metrics.k8s.resourcequota.cpu.request.used',
+    description:
+      'The CPU requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.memory.limit.hard': {
+    name: 'metrics.k8s.resourcequota.memory.limit.hard',
+    description:
+      'The memory limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.memory.limit.used': {
+    name: 'metrics.k8s.resourcequota.memory.limit.used',
+    description:
+      'The memory limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.memory.request.hard': {
+    name: 'metrics.k8s.resourcequota.memory.request.hard',
+    description:
+      'The memory requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.memory.request.used': {
+    name: 'metrics.k8s.resourcequota.memory.request.used',
+    description:
+      'The memory requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.hugepage_count.request.hard': {
+    name: 'metrics.k8s.resourcequota.hugepage_count.request.hard',
+    description:
+      'The huge page requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.hugepage_count.request.used': {
+    name: 'metrics.k8s.resourcequota.hugepage_count.request.used',
+    description:
+      'The huge page requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.storage.request.hard': {
+    name: 'metrics.k8s.resourcequota.storage.request.hard',
+    description:
+      'The storage requests in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.storage.request.used': {
+    name: 'metrics.k8s.resourcequota.storage.request.used',
+    description:
+      'The storage requests in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.persistentvolumeclaim_count.hard': {
+    name: 'metrics.k8s.resourcequota.persistentvolumeclaim_count.hard',
+    description:
+      'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.persistentvolumeclaim_count.used': {
+    name: 'metrics.k8s.resourcequota.persistentvolumeclaim_count.used',
+    description:
+      'The total number of PersistentVolumeClaims that can exist in the namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.ephemeral_storage.request.hard': {
+    name: 'metrics.k8s.resourcequota.ephemeral_storage.request.hard',
+    description:
+      'The sum of local ephemeral storage requests in the namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.ephemeral_storage.request.used': {
+    name: 'metrics.k8s.resourcequota.ephemeral_storage.request.used',
+    description:
+      'The sum of local ephemeral storage requests in the namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.ephemeral_storage.limit.hard': {
+    name: 'metrics.k8s.resourcequota.ephemeral_storage.limit.hard',
+    description:
+      'The sum of local ephemeral storage limits in the namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.ephemeral_storage.limit.used': {
+    name: 'metrics.k8s.resourcequota.ephemeral_storage.limit.used',
+    description:
+      'The sum of local ephemeral storage limits in the namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.object_count.hard': {
+    name: 'metrics.k8s.resourcequota.object_count.hard',
+    description:
+      'The object count limits in a specific namespace. The value represents the configured quota limit of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.k8s.resourcequota.object_count.used': {
+    name: 'metrics.k8s.resourcequota.object_count.used',
+    description:
+      'The object count limits in a specific namespace. The value represents the current observed total usage of the resource in the namespace.',
+    type: 'double',
+  },
+  'metrics.azure.cosmosdb.client.operation.request_charge': {
+    name: 'metrics.azure.cosmosdb.client.operation.request_charge',
+    description:
+      '[Request units](https://learn.microsoft.com/azure/cosmos-db/request-units) consumed by the operation.',
+    type: 'double',
+  },
+  'metrics.azure.cosmosdb.client.active_instance.count': {
+    name: 'metrics.azure.cosmosdb.client.active_instance.count',
+    description: 'Number of active client instances.',
+    type: 'double',
+  },
+  'metrics.container.uptime': {
+    name: 'metrics.container.uptime',
+    description: 'The time the container has been running.',
+    type: 'double',
+  },
+  'metrics.container.cpu.time': {
+    name: 'metrics.container.cpu.time',
+    description: 'Total CPU time consumed.',
+    type: 'double',
+  },
+  'metrics.container.cpu.usage': {
+    name: 'metrics.container.cpu.usage',
+    description:
+      "Container's CPU usage, measured in cpus. Range from 0 to the number of allocatable CPUs.",
+    type: 'double',
+  },
+  'metrics.container.memory.usage': {
+    name: 'metrics.container.memory.usage',
+    description: 'Memory usage of the container.',
+    type: 'double',
+  },
+  'metrics.container.disk.io': {
+    name: 'metrics.container.disk.io',
+    description: 'Disk bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.network.io': {
+    name: 'metrics.container.network.io',
+    description: 'Network bytes for the container.',
+    type: 'double',
+  },
+  'metrics.container.filesystem.available': {
+    name: 'metrics.container.filesystem.available',
+    description: 'Container filesystem available bytes.',
+    type: 'double',
+  },
+  'metrics.container.filesystem.capacity': {
+    name: 'metrics.container.filesystem.capacity',
+    description: 'Container filesystem capacity.',
+    type: 'double',
+  },
+  'metrics.container.filesystem.usage': {
+    name: 'metrics.container.filesystem.usage',
+    description: 'Container filesystem usage.',
+    type: 'double',
+  },
+  'metrics.faas.invoke_duration': {
+    name: 'metrics.faas.invoke_duration',
+    description: "Measures the duration of the function's logic execution.",
+    type: 'double',
+  },
+  'metrics.faas.init_duration': {
+    name: 'metrics.faas.init_duration',
+    description: "Measures the duration of the function's initialization, such as a cold start.",
+    type: 'double',
+  },
+  'metrics.faas.coldstarts': {
+    name: 'metrics.faas.coldstarts',
+    description: 'Number of invocation cold starts.',
+    type: 'double',
+  },
+  'metrics.faas.errors': {
+    name: 'metrics.faas.errors',
+    description: 'Number of invocation errors.',
+    type: 'double',
+  },
+  'metrics.faas.invocations': {
+    name: 'metrics.faas.invocations',
+    description: 'Number of successful invocations.',
+    type: 'double',
+  },
+  'metrics.faas.timeouts': {
+    name: 'metrics.faas.timeouts',
+    description: 'Number of invocation timeouts.',
+    type: 'double',
+  },
+  'metrics.faas.mem_usage': {
+    name: 'metrics.faas.mem_usage',
+    description: 'Distribution of max memory usage per invocation.',
+    type: 'double',
+  },
+  'metrics.faas.cpu_usage': {
+    name: 'metrics.faas.cpu_usage',
+    description: 'Distribution of CPU usage per invocation.',
+    type: 'double',
+  },
+  'metrics.faas.net_io': {
+    name: 'metrics.faas.net_io',
+    description: 'Distribution of net I/O usage per invocation.',
+    type: 'double',
+  },
+  'metrics.vcs.change.count': {
+    name: 'metrics.vcs.change.count',
+    description:
+      'The number of changes (pull requests/merge requests/changelists) in a repository, categorized by their state (e.g. open or merged).',
+    type: 'double',
+  },
+  'metrics.vcs.change.duration': {
+    name: 'metrics.vcs.change.duration',
+    description:
+      'The time duration a change (pull request/merge request/changelist) has been in a given state.',
+    type: 'double',
+  },
+  'metrics.vcs.change.time_to_approval': {
+    name: 'metrics.vcs.change.time_to_approval',
+    description:
+      'The amount of time since its creation it took a change (pull request/merge request/changelist) to get the first approval.',
+    type: 'double',
+  },
+  'metrics.vcs.change.time_to_merge': {
+    name: 'metrics.vcs.change.time_to_merge',
+    description:
+      'The amount of time since its creation it took a change (pull request/merge request/changelist) to get merged into the target(base) ref.',
+    type: 'double',
+  },
+  'metrics.vcs.repository.count': {
+    name: 'metrics.vcs.repository.count',
+    description: 'The number of repositories in an organization.',
+    type: 'double',
+  },
+  'metrics.vcs.ref.count': {
+    name: 'metrics.vcs.ref.count',
+    description: 'The number of refs of type branch or tag in a repository.',
+    type: 'double',
+  },
+  'metrics.vcs.ref.lines_delta': {
+    name: 'metrics.vcs.ref.lines_delta',
+    description:
+      'The number of lines added/removed in a ref (branch) relative to the ref from the `vcs.ref.base.name` attribute.',
+    type: 'double',
+  },
+  'metrics.vcs.ref.revisions_delta': {
+    name: 'metrics.vcs.ref.revisions_delta',
+    description:
+      'The number of revisions (commits) a ref (branch) is ahead/behind the branch from the `vcs.ref.base.name` attribute.',
+    type: 'double',
+  },
+  'metrics.vcs.ref.time': {
+    name: 'metrics.vcs.ref.time',
+    description:
+      'Time a ref (branch) created from the default branch (trunk) has existed. The `ref.type` attribute will always be `branch`.',
+    type: 'double',
+  },
+  'metrics.vcs.contributor.count': {
+    name: 'metrics.vcs.contributor.count',
+    description: 'The number of unique contributors to a repository.',
+    type: 'double',
+  },
+  'metrics.gen_ai.client.token.usage': {
+    name: 'metrics.gen_ai.client.token.usage',
+    description: 'Number of input and output tokens used.',
+    type: 'double',
+  },
+  'metrics.gen_ai.client.operation.duration': {
+    name: 'metrics.gen_ai.client.operation.duration',
+    description: 'GenAI operation duration.',
+    type: 'double',
+  },
+  'metrics.gen_ai.server.request.duration': {
+    name: 'metrics.gen_ai.server.request.duration',
+    description:
+      'Generative AI server request duration such as time-to-last byte or last output token.',
+    type: 'double',
+  },
+  'metrics.gen_ai.server.time_per_output_token': {
+    name: 'metrics.gen_ai.server.time_per_output_token',
+    description: 'Time per output token generated after the first token for successful responses.',
+    type: 'double',
+  },
+  'metrics.gen_ai.server.time_to_first_token': {
+    name: 'metrics.gen_ai.server.time_to_first_token',
+    description: 'Time to generate first token for successful responses.',
+    type: 'double',
+  },
+  'metrics.hw.attributes': {
+    name: 'metrics.hw.attributes',
+    description: 'Attributes for hardware metrics',
+    type: 'double',
+  },
+  'metrics.hw.energy': {
+    name: 'metrics.hw.energy',
+    description: 'Energy consumed by the component.',
+    type: 'double',
+  },
+  'metrics.hw.errors': {
+    name: 'metrics.hw.errors',
+    description: 'Number of errors encountered by the component.',
+    type: 'double',
+  },
+  'metrics.hw.power': {
+    name: 'metrics.hw.power',
+    description: 'Instantaneous power consumed by the component.',
+    type: 'double',
+  },
+  'metrics.hw.status': {
+    name: 'metrics.hw.status',
+    description: 'Operational status: `1` (true) or `0` (false) for each of the possible states.',
+    type: 'double',
+  },
+  'metrics.kestrel.active_connections': {
+    name: 'metrics.kestrel.active_connections',
+    description: 'Number of connections that are currently active on the server.',
+    type: 'double',
+  },
+  'metrics.kestrel.connection.duration': {
+    name: 'metrics.kestrel.connection.duration',
+    description: 'The duration of connections on the server.',
+    type: 'double',
+  },
+  'metrics.kestrel.rejected_connections': {
+    name: 'metrics.kestrel.rejected_connections',
+    description: 'Number of connections rejected by the server.',
+    type: 'double',
+  },
+  'metrics.kestrel.queued_connections': {
+    name: 'metrics.kestrel.queued_connections',
+    description: 'Number of connections that are currently queued and are waiting to start.',
+    type: 'double',
+  },
+  'metrics.kestrel.queued_requests': {
+    name: 'metrics.kestrel.queued_requests',
+    description:
+      'Number of HTTP requests on multiplexed connections (HTTP/2 and HTTP/3) that are currently queued and are waiting to start.',
+    type: 'double',
+  },
+  'metrics.kestrel.upgraded_connections': {
+    name: 'metrics.kestrel.upgraded_connections',
+    description: 'Number of connections that are currently upgraded (WebSockets). .',
+    type: 'double',
+  },
+  'metrics.kestrel.tls_handshake.duration': {
+    name: 'metrics.kestrel.tls_handshake.duration',
+    description: 'The duration of TLS handshakes on the server.',
+    type: 'double',
+  },
+  'metrics.kestrel.active_tls_handshakes': {
+    name: 'metrics.kestrel.active_tls_handshakes',
+    description: 'Number of TLS handshakes that are currently in progress on the server.',
+    type: 'double',
+  },
+  'metrics.process.cpu.time': {
+    name: 'metrics.process.cpu.time',
+    description: 'Total CPU seconds broken down by different states.',
+    type: 'double',
+  },
+  'metrics.process.cpu.utilization': {
+    name: 'metrics.process.cpu.utilization',
+    description:
+      'Difference in process.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.',
+    type: 'double',
+  },
+  'metrics.process.memory.usage': {
+    name: 'metrics.process.memory.usage',
+    description: 'The amount of physical memory in use.',
+    type: 'double',
+  },
+  'metrics.process.memory.virtual': {
+    name: 'metrics.process.memory.virtual',
+    description: 'The amount of committed virtual memory.',
+    type: 'double',
+  },
+  'metrics.process.disk.io': {
+    name: 'metrics.process.disk.io',
+    description: 'Disk bytes transferred.',
+    type: 'double',
+  },
+  'metrics.process.network.io': {
+    name: 'metrics.process.network.io',
+    description: 'Network bytes transferred.',
+    type: 'double',
+  },
+  'metrics.process.thread.count': {
+    name: 'metrics.process.thread.count',
+    description: 'Process threads count.',
+    type: 'double',
+  },
+  'metrics.process.open_file_descriptor.count': {
+    name: 'metrics.process.open_file_descriptor.count',
+    description: 'Number of file descriptors in use by the process.',
+    type: 'double',
+  },
+  'metrics.process.context_switches': {
+    name: 'metrics.process.context_switches',
+    description: 'Number of times the process has been context switched.',
+    type: 'double',
+  },
+  'metrics.process.paging.faults': {
+    name: 'metrics.process.paging.faults',
+    description: 'Number of page faults the process has made.',
+    type: 'double',
+  },
+  'metrics.process.uptime': {
+    name: 'metrics.process.uptime',
+    description: 'The time the process has been running.',
+    type: 'double',
+  },
+  'metrics.jvm.memory.init': {
+    name: 'metrics.jvm.memory.init',
+    description: 'Measure of initial memory requested.',
+    type: 'double',
+  },
+  'metrics.jvm.system.cpu.utilization': {
+    name: 'metrics.jvm.system.cpu.utilization',
+    description: 'Recent CPU utilization for the whole system as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.jvm.system.cpu.load_1m': {
+    name: 'metrics.jvm.system.cpu.load_1m',
+    description: 'Average CPU load of the whole system for the last minute as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.jvm.buffer.memory.used': {
+    name: 'metrics.jvm.buffer.memory.used',
+    description: 'Measure of memory used by buffers.',
+    type: 'double',
+  },
+  'metrics.jvm.buffer.memory.limit': {
+    name: 'metrics.jvm.buffer.memory.limit',
+    description: 'Measure of total memory capacity of buffers.',
+    type: 'double',
+  },
+  'metrics.jvm.buffer.count': {
+    name: 'metrics.jvm.buffer.count',
+    description: 'Number of buffers in the pool.',
+    type: 'double',
+  },
+  'metrics.jvm.file_descriptor.count': {
+    name: 'metrics.jvm.file_descriptor.count',
+    description: 'Number of open file descriptors as reported by the JVM.',
+    type: 'double',
+  },
+  'metrics.cpython.gc.collections': {
+    name: 'metrics.cpython.gc.collections',
+    description: 'The number of times a generation was collected since interpreter start.',
+    type: 'double',
+  },
+  'metrics.cpython.gc.collected_objects': {
+    name: 'metrics.cpython.gc.collected_objects',
+    description:
+      'The total number of objects collected inside a generation since interpreter start.',
+    type: 'double',
+  },
+  'metrics.cpython.gc.uncollectable_objects': {
+    name: 'metrics.cpython.gc.uncollectable_objects',
+    description:
+      'The total number of objects which were found to be uncollectable inside a generation since interpreter start.',
+    type: 'double',
+  },
+  'metrics.dotnet.process.cpu.count': {
+    name: 'metrics.dotnet.process.cpu.count',
+    description: 'The number of processors available to the process.',
+    type: 'double',
+  },
+  'metrics.dotnet.process.cpu.time': {
+    name: 'metrics.dotnet.process.cpu.time',
+    description: 'CPU time used by the process.',
+    type: 'double',
+  },
+  'metrics.dotnet.process.memory.working_set': {
+    name: 'metrics.dotnet.process.memory.working_set',
+    description: 'The number of bytes of physical memory mapped to the process context.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.collections': {
+    name: 'metrics.dotnet.gc.collections',
+    description:
+      'The number of garbage collections that have occurred since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.heap.total_allocated': {
+    name: 'metrics.dotnet.gc.heap.total_allocated',
+    description:
+      'The *approximate* number of bytes allocated on the managed GC heap since the process has started. The returned value does not include any native allocations.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.last_collection.memory.committed_size': {
+    name: 'metrics.dotnet.gc.last_collection.memory.committed_size',
+    description:
+      'The amount of committed virtual memory in use by the .NET GC, as observed during the latest garbage collection.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.last_collection.heap.size': {
+    name: 'metrics.dotnet.gc.last_collection.heap.size',
+    description:
+      'The managed GC heap size (including fragmentation), as observed during the latest garbage collection.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.last_collection.heap.fragmentation.size': {
+    name: 'metrics.dotnet.gc.last_collection.heap.fragmentation.size',
+    description: 'The heap fragmentation, as observed during the latest garbage collection.',
+    type: 'double',
+  },
+  'metrics.dotnet.gc.pause.time': {
+    name: 'metrics.dotnet.gc.pause.time',
+    description: 'The total amount of time paused in GC since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.jit.compiled_il.size': {
+    name: 'metrics.dotnet.jit.compiled_il.size',
+    description:
+      'Count of bytes of intermediate language that have been compiled since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.jit.compiled_methods': {
+    name: 'metrics.dotnet.jit.compiled_methods',
+    description:
+      'The number of times the JIT compiler (re)compiled methods since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.jit.compilation.time': {
+    name: 'metrics.dotnet.jit.compilation.time',
+    description:
+      'The amount of time the JIT compiler has spent compiling methods since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.monitor.lock_contentions': {
+    name: 'metrics.dotnet.monitor.lock_contentions',
+    description:
+      'The number of times there was contention when trying to acquire a monitor lock since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.thread_pool.thread.count': {
+    name: 'metrics.dotnet.thread_pool.thread.count',
+    description: 'The number of thread pool threads that currently exist.',
+    type: 'double',
+  },
+  'metrics.dotnet.thread_pool.work_item.count': {
+    name: 'metrics.dotnet.thread_pool.work_item.count',
+    description:
+      'The number of work items that the thread pool has completed since the process has started.',
+    type: 'double',
+  },
+  'metrics.dotnet.thread_pool.queue.length': {
+    name: 'metrics.dotnet.thread_pool.queue.length',
+    description:
+      'The number of work items that are currently queued to be processed by the thread pool.',
+    type: 'double',
+  },
+  'metrics.dotnet.timer.count': {
+    name: 'metrics.dotnet.timer.count',
+    description: 'The number of timer instances that are currently active.',
+    type: 'double',
+  },
+  'metrics.dotnet.assembly.count': {
+    name: 'metrics.dotnet.assembly.count',
+    description: 'The number of .NET assemblies that are currently loaded.',
+    type: 'double',
+  },
+  'metrics.dotnet.exceptions': {
+    name: 'metrics.dotnet.exceptions',
+    description: 'The number of exceptions that have been thrown in managed code.',
+    type: 'double',
+  },
+  'metrics.http.server.request.duration': {
+    name: 'metrics.http.server.request.duration',
+    description: 'Duration of HTTP server requests.',
+    type: 'double',
+  },
+  'metrics.http.server.active_requests': {
+    name: 'metrics.http.server.active_requests',
+    description: 'Number of active HTTP server requests.',
+    type: 'double',
+  },
+  'metrics.http.server.request.body.size': {
+    name: 'metrics.http.server.request.body.size',
+    description: 'Size of HTTP server request bodies.',
+    type: 'double',
+  },
+  'metrics.http.server.response.body.size': {
+    name: 'metrics.http.server.response.body.size',
+    description: 'Size of HTTP server response bodies.',
+    type: 'double',
+  },
+  'metrics.http.client.request.duration': {
+    name: 'metrics.http.client.request.duration',
+    description: 'Duration of HTTP client requests.',
+    type: 'double',
+  },
+  'metrics.http.client.request.body.size': {
+    name: 'metrics.http.client.request.body.size',
+    description: 'Size of HTTP client request bodies.',
+    type: 'double',
+  },
+  'metrics.http.client.response.body.size': {
+    name: 'metrics.http.client.response.body.size',
+    description: 'Size of HTTP client response bodies.',
+    type: 'double',
+  },
+  'metrics.http.client.open_connections': {
+    name: 'metrics.http.client.open_connections',
+    description:
+      'Number of outbound HTTP connections that are currently active or idle on the client.',
+    type: 'double',
+  },
+  'metrics.http.client.connection.duration': {
+    name: 'metrics.http.client.connection.duration',
+    description: 'The duration of the successfully established outbound HTTP connections.',
+    type: 'double',
+  },
+  'metrics.http.client.active_requests': {
+    name: 'metrics.http.client.active_requests',
+    description: 'Number of active HTTP requests.',
+    type: 'double',
+  },
+  'metrics.messaging.attributes': {
+    name: 'metrics.messaging.attributes',
+    description: 'Common messaging metrics attributes.',
+    type: 'double',
+  },
+  'metrics.messaging.consumer.attributes': {
+    name: 'metrics.messaging.consumer.attributes',
+    description: 'Messaging consumer metrics attributes.',
+    type: 'double',
+  },
+  'metrics.messaging.client.operation.duration': {
+    name: 'metrics.messaging.client.operation.duration',
+    description: 'Duration of messaging operation initiated by a producer or consumer client.',
+    type: 'double',
+  },
+  'metrics.messaging.process.duration': {
+    name: 'metrics.messaging.process.duration',
+    description: 'Duration of processing operation.',
+    type: 'double',
+  },
+  'metrics.messaging.client.sent.messages': {
+    name: 'metrics.messaging.client.sent.messages',
+    description: 'Number of messages producer attempted to send to the broker.',
+    type: 'double',
+  },
+  'metrics.messaging.client.consumed.messages': {
+    name: 'metrics.messaging.client.consumed.messages',
+    description: 'Number of messages that were delivered to the application.',
+    type: 'double',
+  },
+};

@@ -16,23 +16,35 @@ function generateTypeScriptFile(result: any, outputPath: string, log: ToolingLog
   const timestamp = new Date().toISOString();
   const { totalFields, stats } = result;
 
-  // Convert object to string representation with single quotes (for Prettier compliance)
-  function objectToSingleQuoteString(obj: Record<string, string>): string {
+  // Convert structured object to string representation with single quotes (for Prettier compliance)
+  function structuredObjectToString(obj: Record<string, any>): string {
     const entries = Object.entries(obj);
     if (entries.length === 0) {
       return '{}';
     }
 
     const lines = entries.map(([key, value]) => {
-      // Escape single quotes in the value and wrap in single quotes
-      const escapedValue = value.replace(/'/g, "\\'");
-      return `  '${key}': '${escapedValue}',`;
+      const { name, description, type, example } = value;
+
+      // Escape single quotes in strings
+      const escapedName = name.replace(/'/g, "\\'");
+      const escapedDescription = description.replace(/'/g, "\\'");
+      const escapedType = type.replace(/'/g, "\\'");
+
+      let fieldObject = `    name: '${escapedName}',\n    description: '${escapedDescription}',\n    type: '${escapedType}',`;
+
+      if (example !== undefined) {
+        const escapedExample = String(example).replace(/'/g, "\\'");
+        fieldObject += `\n    example: '${escapedExample}',`;
+      }
+
+      return `  '${key}': {\n${fieldObject}\n  },`;
     });
 
     return `{\n${lines.join('\n')}\n}`;
   }
 
-  const fieldsString = objectToSingleQuoteString(totalFields);
+  const fieldsString = structuredObjectToString(totalFields);
 
   const tsContent = `/*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -50,19 +62,9 @@ function generateTypeScriptFile(result: any, outputPath: string, log: ToolingLog
 // Metric groups: ${stats.metricGroups}
 // Total fields: ${stats.totalFields}
 
-export const semconvFlat = ${fieldsString} as const;
+import type { TSemconvFields } from '../types/semconv_types';
 
-export type SemconvFieldName = keyof typeof semconvFlat;
-export type TSemconvFields = typeof semconvFlat;
-
-// Statistics about the generated data
-export const semconvStats = {
-  registryGroups: ${stats.registryGroups},
-  metricGroups: ${stats.metricGroups},
-  totalGroups: ${stats.totalGroups},
-  totalFields: ${stats.totalFields},
-  generatedAt: '${timestamp}'
-} as const;
+export const semconvFlat: TSemconvFields = ${fieldsString};
 `;
 
   const outputDir = path.dirname(outputPath);

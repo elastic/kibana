@@ -12,10 +12,100 @@ import * as yaml from 'js-yaml';
 import type {
   ResolvedSemconvYaml,
   YamlGroup,
-  SemconvFieldDefinitions,
+  SemconvStructuredFieldDefinitions,
+  SemconvFieldMetadata,
   ProcessingResult,
   ProcessingOptions,
 } from '../types/semconv_types';
+
+/**
+ * OpenTelemetry to Elasticsearch field type mapping
+ */
+const OTEL_TO_ES_TYPE_MAP = {
+  // Scalar types
+  string: 'keyword',
+  int: 'long',
+  double: 'double',
+  boolean: 'boolean',
+
+  // Array types
+  'string[]': 'keyword',
+  'int[]': 'long',
+  'double[]': 'double',
+  'boolean[]': 'boolean',
+
+  // Template types
+  'template[string]': 'keyword',
+  'template[int]': 'long',
+  'template[double]': 'double',
+  'template[string[]]': 'keyword',
+
+  // Special OTel types
+  enum: 'keyword',
+  map: 'object',
+  'map[]': 'object',
+  any: 'keyword',
+  undefined: 'keyword',
+
+  // Group types (should not be processed as fields, but just in case)
+  attribute_group: 'object',
+  metric: 'double',
+  span: 'object',
+  event: 'object',
+  entity: 'object',
+
+  // Malformed types
+  "string'": 'keyword', // Handle the typo found in YAML
+
+  // Default fallback
+  unknown: 'keyword',
+} as const;
+
+/**
+ * Map OpenTelemetry field type to Elasticsearch field type
+ */
+function mapOtelTypeToEsType(otelType?: unknown): string {
+  if (!otelType) return 'keyword';
+
+  // Handle simple string types
+  if (typeof otelType === 'string') {
+    const cleanType = otelType.toLowerCase().trim();
+    return OTEL_TO_ES_TYPE_MAP[cleanType as keyof typeof OTEL_TO_ES_TYPE_MAP] || 'keyword';
+  }
+
+  // Handle complex type objects (like enum definitions with members)
+  if (typeof otelType === 'object' && otelType !== null) {
+    const typeObj = otelType as any;
+
+    // Check if it's an enum type with members
+    if (typeObj.members && Array.isArray(typeObj.members)) {
+      return 'keyword'; // Enum values are always keywords
+    }
+
+    // Check if it has a type property
+    if (typeObj.type && typeof typeObj.type === 'string') {
+      return mapOtelTypeToEsType(typeObj.type);
+    }
+
+    // Fallback for other complex objects
+    return 'keyword';
+  }
+
+  // Handle numbers, booleans, etc.
+  return 'keyword';
+}
+
+/**
+ * Extract the first example from examples array or convert single example to string
+ */
+function extractFirstExample(examples?: unknown[]): string | undefined {
+  if (!examples || examples.length === 0) return undefined;
+
+  const firstExample = examples[0];
+  if (firstExample === null || firstExample === undefined) return undefined;
+
+  return String(firstExample);
+}
 
 /**
  * Clean brief text by removing pipe characters, newlines, and extra whitespace
@@ -36,8 +126,8 @@ function cleanBriefText(brief: string): string {
 function processRegistryGroups(
   groups: YamlGroup[],
   options: ProcessingOptions = {}
-): SemconvFieldDefinitions {
-  const registryFields: SemconvFieldDefinitions = {};
+): SemconvStructuredFieldDefinitions {
+  const registryFields: SemconvStructuredFieldDefinitions = {};
 
   for (const group of groups) {
     if (!group.id.startsWith('registry.')) {
@@ -48,15 +138,26 @@ function processRegistryGroups(
     if (group.attributes && group.attributes.length > 0) {
       for (const attribute of group.attributes) {
         if (attribute.name && attribute.brief) {
-          const cleanBrief =
-            options.cleanBriefText !== false ? cleanBriefText(attribute.brief) : attribute.brief;
-
           // Skip deprecated fields unless explicitly included
           if (attribute.deprecated && !options.includeDeprecated) {
             continue;
           }
 
-          registryFields[attribute.name] = cleanBrief;
+          const cleanBrief =
+            options.cleanBriefText !== false ? cleanBriefText(attribute.brief) : attribute.brief;
+
+          const fieldMetadata: SemconvFieldMetadata = {
+            name: attribute.name,
+            description: cleanBrief,
+            type: mapOtelTypeToEsType(attribute.type),
+          };
+
+          const example = extractFirstExample(attribute.examples);
+          if (example) {
+            fieldMetadata.example = example;
+          }
+
+          registryFields[attribute.name] = fieldMetadata;
         }
       }
     }
@@ -71,8 +172,8 @@ function processRegistryGroups(
 function processMetricGroups(
   groups: YamlGroup[],
   options: ProcessingOptions = {}
-): SemconvFieldDefinitions {
-  const metricFields: SemconvFieldDefinitions = {};
+): SemconvStructuredFieldDefinitions {
+  const metricFields: SemconvStructuredFieldDefinitions = {};
 
   for (const group of groups) {
     if (!group.id.startsWith('metric.')) {
@@ -84,27 +185,48 @@ function processMetricGroups(
       continue;
     }
 
-    // Process top-level metric (metric_name -> brief)
-    if (group.metric_name && group.brief) {
+    // Process top-level metric (group.id -> brief)
+    if (group.brief) {
       const cleanBrief =
         options.cleanBriefText !== false ? cleanBriefText(group.brief) : group.brief;
 
-      metricFields[group.metric_name] = cleanBrief;
+      // Convert semantic convention name to actual Kibana field name
+      // "metric.go.memory.used" -> "metrics.go.memory.used"
+      const kibanaFieldName = group.id.replace(/^metric\./, 'metrics.');
+
+      const fieldMetadata: SemconvFieldMetadata = {
+        name: kibanaFieldName, // Use Kibana field name (e.g., "metrics.go.memory.used")
+        description: cleanBrief,
+        type: 'double', // Metrics are always numeric values
+      };
+
+      metricFields[kibanaFieldName] = fieldMetadata; // Key is Kibana field name
     }
 
     // Process attributes within the metric group (name -> brief)
     if (group.attributes && group.attributes.length > 0) {
       for (const attribute of group.attributes) {
         if (attribute.name && attribute.brief) {
-          const cleanBrief =
-            options.cleanBriefText !== false ? cleanBriefText(attribute.brief) : attribute.brief;
-
           // Skip deprecated attributes unless explicitly included
           if (attribute.deprecated && !options.includeDeprecated) {
             continue;
           }
 
-          metricFields[attribute.name] = cleanBrief;
+          const cleanBrief =
+            options.cleanBriefText !== false ? cleanBriefText(attribute.brief) : attribute.brief;
+
+          const fieldMetadata: SemconvFieldMetadata = {
+            name: attribute.name,
+            description: cleanBrief,
+            type: mapOtelTypeToEsType(attribute.type),
+          };
+
+          const example = extractFirstExample(attribute.examples);
+          if (example) {
+            fieldMetadata.example = example;
+          }
+
+          metricFields[attribute.name] = fieldMetadata;
         }
       }
     }
