@@ -198,6 +198,30 @@ See the section on [versioning](#versioning) for more details.
 `/roles` ❌
 `/internal/roles` ❌
 
+**Choosing a `<domain>` name**
+
+Domain name pluralisation is case dependent, but the most common pattern in Kibana is to pluralize.
+
+Additionally, domains are strongly encouraged because of Kibana's size, but not a hard requirement. For example:
+
+❌ Do not choose a domain name that is the same as the resource. For example:
+
+```
+/api/files/files
+```
+
+✅ Rather choose another domain name
+
+```
+/api/storage/files
+```
+
+...or consider not using a domain name in certain cases:
+
+```
+/api/status
+```
+
 **Pluralize collection names**
 
 `PUT /api/my_domain/my_resources/{id}` ✅
@@ -206,13 +230,34 @@ See the section on [versioning](#versioning) for more details.
 
 **Prefix actions against resource collections with `_`**
 
-Sometimes we want to designate a variation or action against a resource:
+Sometimes we want to designate `POST` action against a resource:
 
 ```
 POST /api/my_domain/my_resources/_bulk_delete
 ```
 
-Carefully consider cases where this pattern may make sense as it is more user-friendly to expose simple paths and actions.
+Some common actions include:
+
+- `_search`
+- `_bulk_create`
+- `_bulk_delete`
+- `_bulk_update`
+
+The fewer `_<action>` style APIs, the more user-friendly your APIs will be.
+
+**Use `{id}` in the path when...**
+
+```
+GET    /api/my_resource/{id}
+PUT    /api/my_resource/{id}
+PATCH  /api/my_resource/{id}
+DELETE /api/my_resource/{id}
+POST   /api/my_resource
+```
+
+Typically `POST` does not contain a resource ID because it should always result in a new resource. Optionally, API users can specify an ID for a resource using `PUT` that will do an upsert.
+
+For other path parameters it is recommended to take a conservative approach: do not put too much in the path, it is a character limited input!
 
 ### Methods
 
