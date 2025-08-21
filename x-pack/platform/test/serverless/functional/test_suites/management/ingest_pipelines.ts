@@ -53,7 +53,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(async () => {
         // Delete the test pipeline
-        await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        try {
+          await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        } catch (error) {
+          log.error(`Error deleting pipeline: ${error}`);
+        }
       });
 
       it('Displays the test pipeline in the list of pipelines', async () => {
