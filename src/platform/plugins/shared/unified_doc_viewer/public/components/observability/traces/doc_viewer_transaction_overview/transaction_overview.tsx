@@ -143,20 +143,17 @@ export function TransactionOverview({
             )}
             <EuiFlexItem>
               {traceId && transactionId && (
-                <>
-                  <EuiSpacer size="m" />
-                  <Trace
-                    fields={fieldConfigurations}
-                    fieldMappings={dataViewFields}
-                    traceId={traceId}
-                    docId={transactionId}
-                    displayType="transaction"
-                    dataView={dataView}
-                    tracesIndexPattern={indexes.apm.traces}
-                    showWaterfall={showWaterfall}
-                    showActions={showActions}
-                  />
-                </>
+                <Trace
+                  fields={fieldConfigurations}
+                  fieldMappings={dataViewFields}
+                  traceId={traceId}
+                  docId={transactionId}
+                  displayType="transaction"
+                  dataView={dataView}
+                  tracesIndexPattern={indexes.apm.traces}
+                  showWaterfall={showWaterfall}
+                  showActions={showActions}
+                />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
