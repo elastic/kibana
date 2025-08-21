@@ -7,7 +7,7 @@
 
 import { promises as Fs } from 'fs';
 import Path from 'path';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { LOGHUB_DIR } from './constants';
 import { getFileOrThrow } from './utils';
 

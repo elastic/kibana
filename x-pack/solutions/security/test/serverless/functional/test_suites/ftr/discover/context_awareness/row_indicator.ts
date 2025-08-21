@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 import { SECURITY_SOLUTION_DATA_VIEW } from '../../../constants';
 import { getDiscoverESQLState } from './utils';
 

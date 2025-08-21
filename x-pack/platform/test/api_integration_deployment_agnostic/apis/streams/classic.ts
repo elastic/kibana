@@ -7,11 +7,9 @@
 
 import expect from '@kbn/expect';
 import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { fetchDocument, indexDocument, putStream } from './helpers/requests';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -70,17 +68,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [
-                    {
-                      grok: {
-                        if: { always: {} },
-                        field: 'message',
+                  processing: {
+                    steps: [
+                      {
+                        action: 'grok',
+                        where: { always: {} },
+                        from: 'message',
                         patterns: [
                           '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                         ],
                       },
-                    },
-                  ],
+                    ],
+                  },
                   classic: {},
                 },
               },
@@ -173,7 +172,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [],
+                  processing: {
+                    steps: [],
+                  },
                   classic: {},
                 },
               },
@@ -215,7 +216,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [],
+                  processing: {
+                    steps: [],
+                  },
                   classic: {
                     field_overrides: {
                       'foo.bar': {
@@ -243,7 +246,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [],
+                  processing: {
+                    steps: [],
+                  },
                   classic: {
                     field_overrides: {
                       'foo.bar': {
@@ -378,17 +383,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  grok: {
-                    if: { always: {} },
-                    field: 'message',
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                     ],
                   },
-                },
-              ],
+                ],
+              },
               classic: {},
             },
           },
@@ -442,17 +448,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [
-                {
-                  grok: {
-                    if: { always: {} },
-                    field: 'message',
+              processing: {
+                steps: [
+                  {
+                    action: 'grok',
+                    where: { always: {} },
+                    from: 'message',
                     patterns: [
                       '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                     ],
                   },
-                },
-              ],
+                ],
+              },
               classic: {},
             },
           },
@@ -476,7 +483,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               classic: {},
             },
           },
@@ -497,7 +506,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: { steps: [] },
               classic: {},
             },
           },
@@ -541,7 +550,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 description: '',
                 ingest: {
                   lifecycle: { inherit: {} },
-                  processing: [],
+                  processing: { steps: [] },
                   classic: {},
                 },
               },

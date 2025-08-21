@@ -91,7 +91,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               ...isAvailable('searchPlayground', {
                 id: 'searchPlayground',
                 title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-                  defaultMessage: 'Playground',
+                  defaultMessage: 'RAG Playground',
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',
@@ -123,7 +123,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               {
                 id: 'searchQueryRules',
                 title: i18n.translate('xpack.serverlessSearch.nav.relevance.searchQueryRules', {
-                  defaultMessage: 'Query Rules',
+                  defaultMessage: 'Query rules',
                 }),
                 link: 'searchQueryRules',
               },
@@ -132,7 +132,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 title: i18n.translate(
                   'xpack.serverlessSearch.nav.relevance.searchInferenceEndpoints',
                   {
-                    defaultMessage: 'Inference Endpoints',
+                    defaultMessage: 'Inference endpoints',
                   }
                 ),
                 link: 'searchInferenceEndpoints',

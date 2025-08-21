@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, ApmUserAgentFields } from './apm_fields';
+import type { ApmFields, ApmUserAgentFields } from './apm_fields';
 import { Entity } from '../entity';
 import { RumSpan } from './rum_span';
 import { RumTransaction } from './rum_transaction';

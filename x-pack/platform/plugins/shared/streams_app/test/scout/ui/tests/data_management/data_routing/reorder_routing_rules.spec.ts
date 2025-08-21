@@ -27,8 +27,7 @@ test.describe(
       for (const streamName of streamNames) {
         await apiServices.streams.forkStream('logs', streamName, {
           field: 'service.name',
-          value: streamName.split('.')[1],
-          operator: 'eq',
+          eq: streamName.split('.')[1],
         });
       }
 

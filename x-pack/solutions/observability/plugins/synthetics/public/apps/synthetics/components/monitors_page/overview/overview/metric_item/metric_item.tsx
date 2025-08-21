@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import { EuiPanel, EuiSpacer, EuiThemeComputed, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,8 +14,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import moment from 'moment';
 import React, { useState, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../../../plugin';
+import { MetricItemExtra } from './metric_item_extra';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
@@ -29,11 +31,10 @@ import {
 import { formatDuration } from '../../../../../utils/formatting';
 import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
-import { MetricItemExtra } from './metric_item_extra';
 import { MetricItemIcon } from './metric_item_icon';
-import { FlyoutParamProps } from '../types';
+import type { FlyoutParamProps } from '../types';
 
-const METRIC_ITEM_HEIGHT = 170;
+export const METRIC_ITEM_HEIGHT = 180;
 
 export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?: string) => {
   if (!isEnabled) {
@@ -59,6 +60,16 @@ export const getColor = (euiTheme: EuiThemeComputed, isEnabled: boolean, status?
         ? euiTheme.colors.vis.euiColorVisBehindText0
         : euiTheme.colors.backgroundBaseSuccess;
   }
+};
+
+const truncateText = (text: string) => {
+  // truncate from middle if longer than maxLength
+  const maxLength = 100;
+  if (text.length <= maxLength) {
+    return text;
+  }
+  const halfLength = Math.floor(maxLength / 2);
+  return `${text.slice(0, halfLength)}…${text.slice(-halfLength)}`;
 };
 
 export const MetricItem = ({
@@ -152,6 +163,9 @@ export const MetricItem = ({
             pointer-events: auto;
             opacity: 1;
           }
+          .echMetricText__body {
+            overflow: visible;
+          }
         `}
         title={moment(timestamp).format('LLL')}
       >
@@ -183,7 +197,7 @@ export const MetricItem = ({
             data={[
               [
                 {
-                  title: monitor.name,
+                  title: truncateText(monitor.name),
                   subtitle: locationName,
                   value: trendData !== 'loading' ? trendData?.median ?? 0 : 0,
                   trendShape: MetricTrendShape.Area,
@@ -199,12 +213,12 @@ export const MetricItem = ({
                         }}
                       />
                     ) : trendData === 'loading' ? (
-                      <div>
+                      <span>
                         <FormattedMessage
-                          defaultMessage="Loading metrics"
+                          defaultMessage="..."
                           id="xpack.synthetics.overview.metricItem.loadingMessage"
                         />
-                      </div>
+                      </span>
                     ) : undefined,
                   valueFormatter: (d: number) => formatDuration(d),
                   color: getColor(euiTheme, monitor.isEnabled, status),

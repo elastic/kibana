@@ -5,18 +5,16 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import {
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
   IngestStreamLifecycle,
   IngestStreamLifecycleDSL,
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
-  isDslLifecycle,
-  isIlmLifecycle,
-  isInheritLifecycle,
 } from '@kbn/streams-schema';
-import { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
-import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { IndicesSimulateTemplateTemplate } from '@elastic/elasticsearch/lib/api/types';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {

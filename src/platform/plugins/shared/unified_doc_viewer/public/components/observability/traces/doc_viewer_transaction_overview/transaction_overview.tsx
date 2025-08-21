@@ -8,7 +8,7 @@
  */
 
 import React, { useMemo, useRef } from 'react';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
@@ -146,17 +146,20 @@ export function TransactionOverview({
             )}
             <EuiFlexItem>
               {traceId && transactionId && (
-                <Trace
-                  fields={fieldConfigurations}
-                  fieldMappings={dataViewFields}
-                  traceId={traceId}
-                  docId={transactionId}
-                  displayType="transaction"
-                  dataView={dataView}
-                  tracesIndexPattern={indexes.apm.traces}
-                  showWaterfall={showWaterfall}
-                  showActions={showActions}
-                />
+                <>
+                  <EuiSpacer size="m" />
+                  <Trace
+                    fields={fieldConfigurations}
+                    fieldMappings={dataViewFields}
+                    traceId={traceId}
+                    docId={transactionId}
+                    displayType="transaction"
+                    dataView={dataView}
+                    tracesIndexPattern={indexes.apm.traces}
+                    showWaterfall={showWaterfall}
+                    showActions={showActions}
+                  />
+                </>
               )}
             </EuiFlexItem>
           </EuiFlexGroup>

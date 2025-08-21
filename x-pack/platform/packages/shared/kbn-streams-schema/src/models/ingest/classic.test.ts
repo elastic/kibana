@@ -17,7 +17,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       },
@@ -51,7 +53,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
         },
       },
@@ -69,7 +73,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {},
           wired: {},
         },
@@ -89,7 +95,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },
@@ -120,7 +126,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -154,7 +162,9 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         },
@@ -175,7 +185,7 @@ describe('ClassicStream', () => {
             lifecycle: {
               inherit: {},
             },
-            processing: [],
+            processing: { steps: [] },
             classic: {},
           },
         },

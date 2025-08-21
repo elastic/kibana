@@ -5,11 +5,12 @@
  * 2.0.
  */
 import { getFlattenedObject } from '@kbn/std';
-import { SampleDocument, fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
+import type { SampleDocument } from '@kbn/streams-schema';
+import { fieldDefinitionConfigSchema, Streams } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { SearchHit } from '@kbn/es-types';
-import { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { SearchHit } from '@kbn/es-types';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { MAX_PRIORITY } from '../../../../lib/streams/index_templates/generate_index_template';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -180,7 +181,8 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
-      _index: params.path.name,
+      // Direct writes to child streams are not allowed. This must be set to logs.
+      _index: 'logs',
       _id: hit._id,
       _source: Object.fromEntries(
         Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
