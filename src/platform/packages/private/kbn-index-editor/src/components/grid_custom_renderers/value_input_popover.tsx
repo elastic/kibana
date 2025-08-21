@@ -111,9 +111,9 @@ export const getValueInputPopover =
           <EuiForm component="form" onSubmit={onSubmit}>
             <EuiToolTip position="top" content={error}>
               <InputComponent
-                data-test-subj="cellValueInput"
+                data-test-subj="indexEditorCellValueInput"
                 value={inputValue}
-                aria-label={i18n.translate('indexEditor.cellValueInput.aria', {
+                aria-label={i18n.translate('indexEditor.indexEditorCellValueInput.aria', {
                   defaultMessage: 'Value for {columnId}',
                   values: { columnId },
                 })}

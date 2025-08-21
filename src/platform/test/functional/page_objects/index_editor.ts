@@ -8,7 +8,6 @@
  */
 
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class IndexEditorObject extends FtrService {
@@ -19,7 +18,7 @@ export class IndexEditorObject extends FtrService {
   private readonly es = this.ctx.getService('es');
 
   public async getColumnNames(): Promise<string[]> {
-    const columnHeaders = await this.testSubjects.findAll('columnNameButton');
+    const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
 
     const columnNames: string[] = [];
 
@@ -35,33 +34,33 @@ export class IndexEditorObject extends FtrService {
   }
 
   public async setColumnName(name: string, columnIndex: number) {
-    const columnHeaders = await this.testSubjects.findAll('columnNameButton');
+    const columnHeaders = await this.testSubjects.findAll('indexEditorindexEditorColumnNameButton');
     const columnHeader = columnHeaders[columnIndex];
 
     expect(columnHeader).to.not.be(undefined);
 
     await columnHeader.click();
-    await this.testSubjects.setValue('columnNameInput', name);
+    await this.testSubjects.setValue('indexEditorindexEditorColumnNameInput', name);
     await this.common.pressEnterKey();
   }
 
   public async addColumn(): Promise<void> {
-    await this.testSubjects.click('addColumnButton');
+    await this.testSubjects.click('indexEditorAddColumnButton');
   }
 
   public async deleteColumn(name: string): Promise<void> {
     await this.dataGrid.openColMenuByField(name);
-    await this.testSubjects.click('deleteColumnButton');
+    await this.testSubjects.click('indexEditorindexEditorDeleteColumnButton');
   }
 
   public async setCellValue(rowIndex: number, columnIndex: number, value: string): Promise<void> {
     await this.testSubjects.click(`indexEditorCellValue-${rowIndex}-${columnIndex}`);
-    await this.testSubjects.setValue('cellValueInput', value);
+    await this.testSubjects.setValue('indexEditorCellValueInput', value);
     await this.common.pressEnterKey();
   }
 
   public async addRow(): Promise<void> {
-    await this.testSubjects.click('addRowButton');
+    await this.testSubjects.click('indexEditorAddRowButton');
   }
 
   public async deleteRow(rowIndex: number): Promise<void> {
@@ -98,12 +97,8 @@ export class IndexEditorObject extends FtrService {
     await fileInput.type(filePath);
   }
 
-  public async getSearchBarInput(): Promise<WebElementWrapper> {
-    return await this.testSubjects.find('indexEditorQueryBar');
-  }
-
   public async search(query: string): Promise<void> {
-    const searchBar = await this.getSearchBarInput();
+    const searchBar = await this.testSubjects.find('indexEditorQueryBar');
     await searchBar.clearValue();
     await searchBar.type(query);
     await this.common.pressEnterKey();

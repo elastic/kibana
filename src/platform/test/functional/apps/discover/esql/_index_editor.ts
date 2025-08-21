@@ -81,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // Click Create lookup index suggestion
-      await monacoEditor.selectSuggestionByLabel(`Create lookup index "${INDEX_NAME_FILE}"`);
+      await esql.selectEsqlSuggestionByLabel(`Create lookup index "${INDEX_NAME_FILE}"`);
       await testSubjects.isDisplayed('lookupIndexFlyout');
 
       // Import a file
@@ -113,7 +113,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await monacoEditor.typeCodeEditorValue('from logstash-* | LOOKUP JOIN ', 'ESQLEditor');
 
       // Click Create lookup index suggestion
-      await monacoEditor.selectSuggestionByLabel('Create lookup index');
+      await esql.selectEsqlSuggestionByLabel('Create lookup index');
 
       // Set index name
       await testSubjects.setValue('indexNameInput', INDEX_NAME_MANUAL);
@@ -232,17 +232,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       // Hover the index badge and click on the edit option
-      await monacoEditor.selectBadgeHoverOption('lookupIndexBadge', 'Edit lookup index');
+      await esql.selectEsqlBadgeHoverOption('lookupIndexBadge', 'Edit lookup index');
 
       expect(await testSubjects.isDisplayed('lookupIndexFlyout')).to.be(true);
 
       expect((await dataGrid.getDocTableRows()).length).to.be(2);
 
       // Filter rows
-      /* await indexEditor.search('Elyssa');
-      expect((await dataGrid.getDocTableRows()).length).to.be(1);
+      await indexEditor.search('Elyssa');
+      await retry.try(async () => {
+        expect((await dataGrid.getDocTableRows()).length).to.be(1);
+      });
       await indexEditor.search('');
-      expect((await dataGrid.getDocTableRows()).length).to.be(2);*/
+      await retry.try(async () => {
+        expect((await dataGrid.getDocTableRows()).length).to.be(2);
+      });
 
       // Edit cell values
       await indexEditor.setCellValue(0, 1, 'Jasmin');

@@ -31,7 +31,7 @@ export const getColumnInputRenderer = (
       additional: !isPlaceholder
         ? [
             {
-              'data-test-subj': 'deleteColumnButton',
+              'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
               label: (
                 <FormattedMessage
                   id="indexEditor.flyout.grid.columnHeader.deleteAction"
@@ -98,7 +98,7 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
           anchorProps={{ css: { width: '100%' } }}
         >
           <EuiFieldText
-            data-test-subj="columnNameInput"
+            data-test-subj="indexEditorindexEditorColumnNameInput"
             value={columnName}
             autoFocus
             fullWidth
@@ -131,7 +131,7 @@ export const AddColumnHeader = ({ initialColumnName }: AddColumnHeaderProps) => 
 
   return (
     <EuiButtonEmpty
-      data-test-subj="columnNameButton"
+      data-test-subj="indexEditorindexEditorColumnNameButton"
       css={{
         color: euiTheme.colors.textSubdued,
         width: '100%',

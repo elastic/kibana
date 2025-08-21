@@ -49,7 +49,7 @@ export const RowColumnCreator = ({
     <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="addRowButton"
+          data-test-subj="indexEditorAddRowButton"
           onClick={toggleAddRow}
           iconType="plusInCircle"
           size="s"
@@ -61,7 +61,7 @@ export const RowColumnCreator = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonEmpty
-          data-test-subj="addColumnButton"
+          data-test-subj="indexEditorAddColumnButton"
           onClick={toggleAddColumn}
           iconType="plusInCircle"
           size="s"
