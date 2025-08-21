@@ -16,7 +16,6 @@ export type CasesActionContextProps = Pick<
   CasesContextProps,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
-  | 'attachmentSuggestionRegistry'
   | 'getFilesClient'
 >;
 

@@ -17,7 +17,6 @@ export type GetCasesProps = Omit<
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
   | 'getFilesClient'
-  | 'attachmentSuggestionRegistry'
 >;
 
 const CasesRoutesLazy: React.FC<CasesProps> = lazy(() => import('../../components/app/routes'));
@@ -39,7 +38,6 @@ export const getCasesLazy = ({
   features,
   releasePhase,
   renderAlertsTable,
-  attachmentSuggestionRegistry,
 }: GetCasesPropsInternal) => (
   <CasesProvider
     value={{
@@ -51,7 +49,6 @@ export const getCasesLazy = ({
       basePath,
       features,
       releasePhase,
-      attachmentSuggestionRegistry,
     }}
   >
     <Suspense fallback={<EuiLoadingSpinner />}>

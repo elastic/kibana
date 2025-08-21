@@ -15,7 +15,6 @@ export type GetCasesContextProps = Omit<
   CasesContextProps,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
-  | 'attachmentSuggestionRegistry'
   | 'getFilesClient'
 >;
 
@@ -27,7 +26,6 @@ const CasesProviderLazy: React.FC<{
 const CasesProviderLazyWrapper = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
-  attachmentSuggestionRegistry,
   owner,
   permissions,
   features,
@@ -40,7 +38,6 @@ const CasesProviderLazyWrapper = ({
       value={{
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
-        attachmentSuggestionRegistry,
         owner,
         permissions,
         features,
@@ -58,13 +55,11 @@ CasesProviderLazyWrapper.displayName = 'CasesProviderLazyWrapper';
 export const getCasesContextLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
-  attachmentSuggestionRegistry,
   getFilesClient,
 }: Pick<
   GetCasesContextPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
-  | 'attachmentSuggestionRegistry'
   | 'getFilesClient'
 >): (() => React.FC<PropsWithChildren<GetCasesContextProps>>) => {
   const CasesProviderLazyWrapperWithRegistry: React.FC<PropsWithChildren<GetCasesContextProps>> = ({
@@ -75,7 +70,6 @@ export const getCasesContextLazy = ({
       {...props}
       externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
       persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-      attachmentSuggestionRegistry={attachmentSuggestionRegistry}
       getFilesClient={getFilesClient}
     >
       {children}

@@ -15,7 +15,6 @@ import { APP_OWNER } from '../../../common/constants';
 import { getCasesLazy } from '../../client/ui/get_cases';
 import { useApplicationCapabilities } from '../../common/lib/kibana';
 import type { CasesRoutesProps } from './types';
-import type { AttachmentSuggestionRegistry } from '../../client/attachment_framework/suggestion_registry';
 
 export type CasesProps = CasesRoutesProps;
 
@@ -23,13 +22,11 @@ interface CasesAppProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
   getFilesClient: (scope: string) => ScopedFilesClient;
-  attachmentSuggestionRegistry: AttachmentSuggestionRegistry;
 }
 
 const CasesAppComponent: React.FC<CasesAppProps> = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
-  attachmentSuggestionRegistry,
   getFilesClient,
 }) => {
   const userCapabilities = useApplicationCapabilities();
@@ -39,7 +36,6 @@ const CasesAppComponent: React.FC<CasesAppProps> = ({
       {getCasesLazy({
         externalReferenceAttachmentTypeRegistry,
         persistableStateAttachmentTypeRegistry,
-        attachmentSuggestionRegistry,
         getFilesClient,
         owner: [APP_OWNER],
         useFetchAlertData: () => [false, {}],

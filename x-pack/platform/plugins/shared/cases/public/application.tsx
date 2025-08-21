@@ -18,7 +18,6 @@ import type { PersistableStateAttachmentTypeRegistry } from './client/attachment
 import type { RenderAppProps } from './types';
 
 import { CasesApp } from './components/app';
-import type { AttachmentSuggestionRegistry } from './client/attachment_framework/suggestion_registry';
 
 export const renderApp = (deps: RenderAppProps) => {
   const { mountParams } = deps;
@@ -34,7 +33,6 @@ export const renderApp = (deps: RenderAppProps) => {
 interface CasesAppWithContextProps {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  attachmentSuggestionRegistry: AttachmentSuggestionRegistry;
   getFilesClient: (scope: string) => ScopedFilesClient;
 }
 
@@ -42,14 +40,12 @@ const CasesAppWithContext: React.FC<CasesAppWithContextProps> = React.memo(
   ({
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
-    attachmentSuggestionRegistry,
     getFilesClient,
   }) => {
     return (
       <CasesApp
         externalReferenceAttachmentTypeRegistry={externalReferenceAttachmentTypeRegistry}
         persistableStateAttachmentTypeRegistry={persistableStateAttachmentTypeRegistry}
-        attachmentSuggestionRegistry={attachmentSuggestionRegistry}
         getFilesClient={getFilesClient}
       />
     );
@@ -77,7 +73,6 @@ export const App: React.FC<{ deps: RenderAppProps }> = ({ deps }) => {
             externalReferenceAttachmentTypeRegistry={deps.externalReferenceAttachmentTypeRegistry}
             persistableStateAttachmentTypeRegistry={deps.persistableStateAttachmentTypeRegistry}
             getFilesClient={pluginsStart.files.filesClientFactory.asScoped}
-            attachmentSuggestionRegistry={deps.attachmentSuggestionRegistry}
           />
         </Router>
       </KibanaContextProvider>

@@ -15,13 +15,11 @@ import { useCasesAddToNewCaseFlyout } from './use_cases_add_to_new_case_flyout';
 import { allCasesPermissions } from '../../../common/mock';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
-import { AttachmentSuggestionRegistry } from '../../../client/attachment_framework/suggestion_registry';
 
 jest.mock('../../../common/use_cases_toast');
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
 const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-const attachmentSuggestionRegistry = new AttachmentSuggestionRegistry();
 
 describe('use cases add to new case flyout hook', () => {
   const dispatch = jest.fn();
@@ -34,7 +32,6 @@ describe('use cases add to new case flyout hook', () => {
           value={{
             externalReferenceAttachmentTypeRegistry,
             persistableStateAttachmentTypeRegistry,
-            attachmentSuggestionRegistry,
             owner: ['test'],
             permissions: allCasesPermissions(),
             basePath: '/jest',

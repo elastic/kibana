@@ -33,14 +33,12 @@ import { casesContextReducer, getInitialCasesContextState } from './state/cases_
 import { CasesStateContext } from './state/cases_state_context';
 import { isRegisteredOwner } from '../../files';
 import { casesQueryClient } from './query_client';
-import type { AttachmentSuggestionRegistry } from '../../client/attachment_framework/suggestion_registry';
 
 type CasesContextValueDispatch = Dispatch<CasesContextStoreAction>;
 
 export interface CasesContextValue {
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  attachmentSuggestionRegistry: AttachmentSuggestionRegistry;
   owner: string[];
   permissions: CasesPermissions;
   basePath: string;
@@ -56,7 +54,6 @@ export interface CasesContextProps
     | 'permissions'
     | 'externalReferenceAttachmentTypeRegistry'
     | 'persistableStateAttachmentTypeRegistry'
-    | 'attachmentSuggestionRegistry'
   > {
   basePath?: string;
   features?: CasesFeatures;
@@ -76,7 +73,6 @@ export const CasesProvider: FC<
   value: {
     externalReferenceAttachmentTypeRegistry,
     persistableStateAttachmentTypeRegistry,
-    attachmentSuggestionRegistry,
     owner,
     permissions,
     basePath = DEFAULT_BASE_PATH,
@@ -92,7 +88,6 @@ export const CasesProvider: FC<
     () => ({
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
-      attachmentSuggestionRegistry,
       owner,
       permissions: {
         all: permissions.all,

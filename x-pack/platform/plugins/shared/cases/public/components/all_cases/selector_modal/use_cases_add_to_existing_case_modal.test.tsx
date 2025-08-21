@@ -22,7 +22,6 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachm
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
-import { AttachmentSuggestionRegistry } from '../../../client/attachment_framework/suggestion_registry';
 
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana/use_application');
@@ -56,7 +55,6 @@ const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
 const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
-const attachmentSuggestionRegistry = new AttachmentSuggestionRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
@@ -71,7 +69,6 @@ describe('use cases add to existing case modal hook', () => {
         value={{
           externalReferenceAttachmentTypeRegistry,
           persistableStateAttachmentTypeRegistry,
-          attachmentSuggestionRegistry,
           owner: ['test'],
           permissions: allCasesPermissions(),
           basePath: '/jest',

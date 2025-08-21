@@ -56,7 +56,6 @@ import type {
 } from '../common/types/api';
 
 import type { SupportedCaseAttachment } from '../common/types/domain';
-import type { AttachmentSuggestionRegistry } from './client/attachment_framework/suggestion_registry';
 
 export type {
   SupportedCaseAttachment,
@@ -113,7 +112,6 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
-  attachmentSuggestionRegistry: AttachmentSuggestionRegistry;
 }
 
 export interface CasesPublicSetup {
