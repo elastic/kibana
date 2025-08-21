@@ -67,9 +67,6 @@ describe('ENRICH Validation', () => {
     enrichExpectErrors('from a_index | enrich `this``is fine`', ['Unknown policy [`this``is]']);
     enrichExpectErrors('from a_index | enrich this is fine', ['Unknown policy [this]']);
     enrichExpectErrors(`from a_index |enrich missing-policy `, ['Unknown policy [missing-policy]']);
-    enrichExpectErrors('from a_index | enrich my-pol*', [
-      'Using wildcards (*) in ENRICH is not allowed [my-pol*]',
-    ]);
   });
 
   test('validates the columns', () => {

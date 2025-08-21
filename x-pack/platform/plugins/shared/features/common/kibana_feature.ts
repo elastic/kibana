@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { RecursiveReadonly } from '@kbn/utility-types';
-import { AppCategory } from '@kbn/core/types';
-import { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { FeatureKibanaPrivileges } from './feature_kibana_privileges';
-import { SubFeatureConfig, SubFeature as KibanaSubFeature } from './sub_feature';
-import { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
-import { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
+import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { AppCategory } from '@kbn/core/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { FeatureKibanaPrivileges } from './feature_kibana_privileges';
+import type { SubFeatureConfig } from './sub_feature';
+import { SubFeature as KibanaSubFeature } from './sub_feature';
+import type { ReservedKibanaPrivilege } from './reserved_kibana_privilege';
+import type { AlertingKibanaPrivilege } from './alerting_kibana_privilege';
 
 /**
  * Enum for allowed feature scope values.
@@ -159,6 +160,8 @@ export interface KibanaFeatureConfig {
    * Indicates whether the feature is available as a standalone feature. The feature can still be
    * referenced by other features, but it will not be displayed in any feature management UIs. By default, all features
    * are visible.
+   *
+   * @note This flag is designed for use via configuration overrides, and very select use cases. Please consult prior to use.
    */
   hidden?: boolean;
 

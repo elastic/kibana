@@ -11,12 +11,13 @@ import { access, link, unlink, chmod } from 'fs';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson } from '@kbn/repo-info';
 
-import { write, copyAll, mkdirp, exec, Config, Build } from '../../../lib';
+import type { Config, Build } from '../../../lib';
+import { write, copyAll, mkdirp, exec } from '../../../lib';
 import * as dockerTemplates from './templates';
-import { TemplateContext } from './template_context';
+import type { TemplateContext } from './template_context';
 import { bundleDockerFiles } from './bundle_dockerfiles';
 
 const accessAsync = promisify(access);
@@ -50,7 +51,7 @@ export async function runDockerGenerator(
    */
   if (flags.baseImage === 'wolfi')
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:1c4caa90ee9cf26c9143e44074f50ba9bb17636823bde4397751a5e0d846bfd6';
+      'docker.elastic.co/wolfi/chainguard-base:latest@sha256:442a5663000b3d66d565e61d400b30a4638383a72d90494cfc3104b34dfb3211';
 
   let imageFlavor = '';
   if (flags.baseImage === 'wolfi' && !flags.serverless && !flags.cloud) imageFlavor += `-wolfi`;
@@ -60,7 +61,7 @@ export async function runDockerGenerator(
   if (flags.fips) {
     imageFlavor += '-fips';
     baseImageName =
-      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:69f3df4cc5fd08b194a1a44dda2ff9f6665ac2b59063a2b2aedb8948ebd87f97';
+      'docker.elastic.co/wolfi/chainguard-base-fips:latest@sha256:9f7cb23b2e39892e66ad8355c5740f7529637b7d3dcf5dba62971a348b5120d3';
   }
 
   // General docker var config

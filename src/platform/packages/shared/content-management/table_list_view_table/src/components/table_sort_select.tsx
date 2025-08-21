@@ -9,21 +9,20 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiSelectableOption, Direction } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiPopover,
   EuiFilterButton,
-  EuiSelectableOption,
   EuiIcon,
-  Direction,
   EuiText,
   useEuiTheme,
   EuiIconTip,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
-import { State } from '../table_list_view_table';
+import type { State } from '../table_list_view_table';
 
 type SortItem = EuiSelectableOption & {
   column: SortColumnField;

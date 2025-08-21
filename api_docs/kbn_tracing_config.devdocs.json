@@ -36,14 +36,11 @@
           {
             "parentPluginId": "@kbn/tracing-config",
             "id": "def-common.TracingConfig.enabled",
-            "type": "CompoundType",
+            "type": "boolean",
             "tags": [],
             "label": "enabled",
             "description": [
               "\nWhether OpenTelemetry tracing is enabled."
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
             "deprecated": false,
@@ -75,7 +72,7 @@
               "InferenceTracingExportConfig",
               " | ",
               "InferenceTracingExportConfig",
-              "[] | undefined"
+              "[]"
             ],
             "path": "src/platform/packages/shared/kbn-tracing-config/src/types.ts",
             "deprecated": false,
