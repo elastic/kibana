@@ -19,7 +19,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { capitalize } from 'lodash';
 import { css } from '@emotion/react';
 import type { ComponentData } from '../../types';
 
@@ -82,7 +81,7 @@ export const DataSection = ({ componentData }: Props) => {
         </EuiText>
         <EuiText size="s">
           {iconType ? (
-            capitalize(iconType)
+            iconType
           ) : (
             <FormattedMessage
               id="kbnInspectComponent.inspectFlyout.noIconTypeFound"
