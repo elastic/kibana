@@ -49,7 +49,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [],
+            processing: {
+              steps: [],
+            },
             classic: {},
           },
         });
@@ -116,17 +118,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           description: '',
           ingest: {
             lifecycle: { inherit: {} },
-            processing: [
-              {
-                grok: {
-                  field: 'message',
-                  patterns: [
-                    '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                  ],
-                  if: { always: {} },
-                },
+            processing: {
+              steps: {
+                action: 'grok',
+                from: 'message',
+                patterns: [
+                  '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                ],
+                where: { always: {} },
               },
-            ],
+            },
             classic: {},
           },
         });

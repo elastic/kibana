@@ -30,7 +30,9 @@ describe('ClassicStream', () => {
           lifecycle: {
             inherit: {},
           },
-          processing: [],
+          processing: {
+            steps: [],
+          },
           classic: {
             field_overrides: {
               xxx: {
