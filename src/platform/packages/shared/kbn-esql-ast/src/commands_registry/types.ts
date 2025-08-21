@@ -13,7 +13,7 @@ import type {
   ESQLControlVariable,
   ESQLSourceResult,
 } from '@kbn/esql-types';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
@@ -127,7 +127,7 @@ export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
   getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
 }
 
 export interface ICommandContext {
@@ -235,6 +235,7 @@ const commandOptionNameToLocation: Record<string, Location> = {
   row: Location.ROW,
   sort: Location.SORT,
   stats: Location.STATS,
+  inlinestats: Location.STATS,
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,

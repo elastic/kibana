@@ -9,15 +9,11 @@
 
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { asyncMap } from '@kbn/std';
-import { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
-import {
-  ActionInternal,
-  Action,
-  ActionDefinition,
-  FrequentCompatibilityChangeAction,
-} from '../actions';
+import type { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
+import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
+import { ActionInternal } from '../actions';
 import { TriggerInternal } from '../triggers/trigger_internal';
-import { TriggerContract } from '../triggers/trigger_contract';
+import type { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
 
 export interface UiActionsServiceParams {

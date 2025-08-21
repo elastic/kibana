@@ -12,8 +12,8 @@
  */
 
 import { dynamic } from '@kbn/shared-ux-utility';
-import { ComponentType } from 'react';
-import { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
+import type { ComponentType } from 'react';
+import type { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
 
 export const IndexTemplateFlyout = dynamic<ComponentType<IndexTemplateFlyoutWithContextProps>>(() =>
   import('./index_template_flyout_with_context').then((mod) => ({

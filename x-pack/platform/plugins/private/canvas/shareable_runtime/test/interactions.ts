@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { getSettingsTrigger, getPortal, getContextMenuItems } from './selectors';
 import { waitFor } from './utils';
 

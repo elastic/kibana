@@ -24,8 +24,7 @@ describe('Workflows Service', () => {
 
   describe('createExternalService', () => {
     const actionId = 'test-action-id';
-    const config = {};
-    const secrets = {};
+
     const mockConfigurationUtilities = actionsConfigMock.create();
     const mockConnectorUsageCollector = {} as any;
 
@@ -34,7 +33,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -49,7 +47,6 @@ describe('Workflows Service', () => {
     it('should create external service without workflow service', () => {
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -63,8 +60,6 @@ describe('Workflows Service', () => {
 
   describe('runWorkflow', () => {
     const actionId = 'test-action-id';
-    const config = {};
-    const secrets = {};
     const mockConfigurationUtilities = actionsConfigMock.create();
     const mockConnectorUsageCollector = {} as any;
 
@@ -75,7 +70,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -85,6 +79,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -97,6 +92,7 @@ describe('Workflows Service', () => {
 
       expect(mockWorkflowService).toHaveBeenCalledWith(
         'test-workflow-id',
+        'default',
         { test: 'data' },
         mockRequest
       );
@@ -112,7 +108,6 @@ describe('Workflows Service', () => {
     it('should handle missing workflow service', async () => {
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -121,6 +116,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -140,7 +136,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -150,6 +145,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -167,7 +163,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -177,6 +172,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
         inputs: { test: 'data' },
       };
 
@@ -192,7 +188,6 @@ describe('Workflows Service', () => {
 
       const service = createExternalService(
         actionId,
-        { config, secrets },
         mockLogger,
         mockConfigurationUtilities,
         mockConnectorUsageCollector,
@@ -202,6 +197,7 @@ describe('Workflows Service', () => {
 
       const params = {
         workflowId: 'test-workflow-id',
+        spaceId: 'default',
       };
 
       const result = await service.runWorkflow(params);
@@ -211,7 +207,12 @@ describe('Workflows Service', () => {
         status: 'executed',
       });
 
-      expect(mockWorkflowService).toHaveBeenCalledWith('test-workflow-id', {}, mockRequest);
+      expect(mockWorkflowService).toHaveBeenCalledWith(
+        'test-workflow-id',
+        'default',
+        {},
+        mockRequest
+      );
     });
   });
 });

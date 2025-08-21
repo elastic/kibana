@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, useEuiTheme, IconType } from '@elastic/eui';
-import React, { ComponentProps, FC, ReactNode, useCallback } from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ScoutPage, test as baseTest, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
-import { SLOPageObjects, extendPageObjects } from './page_objects';
+import type { ScoutPage, ObltTestFixtures, ObltWorkerFixtures } from '@kbn/scout-oblt';
+import { test as baseTest } from '@kbn/scout-oblt';
+import type { SLOPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
 
 export interface StreamsTestFixtures extends ObltTestFixtures {
   pageObjects: SLOPageObjects;

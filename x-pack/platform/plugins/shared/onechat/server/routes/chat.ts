@@ -6,20 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { Observable, firstValueFrom, toArray } from 'rxjs';
-import { ServerSentEvent } from '@kbn/sse-utils';
+import type { Observable } from 'rxjs';
+import { firstValueFrom, toArray } from 'rxjs';
+import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream, cloudProxyBufferSize } from '@kbn/sse-utils-server';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
+import type { ConversationUpdatedEvent, ConversationCreatedEvent } from '@kbn/onechat-common';
 import {
-  AgentMode,
   oneChatDefaultAgentId,
   isRoundCompleteEvent,
   isConversationUpdatedEvent,
   isConversationCreatedEvent,
-  ConversationUpdatedEvent,
-  ConversationCreatedEvent,
 } from '@kbn/onechat-common';
-import { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
+import type { ChatRequestBodyPayload, ChatResponse } from '../../common/http_api/chat';
 import { apiPrivileges } from '../../common/features';
 import type { ChatService } from '../services/chat';
 import type { RouteDependencies } from './types';
@@ -38,15 +37,6 @@ export function registerChatRoutes({
 
   const conversePayloadSchema = schema.object({
     agent_id: schema.string({ defaultValue: oneChatDefaultAgentId }),
-    mode: schema.oneOf(
-      [
-        schema.literal(AgentMode.normal),
-        schema.literal(AgentMode.reason),
-        schema.literal(AgentMode.plan),
-        schema.literal(AgentMode.research),
-      ],
-      { defaultValue: AgentMode.normal }
-    ),
     connector_id: schema.maybe(schema.string()),
     conversation_id: schema.maybe(schema.string()),
     input: schema.string(),
@@ -65,7 +55,6 @@ export function registerChatRoutes({
   }) => {
     const {
       agent_id: agentId,
-      mode,
       connector_id: connectorId,
       conversation_id: conversationId,
       input,
@@ -73,7 +62,6 @@ export function registerChatRoutes({
 
     return chatService.converse({
       agentId,
-      mode,
       connectorId,
       conversationId,
       abortSignal,
@@ -183,10 +171,14 @@ export function registerChatRoutes({
 
         return response.ok({
           headers: {
-            'Content-Type': 'text/event-stream',
+            // cloud compress text/* types, loosing chunking capabilities which we need for SSE
+            'Content-Type': cloud?.isCloudEnabled
+              ? 'application/octet-stream'
+              : 'text/event-stream',
             'Cache-Control': 'no-cache',
             Connection: 'keep-alive',
             'Transfer-Encoding': 'chunked',
+            'X-Content-Type-Options': 'nosniff',
             // This disables response buffering on proxy servers
             'X-Accel-Buffering': 'no',
           },

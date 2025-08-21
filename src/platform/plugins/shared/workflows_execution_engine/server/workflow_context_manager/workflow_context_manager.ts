@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { WorkflowSchema } from '@kbn/workflows';
-import { z } from '@kbn/zod';
-import { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
+import type { graphlib } from '@dagrejs/dagre';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { WorkflowContext, WorkflowSchema } from '@kbn/workflows';
+import type { z } from '@kbn/zod';
+import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
+  spaceId: string;
   workflowRunId: string;
   workflow: z.infer<typeof WorkflowSchema>;
   event: any;
@@ -26,25 +27,27 @@ export interface ContextManagerInit {
 }
 
 export class WorkflowContextManager {
-  private context: Record<string, any>; // Make it strongly typed
+  // 'now' will be added by the templating engine
+  private context: Omit<WorkflowContext, 'now'>;
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(init: ContextManagerInit) {
     this.context = {
+      spaceId: init.spaceId,
       workflowRunId: init.workflowRunId,
-      workflow: init.workflow,
       event: init.event,
+      consts: init.workflow.consts || {},
+      steps: {},
     };
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
   }
 
-  public getContext(): Record<string, any> {
-    const stepContex: Record<string, any> = {
+  public getContext() {
+    const stepContext: WorkflowContext = {
       ...this.context,
-      steps: {},
     };
 
     const visited = new Set<string>();
@@ -52,15 +55,15 @@ export class WorkflowContextManager {
       if (visited.has(nodeId)) return;
       visited.add(nodeId);
 
-      stepContex.steps[nodeId] = {};
+      stepContext.steps[nodeId] = {};
       const stepResult = this.workflowExecutionRuntime.getStepResult(nodeId);
       if (stepResult) {
-        stepContex.steps[nodeId] = stepResult.output;
+        stepContext.steps[nodeId] = stepResult;
       }
 
       const stepState = this.workflowExecutionRuntime.getStepState(nodeId);
       if (stepState) {
-        stepContex.steps[nodeId] = stepState;
+        stepContext.steps[nodeId] = stepState;
       }
 
       const preds = this.workflowExecutionGraph.predecessors(nodeId) || [];
@@ -72,10 +75,25 @@ export class WorkflowContextManager {
     const directPredecessors = this.workflowExecutionGraph.predecessors(currentNodeId) || [];
     directPredecessors.forEach((nodeId) => collectPredecessors(nodeId));
 
-    return stepContex;
+    return stepContext;
   }
 
   public getContextKey(key: string): any {
-    return this.context[key];
+    return this.context[key as keyof typeof this.context];
+  }
+
+  public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
+    const propertyPathSegments = propertyPath.split('.');
+    let result: any = this.getContext();
+
+    for (const segment of propertyPathSegments) {
+      if (!(segment in result)) {
+        return { pathExists: false, value: undefined }; // Path not found in context
+      }
+
+      result = result[segment];
+    }
+
+    return { pathExists: true, value: result };
   }
 }
