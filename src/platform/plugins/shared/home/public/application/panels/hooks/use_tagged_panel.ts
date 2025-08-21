@@ -7,9 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { useFavoritesPanel } from './use_favorites_panel';
-export type { FavoritesPanelItem, UseFavoritesPanelReturn } from './use_favorites_panel';
-export { useRecentlyAccessedPanel } from './use_recently_accessed_panel';
-export type { UseRecentlyAccessedPanelOptions, UseRecentlyAccessedPanelReturn } from './use_recently_accessed_panel';
-export { useTaggedPanel } from './use_tagged_panel';
-export type { UseTaggedPanelOptions } from './use_tagged_panel';
+import { useTaggedItems } from '@kbn/content-management-table-list-view-common';
+
+export interface UseTaggedPanelOptions {
+  limit?: number;
+  tags?: string[];
+}
+
+export const useTaggedPanel = (options: UseTaggedPanelOptions = {}) => {
+  return useTaggedItems(options);
+};
