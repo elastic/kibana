@@ -118,6 +118,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
 
       const { savedObjects: results, statuses } = await api.fetchTableData({ appId: 'burguer' });
