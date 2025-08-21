@@ -30,6 +30,15 @@ import { fromQuery } from '../../shared/links/url_helpers';
 
 import { LatencyCorrelations } from './latency_correlations';
 
+jest.mock('../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: {
+      id: 'apm_0',
+      getIndexPattern: () => 'traces-*',
+    },
+  }),
+}));
+
 function Wrapper({
   children,
   dataSearchResponse,

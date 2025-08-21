@@ -26,6 +26,15 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 
 import { TransactionDistribution } from '.';
 
+jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
+  useAdHocApmDataView: () => ({
+    dataView: {
+      id: 'apm_0',
+      getIndexPattern: () => 'traces-*',
+    },
+  }),
+}));
+
 const coreMock = {
   settings: { client: { get: () => {} } },
 } as unknown as CoreStart;
