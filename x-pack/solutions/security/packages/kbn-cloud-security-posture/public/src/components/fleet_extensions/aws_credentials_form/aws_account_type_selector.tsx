@@ -11,13 +11,17 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ,
+  AWS_SINGLE_ACCOUNT_TEST_SUBJ,
+  AWS_ORGANIZATION_ACCOUNT,
+  AWS_SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import { updatePolicyWithInputs } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { AwsAccountType, UpdatePolicy } from '../types';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SINGLE_ACCOUNT } from '../constants';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
-import { AWS_ORGANIZATION_ACCOUNT_TEST_SUBJ, AWS_SINGLE_ACCOUNT_TEST_SUBJ } from '../test_subjects';
 
 const getAwsAccountType = (input: NewPackagePolicyInput): AwsAccountType | undefined =>
   input.streams[0].vars?.['aws.account_type']?.value;

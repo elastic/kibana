@@ -11,14 +11,17 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import {
+  AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
+  AWS_ORGANIZATION_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
 import type { CspRadioOption } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import { updatePolicyWithInputs } from '../utils';
 import { useAwsCredentialsForm } from './aws_hooks';
-import { AWS_ORGANIZATION_ACCOUNT, AWS_SETUP_FORMAT } from '../constants';
+import { AWS_SETUP_FORMAT } from '../constants';
 import { AwsInputVarFields } from './aws_input_var_fields';
-import { AWS_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS } from '../test_subjects';
 import { ReadDocumentation } from '../common';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';

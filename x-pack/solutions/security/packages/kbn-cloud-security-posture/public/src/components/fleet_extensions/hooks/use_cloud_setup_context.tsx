@@ -6,13 +6,13 @@
  */
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { CloudProviderConfig, CloudProviders } from '../types';
-import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
 import {
   AWS_PROVIDER_TEST_SUBJ,
   GCP_PROVIDER_TEST_SUBJ,
   AZURE_PROVIDER_TEST_SUBJ,
-} from '../test_subjects';
+} from '@kbn/cloud-security-posture-common';
+import type { CloudProviderConfig, CloudProviders } from '../types';
+import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from '../constants';
 import { CloudSetupContext } from '../cloud_setup_context';
 
 interface ICloudSetupProviderOptions {

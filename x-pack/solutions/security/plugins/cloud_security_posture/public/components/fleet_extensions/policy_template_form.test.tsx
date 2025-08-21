@@ -21,7 +21,7 @@ import {
   GCP_ORGANIZATION_ACCOUNT,
   GCP_PROVIDER_TEST_SUBJ,
   GCP_SINGLE_ACCOUNT,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import { CspPolicyTemplateForm } from './policy_template_form';
 import { TestProvider } from '../../test/test_provider';
 import {

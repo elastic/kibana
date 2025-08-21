@@ -10,12 +10,16 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ,
+  GCP_SINGLE_ACCOUNT_TEST_SUBJ,
+  GCP_ORGANIZATION_ACCOUNT,
+  GCP_SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
 import { updatePolicyWithInputs, gcpField, getGcpInputVarsFields } from '../utils';
 import type { CspRadioGroupProps } from '../../csp_boxed_radio_group';
 import { RadioGroup } from '../../csp_boxed_radio_group';
 import type { UpdatePolicy } from '../types';
-import { GCP_ORGANIZATION_ACCOUNT, GCP_SINGLE_ACCOUNT } from '../constants';
-import { GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ, GCP_SINGLE_ACCOUNT_TEST_SUBJ } from '../test_subjects';
 import { useCloudSetup } from '../hooks/use_cloud_setup_context';
 
 const getGcpAccountTypeOptions = (isGcpOrgDisabled: boolean): CspRadioGroupProps['options'] => [

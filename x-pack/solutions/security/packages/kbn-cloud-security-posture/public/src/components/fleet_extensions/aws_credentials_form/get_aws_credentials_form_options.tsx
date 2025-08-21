@@ -10,10 +10,10 @@ import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { AWS_INPUT_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import type { AwsCredentialsType, AwsInputFieldMapping } from '../types';
 import { AWS_CREDENTIALS_TYPE } from '../constants';
 import { getAwsCredentialsType } from '../utils';
-import { AWS_INPUT_TEST_SUBJECTS } from '../test_subjects';
 
 const AssumeRoleDescription = (
   <div>

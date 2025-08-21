@@ -17,8 +17,12 @@ import type {
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
 import {
+  AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ,
+  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
   ORGANIZATION_ACCOUNT,
   SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
+import {
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
   SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
   AWS_CREDENTIALS_TYPE,
@@ -43,10 +47,6 @@ import { AwsInputVarFields } from './aws_input_var_fields';
 import { AWSSetupInfoContent } from './aws_setup_info';
 import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 
-import {
-  AWS_CLOUD_FORMATION_ACCORDIAN_TEST_SUBJ,
-  AWS_LAUNCH_CLOUD_FORMATION_TEST_SUBJ,
-} from '../test_subjects';
 import { ReadDocumentation } from '../common';
 import { CloudFormationCloudCredentialsGuide } from './aws_cloud_formation_credential_guide';
 import type { UpdatePolicy } from '../types';

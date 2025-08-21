@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export const ORGANIZATION_ACCOUNT = 'organization-account';
-export const SINGLE_ACCOUNT = 'single-account';
-
 export const AWS_PROVIDER = 'aws';
 export const GCP_PROVIDER = 'gcp';
 export const AZURE_PROVIDER = 'azure';
@@ -32,8 +29,6 @@ export const AZURE_SETUP_FORMAT = {
   MANUAL: 'manual',
 };
 
-export const AZURE_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const AZURE_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
 export const AZURE_CREDENTIALS_TYPE = {
   ARM_TEMPLATE: 'arm_template',
   MANUAL: 'manual',
@@ -52,8 +47,7 @@ export const AWS_SETUP_FORMAT = {
   MANUAL: 'manual',
 };
 // AWS constants
-export const AWS_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const AWS_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
+
 export const AWS_CREDENTIALS_TYPE = {
   CLOUD_CONNECTORS: 'cloud_connectors',
   ASSUME_ROLE: 'assume_role',
@@ -76,8 +70,6 @@ export const GCP_SETUP_ACCESS = {
   MANUAL: 'manual',
 };
 
-export const GCP_SINGLE_ACCOUNT = SINGLE_ACCOUNT;
-export const GCP_ORGANIZATION_ACCOUNT = ORGANIZATION_ACCOUNT;
 export const GCP_CREDENTIALS_TYPE = {
   CREDENTIALS_FILE: 'credentials-file',
   CREDENTIALS_JSON: 'credentials-json',

@@ -17,6 +17,10 @@ import type { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/se
 import type { CloudSetup as ICloudSetup } from '@kbn/cloud-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
+import {
+  ADVANCED_OPTION_ACCORDION_TEST_SUBJ,
+  NAMESPACE_INPUT_TEST_SUBJ,
+} from '@kbn/cloud-security-posture-common';
 import type { CloudSetupConfig, UpdatePolicy } from './types';
 import { updatePolicyWithInputs, getDefaultCloudCredentialsType } from './utils';
 import { ProviderSelector } from './provider_selector';
@@ -34,7 +38,6 @@ import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
 import { CloudSetupProvider } from './cloud_setup_context';
 import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from './constants';
 import { useCloudSetup } from './hooks/use_cloud_setup_context';
-import { ADVANCED_OPTION_ACCORDION_TEST_SUBJ, NAMESPACE_INPUT_TEST_SUBJ } from './test_subjects';
 
 const EditScreenStepTitle = () => (
   <>

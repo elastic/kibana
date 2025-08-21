@@ -15,7 +15,7 @@ import {
   GCP_INPUT_FIELDS_TEST_SUBJECTS,
   AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ,
   AWS_INPUT_TEST_SUBJECTS,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '@kbn/fleet-plugin/public/services/setup_technology_selector';
 import { testSubjectIds } from '../constants/test_subject_ids';
 import type { FtrProviderContext } from '../ftr_provider_context';

@@ -14,11 +14,13 @@ import type {
 import type { SetupTechnology } from '@kbn/fleet-plugin/public';
 import type {
   AWS_ORGANIZATION_ACCOUNT,
-  AWS_SETUP_FORMAT,
   AWS_SINGLE_ACCOUNT,
   AZURE_ORGANIZATION_ACCOUNT,
-  AZURE_SETUP_FORMAT,
   AZURE_SINGLE_ACCOUNT,
+} from '@kbn/cloud-security-posture-common';
+import type {
+  AWS_SETUP_FORMAT,
+  AZURE_SETUP_FORMAT,
   AWS_PROVIDER,
   GCP_PROVIDER,
   AZURE_PROVIDER,

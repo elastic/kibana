@@ -12,7 +12,7 @@ import {
   GCP_ORGANIZATION_ACCOUNT_TEST_SUBJ,
   GCP_SINGLE_ACCOUNT_TEST_SUBJ,
   GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJECTS,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { policiesSavedObjects } from '../constants';
 

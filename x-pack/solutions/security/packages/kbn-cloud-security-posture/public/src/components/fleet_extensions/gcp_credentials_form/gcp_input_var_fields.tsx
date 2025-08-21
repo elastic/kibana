@@ -17,8 +17,8 @@ import {
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { GCP_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
 import { fieldIsInvalid, findVariableDef, gcpField } from '../utils';
-import { GCP_INPUT_FIELDS_TEST_SUBJECTS } from '../test_subjects';
 import { GCP_CREDENTIALS_TYPE } from '../constants';
 import type { GcpFields, GcpInputFields } from '../types';
 

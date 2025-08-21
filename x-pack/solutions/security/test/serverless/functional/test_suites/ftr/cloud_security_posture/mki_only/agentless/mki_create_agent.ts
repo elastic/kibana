@@ -10,7 +10,7 @@ import {
   AWS_PROVIDER_TEST_SUBJ,
   AWS_SINGLE_ACCOUNT_TEST_SUBJ,
   AWS_INPUT_TEST_SUBJECTS,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {

@@ -14,7 +14,7 @@ import {
   AWS_INPUT_TEST_SUBJECTS,
   ADVANCED_OPTION_ACCORDION_TEST_SUBJ,
   NAMESPACE_INPUT_TEST_SUBJ,
-} from '@kbn/cloud-security-posture';
+} from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { policiesSavedObjects } from '../constants';
 
