@@ -21,6 +21,7 @@ run(
     const paths = flagsReader.arrayOfStrings('path');
     const only = flagsReader.string('only') as 'traditional' | 'serverless' | undefined;
     const assertNoErrorIncrease = flagsReader.boolean('assert-no-error-increase');
+    const skipPrintingIssues = flagsReader.boolean('skip-printing-issues');
 
     if (only && only !== 'traditional' && only !== 'serverless') {
       log.error('Invalid value for --only flag, must be "traditional" or "serverless"');
@@ -84,10 +85,13 @@ run(
             errorCount = 1;
             errorMessage = result.errors;
           }
-          log.warning('Found the following issues\n\n' + errorMessage + '\n');
+
+          if (!skipPrintingIssues) {
+            log.warning('Found the following issues\n\n' + errorMessage + '\n');
+          }
+          errorCounts[yamlPath] = errorCount;
           log.warning(`Found ${chalk.bold(errorCount)} errors in ${chalk.underline(yamlPath)}`);
           invalidSpec = true;
-          errorCounts[yamlPath] = errorCount;
         } else {
           log.success(`${chalk.underline(yamlPath)} is valid`);
         }
@@ -146,13 +150,14 @@ run(
     description: 'Validate Kibana OAS YAML files (in oas_docs/output)',
     usage: 'node ./scripts/validate_oas_docs.js',
     flags: {
-      boolean: ['assert-no-error-increase', 'update-baseline'],
+      boolean: ['assert-no-error-increase', 'update-baseline', 'skip-printing-issues'],
       string: ['path', 'only'],
       help: `
       --assert-no-error-increase  Will error if the number of errors in the OAS spec compared to the baseline has increased. Cannot be combined with other flags.
       --update-baseline          Update or create the baseline file with current error counts.
       --path                     Pass in the (start of) a custom path to focus OAS validation error reporting, can be specified multiple times.
       --only                     Validate only OAS for the a specific offering, one of "traditional" or "serverless". Omitting this will validate all offerings.
+      --skip-printing-issues     Do not print the errors found in the OAS spec, only the count of errors.
 `,
       examples: `
 node ./scripts/validate_oas_docs.js
