@@ -39,6 +39,7 @@ export function Definition({ slo }: Props) {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
+  const hasNoData = slo.summary.status === 'NO_DATA';
 
   let IndicatorOverview = null;
   switch (slo.indicator.type) {
@@ -53,6 +54,22 @@ export function Definition({ slo }: Props) {
   return (
     <EuiPanel paddingSize="none" color="transparent" data-test-subj="definition">
       <EuiFlexGrid columns={isMobile ? 2 : 4} gutterSize="l" responsive={false}>
+        <DefinitionItem
+          title={i18n.translate('xpack.slo.sloDetails.overview.observedValueTitle', {
+            defaultMessage: 'Observed value',
+          })}
+          content={
+            <EuiText size="s">
+              {i18n.translate('xpack.slo.sloDetails.overview.observedValueSubtitle', {
+                defaultMessage: '{value} (objective is {objective})',
+                values: {
+                  value: hasNoData ? '-' : numeral(slo.summary.sliValue).format(percentFormat),
+                  objective: numeral(slo.objective.target).format(percentFormat),
+                },
+              })}
+            </EuiText>
+          }
+        />
         <DefinitionItem
           title={i18n.translate('xpack.slo.sloDetails.overview.indicatorTypeTitle', {
             defaultMessage: 'Indicator type',

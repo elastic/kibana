@@ -28,9 +28,6 @@ import { isApmIndicatorType } from '../../../utils/slo/indicator';
 import { EditBurnRateRuleFlyout } from '../../slos/components/common/edit_burn_rate_rule_flyout';
 import { useGetQueryParams } from '../hooks/use_get_query_params';
 import { useSloActions } from '../hooks/use_slo_actions';
-import { ManageLinkedDashboardsFlyout } from '../../../components/manage_linked_dashboards/manage_linked_dashboards_flyout';
-import type { Dashboard } from '../../../components/manage_linked_dashboards/types';
-import { useUpdateSlo } from '../../../hooks/use_update_slo';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -68,7 +65,6 @@ export function HeaderControl({ slo }: Props) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRuleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [isEditRuleFlyoutOpen, setIsEditRuleFlyoutOpen] = useState(false);
-  const [isManageLinkedDashboardsFlyoutOpen, setManageLinkedDashboardsFlyoutOpen] = useState(false);
 
   const { data: rulesBySlo, refetchRules } = useFetchRulesForSlo({
     sloIds: [slo.id],
@@ -76,14 +72,20 @@ export function HeaderControl({ slo }: Props) {
 
   const rules = rulesBySlo?.[slo.id] ?? [];
 
-  const { mutate: updateSlo } = useUpdateSlo();
-
   const handleActionsClick = () => setIsPopoverOpen((value) => !value);
   const closePopover = () => setIsPopoverOpen(false);
 
   const handleManageLinkedDashboards = () => {
-    setManageLinkedDashboardsFlyoutOpen(true);
+    //   // TODO: need to handle remote link with parameters to display the flyout
+    // if (!!remoteAddDashboardsUrl) {
+    //   window.open(remoteAddDashboardsUrl, '_blank');
+    // } else {
+    triggerAction({
+      type: 'add_dashboards',
+      item: slo,
+    });
     setIsPopoverOpen(false);
+    // TODO: handle removeAddDashboardsQueryParam();
   };
 
   const navigate = useCallback(
@@ -466,27 +468,6 @@ export function HeaderControl({ slo }: Props) {
           onSubmit={onCloseRuleFlyout}
           initialValues={{ name: `${slo.name} burn rate`, params: { sloId: slo.id } }}
           shouldUseRuleProducer
-        />
-      ) : null}
-      {isManageLinkedDashboardsFlyoutOpen ? (
-        <ManageLinkedDashboardsFlyout
-          assets={slo.assets}
-          onClose={() => {
-            setManageLinkedDashboardsFlyoutOpen(false);
-          }}
-          onSave={(dashboards: Dashboard[]) => {
-            updateSlo({
-              sloId: slo.id,
-              slo: {
-                assets: dashboards.map((dashboard) => ({
-                  type: 'dashboard',
-                  id: dashboard.id,
-                  label: dashboard.title,
-                })),
-              },
-            });
-            setManageLinkedDashboardsFlyoutOpen(false);
-          }}
         />
       ) : null}
     </>
