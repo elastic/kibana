@@ -978,16 +978,11 @@ export async function getAgentTemplateAssetsMap({
 export async function getPackageKnowledgeBase(options: {
   esClient: ElasticsearchClient;
   pkgName: string;
-  pkgVersion?: string;
 }): Promise<PackageKnowledgeBase | undefined> {
-  const { esClient, pkgName, pkgVersion } = options;
+  const { esClient, pkgName } = options;
 
   try {
-    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(
-      esClient,
-      pkgName,
-      pkgVersion
-    );
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
 
     if (knowledgeBaseItems.length === 0) {
       return undefined;
@@ -996,12 +991,15 @@ export async function getPackageKnowledgeBase(options: {
     // Use the installed_at timestamp from the first knowledge base item
     // All items for the same package should have the same installation timestamp
     const installedAt = knowledgeBaseItems[0]?.installed_at || new Date().toISOString();
+    const pkgVersion = knowledgeBaseItems[0]?.version;
 
     return {
-      package_name: pkgName,
-      version: pkgVersion || 'latest',
-      installed_at: installedAt,
-      knowledge_base_content: knowledgeBaseItems,
+      package: {
+        package_name: pkgName,
+        version: pkgVersion || 'unknown',
+        installed_at: installedAt,
+      },
+      items: knowledgeBaseItems,
     };
   } catch (error) {
     appContextService

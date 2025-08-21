@@ -41,11 +41,11 @@ describe('knowledge_base_index', () => {
   describe('saveKnowledgeBaseContentToIndex', () => {
     const mockKnowledgeBaseContent: KnowledgeBaseItem[] = [
       {
-        filename: 'test1.md',
+        fileName: 'test1.md',
         content: 'Test content 1',
       },
       {
-        filename: 'test2.md',
+        fileName: 'test2.md',
         content: 'Test content 2',
       },
     ];
@@ -176,44 +176,16 @@ describe('knowledge_base_index', () => {
 
       expect(result).toEqual([
         {
-          filename: 'test1.md',
+          fileName: 'test1.md',
           content: 'Test content 1',
           path: 'docs/knowledge_base/test1.md',
+          installed_at: undefined,
         },
         {
-          filename: 'test2.md',
+          fileName: 'test2.md',
           content: 'Test content 2',
           path: 'docs/knowledge_base/test2.md',
-        },
-      ]);
-    });
-
-    it('should retrieve knowledge base content by package name and version', async () => {
-      (mockEsClient.search as jest.Mock).mockResolvedValue(mockSearchResponse as any);
-
-      const result = await getPackageKnowledgeBaseFromIndex(mockEsClient, 'test-package', '1.0.0');
-
-      expect(mockEsClient.search).toHaveBeenCalledWith({
-        index: INTEGRATION_KNOWLEDGE_INDEX,
-        query: {
-          bool: {
-            must: [{ term: { package_name: 'test-package' } }, { term: { version: '1.0.0' } }],
-          },
-        },
-        sort: [{ filename: 'asc' }],
-        size: 1000,
-      });
-
-      expect(result).toEqual([
-        {
-          filename: 'test1.md',
-          content: 'Test content 1',
-          path: 'docs/knowledge_base/test1.md',
-        },
-        {
-          filename: 'test2.md',
-          content: 'Test content 2',
-          path: 'docs/knowledge_base/test2.md',
+          installed_at: undefined,
         },
       ]);
     });
@@ -268,7 +240,7 @@ describe('knowledge_base_index', () => {
   describe('updatePackageKnowledgeBaseVersion', () => {
     const mockKnowledgeBaseContent: KnowledgeBaseItem[] = [
       {
-        filename: 'updated.md',
+        fileName: 'updated.md',
         content: 'Updated content',
       },
     ];

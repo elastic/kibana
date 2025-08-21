@@ -51,7 +51,7 @@ export const DATASTREAM_LIFECYCLE_NAME = 'lifecycle.yml';
 
 export const KIBANA_FOLDER_NAME = 'kibana';
 export const TAGS_NAME = 'tags.yml';
-
+export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 const DEFAULT_RELEASE_VALUE = 'ga';
 
 // Ingest pipelines are specified in a `data_stream/<name>/elasticsearch/ingest_pipeline/` directory where a `default`
@@ -156,8 +156,7 @@ export function filterAssetPathForParseAndVerifyArchive(assetPath: string): bool
   );
 
   // Check for knowledge base markdown files
-  const isKnowledgeBaseFile =
-    assetPath.includes('/docs/knowledge_base/') && assetPath.endsWith('.md');
+  const isKnowledgeBaseFile = assetPath.includes(KNOWLEDGE_BASE_PATH) && assetPath.endsWith('.md');
 
   return isSpecificAsset || isKnowledgeBaseFile;
 }
@@ -793,9 +792,8 @@ export function extractKnowledgeBaseFiles(
   pkgName: string,
   pkgVersion: string
 ): KnowledgeBaseItem[] | null {
-  const knowledgeBasePrefix = `${pkgName}-${pkgVersion}/docs/knowledge_base/`;
   const knowledgeBasePaths = paths.filter(
-    (p) => p.startsWith(knowledgeBasePrefix) && p.endsWith('.md')
+    (p) => p.includes(KNOWLEDGE_BASE_PATH) && p.endsWith('.md')
   );
 
   if (knowledgeBasePaths.length === 0) {
@@ -805,10 +803,15 @@ export function extractKnowledgeBaseFiles(
   return knowledgeBasePaths.map((p) => {
     const buffer = assetsMap[p];
     const content = buffer ? buffer.toString('utf8') : '';
-    const filename = p.substring(knowledgeBasePrefix.length);
+    const knowledgeBaseIndex = p.indexOf(KNOWLEDGE_BASE_PATH);
+    // remove the leading path (docs/knowledge_base/) so we arent storing it in the field in ES
+    const fileName =
+      knowledgeBaseIndex >= 0
+        ? p.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length)
+        : path.basename(p);
 
     return {
-      filename,
+      fileName,
       content,
     };
   });

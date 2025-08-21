@@ -367,20 +367,18 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(res.body).to.have.property('package_name');
-        expect(res.body).to.have.property('version');
-        expect(res.body).to.have.property('installed_at');
-        expect(res.body).to.have.property('knowledge_base_content');
-        expect(res.body.package_name).to.equal(testPkgName);
-        expect(res.body.knowledge_base_content).to.be.an('array');
-        expect(res.body.knowledge_base_content).to.have.length(2);
+        expect(res.body).to.have.property('package.package_name');
+        expect(res.body).to.have.property('package.version');
+        expect(res.body).to.have.property('package.installed_at');
+        expect(res.body).to.have.property('items');
+        expect(res.body.package.package_name).to.equal(testPkgName);
+        expect(res.body.items).to.be.an('array');
+        expect(res.body.items).to.have.length(2);
 
         // Verify the content structure
-        const overviewDoc = res.body.knowledge_base_content.find(
-          (item: any) => item.filename === 'overview.md'
-        );
-        const troubleshootingDoc = res.body.knowledge_base_content.find(
-          (item: any) => item.filename === 'troubleshooting.md'
+        const overviewDoc = res.body.items.find((item: any) => item.fileName === 'overview.md');
+        const troubleshootingDoc = res.body.items.find(
+          (item: any) => item.fileName === 'troubleshooting.md'
         );
 
         expect(overviewDoc).to.not.be(undefined);
@@ -407,16 +405,16 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // Validate response structure matches schema
-        expect(res.body.package_name).to.be.a('string');
-        expect(res.body.version).to.be.a('string');
-        expect(res.body.installed_at).to.be.a('string');
-        expect(res.body.knowledge_base_content).to.be.an('array');
+        expect(res.body.package.package_name).to.be.a('string');
+        expect(res.body.package.version).to.be.a('string');
+        expect(res.body.package.installed_at).to.be.a('string');
+        expect(res.body.items).to.be.an('array');
 
         // Validate knowledge base content items structure
-        res.body.knowledge_base_content.forEach((item: any) => {
-          expect(item).to.have.property('filename');
+        res.body.items.forEach((item: any) => {
+          expect(item).to.have.property('fileName');
           expect(item).to.have.property('content');
-          expect(item.filename).to.be.a('string');
+          expect(item.fileName).to.be.a('string');
           expect(item.content).to.be.a('string');
         });
 

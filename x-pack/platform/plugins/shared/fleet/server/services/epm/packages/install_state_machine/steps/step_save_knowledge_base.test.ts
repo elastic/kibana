@@ -32,11 +32,11 @@ describe('saveKnowledgeBaseContent', () => {
   it('should save knowledge base content to the system index', async () => {
     const knowledgeBaseContent = [
       {
-        filename: 'test-guide.md',
+        fileName: 'test-guide.md',
         content: '# Test Guide\n\nThis is a test knowledge base document.',
       },
       {
-        filename: 'troubleshooting.md',
+        fileName: 'troubleshooting.md',
         content: '# Troubleshooting\n\nCommon issues and solutions.',
       },
     ];

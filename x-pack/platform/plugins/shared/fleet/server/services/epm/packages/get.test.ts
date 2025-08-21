@@ -1533,16 +1533,18 @@ owner: elastic`,
       const mockInstalledAt = '2023-01-01T00:00:00.000Z';
       const mockKnowledgeBaseItems = [
         {
-          filename: 'setup.md',
+          fileName: 'setup.md',
           content: 'Setup instructions for nginx package',
           path: 'docs/knowledge_base/setup.md',
           installed_at: mockInstalledAt,
+          version: '1.0.0',
         },
         {
-          filename: 'troubleshooting.md',
+          fileName: 'troubleshooting.md',
           content: 'Common troubleshooting steps',
           path: 'docs/knowledge_base/troubleshooting.md',
           installed_at: mockInstalledAt,
+          version: '1.0.0',
         },
       ];
 
@@ -1553,34 +1555,35 @@ owner: elastic`,
       const result = await getPackageKnowledgeBase({
         esClient,
         pkgName: 'nginx',
-        pkgVersion: '1.0.0',
       });
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx',
-        '1.0.0'
+        'nginx'
       );
 
       expect(result).toEqual({
-        package_name: 'nginx',
-        version: '1.0.0',
-        installed_at: mockInstalledAt,
-        knowledge_base_content: mockKnowledgeBaseItems,
+        package: {
+          package_name: 'nginx',
+          version: '1.0.0',
+          installed_at: mockInstalledAt,
+        },
+        items: mockKnowledgeBaseItems,
       });
 
       // Validate that installed_at matches the expected timestamp
-      expect(result!.installed_at).toBe(mockInstalledAt);
+      expect(result!.package.installed_at).toBe(mockInstalledAt);
     });
 
-    it('should return knowledge base content with latest version when pkgVersion is not provided', async () => {
+    it('should return knowledge base content with latest version', async () => {
       const mockInstalledAt = '2023-01-01T00:00:00.000Z';
       const mockKnowledgeBaseItems = [
         {
-          filename: 'setup.md',
+          fileName: 'setup.md',
           content: 'Setup instructions for nginx package',
           path: 'docs/knowledge_base/setup.md',
           installed_at: mockInstalledAt,
+          version: '1.2.0',
         },
       ];
 
@@ -1595,15 +1598,17 @@ owner: elastic`,
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx',
-        undefined
+        'nginx'
       );
 
       expect(result).toEqual({
-        package_name: 'nginx',
-        version: 'latest',
-        installed_at: mockInstalledAt,
-        knowledge_base_content: mockKnowledgeBaseItems,
+        package: {
+          package_name: 'nginx',
+          version: '1.2.0',
+          installed_at: mockInstalledAt,
+        },
+
+        items: mockKnowledgeBaseItems,
       });
     });
 
@@ -1613,13 +1618,11 @@ owner: elastic`,
       const result = await getPackageKnowledgeBase({
         esClient,
         pkgName: 'nginx',
-        pkgVersion: '1.0.0',
       });
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx',
-        '1.0.0'
+        'nginx'
       );
 
       expect(result).toBeUndefined();
@@ -1637,13 +1640,11 @@ owner: elastic`,
       const result = await getPackageKnowledgeBase({
         esClient,
         pkgName: 'nginx',
-        pkgVersion: '1.0.0',
       });
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        'nginx',
-        '1.0.0'
+        'nginx'
       );
 
       expect(mockLogger.warn).toHaveBeenCalledWith(
@@ -1662,44 +1663,14 @@ owner: elastic`,
       const result = await getPackageKnowledgeBase({
         esClient,
         pkgName: '',
-        pkgVersion: '1.0.0',
       });
 
       expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
         esClient,
-        '',
-        '1.0.0'
+        ''
       );
 
       expect(result).toBeUndefined();
-    });
-
-    it('should pass through version parameter correctly when provided', async () => {
-      const mockKnowledgeBaseItems = [
-        {
-          filename: 'changelog.md',
-          content: 'Version 2.0.0 changes',
-          path: 'docs/knowledge_base/changelog.md',
-        },
-      ];
-
-      mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockResolvedValue(
-        mockKnowledgeBaseItems
-      );
-
-      const result = await getPackageKnowledgeBase({
-        esClient,
-        pkgName: 'nginx',
-        pkgVersion: '2.0.0',
-      });
-
-      expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
-        esClient,
-        'nginx',
-        '2.0.0'
-      );
-
-      expect(result?.version).toBe('2.0.0');
     });
   });
 });

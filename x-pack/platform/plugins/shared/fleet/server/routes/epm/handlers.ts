@@ -651,7 +651,7 @@ export const getInputsHandler: FleetRequestHandler<
 };
 
 export const getKnowledgeBaseHandler: FleetRequestHandler<
-  TypeOf<typeof GetKnowledgeBaseRequestSchema.query>
+  TypeOf<typeof GetKnowledgeBaseRequestSchema.params>
 > = async (context, request, response) => {
   const { pkgName } = request.params;
   const esClient = (await context.core).elasticsearch.client.asInternalUser;

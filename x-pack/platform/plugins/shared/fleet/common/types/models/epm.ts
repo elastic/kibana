@@ -810,17 +810,21 @@ export interface IndexTemplateEntry {
 }
 
 export interface KnowledgeBaseItem {
-  filename: string;
+  fileName: string;
   content: string;
   path?: string;
   installed_at?: string;
+  version?: string;
 }
 
 export interface PackageKnowledgeBase {
-  package_name: string;
-  version: string;
-  installed_at: string;
-  knowledge_base_content: KnowledgeBaseItem[];
+  package: {
+    package_name: string;
+    version: string;
+    installed_at: string;
+  };
+
+  items: KnowledgeBaseItem[];
 }
 
 // Experimental support for Otel integrations

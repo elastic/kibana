@@ -369,11 +369,17 @@ export const registerRoutes = (router: FleetAuthzRouter, config: FleetConfigType
           fleetAuthz,
           getRouteRequiredAuthz('get', EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN)
         ).granted,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route uses Fleet authorization via fleetAuthz instead of standard Kibana authorization',
+        },
+      },
       summary: `Get all knowledge base content for a package`,
       options: {
         tags: ['internal', 'oas-tag:Elastic Package Manager (EPM)'],
       },
-      security: READ_PACKAGE_INFO_SECURITY,
       access: 'internal',
     })
     .addVersion(

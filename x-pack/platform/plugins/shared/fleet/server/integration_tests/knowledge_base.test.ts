@@ -109,12 +109,12 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     // Mock knowledge base content from package
     const knowledgeBaseContent: KnowledgeBaseItem[] = [
       {
-        filename: 'setup-guide.md',
+        fileName: 'setup-guide.md',
         content:
           '# Setup Guide\n\nThis guide helps you set up the integration.\n\n## Prerequisites\n\n- Node.js 16+\n- Elasticsearch cluster',
       },
       {
-        filename: 'troubleshooting.md',
+        fileName: 'troubleshooting.md',
         content:
           '# Troubleshooting\n\n## Common Issues\n\n### Connection Problems\n\nIf you experience connection issues, check your network settings.',
       },
@@ -135,26 +135,25 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
       esClient,
       pkgName: 'test-integration',
-      pkgVersion: '1.2.0',
     });
 
     // Verify that the retrieved content matches what was saved
     expect(retrievedKnowledgeBase).toBeDefined();
-    expect(retrievedKnowledgeBase?.package_name).toBe('test-integration');
-    expect(retrievedKnowledgeBase?.version).toBe('1.2.0');
-    expect(retrievedKnowledgeBase?.knowledge_base_content).toHaveLength(2);
+    expect(retrievedKnowledgeBase?.package.package_name).toBe('test-integration');
+    expect(retrievedKnowledgeBase?.package.version).toBe('1.2.0');
+    expect(retrievedKnowledgeBase?.items).toHaveLength(2);
 
     // Check the first knowledge base item
-    const setupGuide = retrievedKnowledgeBase?.knowledge_base_content.find(
-      (item) => item.filename === 'setup-guide.md'
+    const setupGuide = retrievedKnowledgeBase?.items.find(
+      (item) => item.fileName === 'setup-guide.md'
     );
     expect(setupGuide).toBeDefined();
     expect(setupGuide?.content).toContain('Setup Guide');
     expect(setupGuide?.content).toContain('Prerequisites');
 
     // Check the second knowledge base item
-    const troubleshooting = retrievedKnowledgeBase?.knowledge_base_content.find(
-      (item) => item.filename === 'troubleshooting.md'
+    const troubleshooting = retrievedKnowledgeBase?.items.find(
+      (item) => item.fileName === 'troubleshooting.md'
     );
     expect(troubleshooting).toBeDefined();
     expect(troubleshooting?.content).toContain('Troubleshooting');
@@ -176,7 +175,6 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     const retrievedKnowledgeBase = await getPackageKnowledgeBase({
       esClient,
       pkgName: 'simple-package',
-      pkgVersion: '1.0.0',
     });
 
     expect(retrievedKnowledgeBase).toBeUndefined();
@@ -191,7 +189,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     // Mock knowledge base content for version 1.0.0
     const knowledgeBaseContentV1: KnowledgeBaseItem[] = [
       {
-        filename: 'old-guide.md',
+        fileName: 'old-guide.md',
         content: '# Old Guide\n\nThis is the old version of the guide.',
       },
     ];
@@ -199,11 +197,11 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     // Mock knowledge base content for version 2.0.0
     const knowledgeBaseContentV2: KnowledgeBaseItem[] = [
       {
-        filename: 'new-guide.md',
+        fileName: 'new-guide.md',
         content: '# New Guide\n\nThis is the updated version of the guide.',
       },
       {
-        filename: 'features.md',
+        fileName: 'features.md',
         content: '# New Features\n\nNew features in version 2.0.0.',
       },
     ];
@@ -223,10 +221,9 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     const v1Result = await getPackageKnowledgeBase({
       esClient,
       pkgName: 'test-package',
-      pkgVersion: '1.0.0',
     });
-    expect(v1Result?.knowledge_base_content).toHaveLength(1);
-    expect(v1Result?.knowledge_base_content[0].filename).toBe('old-guide.md');
+    expect(v1Result?.items).toHaveLength(1);
+    expect(v1Result?.items[0].fileName).toBe('old-guide.md');
 
     // Step 2: Upgrade to version 2.0.0 using the upgrade function
     await updatePackageKnowledgeBaseVersion({
@@ -244,7 +241,6 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     const oldVersionResult = await getPackageKnowledgeBase({
       esClient,
       pkgName: 'test-package',
-      pkgVersion: '1.0.0',
     });
     expect(oldVersionResult).toBeUndefined();
 
@@ -252,18 +248,13 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     const newVersionResult = await getPackageKnowledgeBase({
       esClient,
       pkgName: 'test-package',
-      pkgVersion: '2.0.0',
     });
-    expect(newVersionResult?.knowledge_base_content).toHaveLength(2);
+    expect(newVersionResult?.items).toHaveLength(2);
 
-    const newGuide = newVersionResult?.knowledge_base_content.find(
-      (item) => item.filename === 'new-guide.md'
-    );
+    const newGuide = newVersionResult?.items.find((item) => item.fileName === 'new-guide.md');
     expect(newGuide?.content).toContain('New Guide');
 
-    const features = newVersionResult?.knowledge_base_content.find(
-      (item) => item.filename === 'features.md'
-    );
+    const features = newVersionResult?.items.find((item) => item.fileName === 'features.md');
     expect(features?.content).toContain('New Features');
   });
 });

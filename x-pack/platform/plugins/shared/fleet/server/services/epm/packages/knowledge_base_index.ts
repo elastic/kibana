@@ -11,6 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KnowledgeBaseItem } from '../../../../common/types';
 import { appContextService } from '../../app_context';
 import { retryTransientEsErrors } from '../elasticsearch/retry';
+import { KNOWLEDGE_BASE_PATH } from '../archive/parse';
 
 export const INTEGRATION_KNOWLEDGE_INDEX = '.integration_knowledge';
 export const DEFAULT_SIZE = 1000; // Set a reasonable default size for search results
@@ -38,13 +39,13 @@ export async function saveKnowledgeBaseContentToIndex({
   const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
-    const docId = `${pkgName}-${item.filename}`;
+    const docId = `${pkgName}-${item.fileName}`;
 
     operations.push(
       { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: docId } },
       {
         package_name: pkgName,
-        filename: item.filename,
+        filename: item.fileName,
         content: item.content,
         version: pkgVersion,
         installed_at: installedAt,
@@ -96,9 +97,9 @@ export async function getPackageKnowledgeBaseFromIndex(
     });
 
     return response.hits.hits.map((hit: any) => ({
-      filename: hit._source.filename,
+      fileName: hit._source.filename,
       content: hit._source.content,
-      path: `docs/knowledge_base/${hit._source.filename}`,
+      path: `${KNOWLEDGE_BASE_PATH}${hit._source.filename}`,
       installed_at: hit._source.installed_at,
     }));
   } catch (error) {
@@ -167,13 +168,13 @@ export async function updatePackageKnowledgeBaseVersion({
   const installedAt = new Date().toISOString();
 
   for (const item of knowledgeBaseContent) {
-    const docId = `${pkgName}-${item.filename}`;
+    const docId = `${pkgName}-${item.fileName}`;
 
     operations.push(
       { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: docId } },
       {
         package_name: pkgName,
-        filename: item.filename,
+        filename: item.fileName,
         content: item.content,
         version: newVersion,
         installed_at: installedAt,

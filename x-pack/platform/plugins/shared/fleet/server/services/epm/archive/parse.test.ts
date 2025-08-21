@@ -874,7 +874,7 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'test-package', '1.0.0');
     expect(result).toEqual([
       {
-        filename: 'guide.md',
+        fileName: 'guide.md',
         content,
       },
     ]);
@@ -903,15 +903,15 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'test-package', '1.0.0');
     expect(result).toEqual([
       {
-        filename: 'overview.md',
+        fileName: 'overview.md',
         content: overviewContent,
       },
       {
-        filename: 'troubleshooting.md',
+        fileName: 'troubleshooting.md',
         content: troubleshootingContent,
       },
       {
-        filename: 'advanced.md',
+        fileName: 'advanced.md',
         content: advancedContent,
       },
     ]);
@@ -927,7 +927,7 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'test-package', '1.0.0');
     expect(result).toEqual([
       {
-        filename: 'guide.md',
+        fileName: 'guide.md',
         content: '', // Should default to empty string when buffer is missing
       },
     ]);
@@ -945,7 +945,7 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'test-package', '1.0.0');
     expect(result).toEqual([
       {
-        filename: 'empty.md',
+        fileName: 'empty.md',
         content: '',
       },
     ]);
@@ -970,7 +970,7 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'test-package', '1.0.0');
     expect(result).toEqual([
       {
-        filename: 'guide.md',
+        fileName: 'guide.md',
         content,
       },
     ]);
@@ -989,7 +989,7 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'my-custom-integration', '2.5.3');
     expect(result).toEqual([
       {
-        filename: 'setup.md',
+        fileName: 'setup.md',
         content,
       },
     ]);
@@ -1009,7 +1009,7 @@ describe('extractKnowledgeBaseFiles', () => {
     const result = extractKnowledgeBaseFiles(paths, assetsMap, 'test-package', '1.0.0');
     expect(result).toEqual([
       {
-        filename: 'unicode.md',
+        fileName: 'unicode.md',
         content: unicodeContent,
       },
     ]);

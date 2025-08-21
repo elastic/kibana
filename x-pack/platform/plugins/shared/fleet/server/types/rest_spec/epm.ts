@@ -325,10 +325,12 @@ export const GetInfoResponseSchema = schema.object({
   metadata: schema.maybe(PackageMetadataSchema),
 });
 export const GetKnowledgeBaseResponseSchema = schema.object({
-  package_name: schema.string(),
-  version: schema.string(),
-  installed_at: schema.string(),
-  knowledge_base_content: schema.arrayOf(
+  package: schema.object({
+    package_name: schema.string(),
+    version: schema.string(),
+    installed_at: schema.string(),
+  }),
+  items: schema.arrayOf(
     schema.object({
       filename: schema.string(),
       content: schema.string(),
@@ -516,7 +518,7 @@ export const GetInfoRequestSchema = {
   }),
 };
 export const GetKnowledgeBaseRequestSchema = {
-  query: schema.object({
+  params: schema.object({
     pkgName: schema.string(),
   }),
 };
