@@ -267,6 +267,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) =
         field: name,
         name,
         dataType: 'auto',
+        truncateText: { lines: 2 },
       };
     });
   }, [columnNames]);
@@ -302,7 +303,14 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) =
           <EuiSpacer size={'s'} />
         </>
       ) : null}
-      {filePreview.sampleDocs?.length ? <EuiBasicTable columns={columns} items={items} /> : null}
+      {filePreview.sampleDocs?.length ? (
+        <EuiBasicTable
+          tableLayout="auto"
+          columns={columns}
+          items={items}
+          css={{ overflow: 'auto' }}
+        />
+      ) : null}
     </>
   );
 };
