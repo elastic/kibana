@@ -17,7 +17,6 @@ import {
   alertRuleTrigger,
 } from '@kbn/ui-actions-browser/src/triggers';
 import { UiActionsService } from '@kbn/ui-actions-browser/src/service';
-import { setAnalytics, setI18n, setNotifications, setTheme, setUserProfile } from './services';
 
 export type UiActionsPublicSetup = Pick<
   UiActionsService,
@@ -62,11 +61,6 @@ export class UiActionsPlugin
   }
 
   public start(core: CoreStart): UiActionsPublicStart {
-    setAnalytics(core.analytics);
-    setI18n(core.i18n);
-    setNotifications(core.notifications);
-    setTheme(core.theme);
-    setUserProfile(core.userProfile);
     this.service.start(core);
     return this.service;
   }
