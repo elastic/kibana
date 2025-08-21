@@ -15,7 +15,7 @@
 # from requests it receives, and to prevent a deprecation warning at startup.
 # This setting cannot end in a slash.
 #server.basePath: ""
-
+server.host: 0.0.0.0
 # Specifies whether Kibana should rewrite requests that are prefixed with
 # `server.basePath` or require that they are rewritten by your reverse proxy.
 # Defaults to `false`.

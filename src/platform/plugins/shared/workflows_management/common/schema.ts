@@ -4,10 +4,15 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * License v 3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+
+// NOTE:
+// The generated workflow schema now includes built-in API request steps
+// (elasticsearch.request and kibana.request) via generate_yaml_schema wiring.
+// The local connector contracts remain for connector-backed steps.
 
 // TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
 

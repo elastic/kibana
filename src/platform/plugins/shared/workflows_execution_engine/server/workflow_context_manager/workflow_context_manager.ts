@@ -29,6 +29,7 @@ export class WorkflowContextManager {
   private context: Record<string, any>; // Make it strongly typed
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  private esClient?: ElasticsearchClient;
 
   constructor(init: ContextManagerInit) {
     this.context = {
@@ -39,6 +40,7 @@ export class WorkflowContextManager {
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
+    this.esClient = init.esClient;
   }
 
   public getContext(): Record<string, any> {
@@ -77,5 +79,9 @@ export class WorkflowContextManager {
 
   public getContextKey(key: string): any {
     return this.context[key];
+  }
+
+  public getEsClientAsUser(): ElasticsearchClient | undefined {
+    return this.esClient;
   }
 }

@@ -4,7 +4,7 @@
  * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
  * Public License v 1"; you may not use this file except in compliance with, at
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * License v 3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BaseStep } from '@kbn/workflows'; // Adjust path as needed
@@ -22,12 +22,8 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/wor
 import { EnterForeachNodeImpl, ExitForeachNodeImpl } from './foreach_step';
 import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-// Import specific step implementations
-// import { ForEachStepImpl } from './foreach-step'; // To be created
-// import { IfStepImpl } from './if-step'; // To be created
-// import { AtomicStepImpl } from './atomic-step'; // To be created
-// import { ParallelStepImpl } from './parallel-step'; // To be created
-// import { MergeStepImpl } from './merge-step'; // To be created
+import { EsApiStepImpl } from './es_api_step';
+import { KbnApiStepImpl } from './kbn_api_step';
 
 export class StepFactory {
   public create<TStep extends BaseStep>(
@@ -56,7 +52,32 @@ export class StepFactory {
         return new ExitConditionBranchNodeImpl(step as any, workflowState);
       case 'exit-if':
         return new ExitIfNodeImpl(step as any, workflowState);
-      case 'atomic':
+      case 'atomic': {
+        const config = (step as any).configuration;
+        if (config?.type === 'elasticsearch.request') {
+          const esClientAsUser = contextManager.getEsClientAsUser();
+          if (!esClientAsUser) {
+            throw new Error('Elasticsearch client (as user) is not available');
+          }
+          return new EsApiStepImpl(
+            config,
+            esClientAsUser,
+            contextManager,
+            workflowState,
+            workflowLogger
+          );
+        }
+        if (config?.type === 'kibana.request') {
+          // Wire curated adapters (manual-only PoC: no-op unless with.api present)
+          const services = {} as any;
+          return new KbnApiStepImpl(
+            config,
+            services,
+            contextManager,
+            workflowState,
+            workflowLogger
+          );
+        }
         return new AtomicStepImpl(
           step as any,
           contextManager,
@@ -64,6 +85,7 @@ export class StepFactory {
           workflowState,
           workflowLogger
         );
+      }
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':

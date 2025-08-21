@@ -180,6 +180,56 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
   return schema;
 };
 
+/* --- API Request Steps --- */
+const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'HEAD']);
+
+export const EsApiRequestStepSchema = BaseStepSchema.extend({
+  type: z.literal('elasticsearch.request'),
+  request: z.object({
+    method: HttpMethodSchema,
+    path: z
+      .string()
+      .min(1)
+      .refine((p) => p.startsWith('/'), {
+        message: 'Elasticsearch path must start with /',
+      }),
+    query: z.record(z.string(), z.any()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.any().optional(),
+  }),
+  host: z.string().optional(),
+});
+export type EsApiRequestStep = z.infer<typeof EsApiRequestStepSchema>;
+
+export const getEsApiRequestStepSchema = (loose: boolean = false) => {
+  if (loose) {
+    return EsApiRequestStepSchema.partial().required({ type: true });
+  }
+  return EsApiRequestStepSchema;
+};
+
+export const KbnApiRequestStepSchema = BaseStepSchema.extend({
+  type: z.literal('kibana.request'),
+  request: z.object({
+    method: HttpMethodSchema.exclude(['HEAD']),
+    path: z
+      .string()
+      .min(1)
+      .refine((p) => p.startsWith('/api/'), { message: 'Kibana path must start with /api/' }),
+    query: z.record(z.string(), z.any()).optional(),
+    headers: z.record(z.string(), z.string()).optional(),
+    body: z.any().optional(),
+  }),
+});
+export type KbnApiRequestStep = z.infer<typeof KbnApiRequestStepSchema>;
+
+export const getKbnApiRequestStepSchema = (loose: boolean = false) => {
+  if (loose) {
+    return KbnApiRequestStepSchema.partial().required({ type: true });
+  }
+  return KbnApiRequestStepSchema;
+};
+
 /* --- Inputs --- */
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice']);
 
@@ -237,6 +287,8 @@ const StepSchema = z.lazy(() =>
     IfStepSchema,
     ParallelStepSchema,
     MergeStepSchema,
+    EsApiRequestStepSchema,
+    KbnApiRequestStepSchema,
     BaseConnectorStepSchema,
   ])
 );

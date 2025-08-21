@@ -16,6 +16,8 @@ import {
   getMergeStepSchema,
   getParallelStepSchema,
   WorkflowSchema,
+  getEsApiRequestStepSchema,
+  getKbnApiRequestStepSchema,
 } from '../schema';
 
 export interface ConnectorContract {
@@ -65,6 +67,8 @@ function createRecursiveStepSchema(
     const ifSchema = getIfStepSchema(stepSchema, loose);
     const parallelSchema = getParallelStepSchema(stepSchema, loose);
     const mergeSchema = getMergeStepSchema(stepSchema, loose);
+    const esApiSchema = getEsApiRequestStepSchema(loose);
+    const kbnApiSchema = getKbnApiRequestStepSchema(loose);
 
     // Return discriminated union with all step types
     return z.discriminatedUnion('type', [
@@ -72,6 +76,8 @@ function createRecursiveStepSchema(
       ifSchema,
       parallelSchema,
       mergeSchema,
+      esApiSchema,
+      kbnApiSchema,
       ...connectorSchemas,
     ]);
   });

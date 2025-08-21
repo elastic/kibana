@@ -12,9 +12,20 @@ import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import { configureMonacoYamlSchema } from '@kbn/monaco';
 import { MonacoYamlOptions } from 'monaco-yaml';
 
-interface YamlEditorProps extends Omit<CodeEditorProps, 'languageId'> {
-  schemas: MonacoYamlOptions['schemas'] | null;
+type BaseEditorProps = Omit<CodeEditorProps, 'languageId' | 'value' | 'original' | 'modified'>;
+
+interface YamlEditorSingleProps extends BaseEditorProps {
+  value: string;
 }
+
+interface YamlEditorDiffProps extends BaseEditorProps {
+  original: string;
+  modified: string;
+}
+
+export type YamlEditorProps = (YamlEditorSingleProps | YamlEditorDiffProps) & {
+  schemas: MonacoYamlOptions['schemas'] | null;
+};
 
 export function YamlEditor(props: YamlEditorProps) {
   useEffect(() => {
@@ -23,5 +34,6 @@ export function YamlEditor(props: YamlEditorProps) {
     }
   }, [props.schemas]);
 
-  return <CodeEditor languageId="yaml" {...props} />;
+  const { schemas, ...rest } = props as any;
+  return <CodeEditor languageId="yaml" {...(rest as Omit<CodeEditorProps, 'languageId'>)} />;
 }

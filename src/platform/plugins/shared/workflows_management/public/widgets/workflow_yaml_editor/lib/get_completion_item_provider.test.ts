@@ -65,7 +65,7 @@ describe('getCompletionItemProvider', () => {
   const completionProvider = getCompletionItemProvider(workflowSchema);
 
   describe('Integration tests', () => {
-    it('should provide basic completions', () => {
+    it('should provide basic completions', async () => {
       const yamlContent = `
 version: "1"
 name: "test"
@@ -94,7 +94,11 @@ steps:
       );
 
       // Handle both sync and async returns
-      const completionList = result as monaco.languages.CompletionList;
+      const resolved =
+        result && typeof (result as any).then === 'function'
+          ? await (result as Promise<monaco.languages.CompletionList>)
+          : (result as monaco.languages.CompletionList);
+      const completionList = resolved as monaco.languages.CompletionList;
       expect(completionList?.suggestions).toBeDefined();
       expect(completionList?.suggestions.length).toBeGreaterThan(0);
 

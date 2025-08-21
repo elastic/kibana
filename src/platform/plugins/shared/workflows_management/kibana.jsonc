@@ -23,7 +23,8 @@
       "embeddable"
     ],
     "optionalPlugins": [
-      "alerting"
+      "alerting",
+      "console"
     ]
   }
 }
