@@ -32,7 +32,7 @@ import {
 import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 
 import { coreServices } from '../services/kibana_services';
 import { dashboardAddToLibraryActionStrings } from './_dashboard_actions_strings';

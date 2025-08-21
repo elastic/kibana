@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './test_samples';
+export * from '../../../../../packages/shared/kbn-ui-actions-browser/src/test_samples';

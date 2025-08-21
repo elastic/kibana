@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, type Action } from '@kbn/ui-actions-browser/src/actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';

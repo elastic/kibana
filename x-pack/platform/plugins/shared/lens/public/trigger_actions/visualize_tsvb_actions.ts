@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import type { VisualizeEditorContext } from '../types';

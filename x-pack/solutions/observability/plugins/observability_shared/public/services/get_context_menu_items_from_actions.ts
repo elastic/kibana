@@ -7,7 +7,7 @@
 
 import type { EuiContextMenuItemProps } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import { buildContextMenuForActions } from '@kbn/ui-actions-browser/src/context_menu';
 import type { ObservabilityTriggerId } from '../../common';
 
 export type ObservabilityActionContextMenuItemProps = EuiContextMenuItemProps & {

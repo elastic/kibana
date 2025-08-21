@@ -8,9 +8,9 @@
  */
 
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
   apiPublishesDescription,

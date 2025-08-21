@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { TriggerContract } from './trigger_contract';
-export { TriggerInternal } from './trigger_internal';
+export type { ActionWithContext } from './build_eui_context_menu_panels';
+export { buildContextMenuForActions } from './build_eui_context_menu_panels';
+export { openContextMenu } from './open_context_menu';

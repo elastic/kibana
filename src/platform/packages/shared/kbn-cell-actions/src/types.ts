@@ -8,12 +8,9 @@
  */
 
 import type { PropsWithChildren } from 'react';
-import type {
-  Action,
-  ActionExecutionContext,
-  UiActionsService,
-} from '@kbn/ui-actions-plugin/public';
+import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
+import type { UiActionsService } from '@kbn/ui-actions-browser/src/service';
 import type { Serializable } from '@kbn/utility-types';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import type { CellActionsMode } from './constants';

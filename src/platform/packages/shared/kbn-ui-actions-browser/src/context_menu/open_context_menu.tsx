@@ -9,12 +9,12 @@
 
 import React from 'react';
 
+import type { CoreStart } from '@kbn/core/public';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { EventEmitter } from 'events';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { getAnalytics, getI18n, getTheme, getUserProfile } from '../services';
 
 let activeSession: ContextMenuSession | null = null;
 
@@ -152,6 +152,7 @@ class ContextMenuSession extends EventEmitter {
  */
 export function openContextMenu(
   panels: EuiContextMenuPanelDescriptor[],
+  core: CoreStart,
   props: {
     closeButtonAriaLabel?: string;
     onClose?: () => void;
@@ -172,12 +173,7 @@ export function openContextMenu(
   };
 
   ReactDOM.render(
-    <KibanaRenderContextProvider
-      analytics={getAnalytics()}
-      i18n={getI18n()}
-      theme={getTheme()}
-      userProfile={getUserProfile()}
-    >
+    <KibanaRenderContextProvider {...core}>
       <EuiPopover
         className="embPanel__optionsMenuPopover"
         // @ts-expect-error @types/react@18 upgrade - Type 'HTMLElement' is not assignable to type 'NonNullable<ReactNode> | undefined'

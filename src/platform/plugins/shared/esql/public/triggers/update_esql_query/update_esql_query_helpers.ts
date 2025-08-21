@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 

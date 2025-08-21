@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { createAction, ACTION_VISUALIZE_GEO_FIELD } from '@kbn/ui-actions-plugin/public';
+import { createAction, ACTION_VISUALIZE_GEO_FIELD } from '@kbn/ui-actions-browser/src/actions';
 import { getUsageCollection } from '../kibana_services';
 import { APP_ID } from '../../common/constants';
 import { getMapsLink } from './get_maps_link';

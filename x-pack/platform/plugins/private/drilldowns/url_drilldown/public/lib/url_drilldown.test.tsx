@@ -18,7 +18,7 @@ import {
 } from '@kbn/embeddable-plugin/public';
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { createPoint, rowClickData } from './test/data';
-import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import React from 'react';

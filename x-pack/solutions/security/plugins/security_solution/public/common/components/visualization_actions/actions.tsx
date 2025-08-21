@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
-import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import { buildContextMenuForActions } from '@kbn/ui-actions-browser/src/context_menu';
 
 import React, { useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';

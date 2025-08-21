@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Presentable } from '@kbn/ui-actions-browser/src/types';
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import type { Observable } from 'rxjs';
+import type { Presentable } from '../types';
+import type { Trigger } from '../triggers';
 
 /**
  * During action execution we can provide additional information,

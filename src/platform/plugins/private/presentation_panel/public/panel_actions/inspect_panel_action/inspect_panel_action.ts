@@ -17,7 +17,7 @@ import type {
 } from '@kbn/presentation-publishing';
 import { getTitle, apiHasUniqueId } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { ACTION_INSPECT_PANEL } from './constants';
 import { inspector } from '../../kibana_services';
 

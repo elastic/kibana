@@ -22,7 +22,7 @@ import type {
   Action,
   ActionDefinition,
   ActionExecutionContext,
-} from '@kbn/ui-actions-plugin/public/actions';
+} from '@kbn/ui-actions-browser/src/actions';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   type AdditionalCellAction,

@@ -18,7 +18,7 @@ import type {
   PublishesTitle,
   CanOverrideHoverActions,
 } from '@kbn/presentation-publishing';
-import type { UiActionsService } from '@kbn/ui-actions-plugin/public';
+import type { UiActionsService } from '@kbn/ui-actions-browser/src/service';
 import type { MaybePromise } from '@kbn/utility-types';
 
 /** ------------------------------------------------------------------------------------------

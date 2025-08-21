@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { FilterManager, TimefilterContract } from '@kbn/data-plugin/public';
 import type { Filter } from '@kbn/es-query';
 import { convertRangeFilterToTimeRange, extractTimeFilter } from '@kbn/es-query';

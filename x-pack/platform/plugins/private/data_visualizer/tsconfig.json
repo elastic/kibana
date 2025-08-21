@@ -87,7 +87,8 @@
     "@kbn/file-upload-common",
     "@kbn/file-upload",
     "@kbn/charts-theme",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": [
     "target/**/*",

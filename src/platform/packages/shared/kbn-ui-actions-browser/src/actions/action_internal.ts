@@ -8,10 +8,10 @@
  */
 
 import type * as React from 'react';
-import type { Presentable, PresentableGrouping } from '@kbn/ui-actions-browser/src/types';
+import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { Presentable, PresentableGrouping } from '../types';
 import type { Action, ActionDefinition, ActionMenuItemProps } from './action';
-import { getNotifications } from '../services';
 
 /**
  * @internal
@@ -31,7 +31,12 @@ export class ActionInternal<Context extends object = object>
   public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
   public errorLogged?: boolean;
 
-  constructor(public readonly definition: ActionDefinition<Context>) {
+  private getNotificationsService: () => CoreStart['notifications'] | undefined;
+
+  constructor(
+    public readonly definition: ActionDefinition<Context>,
+    getNotificationsService: () => CoreStart['notifications'] | undefined
+  ) {
     this.id = this.definition.id;
     this.type = this.definition.type || '';
     this.order = this.definition.order || 0;
@@ -40,6 +45,7 @@ export class ActionInternal<Context extends object = object>
     this.showNotification = this.definition.showNotification;
     this.disabled = this.definition.disabled;
     this.errorLogged = false;
+    this.getNotificationsService = getNotificationsService;
 
     if (this.definition.getCompatibilityChangesSubject) {
       this.getCompatibilityChangesSubject = definition.getCompatibilityChangesSubject;
@@ -50,10 +56,14 @@ export class ActionInternal<Context extends object = object>
   }
 
   public async execute(context: Context) {
+    const notificationsService = this.getNotificationsService();
+    if (!notificationsService) {
+      throw new Error('Notifications service is not available');
+    }
     try {
       return await this.definition.execute(context);
     } catch (e) {
-      getNotifications()?.toasts.addWarning(
+      notificationsService.toasts.addWarning(
         i18n.translate('uiActions.execute.unhandledErrorMsg', {
           defaultMessage: `Unable to execute action, error: {errorMessage}`,
           values: { errorMessage: e.message },

@@ -6,12 +6,12 @@
  */
 
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { CoreStart } from '@kbn/core/public';
 import {
-  ACTION_VISUALIZE_GEO_FIELD,
   ADD_PANEL_TRIGGER,
   VISUALIZE_GEO_FIELD_TRIGGER,
-} from '@kbn/ui-actions-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+} from '@kbn/ui-actions-browser/src/triggers';
+import { ACTION_VISUALIZE_GEO_FIELD } from '@kbn/ui-actions-browser/src/actions';
 import { FILTER_BY_MAP_EXTENT } from './filter_by_map_extent/constants';
 import { SYNCHRONIZE_MOVEMENT_ACTION } from './synchronize_movement/constants';
 import type { MapsPluginStartDependencies } from '../plugin';

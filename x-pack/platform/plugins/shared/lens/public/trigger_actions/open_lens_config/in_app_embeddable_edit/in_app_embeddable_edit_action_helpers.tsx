@@ -7,7 +7,7 @@
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { LensPluginStartDependencies } from '../../../plugin';

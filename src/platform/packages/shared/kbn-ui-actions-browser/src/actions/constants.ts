@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type * from './action';
-export * from './action_internal';
-export * from './create_action';
-export * from './incompatible_action_error';
+export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
+export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
+export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';

@@ -12,7 +12,7 @@ import {
   apiIsOfType,
   areTriggersDisabled,
 } from '@kbn/presentation-publishing';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import React, { Suspense, lazy } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
