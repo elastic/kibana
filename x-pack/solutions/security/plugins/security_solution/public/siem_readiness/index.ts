@@ -11,9 +11,9 @@ import { routes } from './routes';
 export class SiemReadiness {
   public setup() {}
 
-  public start(isEnabled = false): SecuritySubPlugin {
+  public start(): SecuritySubPlugin {
     return {
-      routes: isEnabled ? routes : [],
+      routes,
     };
   }
 }

@@ -345,9 +345,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       siemMigrations: subPlugins.siemMigrations.start(
         !this.experimentalFeatures.siemMigrationsDisabled
       ),
-      siemReadiness: subPlugins.siemReadiness.start(
-        !this.experimentalFeatures.siemReadinessDashboard
-      ),
+      siemReadiness: subPlugins.siemReadiness.start(),
       configurations: subPlugins.configurations.start(),
       reports: subPlugins.reports.start(),
     };
