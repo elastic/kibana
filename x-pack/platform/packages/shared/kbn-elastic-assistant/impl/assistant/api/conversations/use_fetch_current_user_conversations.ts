@@ -145,7 +145,6 @@ export const useFetchCurrentUserConversations = ({
         getNextPageParam,
         refetchOnWindowFocus,
         select: (searchResponse) => {
-          console.log('searchResponse', searchResponse);
           return {
             ...searchResponse,
             pages: searchResponse.pages.map((p) => ({

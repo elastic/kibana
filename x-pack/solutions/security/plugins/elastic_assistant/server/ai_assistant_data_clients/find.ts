@@ -56,9 +56,7 @@ export const findDocuments = async <TSearchSchema>({
   aggs,
   mSearch,
 }: FindOptions): Promise<FindResponse<TSearchSchema>> => {
-  console.log('index ==>', index);
   const query = getQueryFilter({ filter });
-  console.log('query ==>', JSON.stringify(query));
   let sort: Sort | undefined;
   const ascOrDesc = sortOrder ?? ('asc' as const);
   if (sortField != null) {

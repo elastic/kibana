@@ -41,13 +41,32 @@ describe('Find user conversations route', () => {
       );
       expect(response.status).toEqual(200);
     });
-    test('calls with correct filter', async () => {
+    test('calls with shared filter when is_owner is falsy', async () => {
       await server.inject(getCurrentUserFindRequest(), requestContextMock.convertContext(context));
       expect(
         clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments
       ).toHaveBeenCalledWith(
         expect.objectContaining({
           filter: 'users:{ name: "elastic" } OR users: "" OR NOT users: { name: * }',
+        })
+      );
+    });
+    test('calls with owner filter when is_owner is truthy', async () => {
+      const request = requestMock.create({
+        method: 'get',
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+        query: {
+          is_owner: true,
+        },
+      });
+
+      await server.inject(request, requestContextMock.convertContext(context));
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.findDocuments
+      ).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter:
+            '(created_by:* AND (created_by.id : "undefined" OR created_by.name : "elastic")) OR (NOT created_by:* AND users:{ name: "elastic" })',
         })
       );
     });

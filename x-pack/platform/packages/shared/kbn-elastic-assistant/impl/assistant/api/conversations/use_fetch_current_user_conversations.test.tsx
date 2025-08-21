@@ -48,6 +48,7 @@ describe('useFetchCurrentUserConversations', () => {
             per_page: 28,
             sort_field: 'updated_at',
             sort_order: 'desc',
+            is_owner: false,
           },
           version: '2023-10-31',
           signal: undefined,
