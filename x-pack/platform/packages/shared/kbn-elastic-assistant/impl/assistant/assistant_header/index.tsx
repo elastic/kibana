@@ -134,7 +134,17 @@ export const AssistantHeader: React.FC<Props> = ({
   );
 
   const userOwnedConversations = useMemo(
-    () => conversations.filter((c) => c.isConversationOwner),
+    () =>
+      Object.values(conversations).reduce(
+        (convos: Record<string, Conversation>, c: ConversationWithOwner) =>
+          c.isConversationOwner
+            ? {
+                ...convos,
+                [c.id]: c,
+              }
+            : convos,
+        {}
+      ),
     [conversations]
   );
 

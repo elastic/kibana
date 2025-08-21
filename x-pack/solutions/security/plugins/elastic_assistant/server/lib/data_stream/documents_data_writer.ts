@@ -138,37 +138,11 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
               ],
             },
           },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-  });
-  // get legacy conversations that do not have `created_by` field
-  getFilterByLegacy = () => ({
-    filter: {
-      bool: {
-        should: [
           {
             bool: {
               must: [
                 // legacy conversation without created_by field have users array we can match against
                 { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
-              ],
-            },
-          },
-        ],
-        minimum_should_match: 1,
-      },
-    },
-  });
-  // only use with the results of getFilterByLegacy
-  getFilterByUserLegacy = (authenticatedUser: AuthenticatedUser) => ({
-    filter: {
-      bool: {
-        should: [
-          {
-            bool: {
-              must: [
                 {
                   nested: {
                     path: 'users',
@@ -205,7 +179,6 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
     authenticatedUser?: AuthenticatedUser
   ) => {
     const updatedAt = new Date().toISOString();
-    console.log('userfilter ==>', JSON.stringify(this.getFilterByUser(authenticatedUser)));
     const responseToUpdate = await this.options.esClient.search({
       query: {
         bool: {
@@ -231,53 +204,7 @@ export class DocumentsDataWriter implements DocumentsDataWriter {
       seq_no_primary_term: true,
       size: 1000,
     });
-    const legacyToUpdate = await this.options.esClient.search({
-      query: {
-        bool: {
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    ids: {
-                      values: documentsToUpdate?.map((c) => c.id),
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-          ...this.getFilterByLegacy(),
-        },
-      },
-      _source: false,
-      ignore_unavailable: true,
-      index: this.options.index,
-      seq_no_primary_term: true,
-      size: 1000,
-    });
-    console.log(
-      'legacy query',
-      JSON.stringify({
-        bool: {
-          must: [
-            {
-              bool: {
-                should: [
-                  {
-                    ids: {
-                      values: documentsToUpdate?.map((c) => c.id),
-                    },
-                  },
-                ],
-              },
-            },
-          ],
-          ...this.getFilterByLegacy(),
-        },
-      })
-    );
-    console.log('legacyToUpdate ==>', JSON.stringify(legacyToUpdate, null, 2));
+
     const availableDocumentsToUpdate = documentsToUpdate.filter((c) =>
       responseToUpdate?.hits.hits.find((ac) => ac._id === c.id)
     );
