@@ -15,18 +15,46 @@ import {
   type ISavedObjectsClientFactory,
   Request,
   Response,
+  SavedObjectsClient,
   SavedObjectsClientFactory,
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
-import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  ISavedObjectTypeRegistry,
+  KibanaRequest,
+  KibanaResponseFactory,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import {
-  type ISavedObjectTypeRegistry,
   MAX_SAVED_OBJECT_ID_LENGTH,
   MAX_SAVED_OBJECT_SEARCH_LENGTH,
   MAX_SAVED_OBJECT_TYPE_LENGTH,
 } from '@kbn/core-saved-objects-server';
 import { SAVED_OBJECT_TYPES_MAX_SIZE } from '.';
+
+type ScrollCountRequest = KibanaRequest<
+  never,
+  never,
+  TypeOf<typeof ScrollCountRoute.validate.body>
+>;
+
+export function scrollCountClientFactory(
+  { body: { typesToInclude: types } }: ScrollCountRequest,
+  clientFactory: ISavedObjectsClientFactory,
+  typeRegistry: ISavedObjectTypeRegistry
+): SavedObjectsClientContract {
+  return clientFactory({
+    includedHiddenTypes: chain(types)
+      .uniq()
+      .filter((type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type))
+      .value(),
+  });
+}
+scrollCountClientFactory.inject = [
+  Request,
+  SavedObjectsClientFactory,
+  SavedObjectsTypeRegistry,
+] as const satisfies unknown[];
 
 @injectable()
 export class ScrollCountRoute {
@@ -57,28 +85,11 @@ export class ScrollCountRoute {
     }),
   };
 
-  private readonly client: SavedObjectsClientContract;
-
   constructor(
-    @inject(SavedObjectsClientFactory) clientFactory: ISavedObjectsClientFactory,
-    @inject(SavedObjectsTypeRegistry) typeRegistry: ISavedObjectTypeRegistry,
-    @inject(Request)
-    private readonly request: KibanaRequest<
-      never,
-      never,
-      TypeOf<typeof ScrollCountRoute.validate.body>
-    >,
+    @inject(SavedObjectsClient) private readonly client: SavedObjectsClientContract,
+    @inject(Request) private readonly request: ScrollCountRequest,
     @inject(Response) private readonly response: KibanaResponseFactory
-  ) {
-    this.client = clientFactory({
-      includedHiddenTypes: chain(this.request.body.typesToInclude)
-        .uniq()
-        .filter(
-          (type) => typeRegistry.isHidden(type) && typeRegistry.isImportableAndExportable(type)
-        )
-        .value(),
-    });
-  }
+  ) {}
 
   private async getSavedObjectCounts(): Promise<Record<string, number>> {
     const { typesToInclude, searchString, references } = this.request.body;
