@@ -57,7 +57,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    describe('search', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/232481
+    describe.skip('search', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();
