@@ -10,26 +10,31 @@
 // eslint-disable-next-line spaced-comment, @typescript-eslint/triple-slash-reference
 /// <reference lib="WebWorker" />
 
-import { clientsClaim, setCacheNameDetails } from 'workbox-core';
+import { setCacheNameDetails } from 'workbox-core';
 import { cleanupOutdatedCaches, precacheAndRoute } from 'workbox-precaching';
-import { ServiceWorkerTaskFramework } from './task_handler';
+import { registerRoute } from 'workbox-routing';
+import { CacheFirst } from 'workbox-strategies';
+import { CacheableResponsePlugin } from 'workbox-cacheable-response';
+import { ExpirationPlugin } from 'workbox-expiration';
+import { ServiceWorkerMLCEngineHandler } from '@mlc-ai/web-llm';
 
 declare const self: ServiceWorkerGlobalScope;
+
+let handler: ServiceWorkerMLCEngineHandler;
+
+const initHandler = () => {
+  if (!handler) {
+    handler = new ServiceWorkerMLCEngineHandler();
+  }
+};
 
 /**
  * serviceworker for kibana
  * @module sw
  */
-(async (global) => {
+((global) => {
   // get version from sw query string
   const swVersion = new URL(global.location.href).searchParams.get('version') ?? '';
-
-  // Service worker code goes here
-  await global.skipWaiting();
-  clientsClaim();
-
-  // empty outdated caches
-  cleanupOutdatedCaches();
 
   setCacheNameDetails({
     precache: 'kibana-precache',
@@ -39,33 +44,37 @@ declare const self: ServiceWorkerGlobalScope;
 
   precacheAndRoute(self.__WB_MANIFEST);
 
-  // Initialize the framework
-  const taskFramework = new ServiceWorkerTaskFramework();
+  registerRoute(
+    /.*\/kbn-ui-shared.*\/.*\.js$/,
+    new CacheFirst({
+      cacheName: 'kibana-shared-ui-deps',
+      plugins: [
+        new CacheableResponsePlugin({
+          statuses: [0, 200],
+        }),
+        new ExpirationPlugin({
+          // cache shared ui deps for two weeks inline with serverless release, maybe change this for other build flavours
+          maxAgeSeconds: 60 * 60 * 24 * 14,
+        }),
+      ],
+    })
+  );
 
-  // Register built-in tasks
-  taskFramework.registerTask({
-    id: 'cache-cleanup',
-    handler: async (data) => {
-      const cacheNames = await caches.keys();
-      const oldCaches = cacheNames.filter((name) =>
-        data.excludePatterns?.some((pattern: string) => !name.includes(pattern))
-      );
-
-      await Promise.all(oldCaches.map((name) => caches.delete(name)));
-      return { deletedCaches: oldCaches };
-    },
-    options: { timeout: 10000 },
+  global.addEventListener('install', async (event) => {
+    // TODO: switch waitUntil to something more meaningful,
+    // when we switch to including a prompt to users to reload the page instead of forcing the install
+    event.waitUntil(global.skipWaiting());
   });
 
-  taskFramework.registerTask({
-    id: 'fetch-and-cache',
-    handler: async (data) => {
-      const { url, cacheKey } = data;
-      const cache = await caches.open(cacheKey || 'default');
-      const response = await fetch(url);
-      await cache.put(url, response.clone());
-      return { cached: url, status: response.status };
-    },
-    options: { timeout: 15000, retry: true, maxRetries: 2 },
+  global.addEventListener('activate', (event) => {
+    initHandler();
+    event.waitUntil(global.clients.claim());
   });
+
+  global.addEventListener('message', (event) => {
+    initHandler();
+  });
+
+  // empty outdated caches
+  cleanupOutdatedCaches();
 })(self);

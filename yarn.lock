@@ -7720,6 +7720,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/on-device-llm-example-plugin@link:examples/on_device_llm":
+  version "0.0.0"
+  uid ""
+
 "@kbn/onechat-browser@link:x-pack/platform/packages/shared/onechat/onechat-browser":
   version "0.0.0"
   uid ""
@@ -9440,7 +9444,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/zither-plugin@link:x-pack/platform/plugins/private/zither":
+"@kbn/zither-plugin@link:x-pack/platform/plugins/shared/zither":
   version "0.0.0"
   uid ""
 
@@ -9924,6 +9928,13 @@
   integrity sha512-QjHtSaoameoalGnKDT3FoIl4+9RwyTmo9ZJGBdLOks/YOiWHoRDI3PUwEzOE7kEmGcV3AFcp9K6dYu9rEuKLAQ==
   dependencies:
     "@types/mdx" "^2.0.0"
+
+"@mlc-ai/web-llm@^0.2.79":
+  version "0.2.79"
+  resolved "https://registry.yarnpkg.com/@mlc-ai/web-llm/-/web-llm-0.2.79.tgz#a0dcfc54bf5d843090be67fd9b168e4de087bc93"
+  integrity sha512-Hy1ZHQ0o2bZGZoVnGK48+fts/ZSKwLe96xjvqL/6C59Mem9HoHTcFE07NC2E23mRmhd01tL655N6CPeYmwWgwQ==
+  dependencies:
+    loglevel "^1.9.1"
 
 "@modelcontextprotocol/sdk@^1.13.2":
   version "1.13.2"
@@ -25670,6 +25681,11 @@ loglevel@^1.6.0:
   resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.9.1.tgz#d63976ac9bcd03c7c873116d41c2a85bafff1be7"
   integrity sha512-hP3I3kCrDIMuRwAwHltphhDM1r8i55H33GgqjXbrisuJhF4kRhW1dNuxsRklp4bXl8DSdLaNLuiL4A/LWRfxvg==
 
+loglevel@^1.9.1:
+  version "1.9.2"
+  resolved "https://registry.yarnpkg.com/loglevel/-/loglevel-1.9.2.tgz#c2e028d6c757720107df4e64508530db6621ba08"
+  integrity sha512-HgMmCqIJSAKqo68l0rS2AanEWfkxaZ5wNiEFb5ggm08lDs9Xl2KxBlX3PTcaD2chBM1gXAYf491/M2Rv8Jwayg==
+
 long@^5.0.0, long@^5.2.0, long@^5.2.4:
   version "5.3.2"
   resolved "https://registry.yarnpkg.com/long/-/long-5.3.2.tgz#1d84463095999262d7d7b7f8bfd4a8cc55167f83"
@@ -35383,7 +35399,7 @@ workbox-build@7.3.0:
     workbox-sw "7.3.0"
     workbox-window "7.3.0"
 
-workbox-cacheable-response@7.3.0:
+workbox-cacheable-response@7.3.0, workbox-cacheable-response@^7.3.0:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/workbox-cacheable-response/-/workbox-cacheable-response-7.3.0.tgz#557b0f5fdfceb22fe243e3f19807c76a0ae646e3"
   integrity sha512-eAFERIg6J2LuyELhLlmeRcJFa5e16Mj8kL2yCDbhWE+HUun9skRQrGIFVUagqWj4DMaaPSMWfAolM7XZZxNmxA==
@@ -35395,7 +35411,7 @@ workbox-core@7.3.0, workbox-core@^7.3.0:
   resolved "https://registry.yarnpkg.com/workbox-core/-/workbox-core-7.3.0.tgz#f24fb92041a0b7482fe2dd856544aaa9fa105248"
   integrity sha512-Z+mYrErfh4t3zi7NVTvOuACB0A/jA3bgxUN3PwtAVHvfEsZxV9Iju580VEETug3zYJRc0Dmii/aixI/Uxj8fmw==
 
-workbox-expiration@7.3.0:
+workbox-expiration@7.3.0, workbox-expiration@^7.3.0:
   version "7.3.0"
   resolved "https://registry.yarnpkg.com/workbox-expiration/-/workbox-expiration-7.3.0.tgz#2c1ee1fdada34aa7e7474f706d5429c914bd10d2"
   integrity sha512-lpnSSLp2BM+K6bgFCWc5bS1LR5pAwDWbcKt1iL87/eTSJRdLdAwGQznZE+1czLgn/X05YChsrEegTNxjM067vQ==

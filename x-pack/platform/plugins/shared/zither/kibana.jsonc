@@ -3,12 +3,12 @@
   "id": "@kbn/zither-plugin",
   "owner": ["@elastic/appex-sharedux"],
   "group": "platform",
-  "visibility": "private",
+  "visibility": "shared",
   "description": "This plugin provides API for interacting with the kibana serviceworker (aka. zither)",
   "plugin": {
     "id": "zither",
     "browser": true,
-    "server": true,
+    "server": false,
     "requiredPlugins": [],
     "requiredBundles": [],
     "configPath": ["xpack", "zither"]

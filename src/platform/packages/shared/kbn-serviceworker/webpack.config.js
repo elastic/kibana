@@ -9,12 +9,8 @@
 
 // @ts-check
 const path = require('path');
-const webpack = require('webpack');
 const { InjectManifest } = require('workbox-webpack-plugin');
 const { NodeLibsBrowserPlugin } = require('@kbn/node-libs-browser-webpack-plugin');
-const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
-// const UiSharedDepsSrc = require('@kbn/ui-shared-deps-src');
-const { REPO_ROOT } = require('@kbn/repo-info');
 
 const { SERVICEWORKER_FILENAME } = require('./src/constants');
 
@@ -47,24 +43,25 @@ const serviceWorkerConfig = {
           },
         },
       },
+      {
+        test: /.*\.wasm$/,
+        exclude: /node_modules(?!\/@mlc-ai\/)(\/[^\/]+\/)/,
+        type: 'javascript/auto', // ← !!
+        loader: 'file-loader',
+      },
     ],
   },
   target: 'webworker',
   plugins: [
     new NodeLibsBrowserPlugin(),
-    new webpack.DllReferencePlugin({
-      context: REPO_ROOT,
-      manifest: require(UiSharedDepsNpm.dllManifestPath), // eslint-disable-line import/no-dynamic-require
-    }),
     new InjectManifest({
       swSrc: path.resolve(__dirname, 'src/worker', 'sw.ts'),
       swDest: SERVICEWORKER_FILENAME,
       mode: process.env.NODE_ENV || 'development',
-      // chunks: [UiSharedDepsSrc.jsFilename],
     }),
   ],
-  externals: {
-    // ...UiSharedDepsSrc.externals,
+  experiments: {
+    asyncWebAssembly: true,
   },
 };
 

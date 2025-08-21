@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/on-device-llm-example-plugin",
+  "owner": "@elastic/appex-sharedux",
+  "description": "Plugin that shows how to implement on-device LLM.",
+  "plugin": {
+    "id": "onDeviceLLMExample",
+    "server": false,
+    "browser": true,
+    "requiredPlugins": ["developerExamples", "zither"],
+    "optionalPlugins": []
+  }
+}

@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
+export type { ZitherPublicPluginSetup, ZitherPublicPluginStart } from './plugin';
 import { ZitherPublicPlugin } from './plugin';
 
 /**

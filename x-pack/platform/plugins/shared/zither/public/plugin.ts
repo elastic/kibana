@@ -4,15 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { BehaviorSubject } from 'rxjs';
 import { type Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { getServiceWorkerUrl } from '@kbn/serviceworker';
+import { CreateServiceWorkerMLCEngine } from '@mlc-ai/web-llm';
 
 export class ZitherPublicPlugin implements Plugin {
   private readonly buildVersion: string;
   private readonly logger: Logger;
   private serviceWorker: ServiceWorker | null = null;
-  private pendingRequests = new Map<string, { resolve: Function; reject: Function }>();
+  private readonly state = new BehaviorSubject<ServiceWorkerState | null>(null);
 
   constructor(ctx: PluginInitializerContext) {
     this.buildVersion = ctx.env.packageInfo.version;
@@ -22,10 +24,15 @@ export class ZitherPublicPlugin implements Plugin {
   public setup(core: CoreSetup) {
     // Setup logic
     this.initialize();
+
+    return {};
   }
 
   public start(core: CoreStart) {
-    // Start logic
+    return {
+      state: this.state.asObservable(),
+      mlcEngine: CreateServiceWorkerMLCEngine,
+    };
   }
 
   /**
@@ -43,11 +50,18 @@ export class ZitherPublicPlugin implements Plugin {
 
         this.serviceWorker = registration.active || registration.waiting || registration.installing;
 
+        // persist current install state
+        this.setServiceWorkerState();
+
+        // set up handler to propagate state changes
+        this.serviceWorker?.addEventListener('statechange', this.setServiceWorkerState.bind(this));
+
         if (!this.serviceWorker) {
           await new Promise((resolve) => {
             registration.addEventListener('updatefound', () => {
               this.serviceWorker = registration.installing;
               this.serviceWorker?.addEventListener('statechange', () => {
+                this.setServiceWorkerState();
                 if (this.serviceWorker?.state === 'activated') {
                   resolve(void 0);
                 }
@@ -55,29 +69,19 @@ export class ZitherPublicPlugin implements Plugin {
             });
           });
         }
-
-        navigator.serviceWorker.addEventListener('message', this.handleMessage.bind(this));
       } catch (error) {
         this.logger.error('Failed to register service worker:', error);
       }
     }
   }
 
-  private handleMessage(event: MessageEvent): void {
-    const { type, requestId, result, error } = event.data;
-
-    if (type === 'TASK_RESULT' && requestId) {
-      const pending = this.pendingRequests.get(requestId);
-      if (pending) {
-        pending.resolve(result);
-        this.pendingRequests.delete(requestId);
-      }
-    } else if (type === 'TASK_ERROR' && requestId) {
-      const pending = this.pendingRequests.get(requestId);
-      if (pending) {
-        pending.reject(new Error(error));
-        this.pendingRequests.delete(requestId);
-      }
-    }
+  private setServiceWorkerState(): void {
+    // persist current install state, we check if there's a controller because of where hard refresh
+    // causes the page not to be controlled, {@see https://www.w3.org/TR/service-workers/#navigator-service-worker-controller}
+    this.state.next(navigator.serviceWorker.controller ? this.serviceWorker?.state || null : null);
   }
 }
+
+export type ZitherPublicPluginStart = ReturnType<ZitherPublicPlugin['start']>;
+
+export type ZitherPublicPluginSetup = ReturnType<ZitherPublicPlugin['setup']>;
