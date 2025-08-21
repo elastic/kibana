@@ -24,14 +24,8 @@ describe('registerRoutes', () => {
     });
 
     expect(httpSetup.createRouter).toHaveBeenCalledTimes(1);
-    expect(router.get).toHaveBeenCalledTimes(2);
+    expect(router.get).toHaveBeenCalledTimes(1);
 
-    expect(router.get).toHaveBeenCalledWith(
-      expect.objectContaining({
-        path: '/api/kibana/management/saved_objects/_find',
-      }),
-      expect.any(Function)
-    );
     expect(router.get).toHaveBeenCalledWith(
       expect.objectContaining({
         path: '/api/kibana/management/saved_objects/relationships/{type}/{id}',
