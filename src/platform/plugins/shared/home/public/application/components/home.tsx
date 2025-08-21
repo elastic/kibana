@@ -150,9 +150,9 @@ export class Home extends Component<HomeProps, State> {
         panelled={false}
       >
         <KibanaPageTemplate.Section
-          bottomBorder
-          paddingSize="xl"
+          paddingSize="none"
           aria-labelledby="homeContentPanels__title"
+          style={{ paddingBottom: '32px !important' }}
         >
           <HomeContentPanels />
         </KibanaPageTemplate.Section>

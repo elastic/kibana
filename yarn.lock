@@ -8093,6 +8093,14 @@
   version "0.0.0"
   uid ""
 
+"@kbn/tagging-core-plugin@link:src/platform/plugins/shared/tagging-core":
+  version "0.0.0"
+  uid ""
+
+"@kbn/tagging-ui-plugin@link:src/platform/plugins/shared/tagging-ui":
+  version "0.0.0"
+  uid ""
+
 "@kbn/task-manager-dependencies-plugin@link:x-pack/platform/plugins/private/task_manager_dependencies":
   version "0.0.0"
   uid ""

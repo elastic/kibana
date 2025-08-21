@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/tagging-ui-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "taggingUi",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [
+      "taggingCore"
+    ],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

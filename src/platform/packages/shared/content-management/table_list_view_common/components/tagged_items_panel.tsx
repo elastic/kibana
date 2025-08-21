@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import {
   EuiPanel,
   EuiBasicTable,
@@ -20,7 +20,8 @@ import {
   EuiHorizontalRule,
   EuiLink,
   EuiBadge,
-  EuiButtonIcon,
+  EuiFilterButton,
+  EuiFilterGroup,
   EuiPopover,
   EuiFormRow,
   EuiComboBox,
@@ -37,7 +38,15 @@ export interface TaggedItem {
 }
 
 export interface TaggedItemsPanelProps {
-  color?: 'transparent' | 'plain' | 'subdued' | 'primary' | 'success' | 'accent' | 'warning' | 'danger';
+  color?:
+    | 'transparent'
+    | 'plain'
+    | 'subdued'
+    | 'primary'
+    | 'success'
+    | 'accent'
+    | 'warning'
+    | 'danger';
   hasBorder?: boolean;
   hasShadow?: boolean;
   paddingSize?: 'none' | 'xs' | 's' | 'm' | 'l' | 'xl';
@@ -48,6 +57,9 @@ export interface TaggedItemsPanelProps {
   isLoading?: boolean;
   error?: Error | null;
   onItemSelect?: (item: TaggedItem) => void;
+  availableTags?: Array<{ id: string; name: string; color: string }>;
+  onTagsChange?: (tagNames: string[]) => void;
+  initialSelectedTags?: string[];
 }
 
 export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
@@ -62,34 +74,40 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
   isLoading = false,
   error = null,
   onItemSelect,
+  availableTags: providedAvailableTags,
+  onTagsChange,
+  initialSelectedTags = [],
 }) => {
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [localSelectedTags, setLocalSelectedTags] = useState<string[]>(initialSelectedTags);
 
-  // Mock available tags for now
+  // Update local state when initialSelectedTags prop changes
+  useEffect(() => {
+    setLocalSelectedTags(initialSelectedTags);
+  }, [initialSelectedTags]);
+
+  // Use provided available tags or fallback to mock data
   const availableTags = useMemo(
-    () => [
-      { id: 'tag1', name: 'takemehome', color: '#0077CC' },
-      { id: 'tag2', name: 'important', color: '#D36086' },
-      { id: 'tag3', name: 'work', color: '#490092' },
-      { id: 'tag4', name: 'personal', color: '#00BFB3' },
-    ],
-    []
+    () =>
+      providedAvailableTags || [
+        { id: 'tag1', name: 'takemehome', color: '#0077CC' },
+        { id: 'tag2', name: 'important', color: '#D36086' },
+        { id: 'tag3', name: 'work', color: '#490092' },
+        { id: 'tag4', name: 'personal', color: '#00BFB3' },
+      ],
+    [providedAvailableTags]
   );
 
-  const getIconType = useCallback(
-    (item: TaggedItem): string => {
-      switch (item.type) {
-        case 'dashboard':
-          return 'dashboardApp';
-        case 'discover':
-          return 'discoverApp';
-        default:
-          return 'document';
-      }
-    },
-    []
-  );
+  const getIconType = useCallback((item: TaggedItem): string => {
+    switch (item.type) {
+      case 'dashboard':
+        return 'dashboardApp';
+      case 'discover':
+        return 'discoverApp';
+      default:
+        return 'document';
+    }
+  }, []);
 
   const handleItemClick = useCallback(
     (item: TaggedItem) => {
@@ -113,10 +131,12 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
         render: (title: string, item: TaggedItem) => (
           <EuiFlexGroup alignItems="center" gutterSize="s">
             <EuiFlexItem grow={false}>
-              <EuiIcon type={getIconType(item)} size="m" />
+              <EuiIcon type={getIconType(item)} size="s" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiLink onClick={() => handleItemClick(item)}>{title}</EuiLink>
+              <EuiLink color="text" onClick={() => handleItemClick(item)}>
+                {title}
+              </EuiLink>
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -215,25 +235,35 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
               <EuiIcon type="tag" size="m" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiTitle size="s">
-                <FormattedMessage
-                  id="contentManagement.tableListView.taggedItemsTitle"
-                  defaultMessage="Tagged Items"
-                />
+              <EuiTitle size="xxs">
+                <h3>
+                  <FormattedMessage
+                    id="contentManagement.tableListView.taggedItemsTitle"
+                    defaultMessage="Tagged Items"
+                  />
+                </h3>
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiPopover
                 button={
-                  <EuiButtonIcon
-                    iconType="gear"
-                    aria-label="Settings"
-                    onClick={() => setIsSettingsOpen(!isSettingsOpen)}
-                  />
+                  <EuiFilterGroup compressed>
+                    <EuiFilterButton
+                      iconType="arrowDown"
+                      onClick={() => setIsSettingsOpen(!isSettingsOpen)}
+                      isSelected={isSettingsOpen}
+                      numActiveFilters={localSelectedTags.length}
+                      hasActiveFilters={localSelectedTags.length > 0}
+                      badgeColor="success"
+                    >
+                      Tags
+                    </EuiFilterButton>
+                  </EuiFilterGroup>
                 }
                 isOpen={isSettingsOpen}
                 closePopover={() => setIsSettingsOpen(false)}
                 panelPaddingSize="m"
+                anchorPosition="downRight"
               >
                 <div style={{ minWidth: '300px' }}>
                   <EuiFormRow
@@ -250,17 +280,30 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
                         label: tag.name,
                         value: tag.id,
                       }))}
-                      selectedOptions={selectedTags
-                        .map((tagId) => {
-                          const tag = availableTags.find((t) => t.id === tagId);
-                          return tag ? { label: tag.name, value: tag.id } : null;
-                        })
-                        .filter(Boolean)}
+                      selectedOptions={
+                        localSelectedTags
+                          .map((tagId) => {
+                            const tag = availableTags.find((t) => t.id === tagId);
+                            return tag ? { label: tag.name, value: tag.id } : null;
+                          })
+                          .filter(Boolean) as Array<{ label: string; value: string }>
+                      }
                       onChange={(selectedOptions) => {
                         const newSelectedTags = selectedOptions
                           .map((option) => option.value)
                           .filter((value): value is string => value !== undefined);
-                        setSelectedTags(newSelectedTags);
+                        setLocalSelectedTags(newSelectedTags);
+
+                        // Convert tag IDs to tag names and call the callback
+                        if (onTagsChange) {
+                          const tagNames = newSelectedTags
+                            .map((tagId) => {
+                              const tag = availableTags.find((t) => t.id === tagId);
+                              return tag ? tag.name : null;
+                            })
+                            .filter((name): name is string => name !== null);
+                          onTagsChange(tagNames);
+                        }
                       }}
                       fullWidth
                     />
@@ -270,7 +313,7 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
               </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" />
+          <EuiHorizontalRule margin="m" style={{ marginTop: '6px' }} />
         </>
       )}
 
@@ -282,12 +325,14 @@ export const TaggedItemsPanel: React.FC<TaggedItemsPanelProps> = ({
           />
         </EuiText>
       ) : (
-        <EuiBasicTable
-          items={items}
-          columns={columns}
-          pagination={pagination}
-          tableLayout="auto"
-        />
+        <EuiPanel color="plain" hasBorder paddingSize="m">
+          <EuiBasicTable
+            items={items}
+            columns={columns}
+            pagination={pagination}
+            tableLayout="auto"
+          />
+        </EuiPanel>
       )}
     </EuiPanel>
   );

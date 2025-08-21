@@ -30,6 +30,9 @@ import type { EnvironmentService } from '../services/environment';
 import type { ConfigSchema } from '../../server/config';
 import type { WelcomeService } from '../services/welcome';
 import type { FavoritesService } from '@kbn/favorites-poc-plugin/public';
+import type { TaggingCorePluginStart } from '@kbn/tagging-core-plugin/public';
+import type { TaggingUiPluginStart } from '@kbn/tagging-ui-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 export interface HomeKibanaServices {
   dataViewsService: DataViewsContract;
@@ -59,6 +62,9 @@ export interface HomeKibanaServices {
   theme: ThemeServiceStart;
   i18nStart: I18nStart;
   favoritesPoc?: { favoritesService: FavoritesService };
+  taggingCore?: TaggingCorePluginStart;
+  taggingUi?: TaggingUiPluginStart;
+  contentManagementService?: ContentManagementPublicStart;
 }
 
 let services: HomeKibanaServices | null = null;

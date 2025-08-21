@@ -21,6 +21,9 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { TaggingCorePluginStart } from '@kbn/tagging-core-plugin/public';
+import type { TaggingUiPluginStart } from '@kbn/tagging-ui-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import type { ConfigSchema } from '../server/config';
@@ -44,7 +47,10 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   cloud: CloudStart;
   share: SharePluginStart;
+  contentManagement: ContentManagementPublicStart;
   favoritesPoc?: { favoritesService: any };
+  taggingCore?: TaggingCorePluginStart;
+  taggingUi?: TaggingUiPluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -86,8 +92,13 @@ export class HomePublicPlugin
           : () => {};
         const [
           coreStart,
-          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart, favoritesPoc },
+          { dataViews, urlForwarding: urlForwardingStart, share: shareStart, cloud: cloudStart, contentManagement, favoritesPoc: favoritesPocStart, taggingCore, taggingUi },
         ] = await core.getStartServices();
+
+        // Set the content management service for the tagging core plugin
+        if (taggingCore && contentManagement) {
+          taggingCore.setContentManagementService(contentManagement);
+        }
 
         setServices({
           share,
@@ -116,7 +127,10 @@ export class HomePublicPlugin
           theme: core.theme,
           i18nStart: coreStart.i18n,
           shareStart,
-          favoritesPoc,
+          favoritesPoc: favoritesPocStart,
+          taggingCore,
+          taggingUi,
+          contentManagementService: contentManagement,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

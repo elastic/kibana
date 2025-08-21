@@ -8,12 +8,22 @@
  */
 
 import { useTaggedItems } from '@kbn/content-management-table-list-view-common';
+import { getServices } from '../../kibana_services';
 
 export interface UseTaggedPanelOptions {
   limit?: number;
   tags?: string[];
+  availableTags?: Array<{ id: string; name: string; color: string }>;
 }
 
 export const useTaggedPanel = (options: UseTaggedPanelOptions = {}) => {
-  return useTaggedItems(options);
+  const services = getServices();
+  const tagsClient = services.taggingCore?.client;
+  const isContentManagementReady = services.taggingCore?.isContentManagementReady;
+  
+  return useTaggedItems({
+    ...options,
+    tagsClient,
+    isContentManagementReady,
+  });
 };

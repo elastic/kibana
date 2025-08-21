@@ -37,10 +37,7 @@ export const useFavoritesPanel = (): UseFavoritesPanelReturn => {
 
       const services = getServices();
       
-      // Debug: Log what services are available
-      console.log('Home services:', Object.keys(services));
-      console.log('favoritesPoc available:', !!services.favoritesPoc);
-      console.log('favoritesService available:', !!services.favoritesPoc?.favoritesService);
+
       
       // Check if favorites service is available
       if (!services.favoritesPoc?.favoritesService) {

@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/tagging-core-plugin",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "taggingCore",
+    "browser": true,
+    "server": false,
+    "requiredPlugins": [],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

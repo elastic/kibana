@@ -13,16 +13,20 @@
     "requiredPlugins": [
       "dataViews",
       "share",
-      "urlForwarding"
+      "urlForwarding",
+      "contentManagement"
     ],
     "optionalPlugins": [
       "usageCollection",
       "customIntegrations",
       "cloud",
-      "favoritesPoc"
+      "favoritesPoc",
+      "taggingCore",
+      "taggingUi"
     ],
     "requiredBundles": [
-      "kibanaReact"
+      "kibanaReact",
+      "kibanaUtils"
     ]
   }
 }
