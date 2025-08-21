@@ -6,10 +6,12 @@
  */
 
 import { v4 } from 'uuid';
-import {
+import type {
   ContentPackIncludedObjects,
   ContentPackSavedObject,
   ContentPackSavedObjectLinks,
+} from '@kbn/content-packs-schema';
+import {
   INDEX_PLACEHOLDER,
   findConfiguration,
   isIncludeAll,
@@ -17,7 +19,7 @@ import {
   replaceIndexPatterns,
 } from '@kbn/content-packs-schema';
 import { compact, uniqBy } from 'lodash';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export function prepareSOForExport({
   savedObjects,

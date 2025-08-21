@@ -7,54 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useState, useCallback } from 'react';
-import { MenuItem, SecondaryMenuItem } from '../../types';
+import { useState, useCallback, useEffect } from 'react';
 
-interface UseNavigationProps {
-  initialMenuItem: MenuItem;
-  isCollapsed: boolean;
-}
+import type { MenuItem, NavigationStructure, SecondaryMenuItem } from '../../types';
+import type { InitialMenuState } from '../utils/get_initial_active_items';
+import { getInitialActiveItems } from '../utils/get_initial_active_items';
 
 interface NavigationState {
-  currentPage: string | undefined;
-  currentSubpage: string | null;
+  activePageId: string | undefined;
+  activeSubpageId: string | undefined;
   sidePanelContent: MenuItem | null;
   isCollapsed: boolean;
   isSidePanelOpen: boolean;
 }
 
-export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationProps) => {
-  const [currentPage, setCurrentPage] = useState(initialMenuItem.href);
-  const [currentSubpage, setCurrentSubpage] = useState<string | null>(null);
-  const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(initialMenuItem);
-
-  // Determine if side panel should be open based on simple logic
-  const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
-
-  // Check if a menu item is currently active
-  const isMenuItemActive = useCallback(
-    (item: MenuItem | SecondaryMenuItem): boolean => {
-      if ('href' in item && item.href) {
-        return item.href === currentPage || item.href === currentSubpage;
-      }
-      return false;
-    },
-    [currentPage, currentSubpage]
+export const useNavigation = (
+  isCollapsed: boolean,
+  items: NavigationStructure,
+  logoId: string,
+  activeItemId?: string
+) => {
+  const { primaryItem, secondaryItem, isLogoActive } = getInitialActiveItems(
+    items,
+    activeItemId,
+    logoId
   );
 
-  // Navigate to a menu item
+  const [activePageId, setActivePageId] = useState<string | undefined>(
+    isLogoActive ? logoId : primaryItem?.id
+  );
+  const [activeSubpageId, setActiveSubpageId] = useState<string | undefined>(secondaryItem?.id);
+  const [sidePanelContent, setSidePanelContent] = useState<MenuItem | null>(primaryItem);
+
+  const isSidePanelOpen = !isCollapsed && !!sidePanelContent?.sections;
+
   const navigateTo = useCallback(
     (primaryMenuItem: MenuItem, secondaryMenuItem?: SecondaryMenuItem) => {
-      setCurrentPage(primaryMenuItem.href);
-      setCurrentSubpage(secondaryMenuItem?.href || null);
+      setActivePageId(primaryMenuItem.id);
+      setActiveSubpageId(secondaryMenuItem?.id || undefined);
       setSidePanelContent(primaryMenuItem);
     },
     []
   );
 
+  const resetActiveItems = useCallback(
+    (newActiveItems: InitialMenuState) => {
+      const {
+        primaryItem: newPrimaryItem,
+        secondaryItem: newSecondaryItem,
+        isLogoActive: newIsLogoActive,
+      } = newActiveItems;
+      setActivePageId(newIsLogoActive ? logoId : newPrimaryItem?.id);
+      setActiveSubpageId(newSecondaryItem?.id);
+      setSidePanelContent(newPrimaryItem);
+    },
+    [logoId]
+  );
+
+  // Update active items when `activeItemId` changes
+  useEffect(() => {
+    const newActiveItems = getInitialActiveItems(items, activeItemId, logoId);
+    resetActiveItems(newActiveItems);
+  }, [activeItemId, items, logoId, resetActiveItems]);
+
   const state: NavigationState = {
-    currentPage,
-    currentSubpage,
+    activePageId,
+    activeSubpageId,
     sidePanelContent,
     isCollapsed,
     isSidePanelOpen,
@@ -63,6 +81,5 @@ export const useNavigation = ({ initialMenuItem, isCollapsed }: UseNavigationPro
   return {
     ...state,
     navigateTo,
-    isMenuItemActive,
   };
 };

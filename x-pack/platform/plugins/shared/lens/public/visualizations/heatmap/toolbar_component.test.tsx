@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { ComponentProps } from 'react';
+import type { ComponentProps } from 'react';
+import React from 'react';
 import { HeatmapToolbar } from './toolbar_component';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import { FramePublicAPI } from '../../types';
-import { HeatmapVisualizationState } from './types';
-import { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
+import type { FramePublicAPI } from '../../types';
+import type { HeatmapVisualizationState } from './types';
+import type { HeatmapGridConfigResult } from '@kbn/expression-heatmap-plugin/common';
 
 type Props = ComponentProps<typeof HeatmapToolbar>;
 

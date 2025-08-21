@@ -12,9 +12,9 @@ import {
   getOffsetFromNowInSeconds,
   getTimeDifferenceInSeconds,
 } from '@kbn/timerange';
-import { EventData } from '../performance_context';
+import type { EventData } from '../performance_context';
 import { perfomanceMarkers } from '../../performance_markers';
-import { DescriptionWithPrefix } from '../types';
+import type { DescriptionWithPrefix } from '../types';
 
 interface PerformanceMeta {
   queryRangeSecs?: number;

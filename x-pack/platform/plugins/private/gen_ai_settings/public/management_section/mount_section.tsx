@@ -17,6 +17,7 @@ import { i18n } from '@kbn/i18n';
 import { GenAiSettingsApp } from '../components/gen_ai_settings_app';
 import { EnabledFeaturesContextProvider } from '../contexts/enabled_features_context';
 import type { GenAiSettingsConfigType } from '../../common/config';
+import { createCallGenAiSettingsAPI } from '../api/client';
 
 interface MountSectionParams {
   core: CoreSetup;
@@ -37,9 +38,11 @@ export const mountManagementSection = async ({
     })
   );
 
+  const genAiSettingsApi = createCallGenAiSettingsAPI(coreStart);
+
   const GenAiSettingsAppWithContext = () => (
     <I18nProvider>
-      <KibanaContextProvider services={{ ...coreStart, ...startDeps }}>
+      <KibanaContextProvider services={{ ...coreStart, ...startDeps, genAiSettingsApi }}>
         <EnabledFeaturesContextProvider config={config}>
           <Router history={history}>
             <GenAiSettingsApp setBreadcrumbs={setBreadcrumbs} />

@@ -8,9 +8,9 @@
  */
 
 import { getESQLQueryColumns } from '@kbn/esql-utils';
+import type { LensDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import {
   LensConfigBuilder,
-  LensDataset,
   type LensConfig,
   type LensGaugeConfig,
   type LensHeatmapConfig,
@@ -44,7 +44,7 @@ import {
   type OneChatToolWithClientCallback,
 } from '@kbn/ai-client-tools-plugin/public';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
-import { DashboardApi } from '../../dashboard_api/types';
+import type { DashboardApi } from '../../dashboard_api/types';
 // import { coreServices, inferenceService } from '../../services/kibana_services';
 import { convertSchemaToObservabilityParameters } from './schema_adapters';
 import { addToDashboardTool } from '../poc_add_lens/add_to_dashboard_tool';

@@ -12,7 +12,7 @@ import { RunTestManuallyContextItem } from './run_test_manually';
 import { EditMonitorContextItem } from './monitor_summary/edit_monitor_link';
 import { RefreshContextItem } from '../common/components/refresh_button';
 import { AddToCaseContextItem } from './add_to_case_action';
-import { ClientPluginsStart } from '../../../../plugin';
+import type { ClientPluginsStart } from '../../../../plugin';
 
 export function Actions() {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -47,10 +47,10 @@ export function Actions() {
       <EuiContextMenuPanel
         size="m"
         items={[
-          <EditMonitorContextItem />,
-          <RefreshContextItem />,
-          <RunTestManuallyContextItem />,
-        ].concat(isAddToCaseEnabled ? [<AddToCaseContextItem />] : [])}
+          <EditMonitorContextItem key="edit-monitor" />,
+          <RefreshContextItem key="refresh-monitor" />,
+          <RunTestManuallyContextItem key="run-test-manually" />,
+        ].concat(isAddToCaseEnabled ? [<AddToCaseContextItem key="add-to-case" />] : [])}
       />
     </EuiPopover>
   );

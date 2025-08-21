@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useCallback, useState } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 import {
   EuiPageSection,
   EuiSpacer,
@@ -19,7 +19,6 @@ import {
   EuiLink,
   EuiButton,
   useEuiTheme,
-  EuiFieldText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -29,6 +28,8 @@ import { getSpaceIdFromPath } from '@kbn/spaces-utils';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { useKibana } from '../hooks/use_kibana';
 import { GoToSpacesButton } from './go_to_spaces_button';
+import { useGenAiConnectors } from '../hooks/use_genai_connectors';
+import { getElasticManagedLlmConnector } from '../utils/get_elastic_managed_llm_connector';
 
 interface GenAiSettingsAppProps {
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
@@ -36,51 +37,18 @@ interface GenAiSettingsAppProps {
 
 export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrumbs }) => {
   const { services } = useKibana();
-  console.log('services', services);
-  const { application, http, docLinks, uiSettings, notifications } = services;
+  const { application, http, docLinks } = services;
   const { showSpacesIntegration, isPermissionsBased, showAiBreadcrumb } = useEnabledFeatures();
   const { euiTheme } = useEuiTheme();
 
+  const hasConnectorsAllPrivilege =
+    application.capabilities.actions?.show === true &&
+    application.capabilities.actions?.execute === true &&
+    application.capabilities.actions?.delete === true &&
+    application.capabilities.actions?.save === true;
   const canManageSpaces = application.capabilities.management.kibana.spaces;
-  const [isSaving, setIsSaving] = useState(false);
-
-  const [defaultGenAiConnector, setDefaultGenAiConnector] = useState('gpt-4o-mini');
-
-  useEffect(
-    function fetchDefaultConnectorId() {
-      let unmounted = false;
-      async function getConnectorId() {
-        const defaultConnectorId = await uiSettings.get('genAI:defaultConnectorId');
-        console.log('defaultConnectorId', defaultConnectorId);
-        if (!unmounted) {
-          setDefaultGenAiConnector(defaultConnectorId);
-        }
-      }
-      getConnectorId();
-      return () => {
-        unmounted = true;
-      };
-    },
-    [uiSettings]
-  );
-
-  const updateDefaultConnectorIdUiSetting = useCallback(
-    async (id: string) => {
-      setIsSaving(true);
-      try {
-        const result = await uiSettings.set('genAI:defaultConnectorId', id);
-        notifications.toasts.addSuccess(
-          i18n.translate('genAiSettings.defaultConnectorIdSaved', {
-            defaultMessage: 'Default Connector ID for Gen AI features updated',
-          })
-        );
-      } catch (error) {
-        notifications.toasts.addError(error);
-      }
-      setIsSaving(false);
-    },
-    [uiSettings]
-  );
+  const connectors = useGenAiConnectors();
+  const hasElasticManagedLlm = getElasticManagedLlmConnector(connectors.connectors);
 
   useEffect(() => {
     const breadcrumbs = [
@@ -113,6 +81,73 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
       openInNewTab: true,
     });
   }, [application, http.basePath, isPermissionsBased]);
+
+  const connectorDescription = useMemo(() => {
+    if (!hasElasticManagedLlm) {
+      return (
+        <p>
+          <FormattedMessage
+            id="genAiSettings.aiConnectorDescription"
+            defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-driven features in Elastic. In order to use the AI Assistant you must ${
+              hasConnectorsAllPrivilege ? 'set up' : 'have'
+            } a Generative AI connector.`}
+          />
+        </p>
+      );
+    }
+
+    const showSpacesNote = showSpacesIntegration && canManageSpaces && hasConnectorsAllPrivilege;
+
+    return (
+      <p>
+        <FormattedMessage
+          id="genAiSettings.aiConnectorDescriptionWithLink"
+          defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
+            showSpacesNote
+              ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
+              : ''
+          }`}
+          values={{
+            link: (
+              <EuiLink
+                href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
+                target="_blank"
+              >
+                <FormattedMessage
+                  id="genAiSettings.additionalCostsLink"
+                  defaultMessage="additional costs incur"
+                />
+              </EuiLink>
+            ),
+            elasticManagedLlm: (
+              <strong>
+                <FormattedMessage
+                  id="genAiSettings.elasticManagedLlm"
+                  defaultMessage="Elastic Managed LLM"
+                />
+              </strong>
+            ),
+            ...(showSpacesNote && {
+              aiFeatureVisibility: (
+                <strong>
+                  <FormattedMessage
+                    id="genAiSettings.aiFeatureVisibilityText"
+                    defaultMessage="AI feature visibility"
+                  />
+                </strong>
+              ),
+            }),
+          }}
+        />
+      </p>
+    );
+  }, [
+    hasElasticManagedLlm,
+    hasConnectorsAllPrivilege,
+    showSpacesIntegration,
+    canManageSpaces,
+    docLinks,
+  ]);
 
   return (
     <div data-test-subj="genAiSettingsPage">
@@ -149,50 +184,7 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                 </EuiFlexItem>
               </EuiFlexGroup>
             }
-            description={
-              <p>
-                <FormattedMessage
-                  id="genAiSettings.aiConnectorDescriptionWithLink"
-                  defaultMessage={`A large language model (LLM) is required to power the AI Assistant and AI-powered features. By default, Elastic uses its {elasticManagedLlm} connector ({link}) when no custom connectors are available. When available, Elastic uses the last used custom connector.${
-                    showSpacesIntegration && canManageSpaces
-                      ? ' Set up your own connectors or disable the AI Assistant from the {aiFeatureVisibility} setting below.'
-                      : ''
-                  }`}
-                  values={{
-                    link: (
-                      <EuiLink
-                        href={docLinks?.links?.observability?.elasticManagedLlmUsageCost}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="genAiSettings.additionalCostsLink"
-                          defaultMessage="additional costs incur"
-                        />
-                      </EuiLink>
-                    ),
-                    elasticManagedLlm: (
-                      <strong>
-                        <FormattedMessage
-                          id="genAiSettings.elasticManagedLlm"
-                          defaultMessage="Elastic Managed LLM"
-                        />
-                      </strong>
-                    ),
-                    ...(showSpacesIntegration &&
-                      canManageSpaces && {
-                        aiFeatureVisibility: (
-                          <strong>
-                            <FormattedMessage
-                              id="genAiSettings.aiFeatureVisibilityText"
-                              defaultMessage="AI feature visibility"
-                            />
-                          </strong>
-                        ),
-                      }),
-                  }}
-                />
-              </p>
-            }
+            description={connectorDescription}
           >
             <EuiFormRow fullWidth>
               <EuiFlexGroup gutterSize="m" responsive={false}>
@@ -208,61 +200,17 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                       });
                     }}
                   >
-                    <FormattedMessage
-                      id="genAiSettings.goToConnectorsButtonLabel"
-                      defaultMessage="Manage connectors"
-                    />
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFormRow>
-          </EuiDescribedFormGroup>
-
-          <EuiDescribedFormGroup
-            data-test-subj="connectorsSection"
-            fullWidth
-            title={
-              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiIcon type="sparkles" size="m" />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <EuiTitle size="xs">
-                    <h3 data-test-subj="connectorsTitle">
+                    {hasConnectorsAllPrivilege ? (
                       <FormattedMessage
-                        id="genAiSettings.aiConnectorLabel"
-                        defaultMessage="Default Gen AI Connector"
+                        id="genAiSettings.goToConnectorsButtonLabel"
+                        defaultMessage="Manage connectors"
                       />
-                    </h3>
-                  </EuiTitle>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            }
-            description={
-              <p>
-                <FormattedMessage
-                  id="genAiSettings.aiConnectorDescriptionWithLink"
-                  defaultMessage={`Set the default Gen AI Connector to use for any Gen AI features within Kibana, outside of the AI Assistant.`}
-                />
-              </p>
-            }
-          >
-            <EuiFormRow fullWidth>
-              <EuiFlexGroup gutterSize="m" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFieldText
-                    placeholder="Set a connector ID"
-                    value={defaultGenAiConnector}
-                    onChange={(e) => setDefaultGenAiConnector(e.target.value)}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    isLoading={isSaving}
-                    onClick={() => updateDefaultConnectorIdUiSetting(defaultGenAiConnector)}
-                    disabled={isSaving}
-                  >
-                    <FormattedMessage id="genAiSettings.saveButtonLabel" defaultMessage="Save" />
+                    ) : (
+                      <FormattedMessage
+                        id="genAiSettings.viewConnectorsButtonLabel"
+                        defaultMessage="View connectors"
+                      />
+                    )}
                   </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -323,13 +271,13 @@ export const GenAiSettingsApp: React.FC<GenAiSettingsAppProps> = ({ setBreadcrum
                   ) : (
                     <FormattedMessage
                       id="genAiSettings.showAIAssistantDescriptionLabel"
-                      defaultMessage="Enable or disable AI-powered features in the {spaces} settings."
+                      defaultMessage="Enable or disable AI-powered features in {space} settings."
                       values={{
-                        spaces: (
+                        space: (
                           <strong>
                             <FormattedMessage
                               id="genAiSettings.spacesLabel"
-                              defaultMessage="Spaces"
+                              defaultMessage="Space"
                             />
                           </strong>
                         ),

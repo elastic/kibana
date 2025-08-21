@@ -11,8 +11,12 @@ import {
   type KibanaReactContextValue,
 } from '@kbn/kibana-react-plugin/public';
 import type { GenAiSettingsStartDeps } from '../plugin';
+import type { GenAiSettingsAPIClient } from '../api/client';
 
-export type StartServices = CoreStart & GenAiSettingsStartDeps;
+export type StartServices = CoreStart &
+  GenAiSettingsStartDeps & {
+    genAiSettingsApi: GenAiSettingsAPIClient;
+  };
 
 export const useKibana = () => useKibanaBase<StartServices>();
 

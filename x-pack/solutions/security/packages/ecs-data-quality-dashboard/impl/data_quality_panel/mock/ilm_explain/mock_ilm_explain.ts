@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
 export const mockIlmExplain: Record<string, IlmExplainLifecycleLifecycleExplain> = {
   '.ds-packetbeat-8.6.1-2023.02.04-000001': {
@@ -27,6 +27,7 @@ export const mockIlmExplain: Record<string, IlmExplainLifecycleLifecycleExplain>
       version: 1,
       modified_date_in_millis: 1675536751205,
     },
+    skip: false,
   },
   '.ds-packetbeat-8.5.3-2023.02.04-000001': {
     index: '.ds-packetbeat-8.5.3-2023.02.04-000001',
@@ -47,6 +48,7 @@ export const mockIlmExplain: Record<string, IlmExplainLifecycleLifecycleExplain>
       version: 1,
       modified_date_in_millis: 1675536751205,
     },
+    skip: false,
   },
   'auditbeat-custom-index-1': {
     index: 'auditbeat-custom-index-1',

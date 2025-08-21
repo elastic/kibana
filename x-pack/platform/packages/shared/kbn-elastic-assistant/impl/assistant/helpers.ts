@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AIConnector } from '../connectorland/connector_selector';
-import { FetchConnectorExecuteResponse } from './api';
+import type { AIConnector } from '../connectorland/connector_selector';
+import type { FetchConnectorExecuteResponse } from './api';
 import type { ClientMessage } from '../assistant_context/types';
 
 export const getMessageFromRawResponse = (

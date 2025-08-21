@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { useNavigateFindings } from '@kbn/cloud-security-posture/src/hooks/use_navigate_findings';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 import { getBenchmarkIdQuery } from './benchmarks_section';
-import { BenchmarkData } from '../../../../common/types_old';
+import type { BenchmarkData } from '../../../../common/types_old';
 import { CISBenchmarkIcon } from '../../../components/cis_benchmark_icon';
 import cisLogoIcon from '../../../assets/icons/cis_logo.svg';
 interface BenchmarkInfo {
