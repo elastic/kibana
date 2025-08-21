@@ -31,8 +31,7 @@
       "ruleRegistry",
       "files",
       "contentManagement",
-      "uiActions",
-      "observabilityAIAssistant"
+      "uiActions"
     ],
     "optionalPlugins": [
       "cloud",
