@@ -247,8 +247,8 @@ export function WorkflowDetailPage({ id }: { id: string }) {
         {activeTab === 'executions' && (
           <EuiFlexItem
             css={{
-              flexBasis: '275px',
-              maxWidth: '275px',
+              flexBasis: '200px',
+              maxWidth: '200px',
               flex: 1,
               backgroundColor: euiTheme.colors.backgroundBasePlain,
               borderRight: `1px solid ${euiTheme.colors.lightShade}`,

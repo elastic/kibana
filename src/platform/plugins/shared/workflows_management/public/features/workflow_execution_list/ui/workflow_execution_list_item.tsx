@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import type { ExecutionStatus } from '@kbn/workflows';
 import React from 'react';
+import { FormattedRelative } from '@kbn/i18n-react';
 import { useFormattedDateTime } from '../../../shared/ui/use_formatted_date';
 import { getStatusLabel } from '../../../shared/translations';
 import { getExecutionStatusIcon } from '../../../shared/ui/status_badge';
@@ -50,6 +51,7 @@ export const WorkflowExecutionListItem = ({
       alignItems="center"
       justifyContent="flexStart"
       onClick={onClick}
+      responsive={false}
     >
       <EuiFlexItem css={{ flexGrow: 0, width: '16px', height: '16px' }}>
         {getExecutionStatusIcon(euiTheme, status)}
@@ -67,8 +69,10 @@ export const WorkflowExecutionListItem = ({
           <EuiFlexItem>
             <p css={{ fontWeight: 500 }}>{getStatusLabel(status)}</p>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <p>{formattedDate}</p>
+          <EuiFlexItem css={{ alignSelf: 'flex-start' }}>
+            <EuiToolTip position="right" content={formattedDate}>
+              <FormattedRelative value={startedAt} />
+            </EuiToolTip>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
