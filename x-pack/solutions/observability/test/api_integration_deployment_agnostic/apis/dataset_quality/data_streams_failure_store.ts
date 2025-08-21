@@ -61,10 +61,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         data_stream: { hidden: false },
       });
 
-      await client.createComponentTemplate({
-        name: 'logs-failure-disabled@mappings',
-        dataStreamOptions: { failure_store: { enabled: true } },
-      });
       await es.indices.putIndexTemplate({
         name: disabledDs,
         index_patterns: [disabledDs],
