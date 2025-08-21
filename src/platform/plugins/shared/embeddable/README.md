@@ -21,9 +21,7 @@ Each embeddable manages its own state. This is because the embeddable system all
 An embeddable API shares state via a publishing subject, a read only RxJS Observable. An embeddable API shares setter methods for updating state.
 
 ### Embeddable overview
-Embeddables manage their own state, can be serialized and deserialized and have 2 parts.
-1) React component 
-2) an API that can be used to interact with them imperatively
+Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
 Plugins register new embeddable types.
 ```
@@ -33,7 +31,7 @@ embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
 });
 ```
 
-Embeddables rendered with `EmbeddableRenderer` React component.
+Embeddables are rendered with `EmbeddableRenderer` React component.
 
 ### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
