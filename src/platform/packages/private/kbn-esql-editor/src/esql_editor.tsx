@@ -111,6 +111,8 @@ const ESQLEditorInternal = function ESQLEditor({
   disableSubmitAction,
   dataTestSubj,
   allowQueryCancellation,
+  allowQueryRefresh,
+  runQueryButtonText,
   hideTimeFilterInfo,
   hideQueryHistory,
   hasOutline,
@@ -121,6 +123,11 @@ const ESQLEditorInternal = function ESQLEditor({
   expandToFitQueryOnMount,
   dataErrorsControl,
   formLabel,
+  customEditorDidMount,
+  fullHeight,
+  barElement,
+  text,
+  onTextChange,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -142,7 +149,7 @@ const ESQLEditorInternal = function ESQLEditor({
 
   const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
-  const [code, setCode] = useState<string>(fixedQuery ?? '');
+  const [code, setCode] = useState<string>(text ?? fixedQuery ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
   const [codeWhenSubmitted, setCodeStateOnSubmission] = useState(code);
   const [editorHeight, setEditorHeight] = useRestorableState(
@@ -230,12 +237,12 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading]);
 
   useEffect(() => {
-    if (editor1.current) {
+    if (editor1.current && text === undefined) {
       if (code !== fixedQuery) {
         setCode(fixedQuery);
       }
     }
-  }, [code, fixedQuery]);
+  }, [text, code, fixedQuery]);
 
   // Enable the variables service if the feature is supported in the consumer app
   useEffect(() => {
@@ -588,10 +595,10 @@ const ESQLEditorInternal = function ESQLEditor({
         color: 'text',
       };
     }
-    if (code !== codeWhenSubmitted) {
+    if (code !== codeWhenSubmitted || !allowQueryRefresh) {
       return {
         label: i18n.translate('esqlEditor.query.runQuery', {
-          defaultMessage: 'Run query',
+          defaultMessage: runQueryButtonText ?? 'Run query',
         }),
         iconType: 'play',
         color: 'success',
@@ -604,7 +611,7 @@ const ESQLEditorInternal = function ESQLEditor({
       iconType: 'refresh',
       color: 'primary',
     };
-  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
+  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading, runQueryButtonText, allowQueryRefresh]);
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
@@ -688,7 +695,7 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   const suggestionProvider = useMemo(
-    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks),
+    () => ESQLLang.getSuggestionProvider?.(esqlCallbacks, text !== undefined),
     [esqlCallbacks]
   );
 
@@ -788,11 +795,11 @@ const ESQLEditorInternal = function ESQLEditor({
           justifyContent="spaceBetween"
           alignItems={hideRunQueryButton ? 'flexEnd' : 'center'}
           css={css`
-            padding: ${theme.euiTheme.size.s} 0;
+            padding: ${theme.euiTheme.size.s};
           `}
         >
-          <EuiFlexItem grow={false}>
-            {formLabel && (
+          {formLabel && (
+            <EuiFlexItem grow={false}>
               <EuiFormLabel
                 isFocused={labelInFocus && !isDisabled}
                 isDisabled={isDisabled}
@@ -809,8 +816,9 @@ const ESQLEditorInternal = function ESQLEditor({
               >
                 {formLabel}
               </EuiFormLabel>
-            )}
-          </EuiFlexItem>
+            </EuiFlexItem>
+          )}
+          {barElement && <EuiFlexItem grow={false}>{barElement}</EuiFlexItem>}
           <EuiFlexItem grow={false}>
             {!hideRunQueryButton && (
               <EuiToolTip
@@ -841,6 +849,7 @@ const ESQLEditorInternal = function ESQLEditor({
         css={{
           zIndex: theme.euiTheme.levels.flyout,
           position: 'relative',
+          height: 'calc(100% - 125px)',
         }}
         responsive={false}
         ref={containerRef}
@@ -868,6 +877,7 @@ const ESQLEditorInternal = function ESQLEditor({
                   value={code}
                   options={codeEditorOptions}
                   width="100%"
+                  height={fullHeight ? '300px' : editorHeight}
                   suggestionProvider={suggestionProvider}
                   hoverProvider={{
                     provideHover: (model, position, token) => {
@@ -877,10 +887,13 @@ const ESQLEditorInternal = function ESQLEditor({
                       return hoverProvider?.provideHover(model, position, token);
                     },
                   }}
-                  onChange={onQueryUpdate}
+                  onChange={onTextChange ?? onQueryUpdate}
                   onFocus={() => setLabelInFocus(true)}
                   onBlur={() => setLabelInFocus(false)}
                   editorDidMount={(editor) => {
+                    if (customEditorDidMount) {
+                      customEditorDidMount(editor);
+                    }
                     editor1.current = editor;
                     const model = editor.getModel();
                     if (model) {
@@ -972,7 +985,7 @@ const ESQLEditorInternal = function ESQLEditor({
           bottomContainer: styles.bottomContainer,
           historyContainer: styles.historyContainer,
         }}
-        code={code}
+        code={query.esql}
         onErrorClick={onErrorClick}
         runQuery={onQuerySubmit}
         updateQuery={onQueryUpdate}
@@ -988,7 +1001,7 @@ const ESQLEditorInternal = function ESQLEditor({
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
         hideQueryHistory={hideQueryHistory}
-        resizableContainerButton={resizableContainerButton}
+        resizableContainerButton={fullHeight ? undefined : resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}

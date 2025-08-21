@@ -39,6 +39,7 @@
     "@kbn/data-plugin",
     "@kbn/esql-ast",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/esql",
   ],
   "exclude": [
     "target/**/*",

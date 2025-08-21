@@ -8,6 +8,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { monaco } from '@kbn/monaco';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -100,6 +101,13 @@ export interface ESQLEditorProps {
   dataErrorsControl?: DataErrorsControl;
   /** Optional form field label to show above the query editor */
   formLabel?: string;
+  barElement?: React.ReactNode;
+  text?: string;
+  onTextChange?: (text: string) => void;
+  customEditorDidMount?: (editor: monaco.editor.IStandaloneCodeEditor) => void;
+  fullHeight?: boolean;
+  allowQueryRefresh?: boolean;
+  runQueryButtonText?: string;
 }
 
 interface ESQLVariableService {

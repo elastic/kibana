@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
+  EuiButton,
   EuiResizableContainer,
   useIsWithinBreakpoints,
   useEuiTheme,
@@ -37,6 +38,7 @@ import {
   useEditorReadContext,
 } from '../../contexts';
 import { MonacoEditor } from './monaco_editor';
+import { EsqlEditor } from './esql_editor';
 import { MonacoEditorOutput } from './monaco_editor_output';
 import { getResponseWithMostSevereStatusCode } from '../../../lib/utils';
 
@@ -67,6 +69,7 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
   const editorDispatch = useEditorActionContext();
 
   const [fetchingAutocompleteEntities, setFetchingAutocompleteEntities] = useState(false);
+  const [isEsqlMode, setIsEsqlMode] = useState(false);
 
   useEffect(() => {
     const debouncedSetFechingAutocompleteEntities = debounce(
@@ -158,11 +161,13 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                 <EuiSplitPanel.Inner
                   paddingSize="none"
                   grow={true}
-                  className="consoleEditorPanel"
-                  css={{ top: 0, height: 'calc(100% - 40px)' }}
+                  className={'consoleEditorPanel'}
+                  css={{ top: 0, height: isEsqlMode ? '100%' : 'calc(100% - 40px)' }}
                 >
                   {loading ? (
                     <EditorContentSpinner />
+                  ) : isEsqlMode ? (
+                    <EsqlEditor />
                   ) : (
                     <MonacoEditor
                       localStorageValue={currentTextObject.text}
@@ -172,6 +177,38 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                   )}
                 </EuiSplitPanel.Inner>
 
+                {/* <EuiSplitPanel.Inner
+                  paddingSize="none"
+                  grow={true}
+                  className="consoleEditorPanel"
+                  css={{ top: 0, height: '100%' }}
+                >
+                  <EuiFlexGroup gutterSize="none" direction="column">
+                    {isEsqlMode && (
+                      <EuiFlexItem
+                        grow={true}
+                        css={{ top: 0, height: '100%' }}
+                      >
+                        <EsqlEditor />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem
+                        grow={true}
+                        css={{ top: 0, height: 'calc(100% - 140px)' }}
+                    >
+                      {loading ? (
+                        <EditorContentSpinner />
+                      ) : (
+                        <MonacoEditor
+                          localStorageValue={currentTextObject.text}
+                          value={inputEditorValue}
+                          setValue={setInputEditorValue}
+                        />
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiSplitPanel.Inner> */}
+
                 {!loading && (
                   <EuiSplitPanel.Inner
                     grow={false}
@@ -179,18 +216,28 @@ export const Editor = memo(({ loading, inputEditorValue, setInputEditorValue }: 
                     color="subdued"
                     className="consoleEditorPanel"
                   >
-                    <EuiButtonEmpty
-                      size="xs"
-                      color="primary"
-                      data-test-subj="clearConsoleInput"
-                      onClick={() => {
-                        setInputEditorValue('');
-                      }}
-                    >
-                      {i18n.translate('console.editor.clearConsoleInputButton', {
-                        defaultMessage: 'Clear this input',
-                      })}
-                    </EuiButtonEmpty>
+                    <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          color="primary"
+                          data-test-subj="clearConsoleInput"
+                          onClick={() => {
+                            setInputEditorValue('');
+                          }}
+                        >
+                          {i18n.translate('console.editor.clearConsoleInputButton', {
+                            defaultMessage: 'Clear this input',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+
+                      <EuiFlexItem grow={false}>
+                        <EuiButton onClick={() => setIsEsqlMode(!isEsqlMode)} size="xs" fill={true}>
+                          {isEsqlMode ? 'Switch to Classic' : 'Try ES|QL'}
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   </EuiSplitPanel.Inner>
                 )}
               </EuiSplitPanel.Outer>
