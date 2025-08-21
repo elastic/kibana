@@ -119,7 +119,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{|<-}}"
 `.trim();
@@ -128,6 +128,7 @@ steps:
         'consts',
         'event',
         'now',
+        'spaceId',
         'steps',
         'workflowRunId',
       ]);
@@ -141,7 +142,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: @|<-
 `.trim();
@@ -158,7 +159,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: hey, this is @|<-
 `.trim();
@@ -175,7 +176,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "@<-"
 `.trim();
@@ -184,6 +185,7 @@ steps:
         'consts',
         'event',
         'now',
+        'spaceId',
         'steps',
         'workflowRunId',
       ]);
@@ -206,7 +208,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.|<-}}"
 `.trim();
@@ -239,7 +241,7 @@ consts:
         body: 'Go look at the activity'
 steps:
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.templates[0].|<-}}"
 `.trim();
@@ -263,11 +265,11 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log  
+    type: console.log
     with:
       message: "hello"
   - name: step1
-    type: console.log  
+    type: console.log
     with:
       message: "{{steps.|<-}}"
 `.trim();
@@ -288,16 +290,16 @@ steps:
       condition: "{{steps.step0.output.message == 'hello'}}"
     steps:
       - name: first-true-step
-        type: console.log  
+        type: console.log
         with:
           message: "im true"
       - name: second-true-step
-        type: console.log  
+        type: console.log
         with:
           message: "im true, {{steps.|<-}}"
     else:
       - name: false-step
-        type: console.log  
+        type: console.log
         with:
           message: "im unreachable"
 `.trim();
@@ -313,7 +315,7 @@ consts:
   apiUrl: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.a|<-}}"
 `.trim();
@@ -329,7 +331,7 @@ consts:
   api-url: "https://api.example.com"
 steps:
   - name: step0
-    type: console.log  
+    type: console.log
     with:
       message: "{{consts.|<-}}"
 `.trim();
@@ -344,7 +346,7 @@ steps:
         api-url: "https://api.example.com"
       steps:
         - name: step0
-          type: console.log  
+          type: console.log
           with:
             message: '{{consts.|<-}}'
       `.trim();
