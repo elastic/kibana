@@ -9,7 +9,6 @@
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import { WorkflowStatus } from '@kbn/workflows';
 import { WORKFLOW_SAVED_OBJECT_TYPE } from '../saved_objects/workflow';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 import { WorkflowsService } from './workflows_management_service';
@@ -127,13 +126,13 @@ describe('WorkflowsService', () => {
             attributes: {
               name: 'Test Workflow',
               description: 'A test workflow',
-              status: WorkflowStatus.ACTIVE,
+              enabled: true,
               tags: [],
               yaml: '',
               definition: {},
               createdBy: 'system',
               lastUpdatedBy: 'system',
-              deleted: false,
+              deleted_at: null,
             },
             created_at: '2023-01-01T00:00:00Z',
             updated_at: '2023-01-01T00:00:00Z',
@@ -150,14 +149,15 @@ describe('WorkflowsService', () => {
       // Mock the searchWorkflowExecutions method
       jest.spyOn(service, 'searchWorkflowExecutions').mockResolvedValue({
         results: [],
-        _pagination: { offset: 0, limit: 100, total: 0 },
+        _pagination: { page: 1, limit: 100, total: 0 },
       });
 
-      await service.searchWorkflows({ limit: 100, offset: 0 }, spaceId);
+      await service.searchWorkflows({ limit: 100, page: 1 }, spaceId);
 
       expect(mockSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith(spaceId);
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: WORKFLOW_SAVED_OBJECT_TYPE,
+        page: 1,
         perPage: 100,
         sortField: 'updated_at',
         sortOrder: 'desc',
