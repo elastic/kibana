@@ -49,7 +49,7 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
 | HasSupportedTriggers | Inteface for publishing supported triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
-| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID |
+| HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID, ACTION_DEPRECATION_BADGE |
 | LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID, ACTION_OPEN_IN_DISCOVER |
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
 | PublishesDataLoading | Interface for publishing when embeddable is loading | Auto refresh |  
@@ -58,6 +58,7 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 | PublishesRendered | Interface for publishing rendered complete | |
 | PublishesSavedObjectId | Interface for surfacing saved object id | |
 | PublishesSavedSearch | Interface for accessing Discover session embeddable state | generateCsvReport | 
+| PublishesTimeRange | Interface for accessing time range state | CUSTOM_TIME_RANGE_BADGE |
 | PublishesTitle | Interface for accessing embeddable title | ACTION_CUSTOMIZE_PANEL |
 | PublishesUnifiedSearch | Interface for publishing unified search state | BADGE_FILTERS_NOTIFICATION |
 | PublishesUnsavedChanges | Interface for publishing when embeddable has unsaved changes | Dashboard unsaved chnages notification and reset |
@@ -69,8 +70,7 @@ The embeddable panel uses UiActions and Triggers registry to make the embeddable
 
 | Trigger | Description |
 | ------- | ----------- |
-| CONTEXT_MENU_TRIGGER | trigger to add an action to a panel's context menu |
-| PANEL_HOVER_TRIGGER | trigger to add an action to a panel's hover menu |
+| CONTEXT_MENU_TRIGGER | trigger to add an action to a panel's context menu or hover action menu. Only actions listed in QUICK_ACTION_IDS are displayed in hover action menu. |
 | PANEL_BADGE_TRIGGER | trigger to add a badge to a panel's title bar |
 | PANEL_NOTIFICATION_TRIGGER | trigger to add a notification to the top-right corner of a panel |
 
@@ -84,6 +84,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | ACTION_CLONE_PANEL | Clones panel in page | CONTEXT_MENU_TRIGGER | |
 | ACTION_COPY_TO_DASHBOARD | Opens "copy to dashboard" modal | CONTEXT_MENU_TRIGGER | |
 | ACTION_CUSTOMIZE_PANEL | Opens panel settings flyout | CONTEXT_MENU_TRIGGER | PublishesDataViews, PublishesTitle |
+| ACTION_DEPRECATION_BADGE | Displays deprecation badge for Visualize embeddable input controls | PANEL_BADGE_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_IN_LENS | Opens Visualize embeddable in lens editor | CONTEXT_MENU_TRIGGER | HasVisualizeConfig |
 | ACTION_EDIT_PANEL | Opens embeddable editor | CONTEXT_MENU_TRIGGER | HasEditCapabilities |
 | ACTION_EXPAND_PANEL | Expands panel so page only displays single panel | CONTEXT_MENU_TRIGGER | |
@@ -105,6 +106,7 @@ The table below lists the UiActions registered to embeddable panel triggers.
 | open-change-point-in-ml-app | Open change point chart embeddable in AIOps Labs | CONTEXT_MENU_TRIGGER | |
 | open-in-anomaly-explorer | Open in Anomaly Explorer | CONTEXT_MENU_TRIGGER | |
 | open-in-single-metric-viewer | Open in Single Metric Viewer | CONTEXT_MENU_TRIGGER | |
+| CUSTOM_TIME_RANGE_BADGE | Displays custom time range badge | PANEL_BADGE_TRIGGER | PublishesTimeRange |
 | OPEN_FLYOUT_ADD_DRILLDOWN | Create drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
 | OPEN_FLYOUT_EDIT_DRILLDOWN | Edit drilldown | CONTEXT_MENU_TRIGGER | HasDynamicActions, HasSupportedTriggers |
 | SYNCHRONIZE_MOVEMENT_ACTION | Synchronize maps, so that if you zoom and pan in one map, the movement is reflected in other maps | CONTEXT_MENU_TRIGGER | |
