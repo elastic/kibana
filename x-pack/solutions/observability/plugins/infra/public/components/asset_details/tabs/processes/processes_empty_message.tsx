@@ -61,7 +61,7 @@ export const ProcessesEmptyMessage: React.FC<ProcessesEmptyMessageProps> = ({
               values={{
                 otelDocsLink: (
                   <EuiLink
-                    data-test-subj="infraProcessesTableTopNByCpuOrMemoryOtelLink"
+                    data-test-subj="infraProcessesTableOtelDocsLink"
                     href="https://ela.st/otel-process-hosts-ui"
                     target="_blank"
                   >
