@@ -26,6 +26,7 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
@@ -72,6 +73,8 @@ export abstract class StepBase<TStep extends BaseStep> implements StepImplementa
     } finally {
       await this.workflowExecutionRuntime.finishStep(stepId);
     }
+
+    this.workflowExecutionRuntime.goToNextStep();
   }
 
   // Subclasses implement this to execute the step logic
