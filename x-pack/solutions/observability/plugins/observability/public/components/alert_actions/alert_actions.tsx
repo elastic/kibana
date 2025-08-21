@@ -21,7 +21,6 @@ import {
   RELATED_ALERTS_TABLE_ID,
   SLO_ALERTS_TABLE_ID,
 } from '@kbn/observability-shared-plugin/common';
-import type { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import {
@@ -61,14 +60,6 @@ export function AlertActions({
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
-
-  const alertAttachment = useMemo(() => {
-    return caseData?.comments?.find((comment) => {
-      if ('alertId' in comment && comment.alertId.includes(alert._id)) {
-        return comment.alertId.includes(alert._id);
-      }
-    });
-  }, [caseData, alert._id]);
 
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete: () => {
@@ -125,7 +116,6 @@ export function AlertActions({
       cases,
     },
     caseId: caseData?.id,
-    alertAttachment: alertAttachment as unknown as AlertAttachment,
   });
 
   const closeActionsPopover = useCallback(() => {
@@ -137,7 +127,7 @@ export function AlertActions({
   };
 
   const removeFromCaseAction = [
-    ...(alertAttachment
+    ...(caseData?.id
       ? [
           <EuiContextMenuItem
             data-test-subj="remove-from-case-action"

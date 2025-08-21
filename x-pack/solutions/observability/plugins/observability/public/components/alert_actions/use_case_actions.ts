@@ -12,7 +12,6 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import type { CasesService } from '@kbn/response-ops-alerts-table/types';
-import type { AlertAttachment } from '@kbn/cases-plugin/common/types/domain';
 import type { EventNonEcsData } from '../../../common/typings';
 
 export const useCaseActions = ({
@@ -20,7 +19,6 @@ export const useCaseActions = ({
   onAddToCase,
   services,
   caseId,
-  alertAttachment,
 }: {
   alerts: Alert[];
   onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
@@ -31,7 +29,6 @@ export const useCaseActions = ({
     cases?: CasesService;
   };
   caseId?: string;
-  alertAttachment?: AlertAttachment;
 }) => {
   const { cases } = services;
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
@@ -40,7 +37,7 @@ export const useCaseActions = ({
     onAddToCase?.({ isNewCase: false });
   }, [onAddToCase]);
 
-  const { mutateAsync: removeAlertsFromCase } = useRemoveAlertFromCase();
+  const { mutateAsync: removeAlertsFromCase } = useRemoveAlertFromCase(caseId ?? '');
 
   const removalSuccessToast = i18n.translate(
     'xpack.observability.alerts.actions.removeFromCaseSuccess',
@@ -49,10 +46,8 @@ export const useCaseActions = ({
 
   const handleRemoveAlertsFromCase = () => {
     alerts.forEach((alert) => {
-      if (alertAttachment && caseId && alert._id) {
+      if (alert._id) {
         removeAlertsFromCase({
-          caseId,
-          alertAttachment,
           alertId: alert._id,
           successToasterTitle: removalSuccessToast,
         });

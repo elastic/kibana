@@ -10,24 +10,62 @@ import { casesMutationsKeys } from './constants';
 import type { ServerError } from '../types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { useCasesToast } from '../common/use_cases_toast';
-import { deleteAlertComment } from './api';
+import { removeAlertFromComment } from './api';
 import * as i18n from './translations';
-import type { AlertAttachment } from '../../common/types/domain';
+import { useGetCase } from './use_get_case';
+import type { AttachmentUI, AlertAttachmentUI } from './types';
 
 interface MutationArgs {
-  caseId: string;
   alertId: string;
   successToasterTitle: string;
-  alertAttachment: AlertAttachment;
 }
 
-export const useRemoveAlertFromCase = () => {
+export const useRemoveAlertFromCase = (caseId: string) => {
   const { showErrorToast, showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
+  const { data: caseData } = useGetCase(caseId);
+  const attachments = caseData?.case?.comments ?? [];
+
   return useMutation(
-    ({ caseId, alertId, alertAttachment }: MutationArgs) =>
-      deleteAlertComment({ caseId, alertId, alertAttachment }),
+    ({ alertId }: MutationArgs) => {
+      const alertAttachment = attachments.find((attachment) => {
+        if ('alertId' in attachment && isAlertAttachment(attachment)) {
+          return attachment.alertId.includes(alertId);
+        }
+        return false;
+      });
+      if (!alertAttachment || isAlertAttachment(alertAttachment) === false) {
+        throw new Error('Alert attachment not found');
+      }
+
+      return removeAlertFromComment({
+        caseId,
+        alertId,
+        alertAttachment: {
+          ...alertAttachment,
+          created_at: alertAttachment.createdAt,
+          created_by: {
+            ...alertAttachment.createdBy,
+            full_name: alertAttachment.createdBy.fullName,
+          },
+          updated_at: alertAttachment.updatedAt,
+          updated_by: alertAttachment.updatedBy
+            ? {
+                ...alertAttachment.updatedBy,
+                full_name: alertAttachment.updatedBy.fullName,
+              }
+            : null,
+          pushed_at: alertAttachment.pushedAt ?? null,
+          pushed_by: alertAttachment.pushedBy
+            ? {
+                ...alertAttachment.pushedBy,
+                full_name: alertAttachment.pushedBy.fullName,
+              }
+            : null,
+        },
+      });
+    },
     {
       mutationKey: casesMutationsKeys.deleteComment,
       onSuccess: (_, { successToasterTitle }) => {
@@ -40,5 +78,11 @@ export const useRemoveAlertFromCase = () => {
     }
   );
 };
+
+export function isAlertAttachment(obj: AttachmentUI): obj is AlertAttachmentUI {
+  if (!obj || typeof obj !== 'object') return false;
+  // Adjust these checks based on the actual AlertAttachment structure
+  return obj.type === 'alert';
+}
 
 export type UseRemoveAlertFromCase = ReturnType<typeof useRemoveAlertFromCase>;

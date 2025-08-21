@@ -7,7 +7,13 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { AlertAttachment, CaseCustomField, User } from '../../common/types/domain';
+import type {
+  AlertAttachment,
+  CaseCustomField,
+  User,
+  AlertAttachmentPayload,
+  UserCommentAttachmentPayload,
+} from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -402,27 +408,19 @@ export const postComment = async (
 export const patchComment = async ({
   caseId,
   commentId,
-  commentUpdate,
   version,
-  owner,
+  patch,
   signal,
 }: {
   caseId: string;
   commentId: string;
-  commentUpdate: string;
+  patch: AlertAttachmentPayload | UserCommentAttachmentPayload;
   version: string;
-  owner: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {
   const response = await KibanaServices.get().http.fetch<Case>(getCaseCommentsUrl(caseId), {
     method: 'PATCH',
-    body: JSON.stringify({
-      comment: commentUpdate,
-      type: AttachmentType.user,
-      id: commentId,
-      version,
-      owner,
-    }),
+    body: JSON.stringify({ id: commentId, version, ...patch }),
     signal,
   });
   return convertCaseToCamelCase(decodeCaseResponse(response));
@@ -451,7 +449,7 @@ export const patchAlertComment = async ({
   return response;
 };
 
-export const deleteAlertComment = async ({
+export const removeAlertFromComment = async ({
   caseId,
   alertId: alertIdToRemove,
   alertAttachment,
@@ -461,35 +459,29 @@ export const deleteAlertComment = async ({
   alertId: string;
   alertAttachment: AlertAttachment;
   signal?: AbortSignal;
-}): Promise<void | AlertAttachment> => {
+}): Promise<void> => {
   const { alertId, index, rule, version, id, owner } = alertAttachment;
   if (Array.isArray(alertId) && Array.isArray(index) && alertId.length > 1) {
     const alertIdx = alertId.indexOf(alertIdToRemove);
     alertId.splice(alertIdx, 1);
     index.splice(alertIdx, 1);
     if (alertId.length === 0) {
-      return deleteComment({
+      deleteComment({
         caseId,
         commentId: alertAttachment.id,
         signal,
       });
     } else {
-      return patchAlertComment({
+      patchComment({
         caseId,
-        commentUpdate: {
-          type: AttachmentType.alert,
-          alertId,
-          index,
-          rule,
-          owner,
-          id,
-          version,
-        } as AlertAttachment,
+        commentId: id,
+        version,
+        patch: { type: AttachmentType.alert, alertId, index, rule, owner },
         signal,
       });
     }
   } else {
-    return deleteComment({
+    deleteComment({
       caseId,
       commentId: alertAttachment.id,
       signal,
