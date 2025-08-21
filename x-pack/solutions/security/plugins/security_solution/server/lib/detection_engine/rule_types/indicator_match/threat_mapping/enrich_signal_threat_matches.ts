@@ -43,14 +43,19 @@ export const buildEnrichments = ({
       feed.name = feedName;
     }
 
-    const dedupedThreatMappingEntries = threatMappings[query.threatMappingIndex].entries.reduce<
-      ThreatMappingEntry[]
-    >((accum, entry) => {
-      if (!accum.some((addedEntry) => isEqual(addedEntry, entry))) {
-        accum.push(entry);
-      }
-      return accum;
-    }, []);
+    const filteredEntries = threatMappings[query.threatMappingIndex].entries.filter(
+      (entry) => entry.negate !== true
+    );
+
+    const dedupedThreatMappingEntries = filteredEntries.reduce<ThreatMappingEntry[]>(
+      (accum, entry) => {
+        if (!accum.some((addedEntry) => isEqual(addedEntry, entry))) {
+          accum.push(entry);
+        }
+        return accum;
+      },
+      []
+    );
     return dedupedThreatMappingEntries.map((entry) => ({
       indicator,
       feed,
