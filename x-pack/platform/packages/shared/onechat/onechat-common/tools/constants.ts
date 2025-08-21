@@ -20,8 +20,10 @@ export const builtinToolIds = {
 
 export const defaultAgentToolIds = [
   builtinToolIds.search,
-  builtinToolIds.listIndices,
   builtinToolIds.indexExplorer,
+  builtinToolIds.listIndices,
+  builtinToolIds.getIndexMapping,
+  builtinToolIds.getDocumentById,
 ];
 
 export const builtInToolIdPrefix = '.';
