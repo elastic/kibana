@@ -189,7 +189,7 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       WORKFLOWS_EXECUTION_LOGS_INDEX,
       this.config.logging.console
     );
-    this.api = new WorkflowsManagementApi(this.workflowsService);
+    this.api = new WorkflowsManagementApi(this.workflowsService, null, this.logger);
     this.spaces = plugins.spaces?.spacesService;
 
     // Register server side APIs
@@ -215,6 +215,11 @@ export class WorkflowsPlugin implements Plugin<WorkflowsPluginSetup, WorkflowsPl
       if (plugins.security) {
         this.workflowsService.setSecurityService(core.security);
       }
+    }
+
+    // Set security service in API
+    if (this.api && plugins.security) {
+      this.api.setSecurityService(core.security);
     }
 
     const actionsTypes = plugins.actions.getAllTypes();

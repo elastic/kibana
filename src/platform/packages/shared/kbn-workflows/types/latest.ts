@@ -57,3 +57,11 @@ export type {
   WaitGraphNodeSchema,
   WaitGraphNode,
 } from './execution';
+
+// Internal Connector Types
+export type {
+  InternalConnectorRequest,
+  InternalConnectorResponse,
+  InternalConnectorStepInput,
+  InternalConnectorStepOutput,
+} from './v1';

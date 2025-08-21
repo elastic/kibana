@@ -24,6 +24,8 @@ import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
+import { InternalConnectorStepImpl } from './internal_connector_step';
+import type { ElasticsearchClient } from '@kbn/core/server';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -87,6 +89,7 @@ export class StepFactory {
           this.workflowRuntime,
           this.workflowLogger
         );
+
       case 'parallel':
       // return new ParallelStepImpl(step as ParallelStep, contextManager);
       case 'merge':

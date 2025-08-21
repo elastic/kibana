@@ -1,0 +1,26 @@
+{
+  "kibana.saved_objects": {
+    "url_params": {
+      "type": {
+        "type": "string",
+        "description": "The saved object type (dashboard, visualization, etc.)"
+      },
+      "id": {
+        "type": "string",
+        "description": "The saved object ID"
+      },
+      "namespace": {
+        "type": "string",
+        "description": "The namespace for the saved object"
+      }
+    },
+    "methods": ["GET", "POST", "PUT", "DELETE"],
+    "patterns": [
+      "api/saved_objects",
+      "api/saved_objects/{type}",
+      "api/saved_objects/{type}/{id}",
+      "api/saved_objects/{type}/{id}?namespace={namespace}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/kibana/current/saved-objects-api.html"
+  }
+}

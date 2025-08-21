@@ -1,0 +1,16 @@
+{
+  "kibana.settings": {
+    "url_params": {
+      "key": {
+        "type": "string",
+        "description": "The setting key to get or set"
+      }
+    },
+    "methods": ["GET", "POST"],
+    "patterns": [
+      "api/kibana/settings",
+      "api/kibana/settings/{key}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/kibana/current/api/settings.html"
+  }
+}

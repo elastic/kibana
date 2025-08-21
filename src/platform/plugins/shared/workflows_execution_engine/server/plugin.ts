@@ -87,7 +87,8 @@ export class WorkflowsExecutionEnginePlugin
                 esClient,
                 logger,
                 config,
-                workflowExecutionRepository
+                workflowExecutionRepository,
+                (pluginsStart as any).core || core
               );
               await workflowRuntime.resume();
 
@@ -135,7 +136,8 @@ export class WorkflowsExecutionEnginePlugin
         this.esClient,
         this.logger,
         this.config,
-        this.workflowExecutionRepository
+        this.workflowExecutionRepository,
+        core
       );
 
       // Log workflow execution start
@@ -159,7 +161,8 @@ async function createContainer(
   esClient: Client,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
-  workflowExecutionRepository: WorkflowExecutionRepository
+  workflowExecutionRepository: WorkflowExecutionRepository,
+  core: CoreStart
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId
@@ -212,6 +215,8 @@ async function createContainer(
     esClient,
     workflowExecutionGraph,
     workflowExecutionRuntime: workflowRuntime,
+    // Pass the full context including the user context
+    fullContext: workflowExecution.context,
   });
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);

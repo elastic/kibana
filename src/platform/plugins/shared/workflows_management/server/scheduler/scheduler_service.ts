@@ -54,7 +54,8 @@ export class SchedulerService {
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
     spaceId: string,
-    inputs: Record<string, any>
+    inputs: Record<string, any>,
+    userContext?: any
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow.definition);
     workflow.executionGraph = convertToSerializableGraph(executionGraph); // TODO: It's not good approach, it's temporary
@@ -66,6 +67,7 @@ export class SchedulerService {
       event: 'event' in inputs ? inputs.event : undefined,
       triggeredBy: 'manual', // <-- mark as manual
       spaceId,
+      userContext, // Pass the extracted user context instead of the full request
     };
 
     const taskInstance = {

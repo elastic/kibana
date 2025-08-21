@@ -237,3 +237,55 @@ export interface WorkflowAggsDto {
     label: string;
   }[];
 }
+
+/* --- Internal Connector Types --- */
+
+export interface InternalConnectorRequest {
+  id: string;
+  type: 'elasticsearch.request' | 'kibana.request';
+  request: {
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS';
+    path: string;
+    headers?: Record<string, string>;
+    body?: any;
+    query?: Record<string, string>;
+  };
+  context?: {
+    workflowId: string;
+    executionId: string;
+    userId: string;
+  };
+}
+
+export interface InternalConnectorResponse {
+  id: string;
+  status: number;
+  headers: Record<string, string>;
+  body: any;
+  error?: {
+    type: string;
+    message: string;
+    details?: any;
+  };
+  metadata: {
+    executionTime: number;
+    timestamp: string;
+    requestId: string;
+  };
+}
+
+export interface InternalConnectorStepInput {
+  type: 'elasticsearch.request' | 'kibana.request';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS';
+  path: string;
+  headers?: Record<string, string>;
+  body?: any;
+  query?: Record<string, string>;
+}
+
+export interface InternalConnectorStepOutput {
+  response: any;
+  status: number;
+  headers: Record<string, string>;
+  executionTime: number;
+}

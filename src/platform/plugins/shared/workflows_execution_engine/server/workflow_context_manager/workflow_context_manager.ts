@@ -24,6 +24,8 @@ export interface ContextManagerInit {
   esClient?: ElasticsearchClient;
   workflowExecutionGraph: graphlib.Graph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  // Full context including the original request
+  fullContext?: Record<string, any>;
 }
 
 export class WorkflowContextManager {
@@ -31,6 +33,8 @@ export class WorkflowContextManager {
   private context: Omit<WorkflowContext, 'now'>;
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
+  private fullContext?: Record<string, any>;
+  private esClient?: ElasticsearchClient;
 
   constructor(init: ContextManagerInit) {
     this.context = {
@@ -43,6 +47,8 @@ export class WorkflowContextManager {
 
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
+    this.fullContext = init.fullContext;
+    this.esClient = init.esClient;
   }
 
   public getContext() {
@@ -80,6 +86,14 @@ export class WorkflowContextManager {
 
   public getContextKey(key: string): any {
     return this.context[key as keyof typeof this.context];
+  }
+
+  public getFullContext(): Record<string, any> | undefined {
+    return this.fullContext;
+  }
+
+  public getEsClient(): ElasticsearchClient | undefined {
+    return this.esClient;
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {

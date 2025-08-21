@@ -1,0 +1,16 @@
+{
+  "kibana.index_patterns": {
+    "url_params": {
+      "id": {
+        "type": "string",
+        "description": "The index pattern ID"
+      }
+    },
+    "methods": ["GET", "POST", "PUT", "DELETE"],
+    "patterns": [
+      "api/index_patterns/index_pattern",
+      "api/index_patterns/index_pattern/{id}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/kibana/current/index-patterns-api.html"
+  }
+}

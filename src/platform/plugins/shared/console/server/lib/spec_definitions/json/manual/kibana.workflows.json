@@ -1,0 +1,22 @@
+{
+  "kibana.workflows": {
+    "url_params": {
+      "id": {
+        "type": "string",
+        "description": "The workflow ID"
+      },
+      "executionId": {
+        "type": "string",
+        "description": "The workflow execution ID"
+      }
+    },
+    "methods": ["GET", "POST", "PUT", "DELETE"],
+    "patterns": [
+      "api/workflows",
+      "api/workflows/{id}",
+      "api/workflows/{id}/executions",
+      "api/workflows/{id}/executions/{executionId}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/kibana/current/workflows-api.html"
+  }
+}
