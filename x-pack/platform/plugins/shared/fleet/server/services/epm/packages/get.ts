@@ -59,7 +59,6 @@ import {
   RegistryResponseError,
   PackageInvalidArchiveError,
   FleetUnauthorizedError,
-  FleetError,
 } from '../../../errors';
 import { appContextService } from '../..';
 import { dataStreamService } from '../../data_streams';
@@ -85,6 +84,7 @@ import {
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 export { getFile } from '../registry';
 
@@ -203,19 +203,6 @@ export async function getPackages(
   });
 
   return packageListWithoutStatus as PackageList;
-}
-
-function shouldIncludePackageWithDatastreamTypes(
-  pkg: Installable<any>,
-  excludeDataStreamTypes: string[] = []
-) {
-  const shouldInclude =
-    (pkg.data_streams || [])?.length === 0 ||
-    pkg.data_streams?.some((dataStream: any) => {
-      return !excludeDataStreamTypes.includes(dataStream.type);
-    });
-
-  return shouldInclude;
 }
 
 function filterOutExcludedDataStreamTypes(
@@ -586,8 +573,14 @@ export async function getPackageInfo({
 
   const excludeDataStreamTypes =
     appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
-  if (!shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)) {
-    throw new FleetError('Package is not compatible with the current project data stream types');
+
+  if (
+    !savedObject &&
+    !shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)
+  ) {
+    throw new PackageNotFoundError(
+      'Package is not compatible with the current project data stream types'
+    );
   }
   const updated = {
     ...packageInfo,
