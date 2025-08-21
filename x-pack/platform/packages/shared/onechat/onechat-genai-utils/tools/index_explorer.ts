@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { BaseMessageLike } from '@langchain/core/messages';
 import { z } from '@kbn/zod';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ScopedModel } from '@kbn/onechat-server';
@@ -86,6 +85,42 @@ export interface SelectedIndex {
   reason: string;
 }
 
+export const createIndexSelectorPrompt = ({
+  indices,
+  mappings,
+  fields,
+  nlQuery,
+  limit = 1,
+}: {
+  indices: ListIndexInfo[];
+  mappings: Record<string, MappingTypeMapping>;
+  fields: Record<string, MappingField[]>;
+  nlQuery: string;
+  limit?: number;
+}): string => {
+  return `You are an AI assistant for the Elasticsearch company.
+       based on a natural language query from the user, your task is to select up to ${limit} most relevant indices from a list of indices.
+
+       *The natural language query is:* ${nlQuery}
+
+       *List of indices with their descriptions:*
+       ${indices
+         .map((index) => {
+           const indexMapping = mappings[index.index];
+           const fieldPaths: string[] = fields[index.index].map((mappingField) => {
+             return mappingField.path;
+           });
+           const description =
+             indexMapping?._meta?.description || `Fields: ${fieldPaths.join(' ,')}`;
+           return `- ${index.index}: ${description}`;
+         })
+         .join('\n\n')}
+
+       Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
+       Remember, you should select at maximum ${limit} indices.
+       `;
+};
+
 const selectIndices = async ({
   indices,
   mappings,
@@ -113,33 +148,15 @@ const selectIndices = async ({
     })
   );
 
-  const indexSelectorPrompt: BaseMessageLike[] = [
-    [
-      'user',
-      `You are an AI assistant for the Elasticsearch company.
-       based on a natural language query from the user, your task is to select up to ${limit} most relevant indices from a list of indices.
+  const promptContent = createIndexSelectorPrompt({
+    indices,
+    mappings,
+    fields,
+    nlQuery,
+    limit,
+  });
 
-       *The natural language query is:* ${nlQuery}
-
-       *List of indices with their descriptions:*
-       ${indices
-         .map((index) => {
-           const indexMapping = mappings[index.index];
-           const fieldPaths: string[] = fields[index.index].map((mappingField) => {
-             return mappingField.path;
-           });
-           const description = indexMapping?._meta?.description || `Fields: ${fieldPaths}`;
-           return `- ${index.index}: ${description}`;
-         })
-         .join('\n\n')}
-
-       Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
-       Remember, you should select at maximum ${limit} indices.
-       `,
-    ],
-  ];
-
-  const { indices: selectedIndices } = await indexSelectorModel.invoke(indexSelectorPrompt);
+  const { indices: selectedIndices } = await indexSelectorModel.invoke(promptContent);
 
   return selectedIndices;
 };
