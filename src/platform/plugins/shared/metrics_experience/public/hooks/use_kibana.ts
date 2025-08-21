@@ -11,9 +11,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { MetricsExperiencePluginStartDependencies } from '../types';
 
-export type StartServices<TAdditionalServices> = CoreStart &
-  MetricsExperiencePluginStartDependencies &
-  TAdditionalServices;
+export type StartServices<TAdditionalServices> = CoreStart & {
+  plugins: { start: MetricsExperiencePluginStartDependencies };
+} & TAdditionalServices & {};
 
 const useTypedKibana = <AdditionalServices extends object = {}>() =>
   useKibana<StartServices<AdditionalServices>>();

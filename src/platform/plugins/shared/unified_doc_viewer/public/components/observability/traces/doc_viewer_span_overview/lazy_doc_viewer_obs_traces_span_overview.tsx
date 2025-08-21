@@ -18,4 +18,3 @@ export const UnifiedDocViewerObservabilityTracesSpanOverview = dynamic(() => imp
     </EuiDelayRender>
   ),
 });
-// here

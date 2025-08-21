@@ -11,12 +11,10 @@ import React from 'react';
 import { Provider } from 'react-redux';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { CoreStart } from '@kbn/core/public';
+import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-plugin/public';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { store } from '../store';
 import { MetricsExperienceProvider } from '../context/metrics_experience_provider';
-import { createMetricsExperienceRepositoryClient } from '../api';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -29,12 +27,15 @@ const queryClient = new QueryClient({
   },
 });
 
-export const UnifiedMericsExperienceGrid = (props: ChartSectionProps) => {
-  const { services } = useKibana();
+export const UnifiedMetricsExperienceGrid = (
+  props: ChartSectionProps & { client?: MetricsExperienceRepositoryClient }
+) => {
+  if (!props.client) {
+    return null;
+  }
+
   return (
-    <MetricsExperienceProvider
-      value={{ callApi: createMetricsExperienceRepositoryClient(services as CoreStart) }}
-    >
+    <MetricsExperienceProvider value={{ callApi: props.client }}>
       <Provider store={store}>
         <QueryClientProvider client={queryClient}>
           <MetricsExperienceGrid {...props} />
@@ -45,4 +46,4 @@ export const UnifiedMericsExperienceGrid = (props: ChartSectionProps) => {
 };
 
 // eslint-disable-next-line import/no-default-export
-export default UnifiedMericsExperienceGrid;
+export default UnifiedMetricsExperienceGrid;

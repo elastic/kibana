@@ -12,8 +12,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
-import { FIELD_VALUE_SEPARATOR } from '../../common/utils/value_formatters/constants';
-import { useMetricFieldsQuery } from '../hooks';
+import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import {
   setCurrentPage,
@@ -29,6 +28,7 @@ import { MetricsGrid } from './metrics_grid';
 import { Pagination } from './pagination';
 import { DimensionsSelector } from './toolbar/dimensions_selector';
 import { ValuesSelector } from './toolbar/values_selector';
+import { useMetricFieldsQuery } from '../hooks';
 
 export const MetricsExperienceGrid = ({
   dataView,
@@ -44,7 +44,6 @@ export const MetricsExperienceGrid = ({
   const searchTerm = useAppSelector(selectSearchTerm);
   const dimensions = useAppSelector(selectDimensions);
   const valueFilters = useAppSelector(selectValueFilters);
-
   const indexPattern = useMemo(() => dataView?.getIndexPattern() ?? 'metrics-*', [dataView]);
 
   const { data: fields = [], isLoading: loading } = useMetricFieldsQuery({
@@ -199,7 +198,7 @@ export const MetricsExperienceGrid = ({
         leftSide: actions,
       }}
     >
-      <div css={histogramCss}>
+      <div {...(histogramCss ? { css: histogramCss } : {})}>
         <MetricsGrid
           fields={currentFields}
           timeRange={getTimeRange()}

@@ -17,10 +17,8 @@ import {
   EuiToolTip,
   EuiTextTruncate,
 } from '@elastic/eui';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import React, { useState } from 'react';
-import type { MetricField } from '../../types';
-// TODO Add flyout import when available
-// import { MetricInsightsFlyout } from '../metrics_insights_flyout';
 
 interface ChartHeaderProps {
   title: string;
@@ -28,19 +26,15 @@ interface ChartHeaderProps {
   esqlQuery: string;
   metric: MetricField;
   displayDensity?: 'normal' | 'compact' | 'row';
-  hasExploreAction?: boolean;
-  hasMetricsInsightsAction?: boolean;
 }
 
-export const ChartHeader: React.FC<ChartHeaderProps> = ({
+export const ChartHeader = ({
   title,
   byDimension,
   esqlQuery,
   metric,
   displayDensity = 'normal',
-  hasExploreAction = true,
-  hasMetricsInsightsAction = true,
-}) => {
+}: ChartHeaderProps) => {
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
 
   // Get title sizes based on display density
@@ -77,32 +71,28 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
 
   const actionIcons = (
     <EuiFlexGroup gutterSize="xs" alignItems="center">
-      {hasExploreAction && (
-        <EuiFlexItem data-test-subj="metricsChartExploreAction" grow={false}>
-          <EuiToolTip content="Explore">
-            <EuiButtonIcon
-              iconType="inspect"
-              size="s"
-              color="text"
-              aria-label="Explore this metric"
-              onClick={handleExplore}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
-      {hasMetricsInsightsAction && (
-        <EuiFlexItem data-test-subj="metricsChartInsightsAction" grow={false}>
-          <EuiToolTip content="Metric insights" disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="sparkles"
-              size="s"
-              color="text"
-              aria-label="Metric insights"
-              onClick={handleInsights}
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      )}
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Explore">
+          <EuiButtonIcon
+            iconType="inspect"
+            size="s"
+            color="text"
+            aria-label="Explore this metric"
+            onClick={handleExplore}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiToolTip content="Metric insights" disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="sparkles"
+            size="s"
+            color="text"
+            aria-label="Metric insights"
+            onClick={handleInsights}
+          />
+        </EuiToolTip>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -159,13 +149,6 @@ export const ChartHeader: React.FC<ChartHeaderProps> = ({
           <EuiFlexItem grow={false}>{actionIcons}</EuiFlexItem>
         </EuiFlexGroup>
       )}
-
-      {/* <MetricInsightsFlyout
-        metric={metric}
-        esqlQuery={esqlQuery}
-        isOpen={isFlyoutOpen}
-        onClose={() => setIsFlyoutOpen(false)}
-      /> */}
     </>
   );
 };

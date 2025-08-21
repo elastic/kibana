@@ -14,9 +14,9 @@
 
 import dateMath from '@elastic/datemath';
 import { useQuery } from '@tanstack/react-query';
-import { createESQLQuery } from '../utils/create_esql_query';
+import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-plugin/public';
+import { createESQLQuery } from '../common/utils/esql/create_esql_query';
 import { useMetricsExperience } from './use_metrics_experience';
-import type { MetricsExperienceRepositoryClient } from '../api';
 
 interface ChartData {
   x: number;

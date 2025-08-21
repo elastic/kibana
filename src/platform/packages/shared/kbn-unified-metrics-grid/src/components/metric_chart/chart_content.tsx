@@ -27,7 +27,7 @@ interface ChartContentProps {
   displayDensity?: 'normal' | 'compact' | 'row';
 }
 
-export const ChartContent: React.FC<ChartContentProps> = ({
+export const ChartContent = ({
   isLoading,
   error,
   data,
@@ -39,7 +39,7 @@ export const ChartContent: React.FC<ChartContentProps> = ({
   timeRange,
   colorIndex,
   displayDensity = 'normal',
-}) => {
+}: ChartContentProps) => {
   // TODO: replace with value from useEuiTheme OR useKibana
   const colorMode = 'light';
 
