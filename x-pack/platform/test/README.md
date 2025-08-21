@@ -80,7 +80,7 @@ FTR tests are organized by type and deployment target to ensure proper test isol
 #### Core Functional Tests
 
 - **`/functional`** - Primary UI test suite
-- **`/functional_basic`** - Basic auth UI tests
+- **`/functional_basic`** - UI tests for Elastic Basic license
 - **`/functional_embedded`** - Embedded Kibana scenarios
 - **`/functional_cors`** - Cross-origin resource sharing tests
 
