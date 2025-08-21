@@ -15,6 +15,7 @@ import {
   BulkGetRoute,
   FindRoute,
   GetAllowedTypesRoute,
+  RelationshipsRoute,
   ScrollCountRoute,
 } from './routes';
 import { SavedObjectsManagement } from './services';
@@ -26,5 +27,6 @@ export const module = new ContainerModule(({ bind }) => {
   bind(Route).toConstantValue(BulkGetRoute);
   bind(Route).toConstantValue(FindRoute);
   bind(Route).toConstantValue(GetAllowedTypesRoute);
+  bind(Route).toConstantValue(RelationshipsRoute);
   bind(Route).toConstantValue(ScrollCountRoute);
 });
