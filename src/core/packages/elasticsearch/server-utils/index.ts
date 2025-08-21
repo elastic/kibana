@@ -7,10 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const isRetryableEsClientErrorMock = jest.fn();
-
-jest.doMock('@kbn/core-elasticsearch-server', () => {
-  return {
-    isRetryableEsClientError: isRetryableEsClientErrorMock,
-  };
-});
+export { isRetryableEsClientError } from './src/is_retryable_es_client_errors';

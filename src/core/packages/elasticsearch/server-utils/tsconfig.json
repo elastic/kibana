@@ -11,10 +11,7 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/utility-types",
-    "@kbn/es-errors",
-    "@kbn/core-http-server",
-    "@kbn/config-schema"
+    "@kbn/es-errors"
   ],
   "exclude": [
     "target/**/*",

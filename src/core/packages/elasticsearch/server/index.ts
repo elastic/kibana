@@ -36,4 +36,3 @@ export type {
 } from './src/contracts';
 export type { IElasticsearchConfig, ElasticsearchSslConfig } from './src/elasticsearch_config';
 export type { ElasticsearchRequestHandlerContext } from './src/request_handler_context';
-export { isRetryableEsClientError } from './src/is_retryable_es_client_errors';
