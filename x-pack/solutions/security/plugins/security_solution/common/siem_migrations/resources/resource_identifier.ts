@@ -22,14 +22,13 @@ export type ResourceIdentifierClass<I extends ItemDocument = ItemDocument> = new
   item: I
 ) => ResourceIdentifier<I>;
 
-export abstract class ResourceIdentifier<I extends ItemDocument = ItemDocument> {
+export abstract class ResourceIdentifier<I> {
   protected identifier: VendorResourceIdentifier;
 
-  constructor(protected readonly item: I) {
-    this.identifier = identifiers[this.getVendor()];
+  constructor(protected readonly vendor: SiemMigrationVendor) {
+    this.identifier = identifiers[this.vendor];
   }
 
-  protected abstract getVendor(): SiemMigrationVendor;
   public abstract fromOriginal(item?: I): RuleMigrationResourceBase[];
 
   public fromOriginals(item: I[]): RuleMigrationResourceBase[] {

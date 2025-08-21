@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-import { mockRuleMigrationsDataPrebuiltRulesClient } from './mocks';
-export const RuleMigrationsDataPrebuiltRulesClient = mockRuleMigrationsDataPrebuiltRulesClient;
+import { MockSiemMigrationsDataItemClient } from './mocks';
+export const SiemMigrationsDataItemClient = MockSiemMigrationsDataItemClient;

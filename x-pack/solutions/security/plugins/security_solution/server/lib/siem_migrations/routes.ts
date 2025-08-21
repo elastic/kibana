@@ -20,7 +20,7 @@ export const registerSiemMigrationsRoutes = (
     registerSiemRuleMigrationsRoutes(router, config, logger);
 
     if (config.experimentalFeatures.automaticDashboardsMigration) {
-      registerSiemDashboardMigrationsRoutes(router, config, logger);
+      registerSiemDashboardMigrationsRoutes(router, logger);
     }
   }
 };

@@ -91,7 +91,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
       ).mockResolvedValueOnce(response);
 
-      const result = await siemMigrationsDataMigrationClient.get({ id });
+      const result = await siemMigrationsDataMigrationClient.get(id);
 
       expect(result).toEqual({
         ...response._source,
@@ -112,7 +112,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         message: JSON.stringify(response),
       });
 
-      const result = await siemMigrationsDataMigrationClient.get({ id });
+      const result = await siemMigrationsDataMigrationClient.get(id);
 
       expect(result).toBeUndefined();
     });
@@ -123,7 +123,7 @@ describe('SiemMigrationsDataMigrationClient', () => {
         esClient.asInternalUser.get as unknown as jest.MockedFn<typeof GetApi>
       ).mockRejectedValueOnce(new Error('Test error'));
 
-      await expect(siemMigrationsDataMigrationClient.get({ id })).rejects.toThrow('Test error');
+      await expect(siemMigrationsDataMigrationClient.get(id)).rejects.toThrow('Test error');
 
       expect(esClient.asInternalUser.get).toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(`Error getting migration ${id}: Error: Test error`);

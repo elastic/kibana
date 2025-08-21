@@ -43,7 +43,7 @@ export const MockSiemMigrationsDataResourcesClient = jest
   .fn()
   .mockImplementation(() => mockSiemMigrationsDataResourcesClient);
 
-export const mockSiemMigrationsDataMigrationsClient = {
+export const mockSiemMigrationsDataMigrationClient = {
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue(undefined),
   getAll: jest.fn().mockResolvedValue([]),
@@ -54,6 +54,10 @@ export const mockSiemMigrationsDataMigrationsClient = {
   updateLastExecution: jest.fn().mockResolvedValue(undefined),
 } as unknown as jest.Mocked<SiemMigrationsDataMigrationClient>;
 
+export const MockSiemMigrationsDataMigrationClient = jest
+  .fn()
+  .mockImplementation(() => mockSiemMigrationsDataMigrationClient);
+
 export const mockDeleteMigration = jest.fn().mockResolvedValue(undefined);
 
 // Rule migrations data client
@@ -61,7 +65,7 @@ export const createSiemMigrationsDataClientMock = () =>
   ({
     items: mockSiemMigrationsDataItemClient,
     resources: mockSiemMigrationsDataResourcesClient,
-    migrations: mockSiemMigrationsDataMigrationsClient,
+    migrations: mockSiemMigrationsDataMigrationClient,
     deleteMigration: mockDeleteMigration,
   } as unknown as jest.MockedObjectDeep<SiemMigrationsDataClient>);
 

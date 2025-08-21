@@ -8,6 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse } from '@kbn/core/server';
+import type { DashboardMigrationDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
 import {
   CreateDashboardMigrationDashboardsRequestBody,
   CreateDashboardMigrationDashboardsRequestParams,
@@ -16,7 +17,9 @@ import { SIEM_DASHBOARD_MIGRATION_DASHBOARDS_PATH } from '../../../../../../comm
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/api/util/authz';
 import { withLicense } from '../../../common/api/util/with_license';
-import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import type { CreateMigrationItemInput } from '../../../common/data/siem_migrations_data_item_client';
+
+type CreateMigrationDashboardInput = CreateMigrationItemInput<DashboardMigrationDashboard>;
 
 export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
   router: SecuritySolutionPluginRouter,
@@ -47,29 +50,37 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             body: `No dashboards provided for migration ID ${migrationId}. Please provide at least one dashboard.`,
           });
         }
-
-        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
-          context.securitySolution,
-          'dashboards'
-        );
         try {
           const ctx = await context.resolve(['securitySolution']);
           const dashboardMigrationsClient =
             ctx.securitySolution.siemMigrations.getDashboardsClient();
-          await siemMigrationAuditLogger.logAddDashboards({
-            migrationId,
-            count: originalDashboardsCount,
-          });
-          await dashboardMigrationsClient.data.dashboards.create(
-            migrationId,
-            originalDashboardsExport
+
+          // Convert the original splunk dashboards format to the migration dashboard item document format
+          const items = originalDashboardsExport.map<CreateMigrationDashboardInput>(
+            ({ result: { ...originalDashboard } }) => ({
+              migration_id: migrationId,
+              original_dashboard: {
+                id: originalDashboard.id,
+                title: originalDashboard.label ?? originalDashboard.title,
+                description: originalDashboard.description ?? '',
+                data: originalDashboard['eai:data'],
+                format: 'xml',
+                vendor: 'splunk',
+                last_updated: originalDashboard.updated,
+                splunk_properties: {
+                  app: originalDashboard['eai:acl.app'],
+                  owner: originalDashboard['eai:acl.owner'],
+                  sharing: originalDashboard['eai:acl.sharing'],
+                },
+              },
+            })
           );
+
+          await dashboardMigrationsClient.data.items.create(items);
+
           return res.ok();
         } catch (error) {
           logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);
-          await siemMigrationAuditLogger.logCreateMigration({
-            error,
-          });
           return res.badRequest({
             body: `Error creating dashboards for migration ID ${migrationId}: ${error.message}`,
           });

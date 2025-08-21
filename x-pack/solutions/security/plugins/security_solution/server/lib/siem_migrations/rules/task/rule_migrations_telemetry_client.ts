@@ -19,7 +19,7 @@ import {
 import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
 import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
 import type { RuleMigrationIntegration, RuleSemanticSearchResult } from '../types';
-import type { MigrateRuleState } from './agent/types';
+// import type { MigrateRuleState } from './agent/types';
 import type { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
 interface IntegrationMatchEvent {
@@ -88,7 +88,7 @@ export class RuleMigrationTelemetryClient
       startItemTranslation: () => {
         const ruleStartTime = Date.now();
         return {
-          success: (migrationResult: MigrateRuleState) => {
+          success: (migrationResult: RuleMigrationRule) => {
             stats.completed++;
             this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
               migrationId: this.migrationId,

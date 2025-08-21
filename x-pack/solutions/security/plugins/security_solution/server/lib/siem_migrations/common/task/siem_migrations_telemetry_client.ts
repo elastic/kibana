@@ -18,6 +18,6 @@ interface StartMigrationTaskTelemetry<I extends ItemDocument = ItemDocument> {
   aborted: (error: Error) => void;
 }
 
-export abstract class SiemMigrationTelemetryClient<I extends ItemDocument = ItemDocument> {
-  public abstract startSiemMigrationTask(): StartMigrationTaskTelemetry<I>;
+export interface SiemMigrationTelemetryClient<I extends ItemDocument = ItemDocument> {
+  startSiemMigrationTask(): StartMigrationTaskTelemetry<I>;
 }

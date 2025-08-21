@@ -16,7 +16,8 @@ jest.mock('../../../../../../common/siem_migrations/resources/resource_identifie
 
 const migrationItem = {} as unknown as ItemDocument;
 
-const MockResourceIdentifier = ResourceIdentifier as jest.MockedClass<ResourceIdentifierClass>;
+const MockResourceIdentifier =
+  ResourceIdentifier as unknown as jest.MockedClass<ResourceIdentifierClass>;
 
 class TestResourceRetriever extends ResourceRetriever {
   protected ResourceIdentifierClass = MockResourceIdentifier;
@@ -24,15 +25,14 @@ class TestResourceRetriever extends ResourceRetriever {
 
 const defaultResourceIdentifier = () =>
   ({
-    getVendor: jest.fn().mockReturnValue('splunk'),
     fromOriginal: jest.fn().mockReturnValue([]),
     fromResources: jest.fn().mockReturnValue([]),
-  } as unknown as jest.Mocked<ResourceIdentifier>);
+  } as unknown as jest.Mocked<typeof MockResourceIdentifier>);
 
 describe('ResourceRetriever', () => {
   let retriever: ResourceRetriever;
   let mockDataClient: jest.Mocked<SiemMigrationsDataResourcesClient>;
-  let mockResourceIdentifier: jest.Mocked<ResourceIdentifier>;
+  let mockResourceIdentifier: jest.Mocked<typeof MockResourceIdentifier>;
 
   beforeEach(() => {
     mockDataClient = {
