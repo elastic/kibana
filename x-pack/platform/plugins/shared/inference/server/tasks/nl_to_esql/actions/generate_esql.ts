@@ -16,21 +16,13 @@ import type {
   ChatCompleteMetadata,
   ChatCompleteOptions,
   ChatCompleteAPI,
-  ToolCallsOf,
 } from '@kbn/inference-common';
-import { isEmpty, pick } from 'lodash';
 import {
   withoutTokenCountEvents,
   isChatCompletionMessageEvent,
   MessageRole,
   OutputEventType,
   ToolChoiceType,
-} from '@kbn/inference-common';
-import {
-  withoutTokenCountEvents,
-  isChatCompletionMessageEvent,
-  MessageRole,
-  OutputEventType,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import { INLINE_ESQL_QUERY_REGEX } from '../../../../common/tasks/nl_to_esql/constants';
@@ -170,7 +162,7 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
         }),
         switchMap((generateEvent) => {
           if (isChatCompletionMessageEvent(generateEvent)) {
-            const toolCalls = generateEvent.toolCalls as ToolCallsOf<TToolOptions>['toolCalls'];
+            const toolCalls = generateEvent.toolCalls as ToolCall[];
             const onlyToolCall = toolCalls.length === 1 ? toolCalls[0] : undefined;
 
             if (onlyToolCall && onlyToolCall.function.name === 'request_documentation') {
@@ -185,12 +177,13 @@ export const generateEsqlTask = <TToolOptions extends ToolOptions>({
                 });
               }
 
-              const args = onlyToolCall.function.arguments;
-              if (args && !isEmpty(pick(args, ['commands', 'functions']))) {
+              const args =
+                'arguments' in onlyToolCall.function ? onlyToolCall.function.arguments : undefined;
+              if (args && (args.commands?.length || args.functions?.length)) {
                 return askLlmToRespond({
                   documentationRequest: {
-                    commands: args.commands,
-                    functions: args.functions,
+                    commands: args.commands ?? [],
+                    functions: args.functions ?? [],
                   },
                   callCount: callCount + 1,
                 });
