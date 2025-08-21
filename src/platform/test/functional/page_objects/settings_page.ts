@@ -562,7 +562,9 @@ export class SettingsPageObject extends FtrService {
         async () => {
           const form = await this.testSubjects.find('indexPatternEditorForm');
           const validationError = await form.getAttribute('data-validation-error');
-          this.log.debug('Validation error count:', validationError);
+          if (validationError !== '0') {
+            this.log.debug('Validation error found, retrying');
+          }
           return validationError === '0';
         }
       );
