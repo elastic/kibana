@@ -15,6 +15,7 @@ import {
 import type { FindConversationsResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import { FindConversationsRequestQuery } from '@kbn/elastic-assistant-common/impl/schemas';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
+import { getUserFilter } from './utils';
 import type { ElasticAssistantPluginRouter } from '../../types';
 import { buildResponse } from '../utils';
 import type { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
@@ -63,18 +64,12 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
           const currentUser = await checkResponse.currentUser;
 
           const additionalFilter = query.filter ? ` AND ${query.filter}` : '';
-          const userFilter = `users:{ ${
-            currentUser?.username
-              ? `name: "${currentUser?.username}"`
-              : `id: "${currentUser?.profile_uid}"`
-          } }`;
 
-          const sharedFilter = ` OR users: "" OR NOT users: { name: * }`;
-          const onlyOwnerFilter = `(created_by:* AND (created_by.id : "${currentUser?.profile_uid}" OR created_by.name : "${currentUser?.username}")) OR (NOT created_by:* AND ${userFilter})`;
-
-          const conversationUserFilter = query.is_owner
-            ? onlyOwnerFilter
-            : `${userFilter}${sharedFilter}`;
+          const conversationUserFilter = getUserFilter({
+            isOwner: query.is_owner,
+            name: currentUser?.username,
+            id: currentUser?.profile_uid,
+          });
 
           const result = await dataClient?.findDocuments<EsConversationSchema>({
             perPage: query.per_page,
