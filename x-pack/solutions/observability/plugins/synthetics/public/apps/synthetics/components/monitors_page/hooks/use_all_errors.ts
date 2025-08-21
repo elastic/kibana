@@ -7,7 +7,7 @@
 import { useTimeZone } from '@kbn/observability-shared-plugin/public';
 import { useParams } from 'react-router-dom';
 import { useMemo } from 'react';
-import { Ping, PingState } from '../../../../../../common/runtime_types';
+import type { Ping, PingState } from '../../../../../../common/runtime_types';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   SUMMARY_FILTER,
@@ -29,48 +29,46 @@ export function useAllMonitorErrors() {
   const { data, loading } = useReduxEsSearch(
     {
       index: SYNTHETICS_INDEX_PATTERN,
-      body: {
-        size: 0,
-        query: {
-          bool: {
-            filter: [
-              SUMMARY_FILTER,
-              EXCLUDE_RUN_ONCE_FILTER,
-              {
-                range: {
-                  '@timestamp': {
-                    gte: dateRangeStart,
-                    lte: dateRangeEnd,
-                    time_zone: timeZone,
-                  },
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            SUMMARY_FILTER,
+            EXCLUDE_RUN_ONCE_FILTER,
+            {
+              range: {
+                '@timestamp': {
+                  gte: dateRangeStart,
+                  lte: dateRangeEnd,
+                  time_zone: timeZone,
                 },
               },
-            ],
+            },
+          ],
+        },
+      },
+      sort: [{ 'state.started_at': 'desc' }],
+      aggs: {
+        states: {
+          terms: {
+            field: 'state.id',
+            size: 10000,
+          },
+          aggs: {
+            summary: {
+              top_hits: {
+                size: 1,
+                _source: ['error', 'state', 'monitor', '@timestamp', 'config_id', 'observer'],
+                sort: [{ '@timestamp': 'desc' }],
+              },
+            },
           },
         },
-        sort: [{ 'state.started_at': 'desc' }],
-        aggs: {
-          states: {
-            terms: {
-              field: 'state.id',
-              size: 10000,
-            },
-            aggs: {
-              summary: {
-                top_hits: {
-                  size: 1,
-                  _source: ['error', 'state', 'monitor', '@timestamp', 'config_id', 'observer'],
-                  sort: [{ '@timestamp': 'desc' }],
-                },
-              },
-            },
-          },
-          latest: {
-            top_hits: {
-              size: 1,
-              _source: ['monitor.status'],
-              sort: [{ '@timestamp': 'desc' }],
-            },
+        latest: {
+          top_metrics: {
+            size: 1,
+            metrics: { field: 'monitor.status' },
+            sort: [{ '@timestamp': 'desc' }],
           },
         },
       },
@@ -100,7 +98,7 @@ export function useAllMonitorErrors() {
         return prev;
       }, defaultValues) ?? defaultValues;
 
-    const hits = data?.aggregations?.latest.hits.hits ?? [];
+    const hits = data?.aggregations?.latest?.top_metrics?.[0]?.metrics?.['monitor.status'];
 
     const hasActiveError: boolean =
       hits.length === 1 &&

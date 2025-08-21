@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { MonitorErrorsCount } from './monitor_errors_count';
 import { ErrorsList } from '../../monitor_details/monitor_errors/errors_list';
 import { FailedTestsByStep } from './failed_tests_by_step';
-import { PingState } from '../../../../../../common/runtime_types';
+import type { PingState } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { FailedTestsCount } from './failed_tests_count';
 import { MonitorFailedTests } from './failed_tests';

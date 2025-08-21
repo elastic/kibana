@@ -8,7 +8,7 @@
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { FAILED_TESTS_LABEL } from './failed_tests';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const FailedTestsCount = ({
   from,
@@ -16,6 +16,7 @@ export const FailedTestsCount = ({
   monitorIds,
 }: {
   to: string;
+
   from: string;
   monitorIds: string[];
 }) => {

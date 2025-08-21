@@ -9,7 +9,8 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { ClientPluginsStart } from '../../../../../plugin';
+import { useEuiTheme } from '@elastic/eui';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 interface MonitorErrorsCountProps {
   from: string;
@@ -21,6 +22,9 @@ export const MonitorErrorsCount = ({ from, to, monitorIds }: MonitorErrorsCountP
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
+  const { euiTheme } = useEuiTheme();
+
+  const isAmsterdam = euiTheme.flags.hasVisColorAdjustment;
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
@@ -42,6 +46,7 @@ export const MonitorErrorsCount = ({ from, to, monitorIds }: MonitorErrorsCountP
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
           filters: [],
+          color: isAmsterdam ? euiTheme.colors.vis.euiColorVis1 : euiTheme.colors.vis.euiColorVis6,
         },
       ]}
     />
