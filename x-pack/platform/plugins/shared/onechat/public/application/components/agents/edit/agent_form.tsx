@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import {
   EuiForm,
   EuiFormRow,
@@ -18,6 +18,7 @@ import {
   EuiTitle,
   EuiCallOut,
   EuiLoadingSpinner,
+  EuiTabbedContent,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
@@ -28,7 +29,8 @@ import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { appPaths } from '../../../utils/app_paths';
 import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
-import { ToolsSelection } from './tools_selection';
+import { AgentSettingsTab } from './tabs/settings_tab.tsx';
+import { ToolsTab } from './tabs/tools_tab.tsx';
 
 export interface AgentFormProps {
   agentId?: string;
@@ -116,6 +118,46 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     }
   }, [agentState, isLoading, reset]);
 
+  const onSubmit = (data: AgentFormData) => {
+    submit(data);
+  };
+
+  const isFormDisabled = isLoading || isSubmitting || isDeleting;
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: 'settings',
+        name: i18n.translate('xpack.onechat.agents.form.settingsTab', {
+          defaultMessage: 'Settings',
+        }),
+        content: (
+          <AgentSettingsTab
+            control={control}
+            formState={formState}
+            isCreateMode={isCreateMode}
+            isFormDisabled={isFormDisabled}
+          />
+        ),
+      },
+      {
+        id: 'tools',
+        name: i18n.translate('xpack.onechat.agents.form.toolsTab', {
+          defaultMessage: 'Tools',
+        }),
+        content: (
+          <ToolsTab
+            control={control}
+            isDisabled={isFormDisabled}
+            tools={tools}
+            toolsLoading={isLoading}
+          />
+        ),
+      },
+    ],
+    [control, formState, isCreateMode, isFormDisabled, tools, isLoading]
+  );
+
   if (isLoading) {
     return (
       <EuiFlexGroup justifyContent="center" alignItems="center" style={{ minHeight: '200px' }}>
@@ -153,132 +195,10 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     );
   }
 
-  const onSubmit = (data: AgentFormData) => {
-    submit(data);
-  };
-
-  const isFormDisabled = isLoading || isSubmitting || isDeleting;
-
   return (
     <FormProvider {...formMethods}>
       <EuiForm component="form" onSubmit={handleSubmit(onSubmit)}>
-        <EuiFormRow
-          label={i18n.translate('xpack.onechat.agents.form.idLabel', {
-            defaultMessage: 'Agent ID',
-          })}
-          isInvalid={!!formState.errors.id}
-          error={formState.errors.id?.message}
-        >
-          <Controller
-            name="id"
-            control={control}
-            rules={{
-              required: i18n.translate('xpack.onechat.agents.form.idRequired', {
-                defaultMessage: 'Agent ID is required',
-              }),
-            }}
-            render={({ field: { ref, ...rest } }) => (
-              <EuiFieldText
-                {...rest}
-                inputRef={ref}
-                disabled={isFormDisabled || !isCreateMode}
-                placeholder={
-                  isCreateMode
-                    ? i18n.translate('xpack.onechat.agents.form.idPlaceholder', {
-                        defaultMessage: 'Enter agent ID',
-                      })
-                    : ''
-                }
-                isInvalid={!!formState.errors.id}
-              />
-            )}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.onechat.agents.form.nameLabel', {
-            defaultMessage: 'Agent Name',
-          })}
-          isInvalid={!!formState.errors.name}
-          error={formState.errors.name?.message}
-        >
-          <Controller
-            name="name"
-            control={control}
-            rules={{
-              required: i18n.translate('xpack.onechat.agents.form.nameRequired', {
-                defaultMessage: 'Agent name is required',
-              }),
-            }}
-            render={({ field: { ref, ...rest } }) => (
-              <EuiFieldText
-                {...rest}
-                inputRef={ref}
-                disabled={isFormDisabled}
-                isInvalid={!!formState.errors.name}
-              />
-            )}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.onechat.agents.form.descriptionLabel', {
-            defaultMessage: 'Description',
-          })}
-        >
-          <Controller
-            name="description"
-            control={control}
-            render={({ field: { ref, ...rest } }) => (
-              <EuiFieldText
-                {...rest}
-                inputRef={ref}
-                disabled={isFormDisabled}
-                isInvalid={!!formState.errors.description}
-              />
-            )}
-          />
-        </EuiFormRow>
-        <EuiFormRow
-          label={i18n.translate('xpack.onechat.agents.form.customInstructionsLabel', {
-            defaultMessage: 'Custom Instructions',
-          })}
-        >
-          <Controller
-            name="configuration.instructions"
-            control={control}
-            render={({ field: { ref, ...rest } }) => (
-              <EuiTextArea
-                {...rest}
-                inputRef={ref}
-                rows={4}
-                disabled={isFormDisabled}
-                isInvalid={!!formState.errors.configuration?.instructions}
-              />
-            )}
-          />
-        </EuiFormRow>
-
-        <EuiSpacer size="l" />
-        <EuiTitle size="m">
-          <h4>
-            {i18n.translate('xpack.onechat.agents.form.toolsSelectionTitle', {
-              defaultMessage: 'Configure Agent Tools',
-            })}
-          </h4>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <Controller
-          name="configuration.tools"
-          control={control}
-          render={({ field }) => (
-            <ToolsSelection
-              tools={tools}
-              toolsLoading={isLoading}
-              selectedTools={field.value}
-              onToolsChange={field.onChange}
-              disabled={isFormDisabled}
-            />
-          )}
-        />
+        <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
 
         <EuiSpacer size="m" />
         <EuiFlexGroup justifyContent="spaceBetween">

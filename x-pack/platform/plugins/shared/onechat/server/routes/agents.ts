@@ -27,6 +27,17 @@ const TOOL_SELECTION_SCHEMA = schema.arrayOf(
   })
 );
 
+const AGENT_SCHEMA = schema.object({
+  name: schema.string(),
+  description: schema.string(),
+  agentColor: schema.maybe(schema.string()),
+  labels: schema.maybe(schema.arrayOf(schema.string())),
+  configuration: schema.object({
+    instructions: schema.maybe(schema.string()),
+    tools: TOOL_SELECTION_SCHEMA,
+  }),
+});
+
 export function registerAgentRoutes({ router, getInternalServices, logger }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
@@ -115,14 +126,8 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         version: '2023-10-31',
         validate: {
           request: {
-            body: schema.object({
+            body: AGENT_SCHEMA.extends({
               id: schema.string(),
-              name: schema.string(),
-              description: schema.string(),
-              configuration: schema.object({
-                instructions: schema.maybe(schema.string()),
-                tools: TOOL_SELECTION_SCHEMA,
-              }),
             }),
           },
         },
@@ -158,16 +163,7 @@ export function registerAgentRoutes({ router, getInternalServices, logger }: Rou
         validate: {
           request: {
             params: schema.object({ id: schema.string() }),
-            body: schema.object({
-              name: schema.maybe(schema.string()),
-              description: schema.maybe(schema.string()),
-              configuration: schema.maybe(
-                schema.object({
-                  instructions: schema.maybe(schema.string()),
-                  tools: schema.maybe(TOOL_SELECTION_SCHEMA),
-                })
-              ),
-            }),
+            body: AGENT_SCHEMA,
           },
         },
       },

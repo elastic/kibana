@@ -31,6 +31,8 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  labels: [],
+  agentColor: '',
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
