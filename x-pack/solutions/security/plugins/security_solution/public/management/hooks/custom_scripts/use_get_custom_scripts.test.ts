@@ -31,6 +31,7 @@ describe('useGetCustomScripts', () => {
     });
 
     // Mock the useHttp hook
+    mockUseHttp.mockReset();
     mockUseHttp.mockReturnValue({
       get: mockHttpGet,
     } as unknown as HttpSetup);
@@ -97,6 +98,9 @@ describe('useGetCustomScripts', () => {
 
   it('should include additional query params in API call', async () => {
     renderHook(() => useGetCustomScripts('sentinel_one', { osType: 'linux' }));
+    const queryOptions = mockUseQuery.mock.calls[0][0] as UseQueryOptions<unknown, unknown>;
+    const queryFn = queryOptions.queryFn as () => Promise<unknown>;
+    await queryFn();
 
     await waitFor(() => {
       expect(mockHttpGet).toHaveBeenCalledWith('/internal/api/endpoint/action/custom_scripts', {
