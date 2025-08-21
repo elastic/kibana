@@ -30,6 +30,7 @@ export const HEALTH_COLOR: Record<Required<EngineComponentStatus>['health'], Ico
   unknown: 'subdued',
   yellow: 'warning',
   red: 'danger',
+  unavailable: 'danger',
 } as const;
 
 const RESOURCE_TO_TEXT: Record<EngineComponentResource, string> = {
