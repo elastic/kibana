@@ -12,6 +12,18 @@ import { useApmServiceContext } from '../../../../context/apm_service/use_apm_se
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { DISCOVER_APP_LOCATOR } from '@kbn/deeplinks-analytics';
+import {
+  SERVICE_ENVIRONMENT,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  TRANSACTION_DURATION,
+  TRANSACTION_TYPE,
+  SERVICE_NAME,
+  SPAN_NAME,
+  TRANSACTION_NAME,
+} from '@kbn/apm-types';
+
+const MOCK_INDEX_PATTERN = 'traces-*';
 
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
@@ -20,7 +32,7 @@ jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
   useAdHocApmDataView: () => ({
     dataView: {
       id: 'apm_0',
-      getIndexPattern: () => 'traces-*',
+      getIndexPattern: () => MOCK_INDEX_PATTERN,
     },
   }),
 }));
@@ -76,7 +88,7 @@ describe('ViewInDiscover', () => {
     expect(mockLocatorGet).toHaveBeenCalledWith(DISCOVER_APP_LOCATOR);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"`,
       },
     });
   });
@@ -96,7 +108,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.type == "${query.transactionType}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_TYPE} == "${query.transactionType}"`,
       },
     });
   });
@@ -118,7 +130,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.destination.service.resource == "${query.dependencyName}"\n  | WHERE span.duration.us >= ${query.sampleRangeFrom} AND span.duration.us <= ${query.sampleRangeTo}`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${SPAN_NAME} == "${query.spanName}"\n  | WHERE ${SPAN_DESTINATION_SERVICE_RESOURCE} == "${query.dependencyName}"\n  | WHERE ${SPAN_DURATION} >= ${query.sampleRangeFrom} AND ${SPAN_DURATION} <= ${query.sampleRangeTo}`,
       },
     });
   });
@@ -137,7 +149,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.duration.us >= ${query.sampleRangeFrom} AND transaction.duration.us <= ${query.sampleRangeTo}`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_DURATION} >= ${query.sampleRangeFrom} AND ${TRANSACTION_DURATION} <= ${query.sampleRangeTo}`,
       },
     });
   });
@@ -156,7 +168,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE span.name == "${query.spanName}"\n  | WHERE span.duration.us >= ${query.sampleRangeFrom} AND span.duration.us <= ${query.sampleRangeTo}`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SPAN_NAME} == "${query.spanName}"\n  | WHERE ${SPAN_DURATION} >= ${query.sampleRangeFrom} AND ${SPAN_DURATION} <= ${query.sampleRangeTo}`,
       },
     });
   });
@@ -173,7 +185,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE QSTR("user.id: \\"123\\" AND status_code: 200")`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE QSTR("user.id: \\"123\\" AND status_code: 200")`,
       },
     });
   });
@@ -191,7 +203,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE transaction.name == "${query.transactionName}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"`,
       },
     });
   });
@@ -209,7 +221,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE transaction.name == "${query.transactionName}"`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"`,
       },
     });
   });
@@ -233,7 +245,7 @@ describe('ViewInDiscover', () => {
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
-        esql: `FROM traces-*\n  | WHERE service.name == "${serviceName}"\n  | WHERE service.environment == "${query.environment}"\n  | WHERE transaction.name == "${query.transactionName}"\n  | WHERE transaction.type == "${query.transactionType}"\n  | WHERE span.destination.service.resource == "${query.dependencyName}"\n  | WHERE transaction.duration.us >= ${query.sampleRangeFrom} AND transaction.duration.us <= ${query.sampleRangeTo}\n  | WHERE QSTR("error.message: \\"timeout\\"")`,
+        esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_TYPE} == "${query.transactionType}"\n  | WHERE ${SPAN_DESTINATION_SERVICE_RESOURCE} == "${query.dependencyName}"\n  | WHERE ${TRANSACTION_DURATION} >= ${query.sampleRangeFrom} AND ${TRANSACTION_DURATION} <= ${query.sampleRangeTo}\n  | WHERE QSTR("error.message: \\"timeout\\"")`,
       },
     });
   });
