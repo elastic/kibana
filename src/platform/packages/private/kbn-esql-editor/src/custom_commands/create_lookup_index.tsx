@@ -175,6 +175,13 @@ export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
   return Array.from(new Set(indexNames));
 }
 
+/** Helper to determine if a privilege is granted either globally (*) or for the specific index */
+const hasPrivilege = (
+  privileges: IndexPrivileges,
+  index: string,
+  permission: keyof IndexPrivileges[string]
+): boolean => !!(privileges['*']?.[permission] || privileges[index]?.[permission]);
+
 /**
  * Hook to register a custom command and tokens for lookup indices in the ESQL editor.
  * @param editorRef
@@ -207,10 +214,9 @@ export const useLookupIndexCommand = (
   const getIndexPrivileges = useCallback(
     (indexName: string, indicesPrivileges: IndexPrivileges) => {
       return {
-        canCreateIndex:
-          indicesPrivileges['*']?.create_index || indicesPrivileges[indexName]?.create_index,
-        canEditIndex: indicesPrivileges['*']?.write || indicesPrivileges[indexName]?.write,
-        canReadIndex: indicesPrivileges['*']?.read || indicesPrivileges[indexName]?.read,
+        canCreateIndex: hasPrivilege(indicesPrivileges, indexName, 'create_index'),
+        canEditIndex: hasPrivilege(indicesPrivileges, indexName, 'write'),
+        canReadIndex: hasPrivilege(indicesPrivileges, indexName, 'read'),
       };
     },
     []
