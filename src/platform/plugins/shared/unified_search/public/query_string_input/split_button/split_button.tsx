@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiButtonIcon } from '@elastic/eui';
-import { useTheme } from '@emotion/react';
+import { EuiButton, EuiButtonIcon, useEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import React from 'react';
 
@@ -43,7 +43,7 @@ export const SplitButton = ({
   ...mainButtonProps
 }: SplitButtonProps) => {
   const styles = useMemoCss(componentStyles);
-  const { euiTheme } = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const hasTransparentBorder = color !== 'text';
   const borderColor = hasTransparentBorder ? 'transparent' : euiTheme.colors.borderBasePlain;
@@ -98,10 +98,12 @@ const componentStyles = {
   containerWithGap: {
     gap: '1px',
   },
-  mainButton: {
-    borderTopRightRadius: 0,
-    borderBottomRightRadius: 0,
-    borderRight: '1px solid',
+  mainButton: ({ euiTheme }: UseEuiTheme) => {
+    return {
+      borderTopRightRadius: 0,
+      borderBottomRightRadius: 0,
+      borderRight: `${euiTheme.border.thin} solid`,
+    };
   },
   secondaryButton: {
     borderTopLeftRadius: 0,
