@@ -22,6 +22,14 @@ export enum ConditionEntryField {
   SIGNER_MAC = 'process.code_signature',
 }
 
+export enum TrustedDeviceConditionEntryField {
+  USERNAME = 'user.name',
+  HOST = 'host.name',
+  DEVICE_ID = 'device.id',
+  MANUFACTURER = 'device.manufacturer',
+  PRODUCT_ID = 'device.model.identifier',
+}
+
 export enum EntryFieldType {
   HASH = '.hash.',
   EXECUTABLE = '.executable.caseless',
