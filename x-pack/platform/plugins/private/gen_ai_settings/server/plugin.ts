@@ -76,7 +76,7 @@ export class GenAiSettingsPlugin
     core.uiSettings.register({
       /**
        * TODO:
-       * Once assistants changes have been made that watch this uiSetting, 
+       * Once assistants changes have been made that watch this uiSetting,
        * change the bellow configuration to the following:
        * {"readonlyMode": "ui", "schema": schema.string(), "value": "NO_DEFAULT_CONNECTOR"}
        */
@@ -91,7 +91,7 @@ export class GenAiSettingsPlugin
     core.uiSettings.register({
       /**
        * TODO:
-       * Once assistants changes have been made that watch this uiSetting, 
+       * Once assistants changes have been made that watch this uiSetting,
        * change the bellow configuration to the following:
        * {"readonlyMode": "ui", "schema": schema.boolean(), "value": false}
        */
