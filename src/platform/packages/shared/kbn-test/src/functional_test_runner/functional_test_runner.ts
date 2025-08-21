@@ -11,7 +11,6 @@ import { writeFileSync, mkdirSync } from 'fs';
 import Path, { dirname } from 'path';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { withSpan } from '@kbn/apm-utils';
 
 import type { Suite, Test } from './fake_mocha_types';
 import type { Providers, Config } from './lib';
@@ -43,8 +42,8 @@ export class FunctionalTestRunner {
         : new EsVersion(esVersion);
   }
 
-  async run(abortSignal?: AbortSignal) {
-    const testStats = await withSpan('get_test_stats', () => this.getTestStats());
+  async run(abortSignal?: AbortSignal): Promise<any> {
+    const testStats = await this.getTestStats();
 
     return await this.runHarness(async (lifecycle, coreProviders) => {
       SuiteTracker.startTracking(lifecycle, this.config.path);
@@ -63,9 +62,9 @@ export class FunctionalTestRunner {
       if (realServices) {
         // Skip ES version validation for serverless project
         if (!this.config.get('serverless') && providers.hasService('es')) {
-          await withSpan('validate_es_version', () => this.validateEsVersion());
+          await this.validateEsVersion();
         }
-        await withSpan('load_providers', () => providers.loadAll());
+        await providers.loadAll();
       }
 
       const customTestRunner = this.config.get('testRunner');
@@ -73,14 +72,11 @@ export class FunctionalTestRunner {
         this.log.warning(
           'custom test runner defined, ignoring all mocha/suite/filtering related options'
         );
-        const res: number = await withSpan('invoke_custom_runner', () =>
-          providers.invokeProviderFn(customTestRunner)
-        );
-        return res || 0;
+        return (await providers.invokeProviderFn(customTestRunner)) || 0;
       }
 
-      let reporter: any;
-      let reporterOptions: any;
+      let reporter;
+      let reporterOptions;
       if (this.config.get('mochaOpts.dryRun')) {
         // override default reporter for dryRun results
         const targetFile = Path.resolve(REPO_ROOT, 'target/functional-tests/dryRunOutput.json');
@@ -91,19 +87,17 @@ export class FunctionalTestRunner {
         this.log.info(`Dry run results will be stored in ${targetFile}`);
       }
 
-      const mocha = await withSpan('setup_mocha', () =>
-        setupMocha({
-          lifecycle,
-          log: this.log,
-          config: this.config,
-          providers,
-          // Skipping root hooks when there are no tests to execute
-          skipRootHooks: !realServices,
-          esVersion: this.esVersion,
-          reporter,
-          reporterOptions,
-        })
-      );
+      const mocha = await setupMocha({
+        lifecycle,
+        log: this.log,
+        config: this.config,
+        providers,
+        // Skipping root hooks when there are no tests to execute
+        skipRootHooks: !realServices,
+        esVersion: this.esVersion,
+        reporter,
+        reporterOptions,
+      });
 
       // there's a bug in mocha's dry run, see https://github.com/mochajs/mocha/issues/4838
       // until we can update to a mocha version where this is fixed, we won't actually
@@ -119,14 +113,14 @@ export class FunctionalTestRunner {
         return;
       }
 
-      await withSpan('before_tests', () => lifecycle.beforeTests.trigger(mocha.suite));
+      await lifecycle.beforeTests.trigger(mocha.suite);
       if (abortSignal?.aborted) {
         this.log.warning('run aborted');
         return;
       }
 
       this.log.info('Starting tests');
-      return await withSpan('internal_run_tests', () => runTests(lifecycle, mocha, abortSignal));
+      return await runTests(lifecycle, mocha, abortSignal);
     });
   }
 
