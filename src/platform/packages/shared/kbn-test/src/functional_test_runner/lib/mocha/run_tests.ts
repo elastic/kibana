@@ -27,10 +27,6 @@ export async function runTests(lifecycle: Lifecycle, mocha: Mocha, abortSignal?:
     runComplete = true;
   });
 
-  lifecycle.cleanup.add(async () => {
-    await agent.flush().catch((error) => {});
-  });
-
   Rx.race(
     lifecycle.cleanup.before$,
     abortSignal ? Rx.fromEvent(abortSignal, 'abort').pipe(Rx.take(1)) : Rx.NEVER

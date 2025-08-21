@@ -195,11 +195,12 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
             if (shutdownEs) {
               await withSpan('shutdown_es', () => shutdownEs());
             }
-            tx.end();
-
-            await apm.flush();
           }
         }
+      }).finally(async () => {
+        tx.end();
+
+        await apm.flush();
       });
     });
   }

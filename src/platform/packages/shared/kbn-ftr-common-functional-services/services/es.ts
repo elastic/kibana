@@ -15,6 +15,7 @@ import type { FtrProviderContext } from './ftr_provider_context';
 export function EsProvider({ getService }: FtrProviderContext): Client {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
+  const log = getService('log');
 
   const lifecycle = getService('lifecycle');
 
@@ -28,7 +29,7 @@ export function EsProvider({ getService }: FtrProviderContext): Client {
         }
   );
 
-  const idxPatterns = ['.kibana*', '.internal*'];
+  const idxPatterns = ['.kibana*', '.internal*', 'logs*', 'metrics*', 'traces*'];
 
   lifecycle.beforeTests.add(async () => {
     client.indices.putIndexTemplate({
@@ -57,12 +58,16 @@ export function EsProvider({ getService }: FtrProviderContext): Client {
           return;
         }
 
-        await client.indices.putSettings({
-          index,
-          settings: {
-            refresh_interval: '1ms',
-          },
-        });
+        await client.indices
+          .putSettings({
+            index,
+            settings: {
+              refresh_interval: '1ms',
+            },
+          })
+          .catch((error) => {
+            log.warning(`Failed to set refresh_interval to 1ms for ${index}`);
+          });
       })
     );
   });
