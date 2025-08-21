@@ -133,6 +133,7 @@ export function SpanLinks({ docId, traceId }: Props) {
 
   return (
     <ContentFrameworkSection
+      data-test-subj="unifiedDocViewerSpanLinksAccordion"
       id="spanLinksSection"
       title={i18n.translate(
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanLinks',

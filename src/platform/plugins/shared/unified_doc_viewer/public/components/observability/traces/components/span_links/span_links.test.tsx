@@ -21,6 +21,7 @@ jest.mock('../../hooks/use_get_generate_discover_link', () => ({
   useGetGenerateDiscoverLink: () => ({
     generateDiscoverLink: jest.fn(() => 'http://discover/link'),
   }),
+  toESQLParamName: (field: string) => field,
 }));
 jest.mock('./get_columns', () => ({
   getColumns: jest.fn(() => [{ field: 'duration', name: 'Duration' }]),

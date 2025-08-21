@@ -38,6 +38,7 @@ export interface ContentFrameworkSectionProps {
   description?: string;
   actions?: Action[];
   children: React.ReactNode;
+  'data-test-subj'?: string;
 }
 
 export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = ({
@@ -46,6 +47,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
   description,
   actions,
   children,
+  'data-test-subj': accordionDataTestSubj,
 }) => {
   const renderActions = () => (
     <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
@@ -82,6 +84,7 @@ export const ContentFrameworkSection: React.FC<ContentFrameworkSectionProps> = (
 
   return (
     <EuiAccordion
+      data-test-subj={accordionDataTestSubj}
       id={`sectionAccordion-${id}`}
       initialIsOpen
       buttonContent={
