@@ -33,7 +33,7 @@ export class EsIndexDataProvider {
     const indexExists = await this.es.indices.exists({ index: this.index });
 
     if (indexExists) {
-      return await this.es.deleteByQuery({
+      return this.es.deleteByQuery({
         index: this.index,
         query: { match_all: {} },
         refresh: true,
@@ -45,7 +45,7 @@ export class EsIndexDataProvider {
     const indexExists = await this.es.indices.exists({ index: this.index });
 
     if (indexExists) {
-      return await this.es.indices.delete({ index: this.index });
+      return this.es.indices.delete({ index: this.index });
     }
   }
 }
