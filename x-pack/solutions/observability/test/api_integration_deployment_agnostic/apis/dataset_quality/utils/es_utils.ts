@@ -41,7 +41,11 @@ export async function setDataStreamSettings(
 }
 
 export async function rolloverDataStream(es: Client, name: string) {
-  return es.indices.rollover({ alias: name });
+  try {
+    return es.indices.rollover({ alias: name });
+  } catch (error) {
+    throw new Error(`Error rolling over data stream ${name}: ${error.message}`);
+  }
 }
 
 export async function getDataStreamSettingsOfEarliestIndex(es: Client, name: string) {
@@ -59,19 +63,17 @@ export async function getDataStreamSettingsOfEarliestIndex(es: Client, name: str
 }
 
 export async function closeDataStream(es: Client, name: string) {
-  const { data_streams: dataStreams } = await es.indices.getDataStream({ name });
+  const indices = Object.keys(
+    (await es.indices.stats({ index: name, forbid_closed_indices: false })).indices ?? {}
+  );
 
-  if (!dataStreams || dataStreams.length === 0) {
-    throw new Error(`Data stream ${name} not found`);
-  }
-
-  if (dataStreams[0].indices.length === 0) {
+  if (indices.length === 0) {
     throw new Error(`Data stream ${name} has no indices to close`);
   }
 
   try {
-    for (const index of dataStreams[0].indices) {
-      await es.indices.close({ index: index.index_name });
+    for (const index of indices) {
+      await es.indices.close({ index });
     }
   } catch (e) {
     throw new Error(`Failed to close data stream ${name}: ${e.message}`);

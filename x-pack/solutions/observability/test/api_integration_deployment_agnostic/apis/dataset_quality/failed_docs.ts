@@ -198,7 +198,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
               ),
           ]);
 
-          await closeDataStream(esClient, 'logs-synth.2-default');
+          await closeDataStream(esClient, 'logs-synth.2-default::failures');
         });
 
         after(async () => {
@@ -213,7 +213,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         describe('when new backing indices are open', () => {
           before(async () => {
-            await rolloverDataStream(esClient, 'logs-synth.2-default');
+            await rolloverDataStream(esClient, 'logs-synth.2-default::failures');
 
             await synthtraceLogsEsClient.index([
               timerange(start, end)
@@ -251,21 +251,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           });
 
           it('returns stats correctly when some of the backing indices are closed and others are open', async () => {
-            const stats = await callApiAs(supertestViewerWithCookieCredentials);
-            expect(stats.body.failedDocs.length).to.be(1);
+            await retry.tryForTime(180 * 1000, async () => {
+              const stats = await callApiAs(supertestViewerWithCookieCredentials);
+              expect(stats.body.failedDocs.length).to.be(1);
 
-            const docsStats = stats.body.failedDocs.reduce(
-              (acc: Record<string, { count: number }>, curr: DataStreamDocsStat) => ({
-                ...acc,
-                [curr.dataset]: {
-                  count: curr.count,
-                },
-              }),
-              {}
-            );
+              const failedDocsStats = stats.body.failedDocs.reduce(
+                (acc: Record<string, { count: number }>, curr: DataStreamDocsStat) => ({
+                  ...acc,
+                  [curr.dataset]: {
+                    count: curr.count,
+                  },
+                }),
+                {}
+              );
 
-            expect(docsStats['logs-synth.2-default']).to.eql({
-              count: 1,
+              expect(failedDocsStats['logs-synth.2-default']).to.eql({
+                count: 1,
+              });
             });
           });
         });
