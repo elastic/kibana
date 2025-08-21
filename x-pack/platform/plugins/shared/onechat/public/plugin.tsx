@@ -15,7 +15,13 @@ import type { Logger } from '@kbn/logging';
 import { ONECHAT_UI_SETTING_ID } from '../common/constants';
 import { registerAnalytics, registerApp } from './register';
 import type { OnechatInternalService } from './services';
-import { AgentService, ChatService, ConversationsService, ToolsService } from './services';
+import {
+  AgentService,
+  ChatService,
+  ConversationsService,
+  ToolsService,
+  DataTypeRegistry,
+} from './services';
 import type {
   ConfigSchema,
   OnechatPluginSetup,
@@ -35,6 +41,7 @@ export class OnechatPlugin
 {
   logger: Logger;
   private internalServices?: OnechatInternalService;
+  private readonly dataTypeRegistry = new DataTypeRegistry();
 
   constructor(context: PluginInitializerContext<ConfigSchema>) {
     this.logger = context.logger.get();
@@ -55,9 +62,19 @@ export class OnechatPlugin
       });
 
       registerAnalytics({ analytics: core.analytics });
+
+      return {
+        dataTypeRegistry: {
+          register: (descriptor) => this.dataTypeRegistry.register(descriptor),
+        },
+      };
     }
 
-    return {};
+    return {
+      dataTypeRegistry: {
+        register: () => {},
+      },
+    };
   }
 
   start({ http }: CoreStart, pluginsStart: OnechatStartDependencies): OnechatPluginStart {
@@ -65,12 +82,14 @@ export class OnechatPlugin
     const chatService = new ChatService({ http });
     const conversationsService = new ConversationsService({ http });
     const toolsService = new ToolsService({ http });
+    const dataTypeRegistry = this.dataTypeRegistry;
 
     this.internalServices = {
       agentService,
       chatService,
       conversationsService,
       toolsService,
+      dataTypeRegistry,
     };
 
     return {};
