@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { Header } from './header';
-export { ComponentDataSection } from './component_data_section';
+export { InspectHeader } from './inspect_header';
+export { DataSection } from './data_section';
 export { LinksSection } from './links_section';
 export { InspectFlyout, flyoutOptions } from './inspect_flyout';

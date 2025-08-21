@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const Header = () => (
+export const InspectHeader = () => (
   <EuiFlyoutHeader hasBorder>
     <EuiTitle size="s">
       <h2>

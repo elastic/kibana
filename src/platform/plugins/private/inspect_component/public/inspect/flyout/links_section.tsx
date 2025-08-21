@@ -9,7 +9,15 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { EuiPanel, EuiTitle, EuiSpacer, EuiCard, EuiIcon, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiTitle,
+  EuiSpacer,
+  EuiCard,
+  EuiIcon,
+  EuiFlexItem,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
@@ -34,7 +42,6 @@ export const LinksSection = ({ componentData }: Props) => {
 
   const ACTIONS: ActionLink[] = [
     {
-      external: true,
       href: GITHUB_LINK,
       i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubButtonText',
       icon: 'logoGithub',
@@ -42,7 +49,6 @@ export const LinksSection = ({ componentData }: Props) => {
       label: 'GitHub',
     },
     {
-      external: true,
       href: GITHUB_DEV_LINK,
       i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openOnGitHubDevButtonText',
       icon: 'logoGithub',
@@ -50,7 +56,6 @@ export const LinksSection = ({ componentData }: Props) => {
       label: 'GitHub.dev',
     },
     {
-      external: false,
       href: VSCODE_LINK,
       i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInVSCodeButtonText',
       icon: 'code',
@@ -58,7 +63,6 @@ export const LinksSection = ({ componentData }: Props) => {
       label: 'VSCode',
     },
     {
-      external: false,
       i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInWebStormButtonText',
       href: WEBSTORM_LINK,
       icon: 'code',
@@ -66,7 +70,6 @@ export const LinksSection = ({ componentData }: Props) => {
       label: 'WebStorm',
     },
     {
-      external: false,
       href: CURSOR_LINK,
       i18nId: 'kbnInspectComponent.inspectFlyout.linksSection.openInCursorButtonText',
       icon: 'code',
@@ -135,7 +138,7 @@ export const LinksSection = ({ componentData }: Props) => {
         </EuiTitle>
         <EuiSpacer size="m" />
         <div className="linksGrid">
-          {ACTIONS.map(({ external, href, icon, id, i18nId, label }) => {
+          {ACTIONS.map(({ href, icon, id, i18nId, label }) => {
             const ariaLabel = i18n.translate(
               'kbnInspectComponent.inspectFlyout.linksSection.openFileInAriaLabel',
               {
@@ -147,15 +150,18 @@ export const LinksSection = ({ componentData }: Props) => {
             return (
               <EuiCard
                 aria-label={ariaLabel}
-                description=""
                 className="linkCard"
                 href={href}
                 icon={<EuiIcon type={icon} size="xxl" />}
                 key={id}
                 layout="vertical"
-                title={<FormattedMessage id={i18nId} defaultMessage={label} />}
+                title={
+                  <EuiText color={euiTheme.colors.textPrimary}>
+                    <FormattedMessage id={i18nId} defaultMessage={label} />
+                  </EuiText>
+                }
                 titleSize="s"
-                {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
+                target="'_blank'"
               />
             );
           })}

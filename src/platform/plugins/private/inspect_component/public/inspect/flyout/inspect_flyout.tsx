@@ -8,11 +8,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { LinksSection } from './links_section';
-import { ComponentDataSection } from './component_data_section';
-import { Header } from './header';
+import { DataSection } from './data_section';
+import { InspectHeader } from './inspect_header';
 import type { ComponentData } from '../../types';
 
 interface Props {
@@ -27,16 +27,11 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
 export const InspectFlyout = ({ componentData }: Props) => {
   return (
     <>
-      <Header />
+      <InspectHeader />
       <EuiFlyoutBody>
-        <EuiFlexGroup direction="column" gutterSize="l">
-          <EuiFlexItem grow={false}>
-            <ComponentDataSection componentData={componentData} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <LinksSection componentData={componentData} />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <DataSection componentData={componentData} />
+        <EuiSpacer size="xl" />
+        <LinksSection componentData={componentData} />
       </EuiFlyoutBody>
     </>
   );

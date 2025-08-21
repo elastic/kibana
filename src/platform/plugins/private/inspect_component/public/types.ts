@@ -54,7 +54,6 @@ export interface InspectComponentResponse {
 }
 
 export interface ActionLink {
-  external: boolean;
   href: string;
   i18nId: string;
   icon: string;
