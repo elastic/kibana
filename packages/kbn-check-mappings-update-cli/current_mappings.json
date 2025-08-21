@@ -601,7 +601,12 @@
         }
       },
       "incremental_id": {
-        "type": "unsigned_long"
+        "type": "unsigned_long",
+        "fields": {
+          "raw": {
+            "type": "keyword"
+          }
+        }
       },
       "observables": {
         "properties": {
