@@ -23,7 +23,7 @@ describe('getIsConversationOwner', () => {
 
   it('returns true when empty conversation id (is new conversation)', () => {
     const conversation = { id: '', createdBy: user, users: [user] };
-    expect(getIsConversationOwner(conversation, user)).toBe(false);
+    expect(getIsConversationOwner(conversation, user)).toBe(true);
   });
 
   it('returns true if user is owner by id', () => {
