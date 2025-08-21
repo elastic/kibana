@@ -13,7 +13,6 @@ import { defer as createDefer } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { Trigger } from '../triggers';
 import type { Action } from '../actions';
-import { buildContextMenuForActions, openContextMenu } from '../context_menu';
 
 interface ExecuteActionTask {
   action: Action;
@@ -125,6 +124,9 @@ export class UiActionsExecutionService {
     if (!this.core) {
       throw new Error('UiActionsExecutionService is not started. Call start() first.');
     }
+
+    const { buildContextMenuForActions, openContextMenu } = await import('../context_menu');
+
     const panels = await buildContextMenuForActions({
       actions: tasks.map(({ action, context, trigger }) => ({
         action,
@@ -137,6 +139,7 @@ export class UiActionsExecutionService {
         session.close();
       },
     });
+
     const session = openContextMenu(panels, this.core, {
       'data-test-subj': 'multipleActionsContextMenu',
     });
