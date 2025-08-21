@@ -43811,6 +43811,14 @@ paths:
             example: 20
             minimum: 0
             type: integer
+        - description: Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+          in: query
+          name: is_owner
+          required: false
+          schema:
+            default: false
+            example: true
+            type: boolean
       responses:
         '200':
           content:
