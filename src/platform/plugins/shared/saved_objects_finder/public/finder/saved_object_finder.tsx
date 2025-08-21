@@ -216,8 +216,6 @@ class SavedObjectFinderUiClass extends React.Component<
     if (this.props.initialTag && prevProps.initialTag !== this.props.initialTag) {
       const newQueryString = `tag:(${this.props.initialTag})`;
 
-      console.log({ newQueryString, prevQuery: this.state.query.text });
-
       if (this.state.query.text !== newQueryString) {
         this.setState(
           {

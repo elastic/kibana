@@ -46,7 +46,7 @@ export interface HomePluginStartDependencies {
   urlForwarding: UrlForwardingStart;
   cloud: CloudStart;
   share: SharePluginStart;
-  savedObjectsTagging: SavedObjectTaggingOssPluginStart;
+  savedObjectsTaggingOss: SavedObjectTaggingOssPluginStart;
   contentManagement: ContentManagementPublicStart;
 }
 
@@ -97,8 +97,6 @@ export class HomePublicPlugin
             savedObjectsTaggingOss: savedObjectsTagging,
           },
         ] = await core.getStartServices();
-
-        console.log(await core.getStartServices());
 
         setServices({
           share,
