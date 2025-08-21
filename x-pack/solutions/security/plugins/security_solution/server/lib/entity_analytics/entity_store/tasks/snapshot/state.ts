@@ -18,12 +18,14 @@ export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
       lastExecutionTimestamp: state.lastExecutionTimestamp || undefined,
+      lastSnapshotTookSeconds: state.lastSnapshotTook || 0,
       runs: state.runs || 0,
       namespace: typeof state.namespace === 'string' ? state.namespace : 'default',
       entityType: state.entityType || undefined,
     }),
     schema: schema.object({
       lastExecutionTimestamp: schema.maybe(schema.string()),
+      lastSnapshotTookSeconds: schema.number(),
       runs: schema.number(),
       namespace: schema.string(),
       entityType: schema.maybe(schema.string()),
@@ -36,7 +38,8 @@ export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const defaultState: LatestTaskStateSchema = {
   lastExecutionTimestamp: undefined,
+  lastSnapshotTookSeconds: 0,
+  runs: 0,
   namespace: 'default',
   entityType: undefined,
-  runs: 0,
 };

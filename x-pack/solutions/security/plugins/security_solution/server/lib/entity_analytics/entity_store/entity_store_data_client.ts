@@ -77,6 +77,10 @@ import {
   removeEntityStoreDataViewRefreshTask,
   startEntityStoreDataViewRefreshTask,
   getEntityStoreDataViewRefreshTaskState,
+  startEntityStoreSnapshotTask,
+  removeEntityStoreSnapshotTask,
+  getEntityStoreSnapshotTaskState,
+  registerEntityStoreSnapshotTask,
 } from './tasks';
 import {
   createEntityIndex,
@@ -92,6 +96,9 @@ import {
   getFieldRetentionEnrichPolicyStatus,
   getEntityIndexStatus,
   getEntityIndexComponentTemplateStatus,
+  deleteAllEntitySnapshotIndices,
+  createEntityResetIndex,
+  deleteEntityResetIndex,
 } from './elasticsearch_assets';
 import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import {
@@ -220,6 +227,9 @@ export class EntityStoreDataClient {
             : []),
           ...(taskManager
             ? [getEntityStoreDataViewRefreshTaskState({ namespace, taskManager })]
+            : []),
+          ...(taskManager
+            ? [getEntityStoreSnapshotTaskState({ namespace, entityType: type, taskManager })]
             : []),
           getPlatformPipelineStatus({
             engineId: definition.id,
@@ -443,6 +453,10 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created entity index`);
 
+      // Create reset index required by Snapshot task
+      await createEntityResetIndex({ entityType, esClient: this.esClient, namespace });
+      this.log(`debug`, entityType, `Created entity reset index`);
+
       // we must create and execute the enrich policy before the pipeline is created
       // this is because the pipeline will fail if the enrich index does not exist
       await createFieldRetentionEnrichPolicy({
@@ -479,6 +493,7 @@ export class EntityStoreDataClient {
         taskManager,
         interval: options.enrichPolicyExecutionInterval,
       });
+      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
 
       // this task will continuously refresh the Entity Store indices based on the Data View
       await startEntityStoreDataViewRefreshTask({
@@ -486,10 +501,15 @@ export class EntityStoreDataClient {
         logger,
         taskManager,
       });
+      this.log(`debug`, entityType, `Started entity store data view refresh task`);
 
-      this.log(`debug`, entityType, `Started entity store field retention enrich task`);
+      // this task will create daily snapshots for the historical view
+      // TODO(kuba): Issue - no access to task manager SETUP
+      await registerEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      await startEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      this.log(`debug`, entityType, `Started entity store snapshot task`);
+
       this.log(`info`, entityType, `Entity store initialized`);
-
       const setupEndTime = moment().utc().toISOString();
       const duration = moment(setupEndTime).diff(moment(setupStartTime), 'seconds');
       this.options.telemetry?.reportEvent(ENTITY_ENGINE_INITIALIZATION_EVENT.eventType, {
@@ -715,6 +735,9 @@ export class EntityStoreDataClient {
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
 
+      await removeEntityStoreSnapshotTask({ namespace, logger, entityType, taskManager });
+      this.log('debug', entityType, `Deleted entity store snapshot task`);
+
       if (deleteData) {
         await deleteEntityIndex({
           entityType,
@@ -723,7 +746,16 @@ export class EntityStoreDataClient {
           logger,
         });
         this.log('debug', entityType, `Deleted entity index`);
+        await deleteAllEntitySnapshotIndices({
+          entityType,
+          esClient: this.esClient,
+          namespace,
+        });
+        this.log('debug', entityType, `Deleted snapshot indices`);
       }
+
+      await deleteEntityResetIndex({ entityType, esClient: this.esClient, namespace });
+      this.log('debug', entityType, `Deleted reset index`);
 
       if (descriptor && deleteEngine) {
         await this.engineClient.delete(entityType);

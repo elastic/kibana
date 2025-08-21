@@ -33,9 +33,11 @@ import {
   MAX_CONCURRENCY,
   SCHEDULE,
 } from './constants';
-
+import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_snapshot_index';
+import { getEntitiesIndexName, getEntitiesResetIndexName } from '../../utils';
 import { FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT } from '../../../../telemetry/event_based/events';
-import { entityStoreTaskLogFactory } from '../utils';
+import { entityStoreTaskLogFactory, entityStoreTaskDebugLogFactory } from '../utils';
+import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
 function getTaskType(namespace: string, entityType: EntityType): string {
   return `${TYPE}:${entityType}:${namespace}`;
@@ -45,27 +47,40 @@ function getTaskId(namespace: string, entityType: EntityType): string {
   return `${getTaskType(namespace, entityType)}:${VERSION}`;
 }
 
-export function registerEntityStoreSnapshotTask({
+export async function registerEntityStoreSnapshotTask({
+  getStartServices,
   logger,
-  namespace,
-  entityType,
   telemetry,
   taskManager,
-  esClient,
 }: {
   logger: Logger;
-  namespace: string;
-  entityType: EntityType;
   telemetry: AnalyticsServiceSetup;
   taskManager: TaskManagerSetupContract | undefined;
-  esClient: ElasticsearchClient;
-}): void {
+  getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
+}): Promise<void> {
   if (!taskManager) {
     logger.warn(
       '[Entity Store]  Task Manager is unavailable; skipping Entity Store snapshot task registration'
     );
     return;
   }
+  const [coreStart, _] = await getStartServices();
+  const esClient = coreStart.elasticsearch.client.asInternalUser;
+
+  // TODO(kuba): FOR EACH ENTITY TYPE/NAMESPACE
+  // DETAILS PASSED AS PARAMS!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  const entityType = 'generic' as EntityType;
+  const namespace = 'TAKE ME FROM PARAMS ON RUN/START!';
 
   taskManager.registerTaskDefinitions({
     [getTaskType(namespace, entityType)]: {
@@ -166,12 +181,15 @@ export async function runTask({
   const state = context.taskInstance.state as EntityStoreFieldRetentionTaskState;
   const taskId = context.taskInstance.id;
   const log = entityStoreTaskLogFactory(logger, taskId);
+  const debugLog = entityStoreTaskDebugLogFactory(logger, taskId);
   try {
     const taskStartTime = moment().utc();
+    const snapshotDate = rewindToYesterday(taskStartTime.toDate());
     log('running task');
 
     const updatedState = {
       lastExecutionTimestamp: taskStartTime.toISOString(),
+      lastSnapshotTookSeconds: 0,
       namespace,
       entityType: entityType as string,
       runs: state.runs + 1,
@@ -188,11 +206,67 @@ export async function runTask({
     //   - create a new function in ../../elasticsearch_assets that can create, update, and delete Snapshot Indices with mappings
     //   - call it here
     //   - ERROR if index exists
+    debugLog('creating snapshot index');
+    const { index: snapshotIndex } = await createEntitySnapshotIndex({
+      esClient,
+      entityType,
+      namespace,
+      snapshotDate,
+    });
     // - reindex the entities: snapshot
-    //   - update timestamps on reindex because we start AFTER MIDNIGHT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    //   - DO WE? update timestamps on reindex because we start AFTER MIDNIGHT
+    // TODO(kuba): potential for running a script, modifying docs
+    debugLog(`reindexing entities to ${snapshotIndex}`);
+    await esClient.reindex({
+      source: {
+        index: [getEntitiesIndexName(entityType, namespace)],
+      },
+      dest: {
+        index: snapshotIndex,
+      },
+      conflicts: 'proceed',
+    });
+
     // - (later) reindex the entities: reset index
+    const resetIndex = getEntitiesResetIndexName(entityType, namespace);
+    debugLog(`reindexing entities to ${resetIndex}`);
+    await esClient.reindex({
+      source: {
+        index: [getEntitiesIndexName(entityType, namespace)],
+      },
+      dest: {
+        index: resetIndex,
+      },
+      conflicts: 'proceed',
+      script: {
+        source: `
+          // Create a new map to hold the filtered fields
+          Map newDoc = new HashMap();
+
+          // Keep the entity.id field
+          if (ctx._source.entity?.id != null) {
+            newDoc.entity = new HashMap();
+            newDoc.entity.id = ctx._source.entity.id;
+          }
+
+          // Set the @timestamp field to the current time
+          newDoc['@timestamp'] = Instant.now().toString();
+
+          // Set the entity.last_seen_timestamp field to the current time
+          if (newDoc.entity != null) {
+            newDoc.entity.last_seen_timestamp = Instant.now().toString();
+          }
+
+          // Replace the existing document with the new filtered document
+          ctx._source = newDoc;
+        `,
+        lang: 'painless',
+      },
+    });
+
     const taskCompletionTime = moment().utc().toISOString();
     const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
+    updatedState.lastSnapshotTookSeconds = taskDurationInSeconds;
     log(`task run completed in ${taskDurationInSeconds} seconds`);
 
     // TODO(kuba):
@@ -245,4 +319,29 @@ export async function getEntityStoreSnapshotTaskState({
     }
     throw e;
   }
+}
+
+/**
+ * Takes a date and returns a date just before midnight the day before. We run
+ * snapshot task just after midnight, so we effectively need previous day's
+ * date.
+ * @param d - The date snapshot task started
+ * @returns d - 1 day
+ */
+function rewindToYesterday(d: Date): Date {
+  const yesterday = new Date(d);
+  yesterday.setUTCHours(0, 0, 0, 0);
+  yesterday.setUTCSeconds(d.getUTCSeconds() - 60);
+  return yesterday;
+}
+
+/**
+ * Takes a date and returns a date just before midnight the day before. We run
+ * snapshot task just after midnight, so we effectively need previous day's
+ * date.
+ * @param d - The date snapshot task started
+ * @returns d - 1 day
+ */
+function rewindMomentToYesterday(d: moment.Moment): moment.Moment {
+  return d.clone().utc().startOf('day').subtract(1, 'minute');
 }

@@ -6,31 +6,41 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import {
-  EngineComponentResourceEnum,
-  type EngineComponentStatus,
-  type EntityType,
-} from '../../../../../common/api/entity_analytics';
-import { getEntitiesSnapshotIndexName } from '../utils';
-import { createOrUpdateIndex } from '../../utils/create_or_update_index';
-
-import type { EntityEngineInstallationDescriptor } from '../installation/types';
+import { type EntityType } from '../../../../../common/api/entity_analytics';
+import { getEntitiesSnapshotIndexName, getEntitiesSnapshotIndexPattern } from '../utils';
+import { IndicesGetResponse } from '@elastic/elasticsearch/lib/api/types';
 
 interface Options {
   entityType: EntityType;
   esClient: ElasticsearchClient;
-  snapshotDate: Date,
+  snapshotDate: Date;
   namespace: string;
 }
 
-export const createEntitySnapshotIndex = async ({ entityType, esClient, snapshotDate, namespace }: Options) =>
-  esClient.indices.create({
-      index: getEntitiesSnapshotIndexName(entityType, snapshotDate, namespace),
-  });
+interface DeleteAllOptions {
+  entityType: EntityType;
+  esClient: ElasticsearchClient;
+  namespace: string;
+}
 
-export const deleteEntitySnapshotIndex = ({ entityType, esClient, snapshotDate, namespace }: Options) =>
-  esClient.indices.delete(
+export async function createEntitySnapshotIndex({
+  entityType,
+  esClient,
+  snapshotDate,
+  namespace,
+}: Options) {
+  return esClient.indices.create({
+    index: getEntitiesSnapshotIndexName(entityType, snapshotDate, namespace),
+  });
+}
+
+export async function deleteEntitySnapshotIndex({
+  entityType,
+  esClient,
+  snapshotDate,
+  namespace,
+}: Options) {
+  return esClient.indices.delete(
     {
       index: getEntitiesSnapshotIndexName(entityType, snapshotDate, namespace),
     },
@@ -38,4 +48,27 @@ export const deleteEntitySnapshotIndex = ({ entityType, esClient, snapshotDate, 
       ignore: [404],
     }
   );
+}
 
+export async function deleteAllEntitySnapshotIndices({
+  entityType,
+  esClient,
+  namespace,
+}: DeleteAllOptions) {
+  const response = await esClient.indices.get({
+    index: getEntitiesSnapshotIndexPattern(entityType, namespace),
+    expand_wildcards: 'all',
+  });
+  const indexNames = Object.keys(response);
+  indexNames.forEach((name) => {
+    esClient.indices.delete(
+      {
+        index: name,
+        ignore_unavailable: true,
+      },
+      {
+        ignore: [404],
+      }
+    );
+  });
+}
