@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiPanel,
   EuiIcon,
   EuiTitle,
-  EuiListGroup,
   EuiLoadingSpinner,
   EuiText,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
+  EuiBasicTable,
+  EuiLink,
 } from '@elastic/eui';
-import type { EuiPanelProps } from '@elastic/eui';
+import type { EuiPanelProps, EuiBasicTableProps } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
@@ -38,6 +39,7 @@ export interface RecentlyAccessedItemsPanelProps {
   filter?: RecentlyAccessedFilter;
   maxWidth?: number;
   width?: number;
+  hideTitle?: boolean;
   // EuiPanel props
   color?: EuiPanelProps['color'];
   hasBorder?: EuiPanelProps['hasBorder'];
@@ -58,6 +60,7 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
   filter = 'all',
   maxWidth,
   width,
+  hideTitle = false,
   color = 'subdued',
   hasBorder,
   hasShadow,
@@ -65,6 +68,11 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
   borderRadius,
   css,
 }) => {
+  const [pagination, setPagination] = useState({
+    pageIndex: 0,
+    pageSize: 10,
+  });
+
   const handleItemClick = (itemId: string, link: string) => {
     if (onItemSelect) {
       onItemSelect(itemId, link);
@@ -76,13 +84,104 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
   };
 
   const getIconType = (item: RecentlyAccessedItem) => {
+    // First try to use the item's type if available
+    if (item.type) {
+      switch (item.type) {
+        case 'discover':
+        case 'search':
+          return 'discoverApp';
+        case 'dashboard':
+          return 'dashboardApp';
+        case 'visualize':
+          return 'visualizeApp';
+        case 'maps':
+          return 'mapApp';
+        case 'canvas':
+          return 'canvasApp';
+        case 'ml':
+          return 'machineLearningApp';
+        case 'unknown':
+        default:
+          // Fall through to URL-based detection
+          break;
+      }
+    }
+
+    // Fallback to filter-based logic
     if (filter === 'discover') {
       return 'discoverApp';
     }
     if (filter === 'dashboard') {
       return 'dashboardApp';
     }
-    return undefined;
+
+    // Final fallback: try to determine from the link URL
+    const link = item.link.toLowerCase();
+    if (link.includes('/app/discover') || link.includes('/discover')) {
+      return 'discoverApp';
+    }
+    if (link.includes('/app/dashboard') || link.includes('/dashboards')) {
+      return 'dashboardApp';
+    }
+    if (link.includes('/app/visualize') || link.includes('/visualize')) {
+      return 'visualizeApp';
+    }
+    if (link.includes('/app/maps') || link.includes('/maps')) {
+      return 'mapApp';
+    }
+    if (link.includes('/app/canvas') || link.includes('/canvas')) {
+      return 'canvasApp';
+    }
+    if (link.includes('/app/ml') || link.includes('/machine-learning')) {
+      return 'machineLearningApp';
+    }
+
+    // Default icon for unknown types
+    return 'document';
+  };
+
+  const columns: EuiBasicTableProps<any>['columns'] = [
+    {
+      field: 'title',
+      name: (
+        <FormattedMessage
+          id="contentManagement.recentlyAccessedItems.table.nameHeader"
+          defaultMessage="Name"
+        />
+      ),
+      render: (itemTitle: string, item: any) => (
+        <EuiLink
+          onClick={() => handleItemClick(item.id, item.link)}
+          color="text"
+          data-test-subj={`recentlyAccessed-link-${item.id}`}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type={getIconType(item)} size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={true}>{itemTitle}</EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiLink>
+      ),
+    },
+  ];
+
+  const tableProps: EuiBasicTableProps<any> = {
+    items,
+    columns,
+    ...(items.length > 10 && {
+      pagination: {
+        ...pagination,
+        pageSizeOptions: [10],
+        totalItemCount: items.length,
+        showPerPageOptions: false,
+      },
+    }),
+    onChange: ({ page }: any) => {
+      setPagination(page);
+    },
+    tableLayout: 'auto',
+    'data-test-subj': 'recentlyAccessedTable',
   };
 
   const renderPanelContent = () => {
@@ -111,25 +210,13 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
         <EuiText color="subdued" size="s">
           <FormattedMessage
             id="contentManagement.recentlyAccessedItems.empty"
-            defaultMessage="No recently viewed items found"
+            defaultMessage="Your recently viewed items will appear here"
           />
         </EuiText>
       );
     }
 
-    return (
-      <EuiListGroup
-        size="s"
-        gutterSize="none"
-        flush
-        listItems={items.map((item) => ({
-          label: getDisplayName(item),
-          onClick: () => handleItemClick(item.id, item.link),
-          'data-test-subj': `recentlyAccessed-${item.id}`,
-          iconType: getIconType(item),
-        }))}
-      />
-    );
+    return <EuiBasicTable {...tableProps} />;
   };
 
   return (
@@ -151,25 +238,26 @@ export const RecentlyAccessedItemsPanel: React.FC<RecentlyAccessedItemsPanelProp
       }
       data-test-subj={dataTestSubj}
     >
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiIcon type="clock" size="l" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              {title || (
-                <FormattedMessage
-                  id="contentManagement.recentlyAccessedItems.title"
-                  defaultMessage="Recently viewed items"
-                />
-              )}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
+      {!hideTitle && (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="clock" size="m" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle size="xs">
+              <h3>
+                {title || (
+                  <FormattedMessage
+                    id="contentManagement.recentlyAccessedItems.title"
+                    defaultMessage="Recently viewed items"
+                  />
+                )}
+              </h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      {!hideTitle && <EuiHorizontalRule margin="s" />}
       {renderPanelContent()}
     </EuiPanel>
   );

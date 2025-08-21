@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTabs, EuiTab, EuiPanel } from '@elastic/eui';
 import { RecentlyAccessedItemsPanel } from '@kbn/content-management-table-list-view-common';
 import { getServices } from '../kibana_services';
 import { useRecentlyAccessedPanel } from './hooks';
@@ -16,6 +16,7 @@ import { FavoritesPanel } from './favorites_panel';
 
 export const HomeContentPanels: React.FC = () => {
   const services = getServices();
+  const [selectedTabId, setSelectedTabId] = useState('favorites');
 
   // Get recently accessed items (all types)
   const {
@@ -58,27 +59,57 @@ export const HomeContentPanels: React.FC = () => {
     services.application.navigateToUrl(link);
   };
 
+  const tabs = [
+    {
+      id: 'favorites',
+      name: 'Favorites',
+      content: <FavoritesPanel color="plain" hasBorder paddingSize="m" hideTitle />,
+    },
+    {
+      id: 'recents',
+      name: 'Recently viewed',
+      content: (
+        <RecentlyAccessedItemsPanel
+          items={recentlyAccessedItems}
+          isLoading={isLoadingRecentlyAccessed}
+          error={recentlyAccessedError}
+          onItemSelect={handleRecentlyAccessedItemSelect}
+          data-test-subj="homeRecentlyAccessedItems"
+          filter="all"
+          color="plain"
+          hasBorder
+          paddingSize="m"
+          hideTitle
+        />
+      ),
+    },
+  ];
+
+  const onTabClick = (tab: any) => {
+    setSelectedTabId(tab.id);
+  };
+
+  const selectedTabContent = tabs.find((tab) => tab.id === selectedTabId)?.content;
+
   return (
     <>
       <EuiFlexGroup justifyContent="flexStart">
-        <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <FavoritesPanel />
-        </EuiFlexItem>
-        <EuiFlexItem style={{ maxWidth: '400px' }}>
-          <RecentlyAccessedItemsPanel
-            items={recentlyAccessedItems}
-            isLoading={isLoadingRecentlyAccessed}
-            error={recentlyAccessedError}
-            onItemSelect={handleRecentlyAccessedItemSelect}
-            title="Recently accessed"
-            data-test-subj="homeRecentlyAccessedItems"
-            filter="all"
-            color="plain"
-            hasBorder
-            paddingSize="m"
-            // width={320}
-            // maxWidth={400}
-          />
+        <EuiFlexItem style={{ maxWidth: '50%' }}>
+          <EuiPanel color="transparent" hasBorder paddingSize="m">
+            <EuiTabs>
+              {tabs.map((tab) => (
+                <EuiTab
+                  key={tab.id}
+                  onClick={() => onTabClick(tab)}
+                  isSelected={tab.id === selectedTabId}
+                >
+                  {tab.name}
+                </EuiTab>
+              ))}
+            </EuiTabs>
+            <EuiSpacer size="m" />
+            {selectedTabContent}
+          </EuiPanel>
         </EuiFlexItem>
         {/* TODO: Add TaggedItemsPanel */}
       </EuiFlexGroup>
