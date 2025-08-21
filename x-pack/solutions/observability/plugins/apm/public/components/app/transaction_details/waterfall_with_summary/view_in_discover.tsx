@@ -78,7 +78,7 @@ export function ViewInDiscover() {
               ? where(`transaction.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
               : where(`span.duration.us <= ?sampleRangeTo`, { sampleRangeTo })
             : (query) => query,
-          kuery ? where(`QSTR("${kuery.replaceAll('"', '')}")`) : (query) => query
+          kuery ? where(`QSTR("${kuery.replaceAll('"', '\\"')}")`) : (query) => query
         )
         .toString(),
     },
@@ -89,7 +89,7 @@ export function ViewInDiscover() {
       aria-label={i18n.translate('xpack.apm.waterfallWithSummary.viewInDiscoverButton.ariaLabel', {
         defaultMessage: 'View in Discover',
       })}
-      data-test-subj="apmWaterfallWithSummaryGoToDiscoverButton"
+      data-test-subj="apmWaterfallWithSummaryViewInDiscoverButton"
       iconType="discoverApp"
       href={discoverHref}
     >
