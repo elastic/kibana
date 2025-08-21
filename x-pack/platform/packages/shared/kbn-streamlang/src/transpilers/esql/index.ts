@@ -8,20 +8,30 @@
 import { pipe } from 'fp-ts/function';
 import type { StreamlangDSL } from '../../../types/streamlang';
 import { flattenSteps } from '../shared/flatten_steps';
-import { convertStreamlangDSLActionsToEsql } from './conversions';
+import { convertStreamlangDSLToESQLCommands } from './conversions';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface EsqlTranspilationOptions {}
+export interface ESQLTranspilationOptions {
+  sourceIndex?: string;
+  limit?: number;
+}
+
+export interface ESQLTranspilationResult {
+  query: string;
+  commands: string[];
+}
 
 export const transpile = (
   streamlang: StreamlangDSL,
-  transpilationOptions?: EsqlTranspilationOptions
-) => {
-  const processors = pipe(flattenSteps(streamlang.steps), (steps) =>
-    convertStreamlangDSLActionsToEsql(steps, transpilationOptions)
+  transpilationOptions?: ESQLTranspilationOptions
+): ESQLTranspilationResult => {
+  const esqlCommandsFromStreamlang = pipe(flattenSteps(streamlang.steps), (steps) =>
+    convertStreamlangDSLToESQLCommands(steps, transpilationOptions)
   );
 
+  const commandsArray = [esqlCommandsFromStreamlang].filter(Boolean);
+
   return {
-    processors,
+    query: `\n| ${commandsArray.join('\n| ')}`,
+    commands: commandsArray,
   };
 };
