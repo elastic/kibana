@@ -53,6 +53,11 @@ describe('TimelinesPage', () => {
   it('should show the correct elements if user has crud and indices exist', () => {
     jest.mocked(useDataView).mockImplementation(withMatchedIndices);
 
+    (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      sourcererDataView: {},
+    });
+
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
         crud: true,
@@ -67,6 +72,11 @@ describe('TimelinesPage', () => {
   });
 
   it('should not show import button or modal if user does not have crud privileges but it should show the new timeline button', () => {
+    (useSourcererDataView as unknown as jest.Mock).mockReturnValue({
+      indicesExist: true,
+      sourcererDataView: {},
+    });
+
     (useUserPrivileges as jest.Mock).mockReturnValue({
       timelinePrivileges: {
         crud: false,
