@@ -8,14 +8,12 @@
 import { EuiText, EuiLink, EuiBadge, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import {
-  IngestStreamEffectiveLifecycle,
-  isDslLifecycle,
-  isErrorLifecycle,
-  isIlmLifecycle,
-} from '@kbn/streams-schema';
+import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
+import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import { isDslLifecycle, isErrorLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
+import { INFINITE_RETENTION_LABEL, NO_RETENTION_LABEL, NO_DATA_SHORT_LABEL } from './translations';
 
 export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
@@ -26,7 +24,19 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
 
   if (isErrorLifecycle(lifecycle)) {
-    return <EuiBadge color="hollow">{lifecycle.error.message}</EuiBadge>;
+    return (
+      <EuiBadge
+        color="hollow"
+        aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.errorBadgeAriaLabel', {
+          defaultMessage: 'Retention policy error: {message}',
+          values: { message: lifecycle.error.message },
+        })}
+        role="status"
+        aria-live="polite"
+      >
+        {lifecycle.error.message}
+      </EuiBadge>
+    );
   }
 
   if (isIlmLifecycle(lifecycle)) {
@@ -40,6 +50,10 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
             policyName: lifecycle.ilm.policy,
           })}
           target="_blank"
+          aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.ilmLinkAriaLabel', {
+            defaultMessage: 'ILM policy: {name}, click to edit the policy in a new tab',
+            values: { name: lifecycle.ilm.policy },
+          })}
         >
           {i18n.translate('xpack.streams.streamsRetentionColumn.ilmBadgeLabel', {
             defaultMessage: 'ILM policy: {name}',
@@ -53,14 +67,35 @@ export function RetentionColumn({ lifecycle }: { lifecycle: IngestStreamEffectiv
   }
 
   if (isDslLifecycle(lifecycle)) {
-    return lifecycle.dsl.data_retention || <EuiIcon type="infinity" size="m" />;
+    const retentionValue = lifecycle.dsl.data_retention;
+
+    if (retentionValue) {
+      return (
+        <span
+          tabIndex={0}
+          aria-label={i18n.translate('xpack.streams.streamsRetentionColumn.dslRetentionAriaLabel', {
+            defaultMessage: 'Data retention period: {retention}',
+            values: { retention: retentionValue },
+          })}
+        >
+          {retentionValue}
+        </span>
+      );
+    }
+
+    return (
+      <span
+        aria-label={INFINITE_RETENTION_LABEL}
+        style={{ display: 'inline-flex', alignItems: 'center' }}
+      >
+        <EuiIcon type="infinity" size="m" aria-hidden="true" />
+      </span>
+    );
   }
 
   return (
-    <EuiText color="subdued">
-      {i18n.translate('xpack.streams.streamsRetentionColumn.noDataLabel', {
-        defaultMessage: 'N/A',
-      })}
+    <EuiText color="subdued" tabIndex={0} aria-label={NO_RETENTION_LABEL}>
+      {NO_DATA_SHORT_LABEL}
     </EuiText>
   );
 }

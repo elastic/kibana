@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Processor } from '../../../../common/types';
+import type { Processor } from '../../../../common/types';
 
-import { ProcessorInternal } from './types';
+import type { ProcessorInternal } from './types';
 import { convertProccesorsToJson } from './utils';
 
 interface SerializeArgs {

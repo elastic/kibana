@@ -7,7 +7,7 @@
 
 // a11y tests for spaces, space selection and spacce creation and feature controls
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'settings']);
@@ -20,7 +20,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Kibana roles page Accessibility', () => {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
@@ -28,7 +30,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
     });
 
     it('a11y test for Roles main page', async () => {

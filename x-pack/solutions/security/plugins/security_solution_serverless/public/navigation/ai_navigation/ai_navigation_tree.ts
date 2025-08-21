@@ -71,6 +71,10 @@ export const createAiNavigationTree = (): NavigationTreeDefinition => ({
             {
               link: 'discover',
             },
+            {
+              id: SecurityPageName.aiValue,
+              link: securityLink(SecurityPageName.aiValue),
+            },
           ],
         },
       ],

@@ -8,7 +8,8 @@
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { DatasetSampleType, type StatusResponse } from '../../../common/types';
+import type { DatasetSampleType } from '../../../common';
+import { type StatusResponse, getSampleDataIndexName } from '../../../common';
 import { ArtifactManager } from '../artifact_manager';
 import { IndexManager } from '../index_manager';
 import type { ZipArchive } from '../types';
@@ -19,7 +20,6 @@ interface SampleDataManagerOpts {
   artifactRepositoryUrl: string;
   kibanaVersion: string;
   elserInferenceId?: string;
-  indexPrefixName: string;
   isServerlessPlatform: boolean;
 }
 
@@ -27,7 +27,7 @@ export class SampleDataManager {
   private readonly log: Logger;
   private readonly artifactManager: ArtifactManager;
   private readonly indexManager: IndexManager;
-  private readonly indexPrefixName: string;
+  private isInstalling: boolean = false;
 
   constructor({
     artifactsFolder,
@@ -35,11 +35,9 @@ export class SampleDataManager {
     artifactRepositoryUrl,
     elserInferenceId,
     kibanaVersion,
-    indexPrefixName,
     isServerlessPlatform,
   }: SampleDataManagerOpts) {
     this.log = logger;
-    this.indexPrefixName = indexPrefixName;
 
     this.artifactManager = new ArtifactManager({
       artifactsFolder,
@@ -65,10 +63,15 @@ export class SampleDataManager {
     this.log.info(`Installing sample data for [${sampleType}]`);
 
     let archive: ZipArchive | undefined;
-    const indexName = this.getSampleDataIndexName(sampleType);
+    const indexName = getSampleDataIndexName(sampleType);
 
     try {
-      await this.removeSampleData({ sampleType, esClient });
+      if ((await this.indexManager.hasIndex({ indexName, esClient })) || this.isInstalling) {
+        this.log.warn(`Sample data already installed for [${sampleType}]`);
+        return indexName;
+      }
+
+      this.isInstalling = true;
 
       const {
         archive: artifactsArchive,
@@ -101,6 +104,7 @@ export class SampleDataManager {
       }
 
       await this.artifactManager.cleanup();
+      this.isInstalling = false;
     }
   }
 
@@ -111,7 +115,7 @@ export class SampleDataManager {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
   }): Promise<void> {
-    const indexName = this.getSampleDataIndexName(sampleType);
+    const indexName = getSampleDataIndexName(sampleType);
     await this.indexManager.deleteIndex({ indexName, esClient });
   }
 
@@ -122,20 +126,16 @@ export class SampleDataManager {
     sampleType: DatasetSampleType;
     esClient: ElasticsearchClient;
   }): Promise<StatusResponse> {
-    const indexName = this.getSampleDataIndexName(sampleType);
+    const indexName = getSampleDataIndexName(sampleType);
     try {
-      const isIndexExists = await esClient.indices.exists({ index: indexName });
+      const hasIndex = await this.indexManager.hasIndex({ indexName, esClient });
       return {
-        status: isIndexExists ? 'installed' : 'uninstalled',
-        indexName: isIndexExists ? indexName : undefined,
+        status: hasIndex ? 'installed' : 'uninstalled',
+        indexName: hasIndex ? indexName : undefined,
       };
     } catch (error) {
       this.log.warn(`Failed to check sample data status for [${sampleType}]: ${error.message}`);
       return { status: 'uninstalled' };
     }
-  }
-
-  private getSampleDataIndexName(sampleType: DatasetSampleType): string {
-    return `${this.indexPrefixName}-${sampleType.toLowerCase()}`;
   }
 }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UrlService } from '../../common/url_service';
-import { ServerShortUrlClientFactoryCreateParams } from './short_urls';
+import type { UrlService } from '../../common/url_service';
+import type { ServerShortUrlClientFactoryCreateParams } from './short_urls';
 
 export type ServerUrlService = UrlService<ServerShortUrlClientFactoryCreateParams>;

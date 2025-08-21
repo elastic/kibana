@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { IO_EVENTS_ROUTE, CURRENT_API_VERSION } from '@kbn/session-view-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';
 const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
@@ -30,13 +30,21 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
 
   describe(`Session view - ${IO_EVENTS_ROUTE} - with a basic license`, () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/session_view/process_events');
-      await esArchiver.load('x-pack/test/functional/es_archives/session_view/io_events');
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events'
+      );
+      await esArchiver.load(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/io_events'
+      );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/process_events');
-      await esArchiver.unload('x-pack/test/functional/es_archives/session_view/io_events');
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/process_events'
+      );
+      await esArchiver.unload(
+        'x-pack/solutions/security/test/fixtures/es_archives/session_view/io_events'
+      );
     });
 
     it(`${IO_EVENTS_ROUTE} fails when an invalid api version is specified`, async () => {

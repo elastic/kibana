@@ -1145,75 +1145,6 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/scout-reporting",
-        "id": "def-common.uploadScoutReportEvents",
-        "type": "Function",
-        "tags": [],
-        "label": "uploadScoutReportEvents",
-        "description": [
-          "\nUpload events logged by a Scout reporter to the configured Scout Reporter ES instance\n"
-        ],
-        "signature": [
-          "(eventLogPath: string, log: ",
-          {
-            "pluginId": "@kbn/tooling-log",
-            "scope": "common",
-            "docId": "kibKbnToolingLogPluginApi",
-            "section": "def-common.ToolingLog",
-            "text": "ToolingLog"
-          },
-          " | undefined) => Promise<void>"
-        ],
-        "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.uploadScoutReportEvents.$1",
-            "type": "string",
-            "tags": [],
-            "label": "eventLogPath",
-            "description": [
-              "Path to event log file"
-            ],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/scout-reporting",
-            "id": "def-common.uploadScoutReportEvents.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "log",
-            "description": [
-              "Logger instance"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/tooling-log",
-                "scope": "common",
-                "docId": "kibKbnToolingLogPluginApi",
-                "section": "def-common.ToolingLog",
-                "text": "ToolingLog"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/persistence/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -1829,6 +1760,34 @@
             "tags": [],
             "label": "id",
             "description": [],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.target",
+            "type": "Object",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "signature": [
+              "{ type: string; mode: string; }"
+            ],
+            "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutTestRunInfo.fully_parallel",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fully_parallel",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
             "path": "src/platform/packages/private/kbn-scout-reporting/src/reporting/report/events/event.ts",
             "deprecated": false,
             "trackAdoption": false

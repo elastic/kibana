@@ -7,8 +7,8 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared';
-import { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { OverviewStatusMetaData } from '../../../../../../common/runtime_types';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const useMonitorMWs = (monitor: OverviewStatusMetaData) => {
   const services = useKibana<ClientPluginsStart>().services;

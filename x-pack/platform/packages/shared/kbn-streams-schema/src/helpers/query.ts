@@ -6,7 +6,7 @@
  */
 
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
-import { StreamQuery } from '../queries';
+import type { StreamQuery } from '../queries';
 
 export const buildEsqlQuery = (
   indices: string[],

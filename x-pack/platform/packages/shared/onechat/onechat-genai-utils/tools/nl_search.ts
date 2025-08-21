@@ -7,26 +7,25 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
-import { executeEsql, EsqlResponse } from './steps/execute_esql';
+import type { EsqlResponse } from './steps/execute_esql';
+import { executeEsql } from './steps/execute_esql';
 import { generateEsql } from './generate_esql';
 
-export type NaturalLanguageSearchResponse = EsqlResponse | { success: false; reason: string };
-
 export const naturalLanguageSearch = async ({
-  query,
+  nlQuery,
   context,
   index,
   model,
   esClient,
 }: {
-  query: string;
+  nlQuery: string;
   context?: string;
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<NaturalLanguageSearchResponse> => {
+}): Promise<EsqlResponse> => {
   const generateResponse = await generateEsql({
-    query,
+    nlQuery,
     context,
     index,
     model,
@@ -34,11 +33,11 @@ export const naturalLanguageSearch = async ({
   });
 
   if (generateResponse.queries.length < 1) {
-    return { success: false, reason: 'No query was generated' };
+    throw new Error(`No esql queries were generated for query=${nlQuery}`);
   }
 
-  return await executeEsql({
-    query: generateResponse.queries[0],
+  return executeEsql({
+    query: generateResponse.queries[0], // TODO: handle multiple queries
     esClient,
   });
 };

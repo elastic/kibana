@@ -10,19 +10,19 @@ The serverless plugin's start contract provides the following navigation-related
 
 ```typescript
 interface ServerlessPluginStart {
-  // Register a navigation tree and set up the SideNavComponent
+  // Register a navigation tree for a serverless plugin
   initNavigation: (
-    id: string, 
+    id: string,
     navigationTree$: Observable<NavigationTreeDefinition>,
     options?: { dataTestSubj?: string }
   ) => void;
-  
+
   // Set breadcrumbs for the current page
   setBreadcrumbs: (breadcrumbs, params) => void;
-  
+
   // Set the project home URL
   setProjectHome: (homeHref: string) => void;
-  
+
   // Get navigation cards for a Stack Management landing page
   getNavigationCards: (
     roleManagementEnabled: boolean,
@@ -33,16 +33,16 @@ interface ServerlessPluginStart {
 
 ## Components
 
-- **SideNavComponent**: A lazily-loaded wrapper that integrates with the core Navigation component
 - **Navigation Cards**: Utilities for generating cards for a landing page in Stack Management
 
 ## Integration
 
 This module connects the serverless plugin with Kibana's core navigation system by:
 
-1. Providing a serverless-specific implementation of SideNavComponent
-2. Using NavigationKibanaProvider to connect with core navigation services
-3. Exposing navigation card generators for a Stack Management landing page
+1. Using the `initNavigation` method to register navigation trees for serverless plugins.
+2. Connecting the navigation tree to the `ProjectNavigationService` to manage active nodes and navigation state.
+3. Rendering the side navigation component using the navigation tree.
+4. Exposing navigation card generators for a Stack Management landing page
 
 ## Usage
 
@@ -61,7 +61,7 @@ public start(core: CoreStart, plugins: PluginsStart) {
       // Your navigation items
     ],
   });
-  
+
   // Register your navigation tree
   plugins.serverless.initNavigation(
     'your-plugin-id',

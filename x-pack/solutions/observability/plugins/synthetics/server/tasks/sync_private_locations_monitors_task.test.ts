@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server/plugin';
+import type { CustomTaskInstance } from './sync_private_locations_monitors_task';
 import {
   SyncPrivateLocationMonitorsTask,
   runSynPrivateLocationMonitorsTaskSoon,
-  CustomTaskInstance,
 } from './sync_private_locations_monitors_task';
-import { SyntheticsServerSetup } from '../types';
-import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { SyntheticsServerSetup } from '../types';
+import type { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import * as getPrivateLocationsModule from '../synthetics_service/get_private_locations';
 import { coreMock } from '@kbn/core/server/mocks';
-import { CoreStart } from '@kbn/core-lifecycle-server';
+import type { CoreStart } from '@kbn/core-lifecycle-server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -171,11 +171,19 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       const result = await task.runTask({ taskInstance });
 
-      expect(mockLogger.debug).toHaveBeenCalledWith(
-        'Syncing private location monitors because data has changed'
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        1,
+        '[syncGlobalParams] Syncing private location monitors, last total params 1 '
+      );
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        2,
+        '[syncGlobalParams] Syncing private location monitors because data has changed '
+      );
+      expect(mockLogger.debug).toHaveBeenNthCalledWith(
+        3,
+        '[syncGlobalParams] Sync of private location monitors succeeded '
       );
       expect(task.syncGlobalParams).toHaveBeenCalled();
-      expect(mockLogger.debug).toHaveBeenCalledWith('Sync of private location monitors succeeded');
       expect(result.error).toBeUndefined();
       expect(result.state).toEqual({
         lastStartedAt: taskInstance.startedAt?.toISOString(),
@@ -198,7 +206,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
       expect(getPrivateLocationsModule.getPrivateLocations).toHaveBeenCalled();
       expect(task.syncGlobalParams).not.toHaveBeenCalled();
-      expect(mockLogger.debug).toHaveBeenCalledWith('Sync of private location monitors succeeded');
+      expect(mockLogger.debug).toHaveBeenLastCalledWith(
+        '[syncGlobalParams] Sync of private location monitors succeeded '
+      );
     });
 
     it('should handle errors during the run', async () => {
@@ -454,7 +464,7 @@ describe('runSynPrivateLocationMonitorsTaskSoon', () => {
     const error = new Error('Failed to run soon');
     mockTaskManagerStart.runSoon.mockRejectedValue(error);
 
-    await runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any });
+    await runSynPrivateLocationMonitorsTaskSoon({ server: mockServerSetup as any, retries: 0 });
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       `Error scheduling Synthetics sync private location monitors task: ${error.message}`,
