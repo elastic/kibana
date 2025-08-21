@@ -64,6 +64,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
 
       const { savedObjects: results, statuses } = await api.fetchTableData();
@@ -107,6 +108,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
 
       const { savedObjects: res, statuses } = await api.fetchTableData();
@@ -119,6 +121,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.fetchTableData();
 
@@ -147,6 +150,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.fetchTableData();
 
@@ -174,6 +178,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendDelete('abc-123-cool-session-ID');
 
@@ -188,6 +193,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendDelete('abc-123-cool-session-ID');
 
@@ -216,6 +222,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendExtend('my-id', '5d');
 
@@ -228,6 +235,7 @@ describe('Search Sessions Management API', () => {
       const api = new SearchSessionsMgmtAPI(sessionsClient, mockConfig, {
         notifications: mockCoreStart.notifications,
         application: mockCoreStart.application,
+        featureFlags: mockCoreStart.featureFlags,
       });
       await api.sendExtend('my-id', '5d');
 
