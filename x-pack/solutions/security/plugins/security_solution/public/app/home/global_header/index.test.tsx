@@ -129,7 +129,8 @@ describe('global header', () => {
   //   expect(getByTestId(DATA_VIEW_PICKER_TEST_ID)).toBeInTheDocument();
   // });
 
-  it('shows data view manager on rule details page', () => {
+  // TODO: Skipping until feature flag is enabled https://github.com/elastic/security-team/issues/11959 by default
+  it.skip('shows data view manager on rule details page', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: sourcererPaths[2] });
 
     const { getByTestId } = render(
