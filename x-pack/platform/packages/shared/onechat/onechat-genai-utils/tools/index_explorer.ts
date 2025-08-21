@@ -13,7 +13,8 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ListIndexInfo } from './steps/list_indices';
 import { listIndices } from './steps/list_indices';
 import { getIndexMappings } from './steps/get_mappings';
-import { cleanupMapping } from './utils/mappings';
+import type { MappingField } from './utils/mappings';
+import { cleanupMapping, flattenMappings } from './utils/mappings';
 
 export interface RelevantIndex {
   indexName: string;
@@ -53,9 +54,15 @@ export const indexExplorer = async ({
     cleanedMappings[indexName] = cleanupMapping(mapping.mappings);
   }
 
+  const flattenedMappings: Record<string, MappingField[]> = {};
+  for (const [indexName, mapping] of Object.entries(allMappings)) {
+    flattenedMappings[indexName] = flattenMappings({ mappings: mapping.mappings });
+  }
+
   const selectedIndices = await selectIndices({
     indices: allIndices,
     mappings: cleanedMappings,
+    fields: flattenedMappings,
     nlQuery,
     model,
     limit,
@@ -82,12 +89,14 @@ export interface SelectedIndex {
 const selectIndices = async ({
   indices,
   mappings,
+  fields,
   nlQuery,
   model,
   limit = 1,
 }: {
   indices: ListIndexInfo[];
   mappings: Record<string, MappingTypeMapping>;
+  fields: Record<string, MappingField[]>;
   nlQuery: string;
   model: ScopedModel;
   limit?: number;
@@ -116,10 +125,13 @@ const selectIndices = async ({
        ${indices
          .map((index) => {
            const indexMapping = mappings[index.index];
-           const description = indexMapping?._meta?.description || 'No description available';
+           const fieldPaths: string[] = fields[index.index].map((mappingField) => {
+             return mappingField.path;
+           });
+           const description = indexMapping?._meta?.description || `Fields: ${fieldPaths}`;
            return `- ${index.index}: ${description}`;
          })
-         .join('\n')}
+         .join('\n\n')}
 
        Based on the natural language query and the index descriptions, please return the most relevant indices with your reasoning.
        Remember, you should select at maximum ${limit} indices.
