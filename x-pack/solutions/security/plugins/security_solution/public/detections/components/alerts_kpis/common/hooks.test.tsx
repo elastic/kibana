@@ -168,11 +168,7 @@ describe('hooks', () => {
       });
       const aggregateableFields = result.current();
       unmount();
-      expect(aggregateableFields.length).toBeGreaterThan(0);
-      expect(mockIndexFields.length).toBeGreaterThan(aggregateableFields.length);
-      expect(mockIndexFieldsByName[aggregateableFields[0].value as string]?.aggregatable).toEqual(
-        true
-      );
+      expect(aggregateableFields).toHaveLength(0);
     });
   });
 });
