@@ -43,12 +43,12 @@ Optional publishing package interfaces. Embeddables may implement these interfac
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
-| HasDynamicActions | Intrfaceo for interacting with  | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
+| HasDynamicActions | Interface for accessing dynamic actions. Dynamics actions are actions that manage their own state. Dynamic action state is stored in embeddable state but managed by the dynamic action. | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | HasEditCapabilities | Interface for editing embeddable state | ACTION_EDIT_PANEL | 
 | HasInspectorAdapters | Interface for accessing embeddable inspector adaptors | ACTION_INSPECT_PANEL, ACTION_EXPORT_CSV |
 | HasLibraryTransforms | Interface for linking to and unlinking from the library | ACTION_ADD_TO_LIBRARY, ACTION_UNLINK_FROM_LIBRARY |
 | HasReadOnlyCapabilities | Interface for showing the embeddable configuration for read only users | ACTION_SHOW_CONFIG_PANEL |
-| HasSupportedTriggers | Inteface for publishing supported trigger types | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
+| HasSupportedTriggers | Inteface for publishing supported triggers | OPEN_FLYOUT_ADD_DRILLDOWN, OPEN_FLYOUT_EDIT_DRILLDOWN |
 | HasVisualizeConfig | Interface for accessing Visualize embeddable state | ACTION_EDIT_IN_LENS, CONVERT_LEGACY_MARKDOWN_ACTION_ID |
 | LensApiCallbacks | Inteface implements Lens API | ADD_TO_EXISTING_CASE_ACTION_ID |
 | PublishesBlockingError | Interface for publishing unrecoverable errors | Embeddable panel to display error state |
