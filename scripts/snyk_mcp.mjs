@@ -27,6 +27,7 @@ const config = {
   snykProjectId: process.env.SNYK_PROJECT_ID,
   snykApiKey: process.env.SNYK_API_KEY,
   snykOrgId: process.env.SNYK_ORG_ID,
+  githubToken: process.env.GITHUB_TOKEN,
 };
 
 const server = new McpServer(
@@ -37,7 +38,97 @@ const server = new McpServer(
   {
     capabilities: {
       prompts: {},
+      tools: {
+        listChanged: true,
+      },
     },
+  }
+);
+
+async function findGitHubIssue(cveId) {
+  try {
+    const query = `repo:elastic/snyk_vuln_analyzer_testing is:issue "${cveId}" in:title,body label:Kibana`;
+    const response = await fetch(
+      `https://api.github.com/search/issues?q=${encodeURIComponent(query)}`,
+      {
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          'User-Agent': 'snyk-triage-mcp',
+          Authorization: `token ${config.githubToken}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+
+    if (data.items && data.items.length > 0) {
+      return data.items[0].number;
+    }
+
+    return null;
+  } catch (error) {
+    console.error('Error finding GitHub issue:', error);
+    return null;
+  }
+}
+
+async function writeCommentOnGitHubIssue(issueNumber, comment) {
+  try {
+    const response = await fetch(
+      `https://api.github.com/repos/elastic/snyk_vuln_analyzer_testing/issues/${issueNumber}/comments`,
+      {
+        method: 'POST',
+        headers: {
+          Accept: 'application/vnd.github.v3+json',
+          'Content-Type': 'application/json',
+          'User-Agent': 'snyk-triage-mcp',
+          Authorization: `token ${config.githubToken}`,
+        },
+        body: JSON.stringify({ body: comment }),
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`GitHub API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error('Error writing comment to GitHub issue:', error);
+    throw error;
+  }
+}
+
+server.tool(
+  'write_security_statement_post',
+  'Write the security statement post to the GitHub issue',
+  {
+    issueNumber: z.number().describe('GitHub issue number to post the security statement.'),
+    securityPost: z
+      .string()
+      .min(1, 'Security post cannot be empty')
+      .describe('Security post content in YAML format.'),
+  },
+  async (args) => {
+    const { issueNumber, securityPost } = args;
+
+    const formattedPost = `### Security statement\n\`\`\`yaml\n${securityPost}\n\`\`\``;
+
+    await writeCommentOnGitHubIssue(issueNumber, formattedPost);
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Security statement post added to GitHub issue #${issueNumber} in repository .`,
+        },
+      ],
+    };
   }
 );
 
@@ -139,6 +230,94 @@ server.tool(
 );
 
 server.tool(
+  'issue_security_statement_template',
+  'Issue security statement template',
+  {
+    isKibanaVulnerable: z.boolean().describe('Is Kibana vulnerable to the issue?'),
+    justification: z
+      .string()
+      .min(1, 'Justification cannot be empty')
+      .describe('Justification for the exception request.'),
+  },
+  async (args) => {
+    const { justification, isKibanaVulnerable } = args;
+
+    const securityStatementOutline = `
+        Information:
+        - **Is Kibana vulnerable?**: ${isKibanaVulnerable ? 'Yes' : 'No'}
+        - **Justification**: ${justification}
+
+        Generalized Templates:
+        - If Kibana is not vulnerable:
+          Kibana uses \`package@x.y.z\` as part of some functionality (alternatively/additionally: as a transitive dependency of \`package@x.y.z\`).
+          Kibana is not affected by this issue because ${justification}. Nevertheless, \`package@x.y.z\` will be updated to version \`patched Y version\` as part of Kibana standard maintenance practices in Kibana version x.y.z.
+        - If Kibana is vulnerable:
+          Kibana is affected by this issue. \`package@x.y.z\` will be updated to version \`patched Y version\` as part of Kibana standard maintenance practices in Kibana version x.y.z.
+      `;
+
+    return {
+      content: [
+        {
+          type: 'text',
+          text: `Security statement template: \n\n ${securityStatementOutline}`,
+        },
+      ],
+    };
+  }
+);
+
+server.tool(
+  'find_github_issue',
+  'Find GitHub issue related to the Snyk vulnerability',
+  {
+    cveId: z
+      .string()
+      .min(1, 'CVE ID cannot be empty')
+      .describe('CVE ID of the vulnerability to find related GitHub issue.'),
+  },
+  async (args) => {
+    const { cveId } = args;
+
+    try {
+      const issueNumber = await findGitHubIssue(cveId);
+
+      if (issueNumber) {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `Found related GitHub issue: #${issueNumber} for CVE ID ${cveId}.`,
+            },
+          ],
+          structuredContent: {
+            issueNumber,
+          },
+        };
+      } else {
+        return {
+          content: [
+            {
+              type: 'text',
+              text: `No related GitHub issue found for CVE ID ${cveId}.`,
+            },
+          ],
+        };
+      }
+    } catch (error) {
+      console.error('Error finding GitHub issue:', error);
+      return {
+        content: [
+          {
+            type: 'text',
+            text: `Error finding GitHub issue for CVE ID ${cveId}: ${error.message}`,
+          },
+        ],
+      };
+    }
+  }
+);
+
+server.tool(
   'triage_snyk_issue',
   'Triage the snyk issue',
   {
@@ -226,9 +405,44 @@ server.tool(
             Find if there are any usages in the codebase (ignore tests, ignore node_modules, ignore target folders, we are interested in production application code). List the usages and check if they are vulnerable.`,
           },
           {
+            id: 'find_github_issue',
+            description:
+              'Using the CVE ID, find the related GitHub issue in the snyk_vuln_analyzer_testing repo.',
+            tool: 'find_github_issue',
+          },
+          {
             id: 'make_triage_comment',
             description: `Based on the triage from previous step, make a triage comment with the justification and risk response. ${triageCommentSamples}.`,
             tool: 'make_triage_comment',
+          },
+          {
+            id: 'determine_kibana_latest_versions',
+            description: `determine the next version of Kibana that will be released after the current version.`,
+          },
+          {
+            id: 'issue_security_statement_template',
+            description: `Based on the triage and justification from previous steps, create a template for a security statement.`,
+            tool: 'issue_security_statement_template',
+          },
+          {
+            id: 'issue_security_statement',
+            description: `Based on the triage, justification, and template for a security statement from previous steps, create text in the following format:
+
+            \`\`\`yaml
+            cve: The CVE ID for the vulnerability triaged. i.e. "CVE-2021-1223". If you are triaging more than one CVEs in the same GH issue, you need to create multiple comments
+            status: Can be one of "future update", "not exploitable", "false positive".
+            statement: Using the security statement template from previous step, fill in the details and make any changes to better alight with the triage that has been done, include a sentence about the Kibana version that will be released with the fix.
+            product: kibana
+            dependency: The name of the npm package, i.e. "minimist"
+            \`\`\`
+
+            This will be called a security post. Log it out
+            `,
+          },
+          {
+            id: 'write_security_statement_post',
+            description: `Using the GitHub issue number and repo from previous steps, add the security statement post to the GitHub issue as a comment.`,
+            tool: 'write_security_statement_post',
           },
           {
             id: 'raise_snyk_exception',
