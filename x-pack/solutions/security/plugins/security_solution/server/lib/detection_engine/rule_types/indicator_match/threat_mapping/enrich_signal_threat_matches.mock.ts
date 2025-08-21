@@ -6,13 +6,11 @@
  */
 
 import type { SignalSourceHit } from '../../types';
-import type { ThreatMatchNamedQuery } from './types';
+import type { BaseThreatNamedQuery } from './types';
 
 export const getNamedQueryMock = (
-  overrides: Partial<ThreatMatchNamedQuery> = {}
-): ThreatMatchNamedQuery => ({
-  id: 'id',
-  index: 'index',
+  overrides: Partial<BaseThreatNamedQuery> = {}
+): BaseThreatNamedQuery => ({
   threatMappingIndex: 0,
   queryType: 'mq',
   ...overrides,

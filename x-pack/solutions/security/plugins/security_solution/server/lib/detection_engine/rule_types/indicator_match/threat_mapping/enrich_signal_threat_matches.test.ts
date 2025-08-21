@@ -51,10 +51,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
   });
@@ -105,7 +102,7 @@ describe('buildEnrichments', () => {
       indicatorPath,
     });
 
-    expect(get(enrichment, 'matched.index')).toEqual('threat-index');
+    expect(get(enrichment, 'matched.index')).toEqual('threat_index');
   });
 
   it('returns the field of the matched indicator as matched.field', () => {
@@ -144,7 +141,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({ id: '123', index: 'threat-index' }),
+        query: getNamedQueryMock(),
       },
       {
         threatHit: getThreatListItemMock({
@@ -160,7 +157,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({ id: '456', index: 'threat-index' }),
+        query: getNamedQueryMock(),
       },
     ];
     const enrichments = buildEnrichments({
@@ -191,7 +188,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -217,7 +214,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({ id: '123', index: 'threat-index' }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -238,7 +235,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -282,7 +279,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -326,7 +323,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -342,7 +339,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.other',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -357,10 +354,7 @@ describe('buildEnrichments', () => {
           _id: '123',
           _source: {},
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -377,7 +371,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -392,10 +386,7 @@ describe('buildEnrichments', () => {
           _id: '123',
           _source: { threat: { indicator: [] } },
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -412,7 +403,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -434,10 +425,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -458,7 +446,7 @@ describe('buildEnrichments', () => {
         matched: {
           atomic: undefined,
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           field: 'event.field',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -477,10 +465,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -504,10 +489,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -538,10 +520,7 @@ describe('buildEnrichments', () => {
             },
           },
         }),
-        query: getNamedQueryMock({
-          id: '123',
-          index: 'threat-index',
-        }),
+        query: getNamedQueryMock(),
       },
     ];
 
@@ -566,7 +545,7 @@ describe('buildEnrichments', () => {
           atomic: undefined,
           field: 'event.field',
           id: '123',
-          index: 'threat-index',
+          index: 'threat_index',
           type: 'indicator_match_rule',
         },
       },
@@ -606,8 +585,6 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
               },
             }),
             query: {
-              id: '123',
-              index: 'indicator_index',
               threatMappingIndex: 0,
               queryType: 'mq',
             },
@@ -679,7 +656,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
         matched: {
           atomic: 'domain_1',
           id: '123',
-          index: 'indicator_index',
+          index: 'threat_index',
           field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -728,7 +705,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
         matched: {
           atomic: 'domain_1',
           id: '123',
-          index: 'indicator_index',
+          index: 'threat_index',
           field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },
@@ -765,8 +742,6 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
               },
             }),
             query: {
-              id: '123',
-              index: 'custom_index',
               threatMappingIndex: 0,
               queryType: 'mq',
             },
@@ -803,7 +778,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
         matched: {
           atomic: 'domain_1',
           id: '123',
-          index: 'custom_index',
+          index: 'threat_index',
           field: 'event.domain',
           type: ENRICHMENT_TYPES.IndicatorMatchRule,
         },

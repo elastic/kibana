@@ -57,8 +57,9 @@ export const buildEnrichments = ({
       matched: {
         atomic: undefined,
         field: entry.field,
-        id: query.id,
-        index: query.index,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        id: threatHit._id!,
+        index: threatHit._index,
         type: ENRICHMENT_TYPES.IndicatorMatchRule,
       },
     }));

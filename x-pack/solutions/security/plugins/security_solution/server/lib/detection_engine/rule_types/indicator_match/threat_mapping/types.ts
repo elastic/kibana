@@ -169,7 +169,7 @@ export interface ThreatEnrichment {
   matched: { id: string; index: string; field: string; atomic?: string; type: string };
 }
 
-interface BaseThreatNamedQuery {
+export interface BaseThreatNamedQuery {
   threatMappingIndex: number;
   queryType: string;
 }

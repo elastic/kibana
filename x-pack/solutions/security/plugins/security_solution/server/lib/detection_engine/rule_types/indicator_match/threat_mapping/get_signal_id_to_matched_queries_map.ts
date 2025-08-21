@@ -16,6 +16,7 @@ import type {
   ThreatListItem,
   AllowedFieldsForTermsQuery,
   EventItem,
+  BaseThreatNamedQuery,
 } from './types';
 import { getThreatList } from './get_threat_list';
 import {
@@ -31,7 +32,7 @@ import type { ThreatRuleParams } from '../../../rule_schema';
 
 export interface MatchedHitAndQuery {
   threatHit: ThreatListItem;
-  query: ThreatMatchNamedQuery;
+  query: BaseThreatNamedQuery;
 }
 export type SignalIdToMatchedQueriesMap = Map<string, MatchedHitAndQuery[]>;
 
@@ -63,9 +64,6 @@ const addMatchedQueryToMaps = ({
   const signalMatch = signalIdToMatchedQueriesMap.get(signalId);
 
   const threatQuery = {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    id: threatHit._id!,
-    index: threatHit._index,
     threatMappingIndex: decodedQuery.threatMappingIndex,
     queryType: decodedQuery.queryType,
   };
