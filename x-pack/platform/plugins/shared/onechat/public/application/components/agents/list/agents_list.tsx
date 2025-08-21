@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
@@ -34,16 +34,17 @@ export const AgentsList: React.FC = () => {
         name: columnNames.name,
         valign: 'top',
         render: (name: string, item: AgentDefinition) => (
-          <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
-            {name}
-          </EuiLink>
+          <EuiFlexGroup direction="column" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
+                {name}
+              </EuiLink>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">{item.description}</EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         ),
-      },
-      {
-        field: 'description',
-        name: columnNames.description,
-        valign: 'top',
-        render: (description: string) => <EuiText size="s">{description}</EuiText>,
       },
       {
         field: 'labels',
