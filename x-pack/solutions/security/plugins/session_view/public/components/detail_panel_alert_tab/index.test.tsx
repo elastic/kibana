@@ -24,6 +24,7 @@ import {
   ALERT_GROUP_ITEM_TITLE_TEST_ID,
 } from '../detail_panel_alert_group_item';
 import { useDateFormat } from '../../hooks';
+import { normalizeArgsToArray } from '../../utils/normalize_args_to_array';
 import { formatDate } from '@elastic/eui';
 
 jest.mock('../../hooks/use_date_format');
@@ -190,7 +191,7 @@ describe('DetailPanelAlertTab component', () => {
       );
 
       expect(renderResult.queryAllByTestId(ALERT_LIST_ITEM_ARGS_TEST_ID)[0]).toHaveTextContent(
-        mockAlerts[0].process!.args!.join(' ')
+        normalizeArgsToArray(mockAlerts[0].process!.args).join(' ')
       );
     });
 

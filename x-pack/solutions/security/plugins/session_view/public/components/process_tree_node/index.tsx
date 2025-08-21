@@ -23,6 +23,7 @@ import { Nbsp } from './nbsp';
 import { useDateFormat } from '../../hooks';
 import { TextHighlight } from './text_highlight';
 import type { SessionViewTelemetryKey } from '../../types';
+import { normalizeArgsToArray } from '../../utils/normalize_args_to_array';
 
 export const EXEC_USER_CHANGE = i18n.translate('xpack.sessionView.execUserChange', {
   defaultMessage: 'Exec user change',
@@ -273,7 +274,8 @@ export function ProcessTreeNode({
 
   const timeStampsNormal = formatDate(start, dateFormat);
 
-  const promptText = `${workingDirectory ?? ''} ${args?.join(' ')}`;
+  const argsArr = normalizeArgsToArray(args);
+  const promptText = `${workingDirectory ?? ''} ${argsArr.join(' ')}`;
 
   return (
     <div>
@@ -294,7 +296,7 @@ export function ProcessTreeNode({
             <span css={styles.sessionLeader}>
               <EuiIcon type={sessionIcon} css={styles.icon} />
               <Nbsp />
-              <b css={styles.darkText}>{dataOrDash(name || args?.[0])}</b>
+              <b css={styles.darkText}>{dataOrDash(name || argsArr[0])}</b>
               <Nbsp />
               <span>
                 <FormattedMessage id="xpack.sessionView.startedBy" defaultMessage="started by" />
@@ -334,9 +336,9 @@ export function ProcessTreeNode({
                   <SplitText css={styles.workingDir}>
                     {dataOrDash(workingDirectory) + ' '}
                   </SplitText>
-                  <SplitText css={styles.darkText}>{`${dataOrDash(args?.[0])}`}</SplitText>
+                  <SplitText css={styles.darkText}>{`${dataOrDash(argsArr[0])}`}</SplitText>
                   <SplitText>
-                    {args && args.length > 1 ? ' ' + args?.slice(1).join(' ') : ''}
+                    {argsArr.length > 1 ? ' ' + argsArr.slice(1).join(' ') : ''}
                   </SplitText>
                 </TextHighlight>
               </span>

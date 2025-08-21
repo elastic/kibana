@@ -10,6 +10,7 @@ import type { DetailPanelProcess, DetailPanelProcessLeader } from '../../types';
 import { DASH } from '../../constants';
 import { dataOrDash } from '../../utils/data_or_dash';
 import { AUDITBEAT_INDEX } from '../../methods';
+import { normalizeArgsToArray } from '../../utils/normalize_args_to_array';
 
 const DEFAULT_PROCESS_DATA: DetailPanelProcessLeader = {
   id: DASH,
@@ -76,7 +77,7 @@ const getDetailPanelProcessLeader = (
   groupId: leader?.group?.id ?? DEFAULT_PROCESS_DATA.groupId,
   groupName: leader?.group?.name ?? DEFAULT_PROCESS_DATA.groupName,
   workingDirectory: leader?.working_directory ?? DEFAULT_PROCESS_DATA.workingDirectory,
-  args: formatProcessArgs(leader?.args) ?? DEFAULT_PROCESS_DATA.args,
+  args: formatProcessArgs(normalizeArgsToArray(leader?.args)) ?? DEFAULT_PROCESS_DATA.args,
   pid: leader?.pid?.toString() ?? DEFAULT_PROCESS_DATA.pid,
   // TODO: get the event action of leader
   executable: leader?.executable ? [[leader?.executable]] : DEFAULT_PROCESS_DATA.executable,
@@ -124,7 +125,7 @@ export const getDetailPanelProcess = (
   processData.pid = `${dataOrDash(details.process?.pid)}`;
   processData.workingDirectory = `${dataOrDash(details.process?.working_directory)}`;
   if (details.process?.args) {
-    processData.args = formatProcessArgs(details.process.args);
+    processData.args = formatProcessArgs(normalizeArgsToArray(details.process.args));
   }
 
   // we grab the executable from each process lifecycle event to give an indication

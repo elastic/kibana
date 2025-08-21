@@ -20,6 +20,7 @@ import type { ProcessDeps } from '.';
 import { ProcessTreeNode } from '.';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';
+import { normalizeArgsToArray } from '../../utils/normalize_args_to_array';
 
 jest.useFakeTimers();
 
@@ -345,7 +346,7 @@ describe('ProcessTreeNode component', () => {
         // ensures we are showing the rest of the info, and not replacing it with just the match.
         const { process } = props.process.getDetails();
         expect(renderResult.container.textContent).toContain(
-          process?.working_directory + '\xA0' + (process?.args && process.args.join(' '))
+          process?.working_directory + '\xA0' + normalizeArgsToArray(process?.args).join(' ')
         );
       });
     });

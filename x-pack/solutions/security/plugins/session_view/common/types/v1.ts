@@ -86,7 +86,7 @@ export interface IOFields {
 
 export interface ProcessFields {
   entity_id?: string;
-  args?: string[];
+  args?: string | string[];
   args_count?: number;
   command_line?: string;
   executable?: string;

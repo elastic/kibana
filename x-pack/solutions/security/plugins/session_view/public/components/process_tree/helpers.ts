@@ -15,6 +15,7 @@ import type {
   ProcessFields,
 } from '../../../common';
 import { ProcessImpl } from './hooks';
+import { normalizeArgsToArray } from '../../utils/normalize_args_to_array';
 
 // Creates an instance of Process, from a nested leader process fieldset
 // This is used to ensure we always have a record for a session leader, as well as
@@ -204,11 +205,12 @@ export const searchProcessTree = (
 
       const event = process.getDetails();
       const { working_directory: workingDirectory, args } = event.process ?? {};
+      const argsArr = normalizeArgsToArray(args);
 
       // TODO: the text we search is the same as what we render.
       // in future we may support KQL searches to match against any property
       // for now plain text search is limited to searching process.working_directory + process.args
-      const text = `${workingDirectory ?? ''} ${args?.join(' ')}`;
+      const text = `${workingDirectory ?? ''} ${argsArr.join(' ')}`;
 
       const searchMatch = [...text.matchAll(new RegExp(escapeRegExp(searchQuery), 'gi'))];
 
