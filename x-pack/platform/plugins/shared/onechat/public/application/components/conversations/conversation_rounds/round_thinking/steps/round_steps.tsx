@@ -15,7 +15,6 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { conversationRoundsId } from '../../conversation_rounds.styles';
 import { QueryResultStep } from './query_result_step';
-// import { ResourceResultStep } from './resource_result_step';
 import { OtherResultStep } from './other_result_step';
 import { TabularDataResultStep } from './tabular_data_result_step';
 
