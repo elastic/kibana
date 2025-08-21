@@ -14,6 +14,7 @@ import {
   EuiInMemoryTable,
   EuiLink,
   EuiText,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
@@ -36,10 +37,17 @@ export const AgentsList: React.FC = () => {
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(
     () => [
+      // Agent avatar
+      {
+        width: '48px',
+        align: 'center',
+        render: (agent: AgentDefinition) =>
+          // TODO: Add avatar for custom agents
+          agent.id === oneChatDefaultAgentId ? <EuiIcon type="logoElastic" size="xl" /> : null,
+      },
       {
         field: 'name',
         name: columnNames.name,
-        valign: 'top',
         render: (name: string, item: AgentDefinition) => (
           <EuiFlexGroup direction="column" gutterSize="xs">
             <EuiFlexItem grow={false}>
@@ -88,7 +96,7 @@ export const AgentsList: React.FC = () => {
   return (
     <EuiInMemoryTable
       items={agents}
-      itemId="id"
+      itemId={(agent) => agent.id}
       columns={columns}
       sorting={true}
       selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
