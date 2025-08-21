@@ -124,7 +124,7 @@ describe('when in the Administration tab', () => {
       expect(await render().findByTestId('policyListPage')).toBeTruthy();
     });
 
-    it('should display trusted apps list page when `canReadEndpointExceptions` is TRUE', async () => {
+    it('should display endpoint exceptions list page when `canReadEndpointExceptions` is TRUE', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadEndpointExceptions: true },
       });
