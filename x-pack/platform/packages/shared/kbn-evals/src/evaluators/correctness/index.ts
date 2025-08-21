@@ -46,9 +46,29 @@ export function createCorrectnessAnalysisEvaluator({
       }
 
       const correctnessAnalysisResult = await pRetry(runCorrectnessAnalysis, {
-        retries: 0,
+        retries: 3,
         onFailedAttempt: (error) => {
-          log.error(new Error(`Failed to score correctness task`, { cause: error }));
+          const isLastAttempt = error.attemptNumber === error.retriesLeft + error.attemptNumber;
+
+          if (isLastAttempt) {
+            log.error(
+              new Error(
+                `Failed to retrieve correctness analysis after ${error.attemptNumber} attempts (no valid tool call or malformed response)`,
+                {
+                  cause: error,
+                }
+              )
+            );
+          } else {
+            log.warning(
+              new Error(
+                `Correctness analysis returned an invalid or missing tool call on attempt ${error.attemptNumber}; retrying...`,
+                {
+                  cause: error,
+                }
+              )
+            );
+          }
         },
       });
 
