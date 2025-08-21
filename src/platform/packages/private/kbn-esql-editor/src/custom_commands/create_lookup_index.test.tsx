@@ -25,7 +25,7 @@ describe('appendIndexToJoinCommand', () => {
   | LOOKUP JOIN new_index`);
   });
 
-  it('should append index name to the join command', () => {
+  it('should append an index name to the join command', () => {
     const result = appendIndexToJoinCommand(
       'FROM kibana_sample_data_logs | LOOKUP JOIN  | LIMIT 10',
       { lineNumber: 1, column: 44 } as monaco.Position,
@@ -36,7 +36,7 @@ describe('appendIndexToJoinCommand', () => {
   | LIMIT 10`);
   });
 
-  it('should append index name to the join command in multi-line query', () => {
+  it('should append an index name to the join command in a multi-line query', () => {
     const result = appendIndexToJoinCommand(
       `FROM kibana_sample_data_logs
   | LOOKUP JOIN\u0020
@@ -49,7 +49,7 @@ describe('appendIndexToJoinCommand', () => {
   | LIMIT 10`);
   });
 
-  it('should append index name to the correct join command', () => {
+  it('should append an index name to the correct join command', () => {
     const result = appendIndexToJoinCommand(
       'FROM kibana_sample_data_logs | LOOKUP JOIN new_index ON some_field | LOOKUP JOIN  | LIMIT 10',
       { lineNumber: 1, column: 82 } as monaco.Position,
@@ -61,7 +61,7 @@ describe('appendIndexToJoinCommand', () => {
   | LIMIT 10`);
   });
 
-  it('should not append index name if an index argument with the same name is already present', () => {
+  it('should not append an index name if an index argument with the same name is already present', () => {
     const result = appendIndexToJoinCommand(
       'FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10',
       { lineNumber: 1, column: 53 } as monaco.Position,
@@ -70,7 +70,7 @@ describe('appendIndexToJoinCommand', () => {
     expect(result).toBe('FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10');
   });
 
-  it('should replace existing index argument', () => {
+  it('should replace the existing index argument', () => {
     const result = appendIndexToJoinCommand(
       'FROM kibana_sample_data_logs | LOOKUP JOIN new_index | LIMIT 10',
       { lineNumber: 1, column: 53 } as monaco.Position,

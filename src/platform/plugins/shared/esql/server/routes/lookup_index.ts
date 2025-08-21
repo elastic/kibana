@@ -130,7 +130,7 @@ export const registerLookupIndexRoutes = (
             },
             // Check if the user has privileges to create, read and write based on the index pattern
             {
-              names: [`${indexName}*`],
+              names: [`${indexName}`],
               privileges: ['read', 'write', 'create_index'],
             },
           ],

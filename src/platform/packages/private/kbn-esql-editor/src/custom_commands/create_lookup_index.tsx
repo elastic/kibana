@@ -146,6 +146,35 @@ function isESQLSourceItem(arg: unknown): arg is ESQLSource {
   return typeof arg === 'object' && arg !== null && 'type' in arg && arg.type === 'source';
 }
 
+export type IndexPrivileges = Record<
+  string,
+  { read: boolean; write: boolean; create_index: boolean }
+>;
+
+/**
+ * Extracts and returns a list of unique lookup indices from the provided ESQL query by parsing the query and traversing its AST.
+ *
+ * @param {string} esqlQuery - The ESQL query string to parse and analyze for lookup indices.
+ * @return {string[]} An array of unique lookup index names found in the query.
+ */
+export function getLookupIndicesFromQuery(esqlQuery: string): string[] {
+  const indexNames: string[] = [];
+
+  // parse esql query and find lookup indices in the query, traversing the AST
+  const { root } = Parser.parse(esqlQuery);
+  // find all join commands
+  root.commands.forEach((command) => {
+    if (command.name === 'join') {
+      const indexName = command.args.find<ESQLSource>(isESQLSourceItem);
+      if (indexName) {
+        indexNames.push(indexName.name);
+      }
+    }
+  });
+
+  return Array.from(new Set(indexNames));
+}
+
 /**
  * Hook to register a custom command and tokens for lookup indices in the ESQL editor.
  * @param editorRef
@@ -163,10 +192,29 @@ export const useLookupIndexCommand = (
 ) => {
   const { euiTheme } = useEuiTheme();
   const {
-    services: { uiActions, docLinks },
+    services: { uiActions, docLinks, http },
   } = useKibana<ESQLEditorDeps>();
 
   const inQueryLookupIndices = useRef<string[]>([]);
+
+  useEffect(
+    function parseIndicesOnChange() {
+      inQueryLookupIndices.current = getLookupIndicesFromQuery(query.esql);
+    },
+    [query.esql]
+  );
+
+  const getIndexPrivileges = useCallback(
+    (indexName: string, indicesPrivileges: IndexPrivileges) => {
+      return {
+        canCreateIndex:
+          indicesPrivileges['*']?.create_index || indicesPrivileges[indexName]?.create_index,
+        canEditIndex: indicesPrivileges['*']?.write || indicesPrivileges[indexName]?.write,
+        canReadIndex: indicesPrivileges['*']?.read || indicesPrivileges[indexName]?.read,
+      };
+    },
+    []
+  );
 
   const lookupIndexBaseBadgeClassName = 'lookupIndexBadge';
   const lookupIndexAddBadgeClassName = 'lookupIndexAddBadge';
@@ -186,25 +234,22 @@ export const useLookupIndexCommand = (
     }
   `;
 
-  useEffect(
-    function parseIndicesOnChange() {
-      const indexNames: string[] = [];
+  const fetchUserPrivileges = useCallback(
+    async (indexNames: string[]) => {
+      const response = await Promise.all(
+        indexNames.map((indexName) => {
+          return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
+        })
+      );
 
-      // parse esql query and find lookup indices in the query, traversing the AST
-      const { root } = Parser.parse(query.esql);
-      // find all join commands
-      root.commands.forEach((command) => {
-        if (command.name === 'join') {
-          const indexName = command.args.find<ESQLSource>(isESQLSourceItem);
-          if (indexName) {
-            indexNames.push(indexName.name);
-          }
-        }
-      });
-
-      inQueryLookupIndices.current = Array.from(new Set(indexNames));
+      return response.reduce((acc, curr) => {
+        return {
+          ...acc,
+          ...curr,
+        };
+      }, {});
     },
-    [query.esql]
+    [http]
   );
 
   // TODO: Replace with the actual lookup index docs URL once it's available
@@ -219,7 +264,18 @@ export const useLookupIndexCommand = (
     }
   );
 
+  /**
+   * Adds decorations to the editor to indicate which lookup indices are used in the query.
+   * @note Because we pass a callback once on mount, the reference has to be stable.
+   *
+   */
   const addLookupIndicesDecorator = useCallback(async () => {
+    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
+
+    const lookupIndices: string[] = inQueryLookupIndices.current;
+
+    const privileges = await fetchUserPrivileges(lookupIndices);
+
     // we need to remove the previous decorations first
     const lineCount = editorModel.current?.getLineCount() || 1;
     for (let i = 1; i <= lineCount; i++) {
@@ -230,17 +286,39 @@ export const useLookupIndexCommand = (
       editorRef?.current?.removeDecorations(lookupIndexDecorations.map((d) => d.id));
     }
 
-    const existingIndices = getLookupIndices ? await getLookupIndices() : { indices: [] };
-
-    const lookupIndices: string[] = inQueryLookupIndices.current;
-
     for (let i = 0; i < lookupIndices.length; i++) {
       const lookupIndex = lookupIndices[i];
 
       const isExistingIndex = existingIndices.indices.some((index) => index.name === lookupIndex);
+      const { canCreateIndex, canReadIndex, canEditIndex } = getIndexPrivileges(
+        lookupIndex,
+        privileges
+      );
 
       const matches =
         editorModel.current?.findMatches(lookupIndex, true, false, true, ' ', true) || [];
+
+      let actionLabel = '';
+      if (isExistingIndex) {
+        if (canEditIndex) {
+          actionLabel = i18n.translate('esqlEditor.lookupIndex.edit', {
+            defaultMessage: 'Edit lookup index',
+          });
+        } else if (canReadIndex) {
+          actionLabel = i18n.translate('esqlEditor.lookupIndex.view', {
+            defaultMessage: 'View lookup index',
+          });
+        }
+      } else {
+        if (canCreateIndex) {
+          actionLabel = i18n.translate('esqlEditor.lookupIndex.create', {
+            defaultMessage: 'Create lookup index',
+          });
+        }
+      }
+
+      // Don't add decorations if the lookup index is not found in the query'
+      if (!actionLabel) continue;
 
       matches.forEach((match) => {
         editorRef?.current?.createDecorationsCollection([
@@ -250,15 +328,7 @@ export const useLookupIndexCommand = (
               isWholeLine: false,
               stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
               hoverMessage: {
-                value: `[${
-                  isExistingIndex
-                    ? i18n.translate('esqlEditor.lookupIndex.edit', {
-                        defaultMessage: 'Edit lookup index',
-                      })
-                    : i18n.translate('esqlEditor.lookupIndex.create', {
-                        defaultMessage: 'Create lookup index',
-                      })
-                }](command:esql.lookup_index.create?${encodeURIComponent(
+                value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
                   JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
                 )})`,
                 isTrusted: true,
@@ -273,7 +343,7 @@ export const useLookupIndexCommand = (
         ]);
       });
     }
-  }, [editorModel, editorRef, getLookupIndices]);
+  }, [getLookupIndices, fetchUserPrivileges, editorModel, editorRef, getIndexPrivileges]);
 
   const onFlyoutClose = useCallback(
     async (
@@ -286,7 +356,7 @@ export const useLookupIndexCommand = (
       const cursorPosition = editorRef.current?.getPosition();
 
       if (!initialIndexName && !cursorPosition) {
-        throw new Error('Could not find cursor position in the editor');
+        throw new Error('Could not find a cursor position in the editor');
       }
 
       const resultQuery = appendIndexToJoinCommand(
