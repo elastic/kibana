@@ -44,6 +44,35 @@ apiTest.describe(
 );`,
   },
   {
+    category: 'Console',
+    description: 'Simple API test for Console/Dev Tools functionality',
+    code: `
+import type { RoleApiCredentials } from '@kbn/scout';
+import { apiTest, expect, tags } from '@kbn/scout';
+
+apiTest.describe(
+  'Console API Test',
+  { tag: tags.DEPLOYMENT_AGNOSTIC },
+  () => {
+    let adminApiCredentials: RoleApiCredentials;
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      adminApiCredentials = await requestAuth.getApiKey('admin');
+    });
+
+    apiTest('should access console proxy successfully', async ({ apiClient }) => {
+      // Navigate: Make Console proxy API call
+      const response = await apiClient.get('api/console/proxy?method=GET&path=/_cat/indices', {
+        headers: { ...adminApiCredentials.apiKeyHeader },
+      });
+
+      // Validate: Check positive response
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toBeDefined();
+    });
+  }
+);`,
+  },
+  {
     category: 'Security',
     description: 'Simple API test for authentication',
     code: `
@@ -123,6 +152,56 @@ test.describe('Basic Dashboard Test', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
     
     // Validate: Check dashboard page is visible
     await expect(pageObjects.dashboard.getDashboardGrid()).toBeVisible();
+  });
+});`,
+  },
+  {
+    category: 'Console',
+    description: 'Simple UI test for Console/Dev Tools navigation',
+    code: `
+import { test, expect, tags } from '@kbn/scout';
+
+test.describe('Console Navigation Test', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+  test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.common.navigateToApp('dev_tools');
+  });
+
+  test('should navigate to console successfully', async ({ pageObjects }) => {
+    // Action: Wait for console to load
+    await pageObjects.console.openTab();
+    
+    // Validate: Check console interface is visible
+    await expect(pageObjects.console.getCodeEditor()).toBeVisible();
+  });
+});`,
+  },
+  {
+    category: 'Parallel',
+    description: 'Parallel UI test with spaces support',
+    code: `
+import { spaceTest, expect, tags } from '@kbn/scout';
+
+spaceTest.describe('Basic Parallel Test', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+  spaceTest.beforeAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
+
+  spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
+    await browserAuth.loginAsAdmin();
+    await pageObjects.common.navigateToApp('app');
+  });
+
+  spaceTest.afterAll(async ({ scoutSpace }) => {
+    await scoutSpace.savedObjects.cleanStandardList();
+  });
+
+  spaceTest('should navigate to app successfully', async ({ pageObjects }) => {
+    // Action: Wait for page to load
+    await pageObjects.app.waitForPageLoad();
+    
+    // Validate: Check app interface is visible
+    await expect(pageObjects.app.getMainContainer()).toBeVisible();
   });
 });`,
   },

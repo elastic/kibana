@@ -74,6 +74,107 @@ function removeCodeFence(text: string): string {
     .replace(/\s*```$/, ''); // remove closing fence
 }
 
+// Generate playwright config for UI tests
+async function createPlaywrightConfig(
+  configPath: string,
+  testDir: string,
+  isParallel: boolean = false
+): Promise<void> {
+  const licenseHeader = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { createPlaywrightConfig } from '@kbn/scout';
+
+export default createPlaywrightConfig({
+  testDir: '${testDir}',${isParallel ? '\n  workers: 2,' : ''}
+});
+`;
+
+  try {
+    await fs.writeFile(configPath, licenseHeader, 'utf-8');
+    // eslint-disable-next-line no-console
+    console.log(`Playwright config created: ${configPath}`);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to create playwright config: ${configPath}`, error);
+  }
+}
+
+// Generate global.setup.ts for parallel tests
+async function createGlobalSetup(setupPath: string): Promise<void> {
+  const globalSetupContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { globalSetupHook } from '@kbn/scout';
+
+globalSetupHook('Ingest data to Elasticsearch', async ({ esArchiver, log }) => {
+  // Add archive paths here as needed for your plugin tests
+  // Example: 'x-pack/test/functional/es_archives/logstash_functional'
+  const archives: string[] = [
+    // Add your ES archive paths here
+  ];
+
+  if (archives.length > 0) {
+    log.debug('[setup] loading test data (only if indexes do not exist)...');
+    for (const archive of archives) {
+      await esArchiver.loadIfNeeded(archive);
+    }
+  } else {
+    log.debug('[setup] no test data archives specified, skipping ES data ingestion');
+  }
+});
+`;
+
+  try {
+    await fs.writeFile(setupPath, globalSetupContent, 'utf-8');
+    // eslint-disable-next-line no-console
+    console.log(`Global setup file created: ${setupPath}`);
+  } catch (error) {
+    // eslint-disable-next-line no-console
+    console.error(`Failed to create global setup file: ${setupPath}`, error);
+  }
+}
+
+// Determine test directory structure based on test type and parallel preference
+function getTestDirectoryInfo(testType: 'ui' | 'api', pluginDetails?: PluginDetails) {
+  // API tests always use regular 'tests' directory structure
+  if (testType === 'api') {
+    return {
+      testDirName: 'tests',
+      configName: 'playwright.config.ts',
+      isParallel: false,
+    };
+  }
+
+  // UI tests can use parallel structure if spaces are supported
+  if (testType === 'ui' && pluginDetails?.supportsSpaces && pluginDetails?.useParallelTesting) {
+    return {
+      testDirName: 'parallel_tests',
+      configName: 'parallel.playwright.config.ts',
+      isParallel: true,
+    };
+  }
+
+  // Default to regular tests directory
+  return {
+    testDirName: 'tests',
+    configName: 'playwright.config.ts',
+    isParallel: false,
+  };
+}
+
 export async function generateTestForFile(
   model: string,
   sourceFilePath: string,
@@ -83,22 +184,46 @@ export async function generateTestForFile(
   pluginDetails?: PluginDetails
 ) {
   if (pluginDetails) {
+    // Get directory structure info based on test type and parallel preference
+    const dirInfo = getTestDirectoryInfo(testType, pluginDetails);
+
     // Use new multi-step approach that generates multiple files
     const generator = new MultiStepTestGenerator(model);
     try {
       const testFiles = await generator.generateFullTest(pluginDetails, pluginMeta, testType);
-      // Create test directory
+
+      // Create base test directory (e.g., /test/scout/ui/ or /test/scout/api/)
       try {
         await fs.mkdir(testDirPath, { recursive: true });
       } catch (error) {
         // eslint-disable-next-line no-console
-        console.error(`Failed to create test directory: ${testDirPath}`, error);
+        console.error(`Failed to create base test directory: ${testDirPath}`, error);
         return;
+      }
+
+      // Create playwright config file
+      const configPath = path.join(testDirPath, dirInfo.configName);
+      await createPlaywrightConfig(configPath, `./${dirInfo.testDirName}`, dirInfo.isParallel);
+
+      // Create specific test directory (tests or parallel_tests)
+      const specificTestDir = path.join(testDirPath, dirInfo.testDirName);
+      try {
+        await fs.mkdir(specificTestDir, { recursive: true });
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.error(`Failed to create specific test directory: ${specificTestDir}`, error);
+        return;
+      }
+
+      // Create global.setup.ts for parallel tests
+      if (dirInfo.isParallel) {
+        const globalSetupPath = path.join(specificTestDir, 'global.setup.ts');
+        await createGlobalSetup(globalSetupPath);
       }
 
       // Write each test file separately
       for (const testFile of testFiles) {
-        const testFilePath = path.join(testDirPath, `${testFile.name}.spec.ts`);
+        const testFilePath = path.join(specificTestDir, `${testFile.name}.spec.ts`);
         try {
           await fs.writeFile(testFilePath, testFile.code, 'utf-8');
           // eslint-disable-next-line no-console

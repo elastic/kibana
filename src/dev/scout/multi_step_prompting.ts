@@ -18,6 +18,8 @@ export interface PluginDetails {
   complexity: 'simple' | 'medium' | 'complex';
   userInteractions: string[];
   apiEndpoints: string[];
+  supportsSpaces: boolean;
+  useParallelTesting: boolean;
 }
 
 export interface PluginAnalysis {
@@ -61,15 +63,23 @@ Plugin Information:
 Instructions:
 1. Use your knowledge of Kibana ecosystem and Elastic Stack to provide insights
 2. Consider typical patterns for this type of plugin based on Elastic's documentation
-3. Identify the plugin category (e.g., visualization, data management, security, monitoring, etc.)
-4. Estimate common use cases users would have with this plugin
-5. Identify technical components that would likely be involved
-6. Highlight potential risk areas that need thorough testing
+3. Identify the plugin category carefully based on purpose and features:
+   - "Console" for Elasticsearch query tools, Dev Tools, API testing interfaces
+   - "Dashboard" for data visualization and dashboard management
+   - "Data" for data management, indexing, search functionality
+   - "Security" for authentication, authorization, user management
+   - "Management" for settings, configuration, administration
+   - "Monitoring" for observability, metrics, alerting
+   - "Visualization" for charts, graphs, visual analytics
+4. Pay special attention to keywords like "Dev Tools", "Console", "Elasticsearch query", "API calls"
+5. Estimate common use cases users would have with this plugin
+6. Identify technical components that would likely be involved
+7. Highlight potential risk areas that need thorough testing
 
 Please provide your analysis in the following JSON format:
 {
   "summary": "Brief 2-3 sentence summary of what this plugin does",
-  "category": "Primary category (visualization/data/security/monitoring/etc)",
+  "category": "Primary category (Console/Dashboard/Data/Security/Management/Monitoring/Visualization)",
   "estimatedUseCases": ["use case 1", "use case 2", "..."],
   "technicalComponents": ["component 1", "component 2", "..."],
   "riskAreas": ["risk area 1", "risk area 2", "..."]
@@ -83,10 +93,26 @@ Respond with only the JSON object, no additional text.`;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error analyzing plugin:', error);
-      // Return fallback analysis
+      // Return fallback analysis with better category detection
+      let fallbackCategory = 'Data';
+      const purpose = pluginDetails.purpose.toLowerCase();
+      if (
+        purpose.includes('console') ||
+        purpose.includes('dev tools') ||
+        purpose.includes('elasticsearch query')
+      ) {
+        fallbackCategory = 'Console';
+      } else if (purpose.includes('dashboard') || purpose.includes('visualization')) {
+        fallbackCategory = 'Dashboard';
+      } else if (purpose.includes('security') || purpose.includes('auth')) {
+        fallbackCategory = 'Security';
+      } else if (purpose.includes('management') || purpose.includes('settings')) {
+        fallbackCategory = 'Management';
+      }
+
       return {
         summary: `${pluginDetails.purpose} plugin for Kibana`,
-        category: 'general',
+        category: fallbackCategory,
         estimatedUseCases: pluginDetails.features,
         technicalComponents: ['UI Components', 'API Endpoints'],
         riskAreas: ['User input validation', 'Data handling'],
@@ -99,15 +125,6 @@ Respond with only the JSON object, no additional text.`;
     analysis: PluginAnalysis,
     testType: 'ui' | 'api'
   ): Promise<TestPlan> {
-    const relevantExamples = getExamplesByCategory(analysis.category, testType);
-    const exampleDescriptions =
-      relevantExamples.length > 0
-        ? relevantExamples.map((ex) => `${ex.category}: ${ex.description}`).join('\n')
-        : getAllExamples(testType)
-            .slice(0, 2)
-            .map((ex) => `${ex.category}: ${ex.description}`)
-            .join('\n');
-
     const prompt = `
 You are an expert Kibana test architect. Create a simple test plan for ${testType.toUpperCase()} testing.
 
@@ -186,9 +203,19 @@ Respond with only the JSON object, no additional text.`;
     pluginMeta: any,
     testType: 'ui' | 'api'
   ): Promise<string> {
-    const relevantExamples = getExamplesByCategory(analysis.category, testType);
-    const exampleCode =
-      relevantExamples.length > 0 ? relevantExamples[0].code : getAllExamples(testType)[0].code;
+    // Choose the right example based on test type and parallel preference
+    let exampleCode: string;
+    if (testType === 'ui' && pluginDetails.supportsSpaces && pluginDetails.useParallelTesting) {
+      // Use parallel test example for UI tests with spaces
+      const parallelExample = getExamplesByCategory('Parallel', testType);
+      exampleCode =
+        parallelExample.length > 0 ? parallelExample[0].code : getAllExamples(testType)[1].code;
+    } else {
+      // Use regular examples
+      const relevantExamples = getExamplesByCategory(analysis.category, testType);
+      exampleCode =
+        relevantExamples.length > 0 ? relevantExamples[0].code : getAllExamples(testType)[0].code;
+    }
 
     const prompt = `
 You are an expert Kibana test developer. Generate a simple, executable test using the @kbn/scout testing framework.
@@ -211,10 +238,22 @@ Requirements:
 4. Focus ONLY on positive test cases (happy path)
 5. Use realistic but simple selectors and API endpoints
 6. Include proper imports and authentication setup
+${
+  testType === 'ui' && pluginDetails.supportsSpaces && pluginDetails.useParallelTesting
+    ? `7. Use 'spaceTest' instead of 'test' for parallel testing with spaces support
+8. Import spaceTest from '@kbn/scout' and use scoutSpace in beforeAll/afterAll hooks`
+    : `7. Use 'test' for regular testing`
+}
 
 Style Guidelines:
 - Use clear, descriptive test names
 - Include proper imports for @kbn/scout
+${
+  testType === 'ui' && pluginDetails.supportsSpaces && pluginDetails.useParallelTesting
+    ? `- Import spaceTest from '@kbn/scout' for parallel testing
+- Use scoutSpace.savedObjects.cleanStandardList() in beforeAll/afterAll`
+    : `- Import test from '@kbn/scout' for regular testing`
+}
 - Use async/await properly
 - Add meaningful assertions with expect()
 - Handle authentication appropriately

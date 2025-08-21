@@ -18,6 +18,8 @@ interface PluginDetails {
   complexity: 'simple' | 'medium' | 'complex';
   userInteractions: string[];
   apiEndpoints: string[];
+  supportsSpaces: boolean;
+  useParallelTesting: boolean;
 }
 
 export async function cli() {
@@ -71,6 +73,8 @@ export async function cli() {
       complexity: 'medium',
       userInteractions: [],
       apiEndpoints: [],
+      supportsSpaces: false,
+      useParallelTesting: false,
     };
 
     // Ask about plugin purpose
@@ -101,8 +105,57 @@ export async function cli() {
     );
     pluginDetails.complexity = (complexityInput.trim() as any) || 'medium';
 
-    // Ask about user interactions (for UI tests)
+    // Ask about Kibana spaces support (for UI tests)
     if (pluginDetails.testTypes.includes('ui')) {
+      // eslint-disable-next-line no-console
+      console.log('\n🌟 Kibana Spaces Support:');
+      const spacesInput = await question(
+        'Does this plugin support Kibana spaces (functionality works within different spaces)? (y/n) [n]: '
+      );
+      pluginDetails.supportsSpaces = spacesInput.toLowerCase() === 'y';
+
+      if (pluginDetails.supportsSpaces) {
+        // eslint-disable-next-line no-console
+        console.log('\n⚡ Parallel Testing (Recommended for faster execution):');
+        // eslint-disable-next-line no-console
+        console.log(
+          'Parallel tests run against the same Kibana and Elasticsearch instance using isolated spaces.'
+        );
+        // eslint-disable-next-line no-console
+        console.log('This significantly boosts test execution time and is highly recommended!');
+
+        const parallelInput = await question(
+          'Would you like to create parallel tests? (y/n) [y]: '
+        );
+        pluginDetails.useParallelTesting = parallelInput.toLowerCase() !== 'n';
+
+        if (pluginDetails.useParallelTesting) {
+          // eslint-disable-next-line no-console
+          console.log('\n📊 Data Ingestion Strategy:');
+          // eslint-disable-next-line no-console
+          console.log(
+            "For parallel tests, it's optimal to ingest Elasticsearch data once before all tests,"
+          );
+          // eslint-disable-next-line no-console
+          console.log(
+            'then only add/delete Kibana saved objects in individual tests (scoped to spaces).'
+          );
+          // eslint-disable-next-line no-console
+          console.log('This approach provides the best performance for parallel execution.');
+
+          const dataInput = await question(
+            'Is it acceptable to ingest Elasticsearch data once before all tests? (y/n) [y]: '
+          );
+
+          if (dataInput.toLowerCase() === 'n') {
+            // eslint-disable-next-line no-console
+            console.log(
+              'Note: A global.setup.ts file will still be generated for future data setup needs.'
+            );
+          }
+        }
+      }
+
       pluginDetails.userInteractions = await multilineQuestion(
         'Describe typical user interactions with this plugin:'
       );
@@ -125,6 +178,14 @@ export async function cli() {
     console.log(`Test Types: ${pluginDetails.testTypes.join(', ')}`);
     // eslint-disable-next-line no-console
     console.log(`Complexity: ${pluginDetails.complexity}`);
+    if (pluginDetails.testTypes.includes('ui')) {
+      // eslint-disable-next-line no-console
+      console.log(`Spaces Support: ${pluginDetails.supportsSpaces ? 'Yes' : 'No'}`);
+      if (pluginDetails.supportsSpaces) {
+        // eslint-disable-next-line no-console
+        console.log(`Parallel Testing: ${pluginDetails.useParallelTesting ? 'Yes' : 'No'}`);
+      }
+    }
 
     const proceed = await question('\nProceed with test generation? (y/n) [y]: ');
     if (proceed.toLowerCase() === 'n') {
