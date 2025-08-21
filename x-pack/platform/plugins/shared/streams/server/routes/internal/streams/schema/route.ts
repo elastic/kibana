@@ -182,8 +182,10 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
-      // Direct writes to child streams are not allowed. This must be set to logs.
-      _index: LOGS_ROOT_STREAM_NAME,
+      // For wired streams direct writes to child streams are not allowed, we must use the "logs" index.
+      _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
+        ? LOGS_ROOT_STREAM_NAME
+        : params.path.name,
       _id: hit._id,
       _source: Object.fromEntries(
         Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
@@ -326,20 +328,28 @@ async function simulateIngest(
     pipeline_substitutions: {
       [DUMMY_PIPELINE_NAME]: {
         // The sampleResults are already gathered directly from the child stream index. But, we can't
-        // simulate an _index other than logs, this reroutes the documents back to the child stream.
+        // simulate an _index other than logs for wired streams, this reroutes the documents back to the child stream.
         // After the reroute the override below ensures no double processing happens.
         processors: [
-          {
-            reroute: {
-              destination: dataStreamName,
-            },
-          },
+          ...(dataStreamName.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
+            ? [
+                {
+                  reroute: {
+                    destination: dataStreamName,
+                  },
+                },
+              ]
+            : []),
         ],
       },
       // prevent double-processing
-      [`${dataStreamName}@stream.processing`]: {
-        processors: [],
-      },
+      ...(dataStreamName.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
+        ? {
+            [`${dataStreamName}@stream.processing`]: {
+              processors: [],
+            },
+          }
+        : {}),
     },
   };
 
