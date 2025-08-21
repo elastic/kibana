@@ -289,14 +289,12 @@ export class WorkflowExecutionRuntimeManager {
       },
       async () => {
         const startedStepExecution = this.workflowExecutionState.getLatestStepExecution(stepId);
-
-        if (!startedStepExecution) {
-          throw new Error(`WorkflowRuntime: Step execution not found for step ID: ${stepId}`);
-        }
-
+        // if there is a last step execution, fail it
+        // if not, create a new step execution with fail
+        const stepExecutionId = startedStepExecution?.id || undefined;
         const stepExecutionUpdate = {
-          id: startedStepExecution.id,
-          stepId: startedStepExecution.stepId,
+          id: stepExecutionId,
+          stepId,
           status: ExecutionStatus.FAILED,
           output: null,
           error: String(error),

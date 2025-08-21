@@ -40,20 +40,25 @@ async function catchError(
   nodesFactory: StepFactory
 ) {
   try {
-    const stack = [...workflowRuntime.getWorkflowExecution().stack];
-
-    while (workflowRuntime.getWorkflowExecution().error && stack.length > 0) {
-      const nodeId = stack.pop()!;
+    while (
+      workflowRuntime.getWorkflowExecution().error &&
+      workflowRuntime.getWorkflowExecution().stack.length > 0
+    ) {
+      const stack = workflowRuntime.getWorkflowExecution().stack;
+      const nodeId = stack[stack.length - 1];
       const node = workflowRuntime.getNode(nodeId);
       const stepImplementation = nodesFactory.create(node as any);
 
       if ((stepImplementation as unknown as StepErrorCatcher).catchError) {
-        await (stepImplementation as unknown as StepErrorCatcher).catchError();
+        const stepErrorCatcher = stepImplementation as unknown as StepErrorCatcher;
+        await stepErrorCatcher.catchError();
       }
 
       if (workflowRuntime.getWorkflowExecution().error) {
-        workflowRuntime.failStep(nodeId, workflowRuntime.getWorkflowExecution().error!);
+        await workflowRuntime.failStep(nodeId, workflowRuntime.getWorkflowExecution().error!);
       }
+
+      workflowRuntime.exitScope();
     }
   } catch (error) {
     workflowRuntime.setWorkflowError(error);
