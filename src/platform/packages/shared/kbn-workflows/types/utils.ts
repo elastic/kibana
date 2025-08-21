@@ -9,18 +9,20 @@
 
 import type { WorkflowYaml } from '../spec/schema';
 import type { EsWorkflow } from './v1';
-import { WorkflowStatus } from './v1';
 
 export function transformWorkflowYamlJsontoEsWorkflow(
   workflowDefinition: WorkflowYaml
-): Omit<EsWorkflow, 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'> {
+): Omit<
+  EsWorkflow,
+  'spaceId' | 'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml'
+> {
   // TODO: handle merge, if, foreach, etc.
 
   return {
     name: workflowDefinition.name,
     description: workflowDefinition.description,
     tags: workflowDefinition.tags ?? [],
-    status: workflowDefinition.enabled ? WorkflowStatus.ACTIVE : WorkflowStatus.DRAFT,
+    enabled: workflowDefinition.enabled,
     definition: workflowDefinition,
     deleted_at: null,
   };
