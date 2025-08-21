@@ -353,10 +353,6 @@ export class ConsolePageObject extends FtrService {
     return await this.isConsoleTabOpen('consoleHistoryPanel');
   }
 
-  public async openSettings() {
-    await this.testSubjects.click('consoleConfigButton');
-  }
-
   public async toggleA11yOverlaySetting() {
     // while the settings form opens/loads this may fail, so retry for a while
     await this.retry.try(async () => {
@@ -428,10 +424,16 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async toggleKeyboardShortcuts(enabled: boolean) {
-    await this.openSettings();
-
     await this.testSubjects.waitForEnabled('enableKeyboardShortcuts');
     await this.testSubjects.setEuiSwitch('enableKeyboardShortcuts', enabled ? 'check' : 'uncheck');
+  }
+
+  public async setKeyboardShortcutsEnabled(enabled: boolean) {
+    await this.openConfig();
+    await this.toggleKeyboardShortcuts(enabled);
+    // The sleep is necessary to allow the switch state to be propagated
+    await this.common.sleep(500);
+    await this.openConsole();
   }
 
   public async hasSuccessBadge() {
