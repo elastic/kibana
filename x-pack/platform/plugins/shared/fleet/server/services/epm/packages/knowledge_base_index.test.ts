@@ -180,12 +180,14 @@ describe('knowledge_base_index', () => {
           content: 'Test content 1',
           path: 'docs/knowledge_base/test1.md',
           installed_at: undefined,
+          version: '1.0.0',
         },
         {
           fileName: 'test2.md',
           content: 'Test content 2',
           path: 'docs/knowledge_base/test2.md',
           installed_at: undefined,
+          version: '1.0.0',
         },
       ]);
     });

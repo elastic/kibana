@@ -101,6 +101,7 @@ export async function getPackageKnowledgeBaseFromIndex(
       content: hit._source.content,
       path: `${KNOWLEDGE_BASE_PATH}${hit._source.filename}`,
       installed_at: hit._source.installed_at,
+      version: hit._source.version,
     }));
   } catch (error) {
     if (error.statusCode === 404) {

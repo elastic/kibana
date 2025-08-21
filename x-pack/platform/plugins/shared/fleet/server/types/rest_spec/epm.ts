@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { ExperimentalDataStreamFeaturesSchema } from '../models/package_policy';
+import { version } from 'yargs';
 
 export const GetCategoriesRequestSchema = {
   query: schema.object({
@@ -332,10 +333,11 @@ export const GetKnowledgeBaseResponseSchema = schema.object({
   }),
   items: schema.arrayOf(
     schema.object({
-      filename: schema.string(),
+      fileName: schema.string(),
       content: schema.string(),
       path: schema.maybe(schema.string()),
       installed_at: schema.maybe(schema.string()),
+      version: schema.maybe(schema.string()),
     })
   ),
 });
