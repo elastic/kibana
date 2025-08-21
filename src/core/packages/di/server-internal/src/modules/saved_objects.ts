@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
+import type { ContainerModuleLoadOptions } from 'inversify';
 import { cacheInScope } from '@kbn/core-di-internal';
 import {
   CoreStart,
@@ -17,8 +17,7 @@ import {
   SavedObjectsTypeRegistry,
 } from '@kbn/core-di-server';
 
-/** @internal */
-export const savedObjects = new ContainerModule(({ bind }) => {
+export function loadSavedObjects({ bind }: ContainerModuleLoadOptions): void {
   bind(SavedObjectsClient)
     .toResolvedValue(
       (savedObjectsClientFactory) => savedObjectsClientFactory(),
@@ -42,4 +41,4 @@ export const savedObjects = new ContainerModule(({ bind }) => {
       [CoreStart('savedObjects')]
     )
     .inSingletonScope();
-});
+}

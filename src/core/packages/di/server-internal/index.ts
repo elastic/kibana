@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { http } from './src/modules/http';
-export { capabilities } from './src/modules/capabilities';
-export { savedObjects } from './src/modules/saved_objects';
+export { CoreInjectionService } from './src/service';

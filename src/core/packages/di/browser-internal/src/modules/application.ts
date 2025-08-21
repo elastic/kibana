@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
+import type { ContainerModuleLoadOptions } from 'inversify';
 import { isPromise } from '@kbn/std';
 import type { AppUnmount } from '@kbn/core-application-browser';
 import { Application, ApplicationParameters, CoreSetup, CoreStart } from '@kbn/core-di-browser';
 import { Global } from '@kbn/core-di-internal';
 import { OnSetup } from '@kbn/core-di';
 
-/** @internal */
-export const application = new ContainerModule(({ bind, onActivation }) => {
+export function loadApplication({ bind, onActivation }: ContainerModuleLoadOptions) {
   onActivation(Application, ({ get }, definition) => {
     get(CoreSetup('application')).register({
       ...definition,
@@ -42,4 +41,4 @@ export const application = new ContainerModule(({ bind, onActivation }) => {
   bind(OnSetup).toConstantValue((container) => {
     container.getAll(Application);
   });
-});
+}

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContainerModule } from 'inversify';
+import type { ContainerModuleLoadOptions } from 'inversify';
 import { CoreSetup, CapabilitiesProvider } from '@kbn/core-di-server';
 import { OnSetup } from '@kbn/core-di';
 
-/** @internal */
-export const capabilities = new ContainerModule(({ bind, onActivation }) => {
+export function loadCapabilites({ bind, onActivation }: ContainerModuleLoadOptions): void {
   onActivation(CapabilitiesProvider, ({ get }, provider) => {
     get(CoreSetup('capabilities')).registerProvider(provider);
 
@@ -22,4 +21,4 @@ export const capabilities = new ContainerModule(({ bind, onActivation }) => {
   bind(OnSetup).toConstantValue((container) => {
     container.getAll(CapabilitiesProvider);
   });
-});
+}

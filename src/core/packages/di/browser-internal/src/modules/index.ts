@@ -7,4 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { CoreInjectionService } from './src/service';
+import { ContainerModule } from 'inversify';
+import { loadApplication } from './application';
+
+export const core = new ContainerModule((options) => {
+  loadApplication(options);
+});

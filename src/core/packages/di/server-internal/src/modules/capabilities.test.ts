@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Container } from 'inversify';
+import { type Container, ContainerModule } from 'inversify';
 import { OnSetup } from '@kbn/core-di';
 import { injectionServiceMock } from '@kbn/core-di-mocks';
 import { CapabilitiesProvider, CoreSetup } from '@kbn/core-di-server';
 import type { CoreSetup as TCoreSetup } from '@kbn/core-lifecycle-server';
-import { capabilities as capabilitiesModule } from './capabilities';
+import { loadCapabilites } from './capabilities';
 
-describe('capabilities', () => {
+describe('loadCapabilities', () => {
   let injection: jest.Mocked<ReturnType<typeof injectionServiceMock.createStartContract>>;
   let container: Container;
   let capabilities: jest.Mocked<TCoreSetup['capabilities']>;
@@ -28,7 +28,7 @@ describe('capabilities', () => {
     injection = injectionServiceMock.createStartContract();
     capabilities = { registerProvider: jest.fn() } as unknown as typeof capabilities;
     container = injection.getContainer();
-    container.loadSync(capabilitiesModule);
+    container.loadSync(new ContainerModule(loadCapabilites));
     container.bind(CoreSetup('capabilities')).toConstantValue(capabilities);
   });
 
