@@ -150,6 +150,10 @@ export const IndexName: FC = () => {
         'data-test-subj': 'indexNameReadMode',
       }}
       onSave={async (value) => {
+        if (error.length) {
+          return false;
+        }
+
         setIsLoading(true);
         const indexExists = await fileUpload.checkIndexExists(value);
         setIsLoading(false);

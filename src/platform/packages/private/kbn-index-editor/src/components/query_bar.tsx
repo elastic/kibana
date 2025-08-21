@@ -56,8 +56,6 @@ export const QueryBar = () => {
       })
     : null;
 
-  const isDiscoverButtonDisabled = !discoverLink;
-
   if (!dataView) {
     return null;
   }
@@ -91,7 +89,7 @@ export const QueryBar = () => {
         <EuiButton
           size={'s'}
           color={'text'}
-          isDisabled={isDiscoverButtonDisabled}
+          isDisabled={!isIndexCreated}
           href={discoverLink ?? undefined}
           target="_blank"
           iconType={'discoverApp'}

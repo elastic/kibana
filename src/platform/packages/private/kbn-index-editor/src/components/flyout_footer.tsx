@@ -64,9 +64,7 @@ export const FlyoutFooter: FC<FlyoutFooterProps> = ({ onClose }) => {
     }
   };
 
-  const isSaveButtonVisible =
-    (!isSaving && !canImport && !isIndexCreated) ||
-    (!isSaving && isIndexCreated && hasUnsavedChanges);
+  const isSaveButtonVisible = !isSaving && hasUnsavedChanges;
 
   return (
     <EuiFlyoutFooter>

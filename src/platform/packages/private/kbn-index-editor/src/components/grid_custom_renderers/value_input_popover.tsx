@@ -65,12 +65,25 @@ export const getValueInputPopover =
             return;
           }
         }
+        if (event.key === 'Tab') {
+          event.preventDefault();
+
+          if (error) {
+            return;
+          }
+
+          dataTableRef?.current?.closeCellPopover();
+          requestAnimationFrame(() => {
+            // openCellPopover takes care of checking the colIndex is out of bounds
+            dataTableRef?.current?.openCellPopover({ rowIndex, colIndex: colIndex + 1 });
+          });
+        }
         if (event.key === 'Escape') {
           setInputValue(cellValue);
           setError(null);
         }
       },
-      [cellValue, error]
+      [cellValue, colIndex, error, rowIndex]
     );
 
     const saveValue = useCallback(

@@ -267,6 +267,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) =
         field: name,
         name,
         dataType: 'auto',
+        truncateText: { lines: 2 },
       };
     });
   }, [columnNames]);
@@ -303,7 +304,13 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) =
         </>
       ) : null}
       {filePreview.sampleDocs?.length ? (
-        <EuiBasicTable data-test-subj="indexEditorPreviewFile" columns={columns} items={items} />
+        <EuiBasicTable
+          data-test-subj="indexEditorPreviewFile"
+          tableLayout="auto"
+          columns={columns}
+          items={items}
+          css={{ overflow: 'auto' }}
+        />
       ) : null}
     </>
   );
