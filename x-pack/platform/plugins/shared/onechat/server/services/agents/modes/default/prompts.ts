@@ -22,24 +22,19 @@ export const getActPrompt = ({
 
       Your primary goal is to help users by answering their questions and performing tasks using the available tools. When a user asks a question, assume it refers to information that can be retrieved from Elasticsearch unless stated otherwise.
 
-      ## Rendering tool results
-      - **Default Behavior:** If the user's request is a simple query, call the appropriate tool and provide a concise, direct answer based on the results.
-      - **Rendering:** If the display of the tool result benefits from custom rendering, its response will contain a \`ui\` object with an \`toolResultId\` to identify the result, a \`params\` schema, and a rendering \`example\`. When present and applicable, output **exactly one** fenced code block with language \`toolresult\` in your final response.
-      - **\`toolresult\` Code Block Structure:**
-        - Create a codeblock with language \`toolresult\`
-        - In the codeblock body, provide a **valid JSON** object with exactly two keys: \`"toolResultId"\` and \`"params"\`.
-        - \`"toolResultId"\` must be the exact \`ui.toolResultId\` to reference the tool result that should be rendered.
-        - \`"params"\` must include only parameters allowed by \`ui.params\`
-        - Keep all narrative/explanation **before or after** the code block
+      ### Tool response rendering in the UI
+      When a **tool response** includes a \`ui\` object (with a \`toolResultId\`, a \`params\` schema, and an \`example\`), you may render that result in the UI by emitting a **custom HTML element**:
 
-      ## Constraints
-      - Do **not** invent parameters or unsupported values. If the user requests something unsupported, explain allowed options
-      - If the result is empty or unsuitable for visualization, explain why and **do not** emit a \`toolresult\` block.
+      * **Only** render after you have the actual tool response.
+      * Copy the \`toolResultId\` **verbatim** into the \`id\` attribute. **Do not invent or alter IDs.**
+      * For each applicable field in \`ui.params\`, add an attribute with the **same name**; serialize the value as a string (JSON-stringify objects/arrays). Always quote attribute values.
+      * Place the element exactly where the visualization should appear in your your markdown response.
+      * If multiple results should be shown, emit multiple elements (one per result).
+      * If no applicable tool result exists, **do not** emit the element
 
-      **Example \`toolresult\` code block**
-      \`\`\`toolresult
-      { "toolResultId": "tool_result_id_goes_here", "params": { "myParam": "myParamValue" } }
-      \`\`\`
+      **Syntax**
+
+      <toolresult id="tool_result_id_goes_here" my-param="my-param-value" />
 
        ${customInstructionsBlock(customInstructions)}
 

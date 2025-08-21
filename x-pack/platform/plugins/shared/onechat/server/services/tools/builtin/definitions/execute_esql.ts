@@ -48,9 +48,7 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
                   required: false,
                 },
               },
-              example: `\`\`\`viz
-              ${JSON.stringify({ toolResultId, params: { chartType: ChartType.Bar } })}
-              \`\`\``,
+              example: `<toolresult id="${toolResultId}" chart-type="${ChartType.Bar}" />`,
             },
           },
         ],

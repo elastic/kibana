@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
@@ -24,7 +26,7 @@ import {
 } from '@elastic/eui';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
-import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
+// import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
@@ -128,12 +130,19 @@ export function ChatMessageText({ content }: Props) {
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+    const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
-    const { components } = processingPlugins[1][1];
+    const [remarkToRehypePlugin, remarkToRehypeOptions] = defaultProcessingPlugins[0];
+    const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
-    processingPlugins[1][1].components = {
-      ...components,
+    const processingPlugins = [
+      [remarkToRehypePlugin, { ...remarkToRehypeOptions, allowDangerousHtml: true }], // allow html
+      [rehypeRaw], // add rehypeRaw plugin
+      [rehypeToReactPlugin, rehypeToReactOptions],
+    ];
+
+    rehypeToReactOptions.components = {
+      ...rehypeToReactOptions.components,
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -178,9 +187,9 @@ export function ChatMessageText({ content }: Props) {
         );
       },
       toolresult: (props) => {
-        const { toolResultId, params } = props.spec;
+        const { id, 'chart-type': chartType } = props;
 
-        if (!toolResultId) {
+        if (!id) {
           return <p>Visualization requires a tool result ID.</p>;
         }
 
@@ -188,12 +197,12 @@ export function ChatMessageText({ content }: Props) {
           .flatMap((r) => r.steps || [])
           .filter((s) => s.type === 'tool_call')
           .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-          .find((r) => r.ui?.toolResultId === toolResultId && r.type === 'tabular_data') as
+          .find((r) => r.ui?.toolResultId === id && r.type === 'tabular_data') as
           | TabularDataResult
           | undefined;
 
         if (!toolResult) {
-          return <p>Unable to find visualization for tool result ID: {toolResultId}</p>;
+          return <p>Unable to find visualization for tool result ID: {id}</p>;
         }
 
         const { esqlQuery, esqlResult } = toolResult.data;
@@ -205,7 +214,7 @@ export function ChatMessageText({ content }: Props) {
             uiActions={pluginsStart.uiActions}
             esqlQuery={esqlQuery}
             esqlResult={esqlResult}
-            preferredChartType={(params.chartType as ChartType | undefined) || ChartType.Line}
+            preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
           />
         );
       },
@@ -215,7 +224,7 @@ export function ChatMessageText({ content }: Props) {
       parsingPluginList: [
         loadingCursorPlugin,
         esqlLanguagePlugin,
-        vizLanguagePlugin,
+        // vizLanguagePlugin,
         ...parsingPlugins,
       ],
       processingPluginList: processingPlugins,
