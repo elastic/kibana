@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFlyoutBody } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { LinksSection } from './links_section';
 import { ComponentDataSection } from './component_data_section';
@@ -26,13 +26,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
 
 export const InspectFlyout = ({ componentData }: Props) => {
   return (
-    <EuiFlyout
-      aria-labelledby="inspectComponentFlyoutHeader"
-      data-test-subj="inspectComponentFlyout"
-      onClose={() => null}
-      ownFocus
-      size="s"
-    >
+    <>
       <Header />
       <EuiFlyoutBody>
         <EuiFlexGroup direction="column" gutterSize="l">
@@ -44,6 +38,6 @@ export const InspectFlyout = ({ componentData }: Props) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutBody>
-    </EuiFlyout>
+    </>
   );
 };

@@ -52,3 +52,12 @@ export interface InspectComponentResponse {
   codeowners: string[];
   relativePath: string;
 }
+
+export interface ActionLink {
+  external: boolean;
+  href: string;
+  i18nId: string;
+  icon: string;
+  id: string;
+  label: string;
+}

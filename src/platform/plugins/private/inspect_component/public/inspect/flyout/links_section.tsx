@@ -13,16 +13,7 @@ import { EuiPanel, EuiTitle, EuiSpacer, EuiCard, EuiIcon, EuiFlexItem } from '@e
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import type { ComponentData } from '../../types';
-
-interface ActionLink {
-  external: boolean;
-  href: string;
-  i18nId: string;
-  icon: string;
-  id: string;
-  label: string;
-}
+import type { ActionLink, ComponentData } from '../../types';
 
 interface Props {
   componentData: ComponentData;
@@ -135,12 +126,12 @@ export const LinksSection = ({ componentData }: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiTitle css={{ color: euiTheme.colors.textParagraph }} size="xxs">
-          <h3>
+          <h4>
             <FormattedMessage
               id="kbnInspectComponent.inspectFlyout.linksSection.subtitle"
               defaultMessage="Open in ..."
             />
-          </h3>
+          </h4>
         </EuiTitle>
         <EuiSpacer size="m" />
         <div className="linksGrid">
