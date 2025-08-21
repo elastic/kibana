@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { Fragment, useEffect, useRef, useState } from 'react';
+import React, { Fragment, useCallback, useEffect, useRef, useState } from 'react';
 import ReactDOM from 'react-dom';
 import type { CoreStart } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
@@ -21,6 +21,10 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiText,
+  EuiSpacer,
+  EuiButton,
+  EuiTextArea,
+  EuiDescriptionList,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { Observable } from 'rxjs';
@@ -50,6 +54,16 @@ export const OnDeviceExampleApp = ({ coreStart, zither, logger }: OnDeviceExampl
   const zitherStateSubscription = useRef<ReturnType<typeof zither.state.subscribe> | null>(null);
   const [zitherState, setZitherState] =
     useState<ZitherPublicPluginStart['state'] extends Observable<infer V> ? V : null>(null);
+  const systemContext = useRef<webllm.ChatCompletionSystemMessageParam[]>([
+    {
+      role: 'system',
+      content: "Your are a helpful assistant named Ducky, that lives on the user's device.",
+    },
+  ]);
+  const [chatMessages, setChatMessages] = useState<
+    Exclude<webllm.ChatCompletionMessageParam, webllm.ChatCompletionSystemMessageParam>[]
+  >([]);
+  const [chatInput, setChatInput] = useState<string>('');
 
   useEffect(() => {
     if (!zitherStateSubscription.current) {
@@ -86,9 +100,30 @@ export const OnDeviceExampleApp = ({ coreStart, zither, logger }: OnDeviceExampl
     }
 
     return () => {
-      // terminate MLC Engine??
+      // any necessary cleanup, maybe terminate MLC Engine??
     };
   }, [logger, zither, zitherState, selectedModelId]);
+
+  const sendMessage = useCallback(async (message: string) => {
+    setChatMessages((prevMessages) => [...prevMessages, { role: 'user', content: message }]);
+
+    await mlcEngine.current?.chat?.completions
+      ?.create({
+        messages: [...systemContext.current, { role: 'user', content: message }],
+        // below configurations are all optional
+        n: 3,
+        temperature: 1.5,
+        max_tokens: 256,
+        logprobs: true,
+        top_logprobs: 2,
+      })
+      .then((reply) => {
+        setChatMessages((prevMessages) => [
+          ...prevMessages,
+          { role: 'assistant', content: reply.choices[0].message.content },
+        ]);
+      });
+  }, []);
 
   return coreStart.rendering.addContext(
     <div>
@@ -155,6 +190,33 @@ export const OnDeviceExampleApp = ({ coreStart, zither, logger }: OnDeviceExampl
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiCallOut>
+      <EuiSpacer size="l" />
+      <EuiFlexGroup>
+        <EuiFlexItem>
+          <EuiDescriptionList
+            listItems={
+              chatMessages?.map((msg, index) => ({
+                title: msg.role,
+                description: msg.content,
+                key: `chat-message-${index}`,
+              })) ?? []
+            }
+          />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow label="Chat Messages" fullWidth>
+            <EuiTextArea
+              value={chatInput}
+              onChange={(e) => setChatInput(e.target.value)}
+              placeholder="Type your message here..."
+              fullWidth
+            />
+          </EuiFormRow>
+          <EuiFormRow>
+            <EuiButton onClick={async () => await sendMessage(chatInput)}>Send Message</EuiButton>
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </div>
   );
 };
