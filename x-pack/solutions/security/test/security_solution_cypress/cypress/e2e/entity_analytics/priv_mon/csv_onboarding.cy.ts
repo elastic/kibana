@@ -6,6 +6,7 @@
  */
 
 import { getDataTestSubjectSelector } from '../../../helpers/common';
+import { ONBOARDING_CALLOUT } from '../../../screens/privileged_user_monitoring';
 
 import { togglePrivilegedUserMonitoring } from '../../../tasks/entity_analytics/enable_privmon';
 import { login } from '../../../tasks/login';
@@ -25,7 +26,7 @@ describe(
   },
   () => {
     before(() => {
-      cy.task('esArchiverLoad', { archiveName: 'all_users' });
+      cy.task('esArchiverLoad', { archiveName: 'linux_process' });
       deletePrivMonEngine(); // Just in case another test left it behind
     });
 
@@ -40,7 +41,7 @@ describe(
     });
 
     after(() => {
-      cy.task('esArchiverUnload', { archiveName: 'all_users' });
+      cy.task('esArchiverUnload', { archiveName: 'linux_process' });
     });
 
     it('uploads a valid CSV file', () => {
@@ -50,7 +51,7 @@ describe(
       uploadCSVFile('valid_file.txt', 'tet1,testLabel');
       clickFileUploaderAssignButton();
 
-      cy.get('[data-test-subj="privilegedUserMonitoringOnboardingCallout"]').should(
+      cy.get(ONBOARDING_CALLOUT).should(
         'contain.text',
         'Privileged user monitoring set up: 1 user added'
       );
