@@ -21,7 +21,8 @@ const storageSettings = {
       type: types.keyword({}),
       description: types.text({}),
       labels: types.keyword({}),
-      agent_color: types.keyword({}),
+      avatar_color: types.keyword({}),
+      avatar_symbol: types.keyword({}),
       configuration: types.object({ dynamic: true }),
       created_at: types.date({}),
       updated_at: types.date({}),
@@ -34,7 +35,8 @@ export interface AgentProperties {
   type: AgentType;
   description: string;
   labels?: string[];
-  agent_color?: string;
+  avatar_color?: string;
+  avatar_symbol?: string;
   configuration: {
     instructions?: string;
     tools: ToolSelection[];

@@ -13,7 +13,7 @@ export interface AgentListOptions {}
 export type AgentCreateRequest = Omit<AgentDefinition, 'type'>;
 
 export type AgentUpdateRequest = Partial<
-  Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'agentColor'>
+  Pick<AgentDefinition, 'name' | 'description' | 'labels' | 'avatar_color' | 'avatar_symbol'>
 > & {
   configuration?: Partial<AgentConfiguration>;
 };

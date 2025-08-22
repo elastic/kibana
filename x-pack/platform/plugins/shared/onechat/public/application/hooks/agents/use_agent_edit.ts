@@ -32,7 +32,8 @@ const emptyState = (): AgentEditState => ({
   name: '',
   description: '',
   labels: [],
-  agent_color: '',
+  avatar_color: '',
+  avatar_symbol: '',
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
@@ -52,7 +53,11 @@ export function useAgentEdit({
   const queryClient = useQueryClient();
   const [state, setState] = useState<AgentEditState>(emptyState());
 
-  const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
+  const {
+    tools,
+    isLoading: toolsLoading,
+    error: toolsError,
+  } = useToolsService({ includeSystemTools: true });
 
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId || '');
 
@@ -60,6 +65,7 @@ export function useAgentEdit({
     mutationFn: (data: AgentEditState) => agentService.create(data),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(result.id) });
       onSaveSuccess(result);
     },
     onError: (err: Error) => {

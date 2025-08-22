@@ -14,13 +14,19 @@ import { ToolsSelection } from '../tools_selection';
 interface ToolsTabProps {
   control: any;
   tools: any[];
-  toolsLoading: boolean;
-  isDisabled: boolean;
+  isLoading: boolean;
+  isFormDisabled: boolean;
 }
 
-export const ToolsTab: React.FC<ToolsTabProps> = ({ control, tools, toolsLoading, isDisabled }) => {
+export const ToolsTab: React.FC<ToolsTabProps> = ({
+  control,
+  tools,
+  isLoading,
+  isFormDisabled,
+}) => {
   return (
     <>
+      <EuiSpacer size="l" />
       <EuiTitle size="m">
         <h4>
           {i18n.translate('xpack.onechat.agents.form.toolsSelectionTitle', {
@@ -35,10 +41,10 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({ control, tools, toolsLoading
         render={({ field }) => (
           <ToolsSelection
             tools={tools}
-            toolsLoading={toolsLoading}
+            toolsLoading={isLoading}
             selectedTools={field.value}
             onToolsChange={field.onChange}
-            disabled={isDisabled}
+            disabled={isFormDisabled}
           />
         )}
       />
