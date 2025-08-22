@@ -128,7 +128,9 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
           await createAlertsIndex(supertest, log);
           const signals = await createSecuritySolutionAlerts(supertest, log, 2);
           alerts = [signals.hits.hits[0] as Alerts[number], signals.hits.hits[1] as Alerts[number]];
@@ -137,7 +139,9 @@ export default ({ getService }: FtrProviderContext): void => {
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/auditbeat/hosts'
+          );
         });
 
         it('deletes alerts and comments', async () => {
@@ -266,11 +270,11 @@ export default ({ getService }: FtrProviderContext): void => {
         };
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         it('deletes alerts and comments', async () => {

@@ -26,10 +26,15 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         supertest = await utils.createSuperTest();
         bsearch = await utils.createBsearch();
-        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/default');
+        await esArchiver.load(
+          'x-pack/solutions/security/test/fixtures/es_archives/filebeat/default'
+        );
       });
       after(
-        async () => await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/default')
+        async () =>
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/fixtures/es_archives/filebeat/default'
+          )
       );
 
       const FROM = '2000-01-01T00:00:00.000Z';

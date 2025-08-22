@@ -31,16 +31,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Lens Accessibility', () => {
     const lensChartName = 'MyLensChart';
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/lens/lens_basic.json'
       );
     });
 

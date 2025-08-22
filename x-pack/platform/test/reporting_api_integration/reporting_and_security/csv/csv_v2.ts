@@ -16,9 +16,11 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 const LOGSTASH_DATA_ARCHIVE =
   'src/platform/test/functional/fixtures/es_archiver/logstash_functional';
-const LOGSTASH_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/logs';
+const LOGSTASH_SAVED_OBJECTS =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/logs';
 const ECOM_SAVED_SEARCH_ID = '6091ead0-1c6d-11ea-a100-8589bb9d7c6b';
-const TIMELESS_SAVED_OBJECTS = 'x-pack/test/functional/fixtures/kbn_archiver/reporting/timeless';
+const TIMELESS_SAVED_OBJECTS =
+  'x-pack/platform/test/functional/fixtures/kbn_archives/reporting/timeless';
 const TIMELESS_SAVED_SEARCH_WITH_QUERY = 'fc3e8ff0-9844-11ed-8e25-6b737289a7c8';
 
 export default ({ getService }: FtrProviderContext) => {

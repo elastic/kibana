@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ??? Should we migrate
-#     x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space
+#     x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0_space
 # ### Yes, it needs migration
 #   ### Saved Object type(s) that we care about:
 #     index-pattern
@@ -20,7 +20,7 @@
 standard_list="url,index-pattern,query,graph-workspace,tag,visualization,canvas-element,canvas-workpad,dashboard,search,lens,map,cases,uptime-dynamic-settings,osquery-saved-query,osquery-pack,infrastructure-ui-source,metrics-explorer-view,inventory-view,infrastructure-monitoring-log-view,apm-indices"
 
 orig_archive="src/platform/test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects"
-new_archive="x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects"
+new_archive="x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects_management/hidden_saved_objects"
 testFiles=("src/platform/test/plugin_functional/test_suites/saved_objects_management/scroll_count.ts")
 
 test_config="src/platform/test/plugin_functional/config.ts"
@@ -379,7 +379,7 @@ save_kbn() {
   set -x
   node scripts/kbn_archiver.js --config "$test_config" save "$new_archive" --type $standard_list --space "$space"
   set +x
-  #  node scripts/kbn_archiver.js --config x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/test/functional/fixtures/kbn_archiver/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
+  #  node scripts/kbn_archiver.js --config x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts save x-pack/platform/test/functional/fixtures/kbn_archives/saved_objects/default_space --type search,index-pattern,visualization,dashboard,lens,map,graph-workspace,query,tag,url,canvas-workpad
 }
 
 load_kbn() {

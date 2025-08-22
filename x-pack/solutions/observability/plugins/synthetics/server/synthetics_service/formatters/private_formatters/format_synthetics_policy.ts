@@ -12,7 +12,11 @@ import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
 import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
-import { formatMWs, replaceStringWithParams } from '../formatting_utils';
+import {
+  formatMWs,
+  handleMultilineStringFormatter,
+  replaceStringWithParams,
+} from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
 
@@ -70,6 +74,10 @@ export const formatSyntheticsPolicy = (
       }
       if (!PARAMS_KEYS_TO_SKIP.includes(key)) {
         configItem.value = replaceStringWithParams(configItem.value, params);
+      }
+      // if value contains a new line we need to add extra \n to escape it
+      if (typeof configItem.value === 'string' && configItem.value.includes('\n')) {
+        configItem.value = handleMultilineStringFormatter(configItem.value);
       }
     }
   });

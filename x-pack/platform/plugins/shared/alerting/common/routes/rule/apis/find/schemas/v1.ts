@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import { schema } from '@kbn/config-schema';
+import { stringOrStringArraySchema } from '../../../../../schemas';
 
 export const findRulesRequestQuerySchema = schema.object({
   per_page: schema.number({
@@ -37,7 +37,7 @@ export const findRulesRequestQuerySchema = schema.object({
     },
   }),
   search_fields: schema.maybe(
-    schema.oneOf([schema.arrayOf(schema.string()), schema.string()], {
+    stringOrStringArraySchema({
       meta: {
         description: 'The fields to perform the simple_query_string parsed query against.',
       },
@@ -77,13 +77,11 @@ export const findRulesRequestQuerySchema = schema.object({
     )
   ),
   fields: schema.maybe(
-    schema.arrayOf(
-      schema.string({
-        meta: {
-          description: 'The fields to return in the `attributes` key of the response.',
-        },
-      })
-    )
+    stringOrStringArraySchema({
+      meta: {
+        description: 'The fields to return in the `attributes` key of the response.',
+      },
+    })
   ),
   filter: schema.maybe(
     schema.string({
@@ -117,7 +115,7 @@ export const findRulesInternalRequestBodySchema = schema.object({
   default_search_operator: schema.oneOf([schema.literal('OR'), schema.literal('AND')], {
     defaultValue: 'OR',
   }),
-  search_fields: schema.maybe(schema.oneOf([schema.arrayOf(schema.string()), schema.string()])),
+  search_fields: schema.maybe(stringOrStringArraySchema()),
   sort_field: schema.maybe(schema.string()),
   sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),
   has_reference: schema.maybe(

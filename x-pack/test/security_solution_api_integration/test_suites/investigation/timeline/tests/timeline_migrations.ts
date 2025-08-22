@@ -53,10 +53,10 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0_space'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0_space'
         );
         await kibanaServer.importExport.load(
-          'x-pack/test/functional/fixtures/kbn_archiver/security_solution/timelines/7.15.0_space',
+          'x-pack/solutions/security/test/fixtures/kbn_archives/timelines/7.15.0_space',
           { space: 'awesome-space' }
         );
       });
@@ -124,13 +124,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
     describe('7.16.0', () => {
       before(async () => {
         await esArchiver.load(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0'
         );
       });
 
       after(async () => {
         await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/timelines/7.15.0'
+          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timelines/7.15.0'
         );
       });
       describe('notes timelineId', () => {

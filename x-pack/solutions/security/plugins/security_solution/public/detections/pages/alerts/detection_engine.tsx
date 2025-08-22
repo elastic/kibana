@@ -337,6 +337,7 @@ const DetectionEnginePageComponent: React.FC<DetectionEngineComponentProps> = ()
           tableType={TableId.alertsOnAlertsPage}
           inputFilters={[...alertsTableDefaultFilters, ...groupingFilters]}
           isLoading={isAlertTableLoading}
+          disableAdditionalToolbarControls={!!groupingFilters.length}
         />
       );
     },

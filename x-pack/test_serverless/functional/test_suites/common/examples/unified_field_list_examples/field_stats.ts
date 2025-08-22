@@ -31,9 +31,11 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     before(async () => {
       await PageObjects.svlCommonPage.loginAsAdmin();
       await kibanaServer.savedObjects.cleanStandardList();
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
@@ -55,7 +57,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       // TODO: Loading this from `es_archives` in `test_serverless`
       // instead since minor modifications were required
       await esArchiver.unload(

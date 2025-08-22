@@ -21,9 +21,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('platform_engineer');
       // Load logstash* data and create dataview for logstash*, logstash-2015.09.22
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.loadIfNeeded(
+        'x-pack/platform/test/fixtures/es_archives/logstash_functional'
+      );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/visualize/default'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/visualize/default'
       );
       await ml.api.createAnomalyDetectionJob(ml.commonConfig.getADFqMultiMetricJobConfig(adJobId));
     });
@@ -31,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanAnomalyDetection();
       await ml.testResources.cleanMLSavedObjects();
-      await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
+      await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/logstash_functional');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 

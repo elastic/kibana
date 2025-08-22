@@ -894,7 +894,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       describe('unknown users', () => {
         beforeEach(async () => {
           await kibanaServer.importExport.load(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
           );
 
           await cases.navigation.navigateToApp();
@@ -905,7 +905,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         afterEach(async () => {
           await kibanaServer.importExport.unload(
-            'x-pack/test/functional/fixtures/kbn_archiver/cases/8.5.0/cases_assignees.json'
+            'x-pack/platform/test/functional/fixtures/kbn_archives/cases/8.5.0/cases_assignees.json'
           );
 
           await cases.api.deleteAllCases();
@@ -1077,7 +1077,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Tabs - alerts linked to case', () => {
       before(async () => {
-        await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await esArchiver.loadIfNeeded(
+          'x-pack/platform/test/fixtures/es_archives/rule_registry/alerts'
+        );
         await cases.navigation.navigateToApp();
         const theCase = await cases.api.createCase();
         await cases.casesTable.waitForCasesToBeListed();
@@ -1097,7 +1099,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.api.deleteAllCases();
-        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts/');
+        await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts/');
       });
 
       beforeEach(async () => {
