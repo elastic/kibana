@@ -19,6 +19,7 @@ import { useOnechatAgentById } from './use_agent_by_id';
 import { useToolsService } from '../tools/use_tools';
 import { queryKeys } from '../../query_keys';
 import { duplicateName } from '../../utils/duplicate_name';
+import { searchParamNames } from '../../search_param_names';
 
 export type AgentEditState = Omit<AgentDefinition, 'type'>;
 
@@ -39,8 +40,6 @@ const emptyState = (): AgentEditState => ({
   },
 });
 
-export const AGENT_SOURCE_QUERY_PARAM = 'source_id';
-
 export function useAgentEdit({
   editingAgentId,
   onSaveSuccess,
@@ -56,7 +55,7 @@ export function useAgentEdit({
   const [state, setState] = useState<AgentEditState>(emptyState());
 
   const { tools, isLoading: toolsLoading, error: toolsError } = useToolsService();
-  const sourceAgentId = searchParams.get(AGENT_SOURCE_QUERY_PARAM);
+  const sourceAgentId = searchParams.get(searchParamNames.sourceId);
   const isClone = Boolean(!editingAgentId && sourceAgentId);
   const agentId = editingAgentId || sourceAgentId || '';
   const { agent, isLoading: agentLoading, error: agentError } = useOnechatAgentById(agentId);

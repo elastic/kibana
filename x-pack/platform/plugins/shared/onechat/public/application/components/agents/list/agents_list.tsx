@@ -27,7 +27,7 @@ import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
-import { AGENT_SOURCE_QUERY_PARAM } from '../../../hooks/agents/use_agent_edit';
+import { searchParamNames } from '../../../search_param_names';
 
 const columnNames = {
   name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
@@ -100,16 +100,15 @@ export const AgentsList: React.FC = () => {
 
     const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
       actions: [
-        // TODO: Implement chat with agent
-        // {
-        //   type: 'icon',
-        //   icon: 'comment',
-        //   name: actionLabels.chat,
-        //   description: actionLabels.chatDescription,
-        //   isPrimary: true,
-        //   onClick: (agent: AgentDefinition) => {
-        //   },
-        // },
+        {
+          type: 'icon',
+          icon: 'comment',
+          name: actionLabels.chat,
+          description: actionLabels.chatDescription,
+          isPrimary: true,
+          href: (agent: AgentDefinition) =>
+            createOnechatUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
+        },
         {
           type: 'icon',
           icon: 'pencil',
@@ -120,14 +119,13 @@ export const AgentsList: React.FC = () => {
           href: (agent: AgentDefinition) =>
             createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
         },
-        // TODO: Implement clone agent
         {
           type: 'icon',
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
           href: (agent: AgentDefinition) =>
-            createOnechatUrl(appPaths.agents.new, { [AGENT_SOURCE_QUERY_PARAM]: agent.id }),
+            createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
         },
         {
           type: 'icon',
