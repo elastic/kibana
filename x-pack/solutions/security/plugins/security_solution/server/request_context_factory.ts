@@ -310,7 +310,6 @@ export class RequestContextFactory implements IRequestContextFactory {
         const soClient = coreContext.savedObjects.getClient({
           includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
         });
-
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
           clusterClient,

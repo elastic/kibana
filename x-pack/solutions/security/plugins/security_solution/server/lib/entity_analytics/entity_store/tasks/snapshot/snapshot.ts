@@ -39,12 +39,8 @@ import { FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT } from '../../../../telem
 import { entityStoreTaskLogFactory, entityStoreTaskDebugLogFactory } from '../utils';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
-function getTaskType(namespace: string, entityType: EntityType): string {
-  return `${TYPE}:${entityType}:${namespace}`;
-}
-
 function getTaskId(namespace: string, entityType: EntityType): string {
-  return `${getTaskType(namespace, entityType)}:${VERSION}`;
+  return `${TYPE}:${entityType}:${namespace}:${VERSION}`;
 }
 
 export async function registerEntityStoreSnapshotTask({
@@ -67,24 +63,9 @@ export async function registerEntityStoreSnapshotTask({
   const [coreStart, _] = await getStartServices();
   const esClient = coreStart.elasticsearch.client.asInternalUser;
 
-  // TODO(kuba): FOR EACH ENTITY TYPE/NAMESPACE
-  // DETAILS PASSED AS PARAMS!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  const entityType = 'generic' as EntityType;
-  const namespace = 'TAKE ME FROM PARAMS ON RUN/START!';
-
   taskManager.registerTaskDefinitions({
-    [getTaskType(namespace, entityType)]: {
-      title: `Entity Store snapshot task for ${entityType} entities in ${namespace} namespace`,
+    [TYPE]: {
+      title: 'Entity Store snapshot task',
       description: `Creates a snapshot every 24h and handles additional data transformations.`,
       timeout: TIMEOUT,
       maxAttempts: MAX_ATTEMPTS,
@@ -97,8 +78,6 @@ export async function registerEntityStoreSnapshotTask({
               logger,
               telemetry,
               context,
-              namespace,
-              entityType,
               esClient,
             });
           },
@@ -127,11 +106,15 @@ export async function startEntityStoreSnapshotTask({
   try {
     await taskManager.ensureScheduled({
       id: taskId,
-      taskType: getTaskType(namespace, entityType),
+      taskType: TYPE,
       scope: SCOPE,
       schedule: SCHEDULE,
       state: { ...defaultState, namespace, entityType },
-      params: { version: VERSION },
+      params: {
+        version: VERSION,
+        namespace,
+        entityType,
+      },
     });
   } catch (e) {
     logger.warn(`[Entity Store]  [task ${taskId}]: error scheduling task, received ${e.message}`);
@@ -165,15 +148,11 @@ export async function runTask({
   logger,
   telemetry,
   context,
-  namespace,
-  entityType,
   esClient,
 }: {
   logger: Logger;
   telemetry: AnalyticsServiceSetup;
   context: RunContext;
-  namespace: string;
-  entityType: EntityType;
   esClient: ElasticsearchClient;
 }): Promise<{
   state: EntityStoreFieldRetentionTaskState;
@@ -187,6 +166,18 @@ export async function runTask({
     const snapshotDate = rewindToYesterday(taskStartTime.toDate());
     log('running task');
 
+    const entityType = context.taskInstance.params.entityType as EntityType;
+    if (entityType === '') {
+      const err = `Task ${taskId} expected vaild entityType in params, got ""`;
+      log(err);
+      throw err;
+    }
+    const namespace = context.taskInstance.params.namespace as string;
+    if (namespace === '') {
+      const err = `Task ${taskId} expected vaild namespace in params, got ""`;
+      log(err);
+      throw err;
+    }
     const updatedState = {
       lastExecutionTimestamp: taskStartTime.toISOString(),
       lastSnapshotTookSeconds: 0,
