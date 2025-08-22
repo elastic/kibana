@@ -190,7 +190,7 @@ describe('DetectionRuleCounter', () => {
       expect(createRuleFn).toHaveBeenCalled();
     });
 
-    // The test verifies that the error is handled, but we don't need to mock 
+    // The test verifies that the error is handled, but we don't need to mock
     // showCreateDetectionRuleErrorToast since that would require more complex mocking
     // The important part is that it uses the consistent error handling approach
   });

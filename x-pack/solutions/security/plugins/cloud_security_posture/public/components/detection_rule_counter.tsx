@@ -21,7 +21,10 @@ import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_detection_rules_alerts_status';
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { useKibana } from '../common/hooks/use_kibana';
-import { showCreateDetectionRuleSuccessToast, showCreateDetectionRuleErrorToast } from './take_action';
+import {
+  showCreateDetectionRuleSuccessToast,
+  showCreateDetectionRuleErrorToast,
+} from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULES_PAGE_PATH = '/rules/management';
