@@ -109,7 +109,7 @@ describe('validatePolicyNamespaceForSpace', () => {
         spaceId: 'test1',
         namespace: 'notvalid',
       })
-    ).rejects.toThrowError(/Invalid namespace, supported namespace prefixes: tata, test, toto/);
+    ).rejects.toThrow(/Invalid namespace, supported namespace prefixes: tata, test, toto/);
   });
 
   it('should not validate if feature flag is off', async () => {
@@ -201,7 +201,7 @@ describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
     });
     await expect(
       validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default'])
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       new PackagePolicyNameExistsError(
         'An integration policy with the name Package Policy 1 already exists in space "default". Please rename it or choose a different name.'
       )
@@ -227,7 +227,7 @@ describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
     });
     await expect(
       validatePackagePoliciesUniqueNameAcrossSpaces([packagePolicy1], ['default', 'space1'])
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       new PackagePolicyNameExistsError(
         'An integration policy with the name Package Policy 1 already exists in space "space1". Please rename it or choose a different name.'
       )

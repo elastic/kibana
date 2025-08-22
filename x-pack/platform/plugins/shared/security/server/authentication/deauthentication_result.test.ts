@@ -24,7 +24,7 @@ describe('DeauthenticationResult', () => {
 
   describe('failed', () => {
     it('fails if error is not specified.', () => {
-      expect(() => DeauthenticationResult.failed(undefined as any)).toThrowError(
+      expect(() => DeauthenticationResult.failed(undefined as any)).toThrow(
         'Error should be specified.'
       );
     });
@@ -59,7 +59,7 @@ describe('DeauthenticationResult', () => {
 
   describe('redirectTo', () => {
     it('fails if redirect URL is not specified.', () => {
-      expect(() => DeauthenticationResult.redirectTo(undefined as any)).toThrowError(
+      expect(() => DeauthenticationResult.redirectTo(undefined as any)).toThrow(
         'Redirect URL must be specified.'
       );
     });

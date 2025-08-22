@@ -347,7 +347,7 @@ describe('Package policy service', () => {
           // Skipping unique name verification just means we have to less mocking/setup
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         /Reusable integration policies cannot be used with agent policies belonging to multiple spaces./
       );
     });
@@ -391,7 +391,7 @@ describe('Package policy service', () => {
           },
           { id: 'test-package-policy', skipUniqueNameVerification: true }
         )
-      ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+      ).rejects.toThrow(/Input tcp is not allowed for deployment mode 'agentless'/);
     });
   });
 
@@ -2231,7 +2231,7 @@ describe('Package policy service', () => {
               },
             }
           )
-        ).rejects.toThrowError(/Input tcp is not allowed for deployment mode 'agentless'/);
+        ).rejects.toThrow(/Input tcp is not allowed for deployment mode 'agentless'/);
       });
     });
   });

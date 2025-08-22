@@ -497,7 +497,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrowError(
+        await expect(extendRes).rejects.toThrow(
           'Failed to extend the expiration of some searches'
         );
 
@@ -518,7 +518,7 @@ describe('Search service', () => {
 
         const extendRes = mockScopedClient.extendSession('123', new Date('2020-01-01'));
 
-        await expect(extendRes).rejects.toThrowError(
+        await expect(extendRes).rejects.toThrow(
           'Failed to extend the expiration of some searches'
         );
 

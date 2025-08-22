@@ -17,7 +17,7 @@ describe('AggType Class', () => {
       expect(() => {
         const aggConfig: AggTypeConfig = undefined as unknown as AggTypeConfig;
         new AggType(aggConfig);
-      }).toThrowError();
+      }).toThrow();
     });
 
     describe('application of config properties', () => {

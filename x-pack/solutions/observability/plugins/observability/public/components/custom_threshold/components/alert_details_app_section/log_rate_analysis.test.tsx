@@ -64,6 +64,6 @@ describe('AlertDetailsAppSection', () => {
 
   // To avoid https://github.com/elastic/kibana/issues/206588
   it('should render LogRateAnalysis without throwing error', async () => {
-    expect(renderComponent).not.toThrowError();
+    expect(renderComponent).not.toThrow();
   });
 });

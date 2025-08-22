@@ -21,7 +21,7 @@ describe('DeprecationsRegistry', () => {
       const deprecationsConfig = {
         getDeprecations: null,
       } as unknown as RegisterDeprecationsConfig;
-      expect(() => deprecationsRegistry.registerDeprecations(deprecationsConfig)).toThrowError(
+      expect(() => deprecationsRegistry.registerDeprecations(deprecationsConfig)).toThrow(
         /getDeprecations must be a function/
       );
     });

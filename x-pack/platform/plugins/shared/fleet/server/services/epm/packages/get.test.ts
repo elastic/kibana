@@ -1309,7 +1309,7 @@ owner: elastic`,
             pkgName: 'my-package',
             pkgVersion: '1.0.0',
           })
-        ).rejects.toThrowError(PackageNotFoundError);
+        ).rejects.toThrow(PackageNotFoundError);
       });
 
       it('sets the latestVersion to installed version when an installed package is not available in the registry', async () => {

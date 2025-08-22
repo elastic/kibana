@@ -11,7 +11,7 @@ import { evaluateKql } from '../eval_kql';
 
 describe('evaluateKql', () => {
   it('should throw an error for invalid KQL', () => {
-    expect(() => evaluateKql('invalid "kql', {})).toThrowError();
+    expect(() => evaluateKql('invalid "kql', {})).toThrow();
   });
 
   describe('"is" expressions', () => {

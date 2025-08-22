@@ -675,7 +675,7 @@ describe('#bulkCreate', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.bulkCreate([obj3], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`returns error when initialNamespaces is used with a space-agnostic object`, async () => {

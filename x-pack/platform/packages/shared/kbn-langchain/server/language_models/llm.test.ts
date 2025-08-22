@@ -141,7 +141,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
         'ActionsClientLlm: action result status is error: action-result-message - action-result-service-message'
       );
     });
@@ -162,7 +162,7 @@ describe('ActionsClientLlm', () => {
         logger: mockLogger,
       });
 
-      await expect(actionsClientLlm._call(prompt)).rejects.toThrowError(
+      await expect(actionsClientLlm._call(prompt)).rejects.toThrow(
         'ActionsClientLlm: content should be a string, but it had an unexpected type: number'
       );
     });

@@ -127,7 +127,7 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([]);
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error fetching current key pair: No current key pair found!'
       );
     });
@@ -140,7 +140,7 @@ describe('MessageSigningService', () => {
         .mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error fetching current key pair: foo'
       );
     });
@@ -151,7 +151,7 @@ describe('MessageSigningService', () => {
       soClientMock.delete.mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error deleting current key pair: foo'
       );
     });
@@ -162,7 +162,7 @@ describe('MessageSigningService', () => {
       soClientMock.create.mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError(
+      await expect(response).rejects.toThrow(
         'Error rotating key pair: Error creating key pair: foo'
       );
     });
@@ -173,7 +173,7 @@ describe('MessageSigningService', () => {
       messageSigningService.generateKeyPair = jest.fn().mockRejectedValue(Error('foo'));
 
       const response = messageSigningService.rotateKeyPair();
-      await expect(response).rejects.toThrowError('Error rotating key pair: foo');
+      await expect(response).rejects.toThrow('Error rotating key pair: foo');
     });
 
     it('does not generate key pair if one exists', async () => {

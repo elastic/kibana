@@ -96,7 +96,7 @@ describe('createPromiseFromRuleImportStream', () => {
 
     await expect(
       createPromiseFromRuleImportStream({ stream: ndJsonStream, objectLimit: 2 })
-    ).rejects.toThrowError("Can't import more than 2 rules");
+    ).rejects.toThrow("Can't import more than 2 rules");
   });
 
   test('throws an error when the number of rules in the stream is larger than the limit', async () => {
@@ -114,7 +114,7 @@ describe('createPromiseFromRuleImportStream', () => {
 
     await expect(
       createPromiseFromRuleImportStream({ stream: ndJsonStream, objectLimit: 1 })
-    ).rejects.toThrowError("Can't import more than 1 rules");
+    ).rejects.toThrow("Can't import more than 1 rules");
   });
 
   test('skips empty lines', async () => {

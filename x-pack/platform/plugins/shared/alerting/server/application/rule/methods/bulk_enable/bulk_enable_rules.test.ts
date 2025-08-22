@@ -839,7 +839,7 @@ describe('bulkEnableRules', () => {
         throw new Error('Unauthorized');
       });
 
-      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -852,7 +852,7 @@ describe('bulkEnableRules', () => {
         throw new Error('Error');
       });
 
-      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkEnableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Error'
       );
 

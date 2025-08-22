@@ -493,7 +493,7 @@ describe('TaskStore', () => {
         taskType: 'report',
         schedule: { interval: 'invalid-interval' },
       };
-      await expect(testSchedule(task)).rejects.toThrowError(
+      await expect(testSchedule(task)).rejects.toThrow(
         `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
     });
@@ -1145,7 +1145,7 @@ describe('TaskStore', () => {
         }
       );
 
-      await expect(store.update(task, { validate: true })).rejects.toThrowError(
+      await expect(store.update(task, { validate: true })).rejects.toThrow(
         `[TaskValidator] Invalid interval "invalid-interval". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.`
       );
     });
@@ -2971,7 +2971,7 @@ describe('TaskStore', () => {
       }));
 
       // allowReadingInvalidState: false, should throw an error
-      await expect(store.schedule(task as TaskInstance)).rejects.toThrowError(
+      await expect(store.schedule(task as TaskInstance)).rejects.toThrow(
         `[TaskValidator] failed to migrate to version 1 because the data returned from the up migration doesn't match the schema: [foo]: expected value of type [string] but got [number]`
       );
     });

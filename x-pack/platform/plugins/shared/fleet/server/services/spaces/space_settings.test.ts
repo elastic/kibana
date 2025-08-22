@@ -98,7 +98,7 @@ describe('saveSpaceSettings', () => {
             allowed_namespace_prefixes: ['test'],
           },
         })
-      ).rejects.toThrowError(/Settings are managed by: kibana_config and should be edited there/);
+      ).rejects.toThrow(/Settings are managed by: kibana_config and should be edited there/);
     });
   });
 });

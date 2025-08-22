@@ -80,7 +80,7 @@ describe('UiActionsService', () => {
 
       service.registerActionFactory(factoryDefinition1);
 
-      expect(() => service.getActionFactory('UNKNOWN_ID')).toThrowError(
+      expect(() => service.getActionFactory('UNKNOWN_ID')).toThrow(
         'Action factory [actionFactoryId = UNKNOWN_ID] does not exist.'
       );
     });

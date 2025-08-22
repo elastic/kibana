@@ -153,7 +153,7 @@ describe('ActionsClientSimpleChatModel', () => {
 
       await expect(
         actionsClientSimpleChatModel._call(callMessages, callOptions, callRunManager)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'ActionsClientSimpleChatModel: action result status is error: action-result-message - action-result-service-message'
       );
     });
@@ -172,7 +172,7 @@ describe('ActionsClientSimpleChatModel', () => {
 
       await expect(
         actionsClientSimpleChatModel._call(callMessages, callOptions, callRunManager)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'ActionsClientSimpleChatModel: content should be a string, but it had an unexpected type: number'
       );
     });
@@ -194,7 +194,7 @@ describe('ActionsClientSimpleChatModel', () => {
           callOptions,
           callRunManager
         )
-      ).rejects.toThrowError('Multimodal messages are not supported');
+      ).rejects.toThrow('Multimodal messages are not supported');
     });
   });
 

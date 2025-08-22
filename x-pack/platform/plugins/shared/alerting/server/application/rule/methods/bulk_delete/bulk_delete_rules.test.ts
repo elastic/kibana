@@ -606,7 +606,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -622,7 +622,7 @@ describe('bulkDelete', () => {
         statuses: [{ id: 'id1', type: RULE_SAVED_OBJECT_TYPE, success: true }],
       });
 
-      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDeleteRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Error'
       );
 

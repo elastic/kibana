@@ -69,6 +69,6 @@ describe('getKnowledgeBaseEntry', () => {
         logger: loggerMock,
         user: mockUser,
       })
-    ).rejects.toThrowError('search failed');
+    ).rejects.toThrow('search failed');
   });
 });

@@ -173,7 +173,7 @@ describe('updateAttackDiscovery', () => {
     const error = new Error('Elasticsearch update error');
     mockEsClient.update.mockRejectedValueOnce(error);
 
-    await expect(updateAttackDiscovery(mockRequest)).rejects.toThrowError(error);
+    await expect(updateAttackDiscovery(mockRequest)).rejects.toThrow(error);
 
     expect(mockEsClient.update).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledTimes(1);

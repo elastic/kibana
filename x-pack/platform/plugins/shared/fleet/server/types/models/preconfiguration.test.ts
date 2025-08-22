@@ -27,7 +27,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs can only have one default output.');
+      }).toThrow('preconfigured outputs can only have one default output.');
     });
 
     it('should not allow multiple default monitoring output', () => {
@@ -48,7 +48,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs can only have one default monitoring output.');
+      }).toThrow('preconfigured outputs can only have one default monitoring output.');
     });
 
     it('should not allow multiple output with same ids', () => {
@@ -67,7 +67,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs need to have unique ids.');
+      }).toThrow('preconfigured outputs need to have unique ids.');
     });
 
     it('should not allow multiple output with same names', () => {
@@ -86,7 +86,7 @@ describe('Test preconfiguration schema', () => {
             hosts: ['http://test.fr:9200'],
           },
         ]);
-      }).toThrowError('preconfigured outputs need to have unique names.');
+      }).toThrow('preconfigured outputs need to have unique names.');
     });
 
     it('should allow logstash type outputs', () => {
@@ -107,7 +107,7 @@ describe('Test preconfiguration schema', () => {
             },
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
 
     it('should allow kafka type outputs', () => {
@@ -128,7 +128,7 @@ describe('Test preconfiguration schema', () => {
             },
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
 
     it('should allow remote elasticsearch type outputs', () => {
@@ -144,7 +144,7 @@ describe('Test preconfiguration schema', () => {
             },
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 
@@ -157,7 +157,7 @@ describe('Test preconfiguration schema', () => {
             name: 'test agent policy',
           },
         ]);
-      }).not.toThrowError();
+      }).not.toThrow();
     });
   });
 });

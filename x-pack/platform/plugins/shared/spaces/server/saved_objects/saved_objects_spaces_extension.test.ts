@@ -29,7 +29,7 @@ beforeAll(() => {
 describe('#getCurrentNamespace', () => {
   test('throws an error when the namespace parameter is truthy', () => {
     const { spacesExtension } = setup();
-    expect(() => spacesExtension.getCurrentNamespace('some-namespace')).toThrowError(
+    expect(() => spacesExtension.getCurrentNamespace('some-namespace')).toThrow(
       'Namespace cannot be specified by the caller when the spaces extension is enabled. Spaces currently determines the namespace.'
     );
   });

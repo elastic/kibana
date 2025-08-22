@@ -25,13 +25,13 @@ describe('Router validator', () => {
     });
     expect(validator.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
     expect(validator.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => validator.getParams({ foo: 1 })).toThrowError('[foo]: Not a string');
-    expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
+    expect(() => validator.getParams({ foo: 1 })).toThrow('[foo]: Not a string');
+    expect(() => validator.getParams({})).toThrow('[foo]: Not a string');
 
-    expect(() => validator.getParams(undefined)).toThrowError(
+    expect(() => validator.getParams(undefined)).toThrow(
       "Cannot destructure property 'foo' of 'undefined' as it is undefined."
     );
-    expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
+    expect(() => validator.getParams({}, 'myField')).toThrow('[myField.foo]: Not a string');
 
     expect(validator.getBody(undefined)).toStrictEqual({});
     expect(validator.getQuery(undefined)).toStrictEqual({});
@@ -48,13 +48,13 @@ describe('Router validator', () => {
     });
     expect(validator.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
     expect(validator.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => validator.getParams({ foo: 1 })).toThrowError('[foo]: Not a string');
-    expect(() => validator.getParams({})).toThrowError('[foo]: Not a string');
+    expect(() => validator.getParams({ foo: 1 })).toThrow('[foo]: Not a string');
+    expect(() => validator.getParams({})).toThrow('[foo]: Not a string');
 
-    expect(() => validator.getParams(undefined)).toThrowError(
+    expect(() => validator.getParams(undefined)).toThrow(
       `Cannot read properties of undefined (reading 'foo')`
     );
-    expect(() => validator.getParams({}, 'myField')).toThrowError('[myField.foo]: Not a string');
+    expect(() => validator.getParams({}, 'myField')).toThrow('[myField.foo]: Not a string');
 
     expect(validator.getBody(undefined)).toStrictEqual({});
     expect(validator.getQuery(undefined)).toStrictEqual({});
@@ -69,16 +69,16 @@ describe('Router validator', () => {
 
     expect(schemaValidation.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
     expect(schemaValidation.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
+    expect(() => schemaValidation.getParams({ foo: 1 })).toThrow(
       '[foo]: expected value of type [string] but got [number]'
     );
-    expect(() => schemaValidation.getParams({})).toThrowError(
+    expect(() => schemaValidation.getParams({})).toThrow(
       '[foo]: expected value of type [string] but got [undefined]'
     );
-    expect(() => schemaValidation.getParams(undefined)).toThrowError(
+    expect(() => schemaValidation.getParams(undefined)).toThrow(
       '[foo]: expected value of type [string] but got [undefined]'
     );
-    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrow(
       '[myField.foo]: expected value of type [string] but got [undefined]'
     );
   });
@@ -92,12 +92,12 @@ describe('Router validator', () => {
 
     expect(schemaValidation.getParams({ foo: 'bar' })).toStrictEqual({ foo: 'bar' });
     expect(schemaValidation.getParams({ foo: 'bar' }).foo.toUpperCase()).toBe('BAR'); // It knows it's a string! :)
-    expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
+    expect(() => schemaValidation.getParams({ foo: 1 })).toThrow(
       /Expected string, received number/
     );
-    expect(() => schemaValidation.getParams({})).toThrowError(/Required/);
-    expect(() => schemaValidation.getParams(undefined)).toThrowError(/Required/);
-    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(/Required/);
+    expect(() => schemaValidation.getParams({})).toThrow(/Required/);
+    expect(() => schemaValidation.getParams(undefined)).toThrow(/Required/);
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrow(/Required/);
   });
 
   it('should validate and infer the type from a config-schema non-ObjectType', () => {
@@ -106,16 +106,16 @@ describe('Router validator', () => {
     const foo = Buffer.from('hi!');
     expect(schemaValidation.getParams(foo)).toStrictEqual(foo);
     expect(schemaValidation.getParams(foo).byteLength).toBeGreaterThan(0); // It knows it's a buffer! :)
-    expect(() => schemaValidation.getParams({ foo: 1 })).toThrowError(
+    expect(() => schemaValidation.getParams({ foo: 1 })).toThrow(
       'expected value of type [Buffer] but got [Object]'
     );
-    expect(() => schemaValidation.getParams({})).toThrowError(
+    expect(() => schemaValidation.getParams({})).toThrow(
       'expected value of type [Buffer] but got [Object]'
     );
-    expect(() => schemaValidation.getParams(undefined)).toThrowError(
+    expect(() => schemaValidation.getParams(undefined)).toThrow(
       `expected value of type [Buffer] but got [undefined]`
     );
-    expect(() => schemaValidation.getParams({}, 'myField')).toThrowError(
+    expect(() => schemaValidation.getParams({}, 'myField')).toThrow(
       '[myField]: expected value of type [Buffer] but got [Object]'
     );
   });
@@ -127,8 +127,8 @@ describe('Router validator', () => {
       },
     });
 
-    expect(() => validator.getParams({ foo: 1 })).toThrowError('Something went terribly wrong');
-    expect(() => validator.getParams({}, 'myField')).toThrowError(
+    expect(() => validator.getParams({ foo: 1 })).toThrow('Something went terribly wrong');
+    expect(() => validator.getParams({}, 'myField')).toThrow(
       '[myField]: Something went terribly wrong'
     );
   });
@@ -138,7 +138,7 @@ describe('Router validator', () => {
       params: { validate: <T>(data: T): T => data } as Type<any>,
     });
 
-    expect(() => wrongValidateSpec.getParams({ foo: 1 })).toThrowError(
+    expect(() => wrongValidateSpec.getParams({ foo: 1 })).toThrow(
       'The validation rule provided in the handler is not valid'
     );
   });
@@ -164,12 +164,12 @@ describe('Router validator', () => {
       RouteValidator.from({
         body: schema.arrayOf(schema.number()),
       }).getBody(['foo', 'bar', 'dolly'])
-    ).toThrowError('[0]: expected value of type [number] but got [string]');
+    ).toThrow('[0]: expected value of type [number] but got [string]');
     expect(() =>
       RouteValidator.from({
         body: schema.arrayOf(schema.number()),
       }).getBody({ foo: 'bar' })
-    ).toThrowError('expected value of type [array] but got [Object]');
+    ).toThrow('expected value of type [array] but got [Object]');
   });
 
   it('should validate and infer type when data is a primitive', () => {
@@ -193,11 +193,11 @@ describe('Router validator', () => {
       RouteValidator.from({
         body: schema.string(),
       }).getBody({ foo: 'bar' })
-    ).toThrowError('expected value of type [string] but got [Object]');
+    ).toThrow('expected value of type [string] but got [Object]');
     expect(() =>
       RouteValidator.from({
         body: schema.number(),
       }).getBody('foobar')
-    ).toThrowError('expected value of type [number] but got [string]');
+    ).toThrow('expected value of type [number] but got [string]');
   });
 });

@@ -273,7 +273,7 @@ describe('SecureSpacesClientWrapper', () => {
           } as CheckPrivilegesResponse);
           authorization.checkPrivilegesWithRequest.mockReturnValue({ atSpaces: checkPrivileges });
 
-          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrowError(
+          await expect(wrapper.getAll({ purpose: scenario.purpose })).rejects.toThrow(
             'Forbidden'
           );
 

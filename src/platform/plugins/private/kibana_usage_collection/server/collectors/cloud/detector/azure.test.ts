@@ -63,7 +63,7 @@ describe('AzureCloudService', () => {
       const someError = new Error('expected: request failed');
       fetchMock.mockRejectedValue(someError);
 
-      await expect(() => azureCloudService['_checkIfService']()).rejects.toThrowError(
+      await expect(() => azureCloudService['_checkIfService']()).rejects.toThrow(
         someError.message
       );
     });

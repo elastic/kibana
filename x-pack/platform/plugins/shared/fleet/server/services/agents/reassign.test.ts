@@ -50,7 +50,7 @@ describe('reassignAgent', () => {
       const { soClient, esClient, agentInRegularDoc, hostedAgentPolicySO } = mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInRegularDoc._id, hostedAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
 
       // does not call ES update
       expect(esClient.update)..toHaveBeenCalledTimes(0);
@@ -61,13 +61,13 @@ describe('reassignAgent', () => {
         mocks;
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
       expect(esClient.update)..toHaveBeenCalledTimes(0);
 
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
       expect(esClient.update)..toHaveBeenCalledTimes(0);
     });

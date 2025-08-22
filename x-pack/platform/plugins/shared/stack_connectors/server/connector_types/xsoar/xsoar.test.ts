@@ -519,7 +519,7 @@ describe('XSOARConnector', () => {
     });
 
     it('error when malformed incident is passed', async () => {
-      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrowError(
+      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrow(
         `Error parsing Body: SyntaxError: Expected property name or '}' in JSON at position 1`
       );
     });

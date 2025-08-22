@@ -1020,6 +1020,6 @@ describe('isPackageVersionOrLaterInstalled', () => {
       pkgVersion: '1.0.0',
     });
 
-    await expect(res).rejects.toThrowError('test unexpected error');
+    await expect(res).rejects.toThrow('test unexpected error');
   });
 });

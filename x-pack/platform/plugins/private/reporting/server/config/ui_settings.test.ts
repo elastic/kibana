@@ -45,7 +45,7 @@ test('throws validation error if provided with data over max size', () => {
       )
       .join('') +
     `+8snFz9eWgvYKS4ZsvS05zRQsDveIzH4Er4iDtr6iICIiAiIgIiICIiD//2Q==`;
-  expect(() => PdfLogoSchema.validate(largeJpgMock)).toThrowError(/too large/);
+  expect(() => PdfLogoSchema.validate(largeJpgMock)).toThrow(/too large/);
 });
 
 test('throws validation error if provided with non-image data', () => {

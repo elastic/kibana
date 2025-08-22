@@ -47,13 +47,13 @@ describe('OIDCAuthenticationProvider', () => {
   it('throws if `realm` option is not specified', () => {
     const providerOptions = mockAuthenticationProviderOptions();
 
-    expect(() => new OIDCAuthenticationProvider(providerOptions)).toThrowError(
+    expect(() => new OIDCAuthenticationProvider(providerOptions)).toThrow(
       'Realm name must be specified'
     );
-    expect(() => new OIDCAuthenticationProvider(providerOptions, {})).toThrowError(
+    expect(() => new OIDCAuthenticationProvider(providerOptions, {})).toThrow(
       'Realm name must be specified'
     );
-    expect(() => new OIDCAuthenticationProvider(providerOptions, { realm: '' })).toThrowError(
+    expect(() => new OIDCAuthenticationProvider(providerOptions, { realm: '' })).toThrow(
       'Realm name must be specified'
     );
   });

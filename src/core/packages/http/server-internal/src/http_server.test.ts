@@ -173,7 +173,7 @@ test('does not allow router registration after server is listening', async () =>
   const { registerRouter } = await server.setup({ config$ });
 
   const router1 = new Router('/foo', logger, enhanceWithContext, routerOptions);
-  expect(() => registerRouter(router1)).not.toThrowError();
+  expect(() => registerRouter(router1)).not.toThrow();
 
   await server.start();
 
@@ -191,14 +191,14 @@ test('allows router registration after server is listening via `registerRouterAf
   const { registerRouterAfterListening } = await server.setup({ config$ });
 
   const router1 = new Router('/foo', logger, enhanceWithContext, routerOptions);
-  expect(() => registerRouterAfterListening(router1)).not.toThrowError();
+  expect(() => registerRouterAfterListening(router1)).not.toThrow();
 
   await server.start();
 
   expect(server.isListening()).toBe(true);
 
   const router2 = new Router('/bar', logger, enhanceWithContext, routerOptions);
-  expect(() => registerRouterAfterListening(router2)).not.toThrowError();
+  expect(() => registerRouterAfterListening(router2)).not.toThrow();
 });
 
 test('valid params', async () => {
@@ -1812,7 +1812,7 @@ describe('setup contract', () => {
       const create = async () => await createCookieSessionStorageFactory(cookieOptions);
 
       await create();
-      expect(create()).rejects.toThrowError('A cookieSessionStorageFactory was already created');
+      expect(create()).rejects.toThrow('A cookieSessionStorageFactory was already created');
     });
 
     test('does not throw if called after stop', async () => {

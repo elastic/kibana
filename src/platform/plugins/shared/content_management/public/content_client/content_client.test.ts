@@ -47,13 +47,13 @@ describe('#get', () => {
     let input = { id: 'test', contentTypeId: 'testType', version: 'foo' }; // Invalid format
     await expect(async () => {
       contentClient.get(input as any);
-    }).rejects.toThrowError('Invalid version [foo]. Must be an integer.');
+    }).rejects.toThrow('Invalid version [foo]. Must be an integer.');
 
     // @ts-expect-error
     input = { id: 'test', contentTypeId: 'testType', version: 4 }; // Latest version is 3
     await expect(async () => {
       contentClient.get(input as any);
-    }).rejects.toThrowError('Invalid version [4]. Latest version is [3]');
+    }).rejects.toThrow('Invalid version [4]. Latest version is [3]');
   });
 
   it('calls rpcClient.get$ with input and returns output', async () => {

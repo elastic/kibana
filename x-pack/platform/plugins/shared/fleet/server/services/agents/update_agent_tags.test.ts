@@ -188,7 +188,7 @@ describe('update_agent_tags', () => {
 
     await expect(
       updateAgentTags(soClient, esClient, { agentIds: ['agent1'] }, ['one'], [])
-    ).rejects.toThrowError('Version conflict of 100 agents');
+    ).rejects.toThrow('Version conflict of 100 agents');
   });
 
   it('should write out error results on last retry with version conflicts', async () => {
@@ -214,7 +214,7 @@ describe('update_agent_tags', () => {
           retryCount: MAX_RETRY_COUNT,
         }
       )
-    ).rejects.toThrowError('Version conflict of 100 agents');
+    ).rejects.toThrow('Version conflict of 100 agents');
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
     expect(agentAction?.document.agents.length).toEqual(100);
@@ -246,7 +246,7 @@ describe('update_agent_tags', () => {
           retryCount: MAX_RETRY_COUNT,
         }
       )
-    ).rejects.toThrowError('Version conflict of 1 agents');
+    ).rejects.toThrow('Version conflict of 1 agents');
 
     const agentAction = esClient.create.mock.calls[0][0] as any;
     expect(agentAction?.document.agents.length).toEqual(3);

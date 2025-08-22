@@ -182,11 +182,11 @@ describe('Content Core', () => {
 
           expect(() => {
             register({ ...contentDefinition, version: undefined } as any);
-          }).toThrowError('Invalid version [undefined]. Must be an integer.');
+          }).toThrow('Invalid version [undefined]. Must be an integer.');
 
           expect(() => {
             register({ ...contentDefinition, version: { latest: 0 } });
-          }).toThrowError('Version must be >= 1');
+          }).toThrow('Version must be >= 1');
 
           cleanUp();
         });
@@ -1037,7 +1037,7 @@ describe('Content Core', () => {
                   request: {} as any,
                 })
                 .for(FOO_CONTENT_ID);
-            }).toThrowError('Content [foo] is not registered.');
+            }).toThrow('Content [foo] is not registered.');
 
             cleanUp();
           });

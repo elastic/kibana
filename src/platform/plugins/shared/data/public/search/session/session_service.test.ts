@@ -143,7 +143,7 @@ describe('Session service', () => {
     it('Tracks searches for current session', () => {
       expect(() =>
         sessionService.trackSearch({ abort: () => {}, poll: async () => {} })
-      ).toThrowError();
+      ).toThrow();
       expect(state$.getValue()).toBe(SearchSessionState.None);
 
       sessionService.start();

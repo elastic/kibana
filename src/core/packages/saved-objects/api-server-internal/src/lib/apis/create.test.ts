@@ -281,7 +281,7 @@ describe('#create', () => {
           it(`throws an error if originId is set for non-multi-namespace type`, async () => {
             await expect(
               repository.create(objType, attributes, { originId: 'some-originId' })
-            ).rejects.toThrowError(
+            ).rejects.toThrow(
               createBadRequestErrorPayload(
                 '"originId" can only be set for multi-namespace object types'
               )
@@ -593,7 +593,7 @@ describe('#create', () => {
           repository.create(NAMESPACE_AGNOSTIC_TYPE, attributes, {
             initialNamespaces: [namespace],
           })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           createBadRequestErrorPayload('"initialNamespaces" cannot be used on space-agnostic types')
         );
       });
@@ -601,7 +601,7 @@ describe('#create', () => {
       it(`throws when options.initialNamespaces is empty`, async () => {
         await expect(
           repository.create(MULTI_NAMESPACE_TYPE, attributes, { initialNamespaces: [] })
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           createBadRequestErrorPayload('"initialNamespaces" must be a non-empty array of strings')
         );
       });
@@ -610,7 +610,7 @@ describe('#create', () => {
         const doTest = async (objType: string, initialNamespaces?: string[]) => {
           await expect(
             repository.create(objType, attributes, { initialNamespaces })
-          ).rejects.toThrowError(
+          ).rejects.toThrow(
             createBadRequestErrorPayload(
               '"initialNamespaces" can only specify a single space when used with space-isolated types'
             )
@@ -625,18 +625,18 @@ describe('#create', () => {
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.create(type, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {
-        await expect(repository.create('unknownType', attributes)).rejects.toThrowError(
+        await expect(repository.create('unknownType', attributes)).rejects.toThrow(
           createUnsupportedTypeErrorPayload('unknownType')
         );
         expect(client.create).not.toHaveBeenCalled();
       });
 
       it(`throws when type is hidden`, async () => {
-        await expect(repository.create(HIDDEN_TYPE, attributes)).rejects.toThrowError(
+        await expect(repository.create(HIDDEN_TYPE, attributes)).rejects.toThrow(
           createUnsupportedTypeErrorPayload(HIDDEN_TYPE)
         );
         expect(client.create).not.toHaveBeenCalled();
@@ -661,7 +661,7 @@ describe('#create', () => {
             overwrite: true,
             namespace,
           })
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(mockPreflightCheckForCreate).toHaveBeenCalled();
       });
 

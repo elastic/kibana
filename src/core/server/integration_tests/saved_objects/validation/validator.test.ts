@@ -195,7 +195,7 @@ describe.skip('validates saved object types when a schema is provided', () => {
         },
         { migrationVersion: { foo: '7.16.0' } }
       );
-    }).rejects.toThrowError(`Migration function for version ${kibanaVersion} threw an error`);
+    }).rejects.toThrow(`Migration function for version ${kibanaVersion} threw an error`);
   });
 
   it('returns validation errors with bulkCreate', async () => {

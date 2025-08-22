@@ -92,7 +92,7 @@ describe('State', () => {
       },
     }));
 
-    await expect(async () => await State.currentState(stateDependenciesMock)).rejects.toThrowError(
+    await expect(async () => await State.currentState(stateDependenciesMock)).rejects.toThrow(
       'Failed to load current Streams state: Unsupported stream type'
     );
   });

@@ -385,7 +385,7 @@ describe('UpdateSLO', () => {
 
       await expect(
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [new-index-*]"
       );
     });
@@ -402,7 +402,7 @@ describe('UpdateSLO', () => {
 
       await expect(
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
-      ).rejects.toThrowError('Transform install error');
+      ).rejects.toThrow('Transform install error');
 
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(
@@ -427,7 +427,7 @@ describe('UpdateSLO', () => {
 
       await expect(
         updateSLO.execute(originalSlo.id, { indicator: newIndicator })
-      ).rejects.toThrowError('summary transform start error');
+      ).rejects.toThrow('summary transform start error');
 
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();

@@ -73,7 +73,7 @@ describe('syncIntegrationsOnRemote', () => {
 
     await expect(
       syncIntegrationsOnRemote(esClientMock, soClientMock, {} as any, abortController, loggerMock)
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Not supported to sync multiple indices with prefix fleet-synced-integrations-ccr-*'
     );
   });

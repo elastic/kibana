@@ -429,7 +429,7 @@ describe('TestTrack', () => {
       },
     };
 
-    expect(() => track.addLoadToLeastCongestedLane(load, false)).toThrowError(
+    expect(() => track.addLoadToLeastCongestedLane(load, false)).toThrow(
       "Track doesn't have any lanes"
     );
   });

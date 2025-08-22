@@ -105,7 +105,7 @@ describe('ResetSLO', () => {
       const slo = createSLO({ id: 'irrelevant', version: 1 });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
-      await expect(resetSLO.execute(slo.id)).rejects.toThrowError(
+      await expect(resetSLO.execute(slo.id)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
     });

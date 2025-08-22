@@ -51,7 +51,7 @@ describe('CollectorSet', () => {
         });
       };
 
-      expect(registerPojo).toThrowError(
+      expect(registerPojo).toThrow(
         'CollectorSet can only have Collector instances registered'
       );
     });
@@ -71,7 +71,7 @@ describe('CollectorSet', () => {
             schema: { prop: { type: 'long' } },
           })
         )
-      ).toThrowError(`Usage collector's type "test_duplicated" is duplicated.`);
+      ).toThrow(`Usage collector's type "test_duplicated" is duplicated.`);
     });
 
     it('should log debug status of fetching from the collector', async () => {

@@ -81,7 +81,7 @@ describe('removeInstallation', () => {
         esClient: esClientMock,
         force: false,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       `Unable to remove package system:1.0.0 with existing package policy(s) in use by agent(s)`
     );
   });

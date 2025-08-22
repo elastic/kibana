@@ -28,7 +28,7 @@ describe('bulk_delete', () => {
 
         await expect(
           bulkDeleteFileAttachments({ caseId: 'mock-id', fileIds }, clientArgs, casesClient)
-        ).rejects.toThrowError(
+        ).rejects.toThrow(
           'Failed to delete file attachments for case: mock-id: Error: The length of the field ids is too long. Array must be of length <= 10'
         );
       });
@@ -84,7 +84,7 @@ describe('bulk_delete', () => {
 
       expect(() =>
         retrieveFilesIgnoringNotFound([otherErrorResult], ['abc'], mockLogger)
-      ).toThrowError(otherError);
+      ).toThrow(otherError);
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
@@ -97,7 +97,7 @@ describe('bulk_delete', () => {
 
       expect(() =>
         retrieveFilesIgnoringNotFound([fileResult, otherErrorResult], ['1', '2'], mockLogger)
-      ).toThrowError(otherError);
+      ).toThrow(otherError);
       expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 

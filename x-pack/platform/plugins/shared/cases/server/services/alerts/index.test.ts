@@ -428,7 +428,7 @@ describe('updateAlertsStatus', () => {
 
       await expect(
         alertService.removeCaseIdFromAlerts({ alerts, caseId })
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing case test-case from alerts: An error'
@@ -458,7 +458,7 @@ describe('updateAlertsStatus', () => {
 
       await expect(
         alertService.removeCaseIdsFromAllAlerts({ caseIds })
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
 
       expect(logger.error).toHaveBeenCalledWith(
         'Failed removing cases test-case-1,test-case-2 for all alerts: An error'

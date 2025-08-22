@@ -148,7 +148,7 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
       ],
     };
 
-    expect(() => getPreconfiguredFleetServerHostFromConfig(config)).toThrowError(
+    expect(() => getPreconfiguredFleetServerHostFromConfig(config)).toThrow(
       /Only one default Fleet Server host is allowed/
     );
   });

@@ -194,7 +194,7 @@ describe('Search Playground - Playgrounds API', () => {
               sortOrder: 'desc',
             },
           })
-        ).rejects.toThrowError(error);
+        ).rejects.toThrow(error);
       });
     });
   });
@@ -339,7 +339,7 @@ describe('Search Playground - Playgrounds API', () => {
               id: '1',
             },
           })
-        ).rejects.toThrowError(error);
+        ).rejects.toThrow(error);
       });
     });
   });
@@ -480,7 +480,7 @@ describe('Search Playground - Playgrounds API', () => {
               elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1"]}}}}}`,
             },
           })
-        ).rejects.toThrowError(error);
+        ).rejects.toThrow(error);
       });
     });
   });
@@ -601,7 +601,7 @@ describe('Search Playground - Playgrounds API', () => {
               elasticsearchQueryJSON: `{"retriever":{"standard":{"query":{"multi_match":{"query":"{query}","fields":["field1"]}}}}}`,
             },
           })
-        ).rejects.toThrowError(error);
+        ).rejects.toThrow(error);
       });
     });
   });

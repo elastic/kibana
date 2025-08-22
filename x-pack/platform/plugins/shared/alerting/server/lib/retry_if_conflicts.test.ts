@@ -23,7 +23,7 @@ describe('retry_if_conflicts', () => {
   test('should throw error if not a conflict error', async () => {
     await expect(
       retryIfConflicts(MockLogger, MockOperationName, OperationFailure)
-    ).rejects.toThrowError('wops');
+    ).rejects.toThrow('wops');
   });
 
   for (let i = 1; i <= RetryForConflictsAttempts; i++) {
@@ -48,7 +48,7 @@ describe('retry_if_conflicts', () => {
         MockOperationName,
         getOperationConflictsTimes(RetryForConflictsAttempts + 1)
       )
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
     );
     expect(MockLogger.debug)..toHaveBeenCalledTimes(RetryForConflictsAttempts);

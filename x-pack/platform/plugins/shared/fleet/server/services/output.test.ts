@@ -1786,7 +1786,7 @@ describe('Output Service', () => {
           type: 'logstash',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Logstash output cannot be used with Fleet Server integration in fleet server policy. Please create a new Elasticsearch output.'
       );
     });
@@ -1805,7 +1805,7 @@ describe('Output Service', () => {
           type: 'logstash',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Logstash output cannot be used with Synthetics integration in synthetics policy. Please create a new Elasticsearch output.'
       );
     });
@@ -1823,7 +1823,7 @@ describe('Output Service', () => {
           type: 'logstash',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Logstash output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });
@@ -2224,7 +2224,7 @@ describe('Output Service', () => {
           type: 'kafka',
           hosts: ['test:4343'],
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Kafka output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });
@@ -2334,7 +2334,7 @@ describe('Output Service', () => {
         outputService.update(soClient, esClientMock, 'existing-es-output', {
           type: 'remote_elasticsearch',
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Remote_elasticsearch output cannot be used with agentless integration in agentless policy. Please create a new Elasticsearch output.'
       );
     });

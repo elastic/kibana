@@ -179,7 +179,7 @@ describe('MaintenanceWindowClient - finish', () => {
 
     await expect(async () => {
       await finishMaintenanceWindow(mockContext, { id: 'test-id' });
-    }).rejects.toThrowError();
+    }).rejects.toThrow();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to finish maintenance window by id: test-id, Error: Error: Cannot finish maintenance window that is not running'

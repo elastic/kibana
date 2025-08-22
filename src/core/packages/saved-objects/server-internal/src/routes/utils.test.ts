@@ -281,7 +281,7 @@ describe('throwOnHttpHiddenTypes', () => {
   it("returns if there aren't any types provided to check", () => {
     expect(() => {
       throwOnHttpHiddenTypes([]);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });
 
@@ -299,7 +299,7 @@ describe('throwOnGloballyHiddenTypes', () => {
   it("returns if there aren't any types provided to check", () => {
     expect(() => {
       throwOnGloballyHiddenTypes(httpVisibleTypes, []);
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 });
 
@@ -324,11 +324,11 @@ describe('throwIfTypeNotVisibleByAPI', () => {
   });
 
   it('does not throw when a type is not hidden from the HTTP APIS', () => {
-    expect(() => throwIfTypeNotVisibleByAPI('hidden', registry)).not.toThrowError();
+    expect(() => throwIfTypeNotVisibleByAPI('hidden', registry)).not.toThrow();
   });
 
   it('does not throw on visible types', () => {
-    expect(() => throwIfTypeNotVisibleByAPI('config', registry)).not.toThrowError();
+    expect(() => throwIfTypeNotVisibleByAPI('config', registry)).not.toThrow();
   });
 });
 
@@ -353,11 +353,11 @@ describe('throwIfAnyTypeNotVisibleByAPI', () => {
   });
 
   it('does not throw when a type is not hidden from the HTTP APIS', () => {
-    expect(() => throwIfAnyTypeNotVisibleByAPI(['hidden'], registry)).not.toThrowError();
+    expect(() => throwIfAnyTypeNotVisibleByAPI(['hidden'], registry)).not.toThrow();
   });
 
   it('does not throw on visible types', () => {
-    expect(() => throwIfAnyTypeNotVisibleByAPI(['config'], registry)).not.toThrowError();
+    expect(() => throwIfAnyTypeNotVisibleByAPI(['config'], registry)).not.toThrow();
   });
 });
 

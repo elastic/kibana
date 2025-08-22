@@ -35,20 +35,20 @@ describe('sanitizeOptions', () => {
 
   it('throws an error when dtstart is missing', () => {
     // @ts-expect-error
-    expect(() => sanitizeOptions({ ...options, dtstart: null })).toThrowError(
+    expect(() => sanitizeOptions({ ...options, dtstart: null })).toThrow(
       'Cannot create RRule: dtstart is required'
     );
   });
 
   it('throws an error when tzid is missing', () => {
     // @ts-expect-error
-    expect(() => sanitizeOptions({ ...options, tzid: null })).toThrowError(
+    expect(() => sanitizeOptions({ ...options, tzid: null })).toThrow(
       'Cannot create RRule: tzid is required'
     );
   });
 
   it('throws an error when tzid is invalid', () => {
-    expect(() => sanitizeOptions({ ...options, tzid: 'invalid' })).toThrowError(
+    expect(() => sanitizeOptions({ ...options, tzid: 'invalid' })).toThrow(
       'Cannot create RRule: tzid is invalid'
     );
   });
@@ -62,18 +62,18 @@ describe('sanitizeOptions', () => {
           getTime: () => NaN,
         },
       })
-    ).toThrowError('Cannot create RRule: until is an invalid date');
+    ).toThrow('Cannot create RRule: until is an invalid date');
   });
 
   it('throws an error when interval is less than 0', () => {
-    expect(() => sanitizeOptions({ ...options, interval: -3 })).toThrowError(
+    expect(() => sanitizeOptions({ ...options, interval: -3 })).toThrow(
       'Cannot create RRule: interval must be greater than 0'
     );
   });
 
   it('throws an error when interval is not a number', () => {
     // @ts-expect-error
-    expect(() => sanitizeOptions({ ...options, interval: 'foobar' })).toThrowError(
+    expect(() => sanitizeOptions({ ...options, interval: 'foobar' })).toThrow(
       'Cannot create RRule: interval must be a number'
     );
   });

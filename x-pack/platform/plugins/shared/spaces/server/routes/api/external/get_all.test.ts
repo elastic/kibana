@@ -120,7 +120,7 @@ describe('GET /spaces/space', () => {
             expect(response.status).toEqual(200);
             expect(response.payload).toEqual(spaces);
           } else {
-            expect(() => queryParamsValidation.validate(request.query)).toThrowError(
+            expect(() => queryParamsValidation.validate(request.query)).toThrow(
               '[include_authorized_purposes]: expected value to equal [false]'
             );
           }

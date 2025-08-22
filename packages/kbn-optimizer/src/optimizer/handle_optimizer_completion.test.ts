@@ -89,5 +89,5 @@ it('passes through errors on the source stream', async () => {
 
   await expect(
     allValuesFrom(update$.pipe(handleOptimizerCompletion(config())))
-  ).rejects.toThrowError(error);
+  ).rejects.toThrow(error);
 });

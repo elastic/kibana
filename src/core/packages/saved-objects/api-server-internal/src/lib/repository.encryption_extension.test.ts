@@ -289,7 +289,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
           overwrite: true,
           version: mockVersion,
         })
-      ).resolves.not.toThrowError();
+      ).resolves.not.toThrow();
     });
 
     it('allows to opt-out of random ID enforcement', async () => {

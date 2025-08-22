@@ -255,7 +255,7 @@ describe('create ESO model version', () => {
         },
         context
       );
-    }).toThrowError(`decryption failed!`);
+    }).toThrow(`decryption failed!`);
 
     expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
       {
@@ -317,7 +317,7 @@ describe('create ESO model version', () => {
         },
         context
       );
-    }).toThrowError(`decryption failed!`);
+    }).toThrow(`decryption failed!`);
 
     expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
       {
@@ -457,7 +457,7 @@ describe('create ESO model version', () => {
         },
         context
       );
-    }).toThrowError(`transform failed!`);
+    }).toThrow(`transform failed!`);
 
     expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
       {
@@ -517,7 +517,7 @@ describe('create ESO model version', () => {
         },
         context
       );
-    }).toThrowError(`transform failed!`);
+    }).toThrow(`transform failed!`);
 
     expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
       {
@@ -579,7 +579,7 @@ describe('create ESO model version', () => {
         },
         context
       );
-    }).toThrowError(`encryption failed!`);
+    }).toThrow(`encryption failed!`);
 
     expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
       {
@@ -649,7 +649,7 @@ describe('create ESO model version', () => {
         },
         context
       );
-    }).toThrowError(`encryption failed!`);
+    }).toThrow(`encryption failed!`);
 
     expect(encryptionSavedObjectService.decryptAttributesSync).toHaveBeenCalledWith(
       {

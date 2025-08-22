@@ -26,10 +26,10 @@ describe('compare', () => {
       });
 
       it('throws when invalid op is provided', () => {
-        expect(() => fn(1, { op: 'boo', to: 2 })).toThrowError(
+        expect(() => fn(1, { op: 'boo', to: 2 })).toThrow(
           new RegExp(errors.invalidCompareOperator('boo').message)
         );
-        expect(() => fn(1, { op: 'boo' })).toThrowError(
+        expect(() => fn(1, { op: 'boo' })).toThrow(
           new RegExp(errors.invalidCompareOperator('boo').message)
         );
       });

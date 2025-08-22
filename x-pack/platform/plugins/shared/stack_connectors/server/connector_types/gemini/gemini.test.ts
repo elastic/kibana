@@ -157,7 +157,7 @@ describe('GeminiConnector', () => {
             // missing candidates and usageMetadata
           };
 
-          expect(() => RunApiResponseSchema.validate(missingRequiredFields)).toThrowError();
+          expect(() => RunApiResponseSchema.validate(missingRequiredFields)).toThrow();
         });
 
         it('removes unknown properties, but does NOT fail validation when they are present', () => {

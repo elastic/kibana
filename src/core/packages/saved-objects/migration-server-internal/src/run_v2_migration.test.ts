@@ -284,7 +284,7 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
 
-    await expect(runV2Migration(options)).rejects.toThrowError(myTaskIndexMigratorError);
+    await expect(runV2Migration(options)).rejects.toThrow(myTaskIndexMigratorError);
   });
 });
 

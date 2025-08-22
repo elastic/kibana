@@ -501,7 +501,7 @@ describe('getPackage', () => {
     } as any);
 
     mockGetBundledPackageByName.mockResolvedValue(bundledPackage);
-    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
+    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrow(
       new FleetError('Error fetching package')
     );
   });
@@ -601,7 +601,7 @@ describe('getPackage', () => {
     } as any);
 
     mockGetBundledPackageByName.mockResolvedValue(undefined);
-    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrowError(
+    await expect(getPackage('testpkg', '1.0.1')).rejects.toThrow(
       new PackageNotFoundError('testpkg@1.0.1 not found')
     );
   });

@@ -490,7 +490,7 @@ describe('helpers', () => {
           indexName: 'auditbeat-custom-index-1',
           requestItems,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Error loading unallowed values for index auditbeat-custom-index-1: simulated error'
       );
     });

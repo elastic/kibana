@@ -74,7 +74,7 @@ describe('assertPickVersionIsTarget', () => {
           pick_version: pickVersion,
         };
 
-        expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrowError(
+        expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrow(
           createExpectedError(ruleId)
         );
       });
@@ -93,7 +93,7 @@ describe('assertPickVersionIsTarget', () => {
         ],
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrowError(
+      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrow(
         createExpectedError(ruleId)
       );
     });
@@ -114,7 +114,7 @@ describe('assertPickVersionIsTarget', () => {
         ],
       };
 
-      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrowError(
+      expect(() => assertPickVersionIsTarget({ requestBody, ruleId })).toThrow(
         createExpectedError(ruleId)
       );
     });

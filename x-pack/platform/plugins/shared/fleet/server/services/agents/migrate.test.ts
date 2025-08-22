@@ -133,7 +133,7 @@ describe('Agent migration', () => {
       mockedPolicy.is_protected = true;
       await expect(
         migrateSingleAgent(esClientMock, agentId, mockedPolicy, mockedAgent, options)
-      ).rejects.toThrowError('Agent is protected and cannot be migrated');
+      ).rejects.toThrow('Agent is protected and cannot be migrated');
     });
   });
 
@@ -210,7 +210,7 @@ describe('Agent migration', () => {
           [mockedPolicy, mockedPolicy],
           options
         )
-      ).rejects.toThrowError('One or more agents are protected agents and cannot be migrated');
+      ).rejects.toThrow('One or more agents are protected agents and cannot be migrated');
     });
   });
 });

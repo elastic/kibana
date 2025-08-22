@@ -387,7 +387,7 @@ describe('UninstallTokenService', () => {
           const so = decorateSOWithMissingToken(getDefaultSO(canEncrypt));
           mockCreatePointInTimeFinderAsInternalUser([so]);
 
-          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrowError(
+          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrow(
             new UninstallTokenError(
               'Invalid uninstall token: Saved object is missing the token attribute.'
             )
@@ -398,7 +398,7 @@ describe('UninstallTokenService', () => {
           const so = decorateSOWithError(getDefaultSO2(canEncrypt));
           mockCreatePointInTimeFinderAsInternalUser([so]);
 
-          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrowError(
+          await expect(uninstallTokenService.getToken(so.id)).rejects.toThrow(
             new UninstallTokenError("Error when reading Uninstall Token with id 'test-so-id-two'.")
           );
         });
@@ -501,7 +501,7 @@ describe('UninstallTokenService', () => {
           defaultBuckets[0].latest.hits.hits[0]._source.created_at = '';
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
-          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
+          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrow(
             'Invalid uninstall token: Saved object is missing creation date.'
           );
         });
@@ -513,7 +513,7 @@ describe('UninstallTokenService', () => {
           ].policy_id = '';
           mockCreatePointInTimeFinder(canEncrypt, defaultBuckets);
 
-          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrowError(
+          await expect(uninstallTokenService.getTokenMetadata()).rejects.toThrow(
             'Invalid uninstall token: Saved object is missing the policy id attribute.'
           );
         });
@@ -895,7 +895,7 @@ describe('UninstallTokenService', () => {
 
           await expect(
             uninstallTokenService.checkTokenValidityForAllPolicies()
-          ).rejects.toThrowError('Unknown error happened while checking Uninstall Tokens validity');
+          ).rejects.toThrow('Unknown error happened while checking Uninstall Tokens validity');
         });
       });
 
@@ -963,7 +963,7 @@ describe('UninstallTokenService', () => {
             uninstallTokenService.checkTokenValidityForPolicy(
               errorWithDecryptionSO2.attributes.policy_id
             )
-          ).rejects.toThrowError('Unknown error happened while checking Uninstall Tokens validity');
+          ).rejects.toThrow('Unknown error happened while checking Uninstall Tokens validity');
         });
       });
     });

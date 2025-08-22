@@ -182,14 +182,14 @@ describe('find', () => {
     describe('errors', () => {
       it(`throws when type is not defined`, async () => {
         // @ts-expect-error type should be defined
-        await expect(repository.find({})).rejects.toThrowError(
+        await expect(repository.find({})).rejects.toThrow(
           'options.type must be a string or an array of strings'
         );
         expect(client.search).not.toHaveBeenCalled();
       });
 
       it(`throws when namespaces is an empty array`, async () => {
-        await expect(repository.find({ type: 'foo', namespaces: [] })).rejects.toThrowError(
+        await expect(repository.find({ type: 'foo', namespaces: [] })).rejects.toThrow(
           'options.namespaces cannot be an empty array'
         );
         expect(client.search).not.toHaveBeenCalled();
@@ -199,13 +199,13 @@ describe('find', () => {
         await expect(
           // @ts-expect-error searchFields is an array
           repository.find({ type, searchFields: 'string' })
-        ).rejects.toThrowError('options.searchFields must be an array');
+        ).rejects.toThrow('options.searchFields must be an array');
         expect(client.search).not.toHaveBeenCalled();
       });
 
       it(`throws when fields is defined but not an array`, async () => {
         // @ts-expect-error fields is an array
-        await expect(repository.find({ type, fields: 'string' })).rejects.toThrowError(
+        await expect(repository.find({ type, fields: 'string' })).rejects.toThrow(
           'options.fields must be an array'
         );
         expect(client.search).not.toHaveBeenCalled();
@@ -214,7 +214,7 @@ describe('find', () => {
       it(`throws when a preference is provided with pit`, async () => {
         await expect(
           repository.find({ type: 'foo', pit: { id: 'abc123' }, preference: 'hi' })
-        ).rejects.toThrowError('options.preference must be excluded when options.pit is used');
+        ).rejects.toThrow('options.preference must be excluded when options.pit is used');
         expect(client.search).not.toHaveBeenCalled();
       });
 

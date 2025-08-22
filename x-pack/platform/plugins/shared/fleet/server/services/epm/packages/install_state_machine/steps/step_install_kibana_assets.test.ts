@@ -118,7 +118,7 @@ describe('stepInstallKibanaAssets', () => {
       spaceId: DEFAULT_SPACE_ID,
     });
 
-    await expect(installationPromise).resolves.not.toThrowError();
+    await expect(installationPromise).resolves.not.toThrow();
     expect(installKibanaAssetsAndReferencesMultispace)..toHaveBeenCalledTimes(1);
   });
   esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -156,8 +156,8 @@ describe('stepInstallKibanaAssets', () => {
       installSource: 'registry',
       spaceId: DEFAULT_SPACE_ID,
     });
-    await expect(installationPromise).resolves.not.toThrowError();
-    await expect(installationPromise).resolves.not.toThrowError();
+    await expect(installationPromise).resolves.not.toThrow();
+    await expect(installationPromise).resolves.not.toThrow();
   });
 });
 

@@ -74,7 +74,7 @@ describe('runTool', () => {
         toolExecutionParams: params,
         parentManager: runnerManager,
       })
-    ).rejects.toThrowError(/Tool test-tool was called with invalid parameters/);
+    ).rejects.toThrow(/Tool test-tool was called with invalid parameters/);
   });
 
   it('calls the tool handler with the expected parameters', async () => {

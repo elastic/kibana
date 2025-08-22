@@ -392,7 +392,7 @@ describe('#start', () => {
 
       await elasticsearchService.setup(setupDeps);
 
-      await expect(elasticsearchService.start()).rejects.toThrowError(
+      await expect(elasticsearchService.start()).rejects.toThrow(
         'Inline scripting is disabled'
       );
     });

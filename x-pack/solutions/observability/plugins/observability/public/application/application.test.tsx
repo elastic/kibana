@@ -119,7 +119,7 @@ describe('renderApp', () => {
         telemetryClient: createTelemetryClientMock(),
       });
       unmount();
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('should clear search sessions when unmounting', () => {

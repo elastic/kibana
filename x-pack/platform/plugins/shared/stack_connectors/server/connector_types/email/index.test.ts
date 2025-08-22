@@ -504,7 +504,7 @@ describe('params validation', () => {
         },
         { configurationUtilities }
       );
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   test('error when using a service that is not enabled', async () => {
@@ -551,7 +551,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 
   test('does not throw when fetching service enabled in config', () => {
@@ -573,7 +573,7 @@ describe('params validation', () => {
         },
         { configurationUtilities: configUtils }
       )
-    ).not.toThrowError();
+    ).not.toThrow();
   });
 });
 

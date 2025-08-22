@@ -133,7 +133,7 @@ describe('UrlDrilldown', () => {
         },
       };
 
-      await expect(urlDrilldown.isCompatible(config, context)).rejects.toThrowError();
+      await expect(urlDrilldown.isCompatible(config, context)).rejects.toThrow();
     });
 
     test('compatible in edit mode if url is valid', async () => {

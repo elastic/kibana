@@ -74,7 +74,7 @@ describe('UiActionsService', () => {
     test('throws if trigger does not exist', () => {
       const service = new UiActionsService();
 
-      expect(() => service.getTrigger(FOO_TRIGGER)).toThrowError(
+      expect(() => service.getTrigger(FOO_TRIGGER)).toThrow(
         'Trigger [triggerId = FOO_TRIGGER] does not exist.'
       );
     });
@@ -438,7 +438,7 @@ describe('UiActionsService', () => {
       } as unknown as ActionDefinition;
 
       service.registerAction(action);
-      expect(() => service.detachAction('i do not exist', ACTION_HELLO_WORLD)).toThrowError(
+      expect(() => service.detachAction('i do not exist', ACTION_HELLO_WORLD)).toThrow(
         'No trigger [triggerId = i do not exist] exists, for detaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
@@ -452,7 +452,7 @@ describe('UiActionsService', () => {
       } as unknown as ActionDefinition;
 
       service.registerAction(action);
-      expect(() => service.addTriggerAction('i do not exist', action)).toThrowError(
+      expect(() => service.addTriggerAction('i do not exist', action)).toThrow(
         'No trigger [triggerId = i do not exist] exists, for attaching action [actionId = ACTION_HELLO_WORLD].'
       );
     });
@@ -466,7 +466,7 @@ describe('UiActionsService', () => {
       } as unknown as ActionDefinition;
 
       service.registerAction(action);
-      expect(() => service.registerAction(action)).toThrowError(
+      expect(() => service.registerAction(action)).toThrow(
         'Action [action.id = ACTION_HELLO_WORLD] already registered.'
       );
     });
@@ -477,7 +477,7 @@ describe('UiActionsService', () => {
       const trigger = { id: 'MY-TRIGGER' } as unknown as Trigger;
 
       service.registerTrigger(trigger);
-      expect(() => service.registerTrigger(trigger)).toThrowError(
+      expect(() => service.registerTrigger(trigger)).toThrow(
         'Trigger [trigger.id = MY-TRIGGER] already registered.'
       );
     });

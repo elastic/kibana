@@ -53,7 +53,7 @@ describe('unenroll', () => {
 
     it('cannot unenroll from hosted agent policy by default', async () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
-      await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrowError(
+      await expect(unenrollAgent(soClient, esClient, agentInHostedDoc._id)).rejects.toThrow(
         HostedAgentPolicyRestrictionRelatedError
       );
       // does not call ES update
@@ -64,7 +64,7 @@ describe('unenroll', () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
       await expect(
         unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
-      ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
+      ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
       expect(esClient.update)..toHaveBeenCalledTimes(0);
     });

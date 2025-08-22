@@ -476,7 +476,7 @@ paths:
 `;
     const vars = {};
 
-    expect(() => compileTemplate(vars, streamTemplate)).toThrowError(
+    expect(() => compileTemplate(vars, streamTemplate)).toThrow(
       'Error while compiling agent template: options.inverse is not a function'
     );
   });
@@ -493,7 +493,7 @@ paths:
       },
     };
 
-    expect(() => compileTemplate(vars, template)).toThrowError(
+    expect(() => compileTemplate(vars, template)).toThrow(
       'YAMLException: duplicated mapping key'
     );
   });

@@ -148,10 +148,10 @@ describe('update_objects_spaces', () => {
 
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload1)
-      ).not.toThrowError();
+      ).not.toThrow();
       expect(() =>
         (updateObjectsSpaces.routeValidation.body as ObjectType).validate(payload2)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
 
     it('passes arguments to the saved objects client and returns the result', async () => {

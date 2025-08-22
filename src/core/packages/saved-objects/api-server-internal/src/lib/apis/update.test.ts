@@ -605,13 +605,13 @@ describe('#update', () => {
       const expectNotFoundError = async (type: string, id: string) => {
         await expect(
           repository.update(type, id, {}, { migrationVersionCompatibility: 'raw' })
-        ).rejects.toThrowError(createGenericNotFoundErrorPayload(type, id));
+        ).rejects.toThrow(createGenericNotFoundErrorPayload(type, id));
       };
 
       it(`throws when options.namespace is '*'`, async () => {
         await expect(
           repository.update(type, id, attributes, { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`throws when type is invalid`, async () => {
@@ -625,7 +625,7 @@ describe('#update', () => {
       });
 
       it(`throws when id is empty`, async () => {
-        await expect(repository.update(type, '', attributes)).rejects.toThrowError(
+        await expect(repository.update(type, '', attributes)).rejects.toThrow(
           createBadRequestErrorPayload('id cannot be empty')
         );
         expect(client.index).not.toHaveBeenCalled();
@@ -686,7 +686,7 @@ describe('#update', () => {
               },
             }
           )
-        ).rejects.toThrowError(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
+        ).rejects.toThrow(createConflictErrorPayload(MULTI_NAMESPACE_ISOLATED_TYPE, id));
         expect(client.get).toHaveBeenCalledTimes(1);
         expect(mockPreflightCheckForCreate).toHaveBeenCalledTimes(1);
         expect(client.index).not.toHaveBeenCalled();

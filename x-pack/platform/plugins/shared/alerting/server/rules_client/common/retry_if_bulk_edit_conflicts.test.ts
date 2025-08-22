@@ -119,7 +119,7 @@ describe('retryIfBulkEditConflicts', () => {
         },
         mockFilter
       )
-    ).rejects.toThrowError('Test failure');
+    ).rejects.toThrow('Test failure');
   });
 
   test(`should return conflict errors when number of retries exceeds ${RETRY_IF_CONFLICTS_ATTEMPTS}`, async () => {

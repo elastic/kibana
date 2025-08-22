@@ -71,7 +71,7 @@ describe('FlyoutService', () => {
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
         const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
         expect(modalContent.html()).toMatchSnapshot();
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
       it('resolves onClose on the previous ref', async () => {

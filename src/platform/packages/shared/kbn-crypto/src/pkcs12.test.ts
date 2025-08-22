@@ -155,7 +155,7 @@ describe('#readPkcs12Keystore', () => {
 
   describe('Throws errors', () => {
     const expectError = (password?: string) => {
-      expect(() => readPkcs12Keystore(ES_P12_PATH, password)).toThrowError(
+      expect(() => readPkcs12Keystore(ES_P12_PATH, password)).toThrow(
         'PKCS#12 MAC could not be verified. Invalid password?'
       );
     };
@@ -174,13 +174,13 @@ describe('#readPkcs12Keystore', () => {
 
     it('When an invalid file path is used', () => {
       const path = 'invalid-filepath';
-      expect(() => readPkcs12Keystore(path)).toThrowError(
+      expect(() => readPkcs12Keystore(path)).toThrow(
         `ENOENT: no such file or directory, open '${path}'`
       );
     });
 
     it('When two keys are present', () => {
-      expect(() => readPkcs12Keystore(TWO_KEYS_PATH, '')).toThrowError(
+      expect(() => readPkcs12Keystore(TWO_KEYS_PATH, '')).toThrow(
         'Keystore contains multiple private keys.'
       );
     });

@@ -327,7 +327,7 @@ describe('hashedItemStore', () => {
         });
 
         it("doesn't throw", () => {
-          expect(() => hashedItemStore.clear()).not.toThrowError();
+          expect(() => hashedItemStore.clear()).not.toThrow();
         });
       });
     });

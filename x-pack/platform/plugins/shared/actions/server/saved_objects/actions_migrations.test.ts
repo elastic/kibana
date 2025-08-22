@@ -314,7 +314,7 @@ describe('handles errors during migrations', () => {
       const action = getMockDataForEmail({});
       expect(() => {
         migration710(action, context);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(context.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.10.0 migration failed for action ${action.id} with error: Can't migrate!`,
         {
@@ -334,7 +334,7 @@ describe('handles errors during migrations', () => {
       const action = getMockDataForEmail({});
       expect(() => {
         migration711(action, context);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(context.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.11.0 migration failed for action ${action.id} with error: Can't migrate!`,
         {
@@ -354,7 +354,7 @@ describe('handles errors during migrations', () => {
       const action = getMockDataForEmail({});
       expect(() => {
         migration714(action, context);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(context.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.14.0 migration failed for action ${action.id} with error: Can't migrate!`,
         {

@@ -81,7 +81,7 @@ describe('ModalService', () => {
         const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
         expect((modalContent.find('MountWrapper').props() as any).mount).toEqual(mountPoint);
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
@@ -175,7 +175,7 @@ describe('ModalService', () => {
         );
 
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 

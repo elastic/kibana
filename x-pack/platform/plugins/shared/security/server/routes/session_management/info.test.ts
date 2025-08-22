@@ -54,7 +54,7 @@ describe('Info session routes', () => {
       const request = httpServerMock.createKibanaRequest();
       await expect(
         routeHandler({} as unknown as SecurityRequestHandlerContext, request, kibanaResponseFactory)
-      ).rejects.toThrowError(unhandledException);
+      ).rejects.toThrow(unhandledException);
 
       expect(session.get).toHaveBeenCalledWith(request);
     });

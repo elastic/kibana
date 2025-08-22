@@ -344,6 +344,6 @@ describe('_stateMachineInstallPackage', () => {
       installSource: 'registry',
       spaceId: DEFAULT_SPACE_ID,
     });
-    await expect(installPromise).rejects.toThrowError(PackageSavedObjectConflictError);
+    await expect(installPromise).rejects.toThrow(PackageSavedObjectConflictError);
   });
 });

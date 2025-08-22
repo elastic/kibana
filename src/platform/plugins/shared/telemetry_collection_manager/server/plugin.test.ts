@@ -69,7 +69,7 @@ describe('Telemetry Collection Manager', () => {
         expect(telemetryCollectionManager['usageGetterMethodPriority']).toBe(1);
       });
       test('fails to register the collection strategy with the same priority', () => {
-        expect(() => setupApi.setCollectionStrategy(createCollectionStrategy(1))).toThrowError(
+        expect(() => setupApi.setCollectionStrategy(createCollectionStrategy(1))).toThrow(
           `A Usage Getter with the same priority is already set.`
         );
       });

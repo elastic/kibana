@@ -56,7 +56,7 @@ describe('partiallyUpdateRule', () => {
 
         await expect(
           partiallyUpdateRule(soClient, MockRuleId, DefaultAttributes)
-        ).rejects.toThrowError('wops');
+        ).rejects.toThrow('wops');
       });
 
       test('should handle the version option', async () => {
@@ -144,7 +144,7 @@ describe('partiallyUpdateRuleWithEs', () => {
 
     await expect(
       partiallyUpdateRuleWithEs(esClient, MockRuleId, DefaultAttributes)
-    ).rejects.toThrowError('wops');
+    ).rejects.toThrow('wops');
   });
 
   test('should handle the version option', async () => {

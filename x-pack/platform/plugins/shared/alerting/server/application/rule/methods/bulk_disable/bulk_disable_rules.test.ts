@@ -737,7 +737,7 @@ describe('bulkDisableRules', () => {
         throw new Error('Unauthorized');
       });
 
-      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Unauthorized'
       );
 
@@ -750,7 +750,7 @@ describe('bulkDisableRules', () => {
         throw new Error('Error');
       });
 
-      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrowError(
+      await expect(rulesClient.bulkDisableRules({ filter: 'fake_filter' })).rejects.toThrow(
         'Error'
       );
 

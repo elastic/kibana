@@ -114,7 +114,7 @@ describe('TutorialsRegistry', () => {
         mockCustomIntegrationsPluginSetup
       );
       testProvider = ({}) => validTutorialProvider;
-      expect(() => setup.registerTutorial(testProvider)).not.toThrowError();
+      expect(() => setup.registerTutorial(testProvider)).not.toThrow();
       expect(mockCustomIntegrationsPluginSetup.registerCustomIntegration.mock.calls).toEqual([
         [
           {
@@ -157,7 +157,7 @@ describe('TutorialsRegistry', () => {
       testScopedTutorialContextFactory = ({}) => 'string';
       expect(() =>
         setup.addScopedTutorialContextFactory(testScopedTutorialContextFactory)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 

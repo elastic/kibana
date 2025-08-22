@@ -107,7 +107,7 @@ describe('installAssetsForInputPackagePolicy', () => {
           ],
         } as any,
       })
-    ).rejects.toThrowError(PackageNotFoundError);
+    ).rejects.toThrow(PackageNotFoundError);
   });
 
   it('should install es index patterns for input package if package is installed', async () => {

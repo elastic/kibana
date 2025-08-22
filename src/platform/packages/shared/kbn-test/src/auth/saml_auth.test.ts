@@ -263,7 +263,7 @@ describe('saml_auth', () => {
       });
 
       await expect(createSAMLResponse(createSAMLResponseParams)).rejects
-        .toThrowError(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
+        .toThrow(`Failed to parse SAML response value.\nMost likely the 'viewer@elastic.co' user has no access to the cloud deployment.
 Login to ${
         new URL(location).hostname
       } with the user from '.ftr/role_users.json' file and try to load

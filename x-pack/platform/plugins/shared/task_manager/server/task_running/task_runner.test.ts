@@ -2405,7 +2405,7 @@ describe('TaskManagerRunner', () => {
           throw error;
         });
 
-        await expect(runner.run()).rejects.toThrowError('fail');
+        await expect(runner.run()).rejects.toThrow('fail');
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
@@ -2450,7 +2450,7 @@ describe('TaskManagerRunner', () => {
           throw error;
         });
 
-        await expect(runner.run()).rejects.toThrowError('fail');
+        await expect(runner.run()).rejects.toThrow('fail');
 
         expect(onTaskEvent).toHaveBeenCalledWith(
           withAnyTiming(
