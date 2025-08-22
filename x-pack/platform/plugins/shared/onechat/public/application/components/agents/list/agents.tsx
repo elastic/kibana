@@ -23,14 +23,14 @@ export const OnechatAgents = () => {
   const { createOnechatUrl } = useNavigation();
   const headerButtons = [
     <EuiButton
-      iconType={'plusInCircle'}
+      iconType={'plusInCircleFilled'}
       color="primary"
       fill
       iconSide="left"
       href={createOnechatUrl(appPaths.agents.new)}
     >
       {i18n.translate('xpack.onechat.agents.newAgentButton', {
-        defaultMessage: 'New Agent',
+        defaultMessage: 'New agent',
       })}
     </EuiButton>,
   ];

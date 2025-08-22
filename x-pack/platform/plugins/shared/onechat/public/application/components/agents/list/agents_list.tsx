@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -21,6 +21,7 @@ import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
 
 const columnNames = {
   name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
@@ -30,13 +31,80 @@ const columnNames = {
   labels: i18n.translate('xpack.onechat.agents.labelsLabel', { defaultMessage: 'Labels' }),
 };
 
+const actionLabels = {
+  chat: i18n.translate('xpack.onechat.agents.chatActionLabel', { defaultMessage: 'Chat' }),
+  chatDescription: i18n.translate('xpack.onechat.agents.chatActionDescription', {
+    defaultMessage: 'Chat with agent',
+  }),
+  edit: i18n.translate('xpack.onechat.agents.editActionLabel', { defaultMessage: 'Edit' }),
+  editDescription: i18n.translate('xpack.onechat.agents.editActionDescription', {
+    defaultMessage: 'Edit agent',
+  }),
+  clone: i18n.translate('xpack.onechat.agents.cloneActionLabel', { defaultMessage: 'Clone' }),
+  cloneDescription: i18n.translate('xpack.onechat.agents.cloneActionDescription', {
+    defaultMessage: 'Clone agent',
+  }),
+  delete: i18n.translate('xpack.onechat.agents.deleteActionLabel', { defaultMessage: 'Delete' }),
+  deleteDescription: i18n.translate('xpack.onechat.agents.deleteActionDescription', {
+    defaultMessage: 'Delete agent',
+  }),
+};
+
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
-
+  const { deleteAgent } = useAgentDelete();
   const { createOnechatUrl } = useNavigation();
 
-  const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(
-    () => [
+  const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
+    const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
+      actions: [
+        // TODO: Implement chat with agent
+        // {
+        //   type: 'icon',
+        //   icon: 'comment',
+        //   name: actionLabels.chat,
+        //   description: actionLabels.chatDescription,
+        //   isPrimary: true,
+        //   onClick: (agent: AgentDefinition) => {
+        //   },
+        // },
+        {
+          type: 'icon',
+          icon: 'pencil',
+          name: actionLabels.edit,
+          description: actionLabels.editDescription,
+          isPrimary: true,
+          showOnHover: true,
+          href: (agent: AgentDefinition) =>
+            createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
+        },
+        // TODO: Implement clone agent
+        // {
+        //   type: 'icon',
+        //   icon: 'copy',
+        //   name: actionLabels.clone,
+        //   description: actionLabels.cloneDescription,
+        //   onClick: (agent: AgentDefinition) => {
+        //     cloneAgent(agent.id);
+        //   },
+        // },
+        {
+          type: 'icon',
+          icon: 'trash',
+          name: actionLabels.delete,
+          description: actionLabels.deleteDescription,
+          color: 'danger',
+          enabled: (agent: AgentDefinition) => agent.id !== oneChatDefaultAgentId,
+          onClick: (agent: AgentDefinition) => {
+            if (agent.id === oneChatDefaultAgentId) {
+              return;
+            }
+            deleteAgent(agent.id);
+          },
+        },
+      ],
+    };
+    return [
       // Agent avatar
       {
         width: '48px',
@@ -74,9 +142,9 @@ export const AgentsList: React.FC = () => {
           </EuiFlexGroup>
         ),
       },
-    ],
-    [createOnechatUrl]
-  );
+      agentActions,
+    ];
+  }, [createOnechatUrl, deleteAgent]);
 
   const errorMessage = useMemo(
     () =>
