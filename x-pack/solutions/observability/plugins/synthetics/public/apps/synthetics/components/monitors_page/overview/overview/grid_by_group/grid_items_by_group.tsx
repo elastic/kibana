@@ -19,17 +19,17 @@ import {
 } from '../../../../../utils/filters/filter_fields';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 import { GroupGridItem } from './grid_group_item';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../../common/runtime_types';
 import type { OverviewView } from '../../../../../state';
 import { selectOverviewState, selectServiceLocationsState } from '../../../../../state';
-import type { FlyoutParamProps } from '../types';
 import { selectOverviewStatus } from '../../../../../state/overview_status';
 
 export const GridItemsByGroup = ({
   setFlyoutConfigCallback,
   view,
 }: {
-  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  setFlyoutConfigCallback: (params: OverviewStatusMetaData) => void;
   view: OverviewView;
 }) => {
   const [fullScreenGroup, setFullScreenGroup] = useState('');

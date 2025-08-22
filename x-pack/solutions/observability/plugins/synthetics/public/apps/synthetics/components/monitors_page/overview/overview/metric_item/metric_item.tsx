@@ -32,7 +32,6 @@ import { formatDuration } from '../../../../../utils/formatting';
 import { ActionsPopover } from '../actions_popover';
 import { MetricItemBody } from './metric_item_body';
 import { MetricItemIcon } from './metric_item_icon';
-import type { FlyoutParamProps } from '../types';
 
 export const METRIC_ITEM_HEIGHT = 180;
 
@@ -79,7 +78,7 @@ export const MetricItem = ({
 }: {
   monitor: OverviewStatusMetaData;
   style?: React.CSSProperties;
-  onClick: (params: FlyoutParamProps) => void;
+  onClick: (params: OverviewStatusMetaData) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const trendData = useSelector(selectOverviewTrends)[monitor.configId + monitor.locationId];
@@ -180,13 +179,7 @@ export const MetricItem = ({
                 dispatch(toggleErrorPopoverOpen(null));
               }
               if (!testInProgress && locationName) {
-                onClick({
-                  configId: monitor.configId,
-                  id: monitor.configId,
-                  location: locationName,
-                  locationId: monitor.locationId,
-                  spaces: monitor.spaces,
-                });
+                onClick(monitor);
               }
             }}
             baseTheme={chartBaseTheme}

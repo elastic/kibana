@@ -7,16 +7,16 @@
 
 import React from 'react';
 import { useSelector } from 'react-redux';
+import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
 import { useMonitorsSortedByStatus } from '../../../../../hooks/use_monitors_sorted_by_status';
 import { selectOverviewState } from '../../../../../state';
 import { GridItemsByGroup } from '../grid_by_group/grid_items_by_group';
-import type { FlyoutParamProps } from '../types';
 import { MonitorsTable } from './components/monitors_table';
 
 export const OverviewGridCompactView = ({
   setFlyoutConfigCallback,
 }: {
-  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  setFlyoutConfigCallback: (params: OverviewStatusMetaData) => void;
 }) => {
   const {
     groupBy: { field: groupField },

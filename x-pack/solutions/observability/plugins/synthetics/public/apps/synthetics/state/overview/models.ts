@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FlyoutParamProps } from '../../components/monitors_page/overview/overview/types';
 import type { TrendTable } from '../../../../../common/types';
 import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
-import type { ConfigKey } from '../../../../../common/runtime_types';
+import type { ConfigKey, OverviewStatusMetaData } from '../../../../../common/runtime_types';
 
 import type { MonitorFilterState } from '../monitor_list';
 
@@ -17,8 +16,6 @@ export interface MonitorOverviewPageState extends MonitorFilterState {
   sortOrder: 'asc' | 'desc';
   sortField: MonitorListSortField;
 }
-
-export type MonitorOverviewFlyoutConfig = FlyoutParamProps | null;
 
 // The first view in the list is the default view
 export const overviewViews = ['cardView', 'compactView'] as const;
@@ -30,7 +27,7 @@ export const isOverviewView = (view: string): view is OverviewView => {
 };
 
 export interface MonitorOverviewState {
-  flyoutConfig: MonitorOverviewFlyoutConfig;
+  flyoutConfig: OverviewStatusMetaData | null;
   pageState: MonitorOverviewPageState;
   isErrorPopoverOpen?: string | null;
   groupBy: GroupByState;

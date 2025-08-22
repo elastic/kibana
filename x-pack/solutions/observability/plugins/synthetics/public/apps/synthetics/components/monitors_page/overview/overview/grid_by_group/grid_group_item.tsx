@@ -20,7 +20,6 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useSelector } from 'react-redux';
 import useKey from 'react-use/lib/useKey';
-import type { FlyoutParamProps } from '../types';
 import { OverviewLoader } from '../overview_loader';
 import { useFilteredGroupMonitors } from './use_filtered_group_monitors';
 import type { OverviewStatusMetaData } from '../../types';
@@ -38,7 +37,7 @@ const GroupGridCardContent = ({
   groupMonitors,
 }: {
   isLoading: boolean;
-  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  setFlyoutConfigCallback: (params: OverviewStatusMetaData) => void;
   groupMonitors: OverviewStatusMetaData[];
 }) => {
   const [activePage, setActivePage] = useState(0);
@@ -107,7 +106,7 @@ export const GroupGridItem = ({
   groupLabel: string;
   fullScreenGroup: string;
   setFullScreenGroup: (group: string) => void;
-  setFlyoutConfigCallback: (params: FlyoutParamProps) => void;
+  setFlyoutConfigCallback: (params: OverviewStatusMetaData) => void;
   view: OverviewView;
 }) => {
   const { status: overviewStatus } = useSelector(selectOverviewStatus);

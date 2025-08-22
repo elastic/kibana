@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect, useRef } from 'react';
 import type { Subject } from 'rxjs';
 import { useDispatch, useSelector } from 'react-redux';
+import type { OverviewStatusMetaData } from '../../../../common/runtime_types';
 import { areFiltersEmpty } from '../common/utils';
 import { getOverviewStore } from './redux_store';
 import { ShowSelectedFilters } from '../common/show_selected_filters';
@@ -24,7 +25,6 @@ import { SyntheticsEmbeddableContext } from '../synthetics_embeddable_context';
 import { OverviewGrid } from '../../synthetics/components/monitors_page/overview/overview/overview_grid';
 import { useMonitorsSortedByStatus } from '../../synthetics/hooks/use_monitors_sorted_by_status';
 import { MetricItem } from '../../synthetics/components/monitors_page/overview/overview/metric_item/metric_item';
-import type { FlyoutParamProps } from '../../synthetics/components/monitors_page/overview/overview/types';
 import { MaybeMonitorDetailsFlyout } from '../../synthetics/components/monitors_page/overview/overview/monitor_detail_flyout';
 import { useOverviewStatus } from '../../synthetics/components/monitors_page/hooks/use_overview_status';
 import { OverviewLoader } from '../../synthetics/components/monitors_page/overview/overview/overview_loader';
@@ -66,7 +66,7 @@ const SingleMonitorView = () => {
   const dispatch = useDispatch();
 
   const setFlyoutConfigCallback = useCallback(
-    (params: FlyoutParamProps) => {
+    (params: OverviewStatusMetaData) => {
       dispatch(setFlyoutConfig(params));
     },
     [dispatch]
