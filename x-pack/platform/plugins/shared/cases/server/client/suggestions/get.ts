@@ -9,19 +9,19 @@ import type { SuggestionHandlerResponse } from '../../../common/types/domain';
 
 import type { CasesClientArgs } from '../types';
 
-import type { GetAllForOwnerArgs } from './types';
+import type { GetAllForOwnersArgs } from './types';
 
 /**
  * Retrieves all the suggestions for the specified owners.
  */
-export async function getAllForOwner(
-  { owner, context, request }: GetAllForOwnerArgs,
+export async function getAllForOwners(
+  { owners, context, request }: GetAllForOwnersArgs,
   clientArgs: CasesClientArgs
 ): Promise<SuggestionHandlerResponse> {
   const { attachmentSuggestionRegistry } = clientArgs;
 
-  const suggestions = await attachmentSuggestionRegistry.getAllSuggestionsForOwner(
-    owner,
+  const suggestions = await attachmentSuggestionRegistry.getAllSuggestionsForOwners(
+    owners,
     context,
     request,
     clientArgs.logger

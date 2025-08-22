@@ -6,6 +6,7 @@
  */
 import type { IKibanaResponse } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import type { SuggestionOwner } from '../../../../../common/types/domain';
 import { isValidOwner } from '../../../../../common/utils/owner';
 import type { SuggestionResponse } from '../../../../../common';
 import { createCasesRoute } from '../../create_cases_route';
@@ -46,16 +47,22 @@ export const getSuggestionsRoute = createCasesRoute({
         comments: caseData.comments,
       });
 
-      const owner = isValidOwner(caseData.owner) ? caseData.owner : undefined;
+      const caseOwner = isValidOwner(caseData.owner) ? caseData.owner : undefined;
 
-      if (!owner) {
+      if (!caseOwner) {
         throw createCaseError({
           message: `Invalid owner ${caseData.owner} for case ${request.params.case_id}; this should never happen`,
         });
       }
 
-      const suggestions = await casesClient.suggestions.getAllForOwner({
-        owner,
+      // Cases (platform) suggestions are always included
+      const owners: SuggestionOwner[] = ['cases'];
+      if (caseOwner !== 'cases') {
+        owners.push(caseOwner);
+      }
+
+      const suggestions = await casesClient.suggestions.getAllForOwners({
+        owners,
         context: metadata,
         request,
       });
