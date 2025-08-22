@@ -49,6 +49,7 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
       await getInspectedElementData({
         event,
         core,
+        componentPath,
         overlayId,
         euiTheme,
         setFlyoutRef,
@@ -56,7 +57,7 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
         sourceComponent,
       });
     },
-    [core, overlayId, euiTheme, setFlyoutRef, setIsInspecting, sourceComponent]
+    [componentPath, core, overlayId, euiTheme, setFlyoutRef, setIsInspecting, sourceComponent]
   );
 
   const handlePointerMove = useCallback(

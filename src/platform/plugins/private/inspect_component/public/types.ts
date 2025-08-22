@@ -22,7 +22,7 @@ export interface FileData {
   fileName: string;
 }
 
-interface EuiInfo {
+export interface EuiInfo {
   componentName: string;
   docsLink: string;
 }
@@ -64,6 +64,7 @@ export interface GetComponentDataOptions {
 export interface GetInspectedElementOptions {
   event: PointerEvent;
   core: CoreStart;
+  componentPath: string | undefined;
   overlayId: string;
   euiTheme: EuiThemeComputed;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;

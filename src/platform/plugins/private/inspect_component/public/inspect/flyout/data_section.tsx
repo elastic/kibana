@@ -113,7 +113,7 @@ export const DataSection = ({ componentData }: Props) => {
         {iconType && <EuiIcon type={iconType} size="m" />}
       </EuiFlexGroup>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiText color={euiTheme.colors.textSubdued} size="s">
+        <EuiText size="s">
           <FormattedMessage
             id="kbnInspectComponent.inspectFlyout.euiDocsLabel"
             defaultMessage="EUI Docs:"
@@ -124,7 +124,7 @@ export const DataSection = ({ componentData }: Props) => {
             {euiInfo.componentName}
           </EuiLink>
         ) : (
-          <EuiText color={euiTheme.colors.textSubdued} size="s">
+          <EuiText size="s">
             <FormattedMessage
               id="kbnInspectComponent.inspectFlyout.noDocsFound"
               defaultMessage="N/A"
