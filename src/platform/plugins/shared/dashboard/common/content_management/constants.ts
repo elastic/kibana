@@ -18,6 +18,7 @@ export const DEFAULT_PANEL_HEIGHT = 15;
 export const DEFAULT_DASHBOARD_OPTIONS = {
   hidePanelTitles: false,
   useMargins: true,
+  autoApplyFilters: true,
   syncColors: true,
   syncCursor: true,
   syncTooltips: true,
