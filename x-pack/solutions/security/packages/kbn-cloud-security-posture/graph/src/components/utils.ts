@@ -105,3 +105,7 @@ export const showErrorToast = (
     toasts.addDanger(extractErrorMessage(error, FETCH_GRAPH_FAILED_TEXT));
   }
 };
+
+// Sanitizes list of strings filtering out undefined/null, empty and whitespace strings
+export const filterNonEmptyStrings = (strArr: string[]) =>
+  strArr.filter((str) => str && str.trim().length > 0);

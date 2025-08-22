@@ -122,6 +122,7 @@ export const entityNodeDataSchema = schema.allOf([
     ips: schema.maybe(schema.arrayOf(schema.string())),
     countryCodes: schema.maybe(schema.arrayOf(schema.string())),
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    hasOriginEvents: schema.maybe(schema.boolean()),
   }),
 ]);
 
@@ -139,6 +140,7 @@ export const labelNodeDataSchema = schema.allOf([
     parentId: schema.maybe(schema.string()),
     color: nodeColorSchema,
     documentsData: schema.maybe(schema.arrayOf(nodeDocumentDataSchema)),
+    hasOriginEvents: schema.maybe(schema.boolean()),
   }),
 ]);
 
