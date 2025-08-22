@@ -8,8 +8,8 @@
 import { of } from 'rxjs';
 
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
-import { LICENSE_TYPE } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
+import { LICENSE_TYPE } from '@kbn/licensing-types';
 
 import { SpacesLicenseService } from './license_service';
 

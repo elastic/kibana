@@ -46,11 +46,11 @@ export const createGetDocViewer =
             );
 
             useEffect(() => {
-              context.logOverviewContext$.next(undefined);
-
               if (!logsOverviewApi) {
                 return;
               }
+
+              context.logOverviewContext$.next(undefined);
 
               if (initialAccordionSection.current) {
                 logsOverviewApi.openAndScrollToSection(initialAccordionSection.current);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { FlyoutFooter } from './flyout_footer';
 
@@ -18,7 +18,7 @@ import {
   removeTrackedLayerStateForSelectedLayer,
   updateFlyout,
 } from '../../../actions';
-import { MapStoreState } from '../../../reducers/store';
+import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

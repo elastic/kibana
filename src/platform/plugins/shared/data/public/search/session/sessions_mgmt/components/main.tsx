@@ -11,12 +11,14 @@ import React from 'react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
 import { SearchSessionsDeprecatedWarning } from '../../search_sessions_deprecation_message';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
-import { SearchUsageCollector } from '../../../collectors';
+import type { SearchUsageCollector } from '../../../collectors';
+import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../constants';
 
 interface Props {
   documentation: AsyncSearchIntroDocumentation;
@@ -26,10 +28,45 @@ interface Props {
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
+  share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
 }
 
-export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
+export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
+  const hasBackgroundSearchEnabled = tableProps.core.featureFlags.getBooleanValue(
+    BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
+    false
+  );
+
+  if (hasBackgroundSearchEnabled) {
+    return (
+      <>
+        <EuiPageHeader
+          pageTitle={
+            <FormattedMessage
+              id="data.mgmt.searchSessions.main.backgroundSearchSectionTitle"
+              defaultMessage="Background Search"
+            />
+          }
+          description={
+            <FormattedMessage
+              id="data.mgmt.searchSessions.main.backgroundSearchSectionDescription"
+              defaultMessage="Manage your background searches."
+            />
+          }
+          bottomBorder
+        />
+
+        <EuiSpacer size="l" />
+        <SearchSessionsMgmtTable
+          data-test-subj="search-sessions-mgmt-table"
+          locators={share.url.locators}
+          {...tableProps}
+        />
+      </>
+    );
+  }
+
   return (
     <>
       <EuiPageHeader
@@ -64,7 +101,11 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
       <SearchSessionsDeprecatedWarning />
 
       <EuiSpacer size="l" />
-      <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+      <SearchSessionsMgmtTable
+        data-test-subj="search-sessions-mgmt-table"
+        locators={share.url.locators}
+        {...tableProps}
+      />
     </>
   );
 }

@@ -9,9 +9,10 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
+import type { ConnectorExecutor } from '../connector_executor';
 import { WorkflowTemplatingEngine } from '../templating_engine';
-import { ConnectorExecutor } from '../connector_executor';
-import { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
+import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   output: any;
@@ -25,83 +26,55 @@ export interface BaseStep {
   if?: string;
   foreach?: string;
   timeout?: number;
+  spaceId: string;
 }
 
 export type StepDefinition = BaseStep;
 
-export abstract class StepBase<TStep extends BaseStep> {
+export interface StepImplementation {
+  run(): Promise<void>;
+}
+
+export abstract class StepBase<TStep extends BaseStep> implements StepImplementation {
   protected step: TStep;
   protected contextManager: WorkflowContextManager;
   protected templatingEngine: WorkflowTemplatingEngine;
   protected connectorExecutor: ConnectorExecutor;
+  protected workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
 
   constructor(
     step: TStep,
     contextManager: WorkflowContextManager,
-    connectorExecutor: ConnectorExecutor,
-    templatingEngineType: 'mustache' | 'nunjucks' = 'nunjucks'
+    connectorExecutor: ConnectorExecutor | undefined,
+    workflowExecutionRuntime: WorkflowExecutionRuntimeManager
   ) {
     this.step = step;
     this.contextManager = contextManager;
-    this.templatingEngine = new WorkflowTemplatingEngine(templatingEngineType);
-    this.connectorExecutor = connectorExecutor;
+    this.templatingEngine = new WorkflowTemplatingEngine();
+    this.connectorExecutor = connectorExecutor as any;
+    this.workflowExecutionRuntime = workflowExecutionRuntime;
   }
 
   public getName(): string {
     return this.step.name;
   }
 
-  public async run(): Promise<RunStepResult> {
-    const stepName = this.getName();
+  public async run(): Promise<void> {
+    const stepId = (this.step as any).id || this.getName();
 
-    // Set step context for logging
-    this.contextManager.setCurrentStep(stepName, stepName, this.step.type);
-
-    // Log step start
-    this.contextManager.logStepStart(stepName);
-
-    // const stepEvent = {
-    //   event: { action: 'step-execution' },
-    //   message: `Executing step: ${stepName}`,
-    // };
-
-    // Start timing
-    // this.contextManager.startTiming(stepEvent);
+    await this.workflowExecutionRuntime.startStep(stepId);
 
     try {
       const result = await this._run();
-
-      // Log success
-      // this.contextManager.stopTiming({
-      //   ...stepEvent,
-      //   event: { ...stepEvent.event, outcome: 'success' },
-      // });
-
-      this.contextManager.logStepComplete(stepName, stepName, true);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      await this.workflowExecutionRuntime.setStepResult(stepId, result);
     } catch (error) {
-      // Log failure
-      // this.contextManager.logError(`Step ${stepName} failed`, error as Error, {
-      //   event: { action: 'step-failed' },
-      // });
-
-      // this.contextManager.stopTiming({
-      //   ...stepEvent,
-      //   event: { ...stepEvent.event, outcome: 'failure' },
-      // });
-
-      this.contextManager.logStepComplete(stepName, stepName, false);
-
       const result = await this.handleFailure(error);
-      this.contextManager.appendStepResult(stepName, result);
-
-      return result;
+      await this.workflowExecutionRuntime.setStepResult(stepId, result);
     } finally {
-      // Clear step context
-      this.contextManager.clearCurrentStep();
+      await this.workflowExecutionRuntime.finishStep(stepId);
     }
+
+    this.workflowExecutionRuntime.goToNextStep();
   }
 
   // Subclasses implement this to execute the step logic

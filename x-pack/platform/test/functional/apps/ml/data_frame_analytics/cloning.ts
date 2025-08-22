@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
+import type { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
       return [
         {
           suiteTitle: 'classification job supported by the form',
-          archive: 'x-pack/test/functional/es_archives/ml/bm_classification',
+          archive: 'x-pack/platform/test/fixtures/es_archives/ml/bm_classification',
           dataView: { name: 'ft_bank_marketing', timeField: '@timestamp' },
           job: {
             id: `bm_1_${timestamp}`,
@@ -62,7 +62,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'outlier detection job supported by the form',
-          archive: 'x-pack/test/functional/es_archives/ml/ihp_outlier',
+          archive: 'x-pack/platform/test/fixtures/es_archives/ml/ihp_outlier',
           dataView: { name: 'ft_ihp_outlier', timeField: '@timestamp' },
           job: {
             id: `ihp_1_${timestamp}`,
@@ -91,7 +91,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         {
           suiteTitle: 'regression job supported by the form',
-          archive: 'x-pack/test/functional/es_archives/ml/egs_regression',
+          archive: 'x-pack/platform/test/fixtures/es_archives/ml/egs_regression',
           dataView: { name: 'ft_egs_regression', timeField: '@timestamp' },
           job: {
             id: `egs_1_${timestamp}`,

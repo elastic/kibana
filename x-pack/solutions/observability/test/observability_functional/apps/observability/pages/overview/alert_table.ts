@@ -6,12 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const ALL_ALERTS = 10;
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
+  const browser = getService('browser');
 
   describe('Observability overview >', function () {
     this.tags('includeFirefox');
@@ -21,9 +22,12 @@ export default ({ getService }: FtrProviderContext) => {
     const rulesService = getService('rules');
 
     describe('Without data', function () {
-      it('navigate and open alerts section', async () => {
+      it('navigates to onboarding page if click on add data', async () => {
         await observability.overview.common.navigateToOverviewPageWithoutAlerts();
         await observability.overview.common.waitForOverviewNoDataPrompt();
+        await observability.overview.common.clickAddDataButton();
+        const url = await browser.getCurrentUrl();
+        expect(url).to.contain('observabilityOnboarding');
       });
     });
 
@@ -45,12 +49,16 @@ export default ({ getService }: FtrProviderContext) => {
           },
           schedule: { interval: '1m' },
         });
-        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.load(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       after(async () => {
         await rulesService.api.deleteAllRules();
-        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
+        await esArchiver.unload(
+          'x-pack/solutions/observability/test/fixtures/es_archives/observability/alerts'
+        );
       });
 
       it('navigate and open alerts section', async () => {

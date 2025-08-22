@@ -212,7 +212,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]and_badge.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]and_badge.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]entry_delete_button.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]entry_item.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]index.test.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]common[\/\\]components[\/\\]threat_match[\/\\]list_item.test.tsx/,
@@ -361,7 +360,6 @@ module.exports = {
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]policy_settings_form[\/\\]components[\/\\]event_collection_card.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]policy_settings_form[\/\\]components[\/\\]setting_locked_card.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]policy[\/\\]view[\/\\]protection_updates[\/\\]protection_updates_layout.tsx/,
-    /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]trusted_apps[\/\\]view[\/\\]components[\/\\]condition_entry_input[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]management[\/\\]pages[\/\\]trusted_apps[\/\\]view[\/\\]components[\/\\]condition_group[\/\\]index.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]resolver[\/\\]view[\/\\]controls[\/\\]styles.tsx/,
     /x-pack[\/\\]solutions[\/\\]security[\/\\]plugins[\/\\]security_solution[\/\\]public[\/\\]resolver[\/\\]view[\/\\]edge_line.tsx/,
@@ -455,5 +453,6 @@ module.exports = {
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_py[\/\\]elasticsearch_py_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_ruby[\/\\]elasticsearch_ruby_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]sample[\/\\]sample_client_readme.tsx/,
+    /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]workflows_management[\/\\]public[\/\\]widgets[\/\\]workflow_search_field[\/\\]ui[\/\\]workflow_search_field.tsx/,
   ],
 };

@@ -408,6 +408,10 @@ describe('HomePage', () => {
           [URL_PARAM_KEY.timerange]: timerange,
           linkTo: [InputsModelId.global],
         },
+        valueReport: {
+          [URL_PARAM_KEY.timerange]: timerange,
+          linkTo: [],
+        },
       };
 
       mockUseInitializeUrlParam(URL_PARAM_KEY.timerange, state);
@@ -452,6 +456,10 @@ describe('HomePage', () => {
         timeline: {
           [URL_PARAM_KEY.timerange]: timerange,
           linkTo: [InputsModelId.global],
+        },
+        valueReport: {
+          [URL_PARAM_KEY.timerange]: timerange,
+          linkTo: [],
         },
       };
 

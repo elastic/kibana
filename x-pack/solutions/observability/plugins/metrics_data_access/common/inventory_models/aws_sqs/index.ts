@@ -7,12 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { metrics } from './metrics';
-import type { InventoryModel } from '../types';
+import { createInventoryModel } from '../shared/create_inventory_model';
 
-export { awsSQSSnapshotMetricTypes } from './metrics';
-
-export const awsSQS: InventoryModel = {
-  id: 'awsSQS',
+export const awsSQS = createInventoryModel('awsSQS', {
   displayName: i18n.translate('xpack.metricsData.inventoryModels.awsSQS.displayName', {
     defaultMessage: 'SQS Queues',
   }),
@@ -22,7 +19,7 @@ export const awsSQS: InventoryModel = {
       defaultMessage: 'SQS Queue',
     }
   ),
-  requiredModule: 'aws',
+  requiredIntegration: 'aws',
   crosslinkSupport: {
     details: true,
     logs: true,
@@ -34,18 +31,4 @@ export const awsSQS: InventoryModel = {
     id: 'aws.sqs.queue.name',
     name: 'aws.sqs.queue.name',
   },
-  requiredMetrics: [
-    'awsSQSMessagesVisible',
-    'awsSQSMessagesDelayed',
-    'awsSQSMessagesSent',
-    'awsSQSMessagesEmpty',
-    'awsSQSOldestMessage',
-  ],
-  tooltipMetrics: [
-    'sqsMessagesVisible',
-    'sqsMessagesDelayed',
-    'sqsMessagesEmpty',
-    'sqsMessagesSent',
-    'sqsOldestMessage',
-  ],
-};
+});

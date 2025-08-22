@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { SO_SEARCH_LIMIT } from '@kbn/fleet-plugin/common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../../../../common/detection_engine/constants';
@@ -15,11 +16,13 @@ import { GET_ALL_INTEGRATIONS_URL } from '../../../../../../common/api/detection
 import { extractIntegrations } from './extract_integrations';
 import { sortPackagesBySecurityCategory } from './sort_packages_by_security_category';
 import { sortIntegrationsByStatus } from './sort_integrations_by_status';
+import { getFleetPackages } from '../../logic/get_fleet_packages';
+import { getFleetPackagePolicies } from '../../logic/get_package_policies';
 
 /**
  * Returns an array of Fleet integrations and their packages
  */
-export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) => {
+export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned
     .get({
       access: 'internal',
@@ -43,8 +46,8 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
           const fleet = ctx.securitySolution.getInternalFleetServices();
 
           const [packages, packagePolicies] = await Promise.all([
-            fleet.packages.getPackages(),
-            fleet.packagePolicy.list(fleet.savedObjects.createInternalScopedSoClient(), {
+            getFleetPackages(fleet, logger),
+            getFleetPackagePolicies(fleet, logger, {
               perPage: SO_SEARCH_LIMIT,
             }),
           ]);
@@ -68,6 +71,7 @@ export const getAllIntegrationsRoute = (router: SecuritySolutionPluginRouter) =>
 
           return response.ok({ body });
         } catch (err) {
+          logger.error(`getAllIntegrationsRoute: Caught error:`, err);
           const error = transformError(err);
           return siemResponse.error({
             body: error.message,

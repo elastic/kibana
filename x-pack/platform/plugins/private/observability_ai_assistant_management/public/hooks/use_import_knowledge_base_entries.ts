@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -46,6 +46,7 @@ export function useImportKnowledgeBaseEntries() {
       );
     },
     {
+      networkMode: 'always',
       onSuccess: (_data, { entries }) => {
         toasts.addSuccess(
           i18n.translate(

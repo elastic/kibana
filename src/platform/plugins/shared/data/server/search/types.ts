@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type {
   IRouter,
   IScopedClusterClient,
@@ -25,9 +25,9 @@ import type {
   IEsSearchRequest,
 } from '@kbn/search-types';
 
-import { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
-import { AggsSetup, AggsStart } from './aggs';
-import { SearchUsage } from './collectors/search';
+import type { ISearchStartSearchSource, SearchSourceService } from '../../common/search';
+import type { AggsSetup, AggsStart } from './aggs';
+import type { SearchUsage } from './collectors/search';
 import type { IScopedSearchSessionsClient } from './session';
 
 export interface SearchStrategyDependencies {

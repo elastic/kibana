@@ -28,9 +28,10 @@ import * as Registry from '../services/epm/registry';
 
 import { MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS, SO_SEARCH_LIMIT } from '../constants';
 import { getInstalledPackages } from '../services/epm/packages';
+import { getPrereleaseFromSettings } from '../services/epm/packages/get_prerelease_setting';
 
 export const TYPE = 'fleet:auto-install-content-packages-task';
-export const VERSION = '1.0.0';
+export const VERSION = '1.0.1';
 const TITLE = 'Fleet Auto Install Content Packages Task';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '10m';
@@ -163,7 +164,7 @@ export class AutoInstallContentPackagesTask {
         this.logger.debug(
           `[AutoInstallContentPackagesTask] Fetching content packages to get discovery fields`
         );
-        this.discoveryMap = await this.getContentPackagesDiscoveryMap();
+        this.discoveryMap = await this.getContentPackagesDiscoveryMap(soClient);
       }
 
       const installedPackages = await getInstalledPackages({
@@ -295,11 +296,11 @@ export class AutoInstallContentPackagesTask {
             .map((dataset) => `"${dataset}"`)
             .join(',')})`
         : '';
-    const response = await esClient.esql.query({
-      query: `FROM logs-*,metrics-*,traces-* | KEEP @timestamp, data_stream.dataset | WHERE @timestamp > NOW() - ${this.intervalToEsql(
-        this.taskInterval
-      )} | STATS COUNT(*) BY data_stream.dataset | LIMIT 100 ${whereClause}`,
-    });
+    const query = `FROM logs-*,metrics-*,traces-* 
+      | KEEP @timestamp, data_stream.dataset 
+      | WHERE @timestamp > NOW() - ${this.intervalToEsql(this.taskInterval)} 
+      | STATS COUNT(*) BY data_stream.dataset ${whereClause}`;
+    const response = await esClient.esql.query({ query });
     this.logger.debug(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
 
     const datasetsWithData: string[] = response.values.map((value: any[]) => value[1]);
@@ -311,13 +312,15 @@ export class AutoInstallContentPackagesTask {
 
   private intervalToEsql(interval: string): string {
     const value = parseInt(interval, 10);
-    const unit = interval.includes('h') ? 'hours' : 'minutes';
+    const unit = interval.includes('h') ? 'hours' : interval.includes('m') ? 'minutes' : 'seconds';
     return `${value} ${unit}`;
   }
 
-  private async getContentPackagesDiscoveryMap(): Promise<DiscoveryMap> {
+  private async getContentPackagesDiscoveryMap(
+    soClient: SavedObjectsClient
+  ): Promise<DiscoveryMap> {
     const type = 'content';
-    const prerelease = false;
+    const prerelease = await getPrereleaseFromSettings(soClient);
     const discoveryMap: DiscoveryMap = {};
     const registryItems = await Registry.fetchList({ prerelease, type });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObject, getPageObjects }: FtrProviderContext) {
   const ml = getService('ml');
@@ -19,7 +19,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
 
   const dashboardTitle = 'lens_to_ml';
   const dashboardArchive =
-    'x-pack/test/functional/fixtures/kbn_archiver/ml/lens_to_ml_dashboard.json';
+    'x-pack/platform/test/functional/fixtures/kbn_archives/ml/lens_to_ml_dashboard.json';
 
   async function retrySwitchTab(tabIndex: number, seconds: number) {
     await retry.tryForTime(seconds * 1000, async () => {
@@ -94,7 +94,7 @@ export default function ({ getService, getPageObject, getPageObjects }: FtrProvi
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
 
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/farequote');
       await kibanaServer.importExport.load(dashboardArchive);
       await browser.setWindowSize(1920, 1080);
     });

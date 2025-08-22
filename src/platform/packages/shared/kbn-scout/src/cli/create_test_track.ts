@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Command } from '@kbn/dev-cli-runner';
+import type { Command } from '@kbn/dev-cli-runner';
 import { ScoutTestConfigStats } from '@kbn/scout-reporting';
 import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
 import yaml from 'js-yaml';
@@ -16,9 +16,10 @@ import { z } from '@kbn/zod';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { writeFileSync } from 'node:fs';
-import { TestTrack, TestTrackLoad } from '../execution/test_track';
+import type { TestTrackLoad } from '../execution/test_track';
+import { TestTrack } from '../execution/test_track';
 
 export const ScoutConfigManifestSchema = z.object({
   enabled: z

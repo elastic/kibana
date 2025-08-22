@@ -18,8 +18,8 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 
-import { SlmPolicyPayload } from '../../../../../../common/types';
-import { StepProps } from '..';
+import type { SlmPolicyPayload } from '../../../../../../common/types';
+import type { StepProps } from '..';
 
 import {
   IndicesAndDataStreamsField,
