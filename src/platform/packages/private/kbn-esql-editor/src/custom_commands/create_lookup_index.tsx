@@ -207,7 +207,7 @@ export const useCanCreateLookupIndex = () => {
         return false;
       }
     },
-    { wait: 500 }
+    { wait: 300, leading: true, trailing: false }
   );
 
   return run as (indexName: string) => Promise<boolean>;
