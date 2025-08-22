@@ -220,5 +220,6 @@ export const getMockCallbacks = (): ICommandCallbacks => {
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
     hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
+    canCreateLookupIndex: jest.fn().mockReturnValue(true),
   };
 };
