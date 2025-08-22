@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section';
@@ -22,15 +22,17 @@ interface Props {
 export const flyoutOptions: OverlayFlyoutOpenOptions = {
   size: 's',
   'data-test-subj': 'inspectComponentFlyout',
+  css: {},
 };
 
-export const InspectFlyout = React.forwardRef<HTMLDivElement, Props>(({ componentData }, ref) => (
-  <div ref={ref}>
+export const InspectFlyout = forwardRef<HTMLDivElement, Props>(({ componentData }, ref) => (
+  <>
     <InspectHeader />
+    <div ref={ref} />
     <EuiFlyoutBody>
       <DataSection componentData={componentData} />
       <EuiSpacer size="xxl" />
       <LinksSection componentData={componentData} />
     </EuiFlyoutBody>
-  </div>
+  </>
 ));
