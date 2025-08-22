@@ -124,10 +124,21 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.registryFields).toEqual({
-        'webengine.name': 'The name of the web engine.',
-        'webengine.version': 'The version of the web engine.',
-        'webengine.description':
-          'Additional description of the web engine (e.g. detailed version and edition information).',
+        'webengine.name': {
+          name: 'webengine.name',
+          description: 'The name of the web engine.',
+          type: 'keyword',
+        },
+        'webengine.version': {
+          name: 'webengine.version',
+          description: 'The version of the web engine.',
+          type: 'keyword',
+        },
+        'webengine.description': {
+          name: 'webengine.description',
+          description: 'Additional description of the web engine (e.g. detailed version and edition information).',
+          type: 'keyword',
+        },
       });
 
       expect(result.stats.registryGroups).toBe(1);
@@ -153,9 +164,11 @@ describe('generate_semconv', () => {
 
       const result = processSemconvYaml(tempYamlFile);
 
-      expect(result.registryFields['test.field']).toBe(
-        'This is a test field with multiple lines and pipe characters.'
-      );
+      expect(result.registryFields['test.field']).toEqual({
+        name: 'test.field',
+        description: 'This is a test field with multiple lines and pipe characters.',
+        type: 'keyword',
+      });
     });
 
     it('should skip registry groups without attributes', () => {
@@ -203,7 +216,11 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.registryFields).toEqual({
-        'valid.field': 'Valid field',
+        'valid.field': {
+          name: 'valid.field',
+          description: 'Valid field',
+          type: 'keyword',
+        },
       });
     });
   });
@@ -215,8 +232,16 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.metricFields).toEqual({
-        'go.memory.used': 'Memory used by the Go runtime.',
-        'go.memory.type': 'The type of memory.',
+        'metrics.go.memory.used': {
+          name: 'metrics.go.memory.used',
+          description: 'Memory used by the Go runtime.',
+          type: 'double',
+        },
+        'go.memory.type': {
+          name: 'go.memory.type',
+          description: 'The type of memory.',
+          type: 'keyword',
+        },
       });
 
       expect(result.stats.metricGroups).toBe(1);
@@ -236,7 +261,11 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.metricFields).toEqual({
-        'simple.metric': 'Simple metric without attributes',
+        'metrics.simple': {
+          name: 'metrics.simple',
+          description: 'Simple metric without attributes',
+          type: 'double',
+        },
       });
     });
 
@@ -258,7 +287,16 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile);
 
       expect(result.metricFields).toEqual({
-        'test.attribute': 'Test attribute',
+        'metrics.no_name': {
+          name: 'metrics.no_name',
+          description: 'Metric without metric_name',
+          type: 'double',
+        },
+        'test.attribute': {
+          name: 'test.attribute',
+          description: 'Test attribute',
+          type: 'keyword',
+        },
       });
     });
   });
@@ -303,7 +341,11 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile, { includeDeprecated: true });
 
       expect(result.registryFields).toEqual({
-        'deprecated.field': 'This field is deprecated',
+        'deprecated.field': {
+          name: 'deprecated.field',
+          description: 'This field is deprecated',
+          type: 'keyword',
+        },
       });
     });
   });
@@ -399,8 +441,18 @@ describe('generate_semconv', () => {
 
       const result = processSemconvYaml(tempYamlFile);
 
-      // Metric fields should override registry fields due to merge order
-      expect(result.totalFields['collision.field']).toBe('Metric group');
+      // Both registry and metric fields should exist (no collision since different names)
+      expect(result.totalFields['collision.field']).toEqual({
+        name: 'collision.field',
+        description: 'Registry field description',
+        type: 'keyword',
+      });
+      
+      expect(result.totalFields['metrics.collision']).toEqual({
+        name: 'metrics.collision',
+        description: 'Metric group',
+        type: 'double',
+      });
     });
   });
 
@@ -411,7 +463,11 @@ describe('generate_semconv', () => {
       const result = processSemconvYaml(tempYamlFile, { cleanBriefText: false });
 
       // Should preserve original formatting
-      expect(result.registryFields['webengine.name']).toBe('|\n      The name of the web engine.');
+      expect(result.registryFields['webengine.name']).toEqual({
+        name: 'webengine.name',
+        description: '|\n      The name of the web engine.',
+        type: 'keyword',
+      });
     });
   });
 });
