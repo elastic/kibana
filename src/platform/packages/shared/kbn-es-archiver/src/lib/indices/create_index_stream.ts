@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Transform, Readable } from 'stream';
+import type { Readable } from 'stream';
+import { Transform } from 'stream';
 import { inspect } from 'util';
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
-import { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import {
   MAIN_SAVED_OBJECT_INDEX,
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
-import { Stats } from '../stats';
+import type { Stats } from '../stats';
 import {
   cleanSavedObjectIndices,
   deleteSavedObjectIndices,
@@ -44,6 +45,7 @@ export function createCreateIndexStream({
   docsOnly = false,
   isArchiveInExceptionList = false,
   log,
+  targetsWithoutIdGeneration = [],
 }: {
   client: Client;
   stats: Stats;
@@ -51,6 +53,7 @@ export function createCreateIndexStream({
   docsOnly?: boolean;
   isArchiveInExceptionList?: boolean;
   log: ToolingLog;
+  targetsWithoutIdGeneration?: string[];
 }) {
   const skipDocsFromIndices = new Set();
 
@@ -110,6 +113,7 @@ export function createCreateIndexStream({
         }
       );
       stats.createdDataStream(dataStream, template.name, { template });
+      targetsWithoutIdGeneration.push(dataStream);
     } catch (err) {
       if (err?.meta?.body?.error?.type !== 'resource_already_exists_exception' || attempts >= 3) {
         throw err;
@@ -186,6 +190,9 @@ export function createCreateIndexStream({
         }
 
         stats.createdIndex(index, { settings });
+        if (settings?.index?.mode === 'time_series') {
+          targetsWithoutIdGeneration.push(index);
+        }
       } catch (err) {
         if (
           err?.body?.error?.reason?.includes('index exists with the same name as the alias') &&

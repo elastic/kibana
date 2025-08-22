@@ -20,7 +20,7 @@ export default function ({ loadTestFile, getService }) {
         'x-pack/platform/test/fixtures/es_archives/logstash_functional'
       );
       await kibanaServer.importExport.load(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
       // Functional tests verify behavior when referenced index pattern saved objects can not be found.
       // However, saved object import fails when reference saved objects can not be found.
@@ -56,7 +56,7 @@ export default function ({ loadTestFile, getService }) {
     after(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/maps/data');
       await kibanaServer.importExport.unload(
-        'x-pack/test/functional/fixtures/kbn_archiver/maps.json'
+        'x-pack/platform/test/functional/fixtures/kbn_archives/maps.json'
       );
     });
 

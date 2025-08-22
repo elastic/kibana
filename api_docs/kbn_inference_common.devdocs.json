@@ -2124,10 +2124,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/inference-common",
-            "id": "def-common.AnonymizationRegexWorkerTaskPayload.rule",
-            "type": "Object",
+            "id": "def-common.AnonymizationRegexWorkerTaskPayload.rules",
+            "type": "Array",
             "tags": [],
-            "label": "rule",
+            "label": "rules",
             "description": [],
             "signature": [
               {
@@ -2136,7 +2136,8 @@
                 "docId": "kibKbnInferenceCommonPluginApi",
                 "section": "def-common.RegexAnonymizationRule",
                 "text": "RegexAnonymizationRule"
-              }
+              },
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
             "deprecated": false,
@@ -3698,6 +3699,20 @@
             "tags": [],
             "label": "modelId",
             "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.NamedEntityRecognitionRule.timeoutSeconds",
+            "type": "number",
+            "tags": [],
+            "label": "timeoutSeconds",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
             "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/chat_complete/anonymization/types.ts",
             "deprecated": false,
             "trackAdoption": false

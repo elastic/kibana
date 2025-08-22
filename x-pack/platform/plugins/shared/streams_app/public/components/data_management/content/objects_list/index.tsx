@@ -19,15 +19,14 @@ import {
 } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
-import {
+import type {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackStream,
-  ROOT_STREAM_ID,
 } from '@kbn/content-packs-schema';
+import { ROOT_STREAM_ID } from '@kbn/content-packs-schema';
+import type { StreamQuery, Streams } from '@kbn/streams-schema';
 import {
-  StreamQuery,
-  Streams,
   getAncestors,
   getAncestorsAndSelf,
   getSegments,

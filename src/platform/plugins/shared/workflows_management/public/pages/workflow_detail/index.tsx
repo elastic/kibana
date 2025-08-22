@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonGroup,
-  EuiButtonGroupOptionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -21,16 +20,17 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
+import React, { useEffect, useMemo, useState } from 'react';
+import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../../common/lib/yaml-utils';
-import { useWorkflowActions } from '../../entities/workflows/model/useWorkflowActions';
+import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
 import { useWorkflowDetail } from '../../entities/workflows/model/useWorkflowDetail';
+import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 import { WorkflowEventModal } from '../../features/run_workflow/ui/workflow_event_modal';
 import { WorkflowEditor } from '../../features/workflow_editor/ui';
 import { WorkflowExecutionList } from '../../features/workflow_execution_list/ui';
 import { useWorkflowUrlState } from '../../hooks/use_workflow_url_state';
-import { TestWorkflowModal } from '../../features/run_workflow/ui/test_workflow_modal';
 
 const WorkflowVisualEditor = React.lazy(() =>
   import('../../features/workflow_visual_editor/ui').then((module) => ({
@@ -65,10 +65,16 @@ export function WorkflowDetailPage({ id }: { id: string }) {
   const originalWorkflowYaml = useMemo(() => workflow?.yaml ?? '', [workflow]);
   const [hasChanges, setHasChanges] = useState(false);
 
-  const workflowYamlObject = useMemo(
-    () => (workflowYaml ? parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE) : null),
-    [workflowYaml]
-  );
+  const workflowYamlObject = useMemo(() => {
+    if (!workflowYaml) {
+      return null;
+    }
+    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
+    if (result.error) {
+      return null;
+    }
+    return result.data;
+  }, [workflowYaml]);
 
   useEffect(() => {
     setWorkflowYaml(workflow?.yaml ?? '');
@@ -152,9 +158,9 @@ export function WorkflowDetailPage({ id }: { id: string }) {
           )}
         </EuiFlexItem>
         <EuiFlexItem>
-          {workflowYamlObject?.data && (
+          {workflowYamlObject && (
             <React.Suspense fallback={<EuiLoadingSpinner />}>
-              <WorkflowVisualEditor workflow={workflowYamlObject.data as WorkflowYaml} />
+              <WorkflowVisualEditor workflow={workflowYamlObject as WorkflowYaml} />
             </React.Suspense>
           )}
         </EuiFlexItem>

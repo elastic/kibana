@@ -9,8 +9,8 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from './validate';
 import { expectErrors } from '../../../__tests__/validation';
-import { timeUnits } from '../../../definitions/constants';
 import { capitalize } from 'lodash';
+import { DATE_PERIOD_UNITS, TIME_DURATION_UNITS } from '../../../parser/constants';
 
 const evalExpectErrors = (query: string, expectedErrors: string[], context = mockContext) => {
   return expectErrors(query, expectedErrors, context, 'eval', validate);
@@ -157,23 +157,7 @@ describe('EVAL Validation', () => {
   });
 
   test('date math', () => {
-    evalExpectErrors('from a_index | eval 1 anno', [
-      'EVAL does not support [date_period] in expression [1 anno]',
-    ]);
-    evalExpectErrors('from a_index | eval col0 = 1 anno', [
-      "Unexpected time interval qualifier: 'anno'",
-    ]);
-    evalExpectErrors('from a_index | eval now() + 1 anno', [
-      "Unexpected time interval qualifier: 'anno'",
-    ]);
-    for (const unit of timeUnits) {
-      evalExpectErrors(`from a_index | eval 1 ${unit}`, [
-        `EVAL does not support [date_period] in expression [1 ${unit}]`,
-      ]);
-      evalExpectErrors(`from a_index | eval 1                ${unit}`, [
-        `EVAL does not support [date_period] in expression [1 ${unit}]`,
-      ]);
-
+    for (const unit of [...TIME_DURATION_UNITS, ...DATE_PERIOD_UNITS]) {
       // this is not possible for now
       // evalExpectErrors(`from a_index | eval col0 = 1 ${timeLiteral.name}`, [
       //   `Eval does not support [date_period] in expression [1 ${timeLiteral.name}]`,
@@ -183,13 +167,22 @@ describe('EVAL Validation', () => {
       evalExpectErrors(`from a_index | eval col0 = dateField - 1 ${unit.toUpperCase()}`, []);
       evalExpectErrors(`from a_index | eval col0 = dateField - 1 ${capitalize(unit)}`, []);
       evalExpectErrors(`from a_index | eval col0 = dateField + 1 ${unit}`, []);
-      evalExpectErrors(`from a_index | eval 1 ${unit} + 1 year`, []);
+    }
+
+    for (const unit of TIME_DURATION_UNITS)
       for (const op of ['*', '/', '%']) {
         evalExpectErrors(`from a_index | eval col0 = now() ${op} 1 ${unit}`, [
           `Argument of [${op}] must be [double], found value [now()] type [date]`,
-          `Argument of [${op}] must be [double], found value [1 ${unit}] type [duration]`,
+          `Argument of [${op}] must be [double], found value [1${unit}] type [time_duration]`,
         ]);
       }
-    }
+
+    for (const unit of DATE_PERIOD_UNITS)
+      for (const op of ['*', '/', '%']) {
+        evalExpectErrors(`from a_index | eval col0 = now() ${op} 1 ${unit}`, [
+          `Argument of [${op}] must be [double], found value [now()] type [date]`,
+          `Argument of [${op}] must be [double], found value [1${unit}] type [date_period]`,
+        ]);
+      }
   });
 });

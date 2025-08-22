@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import type { EuiButtonProps, EuiSelectableProps } from '@elastic/eui';
 import type { DataView, DataViewListItem, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -76,6 +77,10 @@ export interface DataViewPickerProps {
    * Optional callback when data view picker is closed
    */
   onClosePopover?: () => void;
+  /**
+   * Optional callback to get help text based on the active data view
+   */
+  getDataViewHelpText?: (dataView: DataView) => ReactNode | string | undefined;
 }
 
 export const DataViewPicker = ({
@@ -93,6 +98,7 @@ export const DataViewPicker = ({
   selectableProps,
   onCreateDefaultAdHocDataView,
   isDisabled,
+  getDataViewHelpText,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
@@ -110,6 +116,7 @@ export const DataViewPicker = ({
       savedDataViews={savedDataViews}
       selectableProps={selectableProps}
       isDisabled={isDisabled}
+      getDataViewHelpText={getDataViewHelpText}
     />
   );
 };
