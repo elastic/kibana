@@ -13,7 +13,7 @@ import type { OneChatToolWithClientCallback } from '@kbn/ai-client-tools-plugin/
 import { addToDashboardTool } from '@kbn/ai-client-tools-plugin/public';
 import { dataService, observabilityAssistantService } from '../../services/kibana_services';
 import type { DashboardApi } from '../../dashboard_api/types';
-
+import { coreServices } from '../../services/kibana_services';
 const NO_ACTIONS = [];
 
 const getObservabilityToolDetails = (oneChatTool: OneChatToolWithClientCallback) => ({
@@ -25,7 +25,20 @@ export function useObservabilityAIAssistantContext({
 }: {
   dashboardApi: DashboardApi | undefined;
 }) {
+  const { http } = coreServices;
   const [actions, setActions] = useState<any[]>(NO_ACTIONS);
+
+  // Fetch tool details from Onechat API
+  // useEffect(
+  //   function getAddToDashboardToolFromServer() {
+  //     const getTool = async () => {
+  //       const response = await http.get('/api/chat/tools/.add_to_dashboard');
+  //       console.log(`--@@response`, response);
+  //     };
+  //     getTool();
+  //   },
+  //   [http]
+  // );
 
   useEffect(
     function postToolClientActionsEffect() {
