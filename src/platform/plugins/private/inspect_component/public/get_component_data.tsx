@@ -11,7 +11,7 @@ import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { capturePreviewScreenshot } from './screenshot/capture_screenshot';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
-import { flyoutOptions, InspectFlyout } from './inspect';
+import { InspectFlyout, flyoutOptions } from './inspect/flyout/inspect_flyout';
 
 export const getComponentData = async ({
   core,
@@ -31,6 +31,7 @@ export const getComponentData = async ({
 
     const { width: maxWidth, height: maxHeight } = target.getBoundingClientRect();
 
+    // TODO: Screenshot component not target for better looking results
     const image = await capturePreviewScreenshot({
       target,
       maxWidth,

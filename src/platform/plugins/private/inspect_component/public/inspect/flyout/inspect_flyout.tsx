@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CSSProperties, RefObject } from 'react';
 import React, { useEffect, useRef, useState } from 'react';
+import type { CSSProperties, RefObject } from 'react';
+import { createPortal } from 'react-dom';
 import { EuiFlyoutBody, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { createPortal } from 'react-dom';
 import { DataSection } from './data_section';
 import { InspectHeader } from './inspect_header';
 import { LinksSection } from './links_section';
 import type { ComponentData } from '../../types';
 import { EUI_PORTAL_ATTRIBUTE } from '../../constants';
-import { InspectHighlight } from '../overlay';
+import { InspectHighlight } from '../overlay/inspect_highlight';
 
 const setFlyoutZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
   setTimeout(() => {

@@ -10,14 +10,15 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { InspectButton } from './inspect';
+import { InspectButton } from './inspect/inspect_button';
+import type { ConfigSchema } from '../server/config';
 
 export class InspectComponentPluginPublic implements Plugin {
   private readonly isDevMode: boolean;
   private readonly isEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
-    const { enabled } = initializerContext.config.get<{ enabled: boolean }>();
+    const { enabled } = initializerContext.config.get<ConfigSchema>();
     this.isEnabled = enabled;
     this.isDevMode = initializerContext.env.mode.dev;
   }

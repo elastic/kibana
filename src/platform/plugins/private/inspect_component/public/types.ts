@@ -36,16 +36,16 @@ export interface ComponentData extends FileData {
   sourceComponent?: string;
 }
 
+export interface ReactFiberName {
+  displayName?: string;
+  name?: string;
+}
+
 export interface ReactFiberNode {
   _debugSource?: FileData;
   _debugOwner?: ReactFiberNode | null;
   elementType: string | null;
-  type:
-    | string
-    | {
-        name?: string;
-        displayName?: string;
-      };
+  type: string | ReactFiberName;
 }
 
 export interface GetComponentDataOptions {

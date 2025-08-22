@@ -8,10 +8,10 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/css';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiWindowEvent, transparentize, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
 import { findReactComponentPath, getElementFromPoint, getInspectedElementData } from '../../utils';
 import { InspectHighlight } from './inspect_highlight';
@@ -56,7 +56,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
         setIsInspecting,
       });
     },
-    [core, componentPath, overlayId, setFlyoutOverlayRef, setIsInspecting, sourceComponent]
+    [core, componentPath, overlayId, sourceComponent, setFlyoutOverlayRef, setIsInspecting]
   );
 
   const handlePointerMove = useCallback(
@@ -94,7 +94,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
         <InspectHighlight currentPosition={highlightPosition} path={componentPath} />
       </div>
     ),
-    [overlayCss, overlayId, handlePointerMove, handleClick, highlightPosition, componentPath]
+    [overlayCss, overlayId, highlightPosition, componentPath, handlePointerMove, handleClick]
   );
 
   return createPortal(overlayContent, document.body);

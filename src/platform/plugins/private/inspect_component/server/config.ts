@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { InspectHeader } from './inspect_header';
-export { DataSection } from './data_section';
-export { LinksSection } from './links_section';
-export { InspectFlyout, flyoutOptions } from './inspect_flyout';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+
+export const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+});
+
+export type ConfigSchema = TypeOf<typeof configSchema>;

@@ -46,6 +46,10 @@ export const DataSection = ({ componentData }: Props) => {
     `,
   }));
 
+  const boldTextCss = css`
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
+
   return (
     <>
       {image && (
@@ -75,12 +79,7 @@ export const DataSection = ({ componentData }: Props) => {
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />
-      <EuiText
-        size="s"
-        css={css`
-          font-weight: ${euiTheme.font.weight.bold};
-        `}
-      >
+      <EuiText size="s" css={boldTextCss}>
         <FormattedMessage
           id="kbnInspectComponent.inspectFlyout.codeownersTitle"
           defaultMessage="Codeowners:"
@@ -89,12 +88,7 @@ export const DataSection = ({ componentData }: Props) => {
       <EuiListGroup listItems={listItem} color="primary" size="s" flush={true} />
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiText
-          size="s"
-          css={css`
-            font-weight: ${euiTheme.font.weight.bold};
-          `}
-        >
+        <EuiText size="s" css={boldTextCss}>
           <FormattedMessage
             id="kbnInspectComponent.inspectFlyout.iconTypeLabel"
             defaultMessage="Icon:"
@@ -113,12 +107,7 @@ export const DataSection = ({ componentData }: Props) => {
         {iconType && <EuiIcon type={iconType} size="m" />}
       </EuiFlexGroup>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiText
-          css={css`
-            font-weight: ${euiTheme.font.weight.bold};
-          `}
-          size="s"
-        >
+        <EuiText css={boldTextCss} size="s">
           <FormattedMessage
             id="kbnInspectComponent.inspectFlyout.euiDocsLabel"
             defaultMessage="EUI Docs:"

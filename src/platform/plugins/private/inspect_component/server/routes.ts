@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import { sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getComponentCodeowners } from './codeowners';
+import { getComponentCodeowners } from './codeowners/get_component_codeowners';
 
 interface InspectComponentRoutesOptions {
   http: HttpServiceSetup;

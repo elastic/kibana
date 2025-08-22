@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import React, { useState } from 'react';
 import type { MouseEvent } from 'react';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -55,8 +55,7 @@ export const InspectButton = ({ core }: Props) => {
     setIsInspecting((prev) => !prev);
   };
 
-  // Prevents components from closing when clicking on the button
-  const preventTargetLosingFocus = (event: MouseEvent) => {
+  const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();
   };
 
@@ -66,7 +65,7 @@ export const InspectButton = ({ core }: Props) => {
       <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
         <EuiHeaderSectionItemButton
           onClick={handleInspectClick}
-          onMouseDown={preventTargetLosingFocus}
+          onMouseDown={preventTargetFromLosingFocus}
           iconType="inspect"
           isSelected={isInspecting}
           aria-pressed={isInspecting}

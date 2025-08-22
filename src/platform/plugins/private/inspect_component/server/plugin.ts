@@ -15,6 +15,7 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { registerInspectComponentRoutes } from './routes';
+import type { ConfigSchema } from './config';
 
 export class InspectComponentPluginServer implements Plugin {
   private readonly logger: Logger;
@@ -22,9 +23,9 @@ export class InspectComponentPluginServer implements Plugin {
   private readonly isEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
+    const { enabled } = initializerContext.config.get<ConfigSchema>();
     this.logger = initializerContext.logger.get();
     this.isDevMode = initializerContext.env.mode.dev;
-    const { enabled } = initializerContext.config.get<{ enabled: boolean }>();
     this.isEnabled = enabled;
   }
 

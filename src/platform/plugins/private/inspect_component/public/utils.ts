@@ -219,7 +219,7 @@ export const getInspectedElementData = async ({
     core,
     euiInfo: {
       componentName: euiDocsInfo?.componentName || 'N/A',
-      docsLink: euiDocsInfo?.docsLink || 'https://eui.elastic.co/docs/components',
+      docsLink: euiDocsInfo?.docsLink || `${EUI_DOCS_BASE}/components`,
     },
     fileData,
     iconType: iconType || undefined,

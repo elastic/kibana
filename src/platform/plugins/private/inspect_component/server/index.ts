@@ -8,18 +8,17 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
 import { InspectComponentPluginServer } from './plugin';
-
-export const config: PluginConfigDescriptor<{ enabled: boolean }> = {
-  exposeToBrowser: {
-    enabled: true,
-  },
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
-  }),
-};
+import { configSchema } from './config';
+import type { ConfigSchema } from './config';
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new InspectComponentPluginServer(initializerContext);
+};
+
+export const config: PluginConfigDescriptor<ConfigSchema> = {
+  exposeToBrowser: {
+    enabled: true,
+  },
+  schema: configSchema,
 };
