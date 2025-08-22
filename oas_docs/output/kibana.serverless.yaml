@@ -51993,8 +51993,6 @@ paths:
                                         additionalProperties: false
                                         type: object
                                         properties:
-                                          filter:
-                                            type: string
                                           name:
                                             type: string
                                           type:
@@ -52003,7 +52001,13 @@ paths:
                                                   - related
                                                 type: string
                                               - enum:
-                                                  - member
+                                                  - child
+                                                type: string
+                                              - enum:
+                                                  - parent
+                                                type: string
+                                              - enum:
+                                                  - dependency
                                                 type: string
                                         required:
                                           - name
@@ -52035,12 +52039,7 @@ paths:
                                         - enum:
                                             - 4
                                           type: number
-                                    type:
-                                      enum:
-                                        - group
-                                      type: string
                                   required:
-                                    - type
                                     - owner
                                     - tier
                                     - tags
@@ -52303,8 +52302,6 @@ paths:
                         additionalProperties: false
                         type: object
                         properties:
-                          filter:
-                            type: string
                           name:
                             type: string
                           type:
@@ -52313,7 +52310,13 @@ paths:
                                   - related
                                 type: string
                               - enum:
-                                  - member
+                                  - child
+                                type: string
+                              - enum:
+                                  - parent
+                                type: string
+                              - enum:
+                                  - dependency
                                 type: string
                         required:
                           - name
@@ -52345,12 +52348,7 @@ paths:
                         - enum:
                             - 4
                           type: number
-                    type:
-                      enum:
-                        - group
-                      type: string
                   required:
-                    - type
                     - owner
                     - tier
                     - tags
