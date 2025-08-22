@@ -18,7 +18,8 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
-import { reindexOperationSavedObjectType, Version } from '@kbn/upgrade-assistant-pkg-server';
+import { reindexOperationSavedObjectType } from '@kbn/upgrade-assistant-pkg-server';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { RouteDependencies, ReindexServiceServerPluginStart } from './types';
 
 import type { ReindexServiceInternalApi } from './src/lib/reindex_service_wrapper';

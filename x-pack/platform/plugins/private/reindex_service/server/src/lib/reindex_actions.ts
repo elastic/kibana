@@ -14,15 +14,14 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
 import type {
   ReindexOperation,
   ReindexOptions,
   ReindexSavedObject,
 } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import { generateNewIndexName } from './index_settings';
+import { ReindexStatus, ReindexStep, type Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { IndexSettings } from '../../types';
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -39,9 +38,13 @@ export interface ReindexActions {
    */
   createReindexOp({
     indexName,
+    newIndexName,
+    settings,
     opts,
   }: {
     indexName: string;
+    newIndexName: string;
+    settings?: IndexSettings;
     opts?: ReindexOptions;
   }): Promise<ReindexSavedObject>;
 
@@ -133,13 +136,27 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string, opts?: ReindexOptions) {
+    async createReindexOp({
+      indexName,
+      newIndexName,
+      opts,
+      indexSettings,
+    }: {
+      indexName: string;
+      newIndexName: string;
+      opts?: ReindexOptions;
+      indexSettings?: IndexSettings;
+    }) {
       // gets rollup job if it exists and needs stopping, otherwise returns undefined
       const rollupJob = await getRollupJobByIndexName(esClient, log, indexName);
 
+      const settings = indexSettings ? JSON.stringify(indexSettings) : undefined;
+
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: generateNewIndexName(indexName, versionService),
+        // todo need to pass in new index name
+        // newIndexName: generateNewIndexName(indexName, versionService),
+        newIndexName,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -149,6 +166,7 @@ export const reindexActionsFactory = (
         runningReindexCount: null,
         reindexOptions: opts,
         rollupJob,
+        settings,
       });
     },
 

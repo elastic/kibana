@@ -24,7 +24,7 @@ export function registerReindexIndicesRoutes({
   // Start reindex for an index
   router.post(
     {
-      path: `${BASE_PATH}/{indexName}`,
+      path: `${BASE_PATH}`,
       security: {
         authz: {
           enabled: false,
@@ -32,8 +32,19 @@ export function registerReindexIndicesRoutes({
         },
       },
       validate: {
-        params: schema.object({
+        body: schema.object({
           indexName: schema.string(),
+          newIndexName: schema.string(),
+          reindexOptions: schema.maybe(
+            schema.object({
+              enqueue: schema.maybe(schema.boolean()),
+            })
+          ),
+          settings: schema.maybe(
+            schema.object({
+              index: schema.recordOf(schema.string(), schema.any()),
+            })
+          ),
         }),
       },
     },
@@ -43,7 +54,7 @@ export function registerReindexIndicesRoutes({
         elasticsearch: { client: esClient },
       } = await core;
 
-      const { indexName } = request.params;
+      const { indexName, newIndexName } = request.body;
       try {
         const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
@@ -51,7 +62,10 @@ export function registerReindexIndicesRoutes({
           request,
         });
 
-        const result = await reindexService.reindexOrResume(indexName);
+        const result = await reindexService.reindexOrResume({
+          indexName,
+          newIndexName,
+        });
 
         return response.ok({
           body: result,

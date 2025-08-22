@@ -11,8 +11,8 @@ import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-ser
 import moment from 'moment';
 
 import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
-import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import { REINDEX_OP_TYPE, type Version } from '@kbn/upgrade-assistant-pkg-server';
+import { ReindexStatus, ReindexStep, type Version } from '@kbn/upgrade-assistant-pkg-common';
+import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexActions } from './reindex_actions';
 import { LOCK_WINDOW, reindexActionsFactory } from './reindex_actions';
 import { getMockVersionInfo } from '../__fixtures__/version';
@@ -61,7 +61,10 @@ describe('ReindexActions', () => {
     });
 
     it(`prepends reindexed-v${currentMajor} to new name`, async () => {
-      await actions.createReindexOp('myIndex');
+      await actions.createReindexOp({
+        indexName: 'myIndex',
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
+      });
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: 'myIndex',
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
@@ -77,7 +80,10 @@ describe('ReindexActions', () => {
     });
 
     it(`prepends reindexed-v${currentMajor} to new name, preserving leading period`, async () => {
-      await actions.createReindexOp('.internalIndex');
+      await actions.createReindexOp({
+        indexName: '.internalIndex',
+        newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
+      });
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: '.internalIndex',
         newIndexName: `.reindexed-v${currentMajor}-internalIndex`,
@@ -93,7 +99,10 @@ describe('ReindexActions', () => {
     });
 
     it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
-      await actions.createReindexOp(`reindexed-v${prevMajor}-myIndex`);
+      await actions.createReindexOp({
+        indexName: `{reindexed-v${prevMajor}-myIndex`,
+        newIndexName: `reindexed-v${currentMajor}-myIndex`,
+      });
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
         indexName: `reindexed-v${prevMajor}-myIndex`,
         newIndexName: `reindexed-v${currentMajor}-myIndex`,

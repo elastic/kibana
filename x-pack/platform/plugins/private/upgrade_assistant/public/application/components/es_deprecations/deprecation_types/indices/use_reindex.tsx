@@ -7,10 +7,12 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexStatusResponse, IndexWarning } from '../../../../../../common/types';
 import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import type { ApiService } from '../../../../lib/api';
+import { generateNewIndexName } from './index_settings';
 
 const POLL_INTERVAL = 3000;
 
@@ -240,7 +242,13 @@ export const useReindex = ({
       };
     });
 
-    const { data: reindexOp, error } = await api.startReindexTask(indexName);
+    const version = new Version();
+    version.setup('9.0.0');
+
+    // todo get version string correctly, check to make sure semver package isn't adding too much to bundle
+    const newIndexName = generateNewIndexName(indexName, version);
+
+    const { data: reindexOp, error } = await api.startReindexTask(indexName, newIndexName);
 
     if (error) {
       setReindexState((prevValue: ReindexState) => {

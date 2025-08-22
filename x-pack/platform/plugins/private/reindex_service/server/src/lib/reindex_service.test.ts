@@ -14,13 +14,17 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import type { ReindexOperation, ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
+import type {
+  ReindexOperation,
+  ReindexSavedObject,
+  Version,
+} from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
-import { esIndicesStateCheck, type Version } from '@kbn/upgrade-assistant-pkg-server';
+import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
 
 import type { ReindexService } from './reindex_service';
 import { reindexServiceFactory } from './reindex_service';
@@ -90,7 +94,7 @@ describe('reindexService', () => {
           features: { security: { isAvailable: true, isEnabled: false } },
         })
       );
-      const hasRequired = await service.hasRequiredPrivileges('anIndex');
+      const hasRequired = await service.hasRequiredPrivileges(['anIndex']);
       expect(hasRequired).toBe(true);
     });
 
@@ -100,7 +104,7 @@ describe('reindexService', () => {
         { has_all_requested: true }
       );
 
-      const hasRequired = await service.hasRequiredPrivileges('anIndex');
+      const hasRequired = await service.hasRequiredPrivileges(['anIndex']);
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
         cluster: ['manage'],
@@ -124,7 +128,7 @@ describe('reindexService', () => {
         { has_all_requested: true }
       );
 
-      const hasRequired = await service.hasRequiredPrivileges(`reindexed-v${prevMajor}-anIndex`);
+      const hasRequired = await service.hasRequiredPrivileges([`reindexed-v${prevMajor}-anIndex`]);
       expect(hasRequired).toBe(true);
       expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
         cluster: ['manage'],
@@ -185,14 +189,22 @@ describe('reindexService', () => {
       actions.findReindexOperations.mockResolvedValueOnce({ total: 0 });
       actions.createReindexOp.mockResolvedValueOnce();
 
-      await service.createReindexOperation('myIndex');
+      await service.createReindexOperation({
+        indexName: 'myIndex',
+        newIndexName: 'reindexed-myIndex',
+      });
 
       expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex', undefined);
     });
 
     it('fails if index does not exist', async () => {
       clusterClient.asCurrentUser.indices.exists.mockResponse(false);
-      await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
+      await expect(
+        service.createReindexOperation({
+          indexName: 'myIndex',
+          newIndexName: 'reindexed-myIndex',
+        })
+      ).rejects.toThrow();
       expect(actions.createReindexOp).not.toHaveBeenCalled();
     });
 
@@ -205,7 +217,10 @@ describe('reindexService', () => {
       actions.deleteReindexOp.mockResolvedValueOnce();
       actions.createReindexOp.mockResolvedValueOnce();
 
-      await service.createReindexOperation('myIndex');
+      await service.createReindexOperation({
+        indexName: 'myIndex',
+        newIndexName: 'reindexed-myIndex',
+      });
       expect(actions.deleteReindexOp).toHaveBeenCalledWith({
         id: 1,
         attributes: { status: ReindexStatus.failed },
@@ -221,7 +236,10 @@ describe('reindexService', () => {
       actions.deleteReindexOp.mockResolvedValueOnce();
       actions.createReindexOp.mockResolvedValueOnce();
 
-      await service.createReindexOperation('myIndex');
+      await service.createReindexOperation({
+        indexName: 'myIndex',
+        newIndexName: 'reindexed-myIndex',
+      });
       expect(actions.deleteReindexOp).toHaveBeenCalledWith({
         id: 1,
         attributes: { status: ReindexStatus.cancelled },
@@ -235,7 +253,12 @@ describe('reindexService', () => {
         total: 1,
       });
 
-      await expect(service.createReindexOperation('myIndex')).rejects.toThrow();
+      await expect(
+        service.createReindexOperation({
+          indexName: 'myIndex',
+          newIndexName: 'reindexed-myIndex',
+        })
+      ).rejects.toThrow();
       expect(actions.deleteReindexOp).not.toHaveBeenCalled();
       expect(actions.createReindexOp).not.toHaveBeenCalled();
     });

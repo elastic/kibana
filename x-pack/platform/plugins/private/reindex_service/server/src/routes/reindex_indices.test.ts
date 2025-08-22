@@ -19,7 +19,7 @@ import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { ReindexServiceWrapper } from '../lib/reindex_service_wrapper';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -203,7 +203,7 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
       })(
         routeHandlerContextMock,
-        createRequestMock({ params: { indexName: 'theIndex' } }),
+        createRequestMock({ body: { indexName: 'theIndex' } }),
         kibanaResponseFactory
       );
 
@@ -231,7 +231,7 @@ describe('reindex API', () => {
           headers: {
             'kbn-auth-x': 'HERE!',
           },
-          params: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex' },
         }),
         kibanaResponseFactory
       );
@@ -253,7 +253,7 @@ describe('reindex API', () => {
       })(
         routeHandlerContextMock,
         createRequestMock({
-          params: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex' },
         }),
         kibanaResponseFactory
       );
@@ -276,7 +276,7 @@ describe('reindex API', () => {
       })(
         routeHandlerContextMock,
         createRequestMock({
-          params: { indexName: 'theIndex' },
+          body: { indexName: 'theIndex' },
         }),
         kibanaResponseFactory
       );

@@ -71,7 +71,9 @@ export function registerBatchReindexIndicesRoutes({
       },
       validate: {
         body: schema.object({
-          indexNames: schema.arrayOf(schema.string()),
+          indexNames: schema.arrayOf(
+            schema.object({ indexName: schema.string(), newIndexName: schema.string() })
+          ),
         }),
       },
     },

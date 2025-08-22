@@ -5,31 +5,30 @@
  * 2.0.
  */
 
-import {
+import type {
   IClusterClient,
   IScopedClusterClient,
   Logger,
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { Version } from '@kbn/upgrade-assistant-pkg-server';
-import {
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type {
   ReindexOperation,
-  ReindexStatus,
   ReindexStatusResponse,
   ReindexSavedObject,
 } from '@kbn/upgrade-assistant-pkg-common';
+import { ReindexStatus, type Version } from '@kbn/upgrade-assistant-pkg-common';
 import { i18n } from '@kbn/i18n';
+import { asyncForEach } from '@kbn/std';
 import { ReindexWorker } from './worker';
-import { CredentialStore } from './credential_store';
+import type { CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { reindexServiceFactory } from './reindex_service';
 import { error } from './error';
-import { generateNewIndexName } from './index_settings';
 import { sortAndOrderReindexOperations } from './op_utils';
-import { GetBatchQueueResponse, PostBatchResponse } from '../../types';
+import type { GetBatchQueueResponse, PostBatchResponse, IndexSettings } from '../../types';
 import { reindexHandler } from './reindex_handler';
 
 export interface ReindexServiceScopedClientArgs {
@@ -38,14 +37,27 @@ export interface ReindexServiceScopedClientArgs {
   request: KibanaRequest;
 }
 
+interface ReindexArgs {
+  indexName: string;
+  newIndexName: string;
+  reindexOptions?: {
+    enqueue?: boolean;
+  };
+  settings?: IndexSettings;
+}
+
 export interface ReindexServiceScopedClient {
-  hasRequiredPrivileges: (indexName: string) => Promise<boolean>;
-  reindexOrResume: (indexName: string) => Promise<ReindexOperation>;
-  reindex: (indexName: string) => Promise<ReindexOperation>;
+  hasRequiredPrivileges: (indexNames: string[]) => Promise<boolean>;
+  reindexOrResume: ({
+    indexName,
+    reindexOptions,
+    settings,
+  }: ReindexArgs) => Promise<ReindexOperation>;
+  reindex: ({ indexName, reindexOptions, settings }: ReindexArgs) => Promise<ReindexOperation>;
   getStatus: (indexName: string) => Promise<ReindexStatusResponse>;
   cancel: (indexName: string) => Promise<ReindexSavedObject>;
   getBatchQueueResponse: () => Promise<GetBatchQueueResponse>;
-  addToBatch: (indexNames: string[]) => Promise<PostBatchResponse>;
+  addToBatch: (indexNames: ReindexArgs[]) => Promise<PostBatchResponse>;
 }
 
 export interface ReindexServiceInternalApi {
@@ -128,8 +140,8 @@ export class ReindexServiceWrapper {
       this.deps.version
     );
 
-    const throwIfNoPrivileges = async (indexName: string): Promise<void> => {
-      if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+    const throwIfNoPrivileges = async (indexName: string, newIndexName: string): Promise<void> => {
+      if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
         throw error.accessForbidden(
           i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
             defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
@@ -147,19 +159,23 @@ export class ReindexServiceWrapper {
           queue: queue.map((savedObject) => savedObject.attributes),
         };
       },
-      addToBatch: async (indexNames: string[]): Promise<PostBatchResponse> => {
+      // this will be annoying
+      // needs to take array of objects
+      addToBatch: async (reindexJobs: ReindexArgs[]): Promise<PostBatchResponse> => {
         const results: PostBatchResponse = {
           enqueued: [],
           errors: [],
         };
 
-        for (const indexName of indexNames) {
+        // todo name sure settings are passed
+        asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
           try {
             // todo this duplicates code in reindex method and reindexOrResume method
             const result = await reindexHandler({
               savedObjects,
               dataClient,
               indexName,
+              newIndexName,
               log: this.deps.logger,
               licensing: this.deps.licensing,
               request,
@@ -177,7 +193,7 @@ export class ReindexServiceWrapper {
               message: e.message,
             });
           }
-        }
+        });
 
         // todo make sure this happens
         /*
@@ -189,13 +205,13 @@ export class ReindexServiceWrapper {
         return results;
       },
       hasRequiredPrivileges: reindexService.hasRequiredPrivileges.bind(reindexService),
-      reindexOrResume: async (
-        indexName: string,
-        reindexOptions?: {
-          enqueue?: boolean;
-        }
-      ): Promise<ReindexOperation> => {
-        await throwIfNoPrivileges(indexName);
+      reindexOrResume: async ({
+        indexName,
+        newIndexName,
+        reindexOptions,
+        settings,
+      }): Promise<ReindexOperation> => {
+        await throwIfNoPrivileges(indexName, newIndexName);
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
@@ -203,7 +219,12 @@ export class ReindexServiceWrapper {
         const reindexOp =
           existingOp && existingOp.attributes.status === ReindexStatus.paused
             ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
-            : await reindexService.createReindexOperation(indexName, reindexOptions);
+            : await reindexService.createReindexOperation({
+                indexName,
+                newIndexName,
+                opts: reindexOptions,
+                settings,
+              });
 
         // Add users credentials for the worker to use
         await this.deps.credentialStore.set({ reindexOp, request, security: this.deps.security });
@@ -211,13 +232,13 @@ export class ReindexServiceWrapper {
         return reindexOp.attributes;
       },
       // ABOVE AND BELOW add options and mappings, figure out where to move reindexOptions
-      reindex: async (
-        indexName: string,
-        reindexOptions?: {
-          enqueue?: boolean;
-        }
-      ): Promise<ReindexOperation> => {
-        await throwIfNoPrivileges(indexName);
+      reindex: async ({
+        indexName,
+        newIndexName,
+        reindexOptions,
+        settings,
+      }): Promise<ReindexOperation> => {
+        await throwIfNoPrivileges(indexName, newIndexName);
 
         const existingOp = await reindexService.findReindexOperation(indexName);
 
@@ -230,7 +251,12 @@ export class ReindexServiceWrapper {
           );
         }
 
-        const reindexOp = await reindexService.createReindexOperation(indexName, reindexOptions);
+        const reindexOp = await reindexService.createReindexOperation({
+          indexName,
+          newIndexName,
+          opts: reindexOptions,
+          settings,
+        });
 
         // Add users credentials for the worker to use
         await this.deps.credentialStore.set({ reindexOp, request, security: this.deps.security });
@@ -241,8 +267,10 @@ export class ReindexServiceWrapper {
         return reindexOp.attributes;
       },
 
+      // todo I'm not sure if it makes sense to pass both names but it works for now
       getStatus: async (indexName: string): Promise<ReindexStatusResponse> => {
-        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
+        // todo in theory this should check privs on new index as well
+        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges([indexName]);
         const reindexOp = await reindexService.findReindexOperation(indexName);
         // If the user doesn't have privileges than querying for warnings is going to fail.
         const warnings = hasRequiredPrivileges
@@ -259,7 +287,6 @@ export class ReindexServiceWrapper {
           hasRequiredPrivileges,
           meta: {
             indexName,
-            reindexName: generateNewIndexName(indexName, this.deps.version),
             aliases: Object.keys(aliases),
             isFrozen: isTruthy(settings?.frozen),
             isReadonly: isTruthy(settings?.verified_read_only),

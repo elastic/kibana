@@ -15,9 +15,8 @@ import type {
 
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 
-import type { ReindexOperation } from '@kbn/upgrade-assistant-pkg-common';
+import type { ReindexOperation, Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 
 import { reindexActionsFactory } from './reindex_actions';
@@ -29,6 +28,7 @@ interface ReindexHandlerArgs {
   savedObjects: SavedObjectsClientContract;
   dataClient: IScopedClusterClient;
   indexName: string;
+  newIndexName: string;
   log: Logger;
   licensing: LicensingPluginStart;
   request: KibanaRequest;
@@ -45,6 +45,7 @@ export const reindexHandler = async ({
   dataClient,
   request,
   indexName,
+  newIndexName,
   licensing,
   log,
   savedObjects,
@@ -63,7 +64,7 @@ ReindexHandlerArgs): Promise<ReindexOperation> => {
     version
   );
 
-  if (!(await reindexService.hasRequiredPrivileges(indexName))) {
+  if (!(await reindexService.hasRequiredPrivileges([indexName, newIndexName]))) {
     throw error.accessForbidden(
       i18n.translate('xpack.upgradeAssistant.reindex.reindexPrivilegesErrorBatch', {
         defaultMessage: `You do not have adequate privileges to reindex "{indexName}".`,
@@ -78,7 +79,11 @@ ReindexHandlerArgs): Promise<ReindexOperation> => {
   const reindexOp =
     existingOp && existingOp.attributes.status === ReindexStatus.paused
       ? await reindexService.resumeReindexOperation(indexName, reindexOptions)
-      : await reindexService.createReindexOperation(indexName, reindexOptions);
+      : await reindexService.createReindexOperation({
+          indexName,
+          newIndexName,
+          opts: reindexOptions,
+        });
 
   // Add users credentials for the worker to use
   await credentialStore.set({ reindexOp, request, security });

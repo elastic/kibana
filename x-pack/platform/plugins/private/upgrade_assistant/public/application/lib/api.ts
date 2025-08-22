@@ -262,8 +262,9 @@ export class ApiService {
   public async getReindexStatus(indexName: string) {
     return this.reindexService!.getReindexStatus(indexName);
   }
-  public async startReindexTask(indexName: string) {
-    return this.reindexService!.startReindex(indexName);
+
+  public async startReindexTask(indexName: string, newIndexName: string) {
+    return this.reindexService!.startReindex(indexName, newIndexName);
   }
   public async cancelReindexTask(indexName: string) {
     return this.reindexService!.cancelReindex(indexName);

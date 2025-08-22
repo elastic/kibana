@@ -8,4 +8,3 @@
 export { type CredentialStore, credentialStoreFactory } from './credential_store';
 export { reindexServiceFactory } from './reindex_service';
 export { ReindexWorker } from './worker';
-export { generateNewIndexName } from './index_settings';

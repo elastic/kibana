@@ -28,10 +28,14 @@ export class ReindexService {
     });
   }
 
-  public async startReindex(indexName: string) {
+  public async startReindex(indexName: string, newIndexName: string) {
     return sendRequest<ReindexOperation>(this.client, {
       method: 'post',
-      path: `${UA_BASE_PATH}/reindex/${indexName}`,
+      path: `${UA_BASE_PATH}/reindex`,
+      body: {
+        indexName,
+        newIndexName,
+      },
     });
   }
 
