@@ -10,9 +10,9 @@
 import React from 'react';
 import { EuiFlyoutBody, EuiSpacer } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { LinksSection } from './links_section';
 import { DataSection } from './data_section';
 import { InspectHeader } from './inspect_header';
+import { LinksSection } from './links_section';
 import type { ComponentData } from '../../types';
 
 interface Props {
@@ -24,15 +24,13 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   'data-test-subj': 'inspectComponentFlyout',
 };
 
-export const InspectFlyout = ({ componentData }: Props) => {
-  return (
-    <>
-      <InspectHeader />
-      <EuiFlyoutBody>
-        <DataSection componentData={componentData} />
-        <EuiSpacer size="xxl" />
-        <LinksSection componentData={componentData} />
-      </EuiFlyoutBody>
-    </>
-  );
-};
+export const InspectFlyout = React.forwardRef<HTMLDivElement, Props>(({ componentData }, ref) => (
+  <div ref={ref}>
+    <InspectHeader />
+    <EuiFlyoutBody>
+      <DataSection componentData={componentData} />
+      <EuiSpacer size="xxl" />
+      <LinksSection componentData={componentData} />
+    </EuiFlyoutBody>
+  </div>
+));

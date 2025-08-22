@@ -7,12 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { createRef } from 'react';
+import type { RefObject } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { capturePreviewScreenshot } from '@kbn/preview-screenshots';
 import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
+
+const setPortalZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
+  setTimeout(() => {
+    const node = flyoutRef.current;
+
+    if (node) {
+      const portalParent: HTMLElement | null = node.closest('[data-euiportal="true"]');
+
+      if (portalParent) portalParent.style.zIndex = zIndex;
+    }
+  }, 0);
+};
 
 export const getComponentData = async ({
   core,
@@ -26,12 +39,15 @@ export const getComponentData = async ({
   sourceComponent,
 }: GetComponentDataOptions) => {
   try {
+    const flyoutRef = createRef<HTMLDivElement>();
+
     const { codeowners, relativePath, baseFileName }: InspectComponentResponse =
       await core.http.post('/internal/inspect_component/inspect', {
         body: JSON.stringify({ path: fileData.fileName }),
       });
 
     const { width: maxWidth, height: maxHeight } = target.getBoundingClientRect();
+
     const image = await capturePreviewScreenshot({
       target,
       maxWidth,
@@ -41,19 +57,21 @@ export const getComponentData = async ({
 
     const componentData = {
       ...fileData,
+      baseFileName,
+      codeowners,
       euiInfo,
       iconType,
-      relativePath,
-      codeowners,
-      baseFileName,
       image,
+      relativePath,
       sourceComponent,
     };
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(<InspectFlyout componentData={componentData} />, core.rendering),
+      toMountPoint(<InspectFlyout componentData={componentData} ref={flyoutRef} />, core.rendering),
       flyoutOptions
     );
+
+    setPortalZIndex(flyoutRef, '9000');
 
     const restore = setElementHighlight({
       target,
