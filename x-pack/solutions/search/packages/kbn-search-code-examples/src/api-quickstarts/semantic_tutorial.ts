@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-// TODO: get docs team approval on the copy
-export const semanticQuickstartCommands: string = `
+export const semanticTutorialCommands: string = `
 # Welcome to the Elasticsearch Semantic Search Tutorial!
 # This tutorial will guide you through basic semantic search operations in Elasticsearch
 # using API calls from within the Kibana Dev console.

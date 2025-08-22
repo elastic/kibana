@@ -8,15 +8,18 @@
 // Export examples built from documentation
 //   at https://www.elastic.co/docs/solutions/search/api-quickstarts
 
-import { basicsQuickstartCommands } from './basics_quickstart';
-import type { QuickstartCodeExamples } from './types';
+import { basicsTutorialCommands } from './basics_tutorial';
+import { semanticTutorialCommands } from './semantic_tutorial';
+import { esqlTutorialCommands } from './esql_tutorial';
 
-export const quickstartExamples: QuickstartCodeExamples = {
-  basics: basicsQuickstartCommands,
-  queryDSL: `# Query DSL Quickstart`,
-  esql: `# ESQL Quickstart`,
-  aggregations: `# Aggregations Quickstart`,
-  semanticSearch: `# Semantic Search Quickstart`,
-  hybridSearch: `# Hybrid Search Quickstart`,
-  vectorSearch: `# Vector Search Quickstart`,
+import type { ConsoleTutorial } from './types';
+
+export const consoleTutorials: ConsoleTutorial = {
+  basics: basicsTutorialCommands,
+  queryDSL: `# Query DSL Tutorial`,
+  esql: esqlTutorialCommands,
+  aggregations: `# Aggregations Tutorial`,
+  semanticSearch: semanticTutorialCommands,
+  hybridSearch: `# Hybrid Search Tutorial`,
+  vectorSearch: `# Vector Search Tutorial`,
 };

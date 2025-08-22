@@ -6,8 +6,8 @@
  */
 
 import type { IUiSettingsClient } from '@kbn/core/public';
-import { SEARCH_QUICKSTARTS_FEATURE_FLAG_ID } from '@kbn/search-shared-ui';
+import { SEARCH_TUTORIALS_FEATURE_FLAG_ID } from '@kbn/search-shared-ui';
 
-export function isSearchQuickstartsEnabled(uiSettings: IUiSettingsClient): boolean {
-  return uiSettings.get<boolean>(SEARCH_QUICKSTARTS_FEATURE_FLAG_ID, false);
+export function isSearchTutorialsEnabled(uiSettings: IUiSettingsClient): boolean {
+  return uiSettings.get<boolean>(SEARCH_TUTORIALS_FEATURE_FLAG_ID, false);
 }

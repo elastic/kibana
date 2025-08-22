@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export interface QuickstartCodeExamples {
+export interface ConsoleTutorial {
   basics: string;
   queryDSL: string;
   esql: string;

@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { isSearchQuickstartsEnabled } from '../utils/feature_flags';
+import { isSearchTutorialsEnabled } from '../utils/feature_flags';
 import { useKibana } from './use_kibana';
 
-export const useSearchQuickstartsFeatureFlag = (): boolean => {
+export const useSearchTutorialsFeatureFlag = (): boolean => {
   const { uiSettings } = useKibana().services;
 
-  return uiSettings ? isSearchQuickstartsEnabled(uiSettings) : false;
+  return uiSettings ? isSearchTutorialsEnabled(uiSettings) : false;
 };

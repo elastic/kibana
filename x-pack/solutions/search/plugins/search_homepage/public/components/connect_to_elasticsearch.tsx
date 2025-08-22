@@ -14,13 +14,13 @@ import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side
 import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
-import { QuickstartsGroup } from './quickstarts_group';
-import { useSearchQuickstartsFeatureFlag } from '../hooks/use_search_quickstarts';
+import { ConsoleTutorialsGroup } from './console_tutorials_group';
+import { useSearchTutorialsFeatureFlag } from '../hooks/use_search_tutorials';
 import { CONNECT_TO_ELASTICSEARCH_TITLE, ELASTICSEARCH_ENDPOINT_LABEL } from './shared/i18n';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
-  const isQuickstartEnabled = useSearchQuickstartsFeatureFlag();
+  const isTutorialsEnabled = useSearchTutorialsFeatureFlag();
 
   return (
     <EuiFlexGroup gutterSize="xl" wrap>
@@ -69,13 +69,13 @@ export const ConnectToElasticsearch = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          {isQuickstartEnabled && (
+          {isTutorialsEnabled && (
             <>
               <EuiFlexItem grow={false}>
                 <EuiHorizontalRule />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <QuickstartsGroup />
+                <ConsoleTutorialsGroup />
               </EuiFlexItem>
             </>
           )}

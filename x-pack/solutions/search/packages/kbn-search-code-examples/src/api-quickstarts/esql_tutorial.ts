@@ -6,8 +6,8 @@
  */
 
 // TODO: get docs team approval on the copy
-export const esqlQuickstartCommands: string = `# Welcome to the Elasticsearch ES|QL Quickstart!
-# This quickstart will guide you through basic ES|QL queries in Elasticsearch
+export const esqlTutorialCommands: string = `# Welcome to the Elasticsearch ES|QL Tutorial!
+# This tutorial will guide you through basic ES|QL queries in Elasticsearch
 # using API calls from within the Kibana Dev console.
 
 # After selecting a command, execute it by clicking the "Send Request" button or
@@ -252,7 +252,7 @@ POST /cooking_blog/_bulk?refresh=wait_for
 #
 # Response includes documents scored and filtered by custom logic.
 
-# Explore the Playground to experiment with ES|QL queries against your own data!
+# Visit the "Discover" page in Kibana to experiment with ES|QL queries against your own data!
 # Easily ingest data from many sources: https://www.elastic.co/docs/solutions/search/ingest-for-search
 
 # -----------------------------------------------
