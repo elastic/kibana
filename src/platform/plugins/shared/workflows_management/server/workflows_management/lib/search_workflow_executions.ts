@@ -64,7 +64,7 @@ function transformToWorkflowExecutionListModel(
     }),
     _pagination: {
       limit: response.hits.hits.length,
-      offset: 0,
+      page: 1,
       total: response.hits.hits.length,
     },
   };

@@ -79,7 +79,7 @@ export const PlaygroundMoreOptionsMenu = ({
       <EuiText size="s" color="danger">
         <FormattedMessage
           id="xpack.searchPlayground.savedPlayground.moreOptions.deletePlayground.label"
-          defaultMessage="Delete playground"
+          defaultMessage="Delete RAG playground"
         />
       </EuiText>
     </EuiContextMenuItem>,

@@ -1107,6 +1107,62 @@ owner: elastic`,
       });
     });
 
+    it('should throw a not found error if package contains only excluded data streams type', async () => {
+      const mockContract = createAppContextStartContractMock({
+        internal: {
+          excludeDataStreamTypes: ['metrics'],
+        },
+      } as any);
+      appContextService.start(mockContract);
+
+      const soClient = savedObjectsClientMock.create();
+      soClient.get.mockRejectedValue(SavedObjectsErrorHelpers.createGenericNotFoundError());
+      MockRegistry.fetchFindLatestPackageOrUndefined.mockResolvedValue({
+        name: 'nginx',
+        version: '1.0.0',
+      } as RegistryPackage);
+      const packageInfo = {
+        name: 'nginx',
+        version: '1.0.0',
+        assets: [],
+        data_streams: [
+          {
+            dataset: 'nginx.stubstatus',
+            type: 'metrics',
+            namespace: 'default',
+          },
+        ],
+        policy_templates: [
+          {
+            name: 'nginx',
+            inputs: [
+              {
+                type: 'nginx/metrics',
+              },
+              {
+                type: 'logfile',
+              },
+            ],
+          },
+        ],
+      } as unknown as RegistryPackage;
+      MockRegistry.fetchInfo.mockResolvedValue(packageInfo);
+      MockRegistry.getPackage.mockResolvedValue({
+        paths: [],
+        assetsMap: new Map(),
+        archiveIterator: createArchiveIteratorFromMap(new Map()),
+        packageInfo,
+      });
+
+      await expect(
+        getPackageInfo({
+          savedObjectsClient: soClient,
+          pkgName: 'nginx',
+          pkgVersion: '1.0.0',
+        })
+      ).rejects.toThrowError(PackageNotFoundError);
+    });
+
     it('should do nothing if no excluded data streams', async () => {
       const mockContract = createAppContextStartContractMock({
         internal: {

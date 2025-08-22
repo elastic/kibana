@@ -1750,14 +1750,14 @@
         },
         {
           "parentPluginId": "dashboard",
-          "id": "def-public.DashboardStart.registerDashboardPanelPlacementSetting",
+          "id": "def-public.DashboardStart.registerDashboardPanelSettings",
           "type": "Function",
           "tags": [],
-          "label": "registerDashboardPanelPlacementSetting",
+          "label": "registerDashboardPanelSettings",
           "description": [],
           "signature": [
             "<SerializedState extends object = object>(embeddableType: string, getPanelPlacementSettings: ",
-            "GetPanelPlacementSettings",
+            "GetPanelSettings",
             "<SerializedState>) => void"
           ],
           "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",
@@ -1766,7 +1766,7 @@
           "children": [
             {
               "parentPluginId": "dashboard",
-              "id": "def-public.DashboardStart.registerDashboardPanelPlacementSetting.$1",
+              "id": "def-public.DashboardStart.registerDashboardPanelSettings.$1",
               "type": "string",
               "tags": [],
               "label": "embeddableType",
@@ -1781,13 +1781,13 @@
             },
             {
               "parentPluginId": "dashboard",
-              "id": "def-public.DashboardStart.registerDashboardPanelPlacementSetting.$2",
+              "id": "def-public.DashboardStart.registerDashboardPanelSettings.$2",
               "type": "Function",
               "tags": [],
               "label": "getPanelPlacementSettings",
               "description": [],
               "signature": [
-                "GetPanelPlacementSettings",
+                "GetPanelSettings",
                 "<SerializedState>"
               ],
               "path": "src/platform/plugins/shared/dashboard/public/plugin.tsx",

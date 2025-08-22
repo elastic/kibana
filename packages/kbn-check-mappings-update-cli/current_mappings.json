@@ -4297,8 +4297,8 @@
         },
         "type": "text"
       },
-      "status": {
-        "type": "keyword"
+      "enabled": {
+        "type": "boolean"
       },
       "tags": {
         "type": "keyword"

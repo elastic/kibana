@@ -14,10 +14,12 @@ import type {
   AssetDetailsLocatorParams,
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
+import type { InfraPublicConfig } from '../../../common/plugin_config_types';
 import type { InventoryMetricConditions } from '../../../common/alerting/metrics';
 import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { getRuleFormat } from './rule_data_formatters';
+import type { ExpressionsProps } from './components/expression';
 
 interface InventoryMetricRuleTypeParams extends RuleTypeParams {
   criteria: InventoryMetricConditions[];
@@ -55,12 +57,16 @@ const inventoryDefaultRecoveryMessage = i18n.translate(
   }
 );
 
+const LazyRuleParamsExpression = React.lazy(() => import('./components/expression'));
+
 export function createInventoryMetricRuleType({
   assetDetailsLocator,
   inventoryLocator,
+  config,
 }: {
   assetDetailsLocator?: LocatorPublic<AssetDetailsLocatorParams>;
   inventoryLocator?: LocatorPublic<InventoryLocatorParams>;
+  config?: InfraPublicConfig;
 }): ObservabilityRuleTypeModel<InventoryMetricRuleTypeParams> {
   const format = getRuleFormat({ assetDetailsLocator, inventoryLocator });
 
@@ -73,7 +79,14 @@ export function createInventoryMetricRuleType({
     documentationUrl(docLinks) {
       return `${docLinks.links.observability.infrastructureThreshold}`;
     },
-    ruleParamsExpression: React.lazy(() => import('./components/expression')),
+    ruleParamsExpression: (props: ExpressionsProps) => (
+      <React.Suspense fallback={null}>
+        <LazyRuleParamsExpression
+          {...props}
+          metadata={{ ...props.metadata, hostOtelEnabled: config?.featureFlags.hostOtelEnabled }}
+        />
+      </React.Suspense>
+    ),
     validate: validateMetricThreshold,
     defaultActionMessage: inventoryDefaultActionMessage,
     defaultRecoveryMessage: inventoryDefaultRecoveryMessage,

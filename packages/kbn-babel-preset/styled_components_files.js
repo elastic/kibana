@@ -453,5 +453,6 @@ module.exports = {
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_py[\/\\]elasticsearch_py_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]elasticsearch_ruby[\/\\]elasticsearch_ruby_readme.tsx/,
     /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]custom_integrations[\/\\]public[\/\\]components[\/\\]fleet_integration[\/\\]sample[\/\\]sample_client_readme.tsx/,
+    /src[\/\\]platform[\/\\]plugins[\/\\]shared[\/\\]workflows_management[\/\\]public[\/\\]widgets[\/\\]workflow_search_field[\/\\]ui[\/\\]workflow_search_field.tsx/,
   ],
 };

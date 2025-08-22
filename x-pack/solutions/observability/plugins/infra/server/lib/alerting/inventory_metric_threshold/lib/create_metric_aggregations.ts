@@ -6,7 +6,11 @@
  */
 
 import { get } from 'lodash';
-import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import type {
+  DataSchemaFormat,
+  InventoryItemType,
+  SnapshotMetricType,
+} from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import type {
   InfraTimerangeInput,
@@ -21,7 +25,8 @@ export const createMetricAggregations = async (
   timerange: InfraTimerangeInput,
   nodeType: InventoryItemType,
   metric: SnapshotMetricType,
-  customMetric?: SnapshotCustomMetricInput
+  customMetric?: SnapshotCustomMetricInput,
+  schema?: DataSchemaFormat
 ) => {
   const inventoryModel = findInventoryModel(nodeType);
   if (customMetric && customMetric.field) {
@@ -38,7 +43,7 @@ export const createMetricAggregations = async (
   } else if (metric === 'logRate') {
     return createLogRateAggs(timerange, metric);
   } else {
-    const aggregations = await inventoryModel.metrics.getAggregations();
+    const aggregations = await inventoryModel.metrics.getAggregations({ schema });
     const metricAgg = aggregations.get(metric);
 
     if (isInterfaceRateAgg(metricAgg)) {

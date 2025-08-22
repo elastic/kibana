@@ -32,7 +32,7 @@ interface WorkflowOption {
   id: string;
   name: string;
   description: string;
-  status: string;
+  enabled: boolean;
   tags: string[];
   label: string;
   disabled?: boolean;
@@ -167,7 +167,13 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
       setLoadError(null);
 
       try {
-        const response = await http.post('/api/workflows/search');
+        const response = await http.post('/api/workflows/search', {
+          body: JSON.stringify({
+            limit: 1000,
+            page: 1,
+            query: '',
+          }),
+        });
         const workflowsMap = response as WorkflowListDto;
 
         // Check if the currently selected workflow is disabled
@@ -175,7 +181,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
 
         const workflowOptionsWithSortInfo = workflowsMap.results.map((workflow) => {
           // TODO: remove this once we have a way to disable workflows
-          const isDisabled = !workflow.definition.enabled;
+          const isDisabled = !workflow.enabled;
           const isSelected = workflow.id === workflowId;
           const wasSelectedButNowDisabled = isSelected && isDisabled;
           const hasAlertTriggerType = (workflow.definition?.triggers ?? []).some(
@@ -245,7 +251,7 @@ const WorkflowsParamsFields: React.FunctionComponent<ActionParamsProps<Workflows
               id: workflow.id,
               name: workflow.name,
               description: workflow.description,
-              status: workflow.status,
+              enabled: workflow.enabled,
               tags: workflowTags,
               label: workflow.name,
               disabled: isDisabled,

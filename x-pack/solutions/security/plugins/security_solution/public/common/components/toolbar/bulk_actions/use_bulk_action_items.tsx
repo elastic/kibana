@@ -20,6 +20,7 @@ import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
 import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
+import { useAlertCloseInfoModal } from '../../../../detections/hooks/use_alert_close_info_modal';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -46,6 +47,7 @@ export const useBulkActionItems = ({
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
+  const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
   const onAlertStatusUpdateSuccess = useCallback(
     (updated: number, conflicts: number, newStatus: AlertWorkflowStatus) => {
@@ -99,6 +101,10 @@ export const useBulkActionItems = ({
 
   const onClickUpdate = useCallback(
     async (status: AlertWorkflowStatus) => {
+      if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+        return;
+      }
+
       if (query) {
         startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
       } else if (eventIds.length > 1) {
@@ -137,6 +143,7 @@ export const useBulkActionItems = ({
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
       startTransaction,
+      promptAlertCloseConfirmation,
     ]
   );
 

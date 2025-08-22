@@ -76,6 +76,7 @@ export interface UsageStats {
   'securitySolution:enableAssetInventory': boolean;
   'securitySolution:enablePrivilegedUserMonitoring': boolean;
   'securitySolution:enableCloudConnector': boolean;
+  'securitySolution:suppressionBehaviorOnAlertClosure': string;
   'search:includeFrozen': boolean;
   'courier:maxConcurrentShardRequests': number;
   'courier:setRequestPreference': string;

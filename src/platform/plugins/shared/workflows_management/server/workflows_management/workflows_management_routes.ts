@@ -9,7 +9,11 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger } from '@kbn/core/server';
-import { CreateWorkflowCommandSchema } from '@kbn/workflows';
+import {
+  CreateWorkflowCommandSchema,
+  SearchWorkflowCommandSchema,
+  UpdateWorkflowCommandSchema,
+} from '@kbn/workflows';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowsManagementApi } from './workflows_management_api';
 import { type GetWorkflowsParams } from './workflows_management_api';
@@ -22,9 +26,74 @@ export function defineRoutes(
 ) {
   router.get(
     {
+      path: '/api/workflows/stats',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: false,
+    },
+    async (context, request, response) => {
+      try {
+        const stats = await api.getWorkflowStats();
+
+        return response.ok({ body: stats || {} });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: '/api/workflows/aggs',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['read', 'workflow_read'],
+            },
+          ],
+        },
+      },
+      validate: { query: schema.object({ fields: schema.arrayOf(schema.string()) }) },
+    },
+    async (context, request, response) => {
+      try {
+        const { fields } = request.query as { fields: string[] };
+        const aggs = await api.getWorkflowAggs(fields);
+
+        return response.ok({ body: aggs || {} });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.get(
+    {
       path: '/api/workflows/{id}',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -68,7 +137,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/search',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -79,18 +148,24 @@ export function defineRoutes(
           ],
         },
       },
-      validate: false,
+      validate: {
+        body: SearchWorkflowCommandSchema,
+      },
     },
     async (context, request, response) => {
       try {
-        const { limit, offset } = request.query as GetWorkflowsParams;
+        const { limit, page, enabled, createdBy, query } =
+          request.body as unknown as GetWorkflowsParams;
 
         const spaceId = spaces.getSpaceId(request);
         return response.ok({
           body: await api.getWorkflows(
             {
               limit,
-              offset,
+              page,
+              enabled,
+              createdBy,
+              query,
             },
             spaceId
           ),
@@ -109,7 +184,7 @@ export function defineRoutes(
     {
       path: '/api/workflows',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -143,7 +218,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/{id}',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -158,7 +233,7 @@ export function defineRoutes(
         params: schema.object({
           id: schema.string(),
         }),
-        body: CreateWorkflowCommandSchema.partial(),
+        body: UpdateWorkflowCommandSchema.partial(),
       },
     },
     async (context, request, response) => {
@@ -187,7 +262,7 @@ export function defineRoutes(
       path: '/api/workflows/{id}',
 
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -224,7 +299,7 @@ export function defineRoutes(
     {
       path: '/api/workflows',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -261,7 +336,7 @@ export function defineRoutes(
     {
       path: '/api/workflows/{id}/run',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -306,7 +381,51 @@ export function defineRoutes(
   );
   router.post(
     {
+      path: '/api/workflows/{id}/clone',
+      options: {
+        tags: ['api', 'workflows'],
+      },
+      security: {
+        authz: {
+          requiredPrivileges: [
+            {
+              anyRequired: ['all', 'workflow_create'],
+            },
+          ],
+        },
+      },
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const { id } = request.params as { id: string };
+        const spaceId = spaces.getSpaceId(request);
+        const workflow = await api.getWorkflow(id, spaceId);
+        if (!workflow) {
+          return response.notFound();
+        }
+        const createdWorkflow = await api.cloneWorkflow(workflow, spaceId, request);
+        return response.ok({ body: createdWorkflow });
+      } catch (error) {
+        return response.customError({
+          statusCode: 500,
+          body: {
+            message: `Internal server error: ${error}`,
+          },
+        });
+      }
+    }
+  );
+  router.post(
+    {
       path: '/api/workflows/test',
+      options: {
+        tags: ['api', 'workflows'],
+      },
       security: {
         authz: {
           requiredPrivileges: ['all'],
@@ -348,7 +467,7 @@ export function defineRoutes(
     {
       path: '/api/workflowExecutions',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -386,7 +505,7 @@ export function defineRoutes(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}',
       options: {
-        tags: ['access:workflowsManagement'],
+        tags: ['api', 'workflows'],
       },
       security: {
         authz: {
@@ -428,6 +547,9 @@ export function defineRoutes(
   router.get(
     {
       path: '/api/workflowExecutions/{workflowExecutionId}/logs',
+      options: {
+        tags: ['api', 'workflows'],
+      },
       security: {
         authz: {
           requiredPrivileges: ['all'],

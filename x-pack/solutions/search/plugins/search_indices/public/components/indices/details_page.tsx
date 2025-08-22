@@ -256,7 +256,7 @@ export const SearchIndexDetailsPage = () => {
                       >
                         <FormattedMessage
                           id="xpack.searchIndices.indexAction.useInPlaygroundButtonLabel"
-                          defaultMessage="Search in Playground"
+                          defaultMessage="Search in RAG Playground"
                         />
                       </EuiButton>
                     </EuiFlexItem>

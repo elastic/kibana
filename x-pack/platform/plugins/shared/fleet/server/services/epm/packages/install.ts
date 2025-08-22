@@ -99,6 +99,7 @@ import { checkDatasetsNameFormat } from './custom_integrations/validation/check_
 import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { setLastUploadInstallCache, getLastUploadInstallCache } from './utils';
 import { removeInstallation } from './remove';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 export const UPLOAD_RETRY_AFTER_MS = 10000; // 10s
 const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
@@ -710,6 +711,22 @@ export async function installPackageWithStateMachine(options: {
     if (!licenseService.hasAtLeast(elasticSubscription)) {
       logger.error(`Installation requires ${elasticSubscription} license`);
       const err = new FleetError(`Installation requires ${elasticSubscription} license`);
+      sendEvent({
+        ...telemetryEvent,
+        errorMessage: err.message,
+      });
+      return { error: err, installType, installSource, pkgName };
+    }
+
+    const excludeDataStreamTypes =
+      appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+    if (!shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)) {
+      logger.error(
+        `Installation package: ${pkgName} is not allowed due to data stream type exclusions`
+      );
+      const err = new FleetError(
+        `Installation package: ${pkgName} is not allowed due to data stream type exclusions`
+      );
       sendEvent({
         ...telemetryEvent,
         errorMessage: err.message,

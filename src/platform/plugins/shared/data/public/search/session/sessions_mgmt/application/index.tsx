@@ -56,6 +56,7 @@ export class SearchSessionsMgmtApp {
       notifications,
       application,
       usageCollector: setupDeps.searchUsageCollector,
+      featureFlags: coreStart.featureFlags,
     });
 
     const documentation = new AsyncSearchIntroDocumentation(docLinks);

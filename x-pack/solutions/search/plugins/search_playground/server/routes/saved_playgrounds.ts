@@ -239,7 +239,7 @@ export const defineSavedPlaygroundRoutes = ({ logger, router }: DefineRoutesOpti
           return response.badRequest({
             body: {
               message: i18n.translate('xpack.searchPlayground.savedPlaygrounds.validationError', {
-                defaultMessage: 'Invalid playground request',
+                defaultMessage: 'Invalid RAG playground request',
               }),
               attributes: {
                 errors: validationErrors,

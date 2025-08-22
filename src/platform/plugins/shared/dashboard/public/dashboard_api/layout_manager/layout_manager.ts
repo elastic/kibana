@@ -7,15 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import deepEqual from 'fast-deep-equal';
 import { filter, map as lodashMap, max } from 'lodash';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, combineLatestWith, debounceTime, map, merge, tap } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  combineLatestWith,
+  debounceTime,
+  distinctUntilChanged,
+  map,
+  merge,
+  mergeMap,
+  startWith,
+  tap,
+  type Observable,
+} from 'rxjs';
 import { v4 } from 'uuid';
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import type { GridLayoutData, GridPanelData, GridSectionData } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import type { PanelPackage } from '@kbn/presentation-containers';
 import type { SerializedPanelState, SerializedTitles } from '@kbn/presentation-publishing';
@@ -29,19 +42,20 @@ import {
 } from '@kbn/presentation-publishing';
 import { asyncForEach } from '@kbn/std';
 
-import type { DashboardPanel } from '../../../server';
 import type { DashboardState } from '../../../common';
 import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../../../common/content_management';
+import type { DashboardPanel } from '../../../server';
 import { dashboardClonePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 import { getPanelAddedSuccessString } from '../../dashboard_app/_dashboard_app_strings';
-import { getPanelPlacementSetting } from '../../panel_placement/get_panel_placement_settings';
+import { getPanelSettings } from '../../panel_placement/get_panel_placement_settings';
 import { placeClonePanel } from '../../panel_placement/place_clone_panel_strategy';
 import { runPanelPlacementStrategy } from '../../panel_placement/place_new_panel_strategies';
+import type { PanelResizeSettings } from '../../panel_placement/types';
 import { PanelPlacementStrategy } from '../../plugin_constants';
 import { coreServices, usageCollectionService } from '../../services/kibana_services';
 import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
-import { areLayoutsEqual } from './are_layouts_equal';
 import type { initializeTrackPanel } from '../track_panel';
+import { areLayoutsEqual } from './are_layouts_equal';
 import { deserializeLayout } from './deserialize_layout';
 import { serializeLayout } from './serialize_layout';
 import type { DashboardChildren, DashboardLayout, DashboardLayoutPanel } from './types';
@@ -61,6 +75,32 @@ export function initializeLayoutManager(
     getReferences
   );
   const layout$ = new BehaviorSubject<DashboardLayout>(initialLayout); // layout is the source of truth for which panels are in the dashboard.
+  const gridLayout$ = new BehaviorSubject(transformDashboardLayoutToGridLayout(initialLayout, {})); // source of truth for rendering
+  const panelResizeSettings$: Observable<{ [panelType: string]: PanelResizeSettings }> =
+    layout$.pipe(
+      map(({ panels }) => {
+        return [...new Set(Object.values(panels).map((panel) => panel.type))];
+      }),
+      distinctUntilChanged(deepEqual),
+      mergeMap(async (panelTypes: string[]) => {
+        const settingsByPanelType: { [panelType: string]: PanelResizeSettings } = {};
+        await asyncForEach(panelTypes, async (type) => {
+          const panelSettings = await getPanelSettings(type);
+          if (panelSettings?.resizeSettings)
+            settingsByPanelType[type] = panelSettings.resizeSettings;
+        });
+        return settingsByPanelType;
+      }),
+      startWith({}) // do not block rendering by waiting for these settings
+    );
+
+  /** Keep gridLayout$ in sync with layout$ + panelResizeSettings$ */
+  const gridLayoutSubscription = combineLatest([layout$, panelResizeSettings$]).subscribe(
+    ([layout, panelResizeSettings]) => {
+      gridLayout$.next(transformDashboardLayoutToGridLayout(layout, panelResizeSettings));
+    }
+  );
+
   let currentChildState = initialChildState; // childState is the source of truth for the state of each panel.
 
   let lastSavedLayout = initialLayout;
@@ -114,13 +154,19 @@ export function initializeLayoutManager(
         },
       };
     }
-    const customPlacementSettings = await getPanelPlacementSetting(type, serializedState);
+    const panelSettings = await getPanelSettings(type, serializedState);
+    const panelPlacementSettings = {
+      strategy: PanelPlacementStrategy.findTopLeftMostOpenSpace,
+      height: DEFAULT_PANEL_HEIGHT,
+      width: DEFAULT_PANEL_WIDTH,
+      ...panelSettings?.placementSettings,
+    };
     const { newPanelPlacement, otherPanels } = runPanelPlacementStrategy(
-      customPlacementSettings?.strategy ?? PanelPlacementStrategy.findTopLeftMostOpenSpace,
+      panelPlacementSettings?.strategy,
       {
         currentPanels: layout$.value.panels,
-        height: customPlacementSettings?.height ?? DEFAULT_PANEL_HEIGHT,
-        width: customPlacementSettings?.width ?? DEFAULT_PANEL_WIDTH,
+        height: panelPlacementSettings.height,
+        width: panelPlacementSettings.width,
       }
     );
     return {
@@ -320,6 +366,7 @@ export function initializeLayoutManager(
       getSerializedStateForPanel: (panelId: string) => currentChildState[panelId],
       getLastSavedStateForPanel: (panelId: string) => lastSavedChildState[panelId],
       layout$,
+      gridLayout$,
       reset: resetLayout,
       serializeLayout: () => serializeLayout(layout$.value, currentChildState),
       startComparing$: (
@@ -398,6 +445,9 @@ export function initializeLayoutManager(
         trackPanel.scrollToBottom$.next();
       },
     },
+    cleanup: () => {
+      gridLayoutSubscription.unsubscribe();
+    },
   };
 }
 
@@ -423,3 +473,42 @@ function getClonedPanelTitle(panelTitles: string[], rawTitle: string) {
     ? baseTitle + ` (${clonedTag})`
     : baseTitle + ` (${clonedTag} ${similarBaseTitlesCount + 1})`;
 }
+
+const transformDashboardLayoutToGridLayout = (
+  layout: DashboardLayout,
+  resizeSettings: { [panelType: string]: PanelResizeSettings }
+) => {
+  const newLayout: GridLayoutData = {};
+  Object.keys(layout.sections).forEach((sectionId) => {
+    const section = layout.sections[sectionId];
+    newLayout[sectionId] = {
+      id: sectionId,
+      type: 'section',
+      row: section.gridData.y,
+      isCollapsed: Boolean(section.collapsed),
+      title: section.title,
+      panels: {},
+    };
+  });
+  Object.keys(layout.panels).forEach((panelId) => {
+    const gridData = layout.panels[panelId].gridData;
+    const type = layout.panels[panelId].type;
+    const basePanel = {
+      id: panelId,
+      row: gridData.y,
+      column: gridData.x,
+      width: gridData.w,
+      height: gridData.h,
+      resizeOptions: resizeSettings[type],
+    } as GridPanelData;
+    if (gridData.sectionId) {
+      (newLayout[gridData.sectionId] as GridSectionData).panels[panelId] = basePanel;
+    } else {
+      newLayout[panelId] = {
+        ...basePanel,
+        type: 'panel',
+      };
+    }
+  });
+  return newLayout;
+};

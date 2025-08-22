@@ -24,7 +24,7 @@ export const getAllHosts = async ({
   metrics,
   hostNames,
   apmDataAccessServices,
-  schema,
+  schema = 'ecs',
 }: Pick<
   GetHostParameters,
   'infraMetricsClient' | 'apmDataAccessServices' | 'from' | 'to' | 'limit' | 'metrics' | 'schema'
