@@ -7,13 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const {
-  removeConsumedSegments,
-  matchesPatternPart,
-  matchGlobstarPattern,
-} = require('./segment_matcher');
+const { removeConsumedSegments, matchesPatternPart } = require('./remove_consumed_segments');
 
-describe('segment-matcher', () => {
+describe('removeConsumedSegments', () => {
   describe('when removing consumed segments', () => {
     it('should remove exact matching segments', () => {
       const result = removeConsumedSegments('src/components/*.js', ['src', 'components']);
@@ -206,54 +202,6 @@ describe('segment-matcher', () => {
       expect(matchesPatternPart('dist', '!(node_modules|dist|build)')).toBe(false);
       expect(matchesPatternPart('build', '!(node_modules|dist|build)')).toBe(false);
       expect(matchesPatternPart('lib', '!(node_modules|dist|build)')).toBe(true);
-    });
-  });
-
-  describe('when matching globstar patterns', () => {
-    it('should handle single globstar', () => {
-      const result = matchGlobstarPattern(['**'], ['a', 'b', 'c']);
-      expect(result).toBe('**/*');
-    });
-
-    it('should handle globstar with following pattern', () => {
-      const result = matchGlobstarPattern(['**', '*.js'], ['test', 'Button.js']);
-      expect(result).toBe('**/*.js');
-    });
-
-    it('should handle globstar with multiple following segments', () => {
-      const result = matchGlobstarPattern(
-        ['**', 'test', '*.js'],
-        ['components', 'test', 'Button.js']
-      );
-      expect(result).toBe('**/test/*.js');
-    });
-
-    it('should handle empty segments with empty pattern', () => {
-      const result = matchGlobstarPattern([], []);
-      expect(result).toBe('');
-    });
-
-    it('should handle empty segments with pattern', () => {
-      const result = matchGlobstarPattern(['test'], []);
-      expect(result).toBe('test');
-    });
-
-    it('should handle complex nested patterns', () => {
-      const result = matchGlobstarPattern(
-        ['**', 'test', '**', '*.js'],
-        ['src', 'components', 'test', 'unit', 'Button.js']
-      );
-      expect(result).toBe('**/test/**/*.js');
-    });
-
-    it('should handle non-matching patterns', () => {
-      const result = matchGlobstarPattern(['**', 'missing'], ['a', 'b', 'c']);
-      expect(result).toBe('**/missing');
-    });
-
-    it('should handle multiple globstars', () => {
-      const result = matchGlobstarPattern(['**', 'lib', '**'], ['src', 'lib', 'utils']);
-      expect(result).toBe('**/lib/**');
     });
   });
 

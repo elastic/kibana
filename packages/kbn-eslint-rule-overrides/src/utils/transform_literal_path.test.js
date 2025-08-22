@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { transformLiteralPath } = require('./literal_path_transformer');
 const path = require('path');
 
-describe('literal-path-transformer', () => {
+const { transformLiteralPath } = require('./transform_literal_path');
+
+describe('transformLiteralPath', () => {
   const rootDir = '/project';
   const targetDir = '/project/src/components';
 
