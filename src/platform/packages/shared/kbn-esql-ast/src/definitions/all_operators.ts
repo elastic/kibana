@@ -129,6 +129,7 @@ const otherDefinitions: FunctionDefinition[] = [
       defaultMessage: 'WHERE operator',
     }),
     locationsAvailable: [Location.STATS],
+    ignoreAsSuggestion: true,
     signatures: [
       {
         params: [

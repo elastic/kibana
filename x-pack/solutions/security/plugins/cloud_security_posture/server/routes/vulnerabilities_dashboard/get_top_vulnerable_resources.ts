@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggFieldBucket, VulnerableResourceStat } from '../../../common/types_old';
 
 interface ResourceBucket {
   key: string | undefined;

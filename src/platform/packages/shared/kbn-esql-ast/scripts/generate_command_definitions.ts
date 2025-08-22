@@ -12,7 +12,7 @@
 import { readdirSync, readFileSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { ElasticsearchCommandDefinition } from '../src/definitions/types';
+import type { ElasticsearchCommandDefinition } from '../src/definitions/types';
 
 const GENERATED_COMMANDS_BASE_PATH = '../src/definitions/generated/commands';
 const ELASTICSEARCH_COMMANDS_PATH =
@@ -62,7 +62,12 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   // Populate the metadata object without the comment field
   esCommandDefinitions.forEach((command) => {
-    commandsMetadata[command.name] = command;
+    // Normalize the license field to lowercase, to agree with the licensing types
+    const updatedComand = {
+      ...command,
+      license: command.license?.toLowerCase() as typeof command.license,
+    };
+    commandsMetadata[command.name] = updatedComand;
   });
 
   const outputTsPath = join(outputCommandsDir, 'commands.ts');

@@ -5,14 +5,19 @@
  * 2.0.
  */
 
-import { ScoutTestOptions, createPlaywrightConfig } from '@kbn/scout';
-import { PlaywrightTestConfig, defineConfig } from '@playwright/test';
-import { AvailableConnectorWithId, getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
+import type { ScoutTestOptions } from '@kbn/scout';
+import { createPlaywrightConfig } from '@kbn/scout';
+import type { PlaywrightTestConfig } from '@playwright/test';
+import { defineConfig } from '@playwright/test';
+import type { AvailableConnectorWithId } from '@kbn/gen-ai-functional-testing';
+import { getAvailableConnectors } from '@kbn/gen-ai-functional-testing';
 import { ToolingLog, LOG_LEVEL_FLAGS, DEFAULT_LOG_LEVEL } from '@kbn/tooling-log';
 
 export interface EvaluationTestOptions extends ScoutTestOptions {
   connector: AvailableConnectorWithId;
   evaluationConnector: AvailableConnectorWithId;
+  repetitions: number;
+  timeout?: number;
 }
 
 function getLogLevel() {
@@ -29,8 +34,12 @@ function getLogLevel() {
  */
 export function createPlaywrightEvalsConfig({
   testDir,
+  repetitions,
+  timeout,
 }: {
   testDir: string;
+  repetitions?: number;
+  timeout?: number;
 }): PlaywrightTestConfig<{}, EvaluationTestOptions> {
   const log = new ToolingLog({
     level: getLogLevel(),
@@ -66,6 +75,10 @@ export function createPlaywrightEvalsConfig({
     );
   }
 
+  // Priority of determining repetition number: env variable, config parameter, default
+  const experimentRepetitions =
+    parseInt(process.env.EVALUATION_REPETITIONS || '', 10) || repetitions || 1;
+
   // get just the 'local' project (for now)
   const nextProjects = connectors.flatMap((connector) => {
     return (
@@ -79,6 +92,7 @@ export function createPlaywrightEvalsConfig({
               ...project.use,
               connector,
               evaluationConnector,
+              repetitions: experimentRepetitions,
             },
           };
         }) ?? []
@@ -98,6 +112,6 @@ export function createPlaywrightEvalsConfig({
     },
     projects: nextProjects,
     globalSetup: require.resolve('./setup.js'),
-    timeout: 5 * 60_000,
+    timeout: timeout ?? 5 * 60_000,
   });
 }

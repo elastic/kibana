@@ -8,17 +8,20 @@
  */
 
 import { Builder } from '../builder';
-import { LeafPrinter } from '../pretty_print';
+import { BasicPrettyPrinter, LeafPrinter } from '../pretty_print';
 import { isProperNode } from '../ast/is';
 import { SynthNode } from './synth_node';
-import { serialize } from './helpers';
-import type { SynthTemplateHole } from './types';
+import type { SynthColumnShorthand, SynthTemplateHole } from './types';
 
 class UnexpectedSynthHoleError extends Error {
   constructor(hole: unknown) {
     super(`Unexpected synth hole: ${JSON.stringify(hole)}`);
   }
 }
+
+const isColumnShorthand = (hole: unknown): hole is SynthColumnShorthand => {
+  return Array.isArray(hole) && hole.every((part) => typeof part === 'string');
+};
 
 /**
  * Converts a synth template hole to a string fragment. A *hole" in a tagged
@@ -38,6 +41,11 @@ class UnexpectedSynthHoleError extends Error {
  */
 export const holeToFragment = (hole: SynthTemplateHole): string => {
   switch (typeof hole) {
+    case 'string': {
+      const node = Builder.expression.literal.string(hole);
+
+      return LeafPrinter.string(node);
+    }
     case 'number': {
       const isInteger = Math.round(hole) === hole;
       const node = isInteger
@@ -47,6 +55,12 @@ export const holeToFragment = (hole: SynthTemplateHole): string => {
       return LeafPrinter.literal(node);
     }
     case 'object': {
+      if (isColumnShorthand(hole)) {
+        const node = Builder.expression.column(hole);
+
+        return LeafPrinter.column(node);
+      }
+
       if (Array.isArray(hole)) {
         let list: string = '';
 
@@ -56,7 +70,7 @@ export const holeToFragment = (hole: SynthTemplateHole): string => {
 
         return list;
       } else if (hole instanceof SynthNode || isProperNode(hole)) {
-        return serialize(hole);
+        return BasicPrettyPrinter.print(hole);
       }
 
       throw new UnexpectedSynthHoleError(hole);

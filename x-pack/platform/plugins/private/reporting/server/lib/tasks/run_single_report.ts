@@ -9,11 +9,13 @@ import moment from 'moment';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ConcreteTaskInstance, TaskInstance } from '@kbn/task-manager-plugin/server';
 
-import { REPORTING_EXECUTE_TYPE, ReportTaskParams } from '.';
+import type { ReportTaskParams } from '.';
+import { REPORTING_EXECUTE_TYPE } from '.';
 import { SavedReport } from '../store';
 import type { ReportProcessingFields } from '../store/store';
 import { errorLogger } from './error_logger';
-import { PrepareJobResults, RunReportTask } from './run_report';
+import type { PrepareJobResults } from './run_report';
+import { RunReportTask } from './run_report';
 
 type SingleReportTaskInstance = Omit<TaskInstance, 'params'> & {
   params: ReportTaskParams;

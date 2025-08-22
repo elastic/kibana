@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
-import { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import { SpanFlyout } from './span_flyout';
 import { useRootTransactionContext } from '../../doc_viewer_transaction_overview/hooks/use_root_transaction';
@@ -138,7 +138,7 @@ export const FullScreenWaterfall = ({
                   ariaLabel={i18n.translate(
                     'unifiedDocViewer.observability.traces.fullScreenWaterfall.exitFullScreen.button',
                     {
-                      defaultMessage: 'Exit full screen waterfall',
+                      defaultMessage: 'Exit expanded trace timeline',
                     }
                   )}
                 />

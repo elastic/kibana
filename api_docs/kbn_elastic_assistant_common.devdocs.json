@@ -99,6 +99,55 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.enrichDocument",
+        "type": "Function",
+        "tags": [],
+        "label": "enrichDocument",
+        "description": [
+          "\nEnriches a DocumentEntry with a content reference."
+        ],
+        "signature": [
+          "(contentReferencesStore: ",
+          {
+            "pluginId": "@kbn/elastic-assistant-common",
+            "scope": "common",
+            "docId": "kibKbnElasticAssistantCommonPluginApi",
+            "section": "def-common.ContentReferencesStore",
+            "text": "ContentReferencesStore"
+          },
+          ") => (document: { source: string; id: string; type: \"document\"; namespace: string; text: string; name: string; global: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; kbResource: \"user\" | \"security_labs\"; required?: boolean | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }) => { source: string; id: string; type: \"document\"; namespace: string; text: string; name: string; global: boolean; createdBy: string; updatedBy: string; createdAt: string; updatedAt: string; users: { id?: string | undefined; name?: string | undefined; }[]; kbResource: \"user\" | \"security_labs\"; required?: boolean | undefined; vector?: { modelId: string; tokens: {} & { [k: string]: number; }; } | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.enrichDocument.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "contentReferencesStore",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/elastic-assistant-common",
+                "scope": "common",
+                "docId": "kibKbnElasticAssistantCommonPluginApi",
+                "section": "def-common.ContentReferencesStore",
+                "text": "ContentReferencesStore"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.esqlQueryReference",
         "type": "Function",
         "tags": [],
@@ -1597,6 +1646,46 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.sanitizeMessages",
+        "type": "Function",
+        "tags": [],
+        "label": "sanitizeMessages",
+        "description": [
+          "\nRemoves content references from chat history"
+        ],
+        "signature": [
+          "(messages: ",
+          "BaseMessage",
+          "[]) => ",
+          "BaseMessage",
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/elastic-assistant-common",
+            "id": "def-common.sanitizeMessages.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "BaseMessage",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/content_references/references/utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.securityAlertReference",
         "type": "Function",
         "tags": [],
@@ -2788,7 +2877,7 @@
         "label": "AttackDiscoveryFindRequestQuery",
         "description": [],
         "signature": [
-          "{ per_page: number; page: number; sort_field: \"@timestamp\"; sort_order: \"asc\" | \"desc\"; start?: string | undefined; end?: string | undefined; search?: string | undefined; ids?: string[] | undefined; status?: (\"open\" | \"closed\" | \"acknowledged\")[] | undefined; alert_ids?: string[] | undefined; shared?: any; connector_names?: string[] | undefined; }"
+          "{ per_page: number; page: number; sort_field: \"@timestamp\"; sort_order: \"asc\" | \"desc\"; start?: string | undefined; end?: string | undefined; search?: string | undefined; ids?: string[] | undefined; status?: (\"open\" | \"closed\" | \"acknowledged\")[] | undefined; alert_ids?: string[] | undefined; shared?: any; connector_names?: string[] | undefined; include_unique_alert_ids?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -2803,7 +2892,7 @@
         "label": "AttackDiscoveryFindRequestQueryInput",
         "description": [],
         "signature": [
-          "{ per_page?: number | undefined; page?: number | undefined; start?: string | undefined; end?: string | undefined; sort_field?: \"@timestamp\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; search?: string | undefined; ids?: unknown; status?: unknown; alert_ids?: unknown; shared?: any; connector_names?: unknown; }"
+          "{ per_page?: number | undefined; page?: number | undefined; start?: string | undefined; end?: string | undefined; sort_field?: \"@timestamp\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; search?: string | undefined; ids?: unknown; status?: unknown; alert_ids?: unknown; shared?: any; connector_names?: unknown; include_unique_alert_ids?: any; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -2818,7 +2907,7 @@
         "label": "AttackDiscoveryFindResponse",
         "description": [],
         "signature": [
-          "{ page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; }"
+          "{ page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -5103,21 +5192,6 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL",
-        "type": "string",
-        "tags": [],
-        "label": "ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL",
-        "description": [],
-        "signature": [
-          "\"/internal/elastic_assistant/knowledge_base/_indices\""
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL",
         "type": "string",
         "tags": [],
@@ -5578,7 +5652,7 @@
         "label": "FindAttackDiscoveryAlertsParams",
         "description": [],
         "signature": [
-          "{ page: number; perPage: number; sortField: string; start?: string | undefined; end?: string | undefined; search?: string | undefined; sortOrder?: string | undefined; ids?: string[] | undefined; status?: string[] | undefined; alertIds?: string[] | undefined; shared?: boolean | undefined; connectorNames?: string[] | undefined; }"
+          "{ page: number; perPage: number; sortField: string; start?: string | undefined; end?: string | undefined; search?: string | undefined; sortOrder?: string | undefined; ids?: string[] | undefined; status?: string[] | undefined; alertIds?: string[] | undefined; shared?: boolean | undefined; connectorNames?: string[] | undefined; includeUniqueAlertIds?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
         "deprecated": false,
@@ -6039,21 +6113,6 @@
           "{ results: { id: string; status: string; }[]; datasets: string[]; graphs: string[]; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.GetKnowledgeBaseIndicesResponse",
-        "type": "Type",
-        "tags": [],
-        "label": "GetKnowledgeBaseIndicesResponse",
-        "description": [],
-        "signature": [
-          "{} & { [k: string]: string[]; }"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/get_knowledge_base_indices_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -8380,7 +8439,7 @@
         "label": "AttackDiscoveryFindRequestQuery",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ alert_ids: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; connector_names: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; end: Zod.ZodOptional<Zod.ZodString>; ids: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; per_page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; search: Zod.ZodOptional<Zod.ZodString>; shared: Zod.ZodOptional<KbnZodBooleanFromString>; sort_field: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodLiteral<\"@timestamp\">>>; sort_order: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEnum<[\"asc\", \"desc\"]>>>; start: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodEnum<[\"acknowledged\", \"closed\", \"open\"]>, \"many\">, (\"open\" | \"closed\" | \"acknowledged\")[], unknown>>; }, \"strip\", Zod.ZodTypeAny, { per_page: number; page: number; sort_field: \"@timestamp\"; sort_order: \"asc\" | \"desc\"; start?: string | undefined; end?: string | undefined; search?: string | undefined; ids?: string[] | undefined; status?: (\"open\" | \"closed\" | \"acknowledged\")[] | undefined; alert_ids?: string[] | undefined; shared?: any; connector_names?: string[] | undefined; }, { per_page?: number | undefined; page?: number | undefined; start?: string | undefined; end?: string | undefined; sort_field?: \"@timestamp\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; search?: string | undefined; ids?: unknown; status?: unknown; alert_ids?: unknown; shared?: any; connector_names?: unknown; }>"
+          "Zod.ZodObject<{ alert_ids: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; connector_names: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; end: Zod.ZodOptional<Zod.ZodString>; ids: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodString, \"many\">, string[], unknown>>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; per_page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; search: Zod.ZodOptional<Zod.ZodString>; shared: Zod.ZodOptional<KbnZodBooleanFromString>; sort_field: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodLiteral<\"@timestamp\">>>; sort_order: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodEnum<[\"asc\", \"desc\"]>>>; start: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodOptional<Zod.ZodEffects<Zod.ZodArray<Zod.ZodEnum<[\"acknowledged\", \"closed\", \"open\"]>, \"many\">, (\"open\" | \"closed\" | \"acknowledged\")[], unknown>>; include_unique_alert_ids: Zod.ZodOptional<KbnZodBooleanFromString>; }, \"strip\", Zod.ZodTypeAny, { per_page: number; page: number; sort_field: \"@timestamp\"; sort_order: \"asc\" | \"desc\"; start?: string | undefined; end?: string | undefined; search?: string | undefined; ids?: string[] | undefined; status?: (\"open\" | \"closed\" | \"acknowledged\")[] | undefined; alert_ids?: string[] | undefined; shared?: any; connector_names?: string[] | undefined; include_unique_alert_ids?: any; }, { per_page?: number | undefined; page?: number | undefined; start?: string | undefined; end?: string | undefined; sort_field?: \"@timestamp\" | undefined; sort_order?: \"asc\" | \"desc\" | undefined; search?: string | undefined; ids?: unknown; status?: unknown; alert_ids?: unknown; shared?: any; connector_names?: unknown; include_unique_alert_ids?: any; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -8395,7 +8454,7 @@
         "label": "AttackDiscoveryFindResponse",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ connector_names: Zod.ZodArray<Zod.ZodString, \"many\">; data: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; alertRuleUuid: Zod.ZodOptional<Zod.ZodString>; alertWorkflowStatus: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; connectorName: Zod.ZodString; alertStart: Zod.ZodOptional<Zod.ZodString>; alertUpdatedAt: Zod.ZodOptional<Zod.ZodString>; alertUpdatedByUserId: Zod.ZodOptional<Zod.ZodString>; alertUpdatedByUserName: Zod.ZodOptional<Zod.ZodString>; alertWorkflowStatusUpdatedAt: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodOptional<Zod.ZodString>; generationUuid: Zod.ZodString; id: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; riskScore: Zod.ZodOptional<Zod.ZodNumber>; summaryMarkdown: Zod.ZodString; timestamp: Zod.ZodEffects<Zod.ZodString, string, string>; title: Zod.ZodString; userId: Zod.ZodOptional<Zod.ZodString>; userName: Zod.ZodOptional<Zod.ZodString>; users: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }>, \"many\">; page: Zod.ZodNumber; per_page: Zod.ZodOptional<Zod.ZodNumber>; total: Zod.ZodNumber; unique_alert_ids_count: Zod.ZodNumber; }, \"strip\", Zod.ZodTypeAny, { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; }, { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; }>"
+          "Zod.ZodObject<{ connector_names: Zod.ZodArray<Zod.ZodString, \"many\">; data: Zod.ZodArray<Zod.ZodObject<{ alertIds: Zod.ZodArray<Zod.ZodString, \"many\">; alertRuleUuid: Zod.ZodOptional<Zod.ZodString>; alertWorkflowStatus: Zod.ZodOptional<Zod.ZodString>; connectorId: Zod.ZodString; connectorName: Zod.ZodString; alertStart: Zod.ZodOptional<Zod.ZodString>; alertUpdatedAt: Zod.ZodOptional<Zod.ZodString>; alertUpdatedByUserId: Zod.ZodOptional<Zod.ZodString>; alertUpdatedByUserName: Zod.ZodOptional<Zod.ZodString>; alertWorkflowStatusUpdatedAt: Zod.ZodOptional<Zod.ZodString>; detailsMarkdown: Zod.ZodString; entitySummaryMarkdown: Zod.ZodOptional<Zod.ZodString>; generationUuid: Zod.ZodString; id: Zod.ZodString; mitreAttackTactics: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; replacements: Zod.ZodOptional<Zod.ZodObject<{}, \"strip\", Zod.ZodString, Zod.objectOutputType<{}, Zod.ZodString, \"strip\">, Zod.objectInputType<{}, Zod.ZodString, \"strip\">>>; riskScore: Zod.ZodOptional<Zod.ZodNumber>; summaryMarkdown: Zod.ZodString; timestamp: Zod.ZodEffects<Zod.ZodString, string, string>; title: Zod.ZodString; userId: Zod.ZodOptional<Zod.ZodString>; userName: Zod.ZodOptional<Zod.ZodString>; users: Zod.ZodOptional<Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodOptional<Zod.ZodString>; name: Zod.ZodOptional<Zod.ZodString>; }, \"strip\", Zod.ZodTypeAny, { id?: string | undefined; name?: string | undefined; }, { id?: string | undefined; name?: string | undefined; }>, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }, { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }>, \"many\">; page: Zod.ZodNumber; per_page: Zod.ZodOptional<Zod.ZodNumber>; total: Zod.ZodNumber; unique_alert_ids_count: Zod.ZodNumber; unique_alert_ids: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectOutputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }, { page: number; data: { id: string; connectorId: string; timestamp: string; title: string; connectorName: string; alertIds: string[]; detailsMarkdown: string; summaryMarkdown: string; generationUuid: string; users?: { id?: string | undefined; name?: string | undefined; }[] | undefined; replacements?: Zod.objectInputType<{}, Zod.ZodString, \"strip\"> | undefined; userName?: string | undefined; entitySummaryMarkdown?: string | undefined; mitreAttackTactics?: string[] | undefined; alertRuleUuid?: string | undefined; alertWorkflowStatus?: string | undefined; alertStart?: string | undefined; alertUpdatedAt?: string | undefined; alertUpdatedByUserId?: string | undefined; alertUpdatedByUserName?: string | undefined; alertWorkflowStatusUpdatedAt?: string | undefined; riskScore?: number | undefined; userId?: string | undefined; }[]; total: number; connector_names: string[]; unique_alert_ids_count: number; per_page?: number | undefined; unique_alert_ids?: string[] | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/find_attack_discoveries_route.gen.ts",
         "deprecated": false,
@@ -10289,7 +10348,7 @@
         "label": "FindAttackDiscoveryAlertsParams",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ alertIds: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; connectorNames: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; end: Zod.ZodOptional<Zod.ZodString>; ids: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; perPage: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; search: Zod.ZodOptional<Zod.ZodString>; shared: Zod.ZodOptional<Zod.ZodBoolean>; sortField: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; sortOrder: Zod.ZodOptional<Zod.ZodString>; start: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { page: number; perPage: number; sortField: string; start?: string | undefined; end?: string | undefined; search?: string | undefined; sortOrder?: string | undefined; ids?: string[] | undefined; status?: string[] | undefined; alertIds?: string[] | undefined; shared?: boolean | undefined; connectorNames?: string[] | undefined; }, { page?: number | undefined; start?: string | undefined; end?: string | undefined; search?: string | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: string | undefined; ids?: string[] | undefined; status?: string[] | undefined; alertIds?: string[] | undefined; shared?: boolean | undefined; connectorNames?: string[] | undefined; }>"
+          "Zod.ZodObject<{ alertIds: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; connectorNames: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; end: Zod.ZodOptional<Zod.ZodString>; includeUniqueAlertIds: Zod.ZodOptional<Zod.ZodBoolean>; ids: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; page: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; perPage: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodNumber>>; search: Zod.ZodOptional<Zod.ZodString>; shared: Zod.ZodOptional<Zod.ZodBoolean>; sortField: Zod.ZodDefault<Zod.ZodOptional<Zod.ZodString>>; sortOrder: Zod.ZodOptional<Zod.ZodString>; start: Zod.ZodOptional<Zod.ZodString>; status: Zod.ZodOptional<Zod.ZodArray<Zod.ZodString, \"many\">>; }, \"strip\", Zod.ZodTypeAny, { page: number; perPage: number; sortField: string; start?: string | undefined; end?: string | undefined; search?: string | undefined; sortOrder?: string | undefined; ids?: string[] | undefined; status?: string[] | undefined; alertIds?: string[] | undefined; shared?: boolean | undefined; connectorNames?: string[] | undefined; includeUniqueAlertIds?: boolean | undefined; }, { page?: number | undefined; start?: string | undefined; end?: string | undefined; search?: string | undefined; perPage?: number | undefined; sortField?: string | undefined; sortOrder?: string | undefined; ids?: string[] | undefined; status?: string[] | undefined; alertIds?: string[] | undefined; shared?: boolean | undefined; connectorNames?: string[] | undefined; includeUniqueAlertIds?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/attack_discovery/common_attributes.gen.ts",
         "deprecated": false,
@@ -10637,21 +10696,6 @@
           "Zod.ZodObject<{ datasets: Zod.ZodArray<Zod.ZodString, \"many\">; graphs: Zod.ZodArray<Zod.ZodString, \"many\">; results: Zod.ZodArray<Zod.ZodObject<{ id: Zod.ZodString; status: Zod.ZodString; }, \"strip\", Zod.ZodTypeAny, { id: string; status: string; }, { id: string; status: string; }>, \"many\">; }, \"strip\", Zod.ZodTypeAny, { results: { id: string; status: string; }[]; datasets: string[]; graphs: string[]; }, { results: { id: string; status: string; }[]; datasets: string[]; graphs: string[]; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/evaluation/get_evaluate_route.gen.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/elastic-assistant-common",
-        "id": "def-common.GetKnowledgeBaseIndicesResponse",
-        "type": "Object",
-        "tags": [],
-        "label": "GetKnowledgeBaseIndicesResponse",
-        "description": [],
-        "signature": [
-          "Zod.ZodObject<{}, \"strip\", Zod.ZodArray<Zod.ZodString, \"many\">, Zod.objectOutputType<{}, Zod.ZodArray<Zod.ZodString, \"many\">, \"strip\">, Zod.objectInputType<{}, Zod.ZodArray<Zod.ZodString, \"many\">, \"strip\">>"
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/get_knowledge_base_indices_route.gen.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

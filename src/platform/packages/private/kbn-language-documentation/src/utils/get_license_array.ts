@@ -7,18 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { LicenseInfo, MultipleLicenseInfo } from '../types';
+
 // Helper function to get licenses array from either format
-
-export interface LicenseInfo {
-  name: string;
-  isSignatureSpecific?: boolean;
-  paramsWithLicense?: string[];
-}
-
-export interface MultipleLicenseInfo {
-  licenses: LicenseInfo[];
-  hasMultipleLicenses: boolean;
-}
 
 export function getLicensesArray(license: MultipleLicenseInfo | undefined): LicenseInfo[] {
   if (license && Array.isArray(license.licenses)) {

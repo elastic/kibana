@@ -10,6 +10,7 @@ disabled:
   - x-pack/test_serverless/shared/config.base.ts
   - x-pack/platform/test/serverless/shared/config.base.ts
   - x-pack/platform/test/serverless/api_integration/config.base.ts
+  - x-pack/platform/test/serverless/functional/config.base.ts
 
 enabled:
   # Serverless deployment-agnostic configs to run platform api-integration tests

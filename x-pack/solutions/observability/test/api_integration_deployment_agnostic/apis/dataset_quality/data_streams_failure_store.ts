@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const synthtrace = getService('synthtrace');
@@ -61,10 +61,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         data_stream: { hidden: false },
       });
 
-      await client.createComponentTemplate({
-        name: 'logs-failure-disabled@mappings',
-        dataStreamOptions: { failure_store: { enabled: true } },
-      });
       await es.indices.putIndexTemplate({
         name: disabledDs,
         index_patterns: [disabledDs],

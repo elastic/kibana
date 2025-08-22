@@ -82,6 +82,8 @@ export const calculateEndpointAuthz = (
   const canWriteProcessOperations = hasAuth('writeProcessOperations');
   const canWriteTrustedApplications = hasAuth('writeTrustedApplications');
   const canReadTrustedApplications = hasAuth('readTrustedApplications');
+  const canWriteTrustedDevices = hasAuth('writeTrustedDevices');
+  const canReadTrustedDevices = hasAuth('readTrustedDevices');
   const canWriteHostIsolationExceptions = hasAuth('writeHostIsolationExceptions');
   const canReadHostIsolationExceptions = hasAuth('readHostIsolationExceptions');
   const canAccessHostIsolationExceptions = hasAuth('accessHostIsolationExceptions');
@@ -153,6 +155,8 @@ export const calculateEndpointAuthz = (
     // ---------------------------------------------------------
     canWriteTrustedApplications,
     canReadTrustedApplications,
+    canWriteTrustedDevices: canWriteTrustedDevices && isEnterpriseLicense,
+    canReadTrustedDevices: canReadTrustedDevices && isEnterpriseLicense,
     canWriteHostIsolationExceptions: canWriteHostIsolationExceptions && isPlatinumPlusLicense,
     canAccessHostIsolationExceptions: canAccessHostIsolationExceptions && isPlatinumPlusLicense,
     canReadHostIsolationExceptions,
@@ -216,6 +220,8 @@ export const getEndpointAuthzInitialState = (): EndpointAuthz => {
     canWriteScanOperations: false,
     canWriteTrustedApplications: false,
     canReadTrustedApplications: false,
+    canWriteTrustedDevices: false,
+    canReadTrustedDevices: false,
     canWriteHostIsolationExceptions: false,
     canAccessHostIsolationExceptions: false,
     canReadHostIsolationExceptions: false,

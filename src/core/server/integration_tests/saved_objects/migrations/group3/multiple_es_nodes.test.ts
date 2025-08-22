@@ -17,9 +17,9 @@ import {
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { getFips } from 'crypto';
-import { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
+import type { SavedObjectModelUnsafeTransformFn } from '@kbn/core-saved-objects-server';
 
 const LOG_FILE_PREFIX = 'migration_test_multiple_es_nodes';
 

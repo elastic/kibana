@@ -12,13 +12,14 @@ const n = recast.types.namedTypes;
 import fs from 'fs';
 import path from 'path';
 import { functions } from '../src/sections/generated/scalar_functions';
-import { getLicenseInfo } from '../src/utils/get_license_info';
-import { FunctionDefinition } from '../src/types';
+import { getLicenseInfoForFunctions } from '../src/utils/get_license_info';
+import type { FunctionDefinition, MultipleLicenseInfo } from '../src/types';
+import { loadElasticDefinitions } from '../src/utils/load_elastic_definitions';
 
 interface DocsSectionContent {
   description: string;
   preview: boolean;
-  license: ReturnType<typeof getLicenseInfo> | undefined;
+  license: MultipleLicenseInfo | undefined;
 }
 
 (function () {
@@ -87,9 +88,8 @@ function loadFunctionDocs({
   // Read the directory
   const docsFiles = fs.readdirSync(pathToDocs);
 
-  const ESFunctionDefinitions = fs
-    .readdirSync(pathToDefs)
-    .map((file) => JSON.parse(fs.readFileSync(`${pathToDefs}/${file}`, 'utf-8')));
+  const fnDefinitionsMap = loadElasticDefinitions<FunctionDefinition>(pathToDefs);
+  const ESFunctionDefinitions = Array.from(fnDefinitionsMap.values());
 
   const docs = new Map<string, DocsSectionContent>();
 
@@ -118,20 +118,14 @@ function loadFunctionDocs({
         functionDefinition.titleName ? functionDefinition.titleName : baseFunctionName
       }${functionDefinition.operator ? ` (${functionDefinition.operator})` : ''}`;
 
-      // Create a map of function definitions for quick lookup
-      const fnDefinitionMap: Map<string, FunctionDefinition> = new Map();
-      ESFunctionDefinitions.forEach((def) => {
-        fnDefinitionMap.set(def.name, def);
-      });
-
       // Find corresponding function definition for license information
-      const fnDefinition = fnDefinitionMap.get(baseFunctionName);
+      const fnDefinition = fnDefinitionsMap.get(baseFunctionName);
 
       // Add the function name and content to the map
       docs.set(functionName, {
         description: content,
         preview: functionDefinition.preview,
-        license: getLicenseInfo(fnDefinition),
+        license: getLicenseInfoForFunctions(fnDefinition),
       });
     }
   }

@@ -7,11 +7,13 @@
 
 import React, { useMemo } from 'react';
 import { EuiText } from '@elastic/eui';
-import { useFormContext, FieldError } from 'react-hook-form';
+import type { FieldError } from 'react-hook-form';
+import { useFormContext } from 'react-hook-form';
 import { Step } from './step';
 import { FORM_CONFIG } from '../form/form_config';
 import { Field } from '../form/field';
-import { ConfigKey, FormMonitorType, StepKey } from '../types';
+import type { FormMonitorType, StepKey } from '../types';
+import { ConfigKey } from '../types';
 
 export const StepFields = ({
   description,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LanguageDefinition } from '@kbn/search-api-panels';
+import type { LanguageDefinition } from '@kbn/search-api-panels';
 
 import { INDEX_NAME_PLACEHOLDER } from './constants';
 

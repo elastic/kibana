@@ -88,7 +88,11 @@ printf "%s\n" "${results[@]}"
 
 # Scout reporter
 echo "--- Upload Scout reporter events to AppEx QA's team cluster"
-node scripts/scout upload-events --dontFailOnError
+if [[ "${SCOUT_REPORTER_ENABLED:-}" == "true" ]]; then
+  node scripts/scout upload-events --dontFailOnError
+else
+  echo "⚠️ The SCOUT_REPORTER_ENABLED environment variable is not 'true'. Skipping event upload."
+fi
 
 # Force exit 0 to ensure the next build step starts.
 exit 0
