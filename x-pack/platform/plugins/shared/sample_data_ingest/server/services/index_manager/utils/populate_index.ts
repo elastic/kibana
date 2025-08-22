@@ -32,19 +32,18 @@ export const populateIndex = async ({
   try {
     const contentEntries = archive.getEntryPaths().filter(isArtifactContentFilePath);
 
-    await Promise.all(
-      contentEntries.map(async (entryPath) => {
-        log.debug(`Indexing content for entry ${entryPath}`);
-        const contentBuffer = await archive.getEntryContent(entryPath);
-        await indexContentFile({
-          indexName,
-          esClient,
-          contentBuffer,
-          legacySemanticText,
-          elserInferenceId,
-        });
-      })
-    );
+    for (const entryPath of contentEntries) {
+      log.debug(`Indexing content for entry ${entryPath}`);
+
+      const contentBuffer = await archive.getEntryContent(entryPath);
+      await indexContentFile({
+        indexName,
+        esClient,
+        contentBuffer,
+        legacySemanticText,
+        elserInferenceId,
+      });
+    }
 
     await esClient.indices.refresh({ index: indexName });
 
