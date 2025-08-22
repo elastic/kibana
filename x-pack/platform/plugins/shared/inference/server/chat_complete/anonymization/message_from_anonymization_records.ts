@@ -22,8 +22,8 @@ function unescapePointerToken(token: string): string {
  * Throws an error if the path is invalid or doesn't exist.
  */
 function setByPointer(root: Message, pointer: string, value: string): void {
-  if (!pointer || pointer[0] !== '/') {
-    throw new Error('Invalid JSON Pointer format');
+  if (!pointer?.startsWith('/')) {
+    throw new Error(`Invalid JSON Pointer: must start with "/". Got: "${pointer}"`);
   }
 
   const pathParts = pointer.split('/').slice(1).map(unescapePointerToken);
@@ -34,25 +34,38 @@ function setByPointer(root: Message, pointer: string, value: string): void {
     const pathPart = pathParts[i];
 
     if (Array.isArray(cursor)) {
-      // Convert string path part to numeric array index
-      cursor = cursor[Number(pathPart)];
+      const idx = Number(pathPart);
+      if (!Number.isInteger(idx) || idx < 0 || idx >= cursor.length) {
+        throw new Error(
+          `Invalid path segment "${pathPart}" at "${pointer}": array index out of bounds`
+        );
+      }
+      cursor = cursor[idx];
     } else if (cursor && typeof cursor === 'object') {
+      if (!Object.prototype.hasOwnProperty.call(cursor, pathPart)) {
+        throw new Error(`Invalid path segment "${pathPart}" at "${pointer}": missing property`);
+      }
       cursor = (cursor as Record<string, unknown>)[pathPart];
     } else {
-      throw new Error(`Failed to set anonymized value at ${pointer}`);
+      throw new Error(`Invalid path at "${pointer}": expected object or array while traversing`);
     }
   }
 
   // Set the value at the final location
   const leaf = pathParts[pathParts.length - 1];
   if (Array.isArray(cursor)) {
-    // Set array element at numeric index
-    cursor[Number(leaf)] = value;
+    const idx = Number(leaf);
+    if (!Number.isInteger(idx) || idx < 0 || idx >= cursor.length) {
+      throw new Error(`Invalid leaf at "${pointer}": array index out of bounds`);
+    }
+    cursor[idx] = value;
   } else if (cursor && typeof cursor === 'object') {
-    // Set object property
+    if (!Object.prototype.hasOwnProperty.call(cursor, leaf)) {
+      throw new Error(`Invalid leaf at "${pointer}": property does not exist`);
+    }
     (cursor as Record<string, unknown>)[leaf] = value;
   } else {
-    throw new Error(`Failed to set anonymized value at ${pointer}`);
+    throw new Error(`Invalid path at "${pointer}": expected object or array while traversing`);
   }
 }
 

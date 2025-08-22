@@ -11,7 +11,7 @@ import type { AnonymizationRecord } from './types';
 import { messageFromAnonymizationRecords } from './message_from_anonymization_records';
 
 describe('messageFromAnonymizationRecords', () => {
-  test('applies single leaf at /content for user string content', () => {
+  it('applies single leaf at /content for user string content', () => {
     const original: Message = {
       role: MessageRole.User,
       content: 'email a@example.com',
@@ -29,7 +29,7 @@ describe('messageFromAnonymizationRecords', () => {
     });
   });
 
-  test('applies nested leaf under /content array items (index preserved)', () => {
+  it('applies nested leaf under /content array items (index preserved)', () => {
     const original: Message = {
       role: MessageRole.User,
       content: [
@@ -55,7 +55,7 @@ describe('messageFromAnonymizationRecords', () => {
     });
   });
 
-  test('applies to tool response leaf and preserves other types', () => {
+  it('applies to tool response leaf and preserves other types', () => {
     const original: Message = {
       role: MessageRole.Tool,
       name: 'context',
@@ -88,7 +88,7 @@ describe('messageFromAnonymizationRecords', () => {
     });
   });
 
-  test('handles RFC-6901 escaped keys ("/" → "~1", "~" → "~0")', () => {
+  it('handles RFC-6901 escaped keys ("/" → "~1", "~" → "~0")', () => {
     const original: Message = {
       role: MessageRole.Tool,
       name: 'tool',
@@ -120,7 +120,7 @@ describe('messageFromAnonymizationRecords', () => {
     });
   });
 
-  test('non-existent paths throw errors', () => {
+  it('throws on invalid path under a primitive (property does not exist)', () => {
     const original: Message = {
       role: MessageRole.User,
       content: 'hello',
@@ -132,7 +132,90 @@ describe('messageFromAnonymizationRecords', () => {
     };
 
     expect(() => messageFromAnonymizationRecords(original, record)).toThrow(
-      'Failed to set anonymized value'
+      'Invalid path at "/content/missing": expected object or array while traversing'
+    );
+  });
+
+  it('refuses to create new properties on existing objects', () => {
+    const original: Message = {
+      role: MessageRole.User,
+      content: [
+        { type: 'text', text: 'first' },
+        { type: 'text', text: 'second' },
+      ],
+    };
+
+    const record: AnonymizationRecord = {
+      '/content/1/other': 'X',
+    };
+
+    expect(() => messageFromAnonymizationRecords(original, record)).toThrow(
+      'Invalid leaf at "/content/1/other": property does not exist'
+    );
+  });
+
+  it('throws on array out-of-bounds at path segment', () => {
+    const original: Message = {
+      role: MessageRole.User,
+      content: [
+        { type: 'text', text: 'a' },
+        { type: 'text', text: 'b' },
+      ],
+    };
+
+    const record: AnonymizationRecord = {
+      '/content/2/text': 'X',
+    };
+
+    expect(() => messageFromAnonymizationRecords(original, record)).toThrow(
+      'Invalid path segment "2" at "/content/2/text": array index out of bounds'
+    );
+  });
+
+  it('throws when traversing into a non-object/array (primitive in path)', () => {
+    const original: Message = {
+      role: MessageRole.User,
+      content: 'hello',
+    };
+
+    const record: AnonymizationRecord = {
+      '/content/text': 'X',
+    };
+
+    expect(() => messageFromAnonymizationRecords(original, record)).toThrow(
+      'Invalid path at "/content/text": expected object or array while traversing'
+    );
+  });
+
+  it('throws when a parent object property is missing', () => {
+    const original: Message = {
+      role: MessageRole.Tool,
+      name: 'ctx',
+      toolCallId: 't1',
+      response: {},
+    };
+
+    const record: AnonymizationRecord = {
+      '/response/nested/msg': 'X',
+    };
+
+    expect(() => messageFromAnonymizationRecords(original, record)).toThrow(
+      'Invalid path segment "nested" at "/response/nested/msg": missing property'
+    );
+  });
+
+  it('requires pointers to start with "/"', () => {
+    const original: Message = {
+      role: MessageRole.User,
+      content: 'hello',
+    };
+
+    const record: AnonymizationRecord = {
+      content: 'hi',
+    } as any;
+
+    expect(() => messageFromAnonymizationRecords(original, record)).toThrow(
+      'Invalid JSON Pointer: must start with "/". Got: "content"'
     );
   });
 });
