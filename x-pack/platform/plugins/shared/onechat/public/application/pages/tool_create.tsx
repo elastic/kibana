@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { CreateEsqlTool } from '../components/tools/esql/create_esql_tool';
+import { CreateTool } from '../components/tools/create_tool';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
 import { appPaths } from '../utils/app_paths';
 import { labels } from '../utils/i18n';
@@ -22,5 +22,5 @@ export const OnechatToolCreatePage = () => {
       path: appPaths.tools.new,
     },
   ]);
-  return <CreateEsqlTool />;
+  return <CreateTool />;
 };

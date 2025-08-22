@@ -15,10 +15,9 @@
       "esql",
       "features",
       "inference",
-      "kibanaUtils",
       "lens"
     ],
-    "requiredBundles": ["kibanaReact"],
+    "requiredBundles": ["kibanaReact", "kibanaUtils",],
     "optionalPlugins": ["cloud"],
     "extraPublicDirs": []
   }

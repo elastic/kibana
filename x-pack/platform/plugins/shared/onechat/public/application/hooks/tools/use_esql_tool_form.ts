@@ -5,21 +5,23 @@
  * 2.0.
  */
 
+import { ToolType } from '@kbn/onechat-common';
 import { useForm } from 'react-hook-form';
-import { useEsqlToolFormValidationResolver } from '../../components/tools/esql/form/validation/esql_tool_form_validation';
-import type { OnechatEsqlToolFormData } from '../../components/tools/esql/form/types/esql_tool_form_types';
+import type { EsqlToolFormData } from '../../components/tools/form/types/tool_form_types';
+import { useEsqlToolFormValidationResolver } from '../../components/tools/form/validation/tool_form_validation';
 
-const getDefaultValues = (): OnechatEsqlToolFormData => ({
-  name: '',
+const getDefaultValues = (): EsqlToolFormData => ({
+  toolId: '',
   description: '',
   esql: '',
-  tags: [],
+  labels: [],
   params: [],
+  type: ToolType.esql,
 });
 
 export const useEsqlToolForm = () => {
   const resolver = useEsqlToolFormValidationResolver();
-  const form = useForm<OnechatEsqlToolFormData>({
+  const form = useForm<EsqlToolFormData>({
     defaultValues: getDefaultValues(),
     resolver,
     mode: 'onBlur',

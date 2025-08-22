@@ -9,7 +9,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFormErrorText,
   EuiTable,
   EuiTableBody,
   EuiTableHeader,
@@ -20,25 +19,20 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { ESQLLangEditor } from '@kbn/esql/public';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { defer, noop } from 'lodash';
-import React, { useCallback, useRef } from 'react';
-import { Controller, useFieldArray, useFormContext, useWatch } from 'react-hook-form';
-import { promisify } from 'util';
-import { useEsqlEditorParams } from '../hooks/use_esql_editor_params';
+import { defer } from 'lodash';
+import React, { useCallback } from 'react';
+import { useFieldArray, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
-import type { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { EsqlParam, EsqlToolFormData } from '../types/tool_form_types';
 import { EsqlParamRow } from './esql_param_row';
-
-export const OnechatEsqlEditorField = React.memo(() => {
+import { useEsqlEditorParams } from '../hooks/use_esql_editor_params';
+export const EsqlParams = () => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
 
-  const { control, getValues, formState, trigger, setFocus } =
-    useFormContext<OnechatEsqlToolFormData>();
-  const { errors, isSubmitted } = formState;
+  const { control, trigger, getValues, setFocus } = useFormContext<EsqlToolFormData>();
 
   const {
     fields: paramFields,
@@ -55,8 +49,6 @@ export const OnechatEsqlEditorField = React.memo(() => {
     name: 'params',
   });
 
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-
   useEsqlEditorParams({
     params,
     addParam: (name) => appendParamField({ name, description: '', type: ES_FIELD_TYPES.TEXT }),
@@ -72,7 +64,7 @@ export const OnechatEsqlEditorField = React.memo(() => {
         paramNamesMap[param.name] = param;
       }
       return paramNamesMap;
-    }, {} as Record<string, OnechatEsqlParam>);
+    }, {} as Record<string, EsqlParam>);
 
     const updatedParams = [...new Set(inferredParamNamesFromEsql)].map((inferredParamName) => {
       return (
@@ -93,44 +85,7 @@ export const OnechatEsqlEditorField = React.memo(() => {
   }, [getValues, replaceParamFields, triggerEsqlParamWarnings, setFocus]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="m">
-      <EuiFlexGroup direction="column" gutterSize="xs">
-        <Controller
-          control={control}
-          name="esql"
-          render={({ field: { onBlur, ...field } }) => (
-            <div
-              onBlur={() => {
-                if (isSubmitted) {
-                  trigger('esql');
-                } else {
-                  triggerEsqlParamWarnings();
-                }
-              }}
-            >
-              <ESQLLangEditor
-                query={{ esql: field.value }}
-                onTextLangQueryChange={(query) => {
-                  field.onChange(query.esql);
-                  if (isSubmitted) {
-                    triggerEsqlParamWarnings();
-                  }
-                }}
-                onTextLangQuerySubmit={promisify(noop)} // Required prop, but we don't need it
-                editorIsInline
-                hideRunQueryText
-                hasOutline
-                hideRunQueryButton
-                hideQueryHistory
-                hideTimeFilterInfo
-                disableAutoFocus
-                errors={[]} // Hides the initial error message, won't prevent future errors
-              />
-            </div>
-          )}
-        />
-        {errors.esql?.message && <EuiFormErrorText>{errors.esql.message}</EuiFormErrorText>}
-      </EuiFlexGroup>
+    <>
       <EuiFlexGroup gutterSize={isMobile ? 's' : 'm'}>
         <EuiFlexItem>
           <EuiButton
@@ -162,7 +117,6 @@ export const OnechatEsqlEditorField = React.memo(() => {
       </EuiFlexGroup>
       {paramFields.length > 0 ? (
         <div
-          ref={tableContainerRef}
           css={css`
             background-color: ${euiTheme.colors.backgroundBaseSubdued};
             border-radius: ${euiTheme.border.radius.medium};
@@ -200,6 +154,6 @@ export const OnechatEsqlEditorField = React.memo(() => {
           {i18nMessages.noParamsMessage}
         </EuiText>
       )}
-    </EuiFlexGroup>
+    </>
   );
-});
+};
