@@ -54,9 +54,6 @@ export const createNavigationTree = ({
             },
           },
           {
-            link: 'workflows',
-          },
-          {
             link: 'observability-overview:alerts',
           },
           ...(isCasesAvailable

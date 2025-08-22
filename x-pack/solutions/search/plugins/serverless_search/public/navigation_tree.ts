@@ -50,9 +50,6 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             },
           },
           {
-            link: 'workflows',
-          },
-          {
             title: i18n.translate('xpack.serverlessSearch.nav.chat', {
               defaultMessage: 'Chat',
             }),

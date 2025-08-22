@@ -113,9 +113,6 @@ export const getNavigationTreeDefinition = ({
                   link: 'dashboards',
                 },
                 {
-                  link: 'workflows',
-                },
-                {
                   children: [
                     { link: 'onechat:conversations' },
                     { link: 'onechat:tools' },

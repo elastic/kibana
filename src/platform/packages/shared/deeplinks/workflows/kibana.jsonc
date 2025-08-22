@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/deeplinks-workflows",
-  "owner": ["@elastic/workflows-eng"],
-  "group": "platform",
-  "visibility": "shared"
-}
