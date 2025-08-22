@@ -11,6 +11,7 @@ import { EuiCallOut, EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isNestedField } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import {
   getIndexPatternSelectComponent,
   getIndexPatternService,
@@ -18,7 +19,6 @@ import {
 } from '../kibana_services';
 import { getDataViewLabel, getDataViewSelectPlaceholder } from '../../common/i18n_getters';
 import { ES_GEO_FIELD_TYPE, ES_GEO_FIELD_TYPES } from '../../common/constants';
-import type { DataView } from '@kbn/data-plugin/common';
 
 interface Props {
   onChange: (indexPattern: DataView) => void;

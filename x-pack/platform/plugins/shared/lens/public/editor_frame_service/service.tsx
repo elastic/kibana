@@ -15,9 +15,7 @@ import type {
   DataPublicPluginStart,
   TimefilterContract,
 } from '@kbn/data-plugin/public';
-import type {
-  DataViewsContract,
-} from '@kbn/data-views-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';

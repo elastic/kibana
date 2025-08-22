@@ -41,9 +41,7 @@ describe('Kuery field suggestions', () => {
       querySuggestionsArgs,
       mockKueryNode({ prefix, suffix })
     );
-    const filterableFields = (indexPatternResponse.fields as DataViewField[]).filter(
-      isFilterable
-    );
+    const filterableFields = (indexPatternResponse.fields as DataViewField[]).filter(isFilterable);
 
     expect(suggestions.length).toBe(filterableFields.length);
   });

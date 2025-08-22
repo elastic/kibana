@@ -26,9 +26,7 @@ export function extractLayerDescriptorParams(vis: Vis<TileMapVisParams>) {
   } else if (vis.data.indexPattern) {
     // attempt to default to first geo point field when geohash is not configured yet
     const geoField = vis.data.indexPattern.fields.find((field) => {
-      return (
-        !isNestedField(field) && field.aggregatable && field.type === 'geo_point'
-      );
+      return !isNestedField(field) && field.aggregatable && field.type === 'geo_point';
     });
     if (geoField) {
       params.geoFieldName = geoField.name;

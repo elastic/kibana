@@ -112,9 +112,7 @@ export class UpdateSourceEditor extends Component<Props, State> {
       supportsClustering: supportsGeoTileAgg(geoField),
       clusteringDisabledReason: getGeoTileAggNotSupportedReason(geoField),
       sourceFields,
-      sortFields: indexPattern.fields.filter(
-        (field) => field.sortable && !isNestedField(field)
-      ), // todo change sort fields to use fields
+      sortFields: indexPattern.fields.filter((field) => field.sortable && !isNestedField(field)), // todo change sort fields to use fields
     });
   }
   _onTooltipPropertiesChange = (propertyNames: string[]) => {
