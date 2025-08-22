@@ -12,4 +12,5 @@ export interface RuleMigrationFilters extends SiemMigrationFilters {
   installed?: boolean;
   installable?: boolean;
   prebuilt?: boolean;
+  missingIndex?: boolean;
 }

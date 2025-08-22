@@ -16,7 +16,7 @@ import { getValidationNode } from './nodes/validation';
 import { translateDashboardPanelState } from './state';
 import type { TranslatePanelGraphParams, TranslateDashboardPanelState } from './types';
 import { migrateDashboardConfigSchema } from '../../state';
-import { getSelectIndexPatternNode } from './nodes/select_index_pattern/select_index_pattern';
+import { getSelectIndexPatternNode } from './nodes/select_index_pattern';
 
 // How many times we will try to self-heal when validation fails, to prevent infinite graph recursions
 const MAX_VALIDATION_ITERATIONS = 3;

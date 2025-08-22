@@ -39,7 +39,10 @@ export const registerSiemDashboardMigrationsStopRoute = (
         withExistingDashboardMigration(
           async (context, req, res): Promise<IKibanaResponse<StopDashboardsMigrationResponse>> => {
             const migrationId = req.params.migration_id;
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'dashboards'
+            );
             try {
               const ctx = await context.resolve(['securitySolution']);
               const dashboardMigrationsClient =

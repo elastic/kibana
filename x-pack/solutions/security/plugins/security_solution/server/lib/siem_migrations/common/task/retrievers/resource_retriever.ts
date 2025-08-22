@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { ResourceIdentifierClass } from '../../../../../../common/siem_migrations/resources/resource_identifier';
+import type { ResourceIdentifierConstructor } from '../../../../../../common/siem_migrations/resources/resource_identifier';
+import type { OriginalItem } from '../../../../../../common/siem_migrations/types';
 // TODO: move resource related types to migration.gen.ts
 import type {
   RuleMigrationResource as MigrationResource,
@@ -25,13 +26,12 @@ interface ExistingResources {
 }
 
 export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
-  protected abstract ResourceIdentifierClass: ResourceIdentifierClass<I>;
-
   private existingResources?: ExistingResources;
 
   constructor(
-    private readonly migrationId: string,
-    private readonly resourcesDataClient: SiemMigrationsDataResourcesClient
+    protected readonly migrationId: string,
+    protected readonly resourcesDataClient: SiemMigrationsDataResourcesClient,
+    protected readonly ResourceIdentifier: ResourceIdentifierConstructor<I>
   ) {}
 
   public async initialize(): Promise<void> {
@@ -52,14 +52,14 @@ export abstract class ResourceRetriever<I extends ItemDocument = ItemDocument> {
     this.existingResources = existingResources;
   }
 
-  public async getResources(migrationItem: I): Promise<MigrationResources> {
+  public async getResources(migrationItem: OriginalItem<I>): Promise<MigrationResources> {
     const existingResources = this.existingResources;
     if (!existingResources) {
       throw new Error('initialize must be called before calling getResources');
     }
 
-    const resourceIdentifier = new this.ResourceIdentifierClass(migrationItem);
-    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal();
+    const resourceIdentifier = new this.ResourceIdentifier(migrationItem.vendor);
+    const resourcesIdentifiedFromRule = resourceIdentifier.fromOriginal(migrationItem);
 
     const macrosFound = new Map<string, MigrationDefinedResource>();
     const lookupsFound = new Map<string, MigrationDefinedResource>();

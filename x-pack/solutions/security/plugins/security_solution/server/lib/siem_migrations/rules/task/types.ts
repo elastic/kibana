@@ -8,7 +8,7 @@
 import type { AuthenticatedUser } from '@kbn/core/server';
 import type { LangSmithEvaluationOptions } from '../../../../../common/siem_migrations/model/common.gen';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type { StoredRuleMigrationRule } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigrationRule } from '../types';
 import type { getRuleMigrationAgent } from './agent';
 import type { RuleMigrationTelemetryClient } from './rule_migrations_telemetry_client';
 import type { ChatModel } from '../../common/task/util/actions_client_chat';

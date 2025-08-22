@@ -13,7 +13,7 @@ import {
   CreateRuleMigrationRulesRequestBody,
   CreateRuleMigrationRulesRequestParams,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
@@ -73,9 +73,9 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
               await ruleMigrationsClient.data.items.create(ruleMigrations);
 
               // Create identified resource documents without content to keep track of them
-              const resourceIdentifier = new ResourceIdentifier(firstOriginalRule.vendor);
+              const resourceIdentifier = new RuleResourceIdentifier(firstOriginalRule.vendor);
               const resources = resourceIdentifier
-                .fromOriginalRules(originalRules)
+                .fromOriginals(originalRules)
                 .map((resource) => ({ ...resource, migration_id: migrationId }));
 
               if (resources.length > 0) {

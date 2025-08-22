@@ -13,7 +13,7 @@ import type { getDashboardMigrationAgent } from './agent';
 import type { DashboardMigrationTelemetryClient } from './dashboard_migrations_telemetry_client';
 import type { ChatModel } from '../../common/task/util/actions_client_chat';
 import type { DashboardMigrationsRetriever } from './retrievers';
-import type { MigrateDashboardGraphConfig } from './agent/types';
+import type { MigrateDashboardConfig } from './agent/types';
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 import type { MigrationResources } from '../../common/task/retrievers/resource_retriever';
 
@@ -33,7 +33,7 @@ export interface DashboardMigrationTaskCreateClientParams {
 export interface DashboardMigrationTaskStartParams {
   migrationId: string;
   connectorId: string;
-  invocationConfig: MigrateDashboardGraphConfig;
+  invocationConfig: MigrateDashboardConfig;
 }
 
 export interface DashboardMigrationTaskRunParams extends DashboardMigrationTaskStartParams {
@@ -62,6 +62,6 @@ export interface DashboardMigrationTaskEvaluateParams {
   evaluationId: string;
   connectorId: string;
   langsmithOptions: LangSmithEvaluationOptions;
-  invocationConfig: MigrateDashboardGraphConfig;
+  invocationConfig: MigrateDashboardConfig;
   abortController: AbortController;
 }

@@ -23,7 +23,7 @@ import {
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { dsl } from './dsl_queries';
-import { MAX_ES_SEARCH_SIZE } from '../constants';
+import { MAX_ES_SEARCH_SIZE, SIEM_RULE_MIGRATION_INDEX_PATTERN_PLACEHOLDER } from '../constants';
 import type {
   CreateMigrationItemInput,
   SiemMigrationItemSort,

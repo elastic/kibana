@@ -30,11 +30,13 @@ export interface SiemMigrationsClientDependencies {
   telemetry: AnalyticsServiceSetup;
 }
 
-export interface SiemMigrationsCommonCreateClientParams {
+export interface SiemMigrationsCreateClientParams<
+  D extends SiemMigrationsClientDependencies = SiemMigrationsClientDependencies
+> {
   request: KibanaRequest;
   currentUser: AuthenticatedUser | null;
   spaceId: string;
-  dependencies: SiemMigrationsClientDependencies;
+  dependencies: D;
 }
 
 export type SiemMigrationsIndexNameProvider = () => Promise<string>;

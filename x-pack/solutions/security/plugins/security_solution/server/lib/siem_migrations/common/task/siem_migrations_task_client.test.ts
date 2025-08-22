@@ -12,36 +12,42 @@ import {
   SiemMigrationStatus,
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
-import { RuleMigrationTaskRunner } from './siem_migrations_task_runner';
+import type { SiemMigrationTaskRunnerConstructor } from './siem_migrations_task_runner';
+import { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type { StoredSiemMigration } from '../types';
 import type { SiemMigrationTaskStartParams } from './types';
-import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
-import type { SiemMigrationDataStats } from '../data/siem_migrations_data_item_client';
+import { createSiemMigrationsDataClientMock } from '../data/__mocks__/mocks';
+import type { SiemMigrationDataStats } from '../data/types';
 import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/rules/types';
-import type { SiemMigrationsClientDependencies } from '../types';
+import type { SiemMigrationsClientDependencies, StoredSiemMigration } from '../types';
 
-jest.mock('./rule_migrations_task_runner', () => {
-  return {
-    RuleMigrationTaskRunner: jest.fn().mockImplementation(() => {
-      return {
-        setup: jest.fn().mockResolvedValue(undefined),
-        run: jest.fn().mockResolvedValue(undefined),
-        abortController: { abort: jest.fn() },
-      };
-    }),
-  };
-});
+jest.mock('./siem_migrations_task_runner');
 
 const currentUser = {} as AuthenticatedUser;
 const dependencies = {} as SiemMigrationsClientDependencies;
 const migrationId = 'migration1';
 
+const mockRunnerInstance = {
+  setup: jest.fn().mockResolvedValue(undefined),
+  run: jest.fn().mockResolvedValue(undefined),
+  abortController: { abort: jest.fn() },
+} as unknown as SiemMigrationTaskRunner;
+
+const MockTaskRunnerClass =
+  SiemMigrationTaskRunner as unknown as jest.MockedClass<SiemMigrationTaskRunnerConstructor>;
+
+MockTaskRunnerClass.mockImplementation(() => mockRunnerInstance);
+
+class TestTaskClient extends SiemMigrationsTaskClient {
+  TaskRunnerClass = MockTaskRunnerClass;
+  EvaluatorClass = undefined;
+}
+
 describe('RuleMigrationsTaskClient', () => {
   let migrationsRunning: MigrationsRunning;
   let logger: MockedLogger;
-  let data: ReturnType<typeof createRuleMigrationsDataClientMock>;
+  let data: ReturnType<typeof createSiemMigrationsDataClientMock>;
   const params: SiemMigrationTaskStartParams = {
     migrationId,
     connectorId: 'connector1',
@@ -52,41 +58,29 @@ describe('RuleMigrationsTaskClient', () => {
     migrationsRunning = new Map();
     logger = loggerMock.create();
 
-    data = createRuleMigrationsDataClientMock();
+    data = createSiemMigrationsDataClientMock();
     // @ts-expect-error resetting private property for each test.
-    SiemMigrationsTaskClient.migrationsLastError = new Map();
+    TestTaskClient.migrationsLastError = new Map();
     jest.clearAllMocks();
   });
 
   describe('start', () => {
     it('should not start if migration is already running', async () => {
       // Pre-populate with the migration id.
-      migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      migrationsRunning.set(migrationId, {} as SiemMigrationTaskRunner);
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.start(params);
       expect(result).toEqual({ exists: true, started: false });
-      expect(data.rules.updateStatus).not.toHaveBeenCalled();
+      expect(data.items.updateStatus).not.toHaveBeenCalled();
     });
 
     it('should not start if there are no rules to migrate (total = 0)', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 0, pending: 0, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 0, pending: 0, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.start(params);
-      expect(data.rules.updateStatus).toHaveBeenCalledWith(
+      expect(data.items.updateStatus).toHaveBeenCalledWith(
         migrationId,
         { status: SiemMigrationStatus.PROCESSING },
         SiemMigrationStatus.PENDING,
@@ -96,43 +90,24 @@ describe('RuleMigrationsTaskClient', () => {
     });
 
     it('should not start if there are no pending rules', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 0, completed: 10, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 0, completed: 10, failed: 0 },
       } as SiemMigrationDataStats);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.start(params);
       expect(result).toEqual({ exists: true, started: false });
     });
 
     it('should start migration successfully', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 5, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
-      const mockedRunnerInstance = {
-        setup: jest.fn().mockResolvedValue(undefined),
-        run: jest.fn().mockResolvedValue(undefined),
-        abortController: { abort: jest.fn() },
-      };
-      // Use our custom mock for this test.
-      (RuleMigrationTaskRunner as jest.Mock).mockImplementationOnce(() => mockedRunnerInstance);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.start(params);
       expect(result).toEqual({ exists: true, started: true });
       expect(logger.get).toHaveBeenCalledWith(migrationId);
-      expect(mockedRunnerInstance.setup).toHaveBeenCalledWith(params.connectorId);
+      expect(mockRunnerInstance.setup).toHaveBeenCalledWith(params.connectorId);
       expect(logger.get(migrationId).info).toHaveBeenCalledWith('Starting migration');
       expect(migrationsRunning.has(migrationId)).toBe(true);
 
@@ -140,46 +115,34 @@ describe('RuleMigrationsTaskClient', () => {
       await new Promise(process.nextTick);
       expect(migrationsRunning.has(migrationId)).toBe(false);
       // @ts-expect-error check private property
-      expect(SiemMigrationsTaskClient.migrationsLastError.has(migrationId)).toBe(false);
+      expect(TestTaskClient.migrationsLastError.has(migrationId)).toBe(false);
     });
 
     it('should throw error if a race condition occurs after setup', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 5, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
       const mockedRunnerInstance = {
         setup: jest.fn().mockImplementationOnce(() => {
           // Simulate a race condition by setting the migration as running during setup.
-          migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner);
+          migrationsRunning.set(migrationId, {} as SiemMigrationTaskRunner);
           return Promise.resolve();
         }),
         run: jest.fn().mockResolvedValue(undefined),
         abortController: { abort: jest.fn() },
       };
-      (RuleMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
+      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       await expect(client.start(params)).rejects.toThrow('Task already running for this migration');
     });
 
     it('should mark migration as started by calling saveAsStarted', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 5, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
 
       await client.start(params);
       expect(data.migrations.saveAsStarted).toHaveBeenCalledWith({
@@ -190,17 +153,11 @@ describe('RuleMigrationsTaskClient', () => {
 
     it('should mark migration as ended by calling saveAsEnded if run completes successfully', async () => {
       migrationsRunning = new Map();
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 5, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 5, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
 
       await client.start(params);
       // Allow the asynchronous run() call to complete its finally callback.
@@ -211,32 +168,20 @@ describe('RuleMigrationsTaskClient', () => {
 
   describe('updateToRetry', () => {
     it('should not update if migration is currently running', async () => {
-      migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      migrationsRunning.set(migrationId, {} as SiemMigrationTaskRunner);
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const filter: RuleMigrationFilters = { fullyTranslated: true };
       const result = await client.updateToRetry(migrationId, filter);
       expect(result).toEqual({ updated: false });
-      expect(data.rules.updateStatus).not.toHaveBeenCalled();
+      expect(data.items.updateStatus).not.toHaveBeenCalled();
     });
 
     it('should update to retry if migration is not running', async () => {
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const filter: RuleMigrationFilters = { fullyTranslated: true };
       const result = await client.updateToRetry(migrationId, filter);
       expect(filter.installed).toBe(false);
-      expect(data.rules.updateStatus).toHaveBeenCalledWith(
+      expect(data.items.updateStatus).toHaveBeenCalledWith(
         migrationId,
         { fullyTranslated: true, installed: false },
         SiemMigrationStatus.PENDING,
@@ -248,84 +193,60 @@ describe('RuleMigrationsTaskClient', () => {
 
   describe('getStats', () => {
     it('should return RUNNING status if migration is running', async () => {
-      migrationsRunning.set(migrationId, {} as RuleMigrationTaskRunner); // migration is running
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 5, completed: 3, failed: 2 },
+      migrationsRunning.set(migrationId, {} as SiemMigrationTaskRunner); // migration is running
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 5, completed: 3, failed: 2 },
       } as SiemMigrationDataStats);
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
       } as unknown as StoredSiemMigration);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const stats = await client.getStats(migrationId);
       expect(stats.status).toEqual(SiemMigrationTaskStatus.RUNNING);
     });
 
     it('should return READY status if pending equals total', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 10, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
       data.migrations.get.mockResolvedValue({
         id: migrationId,
       } as unknown as StoredSiemMigration);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const stats = await client.getStats(migrationId);
       expect(stats.status).toEqual(SiemMigrationTaskStatus.READY);
     });
 
     it('should return FINISHED status if completed+failed equals total', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 0, completed: 5, failed: 5 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 0, completed: 5, failed: 5 },
       } as SiemMigrationDataStats);
 
       data.migrations.get.mockResolvedValue({
         id: migrationId,
       } as unknown as StoredSiemMigration);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const stats = await client.getStats(migrationId);
       expect(stats.status).toEqual(SiemMigrationTaskStatus.FINISHED);
     });
 
     it('should return STOPPED status for other cases', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 2, completed: 3, failed: 2 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as SiemMigrationDataStats);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const stats = await client.getStats(migrationId);
       expect(stats.status).toEqual(SiemMigrationTaskStatus.INTERRUPTED);
     });
 
     it('should include error if one exists', async () => {
       const errorMessage = 'Test error';
-      data.rules.getStats.mockResolvedValue({
+      data.items.getStats.mockResolvedValue({
         id: 'migration-1',
-        rules: { total: 10, pending: 2, completed: 3, failed: 2 },
+        items: { total: 10, pending: 2, completed: 3, failed: 2 },
       } as SiemMigrationDataStats);
 
       data.migrations.get.mockResolvedValue({
@@ -345,13 +266,7 @@ describe('RuleMigrationsTaskClient', () => {
         },
       } as unknown as StoredSiemMigration);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const stats = await client.getStats(migrationId);
       expect(stats.last_execution?.error).toEqual('Test error');
     });
@@ -362,25 +277,19 @@ describe('RuleMigrationsTaskClient', () => {
       const statsArray = [
         {
           id: 'm1',
-          rules: { total: 10, pending: 10, completed: 0, failed: 0 },
+          items: { total: 10, pending: 10, completed: 0, failed: 0 },
         } as SiemMigrationDataStats,
         {
           id: 'm2',
-          rules: { total: 10, pending: 2, completed: 3, failed: 2 },
+          items: { total: 10, pending: 2, completed: 3, failed: 2 },
         } as SiemMigrationDataStats,
       ];
       const migrations = [{ id: 'm1' }, { id: 'm2' }] as unknown as StoredSiemMigration[];
-      data.rules.getAllStats.mockResolvedValue(statsArray);
+      data.items.getAllStats.mockResolvedValue(statsArray);
       data.migrations.getAll.mockResolvedValue(migrations);
       // Mark migration m1 as running.
-      migrationsRunning.set('m1', {} as RuleMigrationTaskRunner);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      migrationsRunning.set('m1', {} as SiemMigrationTaskRunner);
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const allStats = await client.getAllStats();
       const m1Stats = allStats.find((s) => s.id === 'm1');
       const m2Stats = allStats.find((s) => s.id === 'm2');
@@ -394,60 +303,36 @@ describe('RuleMigrationsTaskClient', () => {
       const abortMock = jest.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
-      } as unknown as RuleMigrationTaskRunner;
+      } as unknown as SiemMigrationTaskRunner;
       migrationsRunning.set(migrationId, migrationRunner);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.stop(migrationId);
       expect(result).toEqual({ exists: true, stopped: true });
       expect(abortMock).toHaveBeenCalled();
     });
 
     it('should return stopped even if migration is already stopped', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 10, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.stop(migrationId);
       expect(result).toEqual({ exists: true, stopped: true });
     });
 
     it('should return exists false if migration is not running and total equals 0', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 0, pending: 0, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 0, pending: 0, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.stop(migrationId);
       expect(result).toEqual({ exists: false, stopped: true });
     });
 
     it('should catch errors and return exists true, stopped false', async () => {
       const error = new Error('Stop error');
-      data.rules.getStats.mockRejectedValue(error);
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      data.items.getStats.mockRejectedValue(error);
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       const result = await client.stop(migrationId);
       expect(result).toEqual({ exists: true, stopped: false });
       expect(logger.error).toHaveBeenCalledWith(
@@ -460,42 +345,30 @@ describe('RuleMigrationsTaskClient', () => {
       const abortMock = jest.fn();
       const migrationRunner = {
         abortController: { abort: abortMock },
-      } as unknown as RuleMigrationTaskRunner;
+      } as unknown as SiemMigrationTaskRunner;
       migrationsRunning.set(migrationId, migrationRunner);
       data.migrations.setIsStopped.mockResolvedValue(undefined);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
       await client.stop(migrationId);
       expect(data.migrations.setIsStopped).toHaveBeenCalledWith({ id: migrationId });
     });
   });
   describe('task error', () => {
     it('should call saveAsFailed when there has been an error during the migration', async () => {
-      data.rules.getStats.mockResolvedValue({
-        rules: { total: 10, pending: 10, completed: 0, failed: 0 },
+      data.items.getStats.mockResolvedValue({
+        items: { total: 10, pending: 10, completed: 0, failed: 0 },
       } as SiemMigrationDataStats);
       const error = new Error('Migration error');
 
       const mockedRunnerInstance = {
         setup: jest.fn().mockResolvedValue(undefined),
         run: jest.fn().mockRejectedValue(error),
-      } as unknown as RuleMigrationTaskRunner;
+      } as unknown as SiemMigrationTaskRunner;
 
-      (RuleMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
+      (SiemMigrationTaskRunner as jest.Mock).mockImplementation(() => mockedRunnerInstance);
 
-      const client = new SiemMigrationsTaskClient(
-        migrationsRunning,
-        logger,
-        data,
-        currentUser,
-        dependencies
-      );
+      const client = new TestTaskClient(migrationsRunning, logger, data, currentUser, dependencies);
 
       const response = await client.start(params);
 

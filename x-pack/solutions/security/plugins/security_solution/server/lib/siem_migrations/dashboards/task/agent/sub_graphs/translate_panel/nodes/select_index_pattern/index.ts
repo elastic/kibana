@@ -4,4 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { getSelectIndexPanelNode as getEcsMappingNode } from './select_index_pattern';
+export { getSelectIndexPatternNode } from './select_index_pattern';

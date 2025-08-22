@@ -11,6 +11,7 @@ import type { DashboardMigration } from '../../../../../common/siem_migrations/m
 import { SiemMigrationsDataMigrationClient } from '../../common/data/siem_migrations_data_migration_client';
 import { DashboardMigrationsDataDashboardsClient } from './dashboard_migrations_data_dashboards_client';
 import type { DashboardMigrationIndexNameProviders } from '../types';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { SiemMigrationsDataClient } from '../../common/data/siem_migrations_data_client';
 import { SiemMigrationsDataResourcesClient } from '../../common/data/siem_migrations_data_resources_client';
 
@@ -25,7 +26,7 @@ export class DashboardMigrationsDataClient extends SiemMigrationsDataClient {
     esScopedClient: IScopedClusterClient,
     logger: Logger,
     spaceId: string,
-    dependencies: DashboardMigrationsClientDependencies
+    dependencies: SiemMigrationsClientDependencies
   ) {
     super(esScopedClient, logger);
 

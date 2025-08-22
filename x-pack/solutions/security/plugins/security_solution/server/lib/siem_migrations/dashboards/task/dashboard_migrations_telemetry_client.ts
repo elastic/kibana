@@ -16,7 +16,6 @@ import {
 } from '../../../telemetry/event_based/events';
 import { siemMigrationEventNames } from '../../../telemetry/event_based/event_meta';
 import { SiemMigrationsEventTypes } from '../../../telemetry/event_based/types';
-import type { MigrateDashboardState } from './agent/types';
 import type { SiemMigrationTelemetryClient } from '../../common/task/siem_migrations_telemetry_client';
 
 export class DashboardMigrationTelemetryClient
@@ -45,16 +44,17 @@ export class DashboardMigrationTelemetryClient
       startItemTranslation: () => {
         const dashboardStartTime = Date.now();
         return {
-          success: (migrationResult: MigrateDashboardState) => {
+          success: (migrationResult: DashboardMigrationDashboard) => {
             stats.completed++;
             this.reportEvent(SIEM_MIGRATIONS_RULE_TRANSLATION_SUCCESS, {
               migrationId: this.migrationId,
               translationResult: migrationResult.translation_result || '',
               duration: Date.now() - dashboardStartTime,
               model: this.modelName,
-              prebuiltMatch: migrationResult.elastic_dashboard?.prebuilt_dashboard_id
-                ? true
-                : false,
+              prebuiltMatch: false,
+              // prebuiltMatch: migrationResult.elastic_dashboard?.prebuilt_dashboard_id
+              //   ? true
+              //   : false,
               eventName: siemMigrationEventNames[SiemMigrationsEventTypes.TranslationSuccess],
             });
           },

@@ -16,20 +16,19 @@ import type {
   DashboardMigrationAdapters,
   DashboardMigrationAdapterId,
   DashboardMigrationIndexNameProviders,
-  DashboardMigrationsClientDependencies,
 } from '../types';
 import { SiemMigrationsBaseDataService } from '../../common/siem_migrations_base_service';
 import { dashboardMigrationsDashboardsFieldMap, dashboardMigrationsFieldMap } from './field_maps';
 import { DashboardMigrationsDataClient } from './dashboard_migrations_data_client';
+import type { SiemMigrationsClientDependencies } from '../../common/types';
 import { migrationResourcesFieldMap } from '../../common/data/field_maps';
 
 interface CreateClientParams {
   spaceId: string;
   currentUser: AuthenticatedUser;
   esScopedClient: IScopedClusterClient;
-  dependencies: DashboardMigrationsClientDependencies;
+  dependencies: SiemMigrationsClientDependencies;
 }
-
 interface CreateDashboardAdapterParams {
   adapterId: DashboardMigrationAdapterId;
   fieldMap: FieldMap;
@@ -67,6 +66,9 @@ export class DashboardMigrationsDataService extends SiemMigrationsBaseDataServic
     fieldMap,
   }: CreateDashboardAdapterParams) {
     const name = this.getAdapterIndexName(adapterId);
+    this.logger.warn(
+      JSON.stringify({ message: 'Creating dashboard index pattern adapter', name, fieldMap })
+    );
     return this.createIndexPatternAdapter({ name, fieldMap });
   }
 

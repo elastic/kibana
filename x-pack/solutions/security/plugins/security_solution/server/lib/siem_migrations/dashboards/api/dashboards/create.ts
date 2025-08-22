@@ -50,11 +50,6 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
             body: `No dashboards provided for migration ID ${migrationId}. Please provide at least one dashboard.`,
           });
         }
-
-        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
-          context.securitySolution,
-          'dashboards'
-        );
         try {
           const ctx = await context.resolve(['securitySolution']);
           const dashboardMigrationsClient =
@@ -86,9 +81,6 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           return res.ok();
         } catch (error) {
           logger.error(`Error creating dashboards for migration ID ${migrationId}: ${error}`);
-          await siemMigrationAuditLogger.logCreateMigration({
-            error,
-          });
           return res.badRequest({
             body: `Error creating dashboards for migration ID ${migrationId}: ${error.message}`,
           });

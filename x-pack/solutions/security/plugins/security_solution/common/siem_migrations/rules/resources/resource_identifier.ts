@@ -5,17 +5,15 @@
  * 2.0.
  */
 // TODO: move resource related types to migration.gen.ts
-import type { RuleMigrationResourceBase, RuleMigrationRule } from '../../model/rule_migration.gen';
+import type {
+  OriginalRule,
+  RuleMigrationResourceBase,
+  RuleMigrationRule,
+} from '../../model/rule_migration.gen';
 import { ResourceIdentifier } from '../../resources/resource_identifier';
-import type { SiemMigrationVendor } from '../../types';
 
 export class RuleResourceIdentifier extends ResourceIdentifier<RuleMigrationRule> {
-  protected getVendor(): SiemMigrationVendor {
-    return this.item.original_rule.vendor;
-  }
-
-  public fromOriginal(rule?: RuleMigrationRule): RuleMigrationResourceBase[] {
-    const originalRule = rule?.original_rule ?? this.item.original_rule;
+  public fromOriginal(originalRule: OriginalRule): RuleMigrationResourceBase[] {
     return this.identifier(originalRule.query);
   }
 }

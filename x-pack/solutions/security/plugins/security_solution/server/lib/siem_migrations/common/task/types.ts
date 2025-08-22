@@ -53,3 +53,4 @@ export type MigrationTask<P extends object = {}, C extends object = {}, O extend
 export interface RuleMigrationAgentRunOptions {
   skipPrebuiltRulesMatching: boolean;
 }
+export type MigrationState<T> = T;

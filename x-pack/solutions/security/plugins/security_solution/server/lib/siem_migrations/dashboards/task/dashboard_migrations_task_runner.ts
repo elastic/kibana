@@ -99,7 +99,9 @@ export class DashboardMigrationTaskRunner extends SiemMigrationTaskRunner<
   protected async prepareTaskInput(
     migrationDashboard: StoredDashboardMigrationDashboard
   ): Promise<DashboardMigrationTaskInput> {
-    const resources = await this.retriever.resources.getResources(migrationDashboard);
+    const resources = await this.retriever.resources.getResources(
+      migrationDashboard.original_dashboard
+    );
     return {
       id: migrationDashboard.id,
       original_dashboard: migrationDashboard.original_dashboard,

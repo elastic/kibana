@@ -30,4 +30,5 @@ export const dsl = {
   isNotInstallable(): QueryDslQueryContainer[] {
     return [genericDsl.isNotFullyTranslated(), dsl.isInstalled()];
   },
+  isMissingIndex: genericDsl.isMissingIndex,
 };

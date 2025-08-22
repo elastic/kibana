@@ -56,6 +56,21 @@ const EXECUTOR_SLEEP = {
  **/
 const EXECUTOR_RECOVER_MAX_ATTEMPTS = 3 as const;
 
+export type SiemMigrationTaskRunnerConstructor<
+  M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
+  I extends ItemDocument = ItemDocument, // The rule or dashboard document type
+  P extends object = {}, // The migration task input parameters schema
+  C extends object = {}, // The migration task config schema
+  O extends object = {} // The migration task output schema
+> = new (
+  migrationId: string,
+  startedBy: AuthenticatedUser,
+  abortController: AbortController,
+  data: SiemMigrationsDataClient<M, I>,
+  logger: Logger,
+  dependencies: SiemMigrationsClientDependencies
+) => SiemMigrationTaskRunner<M, I, P, C, O>;
+
 export class SiemMigrationTaskRunner<
   M extends MigrationDocument = MigrationDocument, // The migration document type (rule migrations and dashboard migrations very similar but have differences)
   I extends ItemDocument = ItemDocument, // The rule or dashboard document type

@@ -51,7 +51,10 @@ export const registerSiemDashboardMigrationsStartRoute = (
               retry,
             } = req.body;
 
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'dashboards'
+            );
             try {
               const ctx = await context.resolve(['actions', 'securitySolution']);
 

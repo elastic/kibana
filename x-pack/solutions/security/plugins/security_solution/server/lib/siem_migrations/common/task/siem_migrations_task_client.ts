@@ -30,6 +30,14 @@ import type {
 import type { SiemMigrationTaskRunner } from './siem_migrations_task_runner';
 import type { SiemMigrationTaskEvaluatorClass } from './siem_migrations_task_evaluator';
 
+export type MigrationsRunning<
+  M extends MigrationDocument = StoredSiemMigration,
+  I extends ItemDocument = ItemDocument,
+  P extends object = {}, // The migration task input parameters schema
+  C extends object = {}, // The migration task config schema
+  O extends object = {} // The migration task output schema
+> = Map<string, SiemMigrationTaskRunner<M, I, P, C, O>>;
+
 export abstract class SiemMigrationsTaskClient<
   M extends MigrationDocument = StoredSiemMigration,
   I extends ItemDocument = ItemDocument,
@@ -41,7 +49,7 @@ export abstract class SiemMigrationsTaskClient<
   protected abstract readonly EvaluatorClass?: SiemMigrationTaskEvaluatorClass<M, I, P, C, O>;
 
   constructor(
-    protected migrationsRunning: Map<string, SiemMigrationTaskRunner<M, I, P, C, O>>,
+    protected migrationsRunning: MigrationsRunning<M, I, P, C, O>,
     private logger: Logger,
     private data: SiemMigrationsDataClient<M, I>,
     private currentUser: AuthenticatedUser,

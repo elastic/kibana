@@ -8,7 +8,7 @@
 import { RuleMigrationTaskRunner } from './rule_migrations_task_runner';
 import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
 import type { AuthenticatedUser } from '@kbn/core/server';
-import type { StoredRuleMigrationRule } from '../types';
+import type { RuleMigrationsClientDependencies, StoredRuleMigrationRule } from '../types';
 import { createRuleMigrationsDataClientMock } from '../data/__mocks__/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -26,8 +26,8 @@ jest.mock('./retrievers', () => ({
 }));
 
 const mockCreateModel = jest.fn(() => ({ model: 'test-model' }));
-jest.mock('./util/actions_client_chat', () => ({
-  ...jest.requireActual('./util/actions_client_chat'),
+jest.mock('../../common/task/util/actions_client_chat', () => ({
+  ...jest.requireActual('../../common/task/util/actions_client_chat'),
   ActionsClientChat: jest.fn().mockImplementation(() => ({ createModel: mockCreateModel })),
 }));
 

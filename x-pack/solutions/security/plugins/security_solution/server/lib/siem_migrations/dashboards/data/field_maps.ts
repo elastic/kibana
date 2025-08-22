@@ -45,4 +45,17 @@ export const dashboardMigrationsDashboardsFieldMap: FieldMap<
   'original_dashboard.splunk_properties.app': { type: 'keyword', required: true },
   'original_dashboard.splunk_properties.sharing': { type: 'keyword', required: true },
   'original_dashboard.splunk_properties.owner': { type: 'keyword', required: true },
+  elastic_dashboard: { type: 'object', required: false },
+  'elastic_dashboard.id': { type: 'keyword', required: false },
+  'elastic_dashboard.title': {
+    type: 'text',
+    required: true,
+    fields: { keyword: { type: 'keyword' } },
+  },
+  'elastic_dashboard.description': { type: 'text', required: false },
+  'elastic_dashboard.data': { type: 'text', required: false },
+  comments: { type: 'object', array: true, required: false },
+  'comments.message': { type: 'keyword', required: true },
+  'comments.created_at': { type: 'date', required: true },
+  'comments.created_by': { type: 'keyword', required: true }, // use 'assistant' for llm
 };

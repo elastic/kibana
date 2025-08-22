@@ -12,6 +12,7 @@ import type { DashboardMigrationsDataClient } from './data/dashboard_migrations_
 import { DashboardMigrationsDataService } from './data/dashboard_migrations_data_service';
 import type { DashboardMigrationsTaskClient } from './task/dashboard_migrations_task_client';
 import { DashboardMigrationsTaskService } from './task/dashboard_migrations_task_service';
+import type { DashboardMigrationsCreateClientParams } from './types';
 
 export interface SiemDashboardsMigrationsSetupParams {
   esClusterClient: IClusterClient;

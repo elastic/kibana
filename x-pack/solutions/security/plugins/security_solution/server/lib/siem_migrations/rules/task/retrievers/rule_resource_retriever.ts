@@ -8,7 +8,13 @@
 import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { ResourceRetriever } from '../../../common/task/retrievers/resource_retriever';
+import type { SiemMigrationsDataResourcesClient } from '../../../common/data/siem_migrations_data_resources_client';
 
 export class RuleResourceRetriever extends ResourceRetriever<RuleMigrationRule> {
-  protected ResourceIdentifierClass = RuleResourceIdentifier;
+  constructor(
+    protected readonly migrationId: string,
+    protected readonly resourcesDataClient: SiemMigrationsDataResourcesClient
+  ) {
+    super(migrationId, resourcesDataClient, RuleResourceIdentifier);
+  }
 }

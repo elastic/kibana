@@ -14,10 +14,12 @@ import { MockEsqlKnowledgeBase } from '../../../common/task/util/__mocks__/mocks
 import { MockDashboardMigrationsRetriever } from '../retrievers/__mocks__/mocks';
 import { getDashboardMigrationAgent } from './graph';
 import type { OriginalDashboard } from '../../../../../../common/siem_migrations/model/dashboard_migration.gen';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { IScopedClusterClient } from '@kbn/core/server';
 
-const mockOriginalDashboardData = fs.readFileSync(
-  `${__dirname}/../../__mocks__/original_dashboard_example.xml`
-);
+const mockOriginalDashboardData = fs
+  .readFileSync(`${__dirname}/../../__mocks__/original_dashboard_example.xml`)
+  .toString('utf-8');
 
 const mockOriginalDashboard: OriginalDashboard = {
   id: 'b12c89bc-9d06-11eb-a592-acde48001122',
@@ -34,12 +36,15 @@ let fakeLLM: SiemMigrationFakeLLM;
 let mockRetriever = new MockDashboardMigrationsRetriever();
 let mockEsqlKnowledgeBase = new MockEsqlKnowledgeBase();
 let mockTelemetryClient = new MockSiemMigrationTelemetryClient();
+const esClientMock =
+  elasticsearchServiceMock.createCustomClusterClient() as unknown as jest.MockedObjectDeep<IScopedClusterClient>;
 
 const setupAgent = (responses: NodeResponse[]) => {
   fakeLLM = new SiemMigrationFakeLLM({ nodeResponses: responses });
   const model = fakeLLM as unknown as ActionsClientChatOpenAI;
   const graph = getDashboardMigrationAgent({
     model,
+    esScopedClient: esClientMock,
     esqlKnowledgeBase: mockEsqlKnowledgeBase,
     dashboardMigrationsRetriever: mockRetriever,
     logger,
