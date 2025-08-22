@@ -1,0 +1,142 @@
+---
+name: Update OpenTelemetry Semantic Conventions
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Weekly on Monday at 2 AM UTC
+  workflow_dispatch: # Manual trigger
+
+permissions:
+  contents: read
+
+jobs:
+  update-semconv:
+    if: github.event.repository.fork == false
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout Kibana
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'yarn'
+
+      - name: Clone OpenTelemetry Semantic Conventions
+        run: |
+          git clone https://github.com/open-telemetry/semantic-conventions.git otel-semconv
+          cd otel-semconv
+          echo "Using latest semantic conventions from $(git rev-parse HEAD)"
+
+      - name: Generate Resolved YAML with Docker Weaver
+        run: |
+          cd otel-semconv
+          echo "Running Docker weaver to generate resolved semantic conventions..."
+          docker run --rm \
+            --env USER=weaver \
+            --env HOME=/home/weaver \
+            --mount type=bind,source=./model,target=/home/weaver/source,readonly \
+            --mount type=bind,source="$(pwd)",target=/home/weaver/out \
+            docker.io/otel/weaver:v0.17.1@sha256:32523b5e44fb44418786347e9f7dde187d8797adb6d57a2ee99c245346c3cdfe \
+            registry resolve \
+            --registry=/home/weaver/source \
+            --output=/home/weaver/out/resolved_semconv.yaml
+
+      - name: Move Generated YAML to Package
+        run: |
+          echo "Moving generated YAML file to Kibana package..."
+          cp otel-semconv/resolved_semconv.yaml src/platform/packages/shared/kbn-otel-semantic-conventions/assets/resolved-semconv.yaml
+          echo "✓ YAML file moved successfully"
+
+      - name: Install Kibana Dependencies
+        run: |
+          echo "Installing Kibana dependencies..."
+          yarn kbn bootstrap --no-cache
+
+      - name: Generate TypeScript Definitions
+        run: |
+          echo "Generating TypeScript definitions from YAML..."
+          node scripts/generate_otel_semconv.js
+          echo "✓ TypeScript generation completed"
+
+      - name: Run ESLint Fix
+        run: |
+          echo "Running ESLint fix on generated files..."
+          yarn lint:es --fix src/platform/packages/shared/kbn-otel-semantic-conventions/src/generated/ || true
+
+      - name: Clean Up Temporary Files
+        run: |
+          rm -rf otel-semconv
+          echo "✓ Cleanup completed"
+
+      - name: Check for Changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changes=false" >> $GITHUB_OUTPUT
+            echo "No changes detected in semantic conventions"
+          else
+            echo "changes=true" >> $GITHUB_OUTPUT
+            echo "Changes detected in semantic conventions"
+            git diff --stat
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@5e914681df9dc83aa4e4905692ca88beb2f9e91f # v7.0.5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: |
+            Update OpenTelemetry semantic conventions
+
+            - Updated resolved-semconv.yaml with latest OTel conventions
+            - Regenerated TypeScript definitions with new field metadata
+            - Generated automatically by GitHub Actions workflow
+          title: '[One Discover][Logs UX] Update OpenTelemetry Semantic Conventions'
+          body: |
+            ## Summary
+
+            This PR updates the OpenTelemetry semantic conventions definitions to the latest version.
+
+            ### Changes Made
+            - ✅ Updated `resolved-semconv.yaml` with latest conventions from OpenTelemetry repository
+            - ✅ Regenerated `resolved-semconv.ts` with new field definitions and metadata
+            - ✅ Applied ESLint formatting to generated files
+
+            ### Validation
+            - ✅ TypeScript compilation successful
+            - ✅ Package tests passing
+            - ✅ ESLint formatting applied
+            - ✅ Generated files follow Kibana coding standards
+          branch: update-otel-semconv-${{ github.run_number }}
+          delete-branch: true
+          labels: |
+            Team:obs-ux-logs
+            release_note:skip
+            backport:skip
+            otel-semantic-conventions
+          reviewers: |
+            elastic/obs-ux-logs-team
+          assignees: |
+            elastic/obs-ux-logs-team
+
+      - name: Workflow Summary
+        run: |
+          echo "## OpenTelemetry Semantic Conventions Update Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.changes.outputs.changes }}" == "true" ]; then
+            echo "✅ **Changes Detected**: Pull request created with updated semantic conventions" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "### Files Updated" >> $GITHUB_STEP_SUMMARY
+            echo "- \`src/platform/packages/shared/kbn-otel-semantic-conventions/assets/resolved-semconv.yaml\`" >> $GITHUB_STEP_SUMMARY
+            echo "- \`src/platform/packages/shared/kbn-otel-semantic-conventions/src/generated/resolved-semconv.ts\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "ℹ️ **No Changes**: Semantic conventions are already up to date" >> $GITHUB_STEP_SUMMARY
+          fi
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Next Steps**: Review and merge the generated pull request to integrate the latest OTel semantic conventions into Kibana's field metadata service." >> $GITHUB_STEP_SUMMARY
