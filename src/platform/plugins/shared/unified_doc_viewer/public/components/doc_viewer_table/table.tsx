@@ -76,8 +76,8 @@ const PAGE_SIZE = 'discover:pageSize';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
-const GRID_COLUMN_FIELD_NAME = 'name';
-const GRID_COLUMN_FIELD_VALUE = 'value';
+export const GRID_COLUMN_FIELD_NAME = 'name';
+export const GRID_COLUMN_FIELD_VALUE = 'value';
 
 const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
   columnVisibility: {
@@ -583,7 +583,7 @@ export const DocViewerTable = ({
               customRenderCellPopover ? customRenderCellPopover : renderCellPopover
             }
             pagination={pagination}
-            leadingControlColumns={leadingControlColumns}
+            leadingControlColumns={availableFeatures.pinColumn ? leadingControlColumns : undefined}
           />
         </EuiFlexItem>
       )}
