@@ -7,7 +7,6 @@
 import { existsQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
-import { termQuery } from '@kbn/es-query';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   SPAN_ID,

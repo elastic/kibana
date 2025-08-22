@@ -89,7 +89,12 @@ describe('SpanLinks', () => {
           {
             spanId: 'incomingSpan1',
             traceId: 'trace1',
-            details: { duration: 100, agentName: 'nodejs', serviceName: 'service1' },
+            details: {
+              duration: 100,
+              agentName: 'nodejs',
+              serviceName: 'service1',
+              environment: 'foo',
+            },
           },
         ],
         outgoingSpanLinks: [],
@@ -115,7 +120,12 @@ describe('SpanLinks', () => {
           {
             spanId: 'outgoingSpan1',
             traceId: 'trace1',
-            details: { duration: 100, agentName: 'nodejs', serviceName: 'service1' },
+            details: {
+              duration: 100,
+              agentName: 'nodejs',
+              serviceName: 'service1',
+              environment: 'foo',
+            },
           },
         ],
       } as SpanLinksType,
@@ -140,7 +150,12 @@ describe('SpanLinks', () => {
           {
             spanId: 'outgoingSpan1',
             traceId: 'trace1',
-            details: { duration: 100, agentName: 'nodejs', serviceName: 'service1' },
+            details: {
+              duration: 100,
+              agentName: 'nodejs',
+              serviceName: 'service1',
+              environment: 'foo',
+            },
           },
         ],
       } as SpanLinksType,
