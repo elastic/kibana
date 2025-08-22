@@ -8,6 +8,7 @@
  */
 
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createDatatableUtilitiesMock } from '../common/mocks';
 import type { DataPlugin } from '.';
 import { searchServiceMock } from './search/mocks';
@@ -27,7 +28,7 @@ const createSetupContract = (): Setup => {
 
 const createStartContract = (): Start => {
   const queryStartMock = queryServiceMock.createStartContract();
-  const dataViewsMock = {} as any; // Mock for dataViews service
+  const dataViewsMock = dataViewPluginMocks.createStartContract();
 
   return {
     actions: {
