@@ -41,7 +41,7 @@ export function useGetGenerateDiscoverLink({
     }
 
     let esql: string;
-    const _from = from(indices.join(','));
+    const _from = from(indices.join());
 
     if (typeof first === 'function') {
       esql = _from.pipe(first as WhereClause, ...rest).toString();
