@@ -53,7 +53,7 @@ describe('useThrottleFn hook', () => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
   });
 
   it('should flush the throttled function call', () => {

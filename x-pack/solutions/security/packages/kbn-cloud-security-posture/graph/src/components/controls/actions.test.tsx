@@ -158,7 +158,7 @@ describe('Actions component', () => {
       });
 
       expect(getByText(SEARCH_BAR_TOUR_TITLE)).toBeInTheDocument();
-      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalled();
       expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
     });
 
@@ -171,7 +171,7 @@ describe('Actions component', () => {
       });
 
       expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
-      expect(setShouldShowSearchBarButtonTourMock).not.toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).not.toHaveBeenCalled();
     });
 
     it('should not show the tour if user already toggled the search bar', () => {
@@ -184,7 +184,7 @@ describe('Actions component', () => {
       });
 
       expect(defaultProps.onSearchToggle).toHaveBeenCalledWith(true);
-      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalled();
       expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
     });
 
@@ -210,7 +210,7 @@ describe('Actions component', () => {
         expect(queryByText(SEARCH_BAR_TOUR_TITLE)).not.toBeInTheDocument();
       });
 
-      expect(setShouldShowSearchBarButtonTourMock).toBeCalled();
+      expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalled();
       expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
     });
   });

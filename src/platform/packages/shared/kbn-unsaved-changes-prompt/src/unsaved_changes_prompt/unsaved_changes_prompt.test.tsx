@@ -57,7 +57,7 @@ describe('useUnsavedChangesPrompt', () => {
 
     expect(history.location.pathname).toBe('/test');
     expect(history.location.search).toBe('');
-    expect(coreStart.overlays.openConfirm).not.toBeCalled();
+    expect(coreStart.overlays.openConfirm).not.toHaveBeenCalled();
     expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
   });
 
@@ -80,7 +80,7 @@ describe('useUnsavedChangesPrompt', () => {
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
     expect(navigateToUrl).toBeCalledWith('/mock/test', expect.anything());
-    expect(coreStart.overlays.openConfirm).toBeCalled();
+    expect(coreStart.overlays.openConfirm).toHaveBeenCalled();
     expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
   });
 
@@ -113,11 +113,11 @@ describe('useUnsavedChangesPrompt', () => {
 
     act(() => history.push('/test'));
 
-    expect(coreStart.overlays.openConfirm).not.toBeCalled();
+    expect(coreStart.overlays.openConfirm).not.toHaveBeenCalled();
 
     expect(history.location.pathname).toBe('/test');
 
-    expect(blockSpy).not.toBeCalled();
+    expect(blockSpy).not.toHaveBeenCalled();
   });
 
   it('should not block if replaced when shouldPromptOnReplace is false', () => {
@@ -136,7 +136,7 @@ describe('useUnsavedChangesPrompt', () => {
 
     expect(history.location.pathname).toBe('/test');
     expect(history.location.search).toBe('');
-    expect(coreStart.overlays.openConfirm).not.toBeCalled();
+    expect(coreStart.overlays.openConfirm).not.toHaveBeenCalled();
     expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
   });
 });

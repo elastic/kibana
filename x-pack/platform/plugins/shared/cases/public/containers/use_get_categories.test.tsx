@@ -54,6 +54,6 @@ describe('useGetCategories', () => {
       ),
     });
 
-    await waitFor(() => expect(addError).toBeCalled());
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

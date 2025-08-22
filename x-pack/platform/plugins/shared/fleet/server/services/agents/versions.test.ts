@@ -424,6 +424,6 @@ describe('getAvailableVersions', () => {
     const res = await getAvailableVersions({ ignoreCache: true });
 
     expect(res).toEqual(['300.0.0', '8.1.0', '8.0.0', '7.17.0']);
-    expect(mockedFetch).not.toBeCalled();
+    expect(mockedFetch).not.toHaveBeenCalled();
   });
 });

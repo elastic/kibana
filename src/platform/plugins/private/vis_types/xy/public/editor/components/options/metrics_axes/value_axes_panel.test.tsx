@@ -92,7 +92,7 @@ describe('ValueAxesPanel component', () => {
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     comp.find('[data-test-subj="visualizeAddYAxisButton"] button').simulate('click');
 
-    expect(addValueAxis).toBeCalled();
+    expect(addValueAxis).toHaveBeenCalled();
   });
 
   describe('description', () => {

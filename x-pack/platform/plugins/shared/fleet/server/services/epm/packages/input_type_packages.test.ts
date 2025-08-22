@@ -71,7 +71,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       logger: mockedLogger,
       packagePolicy: {} as any,
     });
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toBeCalled();
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).not.toHaveBeenCalled();
   });
 
   const TEST_PKG_INFO_INPUT = {
@@ -174,7 +174,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should do nothing for input packages with status !== than installed', async () => {
@@ -189,7 +189,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should clean up assets for input packages with status = installed', async () => {
@@ -328,7 +328,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).not.toBeCalled();
+    expect(cleanupAssetsMock).not.toHaveBeenCalled();
   });
 
   it('should log error if cleanupAssets failed', async () => {
@@ -352,7 +352,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(mockedLogger.error).toBeCalled();
+    expect(mockedLogger.error).toHaveBeenCalled();
   });
 
   describe('isInputPackageDatasetUsedByMultiplePolicies', () => {

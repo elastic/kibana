@@ -2889,7 +2889,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).toBeCalled();
+      expect(mockedSendTelemetryEvents).toHaveBeenCalled();
     });
 
     it('should not send telemetry event when updating a package policy without upgrade', async () => {
@@ -2989,7 +2989,7 @@ describe('Package policy service', () => {
         { force: true }
       );
 
-      expect(mockedSendTelemetryEvents).not.toBeCalled();
+      expect(mockedSendTelemetryEvents).not.toHaveBeenCalled();
     });
 
     it('should call audit logger', async () => {

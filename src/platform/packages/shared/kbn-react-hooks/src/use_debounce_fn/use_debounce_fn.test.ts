@@ -22,7 +22,7 @@ describe('useDebounceFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
 
     act(() => {
       jest.advanceTimersByTime(200);
@@ -44,7 +44,7 @@ describe('useDebounceFn hook', () => {
       jest.advanceTimersByTime(200);
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
   });
 
   it('should flush the debounced function call', () => {
@@ -89,7 +89,7 @@ describe('useDebounceFn hook', () => {
       result.current.run();
     });
 
-    expect(fn).not.toBeCalled();
+    expect(fn).not.toHaveBeenCalled();
 
     act(() => {
       jest.advanceTimersByTime(200);

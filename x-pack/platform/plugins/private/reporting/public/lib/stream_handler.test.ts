@@ -97,9 +97,9 @@ describe('stream handler', () => {
         ],
         failed: [],
       }).subscribe(() => {
-        expect(mockShowDanger).not.toBeCalled();
+        expect(mockShowDanger).not.toHaveBeenCalled();
         expect(mockShowSuccess).toBeCalledTimes(1);
-        expect(mockShowWarning).not.toBeCalled();
+        expect(mockShowWarning).not.toHaveBeenCalled();
         expect(mockShowSuccess.mock.calls).toMatchSnapshot();
         done();
       });
@@ -119,8 +119,8 @@ describe('stream handler', () => {
         ],
         failed: [],
       }).subscribe(() => {
-        expect(mockShowDanger).not.toBeCalled();
-        expect(mockShowSuccess).not.toBeCalled();
+        expect(mockShowDanger).not.toHaveBeenCalled();
+        expect(mockShowSuccess).not.toHaveBeenCalled();
         expect(mockShowWarning).toBeCalledTimes(1);
         expect(mockShowWarning.mock.calls).toMatchSnapshot();
         done();
@@ -141,8 +141,8 @@ describe('stream handler', () => {
         ],
         failed: [],
       }).subscribe(() => {
-        expect(mockShowDanger).not.toBeCalled();
-        expect(mockShowSuccess).not.toBeCalled();
+        expect(mockShowDanger).not.toHaveBeenCalled();
+        expect(mockShowSuccess).not.toHaveBeenCalled();
         expect(mockShowWarning).toBeCalledTimes(1);
         expect(mockShowWarning.mock.calls).toMatchSnapshot();
         done();
@@ -162,8 +162,8 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
       }).subscribe(() => {
-        expect(mockShowSuccess).not.toBeCalled();
-        expect(mockShowWarning).not.toBeCalled();
+        expect(mockShowSuccess).not.toHaveBeenCalled();
+        expect(mockShowWarning).not.toHaveBeenCalled();
         expect(mockShowDanger).toBeCalledTimes(1);
         expect(mockShowDanger.mock.calls).toMatchSnapshot();
         done();

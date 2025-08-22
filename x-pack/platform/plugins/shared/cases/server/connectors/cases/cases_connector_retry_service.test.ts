@@ -39,7 +39,7 @@ describe('CasesConnectorRetryService', () => {
     );
 
     expect(cb).toBeCalledTimes(1);
-    expect(nextBackOff).not.toBeCalled();
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 
   it('should not retry if the status code is not supported', async () => {
@@ -50,7 +50,7 @@ describe('CasesConnectorRetryService', () => {
     );
 
     expect(cb).toBeCalledTimes(1);
-    expect(nextBackOff).not.toBeCalled();
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 
   it('should not retry after trying more than the max attempts', async () => {
@@ -127,7 +127,7 @@ describe('CasesConnectorRetryService', () => {
         `"My error"`
       );
 
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

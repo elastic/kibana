@@ -601,20 +601,20 @@ describe('UninstallTokenService', () => {
           it('does not create new token when calling generateTokenForPolicyId', async () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-            expect(soClientMock.bulkCreate).not.toBeCalled();
+            expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
           });
 
           it('does not create new token when calling generateTokensForPolicyIds', async () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
-            expect(soClientMock.bulkCreate).not.toBeCalled();
+            expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
           });
 
           it('does not create new token when calling generateTokensForAllPolicies', async () => {
             mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies();
-            expect(soClientMock.bulkCreate).not.toBeCalled();
+            expect(soClientMock.bulkCreate).not.toHaveBeenCalled();
           });
         });
 

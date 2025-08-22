@@ -48,9 +48,9 @@ describe('logOverallStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).not.toBeCalled();
-    expect(l.info).not.toBeCalled();
-    expect(l.warn).not.toBeCalled();
+    expect(l.get).not.toHaveBeenCalled();
+    expect(l.info).not.toHaveBeenCalled();
+    expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
   });
@@ -68,7 +68,7 @@ describe('logOverallStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).not.toBeCalled();
+    expect(l.get).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
     expect(l.warn).toBeCalledTimes(1);
@@ -96,7 +96,7 @@ describe('logOverallStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).not.toBeCalled();
+    expect(l.get).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
     expect(l.warn).toBeCalledTimes(1);
@@ -125,10 +125,10 @@ describe('logOverallStatusChanges', () => {
 
     await delay();
 
-    expect(l.get).not.toBeCalled();
+    expect(l.get).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
-    expect(l.warn).not.toBeCalled();
-    expect(l.info).not.toBeCalled();
+    expect(l.warn).not.toHaveBeenCalled();
+    expect(l.info).not.toHaveBeenCalled();
   });
 });

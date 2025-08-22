@@ -35,7 +35,7 @@ describe.skip('useApmServiceHref hook', () => {
 
     await waitFor(() => {
       expect(result.current).toMatchObject({ isSuccessful: true, href: undefined });
-      expect(apmLocatorMock).not.toBeCalled();
+      expect(apmLocatorMock).not.toHaveBeenCalled();
     });
   });
 

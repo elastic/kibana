@@ -52,6 +52,6 @@ describe('useChartActions', () => {
     });
     hook.rerender();
     expect(hook.result.current.chartRef.current.moveFocus).toBe(true);
-    expect(hook.result.current.chartRef.current.element.focus).toBeCalled();
+    expect(hook.result.current.chartRef.current.element.focus).toHaveBeenCalled();
   });
 });

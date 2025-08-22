@@ -99,7 +99,7 @@ describe('GridLayout', () => {
     layoutComponent.rerender({
       layout,
     });
-    expect(onLayoutChange).not.toBeCalled();
+    expect(onLayoutChange).not.toHaveBeenCalled();
 
     // if layout **has** changed, call `onLayoutChange`
     const newLayout: GridLayoutData = {

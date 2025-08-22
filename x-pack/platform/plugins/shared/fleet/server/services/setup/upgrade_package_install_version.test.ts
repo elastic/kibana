@@ -59,8 +59,8 @@ describe('upgradePackageInstallVersion', () => {
       })
     );
 
-    expect(logger.warn).not.toBeCalled();
-    expect(logger.error).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.error).not.toHaveBeenCalled();
   });
 
   it('should log at error level when an error happens while reinstalling package', async () => {
@@ -84,7 +84,7 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(logger.error).toBeCalled();
+    expect(logger.error).toHaveBeenCalled();
   });
 
   it('should log a warn level when an error happens while reinstalling an uploaded package', async () => {
@@ -108,6 +108,6 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(logger.warn).toBeCalled();
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

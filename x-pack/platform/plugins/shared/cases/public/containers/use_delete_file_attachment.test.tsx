@@ -61,7 +61,7 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
+    await waitFor(() => expect(useRefreshCaseViewPage()).toHaveBeenCalled());
   });
 
   it('shows a success toaster correctly', async () => {

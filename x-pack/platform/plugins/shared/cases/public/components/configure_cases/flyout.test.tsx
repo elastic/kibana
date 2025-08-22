@@ -94,7 +94,7 @@ describe('CommonFlyout ', () => {
     await userEvent.click(await screen.findByTestId('common-flyout-cancel'));
 
     await waitFor(() => {
-      expect(props.onCloseFlyout).toBeCalled();
+      expect(props.onCloseFlyout).toHaveBeenCalled();
     });
   });
 
@@ -104,7 +104,7 @@ describe('CommonFlyout ', () => {
     await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
-      expect(props.onCloseFlyout).toBeCalled();
+      expect(props.onCloseFlyout).toHaveBeenCalled();
     });
   });
 
@@ -113,7 +113,7 @@ describe('CommonFlyout ', () => {
 
     await userEvent.click(await screen.findByTestId('common-flyout-save'));
 
-    expect(props.onSaveField).not.toBeCalled();
+    expect(props.onSaveField).not.toHaveBeenCalled();
   });
 
   describe('CustomFieldsFlyout', () => {

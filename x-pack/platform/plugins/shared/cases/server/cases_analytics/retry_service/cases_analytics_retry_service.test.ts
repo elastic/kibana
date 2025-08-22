@@ -39,7 +39,7 @@ describe('CasesAnalyticsRetryService', () => {
     );
 
     expect(cb).toBeCalledTimes(1);
-    expect(nextBackOff).not.toBeCalled();
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 
   it('should not retry after trying more than the max attempts', async () => {
@@ -97,7 +97,7 @@ describe('CasesAnalyticsRetryService', () => {
         `"My error"`
       );
 
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

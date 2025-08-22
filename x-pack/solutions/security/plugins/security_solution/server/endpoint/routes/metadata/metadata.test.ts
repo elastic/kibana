@@ -241,7 +241,7 @@ describe('test endpoint routes', () => {
         authRequired: true,
       });
       expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const endpointResultList = mockResponse.ok.mock.calls[0][0]?.body as MetadataListResponse;
       expect(endpointResultList.data.length).toEqual(1);
       expect(endpointResultList.data[0].metadata).toEqual(
@@ -273,7 +273,7 @@ describe('test endpoint routes', () => {
         mockResponse
       );
 
-      expect(mockResponse.forbidden).toBeCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalled();
     });
 
     it('should use space id when retrieving Endpoint Metadata service client', async () => {
@@ -327,7 +327,7 @@ describe('test endpoint routes', () => {
       expect(routeConfig.options).toEqual({
         authRequired: true,
       });
-      expect(mockResponse.notFound).toBeCalled();
+      expect(mockResponse.notFound).toHaveBeenCalled();
       const message = mockResponse.notFound.mock.calls[0][0]?.body;
       expect(message).toBeInstanceOf(EndpointHostNotFoundError);
     });
@@ -361,7 +361,7 @@ describe('test endpoint routes', () => {
       expect(routeConfig.options).toEqual({
         authRequired: true,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result).toHaveProperty('metadata.Endpoint');
       expect(result.host_status).toEqual(HostStatus.HEALTHY);
@@ -398,7 +398,7 @@ describe('test endpoint routes', () => {
       expect(routeConfig.options).toEqual({
         authRequired: true,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.UNHEALTHY);
     });
@@ -437,7 +437,7 @@ describe('test endpoint routes', () => {
       expect(routeConfig.options).toEqual({
         authRequired: true,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as HostInfo;
       expect(result.host_status).toEqual(HostStatus.UNHEALTHY);
     });
@@ -471,7 +471,7 @@ describe('test endpoint routes', () => {
       );
 
       expect(esSearchMock).toHaveBeenCalledTimes(1);
-      expect(mockResponse.badRequest).toBeCalled();
+      expect(mockResponse.badRequest).toHaveBeenCalled();
     });
 
     it('should work if no security solution access but has fleet access', async () => {
@@ -504,7 +504,7 @@ describe('test endpoint routes', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('should get forbidden if no security solution or fleet access', async () => {
@@ -529,7 +529,7 @@ describe('test endpoint routes', () => {
         mockResponse
       );
 
-      expect(mockResponse.forbidden).toBeCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalled();
     });
 
     it('should retrieve Endpoint Metadata Service client using the space id', async () => {
@@ -581,7 +581,7 @@ describe('test endpoint routes', () => {
         mockResponse
       );
 
-      expect(mockResponse.forbidden).toBeCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalled();
     });
 
     it('should correctly return metadata transform stats', async () => {
@@ -615,7 +615,7 @@ describe('test endpoint routes', () => {
         authRequired: true,
       });
       expect(routeConfig.security?.authz).toEqual({ requiredPrivileges: ['securitySolution'] });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const response = mockResponse.ok.mock.calls[0][0]?.body as TransformGetTransformStatsResponse;
       expect(response.count).toEqual(expectedResponse.count);
       expect(response.transforms).toEqual(expectedResponse.transforms);

@@ -387,7 +387,7 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 
-      expect(mockedBulkUpdateAgents).toBeCalled();
+      expect(mockedBulkUpdateAgents).toHaveBeenCalled();
       expect(mockedBulkUpdateAgents).toBeCalledWith(
         expect.anything(),
         [

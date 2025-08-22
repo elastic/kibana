@@ -266,7 +266,7 @@ describe('Droppable', () => {
       await dragOverToNextByKeyboard();
       // drops on second target
       await dropByKeyboard();
-      expect(firstDroppableOnDrop).not.toBeCalled();
+      expect(firstDroppableOnDrop).not.toHaveBeenCalled();
       expect(secondDroppableOnDrop).toHaveBeenCalledWith(draggableValue, 'field_add');
     });
     test('adds ghost to droppable when element is dragged over', async () => {

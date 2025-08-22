@@ -49,7 +49,7 @@ describe('useRedirectPath', () => {
 
     redirectToPathOrRedirectPath({ pathname: '/test' });
 
-    expect(mockStart.application.navigateToUrl).not.toBeCalled();
+    expect(mockStart.application.navigateToUrl).not.toHaveBeenCalled();
     expect(history.location.pathname).toBe('/test');
   });
 });

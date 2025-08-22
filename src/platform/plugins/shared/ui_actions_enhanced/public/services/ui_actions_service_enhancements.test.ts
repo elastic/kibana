@@ -166,7 +166,7 @@ describe('UiActionsService', () => {
       test('registerFeature is not called if no license requirements', () => {
         const service = new UiActionsServiceEnhancements(deps);
         service.registerActionFactory(factoryDefinition1);
-        expect(spy).not.toBeCalled();
+        expect(spy).not.toHaveBeenCalled();
       });
 
       test('registerFeature is called if has license requirements', () => {

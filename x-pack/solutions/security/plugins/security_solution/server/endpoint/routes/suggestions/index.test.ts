@@ -994,7 +994,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
       it('should respond with forbidden for trusted apps', async () => {
         await callRoute(SUGGESTIONS_INTERNAL_ROUTE, {
@@ -1007,7 +1007,7 @@ describe('when calling the Suggestions route handler', () => {
           },
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
     });
   });

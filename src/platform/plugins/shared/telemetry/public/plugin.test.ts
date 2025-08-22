@@ -58,8 +58,8 @@ describe('TelemetryPlugin', () => {
             home,
           });
 
-          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toBeCalled();
-          expect(home.welcomeScreen.registerOnRendered).not.toBeCalled();
+          expect(home.welcomeScreen.registerTelemetryNoticeRenderer).not.toHaveBeenCalled();
+          expect(home.welcomeScreen.registerOnRendered).not.toHaveBeenCalled();
         });
       });
     });

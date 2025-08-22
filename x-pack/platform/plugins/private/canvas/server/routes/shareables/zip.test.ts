@@ -68,6 +68,6 @@ describe('Zips Canvas shareables runtime together with workpad', () => {
     expect(mockArchive.file).nthCalledWith(2, SHAREABLE_RUNTIME_FILE, {
       name: `${SHAREABLE_RUNTIME_NAME}.js`,
     });
-    expect(mockArchive.finalize).toBeCalled();
+    expect(mockArchive.finalize).toHaveBeenCalled();
   });
 });

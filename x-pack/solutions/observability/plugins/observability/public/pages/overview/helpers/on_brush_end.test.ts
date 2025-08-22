@@ -18,7 +18,7 @@ describe('Chart helper', () => {
     } as unknown as History;
     it("doesn't push a new history when x is not defined", () => {
       onBrushEnd({ x: undefined, history });
-      expect(history.push).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
     });
 
     it('pushes a new history with time range converted to ISO', () => {

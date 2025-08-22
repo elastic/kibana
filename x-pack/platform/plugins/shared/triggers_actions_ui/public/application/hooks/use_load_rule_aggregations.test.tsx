@@ -162,7 +162,7 @@ describe('useLoadRuleAggregations', () => {
     renderHook(() => useLoadRuleAggregations(params), { wrapper });
 
     await waitFor(() =>
-      expect(useKibanaMock().services.notifications.toasts.addDanger).toBeCalled()
+      expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalled()
     );
   });
 });

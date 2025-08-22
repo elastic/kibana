@@ -35,7 +35,7 @@ describe('SubmitCaseButton', () => {
 
     await userEvent.click(await screen.findByTestId('create-case-submit'));
 
-    await waitFor(() => expect(onSubmit).toBeCalled());
+    await waitFor(() => expect(onSubmit).toHaveBeenCalled());
   });
 
   it('disables when submitting', async () => {

@@ -183,7 +183,7 @@ describe('EditCategory ', () => {
     await user.click(screen.getByTestId('edit-category-cancel'));
 
     await waitFor(() => {
-      expect(onSubmit).not.toBeCalled();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     expect(screen.getByTestId('no-categories')).toBeInTheDocument();

@@ -155,7 +155,7 @@ describe('createConversation', () => {
       logger,
     });
 
-    expect(esClient.create).toBeCalled();
+    expect(esClient.create).toHaveBeenCalled();
   });
 
   test('It returns an auto-generated id if id is sent in undefined', async () => {

@@ -52,7 +52,7 @@ describe('state_sync', () => {
       start();
 
       // initial sync of state to storage is not happening
-      expect(testStateStorage.set).not.toBeCalled();
+      expect(testStateStorage.set).not.toHaveBeenCalled();
 
       container.transitions.add({
         id: 1,
@@ -97,7 +97,7 @@ describe('state_sync', () => {
       (testStateStorage.set as jest.Mock).mockClear();
 
       container.set(defaultState);
-      expect(testStateStorage.set).not.toBeCalled();
+      expect(testStateStorage.set).not.toHaveBeenCalled();
 
       stop();
     });

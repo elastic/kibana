@@ -146,7 +146,7 @@ describe('Search service', () => {
 
         expect(callOptions).toBe(options);
         expect(request).toBe(searchRequest);
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('searches using the original request if `id` is provided', async () => {
@@ -258,7 +258,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('does not call `trackId` if restoring', async () => {
@@ -269,7 +269,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
 
       it('does not call `trackId` if no session id provided', async () => {
@@ -280,7 +280,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId).not.toBeCalled();
+        expect(mockSessionClient.trackId).not.toHaveBeenCalled();
       });
     });
 

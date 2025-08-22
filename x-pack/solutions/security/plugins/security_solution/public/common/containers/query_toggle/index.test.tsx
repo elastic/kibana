@@ -60,7 +60,7 @@ describe('useQueryToggle', () => {
     act(() => {
       result.current.setToggleStatus(false);
     });
-    expect(mockSet).not.toBeCalled();
+    expect(mockSet).not.toHaveBeenCalled();
     cleanup();
   });
 });

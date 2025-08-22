@@ -47,7 +47,7 @@ describe('options list type-specific search queries', () => {
         fieldSpec: { type: 'boolean' } as unknown as FieldSpec,
       };
       getSearchSuggestionsAggregationBuilder(optionsListRequestBodyMock);
-      expect(exactMatchSpy).toBeCalled();
+      expect(exactMatchSpy).toHaveBeenCalled();
     });
 
     describe('string (keyword, text+keyword, or nested) field', () => {

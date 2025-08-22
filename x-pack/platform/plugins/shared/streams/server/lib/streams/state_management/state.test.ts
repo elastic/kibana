@@ -237,11 +237,11 @@ describe('State', () => {
       stateDependenciesMock
     );
 
-    expect(applyChangeSpy).toBeCalled();
-    expect(validateSpy).toBeCalled();
-    expect(determineElasticsearchActionsSpy).toBeCalled();
-    expect(planSpy).toBeCalled();
-    expect(executeSpy).toBeCalled();
+    expect(applyChangeSpy).toHaveBeenCalled();
+    expect(validateSpy).toHaveBeenCalled();
+    expect(determineElasticsearchActionsSpy).toHaveBeenCalled();
+    expect(planSpy).toHaveBeenCalled();
+    expect(executeSpy).toHaveBeenCalled();
   });
 });
 

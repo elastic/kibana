@@ -91,7 +91,7 @@ describe('CustomExtentsOptions component', () => {
       const comp = shallow(<CustomExtentsOptions {...defaultProps} />);
       comp.find({ paramName: DEFAULT_Y_EXTENTS }).prop('setValue')(DEFAULT_Y_EXTENTS, true);
 
-      expect(setMultipleValidity).not.toBeCalled();
+      expect(setMultipleValidity).not.toHaveBeenCalled();
       expect(setValueAxis).toBeCalledWith(SCALE, defaultProps.axisScale);
     });
 

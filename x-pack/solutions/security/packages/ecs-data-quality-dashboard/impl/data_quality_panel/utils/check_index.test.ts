@@ -160,11 +160,11 @@ describe('checkIndex', () => {
     });
 
     test('it invokes `onStart`', () => {
-      expect(onStart).toBeCalled();
+      expect(onStart).toHaveBeenCalled();
     });
 
     test('it invokes `onLoadMappingsStart`', () => {
-      expect(onLoadMappingsStart).toBeCalled();
+      expect(onLoadMappingsStart).toHaveBeenCalled();
     });
 
     test('it invokes `onLoadMappingsSuccess` with mappings response', () => {
@@ -172,7 +172,7 @@ describe('checkIndex', () => {
     });
 
     test('it invokes `onLoadUnallowedValuesStart`', () => {
-      expect(onLoadUnallowedValuesStart).toBeCalled();
+      expect(onLoadUnallowedValuesStart).toHaveBeenCalled();
     });
 
     test('it invokes `onLoadUnallowedValuesSuccess` with unallowed value search results', () => {
@@ -205,7 +205,7 @@ describe('checkIndex', () => {
     });
 
     test('it does NOT invoke `onError`', () => {
-      expect(onError).not.toBeCalled();
+      expect(onError).not.toHaveBeenCalled();
     });
 
     test('it invokes the lifecycle hooks in the expected order', () => {
@@ -255,7 +255,7 @@ describe('checkIndex', () => {
       });
 
       test('it does NOT invoke `onSuccess`', () => {
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
       });
 
       test('it invokes the lifecycle hooks in the expected order', () => {
@@ -299,7 +299,7 @@ describe('checkIndex', () => {
       });
 
       test('it does NOT invoke `onSuccess`', () => {
-        expect(onSuccess).not.toBeCalled();
+        expect(onSuccess).not.toHaveBeenCalled();
       });
 
       test('it invokes the lifecycle hooks in the expected order', () => {
@@ -338,7 +338,7 @@ describe('checkIndex', () => {
         pattern,
       });
 
-      expect(onCheckCompleted).not.toBeCalled();
+      expect(onCheckCompleted).not.toHaveBeenCalled();
     });
   });
 
@@ -460,7 +460,7 @@ describe('checkIndex', () => {
         pattern,
       });
 
-      expect(onCheckCompleted).not.toBeCalled();
+      expect(onCheckCompleted).not.toHaveBeenCalled();
     });
   });
 });

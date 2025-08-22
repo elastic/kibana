@@ -295,8 +295,8 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).not.toBeCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
     });
 
     it('does not schedule an alert when the short window burn rate is below the threshold', async () => {
@@ -343,8 +343,8 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).not.toBeCalled();
-      expect(servicesMock.alertsClient?.setAlertData).not.toBeCalled();
+      expect(servicesMock.alertsClient?.report).not.toHaveBeenCalled();
+      expect(servicesMock.alertsClient?.setAlertData).not.toHaveBeenCalled();
     });
 
     it('schedules an alert when both windows of first window definition burn rate have reached the threshold', async () => {

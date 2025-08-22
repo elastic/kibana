@@ -67,11 +67,11 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -82,12 +82,12 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       checker.enable();
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).toBeCalled();
+        expect(listener).toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -98,12 +98,12 @@ describe('Resize Checker', () => {
       const listener = jest.fn();
       checker.on('resize', listener);
 
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
       el.clientHeight = 100;
       checker.enable();
       el.clientHeight = 100;
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -121,7 +121,7 @@ describe('Resize Checker', () => {
       });
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 1000);
     });
@@ -136,12 +136,12 @@ describe('Resize Checker', () => {
         el.clientHeight = 100;
       });
       el.dispatchEvent('resize');
-      expect(listener).not.toBeCalled();
+      expect(listener).not.toHaveBeenCalled();
 
       el.clientHeight = 200;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });
@@ -167,7 +167,7 @@ describe('Resize Checker', () => {
       el.clientHeight = 100;
       el.dispatchEvent('resize');
       setTimeout(() => {
-        expect(listener).not.toBeCalled();
+        expect(listener).not.toHaveBeenCalled();
         done();
       }, 100);
     });

@@ -83,7 +83,7 @@ describe('ES|QL async search strategy', () => {
           )
           .toPromise();
 
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
         const request = mockApiCaller.mock.calls[0][0].body;
         expect(request.query).toEqual(params.query);
         expect(request).toHaveProperty('keep_alive', '60000ms');
@@ -99,7 +99,7 @@ describe('ES|QL async search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
         const request = mockApiCaller.mock.calls[0][0];
         expect(request.path).toContain('foo');
         expect(request.querystring).toHaveProperty('wait_for_completion_timeout');
@@ -118,7 +118,7 @@ describe('ES|QL async search strategy', () => {
 
         await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
 
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
         const request = mockApiCaller.mock.calls[0][0];
         expect(request.path).toContain('foo');
         expect(request.querystring).toHaveProperty('wait_for_completion_timeout', '10s');
@@ -185,7 +185,7 @@ describe('ES|QL async search strategy', () => {
 
         await esSearch.search({ params }, {}, mockDeps).toPromise();
 
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
         const request = mockApiCaller.mock.calls[0][0].body;
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive');
@@ -199,7 +199,7 @@ describe('ES|QL async search strategy', () => {
         const esSearch = await esqlAsyncSearchStrategyProvider(mockSearchConfig, mockLogger);
         await esSearch.search({ id, params }, { retrieveResults: true }, mockDeps).toPromise();
 
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
         const request = mockApiCaller.mock.calls[0][0];
         expect(request.path).toEqual(
           '/_query/async/FlBvQU5CS3BKVEdPcWM1V2lkYXNUbXccVmNhQl9wcWFRdG1WYzE4N2tsOFNNdzozNjMzOQ==/stop'
@@ -231,9 +231,9 @@ describe('ES|QL async search strategy', () => {
         } catch (e) {
           err = e;
         }
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
         expect(err).not.toBeUndefined();
-        expect(mockApiCaller).toBeCalled();
+        expect(mockApiCaller).toHaveBeenCalled();
       });
     });
 
@@ -259,7 +259,7 @@ describe('ES|QL async search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockApiCaller).toBeCalled();
+      expect(mockApiCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
@@ -282,7 +282,7 @@ describe('ES|QL async search strategy', () => {
       } catch (e) {
         err = e;
       }
-      expect(mockApiCaller).toBeCalled();
+      expect(mockApiCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
@@ -299,7 +299,7 @@ describe('ES|QL async search strategy', () => {
 
       await esSearch.cancel!(id, {}, mockDeps);
 
-      expect(mockApiCaller).toBeCalled();
+      expect(mockApiCaller).toHaveBeenCalled();
       const request = mockApiCaller.mock.calls[0][0];
       expect(request.path).toContain(id);
     });
@@ -324,7 +324,7 @@ describe('ES|QL async search strategy', () => {
         err = e;
       }
 
-      expect(mockApiCaller).toBeCalled();
+      expect(mockApiCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(400);
       expect(err?.message).toBe(errResponse.message);
@@ -342,7 +342,7 @@ describe('ES|QL async search strategy', () => {
 
       await esSearch.extend!(id, keepAlive, {}, mockDeps);
 
-      expect(mockApiCaller).toBeCalled();
+      expect(mockApiCaller).toHaveBeenCalled();
       const request = mockApiCaller.mock.calls[0][0];
       expect(request.body).toEqual({ id, keep_alive: keepAlive });
     });
@@ -362,7 +362,7 @@ describe('ES|QL async search strategy', () => {
         err = e;
       }
 
-      expect(mockApiCaller).toBeCalled();
+      expect(mockApiCaller).toHaveBeenCalled();
       expect(err).toBeInstanceOf(KbnServerError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);

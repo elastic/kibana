@@ -78,7 +78,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
     });
 
     expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
-    expect(mockedAgentPolicyService.deployPolicies).not.toBeCalled();
+    expect(mockedAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
   });
 
   it('should do deploy policies out of sync', async () => {

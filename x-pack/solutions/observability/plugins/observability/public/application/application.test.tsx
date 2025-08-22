@@ -141,7 +141,7 @@ describe('renderApp', () => {
     });
     unmount();
 
-    expect(mockSearchSessionClear).toBeCalled();
+    expect(mockSearchSessionClear).toHaveBeenCalled();
   });
 
   function AppWrapper({ children }: { children?: ReactNode }) {

@@ -127,7 +127,7 @@ describe('KbnUrlStateStorage', () => {
         history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
         flushNotifyOnErrors();
-        expect(toasts.addError).toBeCalled();
+        expect(toasts.addError).toHaveBeenCalled();
       });
     });
   });
@@ -199,7 +199,7 @@ describe('KbnUrlStateStorage', () => {
             ...withNotifyOnErrors(toasts),
           });
           await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
-          expect(toasts.addError).toBeCalled();
+          expect(toasts.addError).toHaveBeenCalled();
         });
       });
     });
@@ -309,7 +309,7 @@ describe('KbnUrlStateStorage', () => {
         history.replace(`/?${key}=(ok:2,test:`); // malformed rison
         expect(() => urlStateStorage.get(key)).not.toThrow();
         flushNotifyOnErrors();
-        expect(toasts.addError).toBeCalled();
+        expect(toasts.addError).toHaveBeenCalled();
       });
     });
   });

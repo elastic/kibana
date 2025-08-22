@@ -107,7 +107,7 @@ describe('combineRenderers', () => {
         data,
         scopeId,
       });
-      expect(b.renderRow).not.toBeCalled();
+      expect(b.renderRow).not.toHaveBeenCalled();
     });
 
     it('renders (only) `b` when `a` is NOT an instance and `b` is an instance', () => {
@@ -120,7 +120,7 @@ describe('combineRenderers', () => {
         scopeId,
       });
 
-      expect(a.renderRow).not.toBeCalled();
+      expect(a.renderRow).not.toHaveBeenCalled();
       expect(b.renderRow).toBeCalledWith({
         contextId,
         data,
@@ -132,8 +132,8 @@ describe('combineRenderers', () => {
       a.isInstance.mockReturnValue(false);
       b.isInstance.mockReturnValue(false);
 
-      expect(a.renderRow).not.toBeCalled();
-      expect(b.renderRow).not.toBeCalled();
+      expect(a.renderRow).not.toHaveBeenCalled();
+      expect(b.renderRow).not.toHaveBeenCalled();
     });
   });
 });

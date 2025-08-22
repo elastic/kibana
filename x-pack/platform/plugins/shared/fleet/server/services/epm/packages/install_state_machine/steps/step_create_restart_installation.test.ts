@@ -239,7 +239,7 @@ describe('stepCreateRestartInstallation', () => {
           spaceId: DEFAULT_SPACE_ID,
         });
 
-        expect(mockedRestartInstallation).toBeCalled();
+        expect(mockedRestartInstallation).toHaveBeenCalled();
       });
     });
   });

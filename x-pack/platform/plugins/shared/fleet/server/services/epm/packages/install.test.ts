@@ -634,8 +634,8 @@ describe('handleInstallPackageFailure', () => {
       spaceId: 'default',
     });
 
-    expect(mockedLogger.error).not.toBeCalled();
-    expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
+    expect(mockedLogger.error).not.toHaveBeenCalled();
+    expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
   });
 
   it('should rollback on upgrade on FleetError', async () => {
@@ -912,7 +912,7 @@ describe('handleInstallPackageFailure', () => {
         spaceId: 'default',
       });
 
-      expect(installStateMachine._stateMachineInstallPackage).not.toBeCalled();
+      expect(installStateMachine._stateMachineInstallPackage).not.toHaveBeenCalled();
     });
   });
 });

@@ -175,14 +175,14 @@ describe('SearchInterceptor', () => {
   describe('showError', () => {
     test('Ignores an AbortError', async () => {
       searchInterceptor.showError(new AbortError());
-      expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
-      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(mockCoreSetup.notifications.toasts.addError).not.toHaveBeenCalled();
     });
 
     test('Ignores a SearchTimeoutError', async () => {
       searchInterceptor.showError(new SearchTimeoutError(new Error(), TimeoutErrorMode.CONTACT));
-      expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
-      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addDanger).not.toHaveBeenCalled();
+      expect(mockCoreSetup.notifications.toasts.addError).not.toHaveBeenCalled();
     });
 
     test('Renders a EsError', async () => {
@@ -200,12 +200,12 @@ describe('SearchInterceptor', () => {
         )
       );
       expect(mockCoreSetup.notifications.toasts.addDanger).toBeCalledTimes(1);
-      expect(mockCoreSetup.notifications.toasts.addError).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addError).not.toHaveBeenCalled();
     });
 
     test('Renders a general error', async () => {
       searchInterceptor.showError(new Error('Oopsy'));
-      expect(mockCoreSetup.notifications.toasts.addDanger).not.toBeCalled();
+      expect(mockCoreSetup.notifications.toasts.addDanger).not.toHaveBeenCalled();
       expect(mockCoreSetup.notifications.toasts.addError).toBeCalledTimes(1);
     });
   });
@@ -630,7 +630,7 @@ describe('SearchInterceptor', () => {
 
       await timeTravel(1000);
 
-      expect(mockCoreStart.analytics.reportEvent).toBeCalled();
+      expect(mockCoreStart.analytics.reportEvent).toHaveBeenCalled();
       expect(mockCoreStart.analytics.reportEvent.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "data_search_timeout",
@@ -1059,7 +1059,7 @@ describe('SearchInterceptor', () => {
         response.subscribe({ next, error });
         await timeTravel(10);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(trackSearchComplete).not.toBeCalled();
+        expect(trackSearchComplete).not.toHaveBeenCalled();
         await timeTravel(300);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
         expect(trackSearchComplete).toBeCalledTimes(1);
@@ -1253,7 +1253,7 @@ describe('SearchInterceptor', () => {
 
         expect(mockCoreSetup.http.post).toBeCalledTimes(1);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(completeSearch).not.toBeCalled();
+        expect(completeSearch).not.toHaveBeenCalled();
         await timeTravel(300);
         // Should be called only 2 times (once per partial response)
         expect(mockCoreSetup.http.post).toBeCalledTimes(2);
@@ -1540,7 +1540,7 @@ describe('SearchInterceptor', () => {
         expect(error).toBeCalledTimes(0);
         expect(complete).toBeCalledTimes(0);
         expect(sessionService.trackSearch).toBeCalledTimes(1);
-        expect(completeSearch).not.toBeCalled();
+        expect(completeSearch).not.toHaveBeenCalled();
 
         const next2 = jest.fn();
         const error2 = jest.fn();
@@ -1823,7 +1823,7 @@ describe('SearchInterceptor', () => {
         });
 
         error.mockImplementation((e) => {
-          expect(next).not.toBeCalled();
+          expect(next).not.toHaveBeenCalled();
           expect(e).toBeInstanceOf(AbortError);
         });
 
@@ -1844,7 +1844,7 @@ describe('SearchInterceptor', () => {
 
         error.mockImplementation((e) => {
           expect(e).toBeInstanceOf(AbortError);
-          expect(mockCoreSetup.http.post).not.toBeCalled();
+          expect(mockCoreSetup.http.post).not.toHaveBeenCalled();
         });
 
         response.subscribe({ error });

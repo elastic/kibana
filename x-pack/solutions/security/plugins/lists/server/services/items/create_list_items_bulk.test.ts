@@ -42,7 +42,7 @@ describe('crete_list_item_bulk', () => {
   test('It should not call the dataClient when the values are empty', async () => {
     const options = getCreateListItemBulkOptionsMock();
     options.value = [];
-    expect(options.esClient.bulk).not.toBeCalled();
+    expect(options.esClient.bulk).not.toHaveBeenCalled();
   });
 
   test('It should skip over a value if it is not able to add that item because it is not parsable such as an ip_range with a serializer that only matches one ip', async () => {

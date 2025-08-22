@@ -193,7 +193,7 @@ describe('_stateMachineInstallPackage', () => {
         spaceId: DEFAULT_SPACE_ID,
         retryFromLastState: true,
       });
-      expect(mockCleanupLatestExecutedState).not.toBeCalled();
+      expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
       expect(mockHandleState).toBeCalledWith(
         'create_restart_installation',
         expect.any(Object),
@@ -242,7 +242,7 @@ describe('_stateMachineInstallPackage', () => {
           },
         },
       });
-      expect(mockCleanupLatestExecutedState).not.toBeCalled();
+      expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
       expect(mockHandleState).toBeCalledWith(
         'create_restart_installation',
         expect.any(Object),
@@ -290,7 +290,7 @@ describe('_stateMachineInstallPackage', () => {
           },
         },
       });
-      expect(mockCleanupLatestExecutedState).toBeCalled();
+      expect(mockCleanupLatestExecutedState).toHaveBeenCalled();
       expect(mockHandleState).toBeCalledWith(
         'remove_legacy_templates',
         expect.any(Object),

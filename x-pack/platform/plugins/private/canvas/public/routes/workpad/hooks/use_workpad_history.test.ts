@@ -47,7 +47,7 @@ describe('useRestoreHistory', () => {
       renderHook(() => useWorkpadHistory());
 
       expect(history.replace).toBeCalledWith(history.location.pathname, encode(state.persistent));
-      expect(history.push).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
     });
 
     test('with location state not matching store state', () => {
@@ -69,8 +69,8 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
 
     test('with location state matching store state', () => {
@@ -88,8 +88,8 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
   });
 
@@ -183,8 +183,8 @@ describe('useRestoreHistory', () => {
       mockGetState.mockReturnValue(newState);
       rerender();
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
   });
 
@@ -217,8 +217,8 @@ describe('useRestoreHistory', () => {
 
       rerender();
 
-      expect(history.push).not.toBeCalled();
-      expect(history.replace).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
+      expect(history.replace).not.toHaveBeenCalled();
     });
 
     test('changes to search does a replace', () => {
@@ -249,7 +249,7 @@ describe('useRestoreHistory', () => {
 
       rerender();
 
-      expect(history.push).not.toBeCalled();
+      expect(history.push).not.toHaveBeenCalled();
       expect(history.replace).toBeCalledWith(
         `somepath?${history.location.search}`,
         encode(state.persistent)

@@ -214,8 +214,8 @@ describe('embeddable renderer', () => {
     );
 
     await waitFor(() => expect(embeddable.getByTestId('errorMessageMarkdown')).toBeInTheDocument());
-    expect(onApiAvailable).not.toBeCalled();
-    expect(buildEmbeddable).not.toBeCalled();
+    expect(onApiAvailable).not.toHaveBeenCalled();
+    expect(buildEmbeddable).not.toHaveBeenCalled();
     expect(embeddable.getByTestId('errorMessageMarkdown')).toHaveTextContent(
       'error in buildEmbeddable'
     );

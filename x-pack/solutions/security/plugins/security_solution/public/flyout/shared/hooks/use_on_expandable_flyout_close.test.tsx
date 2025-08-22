@@ -33,7 +33,7 @@ describe('useOnExpandableFlyoutClose', () => {
 
     unmount();
 
-    expect(window.removeEventListener).toBeCalled();
+    expect(window.removeEventListener).toHaveBeenCalled();
   });
 
   it('should add event listener to window', async () => {
@@ -43,6 +43,6 @@ describe('useOnExpandableFlyoutClose', () => {
 
     renderHook(() => useOnExpandableFlyoutClose({ callback: callbackFct }));
 
-    expect(window.addEventListener).toBeCalled();
+    expect(window.addEventListener).toHaveBeenCalled();
   });
 });

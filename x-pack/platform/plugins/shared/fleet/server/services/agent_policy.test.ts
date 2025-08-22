@@ -1630,7 +1630,7 @@ describe('Agent policy', () => {
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.create).not.toBeCalled();
+      expect(esClient.create).not.toHaveBeenCalled();
     });
 
     it('should create a .fleet-policy document if we can get the full policy', async () => {

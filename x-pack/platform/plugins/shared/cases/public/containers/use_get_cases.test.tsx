@@ -35,7 +35,7 @@ describe('useGetCases', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnGetCases).toBeCalled();
+      expect(spyOnGetCases).toHaveBeenCalled();
     });
 
     expect(spyOnGetCases).toBeCalledWith({

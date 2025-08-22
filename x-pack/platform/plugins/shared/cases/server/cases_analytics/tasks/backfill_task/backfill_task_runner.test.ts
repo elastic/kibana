@@ -174,8 +174,8 @@ describe('BackfillTaskRunner', () => {
 
       await taskRunner.run();
 
-      expect(esClient.cluster.health).not.toBeCalled();
-      expect(esClient.reindex).not.toBeCalled();
+      expect(esClient.cluster.health).not.toHaveBeenCalled();
+      expect(esClient.reindex).not.toHaveBeenCalled();
     });
   });
 });

@@ -54,7 +54,7 @@ test('should call onCancel when "Cancel" clicked', async () => {
   const { getByText } = render(<ImageEditor onCancel={onCancel} />);
   expect(getByText('Cancel')).toBeVisible();
   await userEvent.click(getByText('Cancel'));
-  expect(onCancel).toBeCalled();
+  expect(onCancel).toHaveBeenCalled();
 });
 
 test('should call onSave when "Save" clicked (url)', async () => {

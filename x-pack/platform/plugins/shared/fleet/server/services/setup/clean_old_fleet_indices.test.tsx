@@ -44,7 +44,7 @@ describe('cleanUpOldFileIndices', () => {
         name: '.fleet-files,.fleet-file-data,.fleet-filedelivery-data,.fleet-filedelivery-meta',
       })
     );
-    expect(logger.warn).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('should log a warning and not throw if an unexpected error happen', async () => {
@@ -70,7 +70,7 @@ describe('cleanUpOldFileIndices', () => {
     await cleanUpOldFileIndices(esClient, logger);
 
     expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(1);
-    expect(logger.warn).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('should handle 404 when deleting old index', async () => {
@@ -99,6 +99,6 @@ describe('cleanUpOldFileIndices', () => {
     await cleanUpOldFileIndices(esClient, logger);
 
     expect(esClient.indices.delete).toBeCalledTimes(1);
-    expect(logger.warn).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

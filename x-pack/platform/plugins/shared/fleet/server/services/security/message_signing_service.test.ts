@@ -180,7 +180,7 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
 
       const generateKeyPairResponse = await messageSigningService.generateKeyPair();
-      expect(soClientMock.create).not.toBeCalled();
+      expect(soClientMock.create).not.toHaveBeenCalled();
 
       expect(generateKeyPairResponse).toEqual({
         passphrase: expect.any(String),
@@ -275,7 +275,7 @@ describe('MessageSigningService', () => {
       mockCreatePointInTimeFinderAsInternalUser([keyPairObj]);
 
       await messageSigningService.generateKeyPair();
-      expect(soClientMock.create).not.toBeCalled();
+      expect(soClientMock.create).not.toHaveBeenCalled();
       expect(soClientMock.update).toBeCalledWith(
         MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
         keyPairObj.id,

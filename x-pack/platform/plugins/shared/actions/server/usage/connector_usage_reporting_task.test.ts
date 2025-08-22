@@ -196,7 +196,7 @@ describe('ConnectorUsageReportingTask', () => {
 
     await task.start();
 
-    expect(taskManagerStart.ensureScheduled).not.toBeCalled();
+    expect(taskManagerStart.ensureScheduled).not.toHaveBeenCalled();
     expect(logger.error).toHaveBeenCalledWith(
       `Missing required task manager service during start of ${CONNECTOR_USAGE_REPORTING_TASK_TYPE}`
     );
@@ -487,6 +487,6 @@ describe('ConnectorUsageReportingTask', () => {
 
     await task.start(taskManagerStart);
 
-    expect(taskManagerStart.ensureScheduled).not.toBeCalled();
+    expect(taskManagerStart.ensureScheduled).not.toHaveBeenCalled();
   });
 });

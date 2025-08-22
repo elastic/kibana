@@ -166,7 +166,7 @@ describe('Table', () => {
 
     // Click the edit button
     renderTable({ editField }).prop('columns')[6].actions[0].onClick();
-    expect(editField).toBeCalled();
+    expect(editField).toHaveBeenCalled();
   });
 
   test('should not allow edit or deletion for user with only read access', () => {

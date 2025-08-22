@@ -58,7 +58,7 @@ describe('ViewApiRequestFlyout', () => {
         findTestSubject(component, 'apiRequestFlyoutClose').simulate('click');
       });
 
-      expect(payload.closeFlyout).toBeCalled();
+      expect(payload.closeFlyout).toHaveBeenCalled();
     });
 
     test('doesnt have openInConsole when some optional props are not supplied', async () => {

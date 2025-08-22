@@ -153,7 +153,7 @@ describe('CasesConnector', () => {
       templateId,
     });
 
-    expect(getCasesClient).toBeCalled();
+    expect(getCasesClient).toHaveBeenCalled();
   });
 
   it('throws the same error if the executor throws a CasesConnectorError error', async () => {
@@ -316,9 +316,9 @@ describe('CasesConnector', () => {
       templateId,
     });
 
-    expect(getCasesClient).not.toBeCalled();
-    expect(CasesConnectorExecutorMock).not.toBeCalled();
-    expect(mockExecute).not.toBeCalled();
-    expect(nextBackOff).not.toBeCalled();
+    expect(getCasesClient).not.toHaveBeenCalled();
+    expect(CasesConnectorExecutorMock).not.toHaveBeenCalled();
+    expect(mockExecute).not.toHaveBeenCalled();
+    expect(nextBackOff).not.toHaveBeenCalled();
   });
 });

@@ -145,6 +145,6 @@ describe('NumberList', () => {
     const comp = shallow(<NumberList {...defaultProps} />);
     comp.find(NumberRow).first().prop('onBlur')();
 
-    expect(defaultProps.setTouched).toBeCalled();
+    expect(defaultProps.setTouched).toHaveBeenCalled();
   });
 });

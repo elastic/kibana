@@ -668,7 +668,7 @@ describe('Create case', () => {
       await user.click(screen.getByTestId('create-case-submit'));
 
       await waitFor(() => {
-        expect(postCase).toBeCalled();
+        expect(postCase).toHaveBeenCalled();
       });
 
       expect(pushCaseToExternalService).not.toHaveBeenCalled();

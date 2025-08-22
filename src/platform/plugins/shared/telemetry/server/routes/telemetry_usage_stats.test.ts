@@ -17,7 +17,7 @@ async function runRequest(
   mockRouter: IRouter<RequestHandlerContext>,
   body?: { unencrypted?: boolean; refreshCache?: boolean }
 ) {
-  expect(mockRouter.versioned.post).toBeCalled();
+  expect(mockRouter.versioned.post).toHaveBeenCalled();
   const [, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value.addVersion.mock
     .calls[0];
   const mockResponse = httpServerMock.createResponseFactory();
@@ -66,7 +66,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         unencrypted: undefined,
         refreshCache: undefined,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       expect(mockResponse.ok.mock.calls[0][0]).toEqual({ body: mockStats });
     });
 
@@ -138,7 +138,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         refreshCache: false,
         unencrypted: true,
       });
-      expect(mockResponse.forbidden).toBeCalled();
+      expect(mockResponse.forbidden).toHaveBeenCalled();
     });
 
     it('returns 503 when Kibana is not healthy enough to generate the Telemetry report', async () => {
@@ -174,7 +174,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         refreshCache: false,
         unencrypted: true,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('returns 200 when the user does not have enough permissions to request unencrypted telemetry but it requests encrypted', async () => {
@@ -195,7 +195,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         refreshCache: false,
         unencrypted: false,
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it.todo('always returns an empty array on errors on encrypted payload');

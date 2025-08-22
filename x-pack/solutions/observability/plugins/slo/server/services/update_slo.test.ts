@@ -68,18 +68,18 @@ describe('UpdateSLO', () => {
 
   describe('when the update does not change the original SLO', () => {
     function expectNoCallsToAnyMocks() {
-      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toBeCalled();
+      expect(mockScopedClusterClient.asCurrentUser.security.hasPrivileges).not.toHaveBeenCalled();
 
-      expect(mockTransformManager.uninstall).not.toBeCalled();
-      expect(mockTransformManager.install).not.toBeCalled();
-      expect(mockTransformManager.start).not.toBeCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockTransformManager.install).not.toHaveBeenCalled();
+      expect(mockTransformManager.start).not.toHaveBeenCalled();
 
-      expect(mockSummaryTransformManager.uninstall).not.toBeCalled();
-      expect(mockSummaryTransformManager.install).not.toBeCalled();
-      expect(mockSummaryTransformManager.start).not.toBeCalled();
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.install).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.start).not.toHaveBeenCalled();
 
-      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).not.toBeCalled();
-      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
+      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).not.toHaveBeenCalled();
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toHaveBeenCalled();
     }
 
     beforeEach(() => {

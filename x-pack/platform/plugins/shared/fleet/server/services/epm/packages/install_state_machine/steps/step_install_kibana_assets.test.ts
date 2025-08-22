@@ -206,11 +206,11 @@ describe('stepInstallKibanaAssetsWithStreaming', () => {
     expect(result).toEqual({ installedKibanaAssetsRefs: [] });
 
     // Verify that assetsMap was not used
-    expect(assetsMap.get).not.toBeCalled();
-    expect(assetsMap.set).not.toBeCalled();
+    expect(assetsMap.get).not.toHaveBeenCalled();
+    expect(assetsMap.set).not.toHaveBeenCalled();
 
     // Verify that archiveIterator was used
-    expect(archiveIterator.traverseEntries).toBeCalled();
+    expect(archiveIterator.traverseEntries).toHaveBeenCalled();
   });
 });
 
@@ -298,7 +298,7 @@ describe('cleanUpKibanaAssetsStep', () => {
       initialState: 'install_kibana_assets' as any,
     });
 
-    expect(mockedDeleteKibanaAssets).not.toBeCalled();
+    expect(mockedDeleteKibanaAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if retryFromLastState is not passed', async () => {
@@ -323,7 +323,7 @@ describe('cleanUpKibanaAssetsStep', () => {
       initialState: 'install_kibana_assets' as any,
     });
 
-    expect(mockedDeleteKibanaAssets).not.toBeCalled();
+    expect(mockedDeleteKibanaAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if initialState != install_kibana_assets', async () => {
@@ -349,7 +349,7 @@ describe('cleanUpKibanaAssetsStep', () => {
       initialState: 'create_restart_install' as any,
     });
 
-    expect(mockedDeleteKibanaAssets).not.toBeCalled();
+    expect(mockedDeleteKibanaAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if attributes are not present', async () => {
@@ -370,7 +370,7 @@ describe('cleanUpKibanaAssetsStep', () => {
       initialState: 'install_kibana_assets' as any,
     });
 
-    expect(mockedDeleteKibanaAssets).not.toBeCalled();
+    expect(mockedDeleteKibanaAssets).not.toHaveBeenCalled();
   });
 });
 
@@ -426,7 +426,7 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
       installedKibanaAssetsRefs: installedAssets,
     });
 
-    expect(mockedDeleteKibanaAssets).not.toBeCalled();
+    expect(mockedDeleteKibanaAssets).not.toHaveBeenCalled();
   });
 
   it('should clean up assets that are not present in the new package', async () => {

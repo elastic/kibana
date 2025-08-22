@@ -355,7 +355,7 @@ describe('SLOs Page', () => {
 
         button.click();
 
-        expect(mockLocator).toBeCalled();
+        expect(mockLocator).toHaveBeenCalled();
       });
 
       it('allows deleting an SLO', async () => {

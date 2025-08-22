@@ -82,9 +82,9 @@ describe('reset agent policies', () => {
     });
     await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-    expect(mockedSetupFleet).toBeCalled();
-    expect(mockedForceUnenrollAgent).not.toBeCalled();
-    expect(mockedDeleteEnrollmentApiKey).not.toBeCalled();
+    expect(mockedSetupFleet).toHaveBeenCalled();
+    expect(mockedForceUnenrollAgent).not.toHaveBeenCalled();
+    expect(mockedDeleteEnrollmentApiKey).not.toHaveBeenCalled();
   });
 
   it('should unenroll agents and revoke enrollment api keys if there is policies', async () => {
@@ -113,8 +113,8 @@ describe('reset agent policies', () => {
     });
     await resetPreconfiguredAgentPolicies(soClient, esClient);
 
-    expect(mockedSetupFleet).toBeCalled();
-    expect(mockedForceUnenrollAgent).toBeCalled();
-    expect(mockedDeleteEnrollmentApiKey).toBeCalled();
+    expect(mockedSetupFleet).toHaveBeenCalled();
+    expect(mockedForceUnenrollAgent).toHaveBeenCalled();
+    expect(mockedDeleteEnrollmentApiKey).toHaveBeenCalled();
   });
 });

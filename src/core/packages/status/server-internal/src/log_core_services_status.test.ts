@@ -65,7 +65,7 @@ describe('logCoreStatusChanges', () => {
     expect(l.get).nthCalledWith(1, 'elasticsearch');
     expect(l.get).nthCalledWith(2, 'savedObjects');
     expect(l.get).nthCalledWith(3, 'savedObjects');
-    expect(l.warn).not.toBeCalled();
+    expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.info).toBeCalledTimes(2);
     expect(l.info).nthCalledWith(1, 'elasticsearch service is now available: Avail!');
@@ -90,7 +90,7 @@ describe('logCoreStatusChanges', () => {
     expect(l.get).toBeCalledTimes(2);
     expect(l.get).nthCalledWith(1, 'elasticsearch');
     expect(l.get).nthCalledWith(2, 'savedObjects');
-    expect(l.warn).not.toBeCalled();
+    expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.info).toBeCalledTimes(1);
     expect(l.info).nthCalledWith(1, 'elasticsearch service is now available: Avail!');

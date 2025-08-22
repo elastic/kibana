@@ -82,7 +82,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter);
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
 
       test('if there is no value', () => {
@@ -90,7 +90,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs);
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
 
       test('if value is "custom" metric', () => {
@@ -98,7 +98,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs, 'custom');
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
 
       test('if value is selected metric is still available', () => {
@@ -106,7 +106,7 @@ describe('Aggregations utils', () => {
           useFallbackMetric(setValue, aggFilter, metricAggs, '2');
         });
 
-        expect(setValue).not.toBeCalled();
+        expect(setValue).not.toHaveBeenCalled();
       });
     });
 

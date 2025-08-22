@@ -326,7 +326,7 @@ describe('AnalyticsIndex', () => {
         `[${indexName}] Index already exists. Skipping creation.`,
         { tags: ['cai-index-creation', `${indexName}`] }
       );
-      expect(logger.error).not.toBeCalled();
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs multi_project_pending_exception errors as info', async () => {
@@ -348,7 +348,7 @@ describe('AnalyticsIndex', () => {
         `[${indexName}] Multi-project setup. Skipping creation.`,
         { tags: ['cai-index-creation', `${indexName}`] }
       );
-      expect(logger.error).not.toBeCalled();
+      expect(logger.error).not.toHaveBeenCalled();
       expect(nextBackOff).toBeCalledTimes(0);
     });
   });

@@ -179,7 +179,7 @@ describe('helpers', () => {
         isEventPinned,
       });
 
-      expect(onPinEvent).not.toBeCalled();
+      expect(onPinEvent).not.toHaveBeenCalled();
     });
 
     test('it invokes `onUnPinEvent` with the expected eventId when the event is pinned, and allowUnpinning is true', () => {
@@ -211,7 +211,7 @@ describe('helpers', () => {
         isEventPinned,
       });
 
-      expect(onUnPinEvent).not.toBeCalled();
+      expect(onUnPinEvent).not.toHaveBeenCalled();
     });
   });
 });

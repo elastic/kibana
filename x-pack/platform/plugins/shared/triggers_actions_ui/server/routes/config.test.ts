@@ -65,7 +65,7 @@ describe('createConfigRoute', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     await handler({}, httpServerMock.createKibanaRequest(), mockResponse);
 
-    expect(mockResponse.ok).toBeCalled();
+    expect(mockResponse.ok).toHaveBeenCalled();
     expect(mockResponse.ok.mock.calls[0][0]).toEqual({
       body: {
         isUsingSecurity: true,
@@ -100,7 +100,7 @@ describe('createConfigRoute', () => {
     const mockResponse = httpServerMock.createResponseFactory();
     await handler({}, httpServerMock.createKibanaRequest(), mockResponse);
 
-    expect(mockResponse.forbidden).toBeCalled();
+    expect(mockResponse.forbidden).toHaveBeenCalled();
     expect(mockResponse.forbidden.mock.calls[0][0]).toEqual({
       body: { message: 'Unauthorized to access config' },
     });

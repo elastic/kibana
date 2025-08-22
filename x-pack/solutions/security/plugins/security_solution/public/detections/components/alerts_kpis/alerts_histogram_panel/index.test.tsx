@@ -412,7 +412,7 @@ describe('AlertsHistogramPanel', () => {
 
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
         expect(mockSetIsExpanded).toBeCalledWith(false);
-        expect(mockSetToggle).not.toBeCalled();
+        expect(mockSetToggle).not.toHaveBeenCalled();
         wrapper.unmount();
       });
 

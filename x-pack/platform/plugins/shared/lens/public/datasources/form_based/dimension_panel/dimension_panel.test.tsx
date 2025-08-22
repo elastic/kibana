@@ -290,7 +290,7 @@ describe('FormBasedDimensionEditor', () => {
     const filterOperations = jest.fn().mockReturnValue(true);
 
     renderDimensionPanel({ filterOperations });
-    expect(filterOperations).toBeCalled();
+    expect(filterOperations).toHaveBeenCalled();
   });
 
   it('should show field select', () => {

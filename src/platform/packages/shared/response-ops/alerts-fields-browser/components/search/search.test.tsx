@@ -53,6 +53,6 @@ describe('Search', () => {
       .simulate('change', { target: { value: 'timestamp' } });
     wrapper.update();
 
-    expect(onSearchInputChange).toBeCalled();
+    expect(onSearchInputChange).toHaveBeenCalled();
   });
 });

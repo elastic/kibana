@@ -141,7 +141,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(client.get).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toBeCalled();
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,
@@ -211,7 +211,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // getValidId, optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toBeCalled();
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,
@@ -375,7 +375,7 @@ describe('SavedObjectsRepository Encryption Extension', () => {
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.encryptAttributes).not.toHaveBeenCalled();
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toBeCalled();
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).not.toHaveBeenCalled();
       expect(result).toEqual(
         expect.objectContaining({
           type: nonEncryptedSO.type,

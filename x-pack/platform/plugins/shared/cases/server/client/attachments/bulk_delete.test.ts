@@ -85,7 +85,7 @@ describe('bulk_delete', () => {
       expect(() =>
         retrieveFilesIgnoringNotFound([otherErrorResult], ['abc'], mockLogger)
       ).toThrowError(otherError);
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('throws when encountering an error that is not a file not found after a valid file', async () => {
@@ -98,7 +98,7 @@ describe('bulk_delete', () => {
       expect(() =>
         retrieveFilesIgnoringNotFound([fileResult, otherErrorResult], ['1', '2'], mockLogger)
       ).toThrowError(otherError);
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
 
     it('throws a new error when encountering an error that is a string', async () => {
@@ -112,7 +112,7 @@ describe('bulk_delete', () => {
       expect(() =>
         retrieveFilesIgnoringNotFound([fileResult, otherErrorResult], ['1', '2'], mockLogger)
       ).toThrowErrorMatchingInlineSnapshot(`"Failed to retrieve file id: 2: string error"`);
-      expect(mockLogger.warn).not.toBeCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
     });
   });
 });

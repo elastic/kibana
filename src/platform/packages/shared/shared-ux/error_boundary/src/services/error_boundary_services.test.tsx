@@ -63,7 +63,7 @@ describe('<KibanaErrorBoundaryProvider>', () => {
     );
     await userEvent.click(await findByTestId('clickForErrorBtn'));
 
-    expect(reportEventSpy2).not.toBeCalled();
+    expect(reportEventSpy2).not.toHaveBeenCalled();
     expect(reportEventSpy1).toBeCalledWith('fatal-error-react', {
       component_name: 'BadComponent',
       component_stack: expect.any(String),

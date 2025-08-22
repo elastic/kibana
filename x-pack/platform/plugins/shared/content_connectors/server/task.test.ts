@@ -147,8 +147,8 @@ describe('infraSyncTaskRunner', () => {
       taskInstance: taskInstanceStub,
     }).run();
 
-    expect(serviceMock.deployConnector).not.toBeCalled();
-    expect(serviceMock.removeDeployment).not.toBeCalled();
+    expect(serviceMock.deployConnector).not.toHaveBeenCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
   });
 
   test('Does nothing if connectors or policies requires deployment but license is not supported', async () => {
@@ -162,8 +162,8 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).not.toBeCalled();
-    expect(serviceMock.removeDeployment).not.toBeCalled();
+    expect(serviceMock.deployConnector).not.toHaveBeenCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
     expect(logger.warn).toBeCalledWith(expect.stringMatching(/.*not compatible.*/));
     expect(logger.warn).toBeCalledWith(expect.stringMatching(/.*license.*/));
   });
@@ -187,9 +187,9 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).not.toBeCalled();
-    expect(serviceMock.removeDeployment).not.toBeCalled();
-    expect(logger.warn).not.toBeCalled();
+    expect(serviceMock.deployConnector).not.toHaveBeenCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   test('Deploys connectors if no policies has been created for these connectors', async () => {
@@ -263,7 +263,7 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).not.toBeCalled();
+    expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
   });
 
   test('Removes deployments even if another connectors failed to be undeployed', async () => {

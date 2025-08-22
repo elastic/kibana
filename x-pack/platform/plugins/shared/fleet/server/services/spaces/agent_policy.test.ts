@@ -82,7 +82,7 @@ describe('updateAgentPolicySpaces', () => {
     });
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).not.toBeCalled();
+    ).not.toHaveBeenCalled();
   });
 
   it('does nothing if feature flag is not enabled', async () => {
@@ -96,7 +96,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).not.toBeCalled();
+    ).not.toHaveBeenCalled();
   });
 
   it('allow to change spaces', async () => {

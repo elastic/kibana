@@ -446,7 +446,7 @@ describe('createInitialState', () => {
   it('initializes the `discardUnknownObjects` flag to false if the flag is not provided in the config', () => {
     const initialState = createInitialState(createInitialStateParams);
 
-    expect(logger.warn).not.toBeCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
     expect(initialState.discardUnknownObjects).toEqual(false);
   });
 

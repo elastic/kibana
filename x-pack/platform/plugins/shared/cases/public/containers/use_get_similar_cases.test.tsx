@@ -34,7 +34,7 @@ describe('useGetSimilarCases', () => {
     );
 
     await waitFor(() => {
-      expect(spyOnGetCases).toBeCalled();
+      expect(spyOnGetCases).toHaveBeenCalled();
     });
 
     expect(spyOnGetCases).toBeCalledWith({
@@ -54,7 +54,7 @@ describe('useGetSimilarCases', () => {
       }
     );
 
-    expect(spyOnGetCases).not.toBeCalled();
+    expect(spyOnGetCases).not.toHaveBeenCalled();
   });
 
   it('shows a toast error message when an error occurs in the response', async () => {

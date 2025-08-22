@@ -427,7 +427,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.create).toBeCalled();
+        expect(soClient.create).toHaveBeenCalled();
 
         // ID should always be the same for a predefined id
         expect(soClient.create.mock.calls[0][2]?.id).toEqual(outputIdToUuid('output-test'));
@@ -451,7 +451,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update).not.toBeCalled();
+        expect(soClient.update).not.toHaveBeenCalled();
       });
 
       it('should update existing default output when creating a new default output', async () => {
@@ -494,7 +494,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update).not.toBeCalled();
+        expect(soClient.update).not.toHaveBeenCalled();
       });
 
       it('should update existing default monitoring output when creating a new default output', async () => {
@@ -658,7 +658,7 @@ describe('Output Service', () => {
           )}`
         );
 
-        expect(soClient.create).not.toBeCalled();
+        expect(soClient.create).not.toHaveBeenCalled();
       });
 
       // With preconfigured outputs
@@ -745,7 +745,7 @@ describe('Output Service', () => {
           },
           { id: 'output-test' }
         );
-        expect(soClient.create).toBeCalled();
+        expect(soClient.create).toHaveBeenCalled();
       });
 
       it('should update fleet server policies with data_output_id=default_output_id if a new default logstash output is created', async () => {
@@ -1300,7 +1300,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('Allow to update preconfigured output allowed to edit field from preconfiguration', async () => {
@@ -1318,7 +1318,7 @@ describe('Output Service', () => {
         }
       );
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('Should throw when an existing preconfigured default output and updating an output to become the default one outside of preconfiguration', async () => {
@@ -1440,7 +1440,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
     });
 
     it('Should call update with null fields if', async () => {
@@ -1459,7 +1459,7 @@ describe('Output Service', () => {
         ssl: null,
       });
 
-      expect(soClient.update).toBeCalled();
+      expect(soClient.update).toHaveBeenCalled();
       expect(soClient.update).toBeCalledWith(expect.anything(), expect.anything(), {
         is_default: true,
         ca_sha256: null,
@@ -2381,7 +2381,7 @@ describe('Output Service', () => {
         fromPreconfiguration: true,
       });
 
-      expect(soClient.delete).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
 
     it('Call removeOutputFromAll before deleting the output', async () => {
@@ -2401,7 +2401,7 @@ describe('Output Service', () => {
           force: false,
         }
       );
-      expect(soClient.delete).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
 
     it('Call removeOutputFromAll with with force before deleting the output, if deleted from preconfiguration', async () => {
@@ -2423,7 +2423,7 @@ describe('Output Service', () => {
           force: true,
         }
       );
-      expect(soClient.delete).toBeCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
 
     it('should call audit logger', async () => {

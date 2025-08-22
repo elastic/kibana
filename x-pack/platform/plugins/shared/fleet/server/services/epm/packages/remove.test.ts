@@ -126,7 +126,7 @@ describe('deleteESAsset', () => {
       esClient
     );
 
-    expect(esClient.cluster.deleteComponentTemplate).not.toBeCalled();
+    expect(esClient.cluster.deleteComponentTemplate).not.toHaveBeenCalled();
   });
 
   it('should delete @package components template', async () => {

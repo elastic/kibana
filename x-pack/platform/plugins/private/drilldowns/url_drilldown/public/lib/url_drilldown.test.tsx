@@ -318,7 +318,7 @@ describe('UrlDrilldown', () => {
 
       await expect(urlDrilldown.getHref(config, context)).resolves.toBeUndefined();
       await expect(urlDrilldown.execute(config, context)).resolves.toBeUndefined();
-      expect(mockNavigateToUrl).not.toBeCalled();
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
 
       const { getError } = await renderActionMenuItem(urlDrilldown, config, context);
       expect(getError()).toHaveTextContent(

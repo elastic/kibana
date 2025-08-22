@@ -105,7 +105,7 @@ describe('License & ActionFactory', () => {
     test('is not called if no license requirements', async () => {
       const action = createActionFactory().create({ name: 'fake', config: {} });
       await action.execute({});
-      expect(spy).not.toBeCalled();
+      expect(spy).not.toHaveBeenCalled();
     });
     test('is called if has license requirements', async () => {
       const action = createActionFactory({

@@ -69,7 +69,7 @@ describe('PipelineList component', () => {
 
   it('does not notify if not readonly', async () => {
     await renderWithProps();
-    expect(addWarning).not.toBeCalled();
+    expect(addWarning).not.toHaveBeenCalled();
   });
 
   it('renders empty prompt for no pipelines', async () => {

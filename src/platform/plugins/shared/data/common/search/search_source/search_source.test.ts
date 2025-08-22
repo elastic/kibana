@@ -919,7 +919,7 @@ describe('SearchSource', () => {
       await firstValueFrom(searchSource.fetch$(options));
 
       expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).not.toBeCalled();
+      expect(parentFn).not.toHaveBeenCalled();
     });
 
     test('should be called on parent searchSource if callParentStartHandlers is true', async () => {
@@ -1172,7 +1172,7 @@ describe('SearchSource', () => {
         await firstValueFrom(searchSource.fetch$(options));
 
         expect(options.inspector?.adapter?.start).toBeCalledTimes(1);
-        expect(requestResponder.error).not.toBeCalled();
+        expect(requestResponder.error).not.toHaveBeenCalled();
         expect(requestResponder.json).toBeCalledTimes(1);
         expect(requestResponder.ok).toBeCalledTimes(1);
         // First and last

@@ -491,10 +491,10 @@ describe('IndexPatterns', () => {
     const dataView = await indexPatterns.create({ title: indexPattern }, true);
     expect(dataView).toBeInstanceOf(DataView);
     expect(dataView.getIndexPattern()).toBe(indexPattern);
-    expect(indexPatterns.refreshFields).not.toBeCalled();
+    expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
 
     await indexPatterns.create({ title: indexPattern });
-    expect(indexPatterns.refreshFields).toBeCalled();
+    expect(indexPatterns.refreshFields).toHaveBeenCalled();
     expect(dataView.id).toBeDefined();
     expect(dataView.isPersisted()).toBe(false);
 
@@ -577,8 +577,8 @@ describe('IndexPatterns', () => {
     savedObjectsClient.create = jest.fn().mockResolvedValue({});
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSave({ title });
-    expect(indexPatterns.createSavedObject).toBeCalled();
-    expect(indexPatterns.setDefault).toBeCalled();
+    expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
   test('createAndSave DataViewLazy', async () => {
@@ -588,8 +588,8 @@ describe('IndexPatterns', () => {
     savedObjectsClient.create = jest.fn().mockResolvedValue({});
     indexPatterns.setDefault = jest.fn();
     await indexPatterns.createAndSaveDataViewLazy({ title });
-    expect(indexPatterns.createSavedObject).toBeCalled();
-    expect(indexPatterns.setDefault).toBeCalled();
+    expect(indexPatterns.createSavedObject).toHaveBeenCalled();
+    expect(indexPatterns.setDefault).toHaveBeenCalled();
   });
 
   test('createAndSave will throw if insufficient access', async () => {
@@ -761,7 +761,7 @@ describe('IndexPatterns', () => {
       jest.spyOn(indexPatterns, 'refreshFields');
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
-      expect(indexPatterns.refreshFields).not.toBeCalled();
+      expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
       // make sure we're not pulling from cache
       expect(savedObjectsClient.get).toBeCalledTimes(1);
       expect(savedObjectsClient.find).toBeCalledTimes(1);
@@ -813,7 +813,7 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.find).toBeCalledTimes(1);
 
       expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, true, undefined);
-      expect(indexPatterns.refreshFields).not.toBeCalled();
+      expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
     });
 
     test('returns undefined if no data views exist', async () => {

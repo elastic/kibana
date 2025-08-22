@@ -457,7 +457,7 @@ describe('MetricsAxisOptions component', () => {
       setValue.mockClear();
       const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
       onPositionChanged(Position.Top);
-      expect(setValue).not.toBeCalled();
+      expect(setValue).not.toHaveBeenCalled();
     });
 
     it('should not update value axes if category axis stays vertical', () => {
@@ -465,7 +465,7 @@ describe('MetricsAxisOptions component', () => {
       setValue.mockClear();
       const onPositionChanged = component.find(CategoryAxisPanel).prop('onPositionChanged');
       onPositionChanged(Position.Right);
-      expect(setValue).not.toBeCalled();
+      expect(setValue).not.toHaveBeenCalled();
     });
   });
 });

@@ -583,7 +583,7 @@ describe('policy preconfiguration', () => {
         DEFAULT_SPACE_ID
       );
 
-      expect(mockedPackagePolicyService.create).not.toBeCalled();
+      expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
     });
 
     it('should add new package policy to existing managed policies', async () => {
@@ -692,7 +692,7 @@ describe('policy preconfiguration', () => {
         DEFAULT_SPACE_ID
       );
 
-      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalled();
       expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
         expect.anything(), // soClient
         expect.anything(), // esClient
@@ -755,7 +755,7 @@ describe('policy preconfiguration', () => {
         DEFAULT_SPACE_ID
       );
 
-      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalled();
       expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
         expect.anything(), // soClient
         expect.anything(), // esClient
@@ -819,7 +819,7 @@ describe('policy preconfiguration', () => {
         DEFAULT_SPACE_ID
       );
 
-      expect(mockedPackagePolicyService.create).not.toBeCalled();
+      expect(mockedPackagePolicyService.create).not.toHaveBeenCalled();
     });
 
     it('should throw an error when trying to install duplicate packages', async () => {
@@ -1005,7 +1005,7 @@ describe('policy preconfiguration', () => {
           mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         );
-      expect(spyAgentPolicyServiceUpdate).toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalled();
       expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
         expect.anything(), // soClient
         expect.anything(), // esClient
@@ -1047,7 +1047,7 @@ describe('policy preconfiguration', () => {
           mockDefaultDownloadService,
           DEFAULT_SPACE_ID
         );
-      expect(spyAgentPolicyServiceUpdate).not.toBeCalled();
+      expect(spyAgentPolicyServiceUpdate).not.toHaveBeenCalled();
       expect(policies.length).toEqual(1);
       expect(policies[0].id).toBe('test-id');
       expect(nonFatalErrorsB.length).toBe(0);

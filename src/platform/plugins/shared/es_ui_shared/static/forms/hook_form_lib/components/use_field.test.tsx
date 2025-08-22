@@ -711,9 +711,9 @@ describe('<UseField />', () => {
 
       const { form } = testBed;
 
-      expect(deserializer).toBeCalled();
-      expect(serializer).not.toBeCalled();
-      expect(formatter).not.toBeCalled();
+      expect(deserializer).toHaveBeenCalled();
+      expect(serializer).not.toHaveBeenCalled();
+      expect(formatter).not.toHaveBeenCalled();
 
       const internalFormData = formHook.__getFormData$().value;
       expect(internalFormData.name).toEqual('John-deserialized');
@@ -722,11 +722,11 @@ describe('<UseField />', () => {
         form.setInputValue('myField', 'Mike');
       });
 
-      expect(formatter).toBeCalled(); // Formatters are executed on each value change
-      expect(serializer).not.toBeCalled(); // Serializer are executed *only** when outputting the form data
+      expect(formatter).toHaveBeenCalled(); // Formatters are executed on each value change
+      expect(serializer).not.toHaveBeenCalled(); // Serializer are executed *only** when outputting the form data
 
       const outputtedFormData = formHook.getFormData();
-      expect(serializer).toBeCalled();
+      expect(serializer).toHaveBeenCalled();
       expect(outputtedFormData.name).toEqual('MIKE-serialized');
 
       // Make sure that when we reset the form values, we don't serialize the fields
@@ -735,7 +735,7 @@ describe('<UseField />', () => {
       await act(async () => {
         formHook!.reset();
       });
-      expect(serializer).not.toBeCalled();
+      expect(serializer).not.toHaveBeenCalled();
     });
   });
 

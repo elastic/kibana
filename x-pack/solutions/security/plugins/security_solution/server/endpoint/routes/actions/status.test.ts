@@ -168,7 +168,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
   });
@@ -189,7 +189,7 @@ describe('Endpoint Pending Action Summary API', () => {
       },
     });
 
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(
@@ -212,7 +212,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
   });
@@ -236,7 +236,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(2);
@@ -259,7 +259,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(3);
@@ -291,7 +291,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(2);
@@ -328,7 +328,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [mockAgentID],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(1);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].agent_id).toEqual(mockAgentID);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data[0].pending_actions.isolate).toEqual(1);
@@ -375,7 +375,7 @@ describe('Endpoint Pending Action Summary API', () => {
         agent_ids: [agentOne, agentTwo, agentThree],
       },
     });
-    expect(response.ok).toBeCalled();
+    expect(response.ok).toHaveBeenCalled();
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toHaveLength(3);
     expect((response.ok.mock.calls[0][0]?.body as any)?.data).toContainEqual({
       agent_id: agentOne,

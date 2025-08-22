@@ -107,7 +107,7 @@ describe('setEndpointPackagePolicyServerlessBillingFlags', () => {
       perPage: SO_SEARCH_LIMIT,
       kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
     });
-    expect(packagePolicyServiceMock.bulkUpdate).not.toBeCalled();
+    expect(packagePolicyServiceMock.bulkUpdate).not.toHaveBeenCalled();
   });
 
   it('correctly updates billable flag for endpoint policies', async () => {

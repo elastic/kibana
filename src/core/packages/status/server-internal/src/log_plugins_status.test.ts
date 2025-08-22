@@ -76,7 +76,7 @@ describe('logPluginsStatusChanges', () => {
     expect(l.get).nthCalledWith(1, 'A');
     expect(l.get).nthCalledWith(2, 'B');
     expect(l.get).nthCalledWith(3, 'B');
-    expect(l.warn).not.toBeCalled();
+    expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.info).toBeCalledTimes(2);
     expect(l.error).nthCalledWith(1, 'B plugin is now unavailable: Unavail!');
@@ -101,7 +101,7 @@ describe('logPluginsStatusChanges', () => {
     expect(l.get).toBeCalledTimes(2);
     expect(l.get).nthCalledWith(1, 'A');
     expect(l.get).nthCalledWith(2, 'B');
-    expect(l.warn).not.toBeCalled();
+    expect(l.warn).not.toHaveBeenCalled();
     expect(l.error).toBeCalledTimes(1);
     expect(l.info).toBeCalledTimes(1);
     expect(l.info).nthCalledWith(1, 'A plugin is now available: Avail!');

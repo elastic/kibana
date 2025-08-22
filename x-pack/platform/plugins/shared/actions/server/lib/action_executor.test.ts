@@ -322,7 +322,7 @@ describe('Action Executor', () => {
         CONNECTOR_ID,
         { namespace: 'some-namespace' }
       );
-      expect(authorizationMock.ensureAuthorized).not.toBeCalled();
+      expect(authorizationMock.ensureAuthorized).not.toHaveBeenCalled();
 
       expect(connectorTypeRegistry.get).toHaveBeenCalledWith('test');
       expect(connectorTypeRegistry.isActionExecutable).toHaveBeenCalledWith(CONNECTOR_ID, 'test', {
@@ -680,7 +680,7 @@ describe('Action Executor', () => {
         expect(connectorTypeRegistry.hasSubFeature).not.toHaveBeenCalled();
       } else {
         expect(connectorTypeRegistry.hasSubFeature).toHaveBeenCalled();
-        expect(authorizationMock.ensureAuthorized).toBeCalled();
+        expect(authorizationMock.ensureAuthorized).toHaveBeenCalled();
       }
 
       expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledWith(
@@ -1320,7 +1320,7 @@ describe('Action Executor', () => {
       } else {
         await actionExecutor.execute(executeParams);
       }
-      expect(loggerMock.warn).not.toBeCalled();
+      expect(loggerMock.warn).not.toHaveBeenCalled();
     });
 
     test(`${label} logs warning when executor returns error gracefully`, async () => {

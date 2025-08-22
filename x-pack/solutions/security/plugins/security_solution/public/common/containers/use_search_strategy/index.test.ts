@@ -167,7 +167,7 @@ describe('useSearchStrategy', () => {
       })
     );
 
-    expect(mockAddToastError).not.toBeCalled();
+    expect(mockAddToastError).not.toHaveBeenCalled();
   });
 
   it('start should be called when search is called ', () => {
@@ -181,7 +181,7 @@ describe('useSearchStrategy', () => {
 
     result.current.search(request);
 
-    expect(start).toBeCalled();
+    expect(start).toHaveBeenCalled();
   });
 
   it('refetch should execute the previous search again with the same params', async () => {

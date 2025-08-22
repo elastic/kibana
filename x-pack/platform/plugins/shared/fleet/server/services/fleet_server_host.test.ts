@@ -143,7 +143,7 @@ describe('migrateSettingsToFleetServerHost', () => {
     const soClient = getMockedSoClient({ id: DEFAULT_FLEET_SERVER_HOST_ID, findHosts: true });
     await migrateSettingsToFleetServerHost(soClient, esMock);
 
-    expect(soClient.create).not.toBeCalled();
+    expect(soClient.create).not.toHaveBeenCalled();
   });
 
   it('should not migrate settings if there is no old settings', async () => {
@@ -151,7 +151,7 @@ describe('migrateSettingsToFleetServerHost', () => {
     mockedGetAgentsByKuery.mockResolvedValueOnce({ agents: [] } as any);
 
     await migrateSettingsToFleetServerHost(soClient, esMock);
-    expect(soClient.create).not.toBeCalled();
+    expect(soClient.create).not.toHaveBeenCalled();
   });
 
   it('should migrate settings to new saved object', async () => {

@@ -171,7 +171,7 @@ describe('Download Service', () => {
         { id: 'download-source-test' }
       );
 
-      expect(soClient.create).toBeCalled();
+      expect(soClient.create).toHaveBeenCalled();
 
       // ID should always be the same for a predefined id
       expect(soClient.create.mock.calls[0][2]?.id).toEqual('download-source-test');
@@ -194,7 +194,7 @@ describe('Download Service', () => {
         { id: 'download-source-test' }
       );
 
-      expect(soClient.update).not.toBeCalled();
+      expect(soClient.update).not.toHaveBeenCalled();
     });
 
     it('should update existing default download source when creating a new default one', async () => {
@@ -248,7 +248,7 @@ describe('Download Service', () => {
         },
         { id: 'download-source-test' }
       );
-      expect(soClient.create).toBeCalled();
+      expect(soClient.create).toHaveBeenCalled();
     });
   });
 
@@ -306,8 +306,8 @@ describe('Download Service', () => {
     it('Call removeDefaultSourceFromAll before deleting the value', async () => {
       const soClient = getMockedSoClient();
       await downloadSourceService.delete(soClient, 'download-source-test');
-      expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toBeCalled();
-      expect(soClient.delete).toBeCalled();
+      expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toHaveBeenCalled();
+      expect(soClient.delete).toHaveBeenCalled();
     });
   });
 

@@ -40,7 +40,7 @@ describe('upgradeManagedPackagePolicies', () => {
 
     await upgradeManagedPackagePolicies(soClient, esClient, 'testpkg');
 
-    expect(packagePolicyService.upgrade).not.toBeCalled();
+    expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
   });
 
   it('should upgrade policies for managed package', async () => {
@@ -203,7 +203,7 @@ describe('upgradeManagedPackagePolicies', () => {
         },
       ]);
 
-      expect(packagePolicyService.upgrade).not.toBeCalled();
+      expect(packagePolicyService.upgrade).not.toHaveBeenCalled();
     });
   });
 });

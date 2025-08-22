@@ -124,7 +124,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       expect(mockSavedObjectClient.create).toBeCalledWith(
         'policy-settings-protection-updates-note',
         { note: 'note' },
@@ -158,7 +158,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       expect(mockSavedObjectClient.update).toBeCalledWith(...mockedSOSuccessfulUpdateResponse);
     });
 
@@ -178,7 +178,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
       const result = mockResponse.ok.mock.calls[0][0]?.body as { note: string };
       expect(result.note).toEqual('note');
     });
@@ -199,7 +199,7 @@ describe('test protection updates note handler', () => {
         mockResponse
       );
 
-      expect(mockResponse.notFound).toBeCalled();
+      expect(mockResponse.notFound).toHaveBeenCalled();
     });
 
     describe('with space awareness enabled', () => {

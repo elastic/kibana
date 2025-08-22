@@ -57,7 +57,7 @@ describe('server files', () => {
       expect.assertions(1);
       await deleteFiles([], fileServiceMock);
 
-      expect(fileServiceMock.delete).not.toBeCalled();
+      expect(fileServiceMock.delete).not.toHaveBeenCalled();
     });
 
     it('calls delete twice with the ids passed in', async () => {

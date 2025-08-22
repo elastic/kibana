@@ -37,7 +37,7 @@ test('Emit onCreate() when clicking on create drilldown', () => {
   const fn = jest.fn();
   const screen = render(<DrilldownTable items={drilldowns} onCreate={fn} />);
   fireEvent.click(screen.getByText('Create new'));
-  expect(fn).toBeCalled();
+  expect(fn).toHaveBeenCalled();
 });
 
 test('Delete button is not visible when non is selected', () => {

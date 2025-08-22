@@ -250,7 +250,7 @@ describe('Response actions', () => {
         body: { endpoint_ids: ['XYZ'] },
         version: '2023-10-31',
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('accepts a comment field', async () => {
@@ -258,7 +258,7 @@ describe('Response actions', () => {
         body: { endpoint_ids: ['XYZ'], comment: 'XYZ' },
         version: '2023-10-31',
       });
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
     });
 
     it('sends the action to the requested agent', async () => {
@@ -334,7 +334,7 @@ describe('Response actions', () => {
         })
       );
 
-      expect(mockResponse.ok).toBeCalled();
+      expect(mockResponse.ok).toHaveBeenCalled();
 
       expect((mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse).action).toEqual(
         expect.any(String)
@@ -545,7 +545,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('unisolate');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeTruthy();
       });
@@ -578,7 +578,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('isolate');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeTruthy();
       });
@@ -614,7 +614,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('kill-process');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -650,7 +650,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('suspend-process');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -683,7 +683,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('running-processes');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -718,7 +718,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('get-file');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -754,7 +754,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('execute');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -792,7 +792,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('execute');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -827,7 +827,7 @@ describe('Response actions', () => {
         expect(actionDocs[0].index).toEqual(ENDPOINT_ACTIONS_INDEX);
         expect(actionDocs[0].document!.EndpointActions.data.command).toEqual('scan');
 
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
         const responseBody = mockResponse.ok.mock.calls[0][0]?.body as ResponseActionApiResponse;
         expect(responseBody.action).toBeUndefined();
       });
@@ -886,7 +886,7 @@ describe('Response actions', () => {
           license: Platinum,
           version: '2023-10-31',
         });
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
       });
 
       it('prohibits isolating hosts if no authz for it', async () => {
@@ -897,7 +897,7 @@ describe('Response actions', () => {
           version: '2023-10-31',
         });
 
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('allows any license level to unisolate', async () => {
@@ -907,7 +907,7 @@ describe('Response actions', () => {
           version: '2023-10-31',
           license: Gold,
         });
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
       });
     });
 
@@ -917,7 +917,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'] },
           version: '2023-10-31',
         });
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
       });
 
       it('allows user to perform unisolation when canUnIsolateHost is true', async () => {
@@ -925,7 +925,7 @@ describe('Response actions', () => {
           body: { endpoint_ids: ['XYZ'] },
           version: '2023-10-31',
         });
-        expect(mockResponse.ok).toBeCalled();
+        expect(mockResponse.ok).toHaveBeenCalled();
       });
 
       it('prohibits user from performing isolation if canIsolateHost is false', async () => {
@@ -934,7 +934,7 @@ describe('Response actions', () => {
           authz: { canIsolateHost: false },
           version: '2023-10-31',
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('prohibits user from performing un-isolation if canUnIsolateHost is false', async () => {
@@ -943,7 +943,7 @@ describe('Response actions', () => {
           authz: { canUnIsolateHost: false },
           version: '2023-10-31',
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('prohibits user from performing execute action if `canWriteExecuteOperations` is `false`', async () => {
@@ -952,7 +952,7 @@ describe('Response actions', () => {
           authz: { canWriteExecuteOperations: false },
           version: '2023-10-31',
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
 
       it('prohibits user from performing `scan` action if `canWriteScanOperations` is `false`', async () => {
@@ -961,7 +961,7 @@ describe('Response actions', () => {
           authz: { canWriteScanOperations: false },
           version: '2023-10-31',
         });
-        expect(mockResponse.forbidden).toBeCalled();
+        expect(mockResponse.forbidden).toHaveBeenCalled();
       });
     });
 

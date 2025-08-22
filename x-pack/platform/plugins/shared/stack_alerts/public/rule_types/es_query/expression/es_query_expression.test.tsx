@@ -253,7 +253,7 @@ describe('EsQueryRuleTypeExpression', () => {
     await setup(defaultEsQueryExpressionParams);
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(dataMock.search.search).toBeCalled());
+    await waitFor(() => expect(dataMock.search.search).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Query matched 1234 documents in the last 15s.')).toBeInTheDocument();
@@ -304,7 +304,7 @@ describe('EsQueryRuleTypeExpression', () => {
     });
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(dataMock.search.search).toBeCalled());
+    await waitFor(() => expect(dataMock.search.search).toHaveBeenCalled());
 
     expect(screen.getByTestId('testQuerySuccess')).toBeInTheDocument();
     expect(screen.getByText('Grouped query matched 5 groups in the last 15s.')).toBeInTheDocument();
@@ -330,7 +330,7 @@ describe('EsQueryRuleTypeExpression', () => {
     await setup(defaultEsQueryExpressionParams);
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(dataMock.search.search).toBeCalled());
+    await waitFor(() => expect(dataMock.search.search).toHaveBeenCalled());
     await waitFor(() => {
       searchResponseMock$.next(partial);
       searchResponseMock$.next(complete);
@@ -349,7 +349,7 @@ describe('EsQueryRuleTypeExpression', () => {
     await setup(defaultEsQueryExpressionParams);
 
     fireEvent.click(screen.getByTestId('testQuery'));
-    await waitFor(() => expect(dataMock.search.search).toBeCalled());
+    await waitFor(() => expect(dataMock.search.search).toHaveBeenCalled());
 
     expect(screen.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
     expect(screen.getByTestId('testQueryError')).toBeInTheDocument();

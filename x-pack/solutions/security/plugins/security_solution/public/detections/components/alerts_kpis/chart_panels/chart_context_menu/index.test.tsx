@@ -108,6 +108,6 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     fireEvent.click(resetMenuItem);
 
-    expect(onReset).toBeCalled();
+    expect(onReset).toHaveBeenCalled();
   });
 });

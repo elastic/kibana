@@ -119,7 +119,7 @@ describe('<AgentEnrollmentFlyout />', () => {
           agentPolicy: testAgentPolicy,
         });
         await waitFor(() => {
-          expect(sendGetOneAgentPolicy).toBeCalled();
+          expect(sendGetOneAgentPolicy).toHaveBeenCalled();
         });
       });
 
@@ -137,7 +137,7 @@ describe('<AgentEnrollmentFlyout />', () => {
           agentPolicy: testAgentPolicy,
         });
         await waitFor(() => {
-          expect(sendGetOneAgentPolicy).toBeCalled();
+          expect(sendGetOneAgentPolicy).toHaveBeenCalled();
         });
       });
 
@@ -174,7 +174,7 @@ describe('<AgentEnrollmentFlyout />', () => {
             agentPolicy: testAgentPolicy,
           });
           await waitFor(() => {
-            expect(sendGetOneAgentPolicy).toBeCalled();
+            expect(sendGetOneAgentPolicy).toHaveBeenCalled();
           });
         });
 

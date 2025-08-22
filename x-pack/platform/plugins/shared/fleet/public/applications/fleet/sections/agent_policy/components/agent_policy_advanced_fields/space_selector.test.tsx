@@ -89,7 +89,7 @@ describe('Space Selector', () => {
     });
     fireEvent.keyDown(inputEl, { key: 'Enter', code: 'Enter' });
     expect(result.container).toHaveTextContent('invalidSpace is not a valid space.');
-    expect(onChange).not.toBeCalled();
+    expect(onChange).not.toHaveBeenCalled();
     expect(setInvalidSpaceError).toBeCalledWith(true);
   });
 

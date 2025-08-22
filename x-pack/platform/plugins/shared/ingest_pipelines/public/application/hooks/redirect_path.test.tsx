@@ -50,7 +50,7 @@ describe('useRedirectPath', () => {
 
     redirectToPathOrRedirectPath('/test');
 
-    expect(mockedNavigateToUrl).not.toBeCalled();
+    expect(mockedNavigateToUrl).not.toHaveBeenCalled();
     expect(history.location.pathname).toBe('/test');
   });
 });

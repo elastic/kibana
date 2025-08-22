@@ -92,7 +92,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -109,7 +109,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -128,7 +128,7 @@ describe('Elements Loaded Telemetry', () => {
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
   });
 
   it('tracks if elements are in error state after load', () => {
@@ -137,7 +137,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -169,10 +169,10 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     const { rerender } = render(<Component workpad={otherWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
 
     useSelectorMock.mockClear();
     useSelectorMock.mockImplementation((callback) => {
@@ -195,6 +195,6 @@ describe('Elements Loaded Telemetry', () => {
 
     const { rerender } = render(<Component workpad={otherWorkpad} />);
     rerender(<Component workpad={otherWorkpad} />);
-    expect(trackMetric).not.toBeCalled();
+    expect(trackMetric).not.toHaveBeenCalled();
   });
 });

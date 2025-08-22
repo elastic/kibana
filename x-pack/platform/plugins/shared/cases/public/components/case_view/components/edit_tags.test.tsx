@@ -119,7 +119,7 @@ describe('EditTags ', () => {
     await user.click(await screen.findByTestId('edit-tags-cancel'));
 
     await waitFor(() => {
-      expect(onSubmit).not.toBeCalled();
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     expect(await screen.findByTestId('no-tags')).toBeInTheDocument();

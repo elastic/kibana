@@ -237,7 +237,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
   });
 
   it('should do nothing if there is already an host configured', async () => {
@@ -262,7 +262,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
   });
 
   it('should create a new fleet server hosts if there is no host configured', async () => {
@@ -364,7 +364,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       }),
       expect.anything()
     );
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 
   it('should create a preconfigured fleet server host with secrets that does not exist', async () => {
@@ -401,7 +401,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       }),
       expect.anything()
     );
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 
   it('should update preconfigured fleet server hosts if is_internal flag changes', async () => {
@@ -419,7 +419,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -446,7 +446,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -474,7 +474,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -505,7 +505,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -541,7 +541,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -578,7 +578,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
       },
     ]);
 
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
     expect(mockedFleetServerHostService.update).toBeCalledWith(
       expect.anything(),
       expect.anything(),
@@ -609,8 +609,8 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         is_preconfigured: true,
       },
     ]);
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 
   it('should not update preconfigured fleet server hosts with secrets if no fields changed', async () => {
@@ -632,7 +632,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
         },
       },
     ]);
-    expect(mockedFleetServerHostService.create).not.toBeCalled();
-    expect(mockedFleetServerHostService.update).not.toBeCalled();
+    expect(mockedFleetServerHostService.create).not.toHaveBeenCalled();
+    expect(mockedFleetServerHostService.update).not.toHaveBeenCalled();
   });
 });

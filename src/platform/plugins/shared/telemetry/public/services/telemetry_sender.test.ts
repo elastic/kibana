@@ -338,7 +338,7 @@ describe('TelemetrySender', () => {
       expect(telemetrySender['retryCount']).toBe(1);
       expect(setTimeout).toBeCalledTimes(1);
       expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 120000);
-      expect(consoleWarnMock).not.toBeCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
+      expect(consoleWarnMock).not.toHaveBeenCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
 
     it('catches fetch errors and sets a new timeout if fetch fails more than once', async () => {
@@ -361,7 +361,7 @@ describe('TelemetrySender', () => {
       await telemetrySender['sendUsageData']();
       expect(telemetrySender['retryCount']).toBe(5);
       expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 1920000);
-      expect(consoleWarnMock).not.toBeCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
+      expect(consoleWarnMock).not.toHaveBeenCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
 
     it('stops trying to resend the data after 20 retries', async () => {
@@ -373,7 +373,7 @@ describe('TelemetrySender', () => {
       });
       telemetrySender['retryCount'] = 21;
       await telemetrySender['sendUsageData']();
-      expect(setTimeout).not.toBeCalled();
+      expect(setTimeout).not.toHaveBeenCalled();
       expect(consoleWarnMock.mock.calls[0][0]).toBe(
         'TelemetrySender.sendUsageData exceeds number of retry attempts with Error fetching usage'
       );

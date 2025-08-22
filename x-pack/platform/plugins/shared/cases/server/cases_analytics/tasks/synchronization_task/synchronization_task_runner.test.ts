@@ -342,7 +342,7 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.reindex).not.toBeCalled();
+    expect(esClient.reindex).not.toHaveBeenCalled();
     expect(result).toEqual({
       state: taskInstance.state,
     });
@@ -362,11 +362,11 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.cluster.health).not.toBeCalled();
-    expect(esClient.reindex).not.toBeCalled();
+    expect(esClient.cluster.health).not.toHaveBeenCalled();
+    expect(esClient.reindex).not.toHaveBeenCalled();
     expect(result).toBe(undefined);
 
-    expect(logger.error).not.toBeCalled();
+    expect(logger.error).not.toHaveBeenCalled();
     expect(logger.debug).toBeCalledWith(
       '[.internal.cases] Destination index does not exist, skipping synchronization task.',
       { tags: ['cai-synchronization', '.internal.cases'] }
@@ -442,9 +442,9 @@ describe('SynchronizationTaskRunner', () => {
 
       await taskRunner.run();
 
-      expect(esClient.tasks.get).not.toBeCalled();
-      expect(esClient.cluster.health).not.toBeCalled();
-      expect(esClient.reindex).not.toBeCalled();
+      expect(esClient.tasks.get).not.toHaveBeenCalled();
+      expect(esClient.cluster.health).not.toHaveBeenCalled();
+      expect(esClient.reindex).not.toHaveBeenCalled();
     });
   });
 });
