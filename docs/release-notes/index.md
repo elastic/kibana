@@ -347,7 +347,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 ### Fixes [kibana-9.0.6-fixes]
 
 **Kibana platform**:
-* Fixes the breadcrumb to include a link to the home page when browsing pages from the **{es}** section of the navigation [#230270]({{kib-pull}}230270).
+* Fixes the breadcrumb to include a link to the home page when browsing pages from the **{{es}}** section of the navigation [#230270]({{kib-pull}}230270).
 * Updates the built-in `reporting_user` role to leverage a new  `reporting_user` reserved privilege [#231533]({{kib-pull}}231533).
 
 **Search**:
