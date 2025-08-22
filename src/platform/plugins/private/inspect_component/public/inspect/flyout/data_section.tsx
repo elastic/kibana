@@ -114,7 +114,7 @@ export const DataSection = ({ componentData }: Props) => {
           />
         </EuiText>
         {euiInfo ? (
-          <EuiLink href={euiInfo.docsLink} target="_blank">
+          <EuiLink href={euiInfo.docsLink} target="_blank" external>
             {euiInfo.componentName}
           </EuiLink>
         ) : (

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EUI_DATA_ICON_TYPE } from './constants';
+import { EUI_COMPONENTS_DOCS_MAP, EUI_DATA_ICON_TYPE, EUI_DOCS_BASE } from './constants';
 import { getComponentData } from './get_component_data';
 import type {
   EuiInfo,
@@ -16,9 +16,6 @@ import type {
   GetInspectedElementOptions,
   ReactFiberNode,
 } from './types';
-import EUI_DOCS_MAP from './eui_docs_links.json';
-
-const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
 
 export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
   .toLowerCase()
@@ -160,7 +157,7 @@ export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null 
   if (!componentPath) return null;
 
   const toUrl = (name: string): string | null => {
-    const docsLink = (EUI_DOCS_MAP as any)[name];
+    const docsLink = EUI_COMPONENTS_DOCS_MAP.get(name);
 
     if (!docsLink) return null;
 
