@@ -37,9 +37,9 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
       }
     );
 
-    expect(eventLoopDelaysMonitor.collect)..toHaveBeenCalledTimes(0);
+    expect(eventLoopDelaysMonitor.collect).toHaveBeenCalledTimes(0);
     jest.advanceTimersByTime(collectionStartDelay);
-    expect(eventLoopDelaysMonitor.collect)..toHaveBeenCalledTimes(1);
+    expect(eventLoopDelaysMonitor.collect).toHaveBeenCalledTimes(1);
   });
 
   it('logs a warning and increments usage counter when the mean delay exceeds the threshold', () => {
@@ -59,24 +59,24 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
       }
     );
 
-    expect(logger.warn)..toHaveBeenCalledTimes(0);
-    expect(mockEventLoopCounter.incrementCounter)..toHaveBeenCalledTimes(0);
-    expect(eventLoopDelaysMonitor.reset)..toHaveBeenCalledTimes(0);
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(mockEventLoopCounter.incrementCounter).toHaveBeenCalledTimes(0);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(0);
 
     jest.advanceTimersByTime(collectionStartDelay);
-    expect(logger.warn)..toHaveBeenCalledTimes(1);
-    expect(mockEventLoopCounter.incrementCounter)..toHaveBeenCalledTimes(1);
-    expect(eventLoopDelaysMonitor.reset)..toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(mockEventLoopCounter.incrementCounter).toHaveBeenCalledTimes(1);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(1);
 
     jest.advanceTimersByTime(collectionInterval);
-    expect(logger.warn)..toHaveBeenCalledTimes(2);
-    expect(mockEventLoopCounter.incrementCounter)..toHaveBeenCalledTimes(2);
-    expect(eventLoopDelaysMonitor.reset)..toHaveBeenCalledTimes(2);
+    expect(logger.warn).toHaveBeenCalledTimes(2);
+    expect(mockEventLoopCounter.incrementCounter).toHaveBeenCalledTimes(2);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(2);
 
     jest.advanceTimersByTime(collectionInterval);
-    expect(mockEventLoopCounter.incrementCounter)..toHaveBeenCalledTimes(3);
-    expect(logger.warn)..toHaveBeenCalledTimes(3);
-    expect(eventLoopDelaysMonitor.reset)..toHaveBeenCalledTimes(3);
+    expect(mockEventLoopCounter.incrementCounter).toHaveBeenCalledTimes(3);
+    expect(logger.warn).toHaveBeenCalledTimes(3);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(3);
   });
 
   it('does not log warning or increment usage if threshold did not exceed mean delay', () => {
@@ -94,13 +94,13 @@ describe('startTrackingEventLoopDelaysThreshold', () => {
       }
     );
 
-    expect(logger.warn)..toHaveBeenCalledTimes(0);
-    expect(mockEventLoopCounter.incrementCounter)..toHaveBeenCalledTimes(0);
-    expect(eventLoopDelaysMonitor.reset)..toHaveBeenCalledTimes(0);
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(mockEventLoopCounter.incrementCounter).toHaveBeenCalledTimes(0);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(0);
 
     jest.advanceTimersByTime(collectionStartDelay);
-    expect(logger.warn)..toHaveBeenCalledTimes(0);
-    expect(mockEventLoopCounter.incrementCounter)..toHaveBeenCalledTimes(0);
-    expect(eventLoopDelaysMonitor.reset)..toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledTimes(0);
+    expect(mockEventLoopCounter.incrementCounter).toHaveBeenCalledTimes(0);
+    expect(eventLoopDelaysMonitor.reset).toHaveBeenCalledTimes(1);
   });
 });

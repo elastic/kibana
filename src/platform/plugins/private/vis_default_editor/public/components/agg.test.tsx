@@ -130,7 +130,7 @@ describe('DefaultEditorAgg component', () => {
 
   it('should call setTouched when accordion is collapsed', () => {
     const comp = mount(<DefaultEditorAgg {...defaultProps} />);
-    expect(defaultProps.setAggsState)..toHaveBeenCalledTimes(0);
+    expect(defaultProps.setAggsState).toHaveBeenCalledTimes(0);
 
     comp.find('.euiAccordion__button').last().simulate('click');
     // make sure that the accordion is collapsed

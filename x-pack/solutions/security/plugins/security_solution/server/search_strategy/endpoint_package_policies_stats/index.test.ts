@@ -55,7 +55,7 @@ describe('Endpoint package policies stats', () => {
       );
       expect(
         endpointAppContextService.getInternalFleetServices().packagePolicy.list
-      )..toHaveBeenCalledTimes(1);
+      ).toHaveBeenCalledTimes(1);
       expect(response).toEqual({
         isPartial: false,
         isRunning: false,

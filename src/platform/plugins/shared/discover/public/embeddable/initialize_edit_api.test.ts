@@ -187,7 +187,7 @@ describe('initialize edit api', () => {
     });
 
     await onEdit();
-    expect(mockedNavigate)..toHaveBeenCalledTimes(1);
+    expect(mockedNavigate).toHaveBeenCalledTimes(1);
     expect(mockedNavigate).toHaveBeenCalledWith('discover', {
       path: '/mock-url-for-onedit',
       state: expect.objectContaining({

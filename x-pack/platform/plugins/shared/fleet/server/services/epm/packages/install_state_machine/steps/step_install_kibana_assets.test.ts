@@ -119,7 +119,7 @@ describe('stepInstallKibanaAssets', () => {
     });
 
     await expect(installationPromise).resolves.not.toThrow();
-    expect(installKibanaAssetsAndReferencesMultispace)..toHaveBeenCalledTimes(1);
+    expect(installKibanaAssetsAndReferencesMultispace).toHaveBeenCalledTimes(1);
   });
   esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
   appContextService.start(createAppContextStartContractMock());

@@ -118,7 +118,7 @@ describe('Elements Loaded Telemetry', () => {
 
     rerender(<Component workpad={mockWorkpad} />);
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric)..toHaveBeenCalledTimes(1);
+    expect(trackMetric).toHaveBeenCalledTimes(1);
   });
 
   it('does not track if resolvedArgs are never pending', () => {

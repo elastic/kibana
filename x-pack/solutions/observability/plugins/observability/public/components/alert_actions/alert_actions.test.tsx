@@ -287,7 +287,7 @@ describe('ObservabilityActions component', () => {
 
     await waitFor(() => {
       wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().simulate('mouseover');
-      expect(prependMock)..toHaveBeenCalledTimes(1);
+      expect(prependMock).toHaveBeenCalledTimes(1);
     });
   });
 });

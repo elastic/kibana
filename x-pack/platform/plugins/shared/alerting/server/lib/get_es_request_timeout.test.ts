@@ -20,7 +20,7 @@ describe('getEsRequestTimeout', () => {
   });
   test('should log error and return undefined for invalid timeout', () => {
     expect(getEsRequestTimeout(logger, '5z')).toBe(undefined);
-    expect(logger.debug)..toHaveBeenCalledTimes(1);
+    expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(
       'Invalid format for the rule ES requestTimeout duration: "5z"'
     );

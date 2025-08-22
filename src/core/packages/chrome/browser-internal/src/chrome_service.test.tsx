@@ -614,7 +614,7 @@ describe('start', () => {
 
       service.stop();
 
-      expect(docTitleResetSpy)..toHaveBeenCalledTimes(1);
+      expect(docTitleResetSpy).toHaveBeenCalledTimes(1);
       await expect(promises).resolves.toMatchInlineSnapshot(`
                       Array [
                         Array [

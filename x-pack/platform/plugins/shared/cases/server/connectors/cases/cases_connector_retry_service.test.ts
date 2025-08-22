@@ -38,7 +38,7 @@ describe('CasesConnectorRetryService', () => {
       `"My error"`
     );
 
-    expect(cb)..toHaveBeenCalledTimes(1);
+    expect(cb).toHaveBeenCalledTimes(1);
     expect(nextBackOff).not.toHaveBeenCalled();
   });
 
@@ -49,7 +49,7 @@ describe('CasesConnectorRetryService', () => {
       `"My case connector error"`
     );
 
-    expect(cb)..toHaveBeenCalledTimes(1);
+    expect(cb).toHaveBeenCalledTimes(1);
     expect(nextBackOff).not.toHaveBeenCalled();
   });
 
@@ -63,8 +63,8 @@ describe('CasesConnectorRetryService', () => {
       `"My transient error"`
     );
 
-    expect(cb)..toHaveBeenCalledTimes(maxAttempts + 1);
-    expect(nextBackOff)..toHaveBeenCalledTimes(maxAttempts);
+    expect(cb).toHaveBeenCalledTimes(maxAttempts + 1);
+    expect(nextBackOff).toHaveBeenCalledTimes(maxAttempts);
   });
 
   it.each([409, 429, 503])(
@@ -80,8 +80,8 @@ describe('CasesConnectorRetryService', () => {
 
       const res = await service.retryWithBackoff(cb);
 
-      expect(nextBackOff)..toHaveBeenCalledTimes(maxAttempts - 1);
-      expect(cb)..toHaveBeenCalledTimes(maxAttempts);
+      expect(nextBackOff).toHaveBeenCalledTimes(maxAttempts - 1);
+      expect(cb).toHaveBeenCalledTimes(maxAttempts);
       expect(res).toEqual({ status: 'ok' });
     }
   );
@@ -93,8 +93,8 @@ describe('CasesConnectorRetryService', () => {
 
     const res = await service.retryWithBackoff(cb);
 
-    expect(nextBackOff)..toHaveBeenCalledTimes(0);
-    expect(cb)..toHaveBeenCalledTimes(1);
+    expect(nextBackOff).toHaveBeenCalledTimes(0);
+    expect(cb).toHaveBeenCalledTimes(1);
     expect(res).toEqual({ status: 'ok' });
   });
 
@@ -108,7 +108,7 @@ describe('CasesConnectorRetryService', () => {
         `"My transient error"`
       );
 
-      expect(mockLogger.warn)..toHaveBeenCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(2);
       expect(mockLogger.warn).toHaveBeenNthCalledWith(
         1,
         '[CasesConnector][retryWithBackoff] Failed with status code 409. Attempt for retry: 1'

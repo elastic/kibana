@@ -359,7 +359,7 @@ describe('action_type_form', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty'))..toHaveBeenCalledTimes(
+    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toHaveBeenCalledTimes(
       0
     );
   });

@@ -391,10 +391,10 @@ describe('CollectorSet', () => {
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
-      expect(mockIsReady)..toHaveBeenCalledTimes(1);
-      expect(mockReadyFetch)..toHaveBeenCalledTimes(1);
-      expect(mockIsNotReady)..toHaveBeenCalledTimes(1);
-      expect(mockNonReadyFetch)..toHaveBeenCalledTimes(0);
+      expect(mockIsReady).toHaveBeenCalledTimes(1);
+      expect(mockReadyFetch).toHaveBeenCalledTimes(1);
+      expect(mockIsNotReady).toHaveBeenCalledTimes(1);
+      expect(mockNonReadyFetch).toHaveBeenCalledTimes(0);
 
       // Passing object instead of array due to https://github.com/facebook/jest/issues/13352
       expect({ results }).toMatchSnapshot({
@@ -481,10 +481,10 @@ describe('CollectorSet', () => {
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
-      expect(mockFastReady)..toHaveBeenCalledTimes(1);
-      expect(mockReadyFetch)..toHaveBeenCalledTimes(1);
-      expect(mockTimedOutReady)..toHaveBeenCalledTimes(1);
-      expect(mockNonReadyFetch)..toHaveBeenCalledTimes(0);
+      expect(mockFastReady).toHaveBeenCalledTimes(1);
+      expect(mockReadyFetch).toHaveBeenCalledTimes(1);
+      expect(mockTimedOutReady).toHaveBeenCalledTimes(1);
+      expect(mockNonReadyFetch).toHaveBeenCalledTimes(0);
 
       // Passing object instead of array due to https://github.com/facebook/jest/issues/13352
       expect({ results }).toMatchSnapshot({
@@ -552,7 +552,7 @@ describe('CollectorSet', () => {
       const mockSoClient = savedObjectsClientMock.create();
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
-      expect(mockReadyFetch)..toHaveBeenCalledTimes(1);
+      expect(mockReadyFetch).toHaveBeenCalledTimes(1);
       expect(mockReadyFetch).toHaveBeenCalledWith({
         esClient: mockEsClient,
         soClient: mockSoClient,

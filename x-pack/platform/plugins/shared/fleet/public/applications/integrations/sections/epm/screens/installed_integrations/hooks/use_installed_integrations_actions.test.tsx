@@ -56,7 +56,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUninstallIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendRemovePackageForRq)..toHaveBeenCalledTimes(1);
+      expect(sendRemovePackageForRq).toHaveBeenCalledTimes(1);
       expect(sendRemovePackageForRq).toHaveBeenCalledWith({ pkgName: 'test', pkgVersion: '1.0.0' });
     });
 
@@ -89,7 +89,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUninstallIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUninstallPackagesForRq)..toHaveBeenCalledTimes(1);
+      expect(sendBulkUninstallPackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUninstallPackagesForRq).toHaveBeenCalledWith({
         packages: [
           { name: 'test', version: '1.0.0' },
@@ -147,7 +147,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUpgradeIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUpgradePackagesForRq)..toHaveBeenCalledTimes(1);
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
         packages: [{ name: 'test' }],
         upgrade_package_policies: false,
@@ -177,7 +177,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUpgradeIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUpgradePackagesForRq)..toHaveBeenCalledTimes(1);
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
         packages: [{ name: 'test' }],
         upgrade_package_policies: true,
@@ -212,7 +212,7 @@ describe('useInstalledIntegrationsActions', () => {
 
       await expect(bulkUpgradeIntegrationsWithConfirmModalResult).resolves;
 
-      expect(sendBulkUpgradePackagesForRq)..toHaveBeenCalledTimes(1);
+      expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledTimes(1);
       expect(sendBulkUpgradePackagesForRq).toHaveBeenCalledWith({
         packages: [{ name: 'test' }, { name: 'test2' }],
         upgrade_package_policies: false,

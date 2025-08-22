@@ -103,8 +103,8 @@ describe('useVisualizeAppState', () => {
 
     unmount();
 
-    expect(stopStateSyncMock)..toHaveBeenCalledTimes(1);
-    expect(stopSyncingAppFiltersMock)..toHaveBeenCalledTimes(1);
+    expect(stopStateSyncMock).toHaveBeenCalledTimes(1);
+    expect(stopSyncingAppFiltersMock).toHaveBeenCalledTimes(1);
   });
 
   it('should be subscribed on dirtyStateChange event from an editor', () => {

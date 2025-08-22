@@ -204,7 +204,7 @@ describe('Search service', () => {
 
         const result = await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId)..toHaveBeenCalledTimes(1);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(1);
         expect(result?.isStored).toBeUndefined();
       });
 
@@ -222,7 +222,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId)..toHaveBeenCalledTimes(0);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(0);
       });
 
       it('calls `trackId` once, if the response contains an `id`, session is stored and not restoring', async () => {
@@ -245,7 +245,7 @@ describe('Search service', () => {
 
         await mockScopedClient.search(searchRequest, options).toPromise();
 
-        expect(mockSessionClient.trackId)..toHaveBeenCalledTimes(1);
+        expect(mockSessionClient.trackId).toHaveBeenCalledTimes(1);
 
         expect(mockSessionClient.trackId.mock.calls[0]).toEqual([searchRequest, 'my_id', options]);
       });

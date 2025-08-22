@@ -153,7 +153,7 @@ describe('Update profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
-      expect(userProfileService.update)..toHaveBeenCalledTimes(1);
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
       expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', {
         userSettings: {
           darkMode: 'dark',
@@ -176,7 +176,7 @@ describe('Update profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: undefined }));
 
-      expect(userProfileService.update)..toHaveBeenCalledTimes(1);
+      expect(userProfileService.update).toHaveBeenCalledTimes(1);
       expect(userProfileService.update).toHaveBeenCalledWith('u_some_id', { some: 'property' });
     });
   });

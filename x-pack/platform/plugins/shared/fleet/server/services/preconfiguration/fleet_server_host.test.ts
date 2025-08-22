@@ -290,7 +290,7 @@ describe('createCloudFleetServerHostIfNeeded', () => {
 
     await createCloudFleetServerHostIfNeeded(soClient, esClient);
 
-    expect(mockedFleetServerHostService.create)..toHaveBeenCalledTimes(1);
+    expect(mockedFleetServerHostService.create).toHaveBeenCalledTimes(1);
     expect(mockedFleetServerHostService.create).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),

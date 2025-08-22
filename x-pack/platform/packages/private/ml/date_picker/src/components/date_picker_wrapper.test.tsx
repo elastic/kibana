@@ -149,7 +149,7 @@ describe('<DatePickerWrapper />', () => {
 
     render(<DatePickerWrapper />);
 
-    expect(refreshListener)..toHaveBeenCalledTimes(0);
+    expect(refreshListener).toHaveBeenCalledTimes(0);
 
     refreshSubscription.unsubscribe();
   });

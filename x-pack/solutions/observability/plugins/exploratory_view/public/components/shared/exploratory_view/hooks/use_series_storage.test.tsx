@@ -246,7 +246,7 @@ describe('userSeriesStorage', function () {
       result.current.applyChanges();
     });
 
-    expect(trackEvent)..toHaveBeenCalledTimes(7);
+    expect(trackEvent).toHaveBeenCalledTimes(7);
     expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view__filters__filter_url.full',

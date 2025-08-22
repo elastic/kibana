@@ -51,7 +51,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
   describe('clusters/_stats POST route', () => {
     it('registers _stats POST route and accepts body configs', () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
-      expect(mockRouter.versioned.post)..toHaveBeenCalledTimes(1);
+      expect(mockRouter.versioned.post).toHaveBeenCalledTimes(1);
       const [routeConfig, handler] = (mockRouter.versioned.post as jest.Mock).mock.results[0].value
         .addVersion.mock.calls[0];
       expect(routeConfig.version).toMatchInlineSnapshot(`"1"`);
@@ -149,7 +149,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         refreshCache: false,
         unencrypted: true,
       });
-      expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
+      expect(mockResponse.customError).toHaveBeenCalledTimes(1);
       expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,

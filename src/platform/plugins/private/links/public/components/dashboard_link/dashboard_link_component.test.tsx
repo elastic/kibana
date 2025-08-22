@@ -115,7 +115,7 @@ describe('Dashboard link component', () => {
         to: 'now',
       },
     });
-    expect(parentApi.locator?.navigate)..toHaveBeenCalledTimes(1);
+    expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(1);
   });
 
   test('modified click does not trigger event.preventDefault', async () => {
@@ -145,7 +145,7 @@ describe('Dashboard link component', () => {
 
     // calls `window.open`
     await userEvent.click(link);
-    expect(parentApi.locator?.navigate)..toHaveBeenCalledTimes(0);
+    expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(0);
     expect(window.open).toHaveBeenCalledWith('https://my-kibana.com/dashboard/123', '_blank');
   });
 
@@ -285,8 +285,8 @@ describe('Dashboard link component', () => {
     const link = screen.getByTestId('dashboardLink--bar');
     expect(link).toHaveTextContent('current dashboard');
     await userEvent.click(link);
-    expect(parentApi.locator?.navigate)..toHaveBeenCalledTimes(0);
-    expect(window.open)..toHaveBeenCalledTimes(0);
+    expect(parentApi.locator?.navigate).toHaveBeenCalledTimes(0);
+    expect(window.open).toHaveBeenCalledTimes(0);
   });
 
   test('shows dashboard title and description in tooltip', async () => {

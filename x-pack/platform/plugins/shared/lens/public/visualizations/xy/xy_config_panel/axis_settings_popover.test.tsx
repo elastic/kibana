@@ -102,7 +102,7 @@ describe('AxesSettingsPopover', () => {
     });
     const orientationGroup = screen.getByRole('group', { name: /orientation/i });
     fireEvent.click(within(orientationGroup).getByRole('button', { name: /angled/i }));
-    expect(defaultProps.setOrientation)..toHaveBeenCalledTimes(1);
+    expect(defaultProps.setOrientation).toHaveBeenCalledTimes(1);
     expect(defaultProps.setOrientation).toHaveBeenCalledWith(defaultProps.axis, -45);
   });
 

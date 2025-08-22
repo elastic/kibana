@@ -471,7 +471,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update)..toHaveBeenCalledTimes(1);
+        expect(soClient.update).toHaveBeenCalledTimes(1);
         expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           outputIdToUuid('existing-default-output'),
@@ -514,7 +514,7 @@ describe('Output Service', () => {
           { id: 'output-test' }
         );
 
-        expect(soClient.update)..toHaveBeenCalledTimes(1);
+        expect(soClient.update).toHaveBeenCalledTimes(1);
         expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           outputIdToUuid('existing-default-monitoring-output'),
@@ -701,7 +701,7 @@ describe('Output Service', () => {
           { id: 'output-test', fromPreconfiguration: true }
         );
 
-        expect(soClient.update)..toHaveBeenCalledTimes(1);
+        expect(soClient.update).toHaveBeenCalledTimes(1);
         expect(soClient.update).toHaveBeenCalledWith(
           expect.anything(),
           outputIdToUuid('existing-preconfigured-default-output'),
@@ -1184,7 +1184,7 @@ describe('Output Service', () => {
         is_default: true,
       });
 
-      expect(soClient.update)..toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledTimes(2);
       expect(soClient.update).toHaveBeenCalledWith(expect.anything(), outputIdToUuid('output-test'), {
         is_default: true,
       });
@@ -1206,7 +1206,7 @@ describe('Output Service', () => {
         name: 'Test',
       });
 
-      expect(soClient.update)..toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledTimes(1);
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),
@@ -1263,7 +1263,7 @@ describe('Output Service', () => {
         is_default_monitoring: true,
       });
 
-      expect(soClient.update)..toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledTimes(2);
       expect(soClient.update).toHaveBeenCalledWith(expect.anything(), outputIdToUuid('output-test'), {
         is_default_monitoring: true,
       });
@@ -1358,7 +1358,7 @@ describe('Output Service', () => {
         { fromPreconfiguration: true }
       );
 
-      expect(soClient.update)..toHaveBeenCalledTimes(2);
+      expect(soClient.update).toHaveBeenCalledTimes(2);
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         outputIdToUuid('existing-default-output'),

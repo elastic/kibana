@@ -186,7 +186,7 @@ describe('create ESO model version', () => {
 
     // This is the major part of the test. Did the encrypt function get called with
     // the attributes updated by all of the transform functions.
-    expect(encryptionSavedObjectService.encryptAttributesSync)..toHaveBeenCalledTimes(1);
+    expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledTimes(1);
     expect(encryptionSavedObjectService.encryptAttributesSync).toHaveBeenCalledWith(
       {
         id: '123',

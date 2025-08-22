@@ -1655,7 +1655,7 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(services.alertsClient.setAlertData)..toHaveBeenCalledTimes(1);
+        expect(services.alertsClient.setAlertData).toHaveBeenCalledTimes(1);
         expect(services.alertsClient.setAlertData).toHaveBeenCalledWith({
           context: {
             alertDetailsUrl: `http://localhost:5601/s/${MOCKED_SPACE_ID}/app/observability/alerts/uuid-a`,
@@ -1743,7 +1743,7 @@ describe('The custom threshold alert type', () => {
         });
         await execute(COMPARATORS.GREATER_THAN, [0.9]);
         const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
-        expect(getViewInAppUrl)..toHaveBeenCalledTimes(1);
+        expect(getViewInAppUrl).toHaveBeenCalledTimes(1);
         expect(getViewInAppUrl).toHaveBeenCalledWith({
           dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
           groups: [

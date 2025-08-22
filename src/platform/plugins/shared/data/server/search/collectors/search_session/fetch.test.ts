@@ -53,7 +53,7 @@ describe('fetchProvider', () => {
     expect(collRes.transientCount).toBe(0);
     expect(collRes.persistedCount).toBe(0);
     expect(collRes.totalCount).toBe(0);
-    expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
   });
 
   test('returns when ES returns full buckets', async () => {

@@ -1479,7 +1479,7 @@ describe('Agentless Agent service', () => {
       ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error)..toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 404', async () => {
@@ -1541,7 +1541,7 @@ describe('Agentless Agent service', () => {
       ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error)..toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 403', async () => {
@@ -1603,7 +1603,7 @@ describe('Agentless Agent service', () => {
       ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error)..toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 401', async () => {
@@ -1665,7 +1665,7 @@ describe('Agentless Agent service', () => {
       ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error)..toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 400', async () => {
@@ -1727,7 +1727,7 @@ describe('Agentless Agent service', () => {
       ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error)..toHaveBeenCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -88,9 +88,9 @@ describe('getColumnsFromVis', () => {
     });
 
     expect(result).toBeNull();
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(0);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if multiple different sibling aggs was provided', () => {
@@ -103,10 +103,10 @@ describe('getColumnsFromVis', () => {
     });
 
     expect(result).toBeNull();
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(0);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if one sibling agg was provided and it is not supported', () => {
@@ -124,12 +124,12 @@ describe('getColumnsFromVis', () => {
     });
 
     expect(result).toBeNull();
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(1);
-    expect(mockGetCustomBucketColumns)..toHaveBeenCalledTimes(1);
-    expect(mockGetBucketColumns)..toHaveBeenCalledTimes(0);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(1);
+    expect(mockGetCustomBucketColumns).toHaveBeenCalledTimes(1);
+    expect(mockGetBucketColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if metrics are not supported', () => {
@@ -144,12 +144,12 @@ describe('getColumnsFromVis', () => {
     });
 
     expect(result).toBeNull();
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(1);
-    expect(mockConvertMetricToColumns)..toHaveBeenCalledTimes(1);
-    expect(mockGetBucketColumns)..toHaveBeenCalledTimes(0);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(1);
+    expect(mockGetBucketColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if buckets are not supported', () => {
@@ -166,12 +166,12 @@ describe('getColumnsFromVis', () => {
     });
 
     expect(result).toBeNull();
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(1);
-    expect(mockConvertMetricToColumns)..toHaveBeenCalledTimes(1);
-    expect(mockGetBucketColumns)..toHaveBeenCalledTimes(1);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(1);
+    expect(mockGetBucketColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if splits are not supported', () => {
@@ -189,13 +189,13 @@ describe('getColumnsFromVis', () => {
     });
 
     expect(result).toBeNull();
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(1);
-    expect(mockConvertMetricToColumns)..toHaveBeenCalledTimes(1);
-    expect(mockGetBucketColumns)..toHaveBeenCalledTimes(2);
-    expect(mockSortColumns)..toHaveBeenCalledTimes(0);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(1);
+    expect(mockGetBucketColumns).toHaveBeenCalledTimes(2);
+    expect(mockSortColumns).toHaveBeenCalledTimes(0);
   });
 
   test('should return one layer with columns', () => {
@@ -258,14 +258,14 @@ describe('getColumnsFromVis', () => {
         metrics: [metricId],
       },
     ]);
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(1);
-    expect(mockConvertMetricToColumns)..toHaveBeenCalledTimes(1);
-    expect(mockGetBucketColumns)..toHaveBeenCalledTimes(2);
-    expect(mockSortColumns)..toHaveBeenCalledTimes(1);
-    expect(mockGetColumnsWithoutReferenced)..toHaveBeenCalledTimes(1);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(1);
+    expect(mockGetBucketColumns).toHaveBeenCalledTimes(2);
+    expect(mockSortColumns).toHaveBeenCalledTimes(1);
+    expect(mockGetColumnsWithoutReferenced).toHaveBeenCalledTimes(1);
   });
 
   test('should return several layer with columns if series is provided', () => {
@@ -338,13 +338,13 @@ describe('getColumnsFromVis', () => {
     );
 
     expect(result?.length).toEqual(2);
-    expect(mockGetVisSchemas)..toHaveBeenCalledTimes(1);
-    expect(mockIsValidVis)..toHaveBeenCalledTimes(1);
-    expect(mockGetCutomBucketsFromSiblingAggs)..toHaveBeenCalledTimes(1);
-    expect(mockGetMetricsWithoutDuplicates)..toHaveBeenCalledTimes(1);
-    expect(mockConvertMetricToColumns)..toHaveBeenCalledTimes(2);
-    expect(mockGetBucketColumns)..toHaveBeenCalledTimes(4);
-    expect(mockSortColumns)..toHaveBeenCalledTimes(2);
-    expect(mockGetColumnsWithoutReferenced)..toHaveBeenCalledTimes(2);
+    expect(mockGetVisSchemas).toHaveBeenCalledTimes(1);
+    expect(mockIsValidVis).toHaveBeenCalledTimes(1);
+    expect(mockGetCutomBucketsFromSiblingAggs).toHaveBeenCalledTimes(1);
+    expect(mockGetMetricsWithoutDuplicates).toHaveBeenCalledTimes(1);
+    expect(mockConvertMetricToColumns).toHaveBeenCalledTimes(2);
+    expect(mockGetBucketColumns).toHaveBeenCalledTimes(4);
+    expect(mockSortColumns).toHaveBeenCalledTimes(2);
+    expect(mockGetColumnsWithoutReferenced).toHaveBeenCalledTimes(2);
   });
 });

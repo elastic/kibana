@@ -170,7 +170,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           await expect(repository.get('foo', '', { namespace: 'bar' })).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -185,7 +185,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
           client.get.mockResponseOnce(response);
           await repository.get(type, id);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(client.get).toHaveBeenCalledTimes(1);
           expect(client.get).toHaveBeenCalledWith(
@@ -207,7 +207,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -226,7 +226,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse },
             [currentSpace.expectedNamespace ?? 'default']
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(client.create).toHaveBeenCalledTimes(1);
           expect(client.create).toHaveBeenCalledWith(
@@ -254,7 +254,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -263,7 +263,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const attributes = { attr: 'value' };
 
           await repository.create(type, { attr: 'value' });
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(client.create).toHaveBeenCalledTimes(1);
           const regex = new RegExp(
@@ -296,7 +296,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -305,7 +305,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const id = 'some-id';
 
           await deleteSuccess(client, repository, registry, type, id);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(client.delete).toHaveBeenCalledTimes(1);
           const regex = new RegExp(
@@ -329,7 +329,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -341,7 +341,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           mockGetSearchDsl.mockReturnValue(query);
 
           await removeReferencesToSuccess(client, repository, type, id);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(client.updateByQuery).toHaveBeenCalledTimes(1);
           expect(mockGetSearchDsl).toHaveBeenCalledTimes(1);
@@ -365,7 +365,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -374,7 +374,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const obj2 = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'two' };
 
           await checkConflictsSuccess(client, repository, registry, [obj1, obj2]);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(client.mget).toHaveBeenCalledTimes(1);
           expect(client.mget).toHaveBeenCalledWith(
@@ -406,7 +406,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -417,7 +417,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const spacesToRemove = ['space-y'];
 
           await repository.updateObjectsSpaces([obj1, obj2], spacesToAdd, spacesToRemove);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockUpdateObjectsSpaces).toHaveBeenCalledTimes(1);
           expect(mockUpdateObjectsSpaces).toHaveBeenCalledWith(
@@ -444,7 +444,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -453,7 +453,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const obj2 = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'two' };
 
           await repository.collectMultiNamespaceReferences([obj1, obj2]);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledTimes(1);
           expect(mockCollectMultiNamespaceReferences).toHaveBeenCalledWith(
@@ -472,13 +472,13 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       describe('#openPointInTimeForType', () => {
         test(`propagates options.namespaces: ['*']`, async () => {
           await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE, { namespaces: ['*'] });
-          expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(['*']);
         });
 
         test(`supplements options with the current namespace`, async () => {
           await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE);
-          expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(undefined); // will resolve current space
         });
       });
@@ -494,7 +494,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('bar');
         });
 
@@ -556,13 +556,13 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('foo-bar');
         });
 
         test(`supplements internal parameters with the current namespace`, async () => {
           await bulkGetSuccess(client, repository, registry, [obj1, obj2]);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
           expect(client.mget).toHaveBeenCalledTimes(1);
@@ -588,7 +588,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             obj1,
             { ...obj2, namespaces: ['*'] },
           ]);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(['*']);
@@ -622,13 +622,13 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('foo-bar');
         });
 
         test(`supplements internal parameters with the current namespace`, async () => {
           await bulkCreateSuccess(client, repository, [obj1, obj2]);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
           expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -672,7 +672,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('foo-bar');
         });
 
@@ -686,7 +686,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             undefined,
             currentSpace.expectedNamespace
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
           expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -728,7 +728,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           await expect(repository.bulkResolve([], { namespace: 'foo-bar' })).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('foo-bar');
         });
 
@@ -751,7 +751,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
             { type: 'obj-type', id: 'obj-id-2' },
           ];
           await repository.bulkResolve(objects);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
           expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
@@ -773,7 +773,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           const type = 'index-pattern';
           const spaceOverride = 'ns-4';
           await findSuccess(client, repository, { type, namespaces: [spaceOverride] });
-          expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith([spaceOverride]);
           expect(mockGetSearchDsl).toHaveBeenCalledWith(
             mappings,
@@ -788,14 +788,14 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         test(`propagates options.namespaces: ['*']`, async () => {
           const type = 'index-pattern';
           await findSuccess(client, repository, { type, namespaces: ['*'] });
-          expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(['*']);
         });
 
         test(`supplements options with the current namespace`, async () => {
           const type = 'index-pattern';
           await findSuccess(client, repository, { type });
-          expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(undefined); // will resolve current space
         });
       });
@@ -839,13 +839,13 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           ).rejects.toThrow(
             SavedObjectsErrorHelpers.createBadRequestError(ERROR_NAMESPACE_SPECIFIED)
           );
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('foo-bar');
         });
 
         test(`supplements internal parameters with the current namespace`, async () => {
           await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
-          expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+          expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
           expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
           expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
           expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -875,7 +875,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         mockSpacesExt.getCurrentNamespace.mockReturnValue('ns-from-ext');
 
         expect(repository.getCurrentNamespace('ns-from-arg')).toBe('ns-from-ext');
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith('ns-from-arg');
       });
     });
@@ -943,7 +943,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls authorizeFind with the current namespace`, async () => {
         const type = 'index-pattern';
         await findSuccess(client, repository, { type });
-        expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeFind).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeFind).toHaveBeenCalledWith(
@@ -957,7 +957,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         const type = CUSTOM_INDEX_TYPE;
         setupAuthorizeFunc(mockSecurityExt.authorizeCreate as jest.Mock, 'fully_authorized');
         await repository.create(type, { attr: 'value' });
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeCreate).toHaveBeenCalledWith(
@@ -990,7 +990,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls authorizeBulkCreate with the current namespace`, async () => {
         setupAuthorizeFunc(mockSecurityExt.authorizeBulkCreate, 'fully_authorized');
         await bulkCreateSuccess(client, repository, [obj1, obj2]);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeBulkCreate).toHaveBeenCalledWith(
@@ -1012,7 +1012,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
 
         client.get.mockResponseOnce(response);
         await repository.get(type, id);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeGet).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeGet).toHaveBeenCalledWith(
@@ -1051,7 +1051,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls authorizeBulkGet with the current namespace`, async () => {
         setupAuthorizeFunc(mockSecurityExt.authorizeBulkGet, 'fully_authorized');
         await bulkGetSuccess(client, repository, registry, [obj1, obj2]);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeBulkGet).toHaveBeenCalledWith(
@@ -1076,7 +1076,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           { mockGetResponseAsNotFound: { found: false } as estypes.GetResponse },
           [currentSpace]
         );
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeUpdate).toHaveBeenCalledWith(
@@ -1108,7 +1108,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           undefined,
           currentSpace
         );
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeBulkUpdate).toHaveBeenCalledWith(
@@ -1123,7 +1123,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         const id = 'some-id';
         setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
         await deleteSuccess(client, repository, registry, type, id);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeDelete).toHaveBeenCalledWith(
@@ -1170,7 +1170,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls authorizeBulkDelete with the current namespace`, async () => {
         setupAuthorizeFunc(mockSecurityExt.authorizeBulkDelete, 'fully_authorized');
         await bulkDeleteSuccess(client, repository, registry, testObjs, options, internalOptions);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeBulkDelete).toHaveBeenCalledWith(
@@ -1185,7 +1185,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         const obj2 = { type: MULTI_NAMESPACE_ISOLATED_TYPE, id: 'two' };
 
         await checkConflictsSuccess(client, repository, registry, [obj1, obj2]);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeCheckConflicts).toHaveBeenCalledWith(
@@ -1203,7 +1203,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
         mockGetSearchDsl.mockReturnValue(query);
 
         await removeReferencesToSuccess(client, repository, type, id);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeRemoveReferences).toHaveBeenCalledWith(
@@ -1216,7 +1216,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls authorizeOpenPointInTime with the current namespace`, async () => {
         setupAuthorizeFunc(mockSecurityExt.authorizeOpenPointInTime, 'fully_authorized');
         await repository.openPointInTimeForType(CUSTOM_INDEX_TYPE);
-        expect(mockSpacesExt.getSearchableNamespaces)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getSearchableNamespaces).toHaveBeenCalledWith(undefined); // will resolve current space
         expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledTimes(1);
         expect(mockSecurityExt.authorizeOpenPointInTime).toHaveBeenCalledWith(
@@ -1274,7 +1274,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
       test(`calls encryptAttributes with the current namespace`, async () => {
         mockEncryptionExt.isEncryptableType.mockReturnValue(true);
         await repository.create(encryptedSO.type, encryptedSO.attributes);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(client.create).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(3); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
@@ -1312,7 +1312,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           obj1,
           { ...encryptedSO, id: undefined }, // Predefined IDs are not allowed for saved objects with encrypted attributes unless the ID is a UUID
         ]);
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
         expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -1356,7 +1356,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           },
           {}
         );
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(client.index).toHaveBeenCalledTimes(1);
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult
@@ -1401,7 +1401,7 @@ describe('SavedObjectsRepository Spaces Extension', () => {
           undefined,
           undefined
         );
-        expect(mockSpacesExt.getCurrentNamespace)..toHaveBeenCalledTimes(1);
+        expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledTimes(1);
         expect(mockSpacesExt.getCurrentNamespace).toHaveBeenCalledWith(undefined);
         expect(mockSpacesExt.getSearchableNamespaces).not.toHaveBeenCalled();
         expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(6); // (no upsert) optionallyEncryptAttributes, optionallyDecryptAndRedactSingleResult

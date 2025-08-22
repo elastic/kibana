@@ -35,11 +35,11 @@ const mockAssetDetailsLocator = {
 } as unknown as jest.Mocked<AssetDetailsLocator>;
 
 const expectLogsLocatorToBeCalled = () => {
-  expect(logsLocatorMock.getRedirectUrl)..toHaveBeenCalledTimes(4);
+  expect(logsLocatorMock.getRedirectUrl).toHaveBeenCalledTimes(4);
 };
 
 const expectUptimeLocatorToBeCalled = () => {
-  expect(uptimeLocator.getRedirectUrl)..toHaveBeenCalledTimes(1);
+  expect(uptimeLocator.getRedirectUrl).toHaveBeenCalledTimes(1);
 };
 
 describe('Transaction action menu', () => {

@@ -199,6 +199,6 @@ describe('#encryptAttributes', () => {
       attrThree: 'three',
     });
 
-    expect(service.encryptAttributes)..toHaveBeenCalledTimes(1);
+    expect(service.encryptAttributes).toHaveBeenCalledTimes(1);
   });
 });

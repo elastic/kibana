@@ -82,7 +82,7 @@ describe('Bulk upgrade task', () => {
         },
       });
 
-      expect(installPackage)..toHaveBeenCalledTimes(4);
+      expect(installPackage).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -137,7 +137,7 @@ describe('Bulk upgrade task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(installPackage)..toHaveBeenCalledTimes(0);
+      expect(installPackage).toHaveBeenCalledTimes(0);
     });
   });
 });

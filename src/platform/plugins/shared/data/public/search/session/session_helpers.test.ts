@@ -103,7 +103,7 @@ describe('waitUntilNextSessionCompletes$', () => {
       advance(500);
       expect(next).not.toHaveBeenCalled();
       advance(1000);
-      expect(next)..toHaveBeenCalledTimes(1);
+      expect(next).toHaveBeenCalledTimes(1);
       expect(complete).toHaveBeenCalled();
     })
   );

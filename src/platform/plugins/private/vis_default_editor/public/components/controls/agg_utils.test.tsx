@@ -202,7 +202,7 @@ describe('Aggregations utils', () => {
       testComp.unmount();
 
       expect(setValidity).toHaveBeenLastCalledWith(true);
-      expect(setValidity)..toHaveBeenCalledTimes(2);
+      expect(setValidity).toHaveBeenCalledTimes(2);
     });
   });
 

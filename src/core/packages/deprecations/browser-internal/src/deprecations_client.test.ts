@@ -28,7 +28,7 @@ describe('DeprecationsClient', () => {
     it('returns a list of deprecations', async () => {
       const deprecationsClient = new DeprecationsClient({ http });
       const deprecations = await deprecationsClient.getAllDeprecations();
-      expect(http.fetch)..toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
       expect(http.fetch).toHaveBeenCalledWith('/api/deprecations/', {
         asSystemRequest: true,
       });
@@ -69,7 +69,7 @@ describe('DeprecationsClient', () => {
         ...(await deprecationsClient.getDeprecations('testPluginId-2')),
       ];
 
-      expect(http.fetch)..toHaveBeenCalledTimes(2);
+      expect(http.fetch).toHaveBeenCalledTimes(2);
       expect(results).toEqual([
         { domainId: 'testPluginId-1' },
         { domainId: 'testPluginId-1' },
@@ -161,7 +161,7 @@ describe('DeprecationsClient', () => {
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
-      expect(http.fetch)..toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
       expect(http.fetch).toHaveBeenCalledWith({
         path: 'some-path',
         method: 'POST',
@@ -220,7 +220,7 @@ describe('DeprecationsClient', () => {
       };
       const result = await deprecationsClient.resolveDeprecation(mockDeprecationDetails);
 
-      expect(http.fetch)..toHaveBeenCalledTimes(1);
+      expect(http.fetch).toHaveBeenCalledTimes(1);
       expect(http.fetch).toHaveBeenCalledWith({
         path: 'some-path',
         method: 'POST',

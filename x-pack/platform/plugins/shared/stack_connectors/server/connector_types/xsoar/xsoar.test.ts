@@ -213,7 +213,7 @@ describe('XSOARConnector', () => {
 
     it('XSOAR API call is successful with correct parameters', async () => {
       const response = await connector.getPlaybooks(undefined, connectorUsageCollector);
-      expect(mockRequest)..toHaveBeenCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           method: 'post',
@@ -232,7 +232,7 @@ describe('XSOARConnector', () => {
 
     it('Auth headers are correctly set for cloud instance', async () => {
       const response = await cloudConnector.getPlaybooks(undefined, connectorUsageCollector);
-      expect(mockCloudRequest)..toHaveBeenCalledTimes(1);
+      expect(mockCloudRequest).toHaveBeenCalledTimes(1);
       expect(mockCloudRequest).toHaveBeenCalledWith(
         {
           method: 'post',
@@ -494,7 +494,7 @@ describe('XSOARConnector', () => {
 
     it('XSOAR API call is successful with correct parameters', async () => {
       await connector.run(incident, connectorUsageCollector);
-      expect(mockRequest)..toHaveBeenCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/incident',

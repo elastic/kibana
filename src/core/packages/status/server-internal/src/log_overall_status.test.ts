@@ -51,7 +51,7 @@ describe('logOverallStatusChanges', () => {
     expect(l.get).not.toHaveBeenCalled();
     expect(l.info).not.toHaveBeenCalled();
     expect(l.warn).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenCalledTimes(1);
     expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
   });
 
@@ -69,14 +69,14 @@ describe('logOverallStatusChanges', () => {
     await delay();
 
     expect(l.get).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenCalledTimes(1);
     expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
-    expect(l.warn)..toHaveBeenCalledTimes(1);
+    expect(l.warn).toHaveBeenCalledTimes(1);
     expect(l.warn).toHaveBeenNthCalledWith(
       1,
       'Kibana is now degraded (was unavailable): Waiting for ES indices'
     );
-    expect(l.info)..toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(1);
     expect(l.info).toHaveBeenNthCalledWith(1, 'Kibana is now available (was degraded)');
   });
 
@@ -97,14 +97,14 @@ describe('logOverallStatusChanges', () => {
     await delay();
 
     expect(l.get).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenCalledTimes(1);
     expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
-    expect(l.warn)..toHaveBeenCalledTimes(1);
+    expect(l.warn).toHaveBeenCalledTimes(1);
     expect(l.warn).toHaveBeenNthCalledWith(
       1,
       'Kibana is now degraded (was unavailable): Waiting for ES indices'
     );
-    expect(l.info)..toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(1);
     expect(l.info).toHaveBeenNthCalledWith(1, 'Kibana is now available (was degraded)');
   });
 
@@ -126,7 +126,7 @@ describe('logOverallStatusChanges', () => {
     await delay();
 
     expect(l.get).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenCalledTimes(1);
     expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.info).not.toHaveBeenCalled();

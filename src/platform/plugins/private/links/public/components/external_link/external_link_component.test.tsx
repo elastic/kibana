@@ -80,7 +80,7 @@ describe('external link component', () => {
 
     const link = await screen.findByTestId('externalLink--foo');
     await userEvent.click(link);
-    expect(coreServices.application.navigateToUrl)..toHaveBeenCalledTimes(1);
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledTimes(1);
     expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('https://example.com');
   });
 

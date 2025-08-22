@@ -387,7 +387,7 @@ describe('getAvailableVersions', () => {
 
     const res2 = await getAvailableVersions();
 
-    expect(mockedFetch)..toHaveBeenCalledTimes(1);
+    expect(mockedFetch).toHaveBeenCalledTimes(1);
     expect(res2).not.toContain('300.0.0');
   });
 

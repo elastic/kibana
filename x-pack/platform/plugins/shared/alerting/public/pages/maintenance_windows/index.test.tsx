@@ -80,6 +80,6 @@ describe('Maintenance windows page', () => {
     appMockRenderer = createAppMockRenderer({ capabilities, license });
     const result = appMockRenderer.render(<MaintenanceWindowsPage />);
     expect(result.queryByTestId('maintenance-windows-table')).toBeInTheDocument();
-    expect(appMockRenderer.mocked.setBadge)..toHaveBeenCalledTimes(1);
+    expect(appMockRenderer.mocked.setBadge).toHaveBeenCalledTimes(1);
   });
 });

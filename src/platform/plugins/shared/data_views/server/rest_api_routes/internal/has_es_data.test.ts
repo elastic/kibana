@@ -42,7 +42,7 @@ describe('has_es_data route', () => {
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
-    expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(1);
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledWith(
       {
         name: patterns,
@@ -51,7 +51,7 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.ok)..toHaveBeenCalledTimes(1);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hasEsData: true } });
     expect(response).toEqual({ body: { hasEsData: true } });
   });
@@ -82,7 +82,7 @@ describe('has_es_data route', () => {
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
-    expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(2);
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
     expect(mockESClient.indices.resolveCluster).toHaveBeenNthCalledWith(
       1,
       {
@@ -101,7 +101,7 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.ok)..toHaveBeenCalledTimes(1);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hasEsData: true } });
     expect(response).toEqual({ body: { hasEsData: true } });
   });
@@ -127,7 +127,7 @@ describe('has_es_data route', () => {
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
-    expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(2);
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
     expect(mockESClient.indices.resolveCluster).toHaveBeenNthCalledWith(
       1,
       {
@@ -146,7 +146,7 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.ok)..toHaveBeenCalledTimes(1);
+    expect(mockResponse.ok).toHaveBeenCalledTimes(1);
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hasEsData: false } });
     expect(response).toEqual({ body: { hasEsData: false } });
   });
@@ -169,7 +169,7 @@ describe('has_es_data route', () => {
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
-    expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(1);
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledWith(
       {
         name: patterns,
@@ -178,7 +178,7 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
     expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 504,
       body: {
@@ -193,7 +193,7 @@ describe('has_es_data route', () => {
         attributes: { failureReason: 'local_data_timeout' },
       },
     });
-    expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Timeout while checking for Elasticsearch data: local_data_timeout. Current timeout value is 5000ms. ' +
         'Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
@@ -229,7 +229,7 @@ describe('has_es_data route', () => {
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
-    expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(2);
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
     expect(mockESClient.indices.resolveCluster).toHaveBeenNthCalledWith(
       1,
       {
@@ -248,7 +248,7 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
     expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 504,
       body: {
@@ -263,7 +263,7 @@ describe('has_es_data route', () => {
         attributes: { failureReason: 'remote_data_timeout' },
       },
     });
-    expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
+    expect(mockLogger.warn).toHaveBeenCalledTimes(1);
     expect(mockLogger.warn).toHaveBeenCalledWith(
       'Timeout while checking for Elasticsearch data: remote_data_timeout. Current timeout value is 5000ms. ' +
         'Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
@@ -289,7 +289,7 @@ describe('has_es_data route', () => {
       .mockImplementation((params) => params as unknown as IKibanaResponse);
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
-    expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(1);
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledWith(
       {
         name: patterns,
@@ -298,7 +298,7 @@ describe('has_es_data route', () => {
       },
       { requestTimeout: mockEsDataTimeout }
     );
-    expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
+    expect(mockResponse.customError).toHaveBeenCalledTimes(1);
     expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: {
@@ -313,7 +313,7 @@ describe('has_es_data route', () => {
         attributes: { failureReason: 'unknown' },
       },
     });
-    expect(mockLogger.error)..toHaveBeenCalledTimes(1);
+    expect(mockLogger.error).toHaveBeenCalledTimes(1);
     expect(mockLogger.error).toHaveBeenCalledWith(someError);
   });
 });

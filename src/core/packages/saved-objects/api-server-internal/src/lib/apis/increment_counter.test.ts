@@ -490,7 +490,7 @@ describe('#incrementCounter', () => {
       it('increments counter by incrementBy config', async () => {
         await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 3 }]);
 
-        expect(client.update)..toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledTimes(1);
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
@@ -507,7 +507,7 @@ describe('#incrementCounter', () => {
       it('does not increment counter when incrementBy is 0', async () => {
         await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
 
-        expect(client.update)..toHaveBeenCalledTimes(1);
+        expect(client.update).toHaveBeenCalledTimes(1);
         expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({

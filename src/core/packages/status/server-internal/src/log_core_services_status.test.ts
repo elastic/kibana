@@ -61,13 +61,13 @@ describe('logCoreStatusChanges', () => {
 
     await delay();
 
-    expect(l.get)..toHaveBeenCalledTimes(3);
+    expect(l.get).toHaveBeenCalledTimes(3);
     expect(l.get).toHaveBeenNthCalledWith(1, 'elasticsearch');
     expect(l.get).toHaveBeenNthCalledWith(2, 'savedObjects');
     expect(l.get).toHaveBeenNthCalledWith(3, 'savedObjects');
     expect(l.warn).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.info)..toHaveBeenCalledTimes(2);
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(2);
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
     expect(l.info).toHaveBeenNthCalledWith(2, 'savedObjects service is now available: Avail!');
@@ -87,12 +87,12 @@ describe('logCoreStatusChanges', () => {
 
     await delay();
 
-    expect(l.get)..toHaveBeenCalledTimes(2);
+    expect(l.get).toHaveBeenCalledTimes(2);
     expect(l.get).toHaveBeenNthCalledWith(1, 'elasticsearch');
     expect(l.get).toHaveBeenNthCalledWith(2, 'savedObjects');
     expect(l.warn).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.info)..toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(1);
     expect(l.info).toHaveBeenNthCalledWith(1, 'elasticsearch service is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(1, 'savedObjects service is now unavailable: Unavail!');
   });

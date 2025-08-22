@@ -330,7 +330,7 @@ describe('Task Runner', () => {
       ...generateRuleUpdateParams({})
     );
 
-    expect(taskRunnerFactoryInitializerParams.executionContext.withContext)..toHaveBeenCalledTimes(1);
+    expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledTimes(1);
     expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toHaveBeenCalledWith(
       {
         id: '1',
@@ -1828,7 +1828,7 @@ describe('Task Runner', () => {
 
     await taskRunner.run();
 
-    expect(logger.error)..toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
 
     const loggerCall = logger.error.mock.calls[0][0];
     const loggerMeta = logger.error.mock.calls[0][1];
@@ -1889,7 +1889,7 @@ describe('Task Runner', () => {
     );
     expect(loggerMeta?.tags).toEqual(['1', 'test', 'rule-run-failed', 'framework-error']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
-    expect(logger.error)..toHaveBeenCalledTimes(1);
+    expect(logger.error).toHaveBeenCalledTimes(1);
     expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
@@ -3411,7 +3411,7 @@ describe('Task Runner', () => {
 
     const result = await taskRunner.run();
 
-    expect(logger.info)..toHaveBeenCalledTimes(1);
+    expect(logger.info).toHaveBeenCalledTimes(1);
     const loggerCall = logger.info.mock.calls[0][0];
     expect(loggerCall).toMatchInlineSnapshot(
       `"Outdated task version: The task instance ID: old-task-id does not match the rule ID: 1."`

@@ -115,6 +115,6 @@ describe('startMlModelDeployment', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Starting);
-    expect(mockTrainedModelsProvider.startTrainedModelDeployment)..toHaveBeenCalledTimes(1);
+    expect(mockTrainedModelsProvider.startTrainedModelDeployment).toHaveBeenCalledTimes(1);
   });
 });

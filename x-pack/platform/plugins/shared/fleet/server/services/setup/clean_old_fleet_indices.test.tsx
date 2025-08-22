@@ -31,14 +31,14 @@ describe('cleanUpOldFileIndices', () => {
 
     await cleanUpOldFileIndices(esClient, logger);
 
-    expect(esClient.indices.delete)..toHaveBeenCalledTimes(1);
+    expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
     expect(esClient.indices.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         index: '.fleet-files-agent,.fleet-files-test',
       })
     );
 
-    expect(esClient.indices.deleteIndexTemplate)..toHaveBeenCalledTimes(1);
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
     expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: '.fleet-files,.fleet-file-data,.fleet-filedelivery-data,.fleet-filedelivery-meta',
@@ -69,7 +69,7 @@ describe('cleanUpOldFileIndices', () => {
 
     await cleanUpOldFileIndices(esClient, logger);
 
-    expect(esClient.indices.deleteIndexTemplate)..toHaveBeenCalledTimes(1);
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledTimes(1);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
@@ -98,7 +98,7 @@ describe('cleanUpOldFileIndices', () => {
 
     await cleanUpOldFileIndices(esClient, logger);
 
-    expect(esClient.indices.delete)..toHaveBeenCalledTimes(1);
+    expect(esClient.indices.delete).toHaveBeenCalledTimes(1);
     expect(logger.warn).not.toHaveBeenCalled();
   });
 });

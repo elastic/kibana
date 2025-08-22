@@ -261,7 +261,7 @@ describe('useMetricsExplorerState', () => {
       act(() => {
         handleLoadMore();
       });
-      expect(fetchNextPage)..toHaveBeenCalledTimes(1);
+      expect(fetchNextPage).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -66,7 +66,7 @@ describe('server files', () => {
       expect.assertions(2);
       await deleteFiles(['1', '2'], fileServiceMock);
 
-      expect(fileServiceMock.delete)..toHaveBeenCalledTimes(2);
+      expect(fileServiceMock.delete).toHaveBeenCalledTimes(2);
       expect(fileServiceMock.delete.mock.calls).toMatchInlineSnapshot(`
         Array [
           Array [

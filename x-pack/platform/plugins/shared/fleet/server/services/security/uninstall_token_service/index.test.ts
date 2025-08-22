@@ -797,7 +797,7 @@ describe('UninstallTokenService', () => {
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser)..toHaveBeenCalledTimes(1);
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
             expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith({
               filter:
                 'fleet-uninstall-tokens.id: "test-so-id" or fleet-uninstall-tokens.id: "test-so-id-two"',
@@ -816,7 +816,7 @@ describe('UninstallTokenService', () => {
 
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser)..toHaveBeenCalledTimes(2);
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
 
             expect(
               esoClientMock.createPointInTimeFinderDecryptedAsInternalUser

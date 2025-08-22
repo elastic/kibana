@@ -116,14 +116,14 @@ describe('CloudService', () => {
       expect(() =>
         service._parseResponse(JSON.stringify(body), parseBody)
       ).toThrowErrorMatchingInlineSnapshot(`"Unable to handle body"`);
-      expect(parseBody)..toHaveBeenCalledTimes(1);
+      expect(parseBody).toHaveBeenCalledTimes(1);
       expect(parseBody).toHaveBeenCalledWith(body);
       parseBody.mockClear();
 
       expect(() => service._parseResponse(body, parseBody)).toThrowErrorMatchingInlineSnapshot(
         `"Unable to handle body"`
       );
-      expect(parseBody)..toHaveBeenCalledTimes(1);
+      expect(parseBody).toHaveBeenCalledTimes(1);
       expect(parseBody).toHaveBeenCalledWith(body);
     });
 

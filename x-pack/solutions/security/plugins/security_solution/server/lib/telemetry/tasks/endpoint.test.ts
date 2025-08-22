@@ -58,7 +58,7 @@ describe('endpoint telemetry task test', () => {
       testTaskExecutionPeriod.current
     );
     expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter)..toHaveBeenCalledTimes(
+    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toHaveBeenCalledTimes(
       1
     );
   });
@@ -87,7 +87,7 @@ describe('endpoint telemetry task test', () => {
     );
 
     expect(mockTelemetryReceiver.fetchPolicyConfigs).toHaveBeenCalled();
-    expect(mockTaskMetrics.start)..toHaveBeenCalledTimes(1);
-    expect(mockTaskMetrics.end)..toHaveBeenCalledTimes(1);
+    expect(mockTaskMetrics.start).toHaveBeenCalledTimes(1);
+    expect(mockTaskMetrics.end).toHaveBeenCalledTimes(1);
   });
 });

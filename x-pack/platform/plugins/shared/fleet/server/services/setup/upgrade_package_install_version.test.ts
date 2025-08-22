@@ -47,7 +47,7 @@ describe('upgradePackageInstallVersion', () => {
       logger,
     });
 
-    expect(mockedReinstallPackageForInstallation)..toHaveBeenCalledTimes(2);
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledTimes(2);
     expect(mockedReinstallPackageForInstallation).toHaveBeenCalledWith(
       expect.objectContaining({
         installation: expect.objectContaining({ name: 'test1' }),

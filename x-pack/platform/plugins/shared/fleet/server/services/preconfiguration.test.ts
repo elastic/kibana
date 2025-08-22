@@ -635,7 +635,7 @@ describe('policy preconfiguration', () => {
         DEFAULT_SPACE_ID
       );
 
-      expect(mockedPackagePolicyService.create)..toHaveBeenCalledTimes(1);
+      expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(1);
       expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
         expect.anything(), // so client
         expect.anything(), // es client
@@ -1087,10 +1087,10 @@ describe('policy preconfiguration', () => {
         DEFAULT_SPACE_ID
       );
 
-      expect(appContextService.getInternalUserSOClientForSpaceId)..toHaveBeenCalledTimes(1);
+      expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledTimes(1);
       expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith(TEST_NAMESPACE);
 
-      expect(mockedPackagePolicyService.create)..toHaveBeenCalledTimes(1);
+      expect(mockedPackagePolicyService.create).toHaveBeenCalledTimes(1);
       expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
         namespacedSOClient, // namespaced so client
         expect.anything(), // es client
@@ -1100,7 +1100,7 @@ describe('policy preconfiguration', () => {
         expect.anything() // options
       );
 
-      expect(spyAgentPolicyServiceUpdate)..toHaveBeenCalledTimes(1);
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledTimes(1);
       expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         namespacedSOClient, // namespaced so client
         expect.anything(), // es client

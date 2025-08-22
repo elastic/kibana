@@ -459,10 +459,10 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         namespace,
       });
       _expectClientCallArgs([nonEncryptedSO, encryptedSO], { getId });
-      expect(mockEncryptionExt.isEncryptableType)..toHaveBeenCalledTimes(2);
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(nonEncryptedSO.type);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes)..toHaveBeenCalledTimes(1);
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
         expect.objectContaining({ ...encryptedSO }),
         undefined
@@ -711,10 +711,10 @@ describe('SavedObjectsRepository Encryption Extension', () => {
         generateSearchResults
       );
       expect(client.search).toHaveBeenCalledTimes(1);
-      expect(mockEncryptionExt.isEncryptableType)..toHaveBeenCalledTimes(2);
+      expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledTimes(2);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith(encryptedSO.type);
       expect(mockEncryptionExt.isEncryptableType).toHaveBeenCalledWith('index-pattern');
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes)..toHaveBeenCalledTimes(1);
+      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptionExt.decryptOrStripResponseAttributes).toHaveBeenCalledWith(
         expect.objectContaining({ type: encryptedSO.type, id: encryptedSO.id }),
         undefined

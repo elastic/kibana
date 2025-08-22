@@ -269,8 +269,8 @@ describe('CasesConnector', () => {
       templateId,
     });
 
-    expect(nextBackOff)..toHaveBeenCalledTimes(2);
-    expect(mockExecute)..toHaveBeenCalledTimes(3);
+    expect(nextBackOff).toHaveBeenCalledTimes(2);
+    expect(mockExecute).toHaveBeenCalledTimes(3);
   });
 
   it('throws if the kibana request is not defined', async () => {
@@ -298,8 +298,8 @@ describe('CasesConnector', () => {
       '[CasesConnector][run] Execution of case connector failed. Message: Kibana request is not defined. Status code: 400'
     );
 
-    expect(nextBackOff)..toHaveBeenCalledTimes(0);
-    expect(mockExecute)..toHaveBeenCalledTimes(0);
+    expect(nextBackOff).toHaveBeenCalledTimes(0);
+    expect(mockExecute).toHaveBeenCalledTimes(0);
   });
 
   it('does not execute with no alerts', async () => {

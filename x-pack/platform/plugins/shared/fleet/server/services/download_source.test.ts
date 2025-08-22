@@ -208,7 +208,7 @@ describe('Download Service', () => {
         host: 'http://test.co',
       });
 
-      expect(soClient.update)..toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledTimes(1);
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
@@ -289,7 +289,7 @@ describe('Download Service', () => {
         host: 'http://test.co',
       });
 
-      expect(soClient.update)..toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledTimes(1);
       expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',

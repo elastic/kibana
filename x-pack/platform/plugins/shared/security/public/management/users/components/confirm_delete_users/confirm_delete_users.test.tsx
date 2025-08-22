@@ -51,11 +51,11 @@ describe('ConfirmDeleteUsers', () => {
       />
     );
 
-    expect(onCancel)..toHaveBeenCalledTimes(0);
+    expect(onCancel).toHaveBeenCalledTimes(0);
 
     wrapper.find('EuiButtonEmpty[data-test-subj="confirmModalCancelButton"]').simulate('click');
 
-    expect(onCancel)..toHaveBeenCalledTimes(1);
+    expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it('deletes the requested users when confirmed', () => {
@@ -73,7 +73,7 @@ describe('ConfirmDeleteUsers', () => {
 
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
-    expect(apiClientMock.deleteUser)..toHaveBeenCalledTimes(2);
+    expect(apiClientMock.deleteUser).toHaveBeenCalledTimes(2);
     expect(apiClientMock.deleteUser).toHaveBeenCalledWith('foo');
     expect(apiClientMock.deleteUser).toHaveBeenCalledWith('bar');
   });
@@ -100,7 +100,7 @@ describe('ConfirmDeleteUsers', () => {
 
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
-    expect(apiClientMock.deleteUser)..toHaveBeenCalledTimes(2);
+    expect(apiClientMock.deleteUser).toHaveBeenCalledTimes(2);
     expect(apiClientMock.deleteUser).toHaveBeenCalledWith('foo');
     expect(apiClientMock.deleteUser).toHaveBeenCalledWith('bar');
   });

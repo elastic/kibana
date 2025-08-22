@@ -38,7 +38,7 @@ describe('CasesAnalyticsRetryService', () => {
       `"My error"`
     );
 
-    expect(cb)..toHaveBeenCalledTimes(1);
+    expect(cb).toHaveBeenCalledTimes(1);
     expect(nextBackOff).not.toHaveBeenCalled();
   });
 
@@ -52,8 +52,8 @@ describe('CasesAnalyticsRetryService', () => {
       `"My retryable error"`
     );
 
-    expect(cb)..toHaveBeenCalledTimes(maxAttempts + 1);
-    expect(nextBackOff)..toHaveBeenCalledTimes(maxAttempts);
+    expect(cb).toHaveBeenCalledTimes(maxAttempts + 1);
+    expect(nextBackOff).toHaveBeenCalledTimes(maxAttempts);
   });
 
   it('should succeed if cb does not throw', async () => {
@@ -63,8 +63,8 @@ describe('CasesAnalyticsRetryService', () => {
 
     const res = await service.retryWithBackoff(cb);
 
-    expect(nextBackOff)..toHaveBeenCalledTimes(0);
-    expect(cb)..toHaveBeenCalledTimes(1);
+    expect(nextBackOff).toHaveBeenCalledTimes(0);
+    expect(cb).toHaveBeenCalledTimes(1);
     expect(res).toEqual({ status: 'ok' });
   });
 
@@ -78,7 +78,7 @@ describe('CasesAnalyticsRetryService', () => {
         `"My retryable error"`
       );
 
-      expect(mockLogger.warn)..toHaveBeenCalledTimes(2);
+      expect(mockLogger.warn).toHaveBeenCalledTimes(2);
       expect(mockLogger.warn).toHaveBeenNthCalledWith(
         1,
         '[CasesAnalytics][retryWithBackoff] Failed with error "My retryable error". Attempt for retry: 1'

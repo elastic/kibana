@@ -72,13 +72,13 @@ describe('logPluginsStatusChanges', () => {
     plugins$.next({ A: reportedAvailable, B: reportedAvailable, C: inferredAvailable });
 
     await delay();
-    expect(l.get)..toHaveBeenCalledTimes(3);
+    expect(l.get).toHaveBeenCalledTimes(3);
     expect(l.get).toHaveBeenNthCalledWith(1, 'A');
     expect(l.get).toHaveBeenNthCalledWith(2, 'B');
     expect(l.get).toHaveBeenNthCalledWith(3, 'B');
     expect(l.warn).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.info)..toHaveBeenCalledTimes(2);
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(2);
     expect(l.error).toHaveBeenNthCalledWith(1, 'B plugin is now unavailable: Unavail!');
     expect(l.info).toHaveBeenNthCalledWith(1, 'A plugin is now available: Avail!');
     expect(l.info).toHaveBeenNthCalledWith(2, 'B plugin is now available: Avail!');
@@ -98,12 +98,12 @@ describe('logPluginsStatusChanges', () => {
 
     await delay();
 
-    expect(l.get)..toHaveBeenCalledTimes(2);
+    expect(l.get).toHaveBeenCalledTimes(2);
     expect(l.get).toHaveBeenNthCalledWith(1, 'A');
     expect(l.get).toHaveBeenNthCalledWith(2, 'B');
     expect(l.warn).not.toHaveBeenCalled();
-    expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.info)..toHaveBeenCalledTimes(1);
+    expect(l.error).toHaveBeenCalledTimes(1);
+    expect(l.info).toHaveBeenCalledTimes(1);
     expect(l.info).toHaveBeenNthCalledWith(1, 'A plugin is now available: Avail!');
     expect(l.error).toHaveBeenNthCalledWith(1, 'B plugin is now unavailable: Unavail!');
   });
