@@ -478,7 +478,15 @@ export class FileUploadManager {
         this.isExistingIndexUpload()
       );
 
-      this.docCountService.start(indexName);
+      // Calculate expected document count from all files
+      const files = this.getFiles();
+      const expectedDocCount = files.reduce((total, file) => {
+        const status = file.getStatus();
+        // Use the estimated number of lines as a rough approximation of docs
+        return total + (status.results?.num_lines_analyzed ?? 0);
+      }, 0);
+
+      this.docCountService.start(indexName, this.isExistingIndexUpload(), expectedDocCount);
 
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
@@ -525,11 +533,21 @@ export class FileUploadManager {
     const createdPipelineIds = initializeImportResp.pipelineIds;
 
     try {
-      await Promise.all(
+      const importResults = await Promise.all(
         files.map(async (file, i) => {
-          await file.import(indexName, mappings!, createdPipelineIds[i] ?? undefined);
+          const result = await file.import(indexName, mappings!, createdPipelineIds[i] ?? undefined);
+          return result;
         })
       );
+
+      // For append operations, update with actual imported document count
+      if (this.isExistingIndexUpload()) {
+        const totalImportedDocs = files.reduce((total, file) => {
+          const status = file.getStatus();
+          return total + status.docCount;
+        }, 0);
+        this.docCountService.updateExpectedDocCount(totalImportedDocs);
+      }
     } catch (error) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
