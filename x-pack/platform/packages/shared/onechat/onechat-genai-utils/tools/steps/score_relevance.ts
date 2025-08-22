@@ -82,10 +82,10 @@ export const scoreRelevance = async ({
         .array(
           z.object({
             id: z.number().int().describe("The document's unique integer identifier."),
-            score: z.number().int().min(0).max(4).describe('The relevance score from 0 to 4.'),
             reason: z
               .string()
               .describe('A brief, one-sentence justification for the assigned score.'),
+            score: z.number().int().min(0).max(4).describe('The relevance score from 0 to 4.'),
           })
         )
         .describe('An array of relevance ratings, one for each document.'),
@@ -159,9 +159,9 @@ const getRankingPrompt = ({
       ## Instructions
       1.  Carefully review the user's <query>.
       2.  For each <document>, independently evaluate its content against the query.
-      3.  Assign a score from 0 to 4 based on the scoring criteria.
-      4.  For each score, provide a brief, one-sentence justification in the 'reason' field.
-      5.  You MUST respond with a single, valid JSON object that adheres to the schema below. Do not include any other text or explanations before or after the JSON object.
+        2.2.  Provide a brief, one-sentence analyze or justification in the 'reason' field.
+        2.1.  Assign a score from 0 to 4 based on the scoring criteria in the 'score' field.
+      3.  You MUST respond with a single, valid JSON object that adheres to the schema below. Do not include any other text or explanations before or after the JSON object.
 
       ## JSON Schema
       Your output must be a JSON object with a single key "ratings". This key holds an array of rating objects. Each rating object must contain:
@@ -175,13 +175,13 @@ const getRankingPrompt = ({
         "ratings" : [
           {
             "id": 0,
-            "score": 4,
-            "reason": "This document directly explains the primary concept mentioned in the query."
+            "reason": "This document directly explains the primary concept mentioned in the query.",
+            "score": 4
           },
           {
             "id": 1,
-            "score": 1,
-            "reason": "This document only mentions a keyword from the query in passing without any relevant context."
+            "reason": "This document only mentions a keyword from the query in passing without any relevant context.",
+            "score": 1
           }
         ]
       }

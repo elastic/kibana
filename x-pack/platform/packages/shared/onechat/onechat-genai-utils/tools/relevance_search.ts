@@ -20,7 +20,8 @@ export const relevanceSearch = async ({
   index,
   fields = [],
   size = 10,
-  relevanceFiltering = { enabled: true, threshold: RelevanceScore.Context },
+  relevanceFiltering = true,
+  relevanceThreshold = RelevanceScore.Context,
   model,
   esClient,
 }: {
@@ -28,7 +29,8 @@ export const relevanceSearch = async ({
   index?: string;
   fields?: string[];
   size?: number;
-  relevanceFiltering?: { enabled: boolean; threshold: RelevanceScore };
+  relevanceFiltering?: boolean;
+  relevanceThreshold?: RelevanceScore;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<RelevanceSearchResponse> => {
@@ -64,28 +66,45 @@ export const relevanceSearch = async ({
     );
   }
 
-  const { results: unfilteredResults } = await performMatchSearch({
+  const matchResult = await performMatchSearch({
     term,
     fields: selectedFields,
     index: selectedIndex,
     size,
     esClient,
   });
+  let results: MatchResult[] = matchResult.results;
 
-  let filteredResults: MatchResult[] = unfilteredResults;
-
-  if (relevanceFiltering.enabled) {
-    const relevanceScores = await scoreRelevance({
-      query: term,
-      resources: unfilteredResults.map((result) => ({ content: result.highlights.join('\n\n') })),
+  if (relevanceFiltering && results.length > 0) {
+    results = await filterResultsByRelevance({
+      results,
       model,
-    });
-
-    filteredResults = unfilteredResults.filter((result, idx) => {
-      const resultScore = relevanceScores[idx];
-      return resultScore.score >= relevanceFiltering.threshold;
+      term,
+      threshold: relevanceThreshold,
     });
   }
 
-  return { results: filteredResults };
+  return { results };
+};
+
+const filterResultsByRelevance = async ({
+  term,
+  results: unfilteredResults,
+  threshold,
+  model,
+}: {
+  term: string;
+  results: MatchResult[];
+  threshold: RelevanceScore;
+  model: ScopedModel;
+}): Promise<MatchResult[]> => {
+  const relevanceScores = await scoreRelevance({
+    query: term,
+    resources: unfilteredResults.map((result) => ({ content: result.highlights.join('\n\n') })),
+    model,
+  });
+  return unfilteredResults.filter((result, idx) => {
+    const resultScore = relevanceScores[idx];
+    return resultScore.score >= threshold;
+  });
 };
