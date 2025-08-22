@@ -29,7 +29,7 @@ const getExecutionStatusColorsMap = (
 ): Record<ExecutionStatus, ExecutionStatusColors> => {
   return {
     [ExecutionStatus.COMPLETED]: {
-      color: euiTheme.colors.vis.euiColorVis0,
+      color: euiTheme.colors.vis.euiColorVisSuccess0,
       backgroundColor: euiTheme.colors.backgroundBaseSuccess,
     },
     [ExecutionStatus.FAILED]: {

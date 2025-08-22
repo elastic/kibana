@@ -17,7 +17,7 @@ import {
   EuiFlexItem,
   EuiFlexGroup,
   useEuiTheme,
-  EuiHorizontalRule,
+  useEuiFontSize,
 } from '@elastic/eui';
 import type { YamlValidationError } from '../model/types';
 
@@ -33,6 +33,7 @@ export function WorkflowYAMLValidationErrors({
   onErrorClick?: (error: YamlValidationError) => void;
 }) {
   const { euiTheme } = useEuiTheme();
+  const smallFontSize = useEuiFontSize('s').fontSize;
   const accordionId = useGeneratedHtmlId({ prefix: 'wf-yaml-editor-validation-errors' });
   let icon: React.ReactNode | null = null;
   let buttonContent: React.ReactNode | null = null;
@@ -57,7 +58,13 @@ export function WorkflowYAMLValidationErrors({
     icon = <EuiLoadingSpinner size="m" />;
     buttonContent = 'Initializing validation...';
   } else if (validationErrors?.length === 0) {
-    icon = <EuiIcon type="checkInCircleFilled" color="success" size="m" />;
+    icon = (
+      <EuiIcon
+        type="checkInCircleFilled"
+        color={euiTheme.colors.vis.euiColorVisSuccess0}
+        size="m"
+      />
+    );
     buttonContent = 'No validation errors';
   } else {
     icon = (
@@ -86,8 +93,8 @@ export function WorkflowYAMLValidationErrors({
     <div
       css={{
         width: '100%',
-        padding: euiTheme.size.m,
         minHeight: '48px',
+        padding: `0 ${euiTheme.size.m}`,
         zIndex: 1000,
         borderTop: `1px solid ${euiTheme.colors.lightShade}`,
         position: 'fixed',
@@ -97,76 +104,92 @@ export function WorkflowYAMLValidationErrors({
     >
       <EuiAccordion
         id={accordionId}
+        key={validationErrors?.length}
         data-testid="wf-yaml-editor-validation-errors-list"
         buttonContent={
-          <EuiFlexGroup alignItems="center" gutterSize="s" css={{ width: '100%' }}>
+          <EuiFlexGroup
+            alignItems="center"
+            gutterSize="s"
+            css={{
+              width: '100%',
+              padding: `${euiTheme.size.m} 0`,
+              color: euiTheme.colors.textParagraph,
+            }}
+          >
             <EuiFlexItem grow={false}>{icon}</EuiFlexItem>
             <EuiFlexItem>{buttonContent}</EuiFlexItem>
           </EuiFlexGroup>
         }
         arrowDisplay={validationErrors?.length === 0 ? 'none' : 'left'}
-        css={{}}
-        initialIsOpen={validationErrors !== null && validationErrors.length <= 5}
+        initialIsOpen={validationErrors !== null && validationErrors.length > 0}
+        isDisabled={validationErrors?.length === 0}
       >
-        <EuiFlexGroup direction="column" gutterSize="none" css={{ padding: euiTheme.size.m }}>
-          <EuiHorizontalRule margin="none" />
-          {sortedValidationErrors?.map((error, index) => (
-            <EuiFlexItem
-              key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
-              css={css`
-                font-size: 0.875rem;
-                cursor: pointer;
-                display: flex;
-                flex-direction: row;
-                align-items: flex-start;
-                gap: 0.25rem;
-                padding: 0.25rem 1rem;
-                &:hover {
-                  text-decoration: underline;
-                }
-              `}
-              onClick={() => onErrorClick?.(error)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onErrorClick?.(error);
-                }
-              }}
-              role="button"
-              tabIndex={0}
-            >
-              <EuiFlexItem grow={false}>
-                <EuiIcon
-                  type={
-                    error.severity === 'error'
-                      ? 'errorFilled'
-                      : error.severity === 'warning'
-                      ? 'warningFilled'
-                      : 'iInCircle'
+        <div
+          css={{
+            maxHeight: '200px',
+            overflow: 'auto',
+            padding: `${euiTheme.size.s} 0`,
+            borderTop: `1px solid ${euiTheme.colors.lightShade}`,
+          }}
+        >
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {sortedValidationErrors?.map((error, index) => (
+              <EuiFlexItem
+                key={`${error.lineNumber}-${error.column}-${error.message}-${index}-${error.severity}`}
+                css={{
+                  fontSize: smallFontSize,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'flex-start',
+                  gap: euiTheme.size.s,
+                  '&:hover': {
+                    textDecoration: 'underline',
+                  },
+                }}
+                onClick={() => onErrorClick?.(error)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    onErrorClick?.(error);
                   }
-                  color={
-                    error.severity === 'error'
-                      ? 'danger'
-                      : error.severity === 'warning'
-                      ? euiTheme.colors.vis.euiColorVis8
-                      : 'primary'
-                  }
-                  size="s"
-                  css={css`
-                    margin-top: 0.125rem;
-                    flex-shrink: 0;
-                  `}
-                />
+                }}
+                role="button"
+                tabIndex={0}
+              >
+                <EuiFlexItem grow={false} css={{ minWidth: '3rem', display: 'block' }}>
+                  <b>{error.lineNumber}</b>:{error.column}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiIcon
+                    type={
+                      error.severity === 'error'
+                        ? 'errorFilled'
+                        : error.severity === 'warning'
+                        ? 'warningFilled'
+                        : 'iInCircle'
+                    }
+                    color={
+                      error.severity === 'error'
+                        ? 'danger'
+                        : error.severity === 'warning'
+                        ? euiTheme.colors.vis.euiColorVis8
+                        : 'primary'
+                    }
+                    size="s"
+                    css={css`
+                      margin-top: 0.125rem;
+                      flex-shrink: 0;
+                    `}
+                  />
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <span>{error.message}</span>
+                </EuiFlexItem>
               </EuiFlexItem>
-              <EuiFlexItem grow={false} css={{ minWidth: '1.5rem', display: 'block' }}>
-                <b>{error.lineNumber}</b>:{error.column}
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <span>{error.message}</span>
-              </EuiFlexItem>
-            </EuiFlexItem>
-          ))}
-        </EuiFlexGroup>
+            ))}
+          </EuiFlexGroup>
+        </div>
       </EuiAccordion>
     </div>
   );
