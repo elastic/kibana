@@ -51,8 +51,8 @@ export const setStubKibanaServices = () => {
 
   const dataServiceMock = dataPluginMock.createStartContract();
   dataServiceMock.dataViews.getDefaultDataView = jest.fn().mockImplementation(async () => ({
-    isPersisted: () => true, // provide isPersisted implement when not provided by original mock
     ...(await dataServiceMock.dataViews.getDefaultDataView()),
+    isPersisted: () => true,
   }));
 
   setKibanaServices(core, {
