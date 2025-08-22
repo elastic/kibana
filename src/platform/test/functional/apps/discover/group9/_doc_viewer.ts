@@ -178,7 +178,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('should show filters by type in ES|QL view', async function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/232529
+      it.skip('should show filters by type in ES|QL view', async function () {
         await discover.selectTextBaseLang();
 
         const testQuery = `from logstash-* | limit 10000`;
