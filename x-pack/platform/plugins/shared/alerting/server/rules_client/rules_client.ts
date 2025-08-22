@@ -94,6 +94,17 @@ import type {
   BulkFillGapsByRuleIdsOptions,
   BulkFillGapsByRuleIdsParams,
 } from '../application/rule/methods/bulk_fill_gaps_by_rule_ids/types';
+import { createGapFillAutoScheduler } from '../application/gap_auto_fill_scheduler/methods/create';
+import { getGapFillAutoScheduler } from '../application/gap_auto_fill_scheduler/methods/get';
+import { updateGapFillAutoScheduler } from '../application/gap_auto_fill_scheduler/methods/update';
+import type { CreateGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/create/types';
+import type { GetGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/get/types';
+import type { UpdateGapFillAutoSchedulerParams } from '../application/gap_auto_fill_scheduler/methods/update/types';
+
+interface UpdateGapFillAutoSchedulerMethodParams {
+  id: string;
+  updates: UpdateGapFillAutoSchedulerParams;
+}
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -244,6 +255,15 @@ export class RulesClient {
 
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);
+
+  public createGapFillAutoScheduler = (params: CreateGapFillAutoSchedulerParams) =>
+    createGapFillAutoScheduler(this.context, params);
+
+  public getGapFillAutoScheduler = (params: GetGapFillAutoSchedulerParams) =>
+    getGapFillAutoScheduler(this.context, params);
+
+  public updateGapFillAutoScheduler = (params: UpdateGapFillAutoSchedulerMethodParams) =>
+    updateGapFillAutoScheduler(this.context, params);
 
   public getTaskManager = () => this.context.taskManager;
   public getEventLogClient = () => this.context.getEventLogClient();

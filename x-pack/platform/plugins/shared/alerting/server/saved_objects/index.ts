@@ -155,6 +155,9 @@ export function setupSavedObjects(
         updatedAt: { type: 'date' },
       },
     },
+    management: {
+      importableAndExportable: false,
+    },
     modelVersions: gapFillAutoSchedulerModelVersions,
   });
 
