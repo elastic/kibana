@@ -6,13 +6,16 @@
  */
 
 import React from 'react';
-import userEvent from '@testing-library/user-event';
 import { render, fireEvent, waitFor, within } from '@testing-library/react';
 import { IndexEntryEditor } from './index_entry_editor';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { IndexEntry } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { I18nProvider } from '@kbn/i18n-react';
+import { useIndexMappings } from './use_index_mappings';
+import type { HttpSetup } from '@kbn/core-http-browser';
+
+jest.mock('./use_index_mappings');
 
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
@@ -21,17 +24,15 @@ const Wrapper = ({ children }: { children?: React.ReactNode }) => (
 describe('IndexEntryEditor', () => {
   const mockSetEntry = jest.fn();
   const mockDataViews = {
-    getFieldsForWildcard: jest.fn().mockResolvedValue([
-      { name: 'field-1', esTypes: ['semantic_text'] },
-      { name: 'field-2', esTypes: ['text'] },
-      { name: 'field-3', esTypes: ['semantic_text'] },
-    ]),
     getExistingIndices: jest.fn().mockResolvedValue(['index-1']),
     getIndices: jest.fn().mockResolvedValue([
       { name: 'index-1', attributes: ['open'] },
       { name: 'index-2', attributes: ['open'] },
     ]),
   } as unknown as DataViewsContract;
+  const http = {
+    get: jest.fn(),
+  } as unknown as HttpSetup;
 
   const defaultProps = {
     dataViews: mockDataViews,
@@ -46,10 +47,38 @@ describe('IndexEntryEditor', () => {
       queryDescription: 'Test Query Description',
       users: [],
     } as unknown as IndexEntry,
+    http,
   };
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useIndexMappings as jest.Mock).mockImplementation(({ indexName }) => {
+      if (indexName === 'index-1') {
+        return {
+          data: {
+            mappings: {
+              properties: {
+                'field-1-text': { type: 'text' },
+                'field-1-keyword': { type: 'keyword' },
+              },
+            },
+          },
+        };
+      }
+      if (indexName === 'index-2') {
+        return {
+          data: {
+            mappings: {
+              properties: {
+                'field-2-text': { type: 'text' },
+                'field-2-semantic': { type: 'semantic_text' },
+              },
+            },
+          },
+        };
+      }
+      return { data: undefined };
+    });
   });
 
   it('renders the form fields with initial values', async () => {
@@ -131,31 +160,50 @@ describe('IndexEntryEditor', () => {
   });
 
   it('fetches field options based on selected index and updates on selection', async () => {
-    const { getByTestId, getAllByTestId } = render(<IndexEntryEditor {...defaultProps} />, {
-      wrapper: Wrapper,
-    });
+    const { getByTestId, queryByTestId, rerender } = render(
+      <IndexEntryEditor {...defaultProps} />,
+      {
+        wrapper: Wrapper,
+      }
+    );
 
     await waitFor(() => {
-      expect(mockDataViews.getFieldsForWildcard).toHaveBeenCalledWith({
-        pattern: 'index-1',
+      expect(useIndexMappings).toHaveBeenCalledWith({
+        http,
+        indexName: 'index-1',
       });
     });
 
-    await waitFor(async () => {
-      fireEvent.click(getByTestId('index-combobox'));
-      fireEvent.click(getAllByTestId('comboBoxToggleListButton')[0]);
+    // Open field dropdown and check options for index-1
+    fireEvent.click(within(getByTestId('entry-combobox')).getByTestId('comboBoxToggleListButton'));
+    await waitFor(() => {
+      expect(getByTestId('field-option-field-1-text')).toBeInTheDocument();
+      expect(queryByTestId('field-option-field-1-keyword')).not.toBeInTheDocument();
     });
-    fireEvent.click(getByTestId('index-2'));
+
+    // Close the dropdown before re-rendering
+    fireEvent.click(within(getByTestId('entry-combobox')).getByTestId('comboBoxToggleListButton'));
+
+    // Change index to index-2
+    const newEntry = { ...defaultProps.entry, index: 'index-2', field: '' };
+    rerender(<IndexEntryEditor {...defaultProps} entry={newEntry} />);
 
     await waitFor(() => {
-      fireEvent.click(getByTestId('entry-combobox'));
+      expect(useIndexMappings).toHaveBeenCalledWith({
+        http,
+        indexName: 'index-2',
+      });
     });
 
-    await userEvent.type(
-      within(getByTestId('entry-combobox')).getByTestId('comboBoxSearchInput'),
-      'field-3'
-    );
+    // Open field dropdown and check options for index-2
+    fireEvent.click(within(getByTestId('entry-combobox')).getByTestId('comboBoxToggleListButton'));
+    await waitFor(() => {
+      expect(getByTestId('field-option-field-2-text')).toBeInTheDocument();
+      expect(getByTestId('field-option-field-2-semantic')).toBeInTheDocument();
+    });
 
+    // Select a new field
+    fireEvent.click(getByTestId('field-option-field-2-text'));
     await waitFor(() => {
       expect(mockSetEntry).toHaveBeenCalledWith(expect.any(Function));
     });
