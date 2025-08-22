@@ -28,6 +28,7 @@ import {
   SPAN_LINKS_TRACE_ID,
   TRACE_ID_FIELD,
 } from '@kbn/discover-utils';
+import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
@@ -104,24 +105,10 @@ export function SpanLinks({ docId, traceId }: Props) {
 
   const openInDiscoverLink = useMemo(() => {
     if (type === 'incoming') {
-      return generateDiscoverLink(
-        where(
-          `QSTR("${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}") OR QSTR("${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}")`
-        )
-      );
+      return generateDiscoverLink(getIncomingSpanLinksESQL(traceId, docId));
     }
 
-    const params: Array<Record<string, any>> = [];
-    const filters = spanLinks
-      .map((link, idx) => {
-        const traceIdParamName = toESQLParamName(`${TRACE_ID_FIELD}_${idx}`);
-        const spanIdParamName = toESQLParamName(`${SPAN_ID_FIELD}_${idx}`);
-        params.push({ [traceIdParamName]: link.traceId });
-        params.push({ [spanIdParamName]: link.spanId });
-        return `(${TRACE_ID_FIELD} == ?${traceIdParamName} and ${SPAN_ID_FIELD} == ?${spanIdParamName})`;
-      })
-      .join(' OR ');
-    return generateDiscoverLink(where(filters, params));
+    return generateDiscoverLink(getOutgoingSpanLinksESQL(spanLinks));
   }, [docId, generateDiscoverLink, spanLinks, traceId, type]);
 
   if (
@@ -207,5 +194,35 @@ export function SpanLinks({ docId, traceId }: Props) {
         </EuiFlexGroup>
       )}
     </ContentFrameworkSection>
+  );
+}
+
+export function getIncomingSpanLinksESQL(
+  traceId: string,
+  docId: string
+): Record<string, any> | undefined {
+  return where(
+    `QSTR("${OTEL_LINKS_TRACE_ID}:${traceId} AND ${OTEL_LINKS_SPAN_ID}:${docId}") OR QSTR("${SPAN_LINKS_TRACE_ID}:${traceId} AND ${SPAN_LINKS_SPAN_ID}:${docId}")`
+  );
+}
+
+export function getOutgoingSpanLinksESQL(spanLinks: SpanLinkDetails[]) {
+  const traceIdParamName = toESQLParamName(TRACE_ID_FIELD);
+  const spanIdParamName = toESQLParamName(SPAN_ID_FIELD);
+
+  const traceIdsParams: Record<string, string[]> = {};
+  const spanIdsParams: Record<string, string[]> = {};
+
+  spanLinks.forEach((link) => {
+    (traceIdsParams[traceIdParamName] ??= []).push(link.traceId);
+    (spanIdsParams[spanIdParamName] ??= []).push(link.spanId);
+  });
+
+  return where(
+    `${TRACE_ID_FIELD} in (?${traceIdParamName}) and ${SPAN_ID_FIELD} in (?${spanIdParamName})`,
+    [
+      { [traceIdParamName]: Object.values(traceIdsParams) },
+      { [spanIdParamName]: Object.values(spanIdsParams) },
+    ]
   );
 }
