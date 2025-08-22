@@ -8,15 +8,10 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
-import { flattenMappings, MappingField } from './utils';
-import {
-  getIndexMappings,
-  performMatchSearch,
-  MatchResult,
-  PerformMatchSearchResponse,
-  scoreRelevance,
-  RelevanceScore,
-} from './steps';
+import type { MappingField } from './utils';
+import { flattenMappings } from './utils';
+import type { MatchResult, PerformMatchSearchResponse } from './steps';
+import { getIndexMappings, performMatchSearch, scoreRelevance, RelevanceScore } from './steps';
 
 export type RelevanceSearchResponse = PerformMatchSearchResponse;
 
