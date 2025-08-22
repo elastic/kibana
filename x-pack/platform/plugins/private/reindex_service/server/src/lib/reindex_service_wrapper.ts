@@ -158,7 +158,7 @@ export class ReindexServiceWrapper {
         };
 
         // todo name sure settings are passed
-        asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
+        await asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
           try {
             // todo this duplicates code in reindex method and reindexOrResume method
             // todo this should do a bunch of adds in batch style
