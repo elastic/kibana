@@ -16,7 +16,7 @@ import { SessionsClient } from '../../../../sessions_client';
 import { getUiSessionMock } from '../../../__mocks__';
 import { SearchSessionsMgmtAPI } from '../../../lib/api';
 import type { EuiBasicTableColumn, EuiTableFieldDataColumnType } from '@elastic/eui';
-import type { BackgroundSearchOpenedHandler, UISession } from '../../../types';
+import type { UISession } from '../../../types';
 import { render, screen } from '@testing-library/react';
 import { SearchSessionStatus } from '../../../../../../../common';
 
@@ -32,11 +32,9 @@ const getColumn = (columns: Array<EuiBasicTableColumn<UISession>>, field: string
 const setup = ({
   kibanaVersion = '7.14.0',
   tz = 'UTC',
-  onBackgroundSearchClicked = jest.fn(),
 }: {
   kibanaVersion?: string;
   tz?: string;
-  onBackgroundSearchClicked?: BackgroundSearchOpenedHandler;
 } = {}) => {
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
