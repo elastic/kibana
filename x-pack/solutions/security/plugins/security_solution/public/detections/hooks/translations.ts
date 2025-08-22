@@ -7,27 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SELECTED_ALERTS = (selectedAlertsFormatted: string, selectedAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectedAlertsTitle', {
-    values: { selectedAlertsFormatted, selectedAlerts },
-    defaultMessage:
-      'Selected {selectedAlertsFormatted} {selectedAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const SELECT_ALL_ALERTS = (totalAlertsFormatted: string, totalAlerts: number) =>
-  i18n.translate('xpack.securitySolution.toolbar.bulkActions.selectAllAlertsTitle', {
-    values: { totalAlertsFormatted, totalAlerts },
-    defaultMessage:
-      'Select all {totalAlertsFormatted} {totalAlerts, plural, =1 {alert} other {alerts}}',
-  });
-
-export const CLEAR_SELECTION = i18n.translate(
-  'xpack.securitySolution.toolbar.bulkActions.clearSelectionTitle',
-  {
-    defaultMessage: 'Clear selection',
-  }
-);
-
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.bulkActions.updateAlertStatusFailed', {
     values: { conflicts },
@@ -109,5 +88,40 @@ export const BULK_ACTION_CLOSE_SELECTED = i18n.translate(
   'xpack.securitySolution.bulkActions.closeSelectedTitle',
   {
     defaultMessage: 'Mark as closed',
+  }
+);
+
+export const BULK_ACTION_CLOSING_PANEL_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closingPanelTitle',
+  {
+    defaultMessage: 'Select a reason for closing',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_NONE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsNone',
+  {
+    defaultMessage: 'None',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsDuplicate',
+  {
+    defaultMessage: 'Duplicate',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsFalsePositive',
+  {
+    defaultMessage: 'False positive',
+  }
+);
+
+export const BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED = i18n.translate(
+  'xpack.securitySolution.bulkActions.closeSelectedAsInvestigationRequired',
+  {
+    defaultMessage: 'Investigation required',
   }
 );

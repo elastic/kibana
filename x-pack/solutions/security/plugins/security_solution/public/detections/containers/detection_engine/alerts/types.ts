@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertClosingReason } from '../../../../../common/constants';
 import type { Status } from '../../../../../common/api/detection_engine';
 
 export interface BasicSignals {
@@ -48,6 +49,7 @@ export interface UpdateAlertStatusByIdsProps {
   signalIds: string[];
   status: Status;
   signal?: AbortSignal;
+  reason?: AlertClosingReason;
 }
 
 export interface AlertsIndex {

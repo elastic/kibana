@@ -124,6 +124,11 @@ paths:
 
 components:
   schemas:
+    ReasonEnum:
+      type: string
+      enum: ['false_positive', 'duplicate', 'investigation_required']
+      description: 'The reason for closing the alerts'
+
     SetAlertsStatusByIds:
       type: object
       properties:
@@ -137,6 +142,8 @@ components:
           minItems: 1
         status:
           $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertStatus'
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
       required: [signal_ids, status]
 
     SetAlertsStatusByQuery:
@@ -153,4 +160,6 @@ components:
             - abort
             - proceed
           default: abort
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
       required: [query, status]

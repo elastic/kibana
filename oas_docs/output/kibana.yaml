@@ -78935,6 +78935,13 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/Security_Detections_API_QueryRuleCreateFields'
+    Security_Detections_API_ReasonEnum:
+      description: The reason for closing the alerts
+      enum:
+        - false_positive
+        - duplicate
+        - investigation_required
+      type: string
     Security_Detections_API_RelatedIntegration:
       description: |
         Related integration is a potential dependency of a rule. It's assumed that if the user installs
@@ -80054,6 +80061,8 @@ components:
     Security_Detections_API_SetAlertsStatusByIds:
       type: object
       properties:
+        reason:
+          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
         signal_ids:
           description: 'List of alert ids. Use field `_id` on alert document or `kibana.alert.uuid`. Note: signals are a deprecated term for alerts.'
           items:
@@ -80079,6 +80088,8 @@ components:
         query:
           additionalProperties: true
           type: object
+        reason:
+          $ref: '#/components/schemas/Security_Detections_API_ReasonEnum'
         status:
           $ref: '#/components/schemas/Security_Detections_API_AlertStatus'
       required:

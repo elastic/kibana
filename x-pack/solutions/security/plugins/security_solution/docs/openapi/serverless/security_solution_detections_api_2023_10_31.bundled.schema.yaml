@@ -7457,6 +7457,13 @@ components:
             - risk_score
             - severity
         - $ref: '#/components/schemas/QueryRuleCreateFields'
+    ReasonEnum:
+      description: The reason for closing the alerts
+      enum:
+        - false_positive
+        - duplicate
+        - investigation_required
+      type: string
     RelatedIntegration:
       description: >
         Related integration is a potential dependency of a rule. It's assumed
@@ -8759,6 +8766,8 @@ components:
     SetAlertsStatusByIds:
       type: object
       properties:
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
         signal_ids:
           description: >-
             List of alert ids. Use field `_id` on alert document or
@@ -8786,6 +8795,8 @@ components:
         query:
           additionalProperties: true
           type: object
+        reason:
+          $ref: '#/components/schemas/ReasonEnum'
         status:
           $ref: '#/components/schemas/AlertStatus'
       required:

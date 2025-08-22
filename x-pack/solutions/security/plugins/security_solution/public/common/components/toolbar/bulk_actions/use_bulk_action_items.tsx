@@ -6,6 +6,7 @@
  */
 
 import { useMemo, useCallback } from 'react';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { AlertTableContextMenuItem } from '../../../../detections/components/alerts_table/types';
 import { FILTER_ACKNOWLEDGED, FILTER_CLOSED, FILTER_OPEN } from '../../../../../common/types';
 import type {
@@ -14,12 +15,23 @@ import type {
   SetEventsLoading,
 } from '../../../../../common/types';
 import * as i18n from './translations';
+import {
+  BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
+  BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
+  BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
+  BULK_ACTION_CLOSE_SELECTED_AS_NONE,
+  BULK_ACTION_CLOSING_PANEL_TITLE,
+} from '../../../../detections/hooks/translations';
 import { updateAlertStatus } from './update_alerts';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import { useStartTransaction } from '../../../lib/apm/use_start_transaction';
 import { APM_USER_INTERACTIONS } from '../../../lib/apm/constants';
 import type { AlertWorkflowStatus } from '../../../types';
 import type { OnUpdateAlertStatusError, OnUpdateAlertStatusSuccess } from './types';
+import type { AlertClosingReason } from '../../../../../common/constants';
+import { AlertClosingReasonValues } from '../../../../../common/constants';
+
+const ALERT_CLOSING_REASON_PANEL_ID = 'ALERT_CLOSING_REASON_PANEL_ID';
 
 export interface BulkActionsProps {
   eventIds: string[];
@@ -98,7 +110,7 @@ export const useBulkActionItems = ({
   );
 
   const onClickUpdate = useCallback(
-    async (status: AlertWorkflowStatus) => {
+    async (status: AlertWorkflowStatus, reason?: AlertClosingReason) => {
       if (query) {
         startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
       } else if (eventIds.length > 1) {
@@ -113,6 +125,7 @@ export const useBulkActionItems = ({
           status,
           query: query && JSON.parse(query),
           signalIds: eventIds,
+          reason,
         });
 
         // TODO: Only delete those that were successfully updated from updatedRules
@@ -163,7 +176,7 @@ export const useBulkActionItems = ({
         actionItems.push({
           key: 'close',
           'data-test-subj': 'close-alert-status',
-          onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus),
+          panel: ALERT_CLOSING_REASON_PANEL_ID,
           name: i18n.BULK_ACTION_CLOSE_SELECTED,
         });
       }
@@ -187,5 +200,46 @@ export const useBulkActionItems = ({
     return [...actionItems, ...additionalItems];
   }, [currentStatus, customBulkActions, eventIds, onClickUpdate, query, showAlertStatusActions]);
 
-  return items;
+  const panels = useMemo(
+    () =>
+      [
+        {
+          id: ALERT_CLOSING_REASON_PANEL_ID,
+          title: BULK_ACTION_CLOSING_PANEL_TITLE,
+          items: [
+            {
+              name: BULK_ACTION_CLOSE_SELECTED_AS_NONE,
+              onClick: () => onClickUpdate(FILTER_CLOSED as AlertWorkflowStatus),
+            },
+            {
+              name: BULK_ACTION_CLOSE_SELECTED_AS_FALSE_POSITIVE,
+              onClick: () =>
+                onClickUpdate(
+                  FILTER_CLOSED as AlertWorkflowStatus,
+                  AlertClosingReasonValues.false_positive
+                ),
+            },
+            {
+              name: BULK_ACTION_CLOSE_SELECTED_AS_DUPLICATE,
+              onClick: () =>
+                onClickUpdate(
+                  FILTER_CLOSED as AlertWorkflowStatus,
+                  AlertClosingReasonValues.duplicate
+                ),
+            },
+            {
+              name: BULK_ACTION_CLOSE_SELECTED_AS_INVESTIGATION_REQUIRED,
+              onClick: () =>
+                onClickUpdate(
+                  FILTER_CLOSED as AlertWorkflowStatus,
+                  AlertClosingReasonValues.investigation_required
+                ),
+            },
+          ],
+        },
+      ] as EuiContextMenuPanelDescriptor[],
+    [onClickUpdate]
+  );
+
+  return useMemo(() => ({ items, panels }), [items, panels]);
 };
