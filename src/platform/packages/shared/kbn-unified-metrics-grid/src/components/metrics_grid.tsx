@@ -8,19 +8,18 @@
  */
 
 import React from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiLoadingChart, EuiFlexGroup, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGrid,
+  EuiFlexItem,
+  EuiLoadingChart,
+  EuiFlexGroup,
+  EuiText,
+  useEuiTheme,
+  euiScrollBarStyles,
+} from '@elastic/eui';
+import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { css } from '@emotion/react';
 import { MetricChart } from './metric_chart';
-
-interface MetricField {
-  name: string;
-  index: string;
-  dimensions: Array<{ name: string; type: string; description?: string }>;
-  type: string;
-  time_series_metric?: string;
-  unit?: string;
-  brief?: string;
-  stability?: string;
-}
 
 type MetricsGridProps = {
   timeRange: { from?: string; to?: string };
@@ -50,6 +49,8 @@ export const MetricsGrid = ({
   filters = [],
   displayDensity = 'normal',
 }: MetricsGridProps) => {
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
   // Determine number of columns based on display density
   const getColumns = () => {
     switch (displayDensity) {
@@ -82,7 +83,15 @@ export const MetricsGrid = ({
   }
 
   return (
-    <EuiFlexGrid columns={getColumns()} gutterSize="s">
+    <EuiFlexGrid
+      columns={getColumns()}
+      gutterSize="s"
+      css={css`
+        overflow: auto;
+        padding: ${euiTheme.size.s} ${euiTheme.size.s} 0;
+        ${euiScrollBarStyles(euiThemeContext)}
+      `}
+    >
       {pivotOn === 'metric'
         ? fields.map((field, index) => (
             <EuiFlexItem key={`${field.name}-${displayDensity}`}>

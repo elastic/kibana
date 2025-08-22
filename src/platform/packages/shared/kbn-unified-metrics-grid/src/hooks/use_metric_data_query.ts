@@ -18,27 +18,21 @@ import type { MetricsExperienceRepositoryClient } from '@kbn/metrics-experience-
 import { createESQLQuery } from '../common/utils/esql/create_esql_query';
 import { useMetricsExperience } from './use_metrics_experience';
 
-interface ChartData {
+export interface ChartData {
   x: number;
   y: number;
 }
 
-interface SeriesData {
-  key: string;
+export interface SeriesData {
+  key: string | Record<string, string>;
   data: ChartData[];
 }
 
-interface MetricDataResult {
-  data: ChartData[] | SeriesData[];
-  esqlQuery: string;
-  hasDimensions: boolean;
-}
-
 interface UseMetricDataParams {
-  metricName?: string;
+  metricName: string;
   esqlQuery?: string;
   timeRange: { from?: string; to?: string };
-  timeSeriesMetric?: string;
+  instrument?: string;
   index?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
@@ -50,7 +44,7 @@ const fetchMetricData = async ({
   metricName,
   esqlQuery,
   timeRange,
-  timeSeriesMetric,
+  instrument,
   index,
   dimensions,
   filters,
@@ -67,8 +61,8 @@ const fetchMetricData = async ({
   const esql =
     esqlQuery ||
     createESQLQuery({
-      metricName: metricName!,
-      timeSeriesMetric,
+      metricName,
+      instrument,
       index,
       dimensions,
       filters,
@@ -86,17 +80,18 @@ const fetchMetricData = async ({
   });
 
   return {
-    data: (response?.data || []) as MetricDataResult['data'],
+    data: (response?.data || []) as ChartData[] | SeriesData[],
     esqlQuery: response?.esql || '',
     hasDimensions: response?.hasDimensions || false,
   };
 };
 
+// Temp hook to provide test data
 export const useMetricDataQuery = ({
   metricName,
   esqlQuery,
   timeRange,
-  timeSeriesMetric,
+  instrument: timeSeriesMetric,
   index,
   dimensions,
   filters,
@@ -121,7 +116,7 @@ export const useMetricDataQuery = ({
         metricName,
         esqlQuery,
         timeRange,
-        timeSeriesMetric,
+        instrument: timeSeriesMetric,
         index,
         dimensions,
         filters,

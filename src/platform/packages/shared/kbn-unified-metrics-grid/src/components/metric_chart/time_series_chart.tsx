@@ -23,16 +23,7 @@ import dateMath from '@elastic/datemath';
 import { EuiFlexItem, EuiText, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { getValueFormatter } from '../../common/utils';
-
-interface ChartData {
-  x: number;
-  y: number;
-}
-
-interface SeriesData {
-  key: string | Record<string, string>;
-  data: ChartData[];
-}
+import type { ChartData, SeriesData } from '../../hooks/use_metric_data_query';
 
 interface TimeSeriesChartProps {
   data: ChartData[] | SeriesData[];

@@ -12,6 +12,7 @@ import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import { ChartSectionTemplate } from '@kbn/unified-histogram';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { FIELD_VALUE_SEPARATOR } from '../common/utils';
 import { useAppSelector, useAppDispatch } from '../store/hooks';
 import {
@@ -78,13 +79,11 @@ export const MetricsExperienceGrid = ({
     [dispatch]
   );
 
-  // Set pageSize based on display density
   const pageSize = displayDensity === 'compact' ? 20 : 15;
-
   const actions: IconButtonGroupProps['buttons'] = [
     {
       iconType: 'search',
-      label: i18n.translate('discover.metricsExperience.searchButton', {
+      label: i18n.translate('metricsExperience.searchButton', {
         defaultMessage: 'Search',
       }),
 
@@ -93,7 +92,7 @@ export const MetricsExperienceGrid = ({
     },
     {
       iconType: 'fullScreen',
-      label: i18n.translate('discover.metricsExperience.fullScreenButton', {
+      label: i18n.translate('metricsExperience.fullScreenButton', {
         defaultMessage: 'Full screen',
       }),
 
@@ -133,43 +132,33 @@ export const MetricsExperienceGrid = ({
     ]
   );
 
-  // Convert applied selected values to filters format for API
   const filters = useMemo(() => {
     if (!valueFilters || valueFilters.length === 0) {
       return [];
     }
 
-    // Map selected values to their fields using dimensionValues
     return valueFilters
       .map((selectedValue) => {
-        const [field, value] = selectedValue.split(`${0x1d}`);
+        const [field, value] = selectedValue.split(`${FIELD_VALUE_SEPARATOR}`);
         return {
           field,
           value,
         };
       })
-      .filter((filter) => filter.field !== ''); // Only include filters with valid fields
+      .filter((filter) => filter.field !== '');
   }, [valueFilters]);
 
   // Filter fields based on search term, dimensions, and data availability
   const filteredFields = useMemo(() => {
-    return fields.filter((field) => {
-      // Filter out fields with no sample data
-      const hasData = !field.no_data;
+    const term = searchTerm.toLowerCase();
 
-      // Filter by search term
-      const matchesSearch = field.name.toLowerCase().includes(searchTerm.toLowerCase());
-
-      // Filter by dimensions - if no dimensions are selected, show all
-      // If dimensions are selected, show only charts that contain ALL selected dimensions
-      const matchesDimensions =
-        dimensions.length === 0 ||
-        dimensions.every((selectedDimension) =>
-          field.dimensions.some((dimension) => dimension.name === selectedDimension)
-        );
-
-      return hasData && matchesSearch && matchesDimensions;
-    });
+    return fields.filter(
+      (field) =>
+        !field.noData &&
+        field.name.toLowerCase().includes(term) &&
+        (dimensions.length === 0 ||
+          dimensions.every((sel) => field.dimensions.some((d) => d.name === sel)))
+    );
   }, [fields, searchTerm, dimensions]);
 
   // Calculate pagination
@@ -198,7 +187,15 @@ export const MetricsExperienceGrid = ({
         leftSide: actions,
       }}
     >
-      <div {...(histogramCss ? { css: histogramCss } : {})}>
+      <section
+        tabIndex={-1}
+        data-test-subj="unifiedMetricsExperienceRendered"
+        css={css`
+          ${histogramCss || ''}
+          height: 100%;
+          overflow: hidden;
+        `}
+      >
         <MetricsGrid
           fields={currentFields}
           timeRange={getTimeRange()}
@@ -215,7 +212,7 @@ export const MetricsExperienceGrid = ({
           currentPage={currentPage}
           onPageChange={handlePageChange}
         />
-      </div>
+      </section>
     </ChartSectionTemplate>
   );
 };

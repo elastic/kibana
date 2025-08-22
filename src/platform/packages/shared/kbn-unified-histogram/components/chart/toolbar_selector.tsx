@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import { debounce } from 'lodash';
-import type { EuiSelectableProps, EuiSelectableOption, EuiPopoverProps } from '@elastic/eui';
+import type { EuiSelectableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,
@@ -36,8 +36,9 @@ export interface BaseToolbarProps {
   popoverTitle?: string;
   options: SelectableEntry[];
   searchable: boolean;
-  anchorPosition?: EuiPopoverProps['anchorPosition'];
   optionMatcher?: EuiSelectableProps['optionMatcher'];
+  hasArrow?: boolean;
+  disabled?: boolean;
 }
 
 export interface ToolbarSingleSelectorProps {
@@ -63,7 +64,8 @@ export const ToolbarSelector = ({
   optionMatcher,
   onChange,
   singleSelection,
-  anchorPosition = 'downLeft',
+  hasArrow = true,
+  disabled = false,
 }: ToolbarSelectorProps) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -199,12 +201,13 @@ export const ToolbarSelector = ({
             label={buttonLabel}
             onClick={togglePopover}
             onBlur={enableLabelPopover}
+            hasArrow={hasArrow}
+            isDisabled={disabled}
           />
         </EuiToolTip>
       }
       isOpen={isOpen}
       closePopover={closePopover}
-      anchorPosition={anchorPosition}
     >
       {popoverTitle && <EuiPopoverTitle paddingSize="s">{popoverTitle}</EuiPopoverTitle>}
       <EuiSelectable<SelectableEntry>

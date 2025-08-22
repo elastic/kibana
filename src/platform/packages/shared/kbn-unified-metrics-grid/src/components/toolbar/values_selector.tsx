@@ -11,7 +11,14 @@ import React, { useMemo, useCallback } from 'react';
 import type { SelectableEntry } from '@kbn/unified-histogram';
 import { ToolbarSelector } from '@kbn/unified-histogram';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem, EuiNotificationBadge } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiLoadingSpinner,
+  EuiNotificationBadge,
+  EuiText,
+} from '@elastic/eui';
 import { FIELD_VALUE_SEPARATOR } from '../../common/utils';
 import { useDimensionsQuery } from '../../hooks';
 
@@ -81,31 +88,57 @@ export const ValuesSelector = ({
   );
 
   const buttonLabel = useMemo(() => {
-    if (selectedValues.length === 0) {
-      return (
-        <FormattedMessage
-          id="metricsExperience.valuesSelector.valuesSelectorButtonLabel"
-          defaultMessage="Filter by values"
-        />
-      );
-    }
+    const count = selectedValues.length;
+
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="metricsExperience.valuesSelector.valuesSelectorButtonLabelWithSelection"
-            defaultMessage="Values"
-            values={{
-              count: selectedValues.length,
-            }}
-          />
+          {count > 0 ? (
+            <FormattedMessage
+              id="metricsExperience.valuesSelector.valuesSelectorButtonLabelWithSelection"
+              defaultMessage="Values"
+              values={{ count }}
+            />
+          ) : (
+            <FormattedMessage
+              id="metricsExperience.valuesSelector.valuesSelectorButtonLabel"
+              defaultMessage="Filter by values"
+            />
+          )}
+        </EuiFlexItem>
+
+        {count > 0 && (
+          <EuiFlexItem grow={false}>
+            <EuiNotificationBadge>{count}</EuiNotificationBadge>
+          </EuiFlexItem>
+        )}
+
+        {isLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    );
+  }, [isLoading, selectedValues.length]);
+
+  if (error) {
+    return (
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={false}>
+          <EuiIcon type="alert" color="danger" size="s" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiNotificationBadge>{selectedValues.length}</EuiNotificationBadge>
+          <EuiText size="s" color="danger">
+            <FormattedMessage
+              id="metricsExperience.valuesSelector.errorLoadingValues"
+              defaultMessage="Error loading values"
+            />
+          </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [selectedValues]);
+  }
 
   return (
     <ToolbarSelector
@@ -118,10 +151,11 @@ export const ValuesSelector = ({
           ? String(option.name ?? '').includes(normalizedSearchValue)
           : option.label.includes(normalizedSearchValue);
       }}
-      anchorPosition="downCenter"
       options={options}
       singleSelection={false}
+      hasArrow={!isLoading}
       onChange={handleChange}
+      disabled={disabled}
     />
   );
 };
