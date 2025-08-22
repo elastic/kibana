@@ -6,6 +6,7 @@
  */
 
 import babelJest from 'babel-jest';
+import type { SyncTransformer } from '@jest/transform';
 
 // eslint-disable-next-line import/no-default-export
 export default babelJest.createTransformer({
@@ -22,4 +23,4 @@ export default babelJest.createTransformer({
     ],
   ],
   plugins: ['@emotion'],
-});
+}) as unknown as SyncTransformer;
