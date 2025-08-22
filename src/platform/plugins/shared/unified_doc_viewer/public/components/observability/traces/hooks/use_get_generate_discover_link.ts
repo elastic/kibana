@@ -7,17 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { from, where } from '@kbn/esql-composer';
+import { castArray } from 'lodash';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 type WhereClause = ReturnType<typeof where>;
 
-// Overloads
 export interface GenerateDiscoverLink {
   (whereClause?: Record<string, any>): string | undefined;
   (...clauses: WhereClause[]): string | undefined;
 }
 
-export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: string }) {
+export function useGetGenerateDiscoverLink({
+  indexPattern,
+}: {
+  indexPattern?: string | (string | undefined)[];
+}) {
   const {
     data,
     share: {
@@ -26,21 +30,21 @@ export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: st
   } = getUnifiedDocViewerServices();
   const timeRange = data.query.timefilter.timefilter.getAbsoluteTime();
   const discoverLocator = locators.get('DISCOVER_APP_LOCATOR');
+  const indices = castArray(indexPattern).filter(Boolean);
 
   const generateDiscoverLink: GenerateDiscoverLink = (
     first?: Record<string, any> | WhereClause,
     ...rest: WhereClause[]
   ) => {
-    if (!discoverLocator || !indexPattern) {
+    if (!discoverLocator || !indices.length) {
       return undefined;
     }
 
     let esql: string;
+    const _from = from(indices.join(','));
 
     if (typeof first === 'function') {
-      esql = from(indexPattern)
-        .pipe(first as WhereClause, ...rest)
-        .toString();
+      esql = _from.pipe(first as WhereClause, ...rest).toString();
     } else if (first && typeof first === 'object') {
       const whereClause = first as Record<string, any>;
       const paramKeysMap = new Map<string, string>();
@@ -52,7 +56,7 @@ export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: st
         params.push({ [paramKey]: whereClause[key] });
       });
 
-      esql = from(indexPattern)
+      esql = _from
         .pipe(
           where(
             Object.keys(whereClause)
@@ -63,7 +67,7 @@ export function useGetGenerateDiscoverLink({ indexPattern }: { indexPattern?: st
         )
         .toString();
     } else {
-      esql = from(indexPattern).toString();
+      esql = _from.toString();
     }
 
     const url = discoverLocator.getRedirectUrl({

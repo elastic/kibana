@@ -51,7 +51,7 @@ export const FullScreenWaterfall = ({
   const { euiTheme } = useEuiTheme();
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({
-    indexPattern: `${indexes.apm.errors},${indexes.logs}`,
+    indexPattern: [indexes.apm.errors, indexes.logs],
   });
 
   const generateRelatedErrorsDiscoverUrl = useCallback(
