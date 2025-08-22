@@ -29,7 +29,7 @@ import {
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export function ViewInDiscover() {
+export function ViewInDiscoverButton() {
   const { share } = useApmPluginContext();
   const { serviceName } = useApmServiceContext();
   const { dataView } = useAdHocApmDataView();

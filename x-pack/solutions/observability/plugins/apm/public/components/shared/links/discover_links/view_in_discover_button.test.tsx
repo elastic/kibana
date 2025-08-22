@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ViewInDiscover } from './view_in_discover';
+import { ViewInDiscoverButton } from './view_in_discover_button';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -51,7 +51,7 @@ const mockLocatorGet = jest.fn().mockReturnValue({
 
 const serviceName = 'test-service';
 
-describe('ViewInDiscover', () => {
+describe('ViewInDiscoverButton', () => {
   beforeEach(() => {
     mockUseApmServiceContext.mockReturnValue({
       serviceName,
@@ -83,7 +83,7 @@ describe('ViewInDiscover', () => {
       query: {},
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockLocatorGet).toHaveBeenCalledWith(DISCOVER_APP_LOCATOR);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
@@ -104,7 +104,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -126,7 +126,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -145,7 +145,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -164,7 +164,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -181,7 +181,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -199,7 +199,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -217,7 +217,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -241,7 +241,7 @@ describe('ViewInDiscover', () => {
       query,
     });
 
-    render(<ViewInDiscover />);
+    render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       query: {
@@ -255,9 +255,9 @@ describe('ViewInDiscover', () => {
       query: {},
     });
 
-    const { getByTestId } = render(<ViewInDiscover />);
+    const { getByTestId } = render(<ViewInDiscoverButton />);
 
-    const button = getByTestId('apmWaterfallWithSummaryViewInDiscoverButton');
+    const button = getByTestId('apmWaterfallWithSummaryViewInDiscoverButtonButton');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
     expect(button).toHaveTextContent('View in Discover');
