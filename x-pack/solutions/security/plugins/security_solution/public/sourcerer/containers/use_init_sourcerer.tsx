@@ -27,7 +27,10 @@ import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experime
 const defaultInitResult = { browserFields: {} };
 
 export const useInitSourcerer = (
-  scopeId: SourcererScopeName.default | SourcererScopeName.detections = SourcererScopeName.default
+  scopeId:
+    | SourcererScopeName.default
+    | SourcererScopeName.detections
+    | SourcererScopeName.explore = SourcererScopeName.default
 ) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 

@@ -16,8 +16,8 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { AzureRepository, Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { AzureRepository, Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
@@ -335,6 +335,7 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           error={settingErrors.locationMode}
         >
           <EuiSelect
+            isInvalid={Boolean(hasErrors && settingErrors.locationMode)}
             options={locationModeOptions}
             value={locationMode || locationModeOptions[0].value}
             onChange={(e) => {

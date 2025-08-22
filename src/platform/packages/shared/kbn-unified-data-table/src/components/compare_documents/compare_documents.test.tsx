@@ -14,17 +14,21 @@ import { render } from '@testing-library/react';
 import { omit } from 'lodash';
 import React from 'react';
 import { dataViewWithTimefieldMock } from '../../../__mocks__/data_view_with_timefield';
-import CompareDocuments, { CompareDocumentsProps } from './compare_documents';
+import type { CompareDocumentsProps } from './compare_documents';
+import CompareDocuments from './compare_documents';
 import { useComparisonFields } from './hooks/use_comparison_fields';
 
 let mockLocalStorage: Record<string, string> = {};
 
-jest.mock('react-use/lib/useLocalStorage', () =>
-  jest.fn((key: string, value: unknown) => {
-    mockLocalStorage[key] = JSON.stringify(value);
-    return [value, jest.fn()];
-  })
-);
+jest.mock('../../restorable_state', () => {
+  const real = jest.requireActual('../../restorable_state');
+  return {
+    useRestorableLocalStorage: jest.fn((key: string, storageKey, value: unknown) => {
+      mockLocalStorage[storageKey] = JSON.stringify(value);
+      return real.useRestorableLocalStorage(key, storageKey, value);
+    }),
+  };
+});
 
 let mockDataGridProps: EuiDataGridProps | undefined;
 

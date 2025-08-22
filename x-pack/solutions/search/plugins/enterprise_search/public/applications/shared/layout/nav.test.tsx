@@ -58,7 +58,7 @@ const baseNavItems = [
         href: '/app/elasticsearch/applications/search_applications',
         id: 'searchApplications',
         items: undefined,
-        name: 'Search Applications',
+        name: 'Search applications',
       },
     ],
     name: 'Build',
@@ -79,14 +79,14 @@ const baseNavItems = [
         href: '/app/elasticsearch/query_rules',
         id: 'searchQueryRules',
         items: undefined,
-        name: 'Query Rules',
+        name: 'Query rules',
       },
       {
         'data-test-subj': 'searchSideNav-InferenceEndpoints',
         href: '/app/elasticsearch/relevance/inference_endpoints',
         id: 'inference_endpoints',
         items: undefined,
-        name: 'Inference Endpoints',
+        name: 'Inference endpoints',
       },
     ],
     name: 'Relevance',
@@ -120,7 +120,7 @@ const mockNavLinks = [
   },
   {
     id: 'enterpriseSearchApplications:searchApplications',
-    title: 'Search Applications',
+    title: 'Search applications',
     url: '/app/elasticsearch/applications/search_applications',
   },
   {
@@ -130,28 +130,8 @@ const mockNavLinks = [
   },
   {
     id: 'searchInferenceEndpoints:inferenceEndpoints',
-    title: 'Inference Endpoints',
+    title: 'Inference endpoints',
     url: '/app/elasticsearch/relevance/inference_endpoints',
-  },
-  {
-    id: 'enterpriseSearchElasticsearch',
-    title: 'Elasticsearch',
-    url: '/app/elasticsearch/elasticsearch',
-  },
-  {
-    id: 'enterpriseSearchVectorSearch',
-    title: 'Vector Search',
-    url: '/app/elasticsearch/vector_search',
-  },
-  {
-    id: 'enterpriseSearchSemanticSearch',
-    title: 'Semantic Search',
-    url: '/app/elasticsearch/semantic_search',
-  },
-  {
-    id: 'enterpriseSearchAISearch',
-    title: 'AI Search',
-    url: '/app/elasticsearch/ai_search',
   },
   {
     id: 'searchSynonyms:synonyms',
@@ -160,7 +140,7 @@ const mockNavLinks = [
   },
   {
     id: 'searchQueryRules',
-    title: 'Query Rules',
+    title: 'Query rules',
     url: '/app/elasticsearch/query_rules',
   },
 ];

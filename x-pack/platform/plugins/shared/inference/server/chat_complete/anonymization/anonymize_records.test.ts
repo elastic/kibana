@@ -6,9 +6,11 @@
  */
 
 import { anonymizeRecords } from './anonymize_records';
-import { AnonymizationRule } from '@kbn/inference-common';
-import { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
-
+import type { AnonymizationRule } from '@kbn/inference-common';
+import type { MlInferenceResponseResult } from '@elastic/elasticsearch/lib/api/types';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
+import { RegexWorkerService } from './regex_worker_service';
+import type { AnonymizationWorkerConfig } from '../../config';
 const mockEsClient = {
   ml: {
     inferTrainedModel: jest.fn(),
@@ -20,40 +22,55 @@ const setupMockResponse = (entitiesPerDoc: MlInferenceResponseResult[]) => {
     inference_results: entitiesPerDoc,
   });
 };
+const nerRule: AnonymizationRule = {
+  type: 'NER',
+  enabled: true,
+  modelId: 'model-1',
+};
+const nerRule2: AnonymizationRule = {
+  type: 'NER',
+  enabled: true,
+  modelId: 'model-2',
+};
+const regexRule: AnonymizationRule = {
+  type: 'RegExp',
+  enabled: true,
+  entityClass: 'EMAIL',
+  pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
+};
+
+const testConfig = {
+  enabled: false,
+} as AnonymizationWorkerConfig;
 
 describe('anonymizeRecords', () => {
-  const nerRule: AnonymizationRule = {
-    type: 'NER',
-    enabled: true,
-    modelId: 'model-1',
-  };
-  const nerRule2: AnonymizationRule = {
-    type: 'NER',
-    enabled: true,
-    modelId: 'model-2',
-  };
-  const regexRule: AnonymizationRule = {
-    type: 'RegExp',
-    enabled: true,
-    entityClass: 'EMAIL',
-    pattern: '[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}',
-  };
+  let logger: MockedLogger;
+
+  let regexWorker: RegexWorkerService;
 
   beforeEach(() => {
     jest.resetAllMocks();
+    logger = loggerMock.create();
+    regexWorker = new RegexWorkerService(testConfig, logger);
   });
 
   it('masks values using regex rule', async () => {
-    const input = [{ email: 'jorge21@gmail.com' }];
+    const input = [
+      {
+        content: 'one email is jorge21@gmail.com and another is charles@gmail.com',
+        data: 'something@gmail.com',
+      },
+    ];
 
     const { records, anonymizations } = await anonymizeRecords({
       input,
       anonymizationRules: [regexRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
-    expect(records[0].email).not.toContain('jorge21@gmail.com');
-    expect(anonymizations.length).toBe(1);
+    expect(records[0].content).not.toContain('jorge21@gmail.com');
+    expect(anonymizations.length).toBe(3);
   });
 
   it('calls inferTrainedModel with a SINGLE doc when content < MAX_TOKENS_PER_DOC', async () => {
@@ -63,6 +80,7 @@ describe('anonymizeRecords', () => {
     await anonymizeRecords({
       input: [{ content: shortText }],
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -73,21 +91,23 @@ describe('anonymizeRecords', () => {
   });
 
   it('splits text > MAX_TOKENS_PER_DOC into multiple docs', async () => {
-    const longText = 'b'.repeat(1500); // > 1000 chars => should be split into 2 docs (1000 + 500)
+    const longText = 'b'.repeat(1500); // > 512 chars => should be split into 3 docs (512 + 512 + 476)
 
-    setupMockResponse(Array(2).fill({ entities: [] } as any));
+    setupMockResponse(Array(3).fill({ entities: [] } as any));
 
     const { records } = await anonymizeRecords({
       input: [{ content: longText }],
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
     expect(mockEsClient.ml.inferTrainedModel).toHaveBeenCalledTimes(1);
     const callArgs = mockEsClient.ml.inferTrainedModel.mock.calls[0][0];
-    expect(callArgs.docs).toHaveLength(2);
-    expect(callArgs.docs[0].text_field).toBe(longText.slice(0, 1000));
-    expect(callArgs.docs[1].text_field).toBe(longText.slice(1000));
+    expect(callArgs.docs).toHaveLength(3);
+    expect(callArgs.docs[0].text_field).toBe(longText.slice(0, 512));
+    expect(callArgs.docs[1].text_field).toBe(longText.slice(512, 1024));
+    expect(callArgs.docs[2].text_field).toBe(longText.slice(1024));
 
     // reconstructed value should match original and appear only once
     expect(records[0].content).toBe(longText);
@@ -134,6 +154,7 @@ describe('anonymizeRecords', () => {
     const { records, anonymizations } = await anonymizeRecords({
       input,
       anonymizationRules: [nerRule, nerRule2],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -156,6 +177,7 @@ describe('anonymizeRecords', () => {
     const result = await anonymizeRecords({
       input,
       anonymizationRules: [regexRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -190,6 +212,7 @@ describe('anonymizeRecords', () => {
     const result = await anonymizeRecords({
       input,
       anonymizationRules: [nerRule],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -242,6 +265,7 @@ describe('anonymizeRecords', () => {
     const result = await anonymizeRecords({
       input,
       anonymizationRules: [nerRule, nerRule2],
+      regexWorker,
       esClient: mockEsClient,
     });
 
@@ -256,5 +280,45 @@ describe('anonymizeRecords', () => {
 
     // Both models should have been invoked exactly once
     expect(mockEsClient.ml.inferTrainedModel).toHaveBeenCalledTimes(2);
+  });
+
+  it('does not nest masks from later regex over earlier masked text', async () => {
+    const testUrl = 'http://test.com';
+    const input = [{ content: testUrl }];
+
+    const urlRule: AnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      entityClass: 'URL',
+      pattern: 'https?://\\S+',
+    };
+
+    const numberRule: AnonymizationRule = {
+      type: 'RegExp',
+      enabled: true,
+      entityClass: 'NUM',
+      pattern: '\\d+',
+    };
+
+    const result = await anonymizeRecords({
+      input,
+      anonymizationRules: [urlRule, numberRule],
+      regexWorker,
+      esClient: mockEsClient,
+    });
+
+    const anonymizedContent = result.records[0].content;
+
+    // Original URL must be removed
+    expect(anonymizedContent).not.toContain(testUrl);
+
+    // Later rule must not produce a nested NUM mask inside URL mask
+    expect(anonymizedContent).not.toContain('NUM_');
+
+    // Only the URL entity should be recorded
+    const numCount = result.anonymizations.filter((a) => a.entity.class_name === 'NUM').length;
+    const urlCount = result.anonymizations.filter((a) => a.entity.class_name === 'URL').length;
+    expect(numCount).toBe(0);
+    expect(urlCount).toBe(1);
   });
 });

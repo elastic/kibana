@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { StreamActiveRecord } from './stream_active_record';
 
 describe('StreamActiveRecord', () => {
@@ -15,7 +15,7 @@ describe('StreamActiveRecord', () => {
   const cascadingDelete = { type: 'delete', name: 'cascade' };
 
   class TestStream extends StreamActiveRecord<any> {
-    clone(): StreamActiveRecord<Streams.all.Definition> {
+    doClone(): StreamActiveRecord<Streams.all.Definition> {
       return new TestStream(this.definition, this.dependencies);
     }
 

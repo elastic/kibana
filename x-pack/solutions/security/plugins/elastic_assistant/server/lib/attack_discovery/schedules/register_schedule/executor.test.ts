@@ -8,7 +8,8 @@
 import { EcsVersion } from '@elastic/ecs';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AlertsClientError, RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { analyticsServiceMock } from '@kbn/core/server/mocks';
 
@@ -115,6 +116,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
     spaceId,
     state: {},
   };
+  const mockReplacements = {
+    ...mockAnonymizedAlertsReplacements,
+    'e1cb3cf0-30f3-4f99-a9c8-518b955c6f90': 'Test-Host-1',
+    '039c15c5-3964-43e7-a891-42fe2ceeb9ff': 'Test-User-1',
+  };
 
   beforeAll(() => {
     jest.useFakeTimers();
@@ -133,11 +139,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
     (generateAttackDiscoveries as jest.Mock).mockResolvedValue({
       anonymizedAlerts: mockAnonymizedAlerts,
       attackDiscoveries: mockAttackDiscoveries,
-      replacements: {
-        ...mockAnonymizedAlertsReplacements,
-        'e1cb3cf0-30f3-4f99-a9c8-518b955c6f90': 'Test-Host-1',
-        '039c15c5-3964-43e7-a891-42fe2ceeb9ff': 'Test-User-1',
-      },
+      replacements: mockReplacements,
     });
     (deduplicateAttackDiscoveries as jest.Mock).mockResolvedValue(mockAttackDiscoveries);
 
@@ -418,7 +420,11 @@ describe('attackDiscoveryScheduleExecutor', () => {
       esClient: services.scopedClusterClient.asCurrentUser,
       indexPattern: '.alerts-security.attack.discovery.alerts-test-space',
       logger: mockLogger,
-      ownerId: executorOptions.rule.id,
+      ownerInfo: {
+        id: executorOptions.rule.id,
+        isSchedule: true,
+      },
+      replacements: mockReplacements,
       spaceId,
     });
   });

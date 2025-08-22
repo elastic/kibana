@@ -144,9 +144,6 @@ describe('AllCasesListGeneric', () => {
     userProfiles: new Map(),
     currentUserProfile: undefined,
     selectedColumns: [],
-    settings: {
-      displayIncrementalCaseId: false,
-    },
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
@@ -154,10 +151,7 @@ describe('AllCasesListGeneric', () => {
   beforeAll(() => {
     patchGetComputedStyle();
     mockKibana();
-    const {
-      triggersActionsUi: { actionTypeRegistry },
-    } = useKibanaMock().services;
-
+    const actionTypeRegistry = useKibanaMock().services.triggersActionsUi.actionTypeRegistry;
     registerConnectorsToMockActionRegistry(actionTypeRegistry, connectorsMock);
   });
 
@@ -189,9 +183,7 @@ describe('AllCasesListGeneric', () => {
 
   it('should render AllCasesList', async () => {
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { settings: { displayIncrementalCaseId: true } },
-    });
+    renderWithTestingProviders(<AllCasesList />);
 
     const caseDetailsLinks = await screen.findAllByTestId('case-details-link');
 
@@ -200,10 +192,6 @@ describe('AllCasesListGeneric', () => {
     expect(
       (await screen.findAllByTestId('case-user-profile-avatar-damaged_raccoon'))[0]
     ).toHaveTextContent('DR');
-
-    const incrementalIdTextElements = screen.getAllByTestId('cases-incremental-id-text');
-    expect(incrementalIdTextElements).toHaveLength(1);
-    expect(incrementalIdTextElements[0]).toHaveTextContent('#1');
 
     expect((await screen.findAllByTestId('case-table-column-tags-coke'))[0]).toHaveAttribute(
       'title',
@@ -224,18 +212,6 @@ describe('AllCasesListGeneric', () => {
 
     expect(screen.queryByTestId('all-cases-maximum-limit-warning')).not.toBeInTheDocument();
     expect(screen.queryByTestId('all-cases-clear-filters-link-icon')).not.toBeInTheDocument();
-  });
-
-  it('should not render incremental id if setting is disabled', async () => {
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    renderWithTestingProviders(<AllCasesList />, {
-      wrapperProps: { settings: { displayIncrementalCaseId: false } },
-    });
-
-    await screen.findAllByTestId('case-details-link');
-
-    const incrementalIdTextElements = screen.queryAllByTestId('cases-incremental-id-text');
-    expect(incrementalIdTextElements).toHaveLength(0);
   });
 
   it("should show a tooltip with the assignee's email when hover over the assignee avatar", async () => {
@@ -539,6 +515,7 @@ describe('AllCasesListGeneric', () => {
       expect(useGetCasesMock).toHaveBeenLastCalledWith({
         filterOptions: {
           ...DEFAULT_FILTER_OPTIONS,
+          searchFields: ['title', 'description'],
           category: ['twix'],
         },
         queryParams: DEFAULT_QUERY_PARAMS,

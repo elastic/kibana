@@ -37,7 +37,7 @@ import {
 } from './test_subjects';
 import { useCspIntegrationLink } from '../common/navigation/use_csp_integration_link';
 import { useCISIntegrationPoliciesLink } from '../common/navigation/use_navigate_to_cis_integration_policies';
-import { PostureTypes } from '../../common/types_old';
+import type { PostureTypes } from '../../common/types_old';
 import { useAdd3PIntegrationRoute } from '../common/api/use_wiz_integration_route';
 import cloudsSVG from '../assets/illustrations/clouds.svg';
 import { cspIntegrationDocsNavigation } from '../common/navigation/constants';
@@ -83,7 +83,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
     <EuiFlexGroup>
       <EuiFlexItem>
         <EuiEmptyPrompt
-          style={{ padding: euiTheme.size.l }}
+          css={{ padding: euiTheme.size.l }}
           data-test-subj={NO_VULNERABILITIES_STATUS_TEST_SUBJ.NOT_INSTALLED}
           icon={
             <EmptyStatesIllustrationContainer>
@@ -146,7 +146,7 @@ const CnvmIntegrationNotInstalledEmptyPrompt = ({
       {is3PSupportedPage && (
         <EuiFlexItem>
           <EuiEmptyPrompt
-            style={{ padding: euiTheme.size.l }}
+            css={{ padding: euiTheme.size.l }}
             data-test-subj={THIRD_PARTY_INTEGRATIONS_NO_VULNERABILITIES_FINDINGS_PROMPT}
             icon={
               <EmptyStatesIllustrationContainer>

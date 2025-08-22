@@ -16,6 +16,7 @@ export enum SourcererScopeName {
   detections = 'detections',
   timeline = 'timeline',
   analyzer = 'analyzer',
+  explore = 'explore',
 }
 
 /**
@@ -164,6 +165,10 @@ export const initialSourcererState: SourcererModel = {
     [SourcererScopeName.analyzer]: {
       ...initSourcererScope,
       id: SourcererScopeName.analyzer,
+    },
+    [SourcererScopeName.explore]: {
+      ...initSourcererScope,
+      id: SourcererScopeName.explore,
     },
   },
 };

@@ -765,7 +765,7 @@ function getPatternFiringAutoRecoverFalseRuleType() {
             throw new Error('rule executor error');
           } else if (scheduleByPattern === 'timeout') {
             // delay longer than the timeout
-            await new Promise((r) => setTimeout(r, 12000));
+            await new Promise((r) => setTimeout(r, 15000));
           } else if (scheduleByPattern === 'run_long') {
             // delay so rule runs a little longer
             await new Promise((r) => setTimeout(r, 4000));

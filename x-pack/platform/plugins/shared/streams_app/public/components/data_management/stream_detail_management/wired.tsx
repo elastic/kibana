@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { EuiToolTip } from '@elastic/eui';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { RedirectTo } from '../../redirect_to';
@@ -87,7 +87,7 @@ export function WiredStreamDetailManagement({
     ...otherTabs,
   };
 
-  if (!isValidManagementSubTab(tab)) {
+  if (!isValidManagementSubTab(tab) || tabs[tab] === undefined) {
     return <RedirectTo path="/{key}/management/{tab}" params={{ path: { key, tab: 'route' } }} />;
   }
 

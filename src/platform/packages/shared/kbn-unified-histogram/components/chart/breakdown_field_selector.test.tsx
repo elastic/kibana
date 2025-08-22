@@ -7,16 +7,30 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, act, screen } from '@testing-library/react';
+import { render, act, screen, waitFor, fireEvent } from '@testing-library/react';
 import React from 'react';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { DataViewField } from '@kbn/data-views-plugin/common';
-import { UnifiedHistogramBreakdownContext } from '../../types';
+import type { UnifiedHistogramBreakdownContext } from '../../types';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 
+const mapOptionValues = (option: HTMLElement) => ({
+  label: option.getAttribute('title'),
+  value: option.getAttribute('value'),
+  checked: option.getAttribute('aria-checked'),
+});
+
 describe('BreakdownFieldSelector', () => {
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   it('should render correctly for dataview fields', () => {
     const onBreakdownFieldChange = jest.fn();
     const breakdown: UnifiedHistogramBreakdownContext = {
@@ -39,13 +53,7 @@ describe('BreakdownFieldSelector', () => {
     });
 
     const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
           "checked": "true",
@@ -100,13 +108,7 @@ describe('BreakdownFieldSelector', () => {
     });
 
     const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
           "checked": "true",
@@ -148,13 +150,7 @@ describe('BreakdownFieldSelector', () => {
     });
 
     const options = screen.getAllByRole('option');
-    expect(
-      options.map((option) => ({
-        label: option.getAttribute('title'),
-        value: option.getAttribute('value'),
-        checked: option.getAttribute('aria-checked'),
-      }))
-    ).toMatchInlineSnapshot(`
+    expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
       Array [
         Object {
           "checked": "false",
@@ -173,6 +169,69 @@ describe('BreakdownFieldSelector', () => {
         },
       ]
     `);
+  });
+
+  it('should filter options based on the search input', async () => {
+    const onBreakdownFieldChange = jest.fn();
+    const breakdown: UnifiedHistogramBreakdownContext = {
+      field: undefined,
+    };
+
+    render(
+      <BreakdownFieldSelector
+        dataView={dataViewWithTimefieldMock}
+        breakdown={breakdown}
+        onBreakdownFieldChange={onBreakdownFieldChange}
+      />
+    );
+
+    const button = screen.getByTestId('unifiedHistogramBreakdownSelectorButton');
+    expect(button.getAttribute('data-selected-value')).toBe(null);
+
+    act(() => {
+      button.click();
+    });
+
+    const options = screen.getAllByRole('option');
+    expect(options.map(mapOptionValues)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "checked": "true",
+          "label": "No breakdown",
+          "value": "__EMPTY_SELECTOR_OPTION__",
+        },
+        Object {
+          "checked": "false",
+          "label": "bytes",
+          "value": "bytes",
+        },
+        Object {
+          "checked": "false",
+          "label": "extension",
+          "value": "extension",
+        },
+      ]
+    `);
+
+    act(() => {
+      const input = screen.getByTestId('unifiedHistogramBreakdownSelectorSelectorSearch');
+      input.focus();
+      fireEvent.change(input, { target: { value: 'extee' } });
+      jest.advanceTimersByTime(300); // Wait for debounce
+    });
+
+    await waitFor(() => {
+      const filteredOptions = screen.getAllByRole('option');
+      expect(filteredOptions.map(mapOptionValues)).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "checked": "false",
+          "label": "extension",
+          "value": "extension",
+        },
+      ]
+    `);
+    });
   });
 
   it('should call onBreakdownFieldChange with the selected field when the user selects a dataview field', () => {

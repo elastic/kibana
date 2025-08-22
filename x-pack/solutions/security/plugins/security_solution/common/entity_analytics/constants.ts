@@ -9,6 +9,7 @@ export * from './asset_criticality/constants';
 export * from './risk_engine/constants';
 export * from './risk_score/constants';
 export * from './migrations/constants';
+export * from './privilege_monitoring/constants';
 
 export const API_VERSIONS = {
   public: {

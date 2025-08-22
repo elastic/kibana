@@ -291,13 +291,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           )}`
       );
       const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
-      await addPreconfiguredPolicyPackages(
-        esClient,
-        policy!,
-        packagePoliciesToAdd!,
-        defaultOutput,
-        true
-      );
+      await addPreconfiguredPolicyPackages(esClient, policy!, packagePoliciesToAdd!, defaultOutput);
       s?.end();
 
       // Add the is_managed flag after configuring package policies to avoid errors
@@ -309,8 +303,13 @@ export async function ensurePreconfiguredPackagesAndPolicies(
           { is_managed: true },
           {
             force: true,
+            bumpRevision: false,
           }
         );
+      }
+
+      if (packagePoliciesToAdd.length > 0 || shouldAddIsManagedFlag) {
+        await agentPolicyService.bumpRevision(namespacedSoClient, esClient, policy!.id);
       }
     }
   }

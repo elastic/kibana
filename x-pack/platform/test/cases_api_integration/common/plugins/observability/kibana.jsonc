@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-fixtures-plugin",
-  "owner": "@elastic/response-ops",
+  "owner": "@elastic/kibana-cases",
   "plugin": {
     "id": "observabilityFixtures",
     "server": true,

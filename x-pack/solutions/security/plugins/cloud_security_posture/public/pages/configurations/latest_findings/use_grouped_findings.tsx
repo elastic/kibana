@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
+import type { GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { CDR_MISCONFIGURATIONS_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { showErrorToast } from '@kbn/cloud-security-posture';
+import type { FindingsGroupingAggregation, NumberOrNull } from '@kbn/cloud-security-posture';
 import { useKibana } from '../../../common/hooks/use_kibana';
-
-// Elasticsearch returns `null` when a sub-aggregation cannot be computed
-type NumberOrNull = number | null;
 
 export interface FindingsRootGroupingAggregation
   extends RootAggregation<FindingsGroupingAggregation> {
@@ -25,49 +23,6 @@ export interface FindingsRootGroupingAggregation
   passedFindings?: {
     doc_count?: NumberOrNull;
   };
-}
-
-export interface FindingsGroupingAggregation {
-  unitsCount?: {
-    value?: NumberOrNull;
-  };
-  groupsCount?: {
-    value?: NumberOrNull;
-  };
-  failedFindings?: {
-    doc_count?: NumberOrNull;
-  };
-  passedFindings?: {
-    doc_count?: NumberOrNull;
-  };
-  groupByFields?: {
-    buckets?: GenericBuckets[];
-  };
-  description?: {
-    buckets?: GenericBuckets[];
-  };
-  resourceName?: {
-    buckets?: GenericBuckets[];
-  };
-  resourceSubType?: {
-    buckets?: GenericBuckets[];
-  };
-  benchmarkName?: {
-    buckets?: GenericBuckets[];
-  };
-  benchmarkVersion?: {
-    buckets?: GenericBuckets[];
-  };
-  benchmarkId?: {
-    buckets?: GenericBuckets[];
-  };
-  accountName?: {
-    buckets?: GenericBuckets[];
-  };
-  clusterName?: {
-    buckets?: GenericBuckets[];
-  };
-  isLoading?: boolean;
 }
 
 export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
@@ -90,7 +45,7 @@ export const useGroupedFindings = ({
   } = useKibana().services;
 
   return useQuery(
-    ['csp_grouped_findings', { query }],
+    [CDR_MISCONFIGURATIONS_INDEX_PATTERN, 'csp_grouped_findings', { query }],
     async () => {
       const {
         rawResponse: { aggregations },

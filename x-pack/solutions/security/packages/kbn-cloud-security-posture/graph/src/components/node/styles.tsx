@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 import {
+  type EuiThemeComputed,
   type EuiIconProps,
   type EuiTextProps,
   type CommonProps,
@@ -18,23 +20,55 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { rgba } from 'polished';
+import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
 import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
 
-export const LABEL_HEIGHT = 24;
-export const LABEL_PADDING_X = 15;
+/**
+ * The total height of an entity node including the shape and details below, in pixels.
+ * Required to calculate total node's height in layout_graph.ts
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_TOTAL_HEIGHT = 200;
+
+/**
+ * The width of a node in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_WIDTH = 100;
+
+/**
+ * The height of a node in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_HEIGHT = 100;
+
+/**
+ * The width of a node label in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_LABEL_WIDTH = 140;
+
+/**
+ * The height of a node label in the graph, in pixels.
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const NODE_LABEL_HEIGHT = 20;
+
 export const LABEL_BORDER_WIDTH = 1;
-export const NODE_WIDTH = 90;
-export const NODE_HEIGHT = 90;
-export const NODE_LABEL_WIDTH = 160;
+export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
+export const LABEL_PADDING_X = 15;
+
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
 export const LabelNodeContainer = styled.div`
   position: relative;
+  top: ${(NODE_LABEL_HEIGHT - ACTUAL_LABEL_HEIGHT) / 2}px;
   text-wrap: nowrap;
-  min-width: 100px;
-  height: ${LABEL_HEIGHT}px;
+  width: ${NODE_LABEL_WIDTH}px;
+  max-width: ${NODE_LABEL_WIDTH}px;
+  height: ${ACTUAL_LABEL_HEIGHT}px;
 `;
 
 interface LabelShapeProps extends EuiTextProps {
@@ -43,6 +77,8 @@ interface LabelShapeProps extends EuiTextProps {
 
 export const LabelShape = styled(EuiText)<LabelShapeProps>`
   background: ${(props) => useNodeFillColor(props.color)};
+  max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
+  max-height: ${NODE_LABEL_HEIGHT - LABEL_BORDER_WIDTH * 2}px;
   border: ${(props) => {
     const { euiTheme } = useEuiTheme();
     return `solid ${
@@ -61,7 +97,7 @@ export const LabelShape = styled(EuiText)<LabelShapeProps>`
 
   line-height: 1.5;
 
-  padding: 5px ${LABEL_PADDING_X}px;
+  padding: 6px ${LABEL_PADDING_X}px;
   border-radius: 16px;
   min-height: 100%;
   min-width: 100%;
@@ -96,18 +132,40 @@ export const LabelShapeOnHover = styled.div`
   }
 `;
 
+export const NodeContainer = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: ${NODE_WIDTH}px;
+`;
+
 export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
 `;
 
-export const NodeShapeSvg = styled.svg`
+export const NodeShapeSvg = styled.svg<{ shadow?: string }>`
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 1;
+
+  ${({ shadow }) => `
+    /* Apply shadow when node is selected */
+    .react-flow__node.selected & {
+      ${shadow};
+    }
+
+    /* Apply shadow when node is pressed but still not selected */
+    .react-flow__node:active:not(.selected) & {
+      ${shadow};
+    }
+
+    /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
+  `};
 `;
 
 export interface NodeButtonProps extends CommonProps {
@@ -168,7 +226,8 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &, ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &,
+  ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
@@ -225,13 +284,51 @@ export const useNodeFillColor = (color: NodeColor | undefined) => {
   return useEuiBackgroundColor(fillColor);
 };
 
-export const GroupStyleOverride = (size?: {
+export const GroupStyleOverride = (size: {
   width: number;
   height: number;
 }): React.CSSProperties => ({
   backgroundColor: 'transparent',
+  padding: 0,
   border: '0px solid',
   boxShadow: 'none',
-  width: size?.width ?? 140,
-  height: size?.height ?? 75,
+  width: size.width,
+  height: size.height,
 });
+
+export const RoundedBadge = styled.div<{
+  euiTheme: EuiThemeComputed;
+  bgColor?: string;
+}>`
+  display: inline-flex;
+  align-items: center;
+
+  height: 20px;
+  padding: ${({ euiTheme }) => `${euiTheme.size.xxs} ${euiTheme.size.xs}`};
+  gap: ${({ euiTheme }) => euiTheme.size.xxs};
+
+  background-color: ${({ euiTheme, bgColor }) => bgColor || euiTheme.colors.backgroundBasePlain};
+  border: ${({ euiTheme }) =>
+    `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
+  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
+
+  font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
+`;
+
+export const ToolTipButton = (props: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <button
+      {...props}
+      css={css`
+        appearance: none; /* Reset native button styles provided by browsers */
+
+        &:focus {
+          /* Tooltip injects its own outline that uses "currentColor" so we style it setting "color" */
+          color: ${euiTheme.colors.primary};
+        }
+      `}
+      type="button"
+    />
+  );
+};

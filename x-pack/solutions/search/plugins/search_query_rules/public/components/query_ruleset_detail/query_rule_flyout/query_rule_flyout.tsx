@@ -29,7 +29,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Controller } from 'react-hook-form';
 import { isQueryRuleFieldError } from '../../../utils/field_error_utils';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SearchQueryRulesQueryRule } from '../../../types';
+import type { SearchQueryRulesQueryRule } from '../../../types';
 import { QueryRuleFlyoutBody, QueryRuleFlyoutPanel } from '../styles';
 import { QueryRuleMetadataEditor } from './query_rule_metadata_editor';
 import { useQueryRuleFlyoutState } from './use_query_rule_flyout_state';
@@ -127,7 +127,7 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
     >
       <QueryRuleFlyoutHeader ruleId={ruleId} createMode={createMode} />
       <EuiFlyoutBody css={QueryRuleFlyoutBody}>
-        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel(euiTheme)}>
+        <EuiFlexGroup gutterSize="none" css={QueryRuleFlyoutPanel}>
           <EuiFlexItem grow>
             <EuiPanel
               hasBorder={false}
@@ -253,9 +253,9 @@ export const QueryRuleFlyout: React.FC<QueryRuleFlyoutProps> = ({
               />
             </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem grow>
+          <EuiFlexItem grow css={QueryRuleFlyoutPanel}>
             <EuiPanel
-              hasBorder={true}
+              hasBorder={false}
               hasShadow={false}
               paddingSize="l"
               borderRadius="none"

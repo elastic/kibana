@@ -5,24 +5,29 @@
  * 2.0.
  */
 
-import { CasesDeepLinkId, CasesPublicStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
-import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import {
+  type CasesPublicSetup,
+  CasesDeepLinkId,
+  type CasesPublicStart,
+  getCasesDeepLinks,
+} from '@kbn/cases-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { IUiSettingsClient } from '@kbn/core/public';
-import {
+import type {
+  IUiSettingsClient,
   App,
   AppDeepLink,
   AppMountParameters,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin as PluginClass,
   PluginInitializerContext,
   ToastsStart,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -51,7 +56,6 @@ import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
 import type { ExploratoryViewPublicStart } from '@kbn/exploratory-view-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { LicenseManagementUIPluginSetup } from '@kbn/license-management-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
@@ -71,9 +75,10 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { StreamsPluginStart, StreamsPluginSetup } from '@kbn/streams-plugin/public';
-import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
-import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
-import { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
+import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -86,15 +91,14 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
-import {
-  ObservabilityRuleTypeRegistry,
-  createObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 import {
   CaseDetailsLocatorDefinition,
   CasesOverviewLocatorDefinition,
 } from '../common/locators/cases';
+import { getPageAttachmentType } from './attachments/page/attachment';
 import { TelemetryService } from './services/telemetry/telemetry_service';
 
 export interface ConfigSchema {
@@ -134,6 +138,7 @@ export interface ObservabilityPublicPluginsSetup {
   serverless?: ServerlessPluginSetup;
   presentationUtil?: PresentationUtilPluginStart;
   streams?: StreamsPluginSetup;
+  cases?: CasesPublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -148,7 +153,6 @@ export interface ObservabilityPublicPluginsStart {
   embeddable: EmbeddableStart;
   exploratoryView?: ExploratoryViewPublicStart;
   fieldFormats: FieldFormatsStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   licenseManagement?: LicenseManagementUIPluginSetup;
@@ -176,6 +180,7 @@ export interface ObservabilityPublicPluginsStart {
   streams?: StreamsPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   inspector: InspectorPluginStart;
+  savedObjectsTagging: SavedObjectTaggingPluginStart;
 }
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
 
@@ -215,21 +220,6 @@ export class Plugin
         },
       ],
     },
-    getCasesDeepLinks({
-      basePath: CASES_PATH,
-      extend: {
-        [CasesDeepLinkId.cases]: {
-          order: 8003,
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesCreate]: {
-          visibleIn: [],
-        },
-        [CasesDeepLinkId.casesConfigure]: {
-          visibleIn: [],
-        },
-      },
-    }),
   ];
 
   constructor(private readonly initContext: PluginInitializerContext<ConfigSchema>) {
@@ -240,6 +230,25 @@ export class Plugin
     coreSetup: CoreSetup<ObservabilityPublicPluginsStart, ObservabilityPublicStart>,
     pluginsSetup: ObservabilityPublicPluginsSetup
   ) {
+    if (pluginsSetup.cases) {
+      this.deepLinks.push(
+        getCasesDeepLinks({
+          basePath: CASES_PATH,
+          extend: {
+            [CasesDeepLinkId.cases]: {
+              order: 8003,
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesCreate]: {
+              visibleIn: [],
+            },
+            [CasesDeepLinkId.casesConfigure]: {
+              visibleIn: [],
+            },
+          },
+        })
+      );
+    }
     const category = DEFAULT_APP_CATEGORIES.observability;
     const euiIconType = 'logoObservability';
     const config = this.initContext.config.get();
@@ -260,6 +269,13 @@ export class Plugin
 
     const logsLocator =
       pluginsSetup.share.url.locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+
+    if (
+      pluginsSetup.cases &&
+      pluginsSetup.observabilityShared.config.unsafe?.investigativeExperienceEnabled
+    ) {
+      pluginsSetup.cases.attachmentFramework.registerPersistableState(getPageAttachmentType());
+    }
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle

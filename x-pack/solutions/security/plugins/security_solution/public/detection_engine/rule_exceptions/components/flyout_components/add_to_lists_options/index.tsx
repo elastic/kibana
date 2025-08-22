@@ -44,6 +44,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
   return (
     <>
       <EuiRadio
+        name="addToListsOption"
         id="add_to_lists"
         label={
           <EuiFlexGroup
@@ -69,7 +70,7 @@ const ExceptionsAddToListsOptionsComponent: React.FC<ExceptionsAddToListsOptions
                 closePopover={closePopover}
                 anchorPosition="upCenter"
               >
-                <div style={{ width: '300px' }}>
+                <div css={{ width: '300px' }}>
                   <EuiText size="s">
                     {sharedLists.length === 0
                       ? i18n.ADD_TO_LISTS_OPTION_DISABLED_TOOLTIP(rulesCount)

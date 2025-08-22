@@ -74,6 +74,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
       // to be removed in https://github.com/elastic/kibana/issues/221904
       profilingEnabled: schema.boolean({ defaultValue: false }),
       ruleFormV2Enabled: schema.boolean({ defaultValue: false }),
+      hostOtelEnabled: schema.boolean({ defaultValue: false }),
     }),
   }),
   deprecations: () => [sourceFieldsMessageDeprecation],

@@ -19,6 +19,7 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { LastEventIndexKey } from '@kbn/timelines-plugin/common';
+import { DataViewManagerScopeName } from '../../../../data_view_manager/constants';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { dataViewSpecToViewBase } from '../../../../common/lib/kuery';
@@ -74,7 +75,6 @@ import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml
 import { EmptyPrompt } from '../../../../common/components/empty_prompt';
 import { useRefetchOverviewPageRiskScore } from '../../../../entity_analytics/api/hooks/use_refetch_overview_page_risk_score';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
-import { useDataViewSpec } from '../../../../data_view_manager/hooks/use_data_view_spec';
 import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_selected_patterns';
 import { PageLoader } from '../../../../common/components/page_loader';
 
@@ -118,13 +118,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView, status } = useDataView();
-  const { dataViewSpec } = useDataViewSpec();
-  const experimentalSelectedPatterns = useSelectedPatterns();
+  const { dataView: experimentalDataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const experimentalSelectedPatterns = useSelectedPatterns(DataViewManagerScopeName.explore);
 
-  const sourcererDataView = newDataViewPickerEnabled ? dataViewSpec : oldSourcererDataView;
   const indicesExist = newDataViewPickerEnabled
-    ? !!dataView?.matchedIndices?.length
+    ? experimentalDataView.hasMatchedIndices()
     : oldIndicesExist;
   const selectedPatterns = newDataViewPickerEnabled
     ? experimentalSelectedPatterns
@@ -134,7 +132,9 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     try {
       return [
         buildEsQuery(
-          dataViewSpecToViewBase(sourcererDataView),
+          newDataViewPickerEnabled
+            ? experimentalDataView
+            : dataViewSpecToViewBase(oldSourcererDataView),
           [query],
           [...usersDetailsPageFilters, ...globalFilters],
           getEsQueryConfig(uiSettings)
@@ -143,7 +143,15 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     } catch (e) {
       return [undefined, e];
     }
-  }, [globalFilters, sourcererDataView, query, uiSettings, usersDetailsPageFilters]);
+  }, [
+    experimentalDataView,
+    globalFilters,
+    newDataViewPickerEnabled,
+    oldSourcererDataView,
+    query,
+    uiSettings,
+    usersDetailsPageFilters,
+  ]);
 
   const stringifiedAdditionalFilters = JSON.stringify(rawFilteredQuery);
   useInvalidFilterQuery({
@@ -224,7 +232,10 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
         <>
           <EuiWindowEvent event="resize" handler={noop} />
           <FiltersGlobal>
-            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
+            <SiemSearchBar
+              sourcererDataView={oldSourcererDataView} // TODO: newDataViewPicker - Can be removed after migration to new dataview picker
+              id={InputsModelId.global}
+            />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -269,7 +280,11 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
                   narrowDateRange={narrowDateRange}
                   indexPatterns={selectedPatterns}
                   jobNameById={jobNameById}
-                  scopeId={SourcererScopeName.default}
+                  scopeId={
+                    newDataViewPickerEnabled
+                      ? SourcererScopeName.explore
+                      : SourcererScopeName.default
+                  }
                 />
               )}
             </AnomalyTableProvider>
@@ -308,7 +323,6 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               filterQuery={stringifiedAdditionalFilters}
               from={from}
               indexNames={selectedPatterns}
-              dataViewSpec={sourcererDataView}
               isInitializing={isInitializing}
               userDetailFilter={usersDetailsPageFilters}
               setQuery={setQuery}

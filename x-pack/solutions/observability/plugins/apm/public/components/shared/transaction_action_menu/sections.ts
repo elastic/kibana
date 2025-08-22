@@ -137,8 +137,8 @@ export const getSections = ({
       }),
       href: hasPodLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: podId,
-            assetType: 'pod',
+            entityId: podId,
+            entityType: 'pod',
             assetDetails: {
               dateRange: infraMetricsQuery,
             },
@@ -164,8 +164,8 @@ export const getSections = ({
       }),
       href: hasContainerLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: containerId,
-            assetType: 'container',
+            entityId: containerId,
+            entityType: 'container',
             assetDetails: { dateRange: infraMetricsQuery },
           })
         : undefined,
@@ -189,8 +189,8 @@ export const getSections = ({
       }),
       href: hasHostLink
         ? assetDetailsLocator.getRedirectUrl({
-            assetId: hostName,
-            assetType: 'host',
+            entityId: hostName,
+            entityType: 'host',
             assetDetails: {
               dateRange: infraMetricsQuery,
             },
@@ -347,7 +347,7 @@ export const getSections = ({
       {
         key: 'serviceMap',
         title: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         subtitle: i18n.translate('xpack.apm.transactionActionMenu.serviceMap.subtitle', {
           defaultMessage: 'View service map filtered by this trace.',

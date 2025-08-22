@@ -63,17 +63,17 @@ describe('addPrepackagedRuleValidateTypeDependents', () => {
     expect(errors).toEqual(['"threshold.value" has to be bigger than 0']);
   });
 
-  test('threshold.field should contain 3 items or less', () => {
+  test('threshold.field should contain 5 items or less', () => {
     const schema = {
       ...getPrebuiltRuleMock(),
       type: 'threshold',
       threshold: {
-        field: ['field-1', 'field-2', 'field-3', 'field-4'],
+        field: ['field-1', 'field-2', 'field-3', 'field-4', 'field-5', 'field-6'],
         value: 1,
       },
     };
     const errors = addPrepackagedRuleValidateTypeDependents(schema as PrebuiltRuleAsset);
-    expect(errors).toEqual(['Number of fields must be 3 or less']);
+    expect(errors).toEqual(['Number of fields must be 5 or less']);
   });
 
   test('threshold.cardinality[0].field should not be in threshold.field', () => {

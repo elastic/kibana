@@ -3639,6 +3639,9 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
                 }
               }
             },
@@ -3739,6 +3742,9 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
                 }
               }
             },
@@ -3839,6 +3845,9 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
                 }
               }
             }
@@ -3893,6 +3902,63 @@
         "alerts": {
           "properties": {
             "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "main": {
               "properties": {
                 "total": {
                   "type": "long"
@@ -4140,6 +4206,12 @@
             "description": "The Serverless Project type"
           }
         },
+        "productTier": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Product Tier"
+          }
+        },
         "orchestratorTarget": {
           "type": "keyword",
           "_meta": {
@@ -4317,6 +4389,9 @@
                 "type": "keyword"
               },
               "enabled": {
+                "type": "boolean"
+              },
+              "agent_based": {
                 "type": "boolean"
               }
             }

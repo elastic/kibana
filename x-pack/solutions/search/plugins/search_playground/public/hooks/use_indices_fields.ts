@@ -6,8 +6,11 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+
+import { SearchPlaygroundQueryKeys } from '../../common';
+import type { IndicesQuerySourceFields } from '../types';
+import { APIRoutes } from '../types';
 import { useKibana } from './use_kibana';
-import { APIRoutes, IndicesQuerySourceFields } from '../types';
 
 const initialData = {};
 
@@ -16,7 +19,7 @@ export const useIndicesFields = (indices: string[] = []) => {
 
   const { data, isLoading, isFetching, isFetched } = useQuery<IndicesQuerySourceFields>({
     enabled: indices.length > 0,
-    queryKey: ['fields', indices.toString()],
+    queryKey: [SearchPlaygroundQueryKeys.IndicesFields, indices.toString()],
     initialData,
     queryFn: () =>
       services.http.post<IndicesQuerySourceFields>(APIRoutes.POST_QUERY_SOURCE_FIELDS, {

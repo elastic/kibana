@@ -15,7 +15,7 @@ import { FtrService } from './ftr_provider_context';
 
 /**
  * Function copied from here:
- * x-pack/test/rule_registry/common/lib/authentication/spaces.ts
+ * x-pack/platform/test/rule_registry/common/lib/authentication/spaces.ts
  * @param spaceId The space id we want to utilize
  */
 const getSpaceUrlPrefix = (spaceId?: string): string => {

@@ -286,7 +286,7 @@ export class CommonPageObject extends FtrService {
       // Legacy applications
       const appConfig = this.config.get(['apps', appName]);
       appUrl = getUrl.noAuth(this.config.get('servers.kibana'), {
-        pathname: `${basePath}${appConfig.pathname}`,
+        pathname: `${basePath}${appConfig.pathname}${path ? `/${path}` : ''}`,
         hash: hash || appConfig.hash,
         search,
       });

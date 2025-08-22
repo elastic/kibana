@@ -43,3 +43,8 @@ export const useMigrateConversationsFromLocalStorage = () => {
     storage,
   ]);
 };
+
+export const MigrateConversationsFromLocalStorage = () => {
+  useMigrateConversationsFromLocalStorage();
+  return null;
+};

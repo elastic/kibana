@@ -20,7 +20,7 @@ import { ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_DISMISSED } from '../../..
 import { performChecks } from '../../helpers';
 import { writeAttackDiscoveryEvent } from './helpers/write_attack_discovery_event';
 import { buildResponse } from '../../../lib/build_response';
-import { ElasticAssistantRequestHandlerContext } from '../../../types';
+import type { ElasticAssistantRequestHandlerContext } from '../../../types';
 
 export const postAttackDiscoveryGenerationsDismissRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>
@@ -91,7 +91,7 @@ export const postAttackDiscoveryGenerationsDismissRoute = (
 
           const attackDiscoveryAlertsEnabled = await featureFlags.getBooleanValue(
             ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG,
-            false
+            true
           );
 
           if (!attackDiscoveryAlertsEnabled) {

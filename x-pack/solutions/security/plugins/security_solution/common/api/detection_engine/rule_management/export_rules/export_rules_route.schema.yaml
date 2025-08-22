@@ -72,7 +72,7 @@ paths:
                     properties:
                       rule_id:
                         $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
-                  description: Array of `rule_id` fields. Exports all rules when unspecified.
+                  description: Array of objects with a rule's `rule_id` field. Do not use rule's `id` here. Exports all rules when unspecified.
       responses:
         200:
           description: Indicates a successful call.

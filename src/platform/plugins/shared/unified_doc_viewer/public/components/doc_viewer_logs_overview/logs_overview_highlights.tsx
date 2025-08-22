@@ -8,11 +8,13 @@
  */
 
 import React from 'react';
-import { CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
+import type { CloudProvider } from '@kbn/custom-icons';
+import { CloudProviderIcon } from '@kbn/custom-icons';
 import { first } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DataTableRecord, LogDocumentOverview, fieldConstants } from '@kbn/discover-utils';
-import { StreamsFeature } from '@kbn/discover-shared-plugin/public/services/discover_features';
+import type { DataTableRecord, LogDocumentOverview } from '@kbn/discover-utils';
+import { fieldConstants } from '@kbn/discover-utils';
+import type { ObservabilityStreamsFeature } from '@kbn/discover-shared-plugin/public';
 import { HighlightField } from './sub_components/highlight_field';
 import { HighlightSection } from './sub_components/highlight_section';
 import { getUnifiedDocViewerServices } from '../../plugin';
@@ -21,11 +23,11 @@ import { TraceIdHighlightField } from './sub_components/trace_id_highlight_field
 export function LogsOverviewHighlights({
   formattedDoc,
   doc,
-  renderStreamsField,
+  renderFlyoutStreamField,
 }: {
   formattedDoc: LogDocumentOverview;
   doc: DataTableRecord;
-  renderStreamsField?: StreamsFeature['renderStreamsField'];
+  renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
 }) {
   const flattenedDoc = doc.flattened;
   const {
@@ -205,7 +207,7 @@ export function LogsOverviewHighlights({
             truncate
           />
         )}
-        {renderStreamsField && renderStreamsField({ doc })}
+        {renderFlyoutStreamField && renderFlyoutStreamField({ doc })}
         {shouldRenderHighlight(fieldConstants.AGENT_NAME_FIELD) && (
           <HighlightField
             data-test-subj="unifiedDocViewLogsOverviewLogShipper"

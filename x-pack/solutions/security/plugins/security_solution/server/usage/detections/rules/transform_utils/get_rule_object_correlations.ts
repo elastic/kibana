@@ -9,6 +9,7 @@ import type { SavedObjectsFindResult } from '@kbn/core/server';
 import type { RuleMetric } from '../types';
 import type { RuleSearchResult } from '../../../types';
 import { getAlertSuppressionUsage } from '../usage_utils/get_alert_suppression_usage';
+import { getThreatMatchUsage } from '../usage_utils/get_threat_match_usage';
 import { getResponseActionsUsage } from '../usage_utils/get_response_actions_usage';
 
 export interface RuleObjectCorrelationsOptions {
@@ -59,6 +60,9 @@ export const getRuleObjectCorrelations = ({
       rule_type: attributes.params.type,
       rule_version: attributes.params.version,
       enabled: attributes.enabled,
+      is_customized:
+        attributes.params.ruleSource?.type === 'external' &&
+        attributes.params.ruleSource?.isCustomized === true,
       // if rule immutable, it's Elastic/prebuilt
       elastic_rule: attributes.params.immutable,
       created_on: attributes.createdAt,
@@ -78,6 +82,7 @@ export const getRuleObjectCorrelations = ({
       has_response_actions: hasResponseActions,
       has_response_actions_endpoint: hasResponseActionsEndpoint,
       has_response_actions_osquery: hasResponseActionsOsquery,
+      has_does_not_match_condition: getThreatMatchUsage(attributes).hasDoesNotMatchCondition,
     };
   });
 };

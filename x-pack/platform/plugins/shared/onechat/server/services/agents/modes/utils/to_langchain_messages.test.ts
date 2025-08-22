@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { isHumanMessage, isAIMessage, AIMessage, ToolMessage } from '@langchain/core/messages';
-import { ToolCallWithResult, ToolCallStep, ConversationRoundStepType } from '@kbn/onechat-common';
+import type { AIMessage, ToolMessage } from '@langchain/core/messages';
+import { isHumanMessage, isAIMessage } from '@langchain/core/messages';
+import type { ToolCallWithResult, ToolCallStep, ConversationRound } from '@kbn/onechat-common';
+import { ConversationRoundStepType } from '@kbn/onechat-common';
+import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { conversationToLangchainMessages } from './to_langchain_messages';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 describe('conversationLangchainMessages', () => {
   const makeRoundInput = (message: string) => ({ message });
@@ -15,13 +20,13 @@ describe('conversationLangchainMessages', () => {
   const makeToolCallWithResult = (
     id: string,
     toolId: string,
-    args: any,
-    result: string
+    params: any,
+    results: ToolResult[]
   ): ToolCallWithResult => ({
-    toolCallId: id,
-    toolId: { toolId, providerId: 'provider-1' },
-    args,
-    result,
+    tool_call_id: id,
+    tool_id: toolId,
+    params,
+    results,
   });
   const makeToolCallStep = (toolCall: ToolCallWithResult): ToolCallStep => ({
     ...toolCall,
@@ -37,11 +42,11 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles a round with only user and assistant messages', () => {
-    const previousRounds = [
+    const previousRounds: ConversationRound[] = [
       {
-        userInput: makeRoundInput('hi'),
+        input: makeRoundInput('hi'),
         steps: [],
-        assistantResponse: makeAssistantResponse('hello!'),
+        response: makeAssistantResponse('hello!'),
       },
     ];
     const nextInput = makeRoundInput('how are you?');
@@ -59,12 +64,14 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles a round with a tool call step', () => {
-    const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, 'result!');
-    const previousRounds = [
+    const toolCall = makeToolCallWithResult('call-1', 'search', { query: 'foo' }, [
+      { type: ToolResultType.other, data: 'result!' },
+    ]);
+    const previousRounds: ConversationRound[] = [
       {
-        userInput: makeRoundInput('find foo'),
+        input: makeRoundInput('find foo'),
         steps: [makeToolCallStep(toolCall)],
-        assistantResponse: makeAssistantResponse('done!'),
+        response: makeAssistantResponse('done!'),
       },
     ];
     const nextInput = makeRoundInput('next');
@@ -85,7 +92,16 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-1');
     // ToolMessage type guard is not imported, so just check property
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-1');
-    expect((toolCallToolMessage as ToolMessage).content).toBe('result!');
+    expect(toolCallToolMessage.content).toEqual(
+      JSON.stringify({
+        results: [
+          {
+            type: ToolResultType.other,
+            data: 'result!',
+          },
+        ],
+      })
+    );
     expect(isAIMessage(assistantMessage)).toBe(true);
     expect(assistantMessage.content).toBe('done!');
     expect(isHumanMessage(nextHumanMessage)).toBe(true);
@@ -93,16 +109,22 @@ describe('conversationLangchainMessages', () => {
   });
 
   it('handles multiple rounds', () => {
-    const previousRounds = [
+    const previousRounds: ConversationRound[] = [
       {
-        userInput: makeRoundInput('hi'),
+        input: makeRoundInput('hi'),
         steps: [],
-        assistantResponse: makeAssistantResponse('hello!'),
+        response: makeAssistantResponse('hello!'),
       },
       {
-        userInput: makeRoundInput('search for bar'),
-        steps: [makeToolCallStep(makeToolCallWithResult('call-2', 'lookup', { id: 42 }, 'found!'))],
-        assistantResponse: makeAssistantResponse('done with bar'),
+        input: makeRoundInput('search for bar'),
+        steps: [
+          makeToolCallStep(
+            makeToolCallWithResult('call-2', 'lookup', { id: 42 }, [
+              { type: ToolResultType.other, data: 'found!' },
+            ])
+          ),
+        ],
+        response: makeAssistantResponse('done with bar'),
       },
     ];
     const nextInput = makeRoundInput('bye');
@@ -128,10 +150,34 @@ describe('conversationLangchainMessages', () => {
     expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
     expect((toolCallAIMessage as AIMessage).tool_calls![0].id).toBe('call-2');
     expect((toolCallToolMessage as ToolMessage).tool_call_id).toBe('call-2');
-    expect((toolCallToolMessage as ToolMessage).content).toBe('found!');
+    expect(toolCallToolMessage.content).toEqual(
+      JSON.stringify({ results: [{ type: ToolResultType.other, data: 'found!' }] })
+    );
     expect(isAIMessage(secondAssistantMessage)).toBe(true);
     expect(secondAssistantMessage.content).toBe('done with bar');
     expect(isHumanMessage(lastHumanMessage)).toBe(true);
     expect(lastHumanMessage.content).toBe('bye');
+  });
+
+  it('escapes tool ids', () => {
+    const toolCall = makeToolCallWithResult('call-1', '.search', { query: 'foo' }, [
+      { type: ToolResultType.other, data: 'result!' },
+    ]);
+    const previousRounds: ConversationRound[] = [
+      {
+        input: makeRoundInput('find foo'),
+        steps: [makeToolCallStep(toolCall)],
+        response: makeAssistantResponse('done!'),
+      },
+    ];
+    const nextInput = makeRoundInput('next');
+    const result = conversationToLangchainMessages({ previousRounds, nextInput });
+    // 1 user + 1 tool call (AI + Tool) + 1 assistant + 1 user
+    expect(result).toHaveLength(5);
+    const [_human, toolCallAIMessage] = result;
+
+    expect(isAIMessage(toolCallAIMessage)).toBe(true);
+    expect((toolCallAIMessage as AIMessage).tool_calls).toHaveLength(1);
+    expect((toolCallAIMessage as AIMessage).tool_calls![0].name).toBe(sanitizeToolId('.search'));
   });
 });

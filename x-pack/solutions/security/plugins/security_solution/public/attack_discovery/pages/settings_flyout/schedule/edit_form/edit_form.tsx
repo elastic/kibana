@@ -41,10 +41,11 @@ export interface FormState {
 export interface FormProps {
   initialValue: AttackDiscoveryScheduleSchema;
   onChange: (state: FormState) => void;
+  onFormMutated?: () => void;
 }
 
 export const EditForm: React.FC<FormProps> = React.memo((props) => {
-  const { initialValue, onChange } = props;
+  const { initialValue, onChange, onFormMutated } = props;
   const {
     triggersActionsUi: { actionTypeRegistry },
   } = useKibana().services;
@@ -74,8 +75,9 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     (newSettings: AlertsSelectionSettings) => {
       setSettings(newSettings);
       setFieldValue('alertsSelectionSettings', newSettings);
+      onFormMutated?.();
     },
-    [setFieldValue]
+    [onFormMutated, setFieldValue]
   );
 
   const [connectorId, setConnectorId] = React.useState<string | undefined>(
@@ -86,8 +88,9 @@ export const EditForm: React.FC<FormProps> = React.memo((props) => {
     (selectedConnectorId: string) => {
       setConnectorId(selectedConnectorId);
       setFieldValue('connectorId', selectedConnectorId);
+      onFormMutated?.();
     },
-    [setFieldValue]
+    [onFormMutated, setFieldValue]
   );
 
   const { settingsView } = useSettingsView({

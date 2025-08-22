@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subject } from 'rxjs';
+import type { Subject } from 'rxjs';
 
-import type { PublishingSubject } from '@kbn/presentation-publishing';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { PublishesTitle, PublishingSubject } from '@kbn/presentation-publishing';
+import type { SubjectsOf, SettersOf } from '@kbn/presentation-publishing/state_manager/types';
 import type {
   OptionsListControlState,
   OptionsListDisplaySettings,
@@ -18,11 +18,11 @@ import type {
   OptionsListSortingType,
   OptionsListSuggestions,
 } from '../../../../common/options_list';
-import type { DataControlApi } from '../types';
-import { SelectionsState } from './selections_manager';
-import { DefaultDataControlState } from '../../../../common';
-import { TemporaryState } from './temporay_state_manager';
-import { EditorState } from './editor_state_manager';
+import type { DataControlApi, PublishesField } from '../types';
+import type { SelectionsState } from './selections_manager';
+import type { DefaultDataControlState } from '../../../../common';
+import type { TemporaryState } from './temporay_state_manager';
+import type { EditorState } from './editor_state_manager';
 
 export type OptionsListControlApi = DataControlApi & {
   setSelectedOptions: (options: OptionsListSelection[] | undefined) => void;
@@ -40,18 +40,28 @@ interface PublishesOptions {
   invalidSelections$: PublishingSubject<Set<OptionsListSelection>>;
   totalCardinality$: PublishingSubject<number>;
 }
+export type OptionsListState = Pick<DefaultDataControlState, 'fieldName'> &
+  SelectionsState &
+  EditorState &
+  TemporaryState & { sort: OptionsListSortingType | undefined };
 
-export type OptionsListComponentApi = OptionsListControlApi &
+type PublishesOptionsListState = SubjectsOf<OptionsListState>;
+type OptionsListStateSetters = Partial<SettersOf<OptionsListState>> &
+  SettersOf<Pick<OptionsListState, 'sort' | 'searchString' | 'requestSize' | 'exclude'>>;
+
+export type OptionsListComponentApi = PublishesField &
   PublishesOptions &
-  StateManager<DefaultDataControlState>['api'] &
-  StateManager<EditorState>['api'] &
-  StateManager<SelectionsState>['api'] &
-  StateManager<TemporaryState>['api'] & {
+  PublishesOptionsListState &
+  Pick<PublishesTitle, 'title$'> &
+  OptionsListStateSetters & {
     deselectOption: (key: string | undefined) => void;
     makeSelection: (key: string | undefined, showOnlySelected: boolean) => void;
     loadMoreSubject: Subject<void>;
-    sort$: PublishingSubject<OptionsListSortingType | undefined>;
-    setSort: (sort: OptionsListSortingType | undefined) => void;
     selectAll: (keys: string[]) => void;
     deselectAll: (keys: string[]) => void;
+    defaultTitle$?: PublishingSubject<string | undefined>;
+    uuid: string;
+    parentApi: {
+      allowExpensiveQueries$: PublishingSubject<boolean>;
+    };
   };

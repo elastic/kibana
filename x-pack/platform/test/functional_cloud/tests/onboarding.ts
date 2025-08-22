@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 import { parse } from 'url';
 
 import expect from '@kbn/expect';
@@ -68,14 +61,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.get(
         deployment.getHostPort() +
           `/app/cloud/onboarding?onboarding_token=vector&next=${encodeURIComponent(
-            '/app/elasticsearch/vector_search'
+            '/app/elasticsearch/start'
           )}#some=hash-value`
       );
       await find.byCssSelector('[data-test-subj="userMenuButton"]', 20000);
 
       // We need to make sure that both path and hash are respected.
       const currentURL = parse(await browser.getCurrentUrl());
-      expect(currentURL.pathname).to.eql('/app/elasticsearch/vector_search');
+      expect(currentURL.pathname).to.eql('/app/elasticsearch/start');
       expect(currentURL.hash).to.eql('#some=hash-value');
 
       const {

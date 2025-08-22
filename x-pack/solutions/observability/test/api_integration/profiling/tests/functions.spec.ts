@@ -6,9 +6,9 @@
  */
 
 import { getRoutePaths } from '@kbn/profiling-plugin/common';
-import { TopNFunctions } from '@kbn/profiling-utils';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../common/ftr_provider_context';
+import type { FtrProviderContext } from '../common/ftr_provider_context';
 import { loadProfilingData, setupProfiling } from '../utils/profiling_data';
 import { getBettertest } from '../common/bettertest';
 
@@ -26,11 +26,6 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   const end = new Date('2023-03-17T01:05:00.000Z').getTime();
 
   registry.when('Functions api', { config: 'cloud' }, () => {
-    before(async () => {
-      await setupProfiling(bettertest, log);
-      await loadProfilingData(es, log);
-    });
-
     describe('With data', () => {
       let functions: TopNFunctions;
       before(async () => {
@@ -52,10 +47,10 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       });
 
       it(`returns correct result`, async () => {
-        expect(functions.TopN.length).to.equal(5);
-        expect(functions.TotalCount).to.equal(3599);
-        expect(functions.selfCPU).to.equal(397);
-        expect(functions.totalCPU).to.equal(399);
+        expect(functions.TopN.length).to.equal(7047);
+        expect(functions.TotalCount).to.equal(80555);
+        expect(functions.selfCPU).to.equal(3534);
+        expect(functions.totalCPU).to.equal(80555);
         expectSnapshot(functions).toMatch();
       });
     });

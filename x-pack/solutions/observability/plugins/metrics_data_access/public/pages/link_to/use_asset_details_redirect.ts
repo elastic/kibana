@@ -38,12 +38,12 @@ export const useAssetDetailsRedirect = () => {
 
   const getAssetDetailUrl = useCallback(
     ({
-      assetType,
-      assetId,
+      entityType,
+      entityId,
       search,
     }: {
-      assetType: InventoryItemType;
-      assetId: string;
+      entityType: InventoryItemType;
+      entityId: string;
       search: QueryParams;
     }): RouterLinkProps => {
       const { to, from, ...rest } = search;
@@ -69,8 +69,8 @@ export const useAssetDetailsRedirect = () => {
 
       const assetDetailsLocatorParams = {
         ...queryParams,
-        assetType,
-        assetId,
+        entityType,
+        entityId,
         state: {
           ...(location.state ?? {}),
           ...(location.key

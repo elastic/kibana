@@ -5,18 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   SavedObject,
   SavedObjectsClientContract,
-  type SavedObjectsCreateOptions,
   SavedObjectsFindOptions,
-  type SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import {
+  type SavedObjectsBulkCreateObject,
+  type SavedObjectsCreateOptions,
+  type SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
+import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { withApmSpan } from '@kbn/apm-data-access-plugin/server/utils/with_apm_span';
 import { isEmpty, isEqual } from 'lodash';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 import {
   legacyMonitorAttributes,
   legacySyntheticsMonitorTypeSingle,
@@ -25,13 +29,14 @@ import {
   syntheticsMonitorSOTypes,
 } from '../../common/types/saved_objects';
 import { formatSecrets, normalizeSecrets } from '../synthetics_service/utils';
-import {
-  ConfigKey,
+import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithSecretsAttributes,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
+import { combineAndSortSavedObjects } from './utils/combine_and_sort_saved_objects';
 
 const getSuccessfulResult = <T>(
   results: Array<PromiseSettledResult<T>>
@@ -141,16 +146,22 @@ export class MonitorConfigRepository {
     monitors: Array<{ id: string; monitor: MonitorFields }>;
     savedObjectType?: string;
   }) {
-    const newMonitors = monitors.map(({ id, monitor }) => ({
-      id,
-      type: savedObjectType ?? syntheticsMonitorSavedObjectType,
-      attributes: formatSecrets({
-        ...monitor,
-        [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
-        [ConfigKey.CONFIG_ID]: id,
-        revision: 1,
-      }),
-    }));
+    const newMonitors: Array<SavedObjectsBulkCreateObject<EncryptedSyntheticsMonitorAttributes>> =
+      monitors.map(({ id, monitor }) => {
+        const { spaces } = monitor;
+
+        return {
+          id,
+          type: savedObjectType ?? syntheticsMonitorSavedObjectType,
+          attributes: formatSecrets({
+            ...monitor,
+            [ConfigKey.MONITOR_QUERY_ID]: monitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || id,
+            [ConfigKey.CONFIG_ID]: id,
+            revision: 1,
+          }),
+          ...(!isEmpty(spaces) && { initialNamespaces: spaces }),
+        };
+      });
     const result = await this.soClient.bulkCreate<EncryptedSyntheticsMonitorAttributes>(
       newMonitors
     );
@@ -185,18 +196,71 @@ export class MonitorConfigRepository {
     monitors: Array<{
       attributes: MonitorFields;
       id: string;
-      soType: string;
+      previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
     }>;
     namespace?: string;
   }) {
-    return this.soClient.bulkUpdate<MonitorFields>(
-      monitors.map(({ attributes, id, soType }) => ({
-        type: soType,
+    // Split monitors into those needing recreation and those that can be updated
+    const toRecreate: Array<{
+      id: string;
+      attributes: MonitorFields;
+      previousMonitor: SavedObject<SyntheticsMonitorWithSecretsAttributes>;
+    }> = [];
+    const toUpdate: Array<{
+      type: string;
+      id: string;
+      attributes: MonitorFields;
+      namespace?: string;
+    }> = [];
+
+    for (const monitor of monitors) {
+      const { attributes, id, previousMonitor } = monitor;
+      const prevSpaces = (previousMonitor.namespaces || []).sort();
+      const spaces = (attributes.spaces || []).sort();
+      if (!isEqual(prevSpaces, spaces) && !isEmpty(spaces)) {
+        toRecreate.push({ id, attributes, previousMonitor });
+        continue;
+      }
+
+      toUpdate.push({
+        type: previousMonitor?.type,
         id,
         attributes,
         namespace,
-      }))
-    );
+      });
+    }
+
+    // Bulk delete legacy monitors if spaces changed
+    if (toRecreate.length > 0) {
+      const deleteObjects = toRecreate.map(({ id, previousMonitor }) => ({
+        id,
+        type: previousMonitor.type,
+      }));
+      await this.soClient.bulkDelete(deleteObjects, { force: true });
+    }
+
+    // Use bulkCreate for recreations
+    let recreateResults: Array<SavedObject<MonitorFields>> = [];
+    if (toRecreate.length > 0) {
+      const bulkCreateObjects = toRecreate.map(({ id, attributes, previousMonitor }) => ({
+        id,
+        type: syntheticsMonitorSavedObjectType,
+        attributes,
+        ...(!isEmpty(attributes.spaces) && { initialNamespaces: attributes.spaces }),
+      }));
+      const bulkCreateResult = await this.soClient.bulkCreate<MonitorFields>(bulkCreateObjects);
+      recreateResults = bulkCreateResult.saved_objects;
+    }
+
+    // Bulk update the rest
+    const bulkUpdateResult = toUpdate.length
+      ? await this.soClient.bulkUpdate<MonitorFields>(toUpdate)
+      : { saved_objects: [] };
+
+    // Combine results
+    return {
+      saved_objects: [...bulkUpdateResult.saved_objects, ...recreateResults],
+    };
   }
 
   async find<T>(
@@ -204,20 +268,25 @@ export class MonitorConfigRepository {
     types: string[] = syntheticsMonitorSOTypes,
     soClient: SavedObjectsClientContract = this.soClient
   ): Promise<SavedObjectsFindResponse<T>> {
+    const perPage = options.perPage ?? 5000;
+    const page = options.page ?? 1;
+    // fetch all possible monitors, sort locally since we can't sort across multiple types yet
+    const maximumPageSize = 10_000;
+
     const promises: Array<Promise<SavedObjectsFindResponse<T>>> = types.map((type) => {
       const opts = {
         type,
         ...options,
-        perPage: options.perPage ?? 5000,
+        perPage: maximumPageSize,
+        page: 1,
       };
       return soClient.find<T>(this.handleLegacyOptions(opts, type));
     });
-    const [result, legacyResult] = await Promise.all(promises);
-    return {
-      ...result,
-      total: result.total + legacyResult.total,
-      saved_objects: [...result.saved_objects, ...legacyResult.saved_objects],
-    };
+
+    const results = await Promise.all(promises);
+
+    // Use util to combine, sort, and slice
+    return combineAndSortSavedObjects<T>(results, options, page, perPage);
   }
 
   async findDecryptedMonitors({ spaceId, filter }: { spaceId: string; filter?: string }) {
@@ -273,7 +342,7 @@ export class MonitorConfigRepository {
     filter,
     sortField = 'name.keyword',
     sortOrder = 'asc',
-    searchFields,
+    searchFields = MONITOR_SEARCH_FIELDS,
     showFromAllSpaces,
   }: {
     search?: string;

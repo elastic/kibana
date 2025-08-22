@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { EditFilterListHeader } from './header';
 
@@ -29,9 +29,9 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
+    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders the header when creating a new filter list with ID, description and items set', () => {
@@ -43,9 +43,9 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 15,
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
+    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders the header when editing an existing unused filter list with no description or items', () => {
@@ -55,9 +55,9 @@ describe('EditFilterListHeader', () => {
       totalItemCount: 0,
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
+    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 
   test('renders the header when editing an existing used filter list with description and items set', () => {
@@ -72,8 +72,8 @@ describe('EditFilterListHeader', () => {
       },
     };
 
-    const component = shallowWithIntl(<EditFilterListHeader {...props} />);
+    const { container } = renderWithI18n(<EditFilterListHeader {...props} />);
 
-    expect(component).toMatchSnapshot();
+    expect(container).toMatchSnapshot();
   });
 });

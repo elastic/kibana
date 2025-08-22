@@ -16,6 +16,7 @@
       "features",
     ],
     "optionalPlugins": [
+      "cloud",
       "console",
       "searchNavigation",
       "share",

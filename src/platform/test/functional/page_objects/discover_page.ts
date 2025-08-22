@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export class DiscoverPageObject extends FtrService {
@@ -227,14 +227,23 @@ export class DiscoverPageObject extends FtrService {
 
     await (
       await this.testSubjects.find('unifiedHistogramBreakdownSelectorSelectorSearch')
-    ).type(field);
+    ).type(field, { charByChar: true });
 
-    const option = await this.find.byCssSelector(
-      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${
-        value ?? field
-      }"]`
+    const optionValue = value ?? field;
+
+    await this.find.clickDisplayedByCssSelector(
+      `[data-test-subj="unifiedHistogramBreakdownSelectorSelectable"] .euiSelectableListItem[value="${optionValue}"]`
     );
-    await option.click();
+
+    await this.retry.waitFor('the value to be selected', async () => {
+      const breakdownButton = await this.testSubjects.find(
+        'unifiedHistogramBreakdownSelectorButton'
+      );
+      return (
+        (await breakdownButton.getAttribute('data-selected-value')) === optionValue ||
+        (await breakdownButton.getVisibleText()) === field
+      );
+    });
   }
 
   public async clearBreakdownField() {
@@ -307,6 +316,16 @@ export class DiscoverPageObject extends FtrService {
   public async closeHistogramPanel() {
     await this.testSubjects.click('dscHideHistogramButton');
     await this.header.waitUntilLoadingHasFinished();
+  }
+
+  public async getHistogramHeight() {
+    const histogram = await this.testSubjects.find('unifiedHistogramResizablePanelFixed');
+    return (await histogram.getSize()).height;
+  }
+
+  public async resizeHistogramBy(distance: number) {
+    const resizeButton = await this.testSubjects.find('unifiedHistogramResizableButton');
+    await this.browser.dragAndDrop({ location: resizeButton }, { location: { x: 0, y: distance } });
   }
 
   public async getChartInterval() {

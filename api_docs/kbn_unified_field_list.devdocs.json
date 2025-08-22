@@ -5,41 +5,6 @@
     "functions": [
       {
         "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-public.convertFieldsToFallbackFields",
-        "type": "Function",
-        "tags": [],
-        "label": "convertFieldsToFallbackFields",
-        "description": [
-          "\nConverts fields to fallback fields where necessary, e.g. in the case of Smart Fields which\ndon't map 1:1 with a real backing field."
-        ],
-        "signature": [
-          "(props: FieldsInfo) => string[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.convertFieldsToFallbackFields.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "FieldsInfo"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
         "id": "def-public.FieldItemButton",
         "type": "Function",
         "tags": [
@@ -154,9 +119,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -217,9 +182,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",
@@ -570,249 +535,6 @@
             "trackAdoption": false
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-public.getAllFallbackFields",
-        "type": "Function",
-        "tags": [],
-        "label": "getAllFallbackFields",
-        "description": [
-          "\nProvides a flat list of all fallback fields"
-        ],
-        "signature": [
-          "(additionalFieldGroups?: ",
-          {
-            "pluginId": "@kbn/unified-field-list",
-            "scope": "public",
-            "docId": "kibKbnUnifiedFieldListPluginApi",
-            "section": "def-public.AdditionalFieldGroups",
-            "text": "AdditionalFieldGroups"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/field-utils",
-            "scope": "common",
-            "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
-            "text": "FieldBase"
-          },
-          "> | undefined) => string[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.getAllFallbackFields.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "additionalFieldGroups",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/unified-field-list",
-                "scope": "public",
-                "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-public.AdditionalFieldGroups",
-                "text": "AdditionalFieldGroups"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/field-utils",
-                "scope": "common",
-                "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
-                "text": "FieldBase"
-              },
-              "> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-public.getAssociatedSmartFields",
-        "type": "Function",
-        "tags": [],
-        "label": "getAssociatedSmartFields",
-        "description": [
-          "\nReturns a list of Smart Fields associated with a given fallback field name."
-        ],
-        "signature": [
-          "(fieldName: string, additionalFieldGroups?: ",
-          {
-            "pluginId": "@kbn/unified-field-list",
-            "scope": "public",
-            "docId": "kibKbnUnifiedFieldListPluginApi",
-            "section": "def-public.AdditionalFieldGroups",
-            "text": "AdditionalFieldGroups"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/field-utils",
-            "scope": "common",
-            "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
-            "text": "FieldBase"
-          },
-          "> | undefined) => string[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.getAssociatedSmartFields.$1",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.getAssociatedSmartFields.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "additionalFieldGroups",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/unified-field-list",
-                "scope": "public",
-                "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-public.AdditionalFieldGroups",
-                "text": "AdditionalFieldGroups"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/field-utils",
-                "scope": "common",
-                "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
-                "text": "FieldBase"
-              },
-              "> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-public.getAssociatedSmartFieldsAsString",
-        "type": "Function",
-        "tags": [],
-        "label": "getAssociatedSmartFieldsAsString",
-        "description": [
-          "\nReturns a list of Smart Fields associated with a given fallback field name formatted as a string."
-        ],
-        "signature": [
-          "(fieldName: string, additionalFieldGroups?: ",
-          {
-            "pluginId": "@kbn/unified-field-list",
-            "scope": "public",
-            "docId": "kibKbnUnifiedFieldListPluginApi",
-            "section": "def-public.AdditionalFieldGroups",
-            "text": "AdditionalFieldGroups"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/field-utils",
-            "scope": "common",
-            "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
-            "text": "FieldBase"
-          },
-          "> | undefined, delimiter?: string) => string"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.getAssociatedSmartFieldsAsString.$1",
-            "type": "string",
-            "tags": [],
-            "label": "fieldName",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.getAssociatedSmartFieldsAsString.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "additionalFieldGroups",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/unified-field-list",
-                "scope": "public",
-                "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-public.AdditionalFieldGroups",
-                "text": "AdditionalFieldGroups"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/field-utils",
-                "scope": "common",
-                "docId": "kibKbnFieldUtilsPluginApi",
-                "section": "def-common.FieldBase",
-                "text": "FieldBase"
-              },
-              "> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.getAssociatedSmartFieldsAsString.$3",
-            "type": "string",
-            "tags": [],
-            "label": "delimiter",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/utils/fallback_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1228,38 +950,6 @@
         "trackAdoption": false,
         "children": [],
         "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-public.SmartFieldFallbackTooltip",
-        "type": "Function",
-        "tags": [],
-        "label": "SmartFieldFallbackTooltip",
-        "description": [],
-        "signature": [
-          "React.ForwardRefExoticComponent<{ associatedSmartFields: string; } & React.RefAttributes<{}>>"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/fallback_fields/index.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.SmartFieldFallbackTooltip.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "props",
-            "description": [],
-            "signature": [
-              "P"
-            ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
         "initialIsOpen": false
       },
       {
@@ -1800,7 +1490,7 @@
         "label": "useGroupedFields",
         "description": [],
         "signature": [
-          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n  additionalFieldGroups,\n}: ",
+          "({\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n}: ",
           {
             "pluginId": "@kbn/unified-field-list",
             "scope": "public",
@@ -1827,7 +1517,7 @@
             "id": "def-public.useGroupedFields.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n  additionalFieldGroups,\n}",
+            "label": "{\n  dataViewId,\n  allFields,\n  services,\n  isAffectedByGlobalFilter = false,\n  popularFieldsLimit,\n  sortedSelectedFields,\n  getCustomFieldType,\n  onOverrideFieldGroupDetails,\n  onSupportedFieldFilter,\n  onSelectedFieldFilter,\n  getNewFieldsBySpec,\n}",
             "description": [],
             "signature": [
               {
@@ -1906,58 +1596,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "@kbn/unified-field-list",
-        "id": "def-public.AdditionalFieldGroups",
-        "type": "Interface",
-        "tags": [],
-        "label": "AdditionalFieldGroups",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/unified-field-list",
-            "scope": "public",
-            "docId": "kibKbnUnifiedFieldListPluginApi",
-            "section": "def-public.AdditionalFieldGroups",
-            "text": "AdditionalFieldGroups"
-          },
-          "<T>"
-        ],
-        "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.AdditionalFieldGroups.smartFields",
-            "type": "Array",
-            "tags": [],
-            "label": "smartFields",
-            "description": [],
-            "signature": [
-              "T[] | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.AdditionalFieldGroups.fallbackFields",
-            "type": "Object",
-            "tags": [],
-            "label": "fallbackFields",
-            "description": [],
-            "signature": [
-              "Record<string, string[]> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/unified-field-list",
         "id": "def-public.BucketedAggregation",
@@ -2909,7 +2547,14 @@
             "label": "size",
             "description": [],
             "signature": [
-              "\"s\" | \"xs\" | undefined"
+              {
+                "pluginId": "@kbn/react-field",
+                "scope": "public",
+                "docId": "kibKbnReactFieldPluginApi",
+                "section": "def-public.ButtonSize",
+                "text": "ButtonSize"
+              },
+              " | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/components/field_item_button/field_item_button.tsx",
             "deprecated": false,
@@ -3367,14 +3012,6 @@
                 "text": "FieldsGroup"
               },
               "<T> | undefined; UnmappedFields?: ",
-              {
-                "pluginId": "@kbn/unified-field-list",
-                "scope": "public",
-                "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-public.FieldsGroup",
-                "text": "FieldsGroup"
-              },
-              "<T> | undefined; SmartFields?: ",
               {
                 "pluginId": "@kbn/unified-field-list",
                 "scope": "public",
@@ -5309,27 +4946,6 @@
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.GroupedFieldsParams.additionalFieldGroups",
-            "type": "Object",
-            "tags": [],
-            "label": "additionalFieldGroups",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/unified-field-list",
-                "scope": "public",
-                "docId": "kibKbnUnifiedFieldListPluginApi",
-                "section": "def-public.AdditionalFieldGroups",
-                "text": "AdditionalFieldGroups"
-              },
-              "<T> | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-unified-field-list/src/hooks/use_grouped_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5820,12 +5436,12 @@
           },
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-public.UnifiedFieldListRestorableState.scrollPosition",
+            "id": "def-public.UnifiedFieldListRestorableState.scrollTop",
             "type": "number",
             "tags": [],
-            "label": "scrollPosition",
+            "label": "scrollTop",
             "description": [
-              "\nScroll position of the field list"
+              "\nScroll position inside the field list"
             ],
             "path": "src/platform/packages/shared/kbn-unified-field-list/src/restorable_state.ts",
             "deprecated": false,
@@ -6182,14 +5798,6 @@
             "section": "def-public.FieldsGroup",
             "text": "FieldsGroup"
           },
-          "<T> | undefined; SmartFields?: ",
-          {
-            "pluginId": "@kbn/unified-field-list",
-            "scope": "public",
-            "docId": "kibKbnUnifiedFieldListPluginApi",
-            "section": "def-public.FieldsGroup",
-            "text": "FieldsGroup"
-          },
           "<T> | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-unified-field-list/src/types.ts",
@@ -6207,9 +5815,9 @@
         "signature": [
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           }
         ],
@@ -6267,9 +5875,9 @@
           "<T extends ",
           {
             "pluginId": "@kbn/field-utils",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnFieldUtilsPluginApi",
-            "section": "def-common.FieldBase",
+            "section": "def-public.FieldBase",
             "text": "FieldBase"
           },
           " = ",

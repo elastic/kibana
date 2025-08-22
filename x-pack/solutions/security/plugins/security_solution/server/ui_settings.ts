@@ -43,6 +43,11 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
+  DEFAULT_VALUE_REPORT_MINUTES,
+  DEFAULT_VALUE_REPORT_RATE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -90,7 +95,7 @@ export const initUiSettings = (
         value: schema.number(),
         pause: schema.boolean(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_APP_TIME_RANGE]: {
       type: 'json',
@@ -111,7 +116,7 @@ export const initUiSettings = (
         from: schema.string(),
         to: schema.string(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultIndexLabel', {
@@ -130,7 +135,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 50 })
         : schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -151,7 +156,7 @@ export const initUiSettings = (
       schema: validationsEnabled
         ? schema.arrayOf(schema.string(), { maxSize: 10 })
         : schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -170,7 +175,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {
@@ -185,7 +190,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER]: {
       name: i18n.translate(
@@ -207,7 +212,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
@@ -224,7 +229,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
     [ENABLE_ASSET_INVENTORY_SETTING]: {
@@ -242,6 +247,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
@@ -259,6 +265,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
     [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
@@ -284,7 +291,7 @@ export const initUiSettings = (
         value: schema.number({ min: 60000 }),
         on: schema.boolean(),
       }),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [NEWS_FEED_URL_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.newsFeedUrl', {
@@ -299,7 +306,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.string(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [IP_REPUTATION_LINKS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.ipReputationLinks', {
@@ -323,7 +330,7 @@ export const initUiSettings = (
           url_template: schema.string(),
         })
       ),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [ENABLE_CCS_READ_WARNING_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableCcsReadWarningLabel', {
@@ -338,8 +345,53 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: false,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.continueSuppressionWindowAdvancedSettingEnabled
+      ? {
+          [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+              {
+                defaultMessage: 'Default suppression behavior on alert closure',
+              }
+            ),
+            value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+              {
+                defaultMessage:
+                  'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+              }
+            ),
+            type: 'select',
+            schema: schema.oneOf([
+              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+              schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+            ]),
+            options: [
+              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+              SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+            ],
+            optionLabels: {
+              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+                {
+                  defaultMessage: 'Restart suppression',
+                }
+              ),
+              [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+                'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+                {
+                  defaultMessage: 'Continue suppression until window ends',
+                }
+              ),
+            },
+            category: [APP_ID],
+            requiresPageReload: false,
+          },
+        }
+      : {}),
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
         defaultMessage: 'Related integrations',
@@ -356,7 +408,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [DEFAULT_ALERT_TAGS_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAlertTagsLabel', {
@@ -372,7 +424,7 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.arrayOf(schema.string()),
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
     [EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION]: {
       name: i18n.translate(
@@ -397,8 +449,34 @@ export const initUiSettings = (
       value: [],
       category: [APP_ID],
       requiresPageReload: false,
-      solution: 'security',
+      solutionViews: ['classic', 'security'],
     },
+    ...(experimentalFeatures.privilegedUserMonitoringDisabled
+      ? {}
+      : {
+          [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
+            name: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
+              {
+                defaultMessage: 'Privileged user monitoring',
+              }
+            ),
+            value: false,
+            description: i18n.translate(
+              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+              {
+                defaultMessage:
+                  '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+                values: { p: (chunks) => `<p>${chunks}</p>` },
+              }
+            ),
+            type: 'boolean',
+            category: [APP_ID],
+            requiresPageReload: true,
+            schema: schema.boolean(),
+            solutionViews: ['classic', 'security'],
+          },
+        }),
     ...(experimentalFeatures.extendedRuleExecutionLoggingEnabled
       ? {
           [EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING]: {
@@ -421,7 +499,7 @@ export const initUiSettings = (
             value: true,
             category: [APP_ID],
             requiresPageReload: false,
-            solution: 'security',
+            solutionViews: ['classic', 'security'],
           },
           [EXTENDED_RULE_EXECUTION_LOGGING_MIN_LEVEL_SETTING]: {
             name: i18n.translate(
@@ -496,7 +574,7 @@ export const initUiSettings = (
             },
             category: [APP_ID],
             requiresPageReload: false,
-            solution: 'security',
+            solutionViews: ['classic', 'security'],
           },
         }
       : {}),
@@ -516,8 +594,8 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           description: i18n.translate(
             'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
             {
-              // TODO update this copy, waiting on James Spiteri's input
-              defaultMessage: 'Default AI connector for serverless AI features (AI for SOC)',
+              defaultMessage:
+                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
             }
           ),
           type: 'select',
@@ -526,7 +604,43 @@ export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsC
           category: [APP_ID],
           requiresPageReload: true,
           schema: schema.string(),
-          solution: 'security',
+          solutionViews: ['classic', 'security'],
         },
       }
     : null;
+
+export const getDefaultValueReportSettings = (): SettingsConfig => ({
+  [DEFAULT_VALUE_REPORT_MINUTES]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueMinutesLabel', {
+      defaultMessage: 'Value report minutes per alert',
+    }),
+    value: 8,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.defaultValueMinutesDescription',
+      {
+        defaultMessage:
+          'The average review time for an analyst to review an alert. Used for calculations in the Value report.',
+      }
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [DEFAULT_VALUE_REPORT_RATE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateLabel', {
+      defaultMessage: 'Value report analyst hourly rate',
+    }),
+    value: 75,
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateDescription', {
+      defaultMessage:
+        'The average hourly rate for a security analyst. Used for calculations in the Value report.',
+    }),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+});

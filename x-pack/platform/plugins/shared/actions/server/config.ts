@@ -141,6 +141,7 @@ export const configSchema = schema.object({
     schema.object(
       {
         domain_allowlist: schema.maybe(schema.arrayOf(schema.string())),
+        recipient_allowlist: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1 })),
         services: schema.maybe(
           schema.object(
             {
@@ -178,7 +179,11 @@ export const configSchema = schema.object({
       {
         validate: (obj) => {
           if (obj && Object.keys(obj).length === 0) {
-            return 'email.domain_allowlist or email.services must be defined';
+            return 'email.domain_allowlist, email.recipient_allowlist, or email.services must be defined';
+          }
+
+          if (obj?.domain_allowlist && obj?.recipient_allowlist) {
+            return 'email.domain_allowlist and email.recipient_allowlist can not be used at the same time';
           }
         },
       }

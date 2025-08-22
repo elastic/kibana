@@ -8,8 +8,11 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
-import { getElasticManagedLlmConnector } from '@kbn/observability-ai-assistant-plugin/public';
-import { ElasticLlmTourCallout } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  getElasticManagedLlmConnector,
+  ElasticLlmTourCallout,
+  useObservabilityAIAssistantFlyoutStateContext,
+} from '@kbn/observability-ai-assistant-plugin/public';
 
 jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
   ElasticLlmTourCallout: jest.fn(({ children }) => (
@@ -17,6 +20,7 @@ jest.mock('@kbn/observability-ai-assistant-plugin/public', () => ({
   )),
   getElasticManagedLlmConnector: jest.fn(),
   useElasticLlmCalloutDismissed: jest.fn().mockReturnValue([false, jest.fn()]),
+  useObservabilityAIAssistantFlyoutStateContext: jest.fn().mockReturnValue({ isFlyoutOpen: false }),
   ElasticLlmCalloutKey: {
     TOUR_CALLOUT: 'tour_callout',
   },
@@ -33,6 +37,24 @@ jest.mock('./chat_sharing_menu', () => ({
 jest.mock('./chat_context_menu', () => ({
   ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
 }));
+
+const elasticManagedConnector = {
+  id: 'elastic-llm',
+  actionTypeId: '.inference',
+  name: 'Elastic LLM',
+  isPreconfigured: true,
+  isDeprecated: false,
+  isSystemAction: false,
+  config: {
+    provider: 'elastic',
+    taskType: 'chat_completion',
+    inferenceId: '.rainbow-sprinkles-elastic',
+    providerConfig: {
+      model_id: 'rainbow-sprinkles',
+    },
+  },
+  referencedByCount: 0,
+};
 
 describe('ChatHeader', () => {
   const baseProps = {
@@ -70,23 +92,6 @@ describe('ChatHeader', () => {
   });
 
   it('shows the Elastic Managed LLM connector tour callout when the connector is present', () => {
-    const elasticManagedConnector = {
-      id: 'elastic-llm',
-      actionTypeId: '.inference',
-      name: 'Elastic LLM',
-      isPreconfigured: true,
-      isDeprecated: false,
-      isSystemAction: false,
-      config: {
-        provider: 'elastic',
-        taskType: 'chat_completion',
-        inferenceId: '.rainbow-sprinkles-elastic',
-        providerConfig: {
-          model_id: 'rainbow-sprinkles',
-        },
-      },
-      referencedByCount: 0,
-    };
     (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
 
     render(
@@ -128,5 +133,57 @@ describe('ChatHeader', () => {
     expect(screen.queryByTestId('elastic-llm-tour')).toBeNull();
     expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
     expect(ElasticLlmTourCallout).not.toHaveBeenCalled();
+  });
+
+  it('hides the tour callout from the AI Assistant page when the flyout is open', () => {
+    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
+    (useObservabilityAIAssistantFlyoutStateContext as jest.Mock).mockReturnValue({
+      isFlyoutOpen: true,
+    });
+
+    render(
+      <ChatHeader
+        {...baseProps}
+        isConversationApp={true}
+        connectors={{
+          connectors: [elasticManagedConnector],
+          selectedConnector: undefined,
+          loading: false,
+          error: undefined,
+          selectConnector: (id: string) => {},
+          reloadConnectors: () => {},
+        }}
+      />
+    );
+
+    expect(screen.queryByTestId('elastic-llm-tour')).toBeNull();
+    expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
+    expect(ElasticLlmTourCallout).not.toHaveBeenCalled();
+  });
+
+  it('shows the tour callout on the AI Assistant page when the flyout is closed', () => {
+    (getElasticManagedLlmConnector as jest.Mock).mockReturnValue(elasticManagedConnector);
+    (useObservabilityAIAssistantFlyoutStateContext as jest.Mock).mockReturnValue({
+      isFlyoutOpen: false,
+    });
+
+    render(
+      <ChatHeader
+        {...baseProps}
+        isConversationApp={true}
+        connectors={{
+          connectors: [elasticManagedConnector],
+          selectedConnector: undefined,
+          loading: false,
+          error: undefined,
+          selectConnector: (id: string) => {},
+          reloadConnectors: () => {},
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('elastic-llm-tour')).toBeInTheDocument();
+    expect(screen.getByTestId('chat-actions-menu')).toBeInTheDocument();
+    expect(ElasticLlmTourCallout).toHaveBeenCalled();
   });
 });

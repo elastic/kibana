@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
-import { SchemaEditorProps, SchemaField } from './types';
+import type { SchemaEditorProps, SchemaField } from './types';
 
 export const UnpromoteFieldModal = ({
   field,
@@ -24,10 +24,14 @@ export const UnpromoteFieldModal = ({
     if (onClose) onClose();
   }, [field, onClose, onFieldUnmap]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
       isLoading={loading}
       title={field.name}
+      aria-labelledby={modalTitleId}
+      titleProps={{ id: modalTitleId }}
       onCancel={onClose}
       onConfirm={unmapField}
       cancelButtonText={i18n.translate(

@@ -92,9 +92,13 @@ export class AnalyticsService {
    * @internal
    */
   private registerSessionIdContext() {
+    const sessionInfo = { session_id: getSessionId() };
+
+    apm.addLabels(sessionInfo); // Attach this label to APM to help us identify issues affecting multiple sessions
+
     this.analyticsClient.registerContextProvider({
       name: 'session-id',
-      context$: of({ session_id: getSessionId() }),
+      context$: of(sessionInfo),
       schema: {
         session_id: {
           type: 'keyword',

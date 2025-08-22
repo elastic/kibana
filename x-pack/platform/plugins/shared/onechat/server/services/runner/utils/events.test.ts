@@ -7,7 +7,7 @@
 
 import { createToolEventEmitter, createAgentEventEmitter } from './events';
 import type { InternalToolEvent, RunContext } from '@kbn/onechat-server';
-import { ChatAgentEventType, type MessageChunkEvent } from '@kbn/onechat-common/agents';
+import { ChatEventType, type MessageChunkEvent } from '@kbn/onechat-common';
 
 describe('Event utilities', () => {
   describe('createToolEventEmitter', () => {
@@ -51,10 +51,10 @@ describe('Event utilities', () => {
       });
 
       const testEvent: MessageChunkEvent = {
-        type: ChatAgentEventType.messageChunk,
+        type: ChatEventType.messageChunk,
         data: {
-          messageId: 'test-message-id',
-          textChunk: 'test message',
+          message_id: 'test-message-id',
+          text_chunk: 'test message',
         },
       };
 
@@ -75,10 +75,10 @@ describe('Event utilities', () => {
       });
 
       const testEvent: MessageChunkEvent = {
-        type: ChatAgentEventType.messageChunk,
+        type: ChatEventType.messageChunk,
         data: {
-          messageId: 'test-message-id',
-          textChunk: 'test message',
+          message_id: 'test-message-id',
+          text_chunk: 'test message',
         },
       };
 

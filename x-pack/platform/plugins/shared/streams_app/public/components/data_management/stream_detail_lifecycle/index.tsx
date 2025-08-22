@@ -7,13 +7,15 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
-import { IngestStreamLifecycle, Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
-import { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
+import type { IngestStreamLifecycle } from '@kbn/streams-schema';
+import { Streams, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
+import type { PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { useKibana } from '../../../hooks/use_kibana';
-import { EditLifecycleModal, LifecycleEditAction } from './modal';
+import type { LifecycleEditAction } from './modal';
+import { EditLifecycleModal } from './modal';
 import { RetentionSummary } from './summary';
 import { RetentionMetadata } from './metadata';
 import { IlmSummary } from './ilm_summary';
@@ -33,7 +35,7 @@ function useLifecycleState({
 
   const lifecycleActions = useMemo(() => {
     const actions: Array<{ name: string; action: LifecycleEditAction }> = [];
-    const isWired = Streams.WiredStream.GetResponse.is(definition);
+    const isClassic = Streams.ClassicStream.GetResponse.is(definition);
 
     actions.push({
       name: i18n.translate('xpack.streams.streamDetailLifecycle.setRetentionDays', {
@@ -51,7 +53,7 @@ function useLifecycleState({
       });
     }
 
-    if (isWired && !isRoot(definition.stream.name)) {
+    if (isClassic || !isRoot(definition.stream.name)) {
       actions.push({
         name: i18n.translate('xpack.streams.streamDetailLifecycle.resetToDefault', {
           defaultMessage: 'Reset to default',
@@ -161,19 +163,13 @@ export function StreamDetailLifecycle({
       />
       <EuiFlexGroup gutterSize="m" css={flexRowCss}>
         <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="m">
-          <RetentionSummary
-            definition={definition}
-            isLoadingStats={isLoadingStats}
-            stats={stats}
-            statsError={statsError}
-          />
+          <RetentionSummary definition={definition} stats={stats} statsError={statsError} />
         </EuiPanel>
         <EuiPanel grow hasShadow={false} hasBorder paddingSize="m">
           <RetentionMetadata
             definition={definition}
             lifecycleActions={lifecycleActions}
             openEditModal={(action) => setOpenEditModal(action)}
-            isLoadingStats={isLoadingStats}
             stats={stats}
             statsError={statsError}
           />
@@ -194,7 +190,11 @@ export function StreamDetailLifecycle({
         {definition.privileges.lifecycle && isIlmLifecycle(definition.effective_lifecycle) ? (
           <EuiFlexItem grow={3}>
             <EuiPanel hasShadow={false} hasBorder paddingSize="m">
-              <IlmSummary definition={definition} lifecycle={definition.effective_lifecycle} />
+              <IlmSummary
+                definition={definition}
+                stats={stats}
+                lifecycle={definition.effective_lifecycle}
+              />
             </EuiPanel>
           </EuiFlexItem>
         ) : null}

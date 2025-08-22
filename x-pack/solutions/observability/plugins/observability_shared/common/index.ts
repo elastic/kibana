@@ -199,7 +199,7 @@ export {
   AssetDetailsFlyoutLocatorDefinition,
   ASSET_DETAILS_LOCATOR_ID,
   AssetDetailsLocatorDefinition,
-  SupportedAssetTypes,
+  SupportedEntityTypes,
   HostsLocatorDefinition,
   INVENTORY_LOCATOR_ID,
   InventoryLocatorDefinition,

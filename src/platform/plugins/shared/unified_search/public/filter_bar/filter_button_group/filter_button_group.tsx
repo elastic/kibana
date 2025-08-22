@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, ReactNode } from 'react';
+import type { FC, ReactNode } from 'react';
+import React from 'react';
 import classNames from 'classnames';
-import { EuiFlexGroup, EuiFlexItem, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useMemoCss } from '../../use_memo_css';
 
@@ -60,7 +62,7 @@ const filterButtonStyles = {
         content: "''",
         position: 'absolute',
         inset: 0,
-        border: `${euiTheme.border.thin} solid ${euiTheme.colors.borderBasePlain}`,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
         borderRadius: 'inherit',
         pointerEvents: 'none',
       },

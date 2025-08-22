@@ -8,9 +8,10 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction, ESQLMap } from '../../types';
+import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type { BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
 const reprint = (src: string) => {
   const { root } = parse(src);
@@ -72,6 +73,14 @@ describe('single line query', () => {
         const { text } = reprint('FROM a | SORT b DESC NULLS FIRST');
 
         expect(text).toBe('FROM a | SORT b DESC NULLS FIRST');
+      });
+    });
+
+    describe('WHERE', () => {
+      test('escapes field parts which match keywords (FIRST)', () => {
+        const { text } = reprint('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
+
+        expect(text).toBe('FROM a | WHERE `first`.name == "Beatrice" AND `and` == "one"');
       });
     });
 
@@ -272,14 +281,14 @@ describe('single line query', () => {
       });
     });
 
-    describe('RRF', () => {
+    describe('FUSE', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score
+          reprint(`FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score
         `);
 
         expect(text).toBe(
-          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
 
@@ -288,12 +297,12 @@ describe('single line query', () => {
   | FORK
     (WHERE semantic_title : "Shakespeare" | SORT _score)
     (WHERE title : "Shakespeare" | SORT _score)
-  | RRF
+  | FUSE
   | KEEP title, _score
           `);
 
         expect(text).toBe(
-          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | RRF | KEEP title, _score'
+          'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
     });
@@ -301,24 +310,24 @@ describe('single line query', () => {
     describe('COMPLETION', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}
         `);
 
         expect(text).toBe(
-          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}'
         );
       });
 
       test('from multiline', () => {
         const { text } = reprint(
           `FROM kibana_sample_data_ecommerce
-                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"}
                  | LIMIT 2
           `
         );
 
         expect(text).toBe(
-          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"} | LIMIT 2'
         );
       });
     });

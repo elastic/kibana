@@ -5,8 +5,48 @@
  * 2.0.
  */
 
-import type { ToolDescriptor } from '@kbn/onechat-common';
+import type {
+  ToolDefinition,
+  ToolDefinitionWithSchema,
+  SerializedOnechatError,
+} from '@kbn/onechat-common';
 
 export interface ListToolsResponse {
-  tools: ToolDescriptor[];
+  results: ToolDefinitionWithSchema[];
+}
+
+export type GetToolResponse = ToolDefinitionWithSchema;
+
+export interface DeleteToolResponse {
+  success: boolean;
+}
+
+export type CreateToolPayload = Omit<ToolDefinition, 'description' | 'tags'> &
+  Partial<Pick<ToolDefinition, 'description' | 'tags'>>;
+
+export type UpdateToolPayload = Partial<Pick<ToolDefinition, 'description' | 'tags'>> & {
+  configuration?: Partial<ToolDefinition['configuration']>;
+};
+
+export type CreateToolResponse = ToolDefinitionWithSchema;
+
+export type UpdateToolResponse = ToolDefinitionWithSchema;
+
+interface BulkDeleteToolResultBase {
+  toolId: string;
+}
+
+interface BulkDeleteToolSuccessResult extends BulkDeleteToolResultBase {
+  success: true;
+}
+
+interface BulkDeleteToolFailureResult extends BulkDeleteToolResultBase {
+  success: false;
+  reason: SerializedOnechatError;
+}
+
+export type BulkDeleteToolResult = BulkDeleteToolSuccessResult | BulkDeleteToolFailureResult;
+
+export interface BulkDeleteToolResponse {
+  results: BulkDeleteToolResult[];
 }

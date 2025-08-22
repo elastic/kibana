@@ -18,7 +18,7 @@ import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import type { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
-import type { RuleTaskStateAndMetrics } from '../task_runner/types';
+import type { RunRuleResult } from '../task_runner/types';
 import type { RuleRunMetrics } from './rule_run_metrics_store';
 
 export interface IExecutionStatusAndMetrics {
@@ -27,15 +27,15 @@ export interface IExecutionStatusAndMetrics {
 }
 
 export function executionStatusFromState({
-  stateWithMetrics,
+  runRuleResult,
   ruleResultService,
   lastExecutionDate,
 }: {
-  stateWithMetrics: RuleTaskStateAndMetrics;
+  runRuleResult: RunRuleResult;
   ruleResultService: RuleResultService;
   lastExecutionDate?: Date;
 }): IExecutionStatusAndMetrics {
-  const alertIds = Object.keys(stateWithMetrics.alertInstances ?? {});
+  const alertIds = Object.keys(runRuleResult.state.alertInstances ?? {});
 
   let status: RuleExecutionStatuses =
     alertIds.length === 0 ? RuleExecutionStatusValues[0] : RuleExecutionStatusValues[1];
@@ -45,15 +45,15 @@ export function executionStatusFromState({
   let error = null;
 
   // We only have a single warning field so prioritizing the alert circuit breaker over the actions circuit breaker
-  if (stateWithMetrics.metrics.hasReachedAlertLimit) {
+  if (runRuleResult.metrics.hasReachedAlertLimit) {
     status = RuleExecutionStatusValues[5];
     warning = {
       reason: RuleExecutionStatusWarningReasons.MAX_ALERTS,
       message: translations.taskRunner.warning.maxAlerts,
     };
-  } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
+  } else if (runRuleResult.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     status = RuleExecutionStatusValues[5];
-    if (stateWithMetrics.metrics.hasReachedQueuedActionsLimit) {
+    if (runRuleResult.metrics.hasReachedQueuedActionsLimit) {
       warning = {
         reason: RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS,
         message: translations.taskRunner.warning.maxQueuedActions,
@@ -94,7 +94,7 @@ export function executionStatusFromState({
       ...(warning ? { warning } : {}),
       ...(error ? { error } : {}),
     },
-    metrics: stateWithMetrics.metrics,
+    metrics: runRuleResult.metrics,
   };
 }
 

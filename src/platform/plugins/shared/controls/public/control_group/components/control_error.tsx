@@ -9,7 +9,8 @@
 
 import React, { useState } from 'react';
 
-import { EuiButtonEmpty, EuiPopover, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPopover } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Markdown } from '@kbn/shared-ux-markdown';
 import { useErrorTextStyle } from '@kbn/react-hooks';
@@ -61,9 +62,8 @@ export const ControlError = ({ error }: ControlErrorProps) => {
       iconType="error"
       data-test-subj="control-frame-error"
       onClick={() => setPopoverOpen((open) => !open)}
-      className="errorEmbeddableCompact__button controlErrorButton"
+      className="controlErrorButton"
       css={styles.button}
-      textProps={{ className: 'errorEmbeddableCompact__text' }}
       contentProps={{ css: styles.buttonContentCss }}
     >
       <FormattedMessage
@@ -77,7 +77,6 @@ export const ControlError = ({ error }: ControlErrorProps) => {
     <EuiPopover
       button={popoverButton}
       isOpen={isPopoverOpen}
-      className="errorEmbeddableCompact__popover"
       closePopover={() => setPopoverOpen(false)}
       css={styles.popover}
     >

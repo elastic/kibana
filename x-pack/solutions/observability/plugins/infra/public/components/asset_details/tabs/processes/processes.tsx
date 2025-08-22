@@ -22,6 +22,7 @@ import { getFieldByType } from '@kbn/metrics-data-access-plugin/common';
 import { debounce } from 'lodash';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { ProcessListAPIResponseRT } from '../../../../../common/http_api';
+import { usePluginConfig } from '../../../../containers/plugin_config_context';
 import { useSourceContext } from '../../../../containers/metrics_source';
 import { isPending, useFetcher } from '../../../../hooks/use_fetcher';
 import { ProcessesExplanationMessage } from '../../components/processes_explanation';
@@ -46,7 +47,8 @@ export const Processes = () => {
   const ref = useRef<HTMLDivElement>(null);
   const { getDateRangeInTimestamp } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
-  const { asset } = useAssetDetailsRenderPropsContext();
+  const { featureFlags } = usePluginConfig();
+  const { entity, schema } = useAssetDetailsRenderPropsContext();
   const { sourceId } = useSourceContext();
   const { request$ } = useRequestObservable();
   const { isActiveTab } = useTabSwitcherContext();
@@ -65,9 +67,9 @@ export const Processes = () => {
   });
 
   const hostTerm = useMemo(() => {
-    const field = getFieldByType(asset.type) ?? asset.type;
-    return { [field]: asset.name };
-  }, [asset.name, asset.type]);
+    const field = getFieldByType(entity.type) ?? entity.type;
+    return { [field]: entity.name };
+  }, [entity.name, entity.type]);
 
   const searchFilter = useMemo(() => parseSearchString(searchText), [searchText]);
   const parsedSortBy = useMemo(
@@ -91,12 +93,13 @@ export const Processes = () => {
           to: toTimestamp,
           sortBy: parsedSortBy,
           searchFilter,
+          schema,
         }),
       });
 
       return decodeOrThrow(ProcessListAPIResponseRT)(response);
     },
-    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp],
+    [hostTerm, parsedSortBy, searchFilter, sourceId, toTimestamp, schema],
     {
       requestObservable$: request$,
       autoFetch: isActiveTab('processes'),
@@ -132,15 +135,19 @@ export const Processes = () => {
 
   const isLoading = isPending(status);
 
+  const hideSummaryTable = schema === 'semconv' && featureFlags.hostOtelEnabled;
+
   return (
     <ProcessListContextProvider hostTerm={hostTerm} to={toTimestamp}>
       <EuiFlexGroup direction="column" gutterSize="m" ref={ref}>
-        <EuiFlexItem grow={false}>
-          <SummaryTable
-            isLoading={isLoading}
-            processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
-          />
-        </EuiFlexItem>
+        {!hideSummaryTable && (
+          <EuiFlexItem grow={false}>
+            <SummaryTable
+              isLoading={isLoading}
+              processSummary={error || !data?.summary ? { total: 0 } : data?.summary}
+            />
+          </EuiFlexItem>
+        )}
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup gutterSize="xs" alignItems="center">
             <EuiFlexItem grow={false}>
@@ -180,16 +187,20 @@ export const Processes = () => {
                 defaultMessage: 'Search for processes…',
               }),
             }}
-            filters={[
-              {
-                type: 'field_value_selection',
-                field: 'state',
-                name: 'State',
-                operator: 'exact',
-                multiSelect: false,
-                options,
-              },
-            ]}
+            filters={
+              schema === 'semconv' && featureFlags.hostOtelEnabled
+                ? []
+                : [
+                    {
+                      type: 'field_value_selection',
+                      field: 'state',
+                      name: 'State',
+                      operator: 'exact',
+                      multiSelect: false,
+                      options,
+                    },
+                  ]
+            }
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -202,6 +213,8 @@ export const Processes = () => {
               error={searchQueryError?.message}
               setSortBy={setSortBy}
               clearSearchBar={clearSearchBar}
+              schema={schema}
+              isHostOtelEnabled={featureFlags.hostOtelEnabled}
             />
           ) : (
             <EuiEmptyPrompt

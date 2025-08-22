@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
+import type { Message, Deanonymization, Anonymization } from '@kbn/inference-common';
 import { isEmpty } from 'lodash';
 import { getAnonymizableMessageParts } from './get_anonymizable_message_parts';
 
@@ -13,32 +13,24 @@ export function deanonymize<TMessage extends Message>(
   message: TMessage,
   anonymizations: Anonymization[]
 ): { message: TMessage; deanonymizations: Deanonymization[] } {
-  // reverse order of anonymizations when unmasking, this ensures
-  // doubly masked parts are unmasked appropriately. e.g.:
-  // a => b => c should be unmasked as c => b => a. if you start
-  // with a, you won't find a match, only c will be unmasked to b.
-  const reversedAnonymizations = anonymizations.concat().reverse();
-
   function replace(content: string) {
     let next = content;
     const deanonymizations: Deanonymization[] = [];
 
-    reversedAnonymizations.forEach(({ entity }) => {
+    anonymizations.forEach(({ entity }) => {
       let index = next.indexOf(entity.mask);
 
-      let offset = 0;
-
       while (index !== -1) {
-        const start = index + offset;
-        const end = start + entity.mask.length;
+        const start = index;
+        const end = start + entity.value.length;
 
         deanonymizations.push({ start, end, entity });
 
+        // Replace the mask with the original value
         next = next.slice(0, start) + entity.value + next.slice(start + entity.mask.length);
 
-        index = next.indexOf(entity.mask, end);
-
-        offset += entity.value.length;
+        // Continue searching after the replaced value to avoid infinite loops
+        index = next.indexOf(entity.mask, start + entity.value.length);
       }
     });
 

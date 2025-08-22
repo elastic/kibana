@@ -15,8 +15,8 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { ConnectorRulesList } from './connector_rules_list';
 import { useKibana } from '../../../common/lib/kibana';
-import { ActionConnector } from '../../../types';
-import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helpers';
+import type { ActionConnector } from '../../../types';
+import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_helper';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/rule_api/rules_kuery_filter', () => ({

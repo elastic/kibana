@@ -41,6 +41,7 @@ export function initializeMetadata({
     build_sha: initializerContext.env.packageInfo.buildSha,
     build_sha_short: initializerContext.env.packageInfo.buildShaShort,
     project_type: cloud.serverless.projectType,
+    product_tier: cloud.serverless.productTier,
     orchestrator_target: cloud.serverless.orchestratorTarget,
     organizationKey: cloud.organizationId,
     trial_end_date: cloud.trialEndDate,

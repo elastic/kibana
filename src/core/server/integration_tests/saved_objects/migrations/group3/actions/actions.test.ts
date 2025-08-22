@@ -81,6 +81,7 @@ describe('migration actions', () => {
       aliases: ['existing_index_with_docs_alias'],
       esCapabilities,
       mappings: {
+        // @ts-expect-error allowed for test purposes only (dynamic mapping definition)
         dynamic: true,
         properties: {
           someProperty: {
@@ -986,7 +987,7 @@ describe('migration actions', () => {
         client,
         indexName: 'reindex_target_6',
         mappings: {
-          dynamic: false,
+          dynamic: 'false',
           properties: { title: { type: 'integer' } }, // integer is incompatible with string title
         },
         esCapabilities,
@@ -1471,7 +1472,7 @@ describe('migration actions', () => {
         client,
         indexName: 'existing_index_without_mappings',
         mappings: {
-          dynamic: false,
+          dynamic: 'false',
           properties: {},
         },
         esCapabilities,

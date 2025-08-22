@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const spacesService = getService('spaces');
@@ -20,15 +20,17 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await spacesService.create({ id: spaceId, name: spaceId });
       await kibanaServer.importExport.load(
-        `x-pack/test/functional/fixtures/kbn_archiver/reporting/ecommerce_kibana_non_default_space`,
+        `x-pack/platform/test/functional/fixtures/kbn_archives/reporting/ecommerce_kibana_non_default_space`,
         { space: spaceId }
       );
       await reportingAPI.initEcommerce();
-      await esArchiver.load('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.load('x-pack/platform/test/fixtures/es_archives/reporting/archived_reports');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/reporting/archived_reports');
+      await esArchiver.unload(
+        'x-pack/platform/test/fixtures/es_archives/reporting/archived_reports'
+      );
       await reportingAPI.teardownEcommerce();
       await reportingAPI.deleteAllReports();
       await spacesService.delete(spaceId);

@@ -73,6 +73,27 @@ describe('#resolve()', () => {
     `);
   });
 
+  it('resolves sub-path exports (exact match)', () => {
+    expect(resolver.resolve('exports-pkg/my_module', FIXTURES_DIR)).toMatchInlineSnapshot(`
+      Object {
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/exports-pkg/dist/my_module.js,
+        "nodeModule": "exports-pkg",
+        "type": "file",
+      }
+    `);
+  });
+
+  it('resolves sub-path exports (wildcard match)', () => {
+    expect(resolver.resolve('exports-pkg/sub/my_other_module', FIXTURES_DIR))
+      .toMatchInlineSnapshot(`
+      Object {
+        "absolute": <absolute path>/src/platform/packages/private/kbn-import-resolver/src/__fixtures__/node_modules/exports-pkg/dist/sub/my_other_module.js,
+        "nodeModule": "exports-pkg",
+        "type": "file",
+      }
+    `);
+  });
+
   it('returns null when the import cannot be resolved', () => {
     expect(resolver.resolve('../../../../../../../invalid', FIXTURES_DIR)).toMatchInlineSnapshot(
       `null`

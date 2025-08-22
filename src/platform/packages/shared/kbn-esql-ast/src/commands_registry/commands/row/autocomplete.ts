@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLCommand } from '../../../types';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
-} from '../../utils/complete_items';
+} from '../../complete_items';
 import { Location } from '../../types';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 import { getFunctionSuggestions } from '../../../definitions/utils';
@@ -22,15 +23,21 @@ export async function autocomplete(
   query: string,
   command: ESQLCommand,
   callbacks?: ICommandCallbacks,
-  context?: ICommandContext
+  context?: ICommandContext,
+  cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   // ROW col0 = /
-  if (/=\s*$/.test(query)) {
-    return getFunctionSuggestions({ location: Location.ROW });
+  if (/=\s*$/.test(innerText)) {
+    return getFunctionSuggestions(
+      { location: Location.ROW },
+      callbacks?.hasMinimumLicenseRequired,
+      context?.activeProduct
+    );
   }
 
   // ROW col0 = 23 /
-  else if (command.args.length > 0 && !isRestartingExpression(query)) {
+  else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
       { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
       { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
@@ -41,6 +48,10 @@ export async function autocomplete(
   // ROW foo = "bar", /
   return [
     getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-    ...getFunctionSuggestions({ location: Location.ROW }),
+    ...getFunctionSuggestions(
+      { location: Location.ROW },
+      callbacks?.hasMinimumLicenseRequired,
+      context?.activeProduct
+    ),
   ];
 }

@@ -14,7 +14,7 @@ export type DockerContainerMetrics = 'cpu' | 'memory' | 'network' | 'disk';
 export type ContainerMetricTypes = KubernetesContainerMetrics | DockerContainerMetrics;
 
 export interface MetricsChartsFields {
-  assetId: string;
+  entityId: string;
   dateRange: TimeRange;
   dataView?: DataView;
   overview?: boolean;

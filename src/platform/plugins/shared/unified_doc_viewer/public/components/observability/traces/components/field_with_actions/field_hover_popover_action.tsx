@@ -8,16 +8,16 @@
  */
 
 import React, { useEffect, useRef, useState } from 'react';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiPopover,
   EuiButtonIcon,
   EuiPopoverTitle,
   EuiToolTip,
-  PopoverAnchorPosition,
   type EuiPopoverProps,
 } from '@elastic/eui';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { useUIFieldActions } from '../../../../../hooks/use_field_actions';
 
 interface HoverPopoverActionProps {
@@ -88,7 +88,7 @@ export const FieldHoverActionPopover = ({
         </EuiPopoverTitle>
         <EuiFlexGroup wrap gutterSize="none" alignItems="center" justifyContent="spaceBetween">
           {uiFieldActions.map((action) => (
-            <EuiToolTip content={action.label} key={action.id}>
+            <EuiToolTip content={action.label} key={action.id} disableScreenReaderOutput>
               <EuiButtonIcon
                 data-test-subj="unifiedDocViewerObservabilityTracesFieldHoverActionPopoverButton"
                 size="xs"

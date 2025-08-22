@@ -10,6 +10,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import React, { useCallback, useMemo, useState } from 'react';
 
+import type { EuiRadioGroupOption } from '@elastic/eui';
 import {
   EuiForm,
   EuiIcon,
@@ -25,20 +26,16 @@ import {
   EuiButtonEmpty,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
-  EuiRadioGroupOption,
 } from '@elastic/eui';
 
-import {
-  LinkType,
-  EXTERNAL_LINK_TYPE,
-  DASHBOARD_LINK_TYPE,
-  LinkOptions,
-} from '../../../common/content_management';
+import type { LinkType } from '../../../common/content_management';
+import { EXTERNAL_LINK_TYPE, DASHBOARD_LINK_TYPE } from '../../../common/content_management';
 import { LinksStrings } from '../links_strings';
 import { LinkInfo } from './constants';
 import { LinkOptionsComponent } from './link_options';
-import { UnorderedLink } from '../../editor/open_link_editor_flyout';
+import type { UnorderedLink } from '../../editor/open_link_editor_flyout';
 import { LinkDestination } from './link_destination';
+import type { LinkOptions } from '../../../server';
 
 export const LinkEditor = ({
   link,
@@ -122,6 +119,7 @@ export const LinkEditor = ({
                 }
                 setSelectedLinkType(id as LinkType);
               }}
+              name="linkType"
             />
           </EuiFormRow>
           <LinkDestination

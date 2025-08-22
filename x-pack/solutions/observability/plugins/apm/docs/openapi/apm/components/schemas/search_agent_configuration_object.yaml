@@ -13,3 +13,8 @@ properties:
     description: |
       `markAsAppliedByAgent=true` means "force setting it to true regardless of etag".
       This is needed for Jaeger agent that doesn't have etags
+  error:
+    type: string
+    description: |
+      If provided, the agent configuration will be marked as error and `applied_by_agent` will be set to `false`.
+      This is useful for cases where the agent configuration was not applied successfully.

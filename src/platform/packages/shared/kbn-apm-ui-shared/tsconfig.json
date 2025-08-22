@@ -10,5 +10,6 @@
     "@kbn/i18n",
     "@kbn/charts-theme",
     "@kbn/apm-types-shared",
+    "@kbn/custom-icons",
   ]
 }

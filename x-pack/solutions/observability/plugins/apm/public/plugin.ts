@@ -15,6 +15,7 @@ import type {
   AppMountParameters,
   CoreSetup,
   CoreStart,
+  NotificationsStart,
   Plugin,
   PluginInitializerContext,
   SecurityServiceStart,
@@ -159,6 +160,7 @@ export interface ApmPluginStartDeps {
   savedSearch: SavedSearchPublicPluginStart;
   fieldsMetadata: FieldsMetadataPublicStart;
   share?: SharePublicStart;
+  notifications: NotificationsStart;
 }
 
 const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
@@ -166,7 +168,7 @@ const applicationsTitle = i18n.translate('xpack.apm.navigation.rootTitle', {
 });
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {
-  defaultMessage: 'Service Inventory',
+  defaultMessage: 'Service inventory',
 });
 
 const serviceGroupsTitle = i18n.translate('xpack.apm.navigation.serviceGroupsTitle', {
@@ -177,7 +179,7 @@ const tracesTitle = i18n.translate('xpack.apm.navigation.tracesTitle', {
   defaultMessage: 'Traces',
 });
 const serviceMapTitle = i18n.translate('xpack.apm.navigation.serviceMapTitle', {
-  defaultMessage: 'Service Map',
+  defaultMessage: 'Service map',
 });
 
 const dependenciesTitle = i18n.translate('xpack.apm.navigation.dependenciesTitle', {
@@ -189,7 +191,7 @@ const apmSettingsTitle = i18n.translate('xpack.apm.navigation.apmSettingsTitle',
 });
 
 const apmStorageExplorerTitle = i18n.translate('xpack.apm.navigation.apmStorageExplorerTitle', {
-  defaultMessage: 'Storage Explorer',
+  defaultMessage: 'Storage explorer',
 });
 
 const apmTutorialTitle = i18n.translate('xpack.apm.navigation.apmTutorialTitle', {

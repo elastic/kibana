@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import { DiagnosticResult, errors } from '@elastic/elasticsearch';
-import {
+import type { DiagnosticResult } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
+import type {
   IndicesDataStream,
   QueryDslQueryContainer,
   Result,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
-import { Condition, Streams, getAncestors, getParentId } from '@kbn/streams-schema';
-import { LockManagerService } from '@kbn/lock-manager';
-import { AssetClient } from './assets/asset_client';
+import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import type { LockManagerService } from '@kbn/lock-manager';
+import type { Condition } from '@kbn/streamlang';
+import type { AssetClient } from './assets/asset_client';
 import { ASSET_ID, ASSET_TYPE } from './assets/fields';
-import { QueryClient } from './assets/query/query_client';
+import type { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
   isDefinitionNotFoundError,
@@ -25,7 +27,7 @@ import {
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
 import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
-import { StreamsStorageClient } from './service';
+import type { StreamsStorageClient } from './service';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
@@ -133,7 +135,7 @@ export class StreamsClient {
     const rootStreamExists = await this.checkRootLogsStreamExists();
 
     if (!rootStreamExists) {
-      const result = await State.attemptChanges(
+      await State.attemptChanges(
         [
           {
             type: 'upsert',
@@ -145,10 +147,6 @@ export class StreamsClient {
           streamsClient: this,
         }
       );
-
-      if (result.status === 'failed_with_rollback') {
-        throw result.error;
-      }
     }
 
     if (!this.dependencies.isServerless) {
@@ -172,7 +170,7 @@ export class StreamsClient {
    * such as data streams. That means it deletes all data
    * belonging to wired streams.
    *
-   * It does NOT delete unwired streams.
+   * It does NOT delete classic streams.
    */
   async disableStreams(): Promise<DisableStreamsResponse> {
     try {
@@ -191,7 +189,7 @@ export class StreamsClient {
     const elasticsearchStreamsEnabled = await this.checkElasticsearchStreamStatus();
 
     if (rootStreamExists) {
-      const result = await State.attemptChanges(
+      await State.attemptChanges(
         [
           {
             type: 'delete',
@@ -203,10 +201,6 @@ export class StreamsClient {
           streamsClient: this,
         }
       );
-
-      if (result.status === 'failed_with_rollback') {
-        throw result.error;
-      }
 
       const { assetClient, storageClient } = this.dependencies;
       await Promise.all([assetClient.clean(), storageClient.clean()]);
@@ -268,28 +262,31 @@ export class StreamsClient {
       }
     );
 
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
-    const { dashboards, queries } = request;
-
-    // sync dashboards as before
-    await this.dependencies.assetClient.syncAssetList(
-      stream.name,
-      dashboards.map((dashboard) => ({
-        [ASSET_ID]: dashboard,
-        [ASSET_TYPE]: 'dashboard' as const,
-      })),
-      'dashboard'
-    );
-
-    // sync rules with asset links
-    await this.dependencies.queryClient.syncQueries(stream.name, queries);
+    await this.syncAssets(stream.name, request);
 
     return {
       acknowledged: true,
       result: result.changes.created.includes(name) ? 'created' : 'updated',
+    };
+  }
+
+  async bulkUpsert(streams: Array<{ name: string; request: Streams.all.UpsertRequest }>) {
+    const result = await State.attemptChanges(
+      streams.map(({ name, request }) => ({
+        type: 'upsert',
+        definition: { ...request.stream, name } as Streams.all.Definition,
+      })),
+      {
+        ...this.dependencies,
+        streamsClient: this,
+      }
+    );
+
+    await Promise.all(streams.map(({ name, request }) => this.syncAssets(name, request)));
+
+    return {
+      acknowledged: true,
+      result: { created: result.changes.created, updated: result.changes.updated },
     };
   }
 
@@ -299,11 +296,11 @@ export class StreamsClient {
   async forkStream({
     parent,
     name,
-    if: condition,
+    where: condition,
   }: {
     parent: string;
     name: string;
-    if: Condition;
+    where: Condition;
   }): Promise<ForkStreamResponse> {
     const parentDefinition = Streams.WiredStream.Definition.parse(await this.getStream(parent));
 
@@ -313,7 +310,7 @@ export class StreamsClient {
       throw new StatusError(`Child stream ${name} already exists`, 409);
     }
 
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'upsert',
@@ -325,7 +322,7 @@ export class StreamsClient {
                 ...parentDefinition.ingest.wired,
                 routing: parentDefinition.ingest.wired.routing.concat({
                   destination: name,
-                  if: condition,
+                  where: condition,
                 }),
               },
             },
@@ -338,7 +335,9 @@ export class StreamsClient {
             description: '',
             ingest: {
               lifecycle: { inherit: {} },
-              processing: [],
+              processing: {
+                steps: [],
+              },
               wired: {
                 fields: {},
                 routing: [],
@@ -349,10 +348,6 @@ export class StreamsClient {
       ],
       { ...this.dependencies, streamsClient: this }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
 
     return { acknowledged: true, result: 'created' };
   }
@@ -533,14 +528,16 @@ export class StreamsClient {
    */
   private getDataStreamAsIngestStream(
     dataStream: IndicesDataStream
-  ): Streams.UnwiredStream.Definition {
-    const definition: Streams.UnwiredStream.Definition = {
+  ): Streams.ClassicStream.Definition {
+    const definition: Streams.ClassicStream.Definition = {
       name: dataStream.name,
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
-        unwired: {},
+        processing: {
+          steps: [],
+        },
+        classic: {},
       },
     };
 
@@ -601,10 +598,10 @@ export class StreamsClient {
   }
 
   /**
-   * Lists all unmanaged streams (unwired streams without a
+   * Lists all unmanaged streams (classic streams without a
    * stored definition).
    */
-  private async getUnmanagedDataStreams(): Promise<Streams.UnwiredStream.Definition[]> {
+  private async getUnmanagedDataStreams(): Promise<Streams.ClassicStream.Definition[]> {
     const response = await wrapEsCall(
       this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream()
     );
@@ -614,8 +611,8 @@ export class StreamsClient {
       description: '',
       ingest: {
         lifecycle: { inherit: {} },
-        processing: [],
-        unwired: {},
+        processing: { steps: [] },
+        classic: {},
       },
     }));
   }
@@ -657,7 +654,7 @@ export class StreamsClient {
       // in serverless, Elasticsearch doesn't natively support streams yet
       return false;
     }
-    const response = (await this.dependencies.scopedClusterClient.asCurrentUser.transport.request({
+    const response = (await this.dependencies.scopedClusterClient.asInternalUser.transport.request({
       method: 'GET',
       path: '/_streams/status',
     })) as { logs: { enabled: boolean } };
@@ -676,20 +673,7 @@ export class StreamsClient {
       throw new StatusError('Cannot delete root stream', 400);
     }
 
-    const access =
-      definition && Streams.GroupStream.Definition.is(definition)
-        ? { write: true, read: true }
-        : await checkAccess({
-            name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          });
-
-    // Can/should State manage access control as well?
-    if (!access.write) {
-      throw new SecurityError(`Cannot delete stream, insufficient privileges`);
-    }
-
-    const result = await State.attemptChanges(
+    await State.attemptChanges(
       [
         {
           type: 'delete',
@@ -701,12 +685,6 @@ export class StreamsClient {
         streamsClient: this,
       }
     );
-
-    if (result.status === 'failed_with_rollback') {
-      throw result.error;
-    }
-
-    await this.dependencies.queryClient.syncQueries(name, []);
 
     return { acknowledged: true, result: 'deleted' };
   }
@@ -751,5 +729,22 @@ export class StreamsClient {
         },
       },
     }).then((streams) => streams.filter(Streams.WiredStream.Definition.is));
+  }
+
+  private async syncAssets(name: string, request: Streams.all.UpsertRequest) {
+    const { dashboards, queries } = request;
+
+    // sync dashboards as before
+    await this.dependencies.assetClient.syncAssetList(
+      name,
+      dashboards.map((dashboard) => ({
+        [ASSET_ID]: dashboard,
+        [ASSET_TYPE]: 'dashboard' as const,
+      })),
+      'dashboard'
+    );
+
+    // sync rules with asset links
+    await this.dependencies.queryClient.syncQueries(name, queries);
   }
 }

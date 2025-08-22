@@ -9,13 +9,8 @@
 
 import React from 'react';
 
-import {
-  EuiLink,
-  EuiButton,
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiButtonColor,
-} from '@elastic/eui';
+import type { EuiButtonColor } from '@elastic/eui';
+import { EuiLink, EuiButton, EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -40,6 +35,7 @@ export interface TryInConsoleButtonProps {
   type?: 'link' | 'button' | 'emptyButton' | 'contextMenuItem';
   telemetryId?: string;
   onClick?: () => void;
+  disabled?: boolean;
   'data-test-subj'?: string;
 }
 export const TryInConsoleButton = ({
@@ -54,6 +50,7 @@ export const TryInConsoleButton = ({
   type = 'emptyButton',
   telemetryId,
   onClick: onClickProp,
+  disabled = false,
   'data-test-subj': dataTestSubj,
 }: TryInConsoleButtonProps) => {
   const url = sharePlugin?.url;
@@ -110,6 +107,7 @@ export const TryInConsoleButton = ({
     'aria-label': getAriaLabel(),
     'data-telemetry-id': telemetryId,
     onClick,
+    disabled,
   };
   const btnIconType = showIcon ? iconType : undefined;
 

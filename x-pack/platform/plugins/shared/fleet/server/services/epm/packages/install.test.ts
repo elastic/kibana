@@ -202,6 +202,7 @@ describe('install', () => {
         newVersion: '1.1.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -224,6 +225,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -245,6 +247,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -270,6 +273,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -296,6 +300,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
 
@@ -485,6 +490,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -506,6 +512,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'success',
+        automaticInstall: false,
       });
     });
 
@@ -532,6 +539,7 @@ describe('install', () => {
         newVersion: '1.3.0',
         packageName: 'apache',
         status: 'failure',
+        automaticInstall: false,
       });
     });
   });

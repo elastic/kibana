@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { DatasourcePublicAPI, Datasource } from '../types';
+import type { DatasourcePublicAPI, Datasource } from '../types';
 
 export type DatasourceMock = jest.Mocked<Datasource> & {
   publicAPIMock: jest.Mocked<DatasourcePublicAPI>;
@@ -39,7 +39,7 @@ export function createMockDatasource(
     getDatasourceSuggestionsFromCurrentState: jest.fn((_state, _indexPatterns) => []),
     getPersistableState: jest.fn((x) => ({
       state: x,
-      savedObjectReferences: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
+      references: [{ type: 'index-pattern', id: 'mockip', name: 'mockip' }],
     })),
     getRenderEventCounters: jest.fn((_state) => []),
     getPublicAPI: jest.fn().mockReturnValue(publicAPIMock),

@@ -6,17 +6,14 @@
  */
 
 import { EuiBasicTable, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { sum } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useAddFilter } from '../../../../../common/hooks/use_add_filter';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../../../common/components/page/manage_query';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
-import { EntityType, RiskScoreFields } from '../../../../../../common/search_strategy';
-import { SecuritySolutionLinkAnchor } from '../../../../../common/components/links';
+import { EntityType } from '../../../../../../common/search_strategy';
 import { ChartLabel } from '../../../../../overview/components/detection_response/alerts_by_status/chart_label';
 import { DonutChart } from '../../../../../common/components/charts/donutchart';
 import { HeaderSection } from '../../../../../common/components/header_section';
@@ -29,7 +26,7 @@ import { EnableRiskScore } from '../../../enable_risk_score';
 
 const TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.title',
-  { defaultMessage: 'Risk levels of privileged users' }
+  { defaultMessage: 'Privileged user risk levels' }
 );
 
 export const DONUT_CHART_HEIGHT = 160;
@@ -70,15 +67,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
     [severityTableData]
   );
 
-  const addFilter = useAddFilter();
-
-  const onDonutPartitionClicked = useCallback(
-    (level: string) => {
-      addFilter({ field: RiskScoreFields.userRisk, value: level });
-    },
-    [addFilter]
-  );
-
   useQueryInspector({
     deleteQuery,
     inspect,
@@ -91,11 +79,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
   const isDisabled = !hasEngineBeenInstalled && !isLoading;
 
   if (isDisabled) {
-    return (
-      <EuiPanel hasBorder>
-        <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />
-      </EuiPanel>
-    );
+    return <EnableRiskScore isDisabled={isDisabled} entityType={EntityType.user} />;
   }
 
   return (
@@ -108,16 +92,9 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
           id={RISK_LEVELS_PRIVILEGED_USERS_QUERY_ID}
           inspectTitle={TITLE}
           title={TITLE}
-          titleSize="s"
+          titleSize="m"
           outerDirection={'column'}
-        >
-          <SecuritySolutionLinkAnchor deepLinkId={SecurityPageName.entityAnalytics}>
-            <FormattedMessage
-              id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.tableTitle"
-              defaultMessage="View more in Risk Analytics"
-            />
-          </SecuritySolutionLinkAnchor>
-        </HeaderSection>
+        />
         {toggleStatus &&
           (isError ? (
             <div>
@@ -138,7 +115,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                 <EuiBasicTable
                   responsiveBreakpoint={false}
                   data-test-subj="severity-level-table"
-                  compressed
                   columns={columns}
                   items={severityTableData}
                   loading={isLoading}
@@ -158,7 +134,6 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
                   }
                   title={<ChartLabel count={total} />}
                   totalCount={total}
-                  onPartitionClick={onDonutPartitionClicked}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal } from '@elastic/eui';
+import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 
 const i18nTexts = {
   title: i18n.translate('indexPatternFieldEditor.cancelField.confirmationModal.title', {
@@ -32,9 +32,13 @@ interface Props {
 }
 
 export const ModifiedFieldModal: React.FC<Props> = ({ onCancel, onConfirm }) => {
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
     <EuiConfirmModal
+      aria-labelledby={modalTitleId}
       title={i18nTexts.title}
+      titleProps={{ id: modalTitleId }}
       buttonColor="danger"
       data-test-subj="runtimeFieldModifiedFieldConfirmModal"
       cancelButtonText={i18nTexts.cancelButton}

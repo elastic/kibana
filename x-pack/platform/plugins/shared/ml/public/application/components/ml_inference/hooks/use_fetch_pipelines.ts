@@ -12,7 +12,9 @@ import { useMlApi, useMlKibana } from '../../../contexts/kibana';
 export const useFetchPipelines = () => {
   const [pipelineNames, setPipelineNames] = useState<string[]>([]);
   const {
-    notifications: { toasts },
+    services: {
+      notifications: { toasts },
+    },
   } = useMlKibana();
 
   const {
@@ -23,18 +25,17 @@ export const useFetchPipelines = () => {
     async function fetchPipelines() {
       let names: string[] = [];
       try {
-        const results = await getAllIngestPipelines();
-        names = Object.keys(results);
+        names = await getAllIngestPipelines();
         setPipelineNames(names);
       } catch (e) {
-        toasts.danger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.ml.trainedModels.content.indices.pipelines.fetchIngestPipelinesError',
             {
               defaultMessage: 'Unable to fetch ingest pipelines.',
             }
           ),
-          body: e.message,
+          text: e.message,
           toastLifeTimeMs: 5000,
         });
       }

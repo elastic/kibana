@@ -6,6 +6,7 @@
  */
 
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
+import { getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import React, { useMemo } from 'react';
 
@@ -32,11 +33,8 @@ const AlertsTabComponent: React.FC<Props> = ({ attackDiscovery, replacements }) 
   const AIForSOC = capabilities[SECURITY_FEATURE_ID].configurations;
 
   const originalAlertIds = useMemo(
-    () =>
-      attackDiscovery.alertIds.map((alertId) =>
-        replacements != null ? replacements[alertId] ?? alertId : alertId
-      ),
-    [attackDiscovery.alertIds, replacements]
+    () => getOriginalAlertIds({ alertIds: attackDiscovery.alertIds, replacements }),
+    [attackDiscovery, replacements]
   );
 
   const alertIdsQuery = useMemo(

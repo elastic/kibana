@@ -16,21 +16,19 @@ import {
 } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/utils/complete_items';
+import { getDateHistogramCompletionItem } from '@kbn/esql-ast/src/commands_registry/complete_items';
 import { getRecommendedQueriesTemplates } from '@kbn/esql-ast/src/commands_registry/options/recommended_queries';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
+import type { PartialSuggestionWithText, SuggestOptions } from './__tests__/helpers';
 import {
   attachTriggerCommand,
-  createCompletionContext,
   createCustomCallbackMocks,
   fields,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
   getPolicyFields,
-  PartialSuggestionWithText,
   policies,
   setup,
-  SuggestOptions,
   TIME_PICKER_SUGGESTION,
 } from './__tests__/helpers';
 import { suggest } from './autocomplete';
@@ -226,8 +224,7 @@ describe('autocomplete', () => {
       const statement = 'from index_b | drop keywordField | eval col0 = abs(doubleField) ';
 
       const triggerOffset = statement.lastIndexOf(' ');
-      const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(statement, triggerOffset + 1, context, callbackMocks);
+      await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({
         query: 'from index_b',
       });
@@ -236,8 +233,7 @@ describe('autocomplete', () => {
       const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
       const statement = 'from index_d | drop | eval col0 = abs(doubleField) ';
       const triggerOffset = statement.lastIndexOf('p') + 1; // drop <here>
-      const context = createCompletionContext(statement[triggerOffset]);
-      await suggest(statement, triggerOffset + 1, context, callbackMocks);
+      await suggest(statement, triggerOffset + 1, callbackMocks);
       expect(callbackMocks.getColumnsFor).toHaveBeenCalledWith({ query: 'from index_d' });
     });
   });
@@ -428,7 +424,18 @@ describe('autocomplete', () => {
     ]);
 
     // STATS argument BY
-    testSuggestions('FROM index1 | STATS AVG(booleanField) B/', ['WHERE ', 'BY ', ', ', '| ']);
+    testSuggestions('FROM index1 | STATS AVG(doubleField) B/', [
+      'WHERE ',
+      'BY ',
+      ', ',
+      '| ',
+      ...getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        { operators: true, skipAssign: true },
+        ['double']
+      ),
+    ]);
 
     // STATS argument BY expression
     testSuggestions('FROM index1 | STATS field BY f/', [
@@ -814,11 +821,20 @@ describe('autocomplete', () => {
     );
 
     // STATS argument BY
-    testSuggestions('FROM a | STATS AVG(numberField) /', [
+    testSuggestions('FROM a | STATS AVG(integerField) /', [
       ', ',
       attachTriggerCommand('WHERE '),
       attachTriggerCommand('BY '),
       attachTriggerCommand('| '),
+      ...getFunctionSignaturesByReturnType(
+        Location.STATS,
+        'any',
+        {
+          operators: true,
+          skipAssign: true,
+        },
+        ['integer']
+      ),
     ]);
 
     // STATS argument BY field

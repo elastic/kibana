@@ -6,8 +6,8 @@
  */
 
 import type { InferenceTaskEventBase } from '../inference_task';
-import { Deanonymization } from './anonymization';
-import { Message } from './messages';
+import type { Deanonymization } from './anonymization';
+import type { Message } from './messages';
 import type { ToolCallsOf, ToolOptions } from './tools';
 
 /**
@@ -90,11 +90,11 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
     /**
      * Optional deanonymized input messages metadata
      */
-    deanonymized_input?: Array<{ message: any; deanonymizations: Deanonymization[] }>;
+    deanonymized_input?: Array<{ message: Message; deanonymizations: Deanonymization[] }>;
     /**
      * Optional deanonymized output metadata
      */
-    deanonymized_output?: { message: any; deanonymizations: Deanonymization[] };
+    deanonymized_output?: { message: Message; deanonymizations: Deanonymization[] };
   }
 >;
 

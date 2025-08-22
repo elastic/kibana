@@ -570,7 +570,7 @@
         "label": "UnifiedHistogramLayout",
         "description": [],
         "signature": [
-          "({ container, unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, onTopPanelHeightChange, children, }: ",
+          "({ unifiedHistogramChart, chart, isChartAvailable, hits, topPanelHeight, onTopPanelHeightChange, children, }: ",
           {
             "pluginId": "@kbn/unified-histogram",
             "scope": "public",
@@ -589,7 +589,7 @@
             "id": "def-public.UnifiedHistogramLayout.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  container,\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
+            "label": "{\n  unifiedHistogramChart,\n  chart,\n  isChartAvailable,\n  hits,\n  topPanelHeight,\n  onTopPanelHeightChange,\n  children,\n}",
             "description": [],
             "signature": [
               {
@@ -1962,7 +1962,13 @@
             "description": [],
             "signature": [
               "{ title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsXY\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -1996,7 +2002,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2022,7 +2034,13 @@
                 "text": "XYState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsPie\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2056,7 +2074,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2076,7 +2100,13 @@
               " | undefined; }; visualization: ",
               "PieVisualizationState",
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2110,7 +2140,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2136,7 +2172,13 @@
                 "text": "HeatmapVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsGauge\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2170,7 +2212,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2196,7 +2244,13 @@
                 "text": "GaugeVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2230,7 +2284,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2256,7 +2316,13 @@
                 "text": "DatatableVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2290,7 +2356,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2316,7 +2388,13 @@
                 "text": "LegacyMetricState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: \"lnsMetric\"; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2350,7 +2428,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2376,7 +2460,13 @@
                 "text": "MetricVisualizationState"
               },
               "; }; } | { title: string; description?: string | undefined; references: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[]; visualizationType: string; state: { query: ",
               {
                 "pluginId": "@kbn/es-query",
@@ -2410,7 +2500,13 @@
                 "text": "DataViewSpec"
               },
               "> | undefined; internalReferences?: ",
-              "SavedObjectReference",
+              {
+                "pluginId": "@kbn/content-management-utils",
+                "scope": "server",
+                "docId": "kibKbnContentManagementUtilsPluginApi",
+                "section": "def-server.Reference",
+                "text": "Reference"
+              },
               "[] | undefined; datasourceStates: { formBased?: ",
               {
                 "pluginId": "lens",
@@ -2560,7 +2656,7 @@
         "label": "UnifiedHistogramLayoutProps",
         "description": [],
         "signature": [
-          "{ container: HTMLElement | null; unifiedHistogramChart: React.ReactNode; chart?: ",
+          "{ unifiedHistogramChart: React.ReactNode; chart?: ",
           "UnifiedHistogramChartContext",
           " | undefined; isChartAvailable?: boolean | undefined; hits?: ",
           "UnifiedHistogramHitsContext",
@@ -2737,7 +2833,13 @@
             "text": "UnifiedHistogramExternalVisContextStatus"
           },
           ") => void) | undefined; getModifiedVisAttributes?: ((attributes: { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsXY\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -2771,7 +2873,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -2797,7 +2905,13 @@
             "text": "XYState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsPie\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -2831,7 +2945,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -2851,7 +2971,13 @@
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -2885,7 +3011,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -2911,7 +3043,13 @@
             "text": "HeatmapVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsGauge\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -2945,7 +3083,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -2971,7 +3115,13 @@
             "text": "GaugeVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3005,7 +3155,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3031,7 +3187,13 @@
             "text": "DatatableVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3065,7 +3227,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3091,7 +3259,13 @@
             "text": "LegacyMetricState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsMetric\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3125,7 +3299,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3151,7 +3331,13 @@
             "text": "MetricVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: string; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3185,7 +3371,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3203,7 +3395,13 @@
             "text": "TextBasedPersistedState"
           },
           " | undefined; }; visualization: unknown; }; }) => { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsXY\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3237,7 +3435,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3263,7 +3467,13 @@
             "text": "XYState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsPie\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3297,7 +3507,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3317,7 +3533,13 @@
           " | undefined; }; visualization: ",
           "PieVisualizationState",
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsHeatmap\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3351,7 +3573,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3377,7 +3605,13 @@
             "text": "HeatmapVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsGauge\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3411,7 +3645,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3437,7 +3677,13 @@
             "text": "GaugeVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsDatatable\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3471,7 +3717,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3497,7 +3749,13 @@
             "text": "DatatableVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsLegacyMetric\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3531,7 +3789,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3557,7 +3821,13 @@
             "text": "LegacyMetricState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: \"lnsMetric\"; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3591,7 +3861,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",
@@ -3617,7 +3893,13 @@
             "text": "MetricVisualizationState"
           },
           "; }; } | { title: string; description?: string | undefined; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; visualizationType: string; state: { query: ",
           {
             "pluginId": "@kbn/es-query",
@@ -3651,7 +3933,13 @@
             "text": "DataViewSpec"
           },
           "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[] | undefined; datasourceStates: { formBased?: ",
           {
             "pluginId": "lens",

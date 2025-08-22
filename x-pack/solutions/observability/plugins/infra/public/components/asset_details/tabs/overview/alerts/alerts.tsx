@@ -25,17 +25,17 @@ import { useIntegrationCheck } from '../../../hooks/use_integration_check';
 import { INTEGRATIONS } from '../../../constants';
 
 export const AlertsSummaryContent = ({
-  assetId,
-  assetType,
+  entityId,
+  entityType,
   dateRange,
 }: {
-  assetId: string;
-  assetType: InventoryItemType;
+  entityId: string;
+  entityType: InventoryItemType;
   dateRange: TimeRange;
 }) => {
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
-  const { overrides } = useAssetDetailsRenderPropsContext();
+  const { overrides, schema } = useAssetDetailsRenderPropsContext();
   const [collapsibleStatus, setCollapsibleStatus] =
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
@@ -48,11 +48,11 @@ export const AlertsSummaryContent = ({
     setActiveAlertsCount(alertsCount?.activeAlertCount);
   };
 
-  const assetIdField = findInventoryFields(assetType).id;
+  const entityIdField = findInventoryFields(entityType).id;
   const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
   const showCreateRuleFeature =
     featureFlags.inventoryThresholdAlertRuleEnabled &&
-    (assetType !== 'container' || isDockerContainer);
+    (entityType !== 'container' || isDockerContainer);
 
   return (
     <>
@@ -75,7 +75,7 @@ export const AlertsSummaryContent = ({
             )}
             <EuiFlexItem grow={false}>
               <LinkToAlertsPage
-                kuery={`${assetIdField}:"${assetId}"`}
+                kuery={`${entityIdField}:"${entityId}"`}
                 dateRange={dateRange}
                 data-test-subj="infraAssetDetailsAlertsTabAlertsShowAllButton"
               />
@@ -86,14 +86,15 @@ export const AlertsSummaryContent = ({
         <AlertsOverview
           onLoaded={onLoaded}
           dateRange={dateRange}
-          assetId={assetId}
-          assetType={assetType}
+          entityId={entityId}
+          entityType={entityType}
         />
       </Section>
       {showCreateRuleFeature && (
         <AlertFlyout
-          filter={`${assetIdField}: "${assetId}"`}
-          nodeType={assetType}
+          filter={`${entityIdField}: "${entityId}"`}
+          nodeType={entityType}
+          schema={schema}
           setVisible={toggleAlertFlyout}
           visible={isAlertFlyoutVisible}
           options={overrides?.alertRule?.options}

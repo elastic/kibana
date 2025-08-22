@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
-import { Streams } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
-import { StreamDetailEnrichment } from '../stream_detail_enrichment';
+import type { Streams } from '@kbn/streams-schema';
+import React from 'react';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { StreamDetailSignificantEventsView } from '../../stream_detail_significant_events_view';
+import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 
 export function useStreamsDetailManagementTabs({
   definition,
@@ -36,12 +36,7 @@ export function useStreamsDetailManagementTabs({
     ...(isSignificantEventsEnabled
       ? {
           significantEvents: {
-            content: (
-              <StreamDetailSignificantEventsView
-                definition={definition}
-                refreshDefinition={refreshDefinition}
-              />
-            ),
+            content: <StreamDetailSignificantEventsView definition={definition} />,
             label: i18n.translate('xpack.streams.streamDetailView.significantEventsTab', {
               defaultMessage: 'Significant events',
             }),

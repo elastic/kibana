@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { PromptResponse, PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
+import type { PromptResponse } from '@kbn/elastic-assistant-common/impl/schemas';
+import { PromptTypeEnum } from '@kbn/elastic-assistant-common/impl/schemas';
 import { getOptions } from '../helpers';
 import * as i18n from '../translations';
 import { useAssistantContext } from '../../../../assistant_context';
@@ -156,7 +157,7 @@ const SelectSystemPromptComponent: React.FC<Props> = ({
         `}
       >
         {isClearable && selectedPrompt && (
-          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT}>
+          <EuiToolTip content={i18n.CLEAR_SYSTEM_PROMPT} disableScreenReaderOutput>
             <EuiButtonIcon
               aria-label={i18n.CLEAR_SYSTEM_PROMPT}
               data-test-subj="clearSystemPrompt"

@@ -5,51 +5,15 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import { GenericBuckets, GroupingQuery, RootAggregation } from '@kbn/grouping/src';
+import type { GroupingQuery, RootAggregation } from '@kbn/grouping/src';
 import { useQuery } from '@tanstack/react-query';
 import { lastValueFrom } from 'rxjs';
 import { showErrorToast } from '@kbn/cloud-security-posture';
+import type { VulnerabilitiesGroupingAggregation } from '@kbn/cloud-security-posture';
 import { CDR_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
 import { useKibana } from '../../../common/hooks/use_kibana';
-
-// Elasticsearch returns `null` when a sub-aggregation cannot be computed
-type NumberOrNull = number | null;
-
-export interface VulnerabilitiesGroupingAggregation {
-  unitsCount?: {
-    value?: NumberOrNull;
-  };
-  groupsCount?: {
-    value?: NumberOrNull;
-  };
-  groupByFields?: {
-    buckets?: GenericBuckets[];
-  };
-  description?: {
-    buckets?: GenericBuckets[];
-  };
-  resourceName?: {
-    buckets?: GenericBuckets[];
-  };
-  isLoading?: boolean;
-  critical?: {
-    doc_count?: NumberOrNull;
-  };
-  high?: {
-    doc_count?: NumberOrNull;
-  };
-  medium?: {
-    doc_count?: NumberOrNull;
-  };
-  low?: {
-    doc_count?: NumberOrNull;
-  };
-  cloudProvider?: {
-    buckets?: GenericBuckets[];
-  };
-}
 
 export type VulnerabilitiesRootGroupingAggregation =
   RootAggregation<VulnerabilitiesGroupingAggregation>;
@@ -74,7 +38,7 @@ export const useGroupedVulnerabilities = ({
   } = useKibana().services;
 
   return useQuery(
-    ['csp_grouped_vulnerabilities', { query }],
+    [CDR_VULNERABILITIES_INDEX_PATTERN, 'csp_grouped_vulnerabilities', { query }],
     async () => {
       const {
         rawResponse: { aggregations },

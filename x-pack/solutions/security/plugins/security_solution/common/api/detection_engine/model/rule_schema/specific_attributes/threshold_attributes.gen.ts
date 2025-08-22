@@ -45,7 +45,7 @@ export const ThresholdValue = z.number().int().min(1);
  * The field on which the threshold is applied. If you specify an empty array ([]), alerts are generated when the query returns at least the number of results specified in the value field.
  */
 export type ThresholdField = z.infer<typeof ThresholdField>;
-export const ThresholdField = z.union([z.string(), z.array(z.string())]);
+export const ThresholdField = z.union([z.string(), z.array(z.string()).max(5)]);
 
 /**
  * Field to aggregate on

@@ -21,7 +21,6 @@ export interface InvestigateInTimelineProps {
   /**
    * Click event to close the popover in the parent component
    */
-  // eslint-disable-next-line react/no-unused-prop-types
   onClick?: () => void;
   /**
    * Used for unit and e2e tests.
@@ -88,7 +87,7 @@ export const InvestigateInTimelineButtonIcon: VFC<InvestigateInTimelineProps> = 
   }
 
   return (
-    <EuiToolTip content={BUTTON_ICON_LABEL}>
+    <EuiToolTip content={BUTTON_ICON_LABEL} disableScreenReaderOutput>
       <EuiButtonIcon
         aria-label={BUTTON_ICON_LABEL}
         iconType="timeline"

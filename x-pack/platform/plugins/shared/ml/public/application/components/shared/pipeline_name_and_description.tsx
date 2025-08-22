@@ -61,6 +61,7 @@ export const PipelineNameAndDescription: FC<Props> = ({
         isInvalid={pipelineNameError !== undefined}
       >
         <EuiFieldText
+          isInvalid={pipelineNameError !== undefined}
           data-test-subj="mlTrainedModelsInferencePipelineNameInput"
           fullWidth
           placeholder={i18n.translate(

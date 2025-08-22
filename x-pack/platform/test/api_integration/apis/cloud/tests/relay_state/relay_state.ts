@@ -85,13 +85,13 @@ export default function ({ getService }: FtrProviderContext) {
         {
           providerName: 'saml1',
           redirectURL: `/app/cloud/onboarding?onboarding_token=vector&next=${encodeURIComponent(
-            '/app/enterprise_search/vector_search'
+            '/app/elasticsearch/start'
           )}`,
         },
         {
           providerName: 'saml1',
           redirectURL: `/app/cloud/onboarding?onboarding_token=vector&next=${encodeURIComponent(
-            '/app/enterprise_search/vector_search'
+            '/app/elasticsearch/start'
           )}#some=hash-value`,
         },
       ]) {

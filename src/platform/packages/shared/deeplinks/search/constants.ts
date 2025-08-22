@@ -9,6 +9,8 @@
 
 export const ENTERPRISE_SEARCH_APP_ID = 'enterpriseSearch';
 export const ENTERPRISE_SEARCH_CONTENT_APP_ID = 'enterpriseSearchContent';
+export const ENTERPRISE_SEARCH_CONNECTORS_ID = `${ENTERPRISE_SEARCH_CONTENT_APP_ID}:connectors`;
+export const ENTERPRISE_SEARCH_WEB_CRAWLERS_ID = `${ENTERPRISE_SEARCH_CONTENT_APP_ID}:webCrawlers`;
 export const ENTERPRISE_SEARCH_APPLICATIONS_APP_ID = 'enterpriseSearchApplications';
 export const ENTERPRISE_SEARCH_ANALYTICS_APP_ID = 'enterpriseSearchAnalytics';
 export const SERVERLESS_ES_APP_ID = 'serverlessElasticsearch';
@@ -22,8 +24,4 @@ export const SEARCH_HOMEPAGE = 'searchHomepage';
 export const SEARCH_INDICES_START = 'elasticsearchStart';
 export const SEARCH_INDICES = 'elasticsearchIndices';
 export const SEARCH_INDEX_MANAGEMENT = 'elasticsearchIndexManagement';
-export const SEARCH_ELASTICSEARCH = 'enterpriseSearchElasticsearch';
-export const SEARCH_VECTOR_SEARCH = 'enterpriseSearchVectorSearch';
-export const SEARCH_SEMANTIC_SEARCH = 'enterpriseSearchSemanticSearch';
-export const SEARCH_AI_SEARCH = 'enterpriseSearchAISearch';
 export const SEARCH_INDICES_CREATE_INDEX = 'createIndex';

@@ -11,7 +11,7 @@
         "label": "ResizableLayout",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<",
+          "({ className, mode, direction, fixedPanelSize, minFixedPanelSize, minFlexPanelSize, fixedPanel, flexPanel, resizeButtonClassName, [\"data-test-subj\"]: dataTestSubj, onFixedPanelSizeChange, }: ",
           {
             "pluginId": "@kbn/resizable-layout",
             "scope": "public",
@@ -19,36 +19,35 @@
             "section": "def-public.ResizableLayoutProps",
             "text": "ResizableLayoutProps"
           },
-          " & ",
-          {
-            "pluginId": "@kbn/shared-ux-utility",
-            "scope": "common",
-            "docId": "kibKbnSharedUxUtilityPluginApi",
-            "section": "def-common.WithSuspenseExtendedDeps",
-            "text": "WithSuspenseExtendedDeps"
-          },
-          " & React.RefAttributes<{}>>"
+          ") => React.JSX.Element"
         ],
-        "path": "src/platform/packages/shared/kbn-resizable-layout/index.ts",
+        "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/resizable-layout",
             "id": "def-public.ResizableLayout.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
-            "label": "props",
+            "label": "{\n  className,\n  mode,\n  direction,\n  fixedPanelSize,\n  minFixedPanelSize,\n  minFlexPanelSize,\n  fixedPanel,\n  flexPanel,\n  resizeButtonClassName,\n  ['data-test-subj']: dataTestSubj,\n  onFixedPanelSizeChange,\n}",
             "description": [],
             "signature": [
-              "P"
+              {
+                "pluginId": "@kbn/resizable-layout",
+                "scope": "public",
+                "docId": "kibKbnResizableLayoutPluginApi",
+                "section": "def-public.ResizableLayoutProps",
+                "text": "ResizableLayoutProps"
+              }
             ],
-            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -119,22 +118,6 @@
                 "section": "def-public.ResizableLayoutDirection",
                 "text": "ResizableLayoutDirection"
               }
-            ],
-            "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/resizable-layout",
-            "id": "def-public.ResizableLayoutProps.container",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "container",
-            "description": [
-              "\nThe parent container element, used to calculate the layout size"
-            ],
-            "signature": [
-              "HTMLElement | null"
             ],
             "path": "src/platform/packages/shared/kbn-resizable-layout/src/resizable_layout.tsx",
             "deprecated": false,

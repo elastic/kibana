@@ -58,6 +58,23 @@ describe('MS Defender response actions client', () => {
     connectorActionsMock =
       clientConstructorOptionsMock.connectorActions as NormalizedExternalConnectorClientMock;
     msClientMock = new MicrosoftDefenderEndpointActionsClient(clientConstructorOptionsMock);
+
+    getActionDetailsByIdMock.mockImplementation(async (_, __, id: string) => {
+      return new EndpointActionGenerator('seed').generateActionDetails({
+        id,
+      });
+    });
+
+    const fleetServices = clientConstructorOptionsMock.endpointService.getInternalFleetServices();
+    const ensureInCurrentSpaceMock = jest.spyOn(fleetServices, 'ensureInCurrentSpace');
+
+    ensureInCurrentSpaceMock.mockResolvedValue(undefined);
+
+    const getInternalFleetServicesMock = jest.spyOn(
+      clientConstructorOptionsMock.endpointService,
+      'getInternalFleetServices'
+    );
+    getInternalFleetServicesMock.mockReturnValue(fleetServices);
   });
 
   const supportedResponseActionClassMethods: Record<keyof ResponseActionsClient, boolean> = {
@@ -151,7 +168,17 @@ describe('MS Defender response actions client', () => {
             },
             agent: {
               id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
             },
+            originSpaceId: 'default',
+            tags: [],
             meta: {
               machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
             },
@@ -173,7 +200,7 @@ describe('MS Defender response actions client', () => {
         expect.objectContaining({
           id: expect.any(String),
           command: expect.any(String),
-          isCompleted: false,
+          isCompleted: expect.any(Boolean),
         })
       );
       expect(getActionDetailsByIdMock).toHaveBeenCalled();
@@ -268,7 +295,17 @@ describe('MS Defender response actions client', () => {
             },
             agent: {
               id: ['1-2-3'],
+              policy: [
+                {
+                  agentId: '1-2-3',
+                  agentPolicyId: expect.any(String),
+                  elasticAgentId: '1-2-3',
+                  integrationPolicyId: expect.any(String),
+                },
+              ],
             },
+            originSpaceId: 'default',
+            tags: [],
             meta: {
               machineActionId: '5382f7ea-7557-4ab7-9782-d50480024a4e',
             },
@@ -713,7 +750,9 @@ describe('MS Defender response actions client', () => {
       responseActionsClientMock.setConnectorActionsClientExecuteResponse(
         connectorActionsMock,
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
-        { data: undefined }
+        responseActionsClientMock.createConnectorActionExecuteResponse({
+          data: undefined,
+        })
       );
 
       // Mock the connector to throw an error
@@ -1011,7 +1050,22 @@ describe('MS Defender response actions client', () => {
         msMachineActionsApiResponse.value[0] = {
           ...msMachineActionsApiResponse.value[0],
           type: 'LiveResponse',
-          commands: ['RunScript'],
+          commands: [
+            {
+              index: 0,
+              startTime: '2025-07-07T18:50:10.186354Z',
+              endTime: '2025-07-07T18:50:21.811356Z',
+              commandStatus: 'Completed',
+              errors: [],
+              command: {
+                type: 'RunScript',
+                params: [
+                  { key: 'ScriptName', value: 'hello.sh' },
+                  { key: 'Args', value: '--noargs' },
+                ],
+              },
+            },
+          ],
         };
 
         responseActionsClientMock.setConnectorActionsClientExecuteResponse(
@@ -1100,6 +1154,35 @@ describe('MS Defender response actions client', () => {
           expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(expectedResult);
         }
       );
+
+      it('should set error.message to all command errors joined by newline if present', async () => {
+        // Arrange: set up a completed runscript machine action with command errors
+        msMachineActionsApiResponse.value[0].status = 'Failed';
+        msMachineActionsApiResponse.value[0].commands = [
+          {
+            command: { type: 'RunScript', params: [] },
+            errors: [
+              'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.',
+              'Another error',
+            ],
+            index: 0,
+            startTime: '2025-07-07T14:07:27.570687Z',
+            endTime: '2025-07-07T14:07:48.936317Z',
+            commandStatus: 'Completed',
+          },
+        ];
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              message:
+                'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.\nAnother error',
+            },
+          })
+        );
+      });
     });
 
     describe('telemetry events', () => {
@@ -1216,7 +1299,22 @@ describe('MS Defender response actions client', () => {
           msMachineActionsApiResponse.value[0] = {
             ...msMachineActionsApiResponse.value[0],
             type: 'LiveResponse',
-            commands: ['RunScript'],
+            commands: [
+              {
+                index: 0,
+                startTime: '2025-07-07T18:50:10.186354Z',
+                endTime: '2025-07-07T18:50:21.811356Z',
+                commandStatus: 'Completed',
+                errors: [],
+                command: {
+                  type: 'RunScript',
+                  params: [
+                    { key: 'ScriptName', value: 'hello.sh' },
+                    { key: 'Args', value: '--noargs' },
+                  ],
+                },
+              },
+            ],
           };
 
           responseActionsClientMock.setConnectorActionsClientExecuteResponse(

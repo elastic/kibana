@@ -40,7 +40,10 @@ describe('When on the Event Filters list page', () => {
       history.push(EVENT_FILTERS_PATH);
     });
 
-    mockedEndpointPrivileges = { canWriteTrustedApplications: true };
+    mockedEndpointPrivileges = {
+      canManageGlobalArtifacts: true,
+      canWriteTrustedApplications: true,
+    };
     mockUserPrivileges.mockReturnValue({ endpointPrivileges: mockedEndpointPrivileges });
   });
 

@@ -11,7 +11,8 @@ import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public'
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
-import { CloudStart } from '@kbn/cloud-plugin/public';
+import type { SampleDataIngestPluginStart } from '@kbn/sample-data-ingest/public';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { App } from './components/stack_app';
 
 export interface SearchHomepageAppInfo {
@@ -47,6 +48,7 @@ export interface SearchHomepageAppPluginStartDependencies {
   console?: ConsolePluginStart;
   share: SharePluginStart;
   usageCollection?: UsageCollectionStart;
+  sampleDataIngest?: SampleDataIngestPluginStart;
   cloud?: CloudStart;
   searchNavigation?: SearchNavigationPluginStart;
 }

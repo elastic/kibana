@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
-import {
+import type { Subject } from 'rxjs';
+import type {
   AppUpdater,
   ApplicationStart,
   AppDeepLink,
-  type PricingServiceStart,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
+import { type PricingServiceStart } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId } from '../../common';
 
@@ -76,8 +77,18 @@ export function updateGlobalNavigation({
     })
     .filter((link): link is AppDeepLink => link !== null);
 
-  updater$.next(() => ({
-    deepLinks: updatedDeepLinks,
-    visibleIn: someVisible ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview'] : [],
-  }));
+  updater$.next(() => {
+    const visibleIn: AppDeepLinkLocations[] = someVisible
+      ? ['sideNav', 'home', 'kibanaOverview']
+      : [];
+
+    if (isCompleteOverviewEnabled && someVisible) {
+      visibleIn.push('globalSearch');
+    }
+
+    return {
+      deepLinks: updatedDeepLinks,
+      visibleIn,
+    };
+  });
 }

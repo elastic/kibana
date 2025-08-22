@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
   describe('discover/tabs', function () {
     before(async function () {
-      await browser.setWindowSize(1200, 800);
+      await browser.setWindowSize(1200, 1200);
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
@@ -31,8 +31,6 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('home');
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'true');
       await common.navigateToApp('discover');
       await discover.waitUntilTabIsLoaded();
     });
@@ -48,6 +46,9 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
+    loadTestFile(require.resolve('./_duplication'));
+    loadTestFile(require.resolve('./_new_tab'));
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_restorable_state'));
   });
 }

@@ -7,54 +7,48 @@
 
 import { BehaviorSubject, firstValueFrom, type Subscription } from 'rxjs';
 
-import { ChartsPluginStart } from '@kbn/charts-plugin/public';
-import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import { ConsolePluginStart } from '@kbn/console-plugin/public';
-import { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
-import {
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { SearchConnectorsPluginStart } from '@kbn/content-connectors-plugin/public';
+import type {
   AppMountParameters,
   CoreStart,
   CoreSetup,
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-  DEFAULT_APP_CATEGORIES,
   AppDeepLink,
-  type AppUpdater,
-  AppStatus,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { FleetStart } from '@kbn/fleet-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { DEFAULT_APP_CATEGORIES, type AppUpdater, AppStatus } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
-import { LensPublicStart } from '@kbn/lens-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { MlPluginStart } from '@kbn/ml-plugin/public';
+import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { MlPluginStart } from '@kbn/ml-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
-import { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
-import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
-import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
-import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { SearchPlaygroundPluginStart } from '@kbn/search-playground/public';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
 import {
   ANALYTICS_PLUGIN,
   APPLICATIONS_PLUGIN,
-  ELASTICSEARCH_PLUGIN,
-  AI_SEARCH_PLUGIN,
   ENTERPRISE_SEARCH_DATA_PLUGIN,
   ENTERPRISE_SEARCH_HOME_PLUGIN,
   SEARCH_EXPERIENCES_PLUGIN,
   SEARCH_PRODUCT_NAME,
-  VECTOR_SEARCH_PLUGIN,
-  SEMANTIC_SEARCH_PLUGIN,
   SEARCH_HOMEPAGE,
+  SEARCH_APPS_TITLE,
 } from '../common/constants';
 import { registerLocators } from '../common/locators';
-import { ClientConfigType, InitialAppData } from '../common/types';
+import type { ClientConfigType, InitialAppData } from '../common/types';
 import { hasEnterpriseLicense } from '../common/utils/licensing';
 
 import { SEARCH_APPLICATIONS_PATH } from './applications/applications/routes';
@@ -86,7 +80,6 @@ export interface PluginsStart {
   contentConnectors?: SearchConnectorsPluginStart;
   data?: DataPublicPluginStart;
   fleet?: FleetStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   indexManagement?: IndexManagementPluginStart;
   lens?: LensPublicStart;
   licensing?: LicensingPluginStart;
@@ -126,12 +119,7 @@ const applicationsLinks: AppDeepLink[] = [
   {
     id: 'searchApplications',
     path: `/${SEARCH_APPLICATIONS_PATH}`,
-    title: i18n.translate(
-      'xpack.enterpriseSearch.navigation.applicationsSearchApplicationsLinkLabel',
-      {
-        defaultMessage: 'Search Applications',
-      }
-    ),
+    title: SEARCH_APPS_TITLE,
     visibleIn: [],
   },
 ];
@@ -254,94 +242,6 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     core.application.register({
-      appRoute: ELASTICSEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: ENTERPRISE_SEARCH_HOME_PLUGIN.LOGO,
-      id: ELASTICSEARCH_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(ELASTICSEARCH_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { Elasticsearch } = await import('./applications/elasticsearch');
-
-        return renderApp(Elasticsearch, kibanaDeps, pluginData);
-      },
-      title: ELASTICSEARCH_PLUGIN.NAME,
-      visibleIn: [],
-    });
-
-    core.application.register({
-      appRoute: VECTOR_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: VECTOR_SEARCH_PLUGIN.LOGO,
-      id: VECTOR_SEARCH_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(VECTOR_SEARCH_PLUGIN.NAME);
-
-        this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchVectorSearch } = await import('./applications/vector_search');
-
-        return renderApp(EnterpriseSearchVectorSearch, kibanaDeps, pluginData);
-      },
-      title: VECTOR_SEARCH_PLUGIN.NAV_TITLE,
-      visibleIn: [],
-    });
-
-    core.application.register({
-      appRoute: SEMANTIC_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: SEMANTIC_SEARCH_PLUGIN.LOGO,
-      id: SEMANTIC_SEARCH_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(SEMANTIC_SEARCH_PLUGIN.NAME);
-
-        this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchSemanticSearch } = await import('./applications/semantic_search');
-
-        return renderApp(EnterpriseSearchSemanticSearch, kibanaDeps, pluginData);
-      },
-      title: SEMANTIC_SEARCH_PLUGIN.NAV_TITLE,
-      visibleIn: [],
-    });
-
-    core.application.register({
-      appRoute: AI_SEARCH_PLUGIN.URL,
-      category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
-      euiIconType: AI_SEARCH_PLUGIN.LOGO,
-      id: AI_SEARCH_PLUGIN.ID,
-      mount: async (params: AppMountParameters) => {
-        const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
-        const { chrome, http } = kibanaDeps.core;
-        chrome.docTitle.change(AI_SEARCH_PLUGIN.NAME);
-
-        await this.getInitialData(http);
-        const pluginData = this.getPluginData();
-
-        const { renderApp } = await import('./applications');
-        const { EnterpriseSearchAISearch } = await import('./applications/ai_search');
-
-        return renderApp(EnterpriseSearchAISearch, kibanaDeps, pluginData);
-      },
-      title: AI_SEARCH_PLUGIN.NAV_TITLE,
-      visibleIn: [],
-    });
-
-    core.application.register({
       appRoute: APPLICATIONS_PLUGIN.URL,
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       deepLinks: applicationsLinks,
@@ -445,16 +345,6 @@ export class EnterpriseSearchPlugin implements Plugin {
         path: ANALYTICS_PLUGIN.URL,
         showOnHomePage: false,
         title: ANALYTICS_PLUGIN.NAME,
-      });
-
-      plugins.home.featureCatalogue.register({
-        category: 'data',
-        description: ELASTICSEARCH_PLUGIN.DESCRIPTION,
-        icon: 'appElasticsearch',
-        id: ELASTICSEARCH_PLUGIN.ID,
-        path: ELASTICSEARCH_PLUGIN.URL,
-        showOnHomePage: false,
-        title: ELASTICSEARCH_PLUGIN.NAME,
       });
 
       plugins.home.featureCatalogue.register({

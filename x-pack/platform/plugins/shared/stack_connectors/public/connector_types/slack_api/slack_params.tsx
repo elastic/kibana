@@ -11,17 +11,17 @@ import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiFormRow,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiButtonGroup,
   EuiLink,
 } from '@elastic/eui';
 import { useSubAction, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { UserConfiguredActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type {
   PostBlockkitParams,
   PostMessageParams,
@@ -55,7 +55,7 @@ const SlackParamsFields: React.FunctionComponent<
   const [messageType, setMessageType] = useState('text');
   const [textValue, setTextValue] = useState<string | undefined>(text);
   const [validChannelId, setValidChannelId] = useState('');
-  const { toasts } = useKibana().notifications;
+  const { toasts } = useKibana().services.notifications;
   const allowedChannelsConfig =
     (actionConnector as UserConfiguredActionConnector<SlackApiConfig, unknown>)?.config
       ?.allowedChannels ?? [];
@@ -140,9 +140,9 @@ const SlackParamsFields: React.FunctionComponent<
       );
       setChannelValidError([errorMessage]);
       setValidChannelId('');
-      toasts.danger({
+      toasts.addDanger({
         title: errorMessage,
-        body: channelValidErrorResp.message,
+        text: channelValidErrorResp.message,
       });
     }
   }, [toasts, channelValidErrorResp, validChannelId, editAction, text, index]);

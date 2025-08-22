@@ -13,7 +13,7 @@ import type { AlertFilterControlsProps } from '@kbn/alerts-ui-shared/src/alert_f
 import { AlertFilterControls } from '@kbn/alerts-ui-shared/src/alert_filter_controls';
 import { useHistory } from 'react-router-dom';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
-import type { DataViewSpec } from '@kbn/data-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-plugin/common';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../common/lib/kibana';
 import { DEFAULT_DETECTION_PAGE_FILTERS } from '../../../../common/constants';
@@ -25,11 +25,11 @@ export type DetectionEngineFiltersProps = Pick<
   AlertFilterControlsProps,
   'filters' | 'onFiltersChange' | 'query' | 'timeRange' | 'onInit'
 > & {
-  dataViewSpec?: DataViewSpec;
+  dataView?: DataView | DataViewSpec;
 };
 
 export const DetectionEngineFilters = ({
-  dataViewSpec: indexPattern,
+  dataView: indexPattern,
   ...props
 }: DetectionEngineFiltersProps) => {
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');

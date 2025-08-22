@@ -7,26 +7,24 @@
 
 import { createSelector } from 'reselect';
 
-import { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
+import type { FlattenRecord, SampleDocument } from '@kbn/streams-schema';
 import { isPlainObject, uniq } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { SimulationContext } from './types';
+import type { SimulationContext } from './types';
 import { getFilterSimulationDocumentsFn } from './utils';
-
-const EMPTY_ARRAY: [] = [];
 
 /**
  * Selects the documents used for the data preview table.
  */
 export const selectPreviewRecords = createSelector(
   [
-    (context: SimulationContext | undefined) => context?.samples,
-    (context: SimulationContext | undefined) => context?.previewDocsFilter,
-    (context: SimulationContext | undefined) => context?.simulation?.documents,
+    (context: Pick<SimulationContext, 'samples'>) => context.samples,
+    (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
+    (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
   ],
   (samples, previewDocsFilter, documents) => {
     if (!previewDocsFilter || !documents) {
-      return (samples?.map(flattenObjectNestedLast) as FlattenRecord[]) || EMPTY_ARRAY;
+      return samples.map((sample) => flattenObjectNestedLast(sample.document)) as FlattenRecord[];
     }
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
     return documents.filter(filterFn).map((doc) => doc.value);
@@ -35,17 +33,24 @@ export const selectPreviewRecords = createSelector(
 
 export const selectOriginalPreviewRecords = createSelector(
   [
-    (context: SimulationContext | undefined) => context?.samples,
-    (context: SimulationContext | undefined) => context?.previewDocsFilter,
-    (context: SimulationContext | undefined) => context?.simulation?.documents,
+    (context: SimulationContext) => context.samples,
+    (context: SimulationContext) => context.previewDocsFilter,
+    (context: SimulationContext) => context.simulation?.documents,
   ],
   (samples, previewDocsFilter, documents) => {
     if (!previewDocsFilter || !documents) {
-      return undefined;
+      return samples;
     }
     const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
     // return the samples where the filterFn matches the documents at the same index
-    return samples?.filter((_, index) => filterFn(documents[index])) || EMPTY_ARRAY;
+    return samples.filter((_, index) => filterFn(documents[index]));
+  }
+);
+
+export const selectHasSimulatedRecords = createSelector(
+  [(context: SimulationContext) => context.simulation?.documents],
+  (documents) => {
+    return Boolean(documents && documents.length > 0);
   }
 );
 
@@ -55,7 +60,7 @@ export const selectOriginalPreviewRecords = createSelector(
 export const selectUnsupportedDottedFields = createSelector(
   [(context: SimulationContext) => context.samples],
   (samples) => {
-    const properties = samples.flatMap(getDottedFieldPrefixes);
+    const properties = samples.flatMap((sample) => getDottedFieldPrefixes(sample.document));
 
     return uniq(properties);
   }
