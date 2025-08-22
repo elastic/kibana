@@ -25,6 +25,7 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
   isFormDisabled,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
+  const [showGroupedView, setShowGroupedView] = useState(true);
 
   return (
     <>
@@ -49,9 +50,10 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
             disabled={isFormDisabled}
             enableSearch={true}
             enableFiltering={true}
-            enableGrouping={true}
             showActiveOnly={showActiveOnly}
             onShowActiveOnlyChange={setShowActiveOnly}
+            showGroupedView={showGroupedView}
+            onShowGroupedViewChange={setShowGroupedView}
           />
         )}
       />

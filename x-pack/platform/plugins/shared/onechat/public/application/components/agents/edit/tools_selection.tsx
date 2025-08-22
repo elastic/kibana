@@ -48,7 +48,8 @@ interface ToolsSelectionProps {
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
   enableSearch?: boolean;
   enableFiltering?: boolean;
-  enableGrouping?: boolean;
+  showGroupedView?: boolean;
+  onShowGroupedViewChange?: (showGroupedView: boolean) => void;
 }
 
 const toolTypeDisplays = {
@@ -72,7 +73,8 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   onShowActiveOnlyChange,
   enableSearch = true,
   enableFiltering = true,
-  enableGrouping = true,
+  showGroupedView = true,
+  onShowGroupedViewChange,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
@@ -218,8 +220,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return <EuiLoadingSpinner size="l" />;
   }
 
-  // Render using EuiInMemoryTable for consistency with tools_table when not grouping
-  if (!enableGrouping) {
+  if (!showGroupedView) {
     const columns = [
       {
         width: '40px',
@@ -269,19 +270,40 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return (
       <div>
         {/* Enhanced header with search and filters */}
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-          <EuiFlexItem>
-            {(enableSearch || enableFiltering) && <EuiSearchBar {...searchConfig} />}
-          </EuiFlexItem>
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          {(enableSearch || enableFiltering) && (
+            <EuiFlexItem>
+              <EuiSearchBar {...searchConfig} />
+            </EuiFlexItem>
+          )}
+          {onShowGroupedViewChange && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label="Group by type"
+                    checked={showGroupedView}
+                    onChange={(e) => onShowGroupedViewChange(e.target.checked)}
+                    disabled={disabled}
+                    compressed
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
           {onShowActiveOnlyChange && (
             <EuiFlexItem grow={false}>
-              <EuiSwitch
-                label={<EuiText size="s">Show active only</EuiText>}
-                checked={showActiveOnly}
-                onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
-                disabled={disabled}
-                compressed
-              />
+              <EuiFlexGroup alignItems="center" gutterSize="s">
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label="Show active only"
+                    checked={showActiveOnly}
+                    onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
+                    disabled={disabled}
+                    compressed
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
@@ -290,7 +312,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
         <EuiInMemoryTable
           css={css`
-            border-top: 1px solid ${euiTheme.colors.borderBaseSubdued};
             table {
               background-color: transparent;
             }
@@ -320,23 +341,46 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     );
   }
 
-  // Render grouped view (preserve original logic with enhancements)
   return (
     <div>
-      {/* Enhanced header with search and filters */}
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-        <EuiFlexItem>
-          {(enableSearch || enableFiltering) && <EuiSearchBar {...searchConfig} />}
-        </EuiFlexItem>
+      <EuiFlexGroup alignItems="center" gutterSize="m">
+        {(enableSearch || enableFiltering) && (
+          <EuiFlexItem>
+            <EuiSearchBar {...searchConfig} />
+          </EuiFlexItem>
+        )}
+        {onShowGroupedViewChange && (
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate('xpack.onechat.tools.groupByType', {
+                    defaultMessage: 'Group by type',
+                  })}
+                  checked={showGroupedView}
+                  onChange={(e) => onShowGroupedViewChange(e.target.checked)}
+                  disabled={disabled}
+                  compressed
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        )}
         {onShowActiveOnlyChange && (
           <EuiFlexItem grow={false}>
-            <EuiSwitch
-              label={<EuiText size="s">Show active only</EuiText>}
-              checked={showActiveOnly}
-              onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
-              disabled={disabled}
-              compressed
-            />
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiSwitch
+                  label={i18n.translate('xpack.onechat.tools.showActiveOnly', {
+                    defaultMessage: 'Show active only',
+                  })}
+                  checked={showActiveOnly}
+                  onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
+                  disabled={disabled}
+                  compressed
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>
@@ -401,19 +445,19 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                   </EuiFlexGroup>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    id={`type-${type}`}
-                    label={
-                      <EuiText size="s" color="subdued">
-                        {i18n.translate('xpack.onechat.tools.selectAllTypeTools', {
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        id={`type-${type}`}
+                        label={i18n.translate('xpack.onechat.tools.selectAllTypeTools', {
                           defaultMessage: 'Select all',
                         })}
-                      </EuiText>
-                    }
-                    checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
-                    onChange={() => handleToggleTypeTools(toolType)}
-                    disabled={disabled}
-                  />
+                        checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
+                        onChange={() => handleToggleTypeTools(toolType)}
+                        disabled={disabled}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPanel>
