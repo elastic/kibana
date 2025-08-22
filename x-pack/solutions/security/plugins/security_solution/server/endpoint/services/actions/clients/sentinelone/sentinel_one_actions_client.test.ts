@@ -1018,6 +1018,133 @@ describe('SentinelOneActionsClient class', () => {
       });
     });
 
+    describe('for Runscript action', () => {
+      let actionRequestsSearchResponse: SearchResponse<LogsEndpointAction>;
+
+      beforeEach(() => {
+        // { command: 'kill-process', parameters: { process_name: 'foo' } }
+        const s1DataGenerator = new SentinelOneDataGenerator('seed');
+
+        actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
+          s1DataGenerator.generateActionEsHit({
+            agent: { id: 'agent-uuid-1' },
+            EndpointActions: {
+              data: {
+                command: 'runscript',
+                parameters: { scriptId: '123', inputParams: '--some-option' },
+              },
+            },
+            meta: {
+              agentId: 's1-agent-a',
+              agentUUID: 'agent-uuid-1',
+              hostName: 's1-host-name',
+              parentTaskId: 's1-parent-task-123',
+            },
+          }),
+        ]);
+        const actionResponsesSearchResponse = s1DataGenerator.toEsSearchResponse<
+          LogsEndpointActionResponse | EndpointActionResponse
+        >([]);
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTIONS_INDEX,
+          response: jest
+            .fn(() => s1DataGenerator.toEsSearchResponse([]))
+            .mockReturnValueOnce(actionRequestsSearchResponse),
+          pitUsage: true,
+        });
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient,
+          index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
+          response: actionResponsesSearchResponse,
+        });
+      });
+
+      it('should create response with error if action request is missing S1 parent task id', async () => {
+        // @ts-expect-error
+        actionRequestsSearchResponse.hits.hits[0]!._source!.meta!.parentTaskId = '';
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: { command: 'runscript', comment: '' },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: {
+            message:
+              "Action request missing SentinelOne 'parentTaskId' value - unable check on its status",
+          },
+          meta: undefined,
+        });
+      });
+
+      it('should do nothing if action is still pending', async () => {
+        setGetRemoteScriptStatusConnectorResponse(
+          new SentinelOneDataGenerator('seed').generateSentinelOneApiRemoteScriptStatusResponse({
+            status: 'pending',
+          })
+        );
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).not.toHaveBeenCalled();
+      });
+
+      it('should complete action', async () => {
+        setGetRemoteScriptStatusConnectorResponse(
+          new SentinelOneDataGenerator('seed').generateSentinelOneApiRemoteScriptStatusResponse({
+            status: 'completed',
+          })
+        );
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith({
+          '@timestamp': expect.any(String),
+          EndpointActions: {
+            action_id: '90d62689-f72d-4a05-b5e3-500cad0dc366',
+            completed_at: expect.any(String),
+            data: {
+              command: 'runscript',
+              comment: 'Execution completed successfully',
+              output: {
+                content: { code: 'ok', stderr: '', stdout: '' },
+                type: 'json',
+              },
+            },
+            input_type: 'sentinel_one',
+            started_at: expect.any(String),
+          },
+          agent: { id: 'agent-uuid-1' },
+          error: undefined,
+          meta: { taskId: 'b57d0bd6-31d0-41f4-ab34-cb56f9d12d12' },
+        });
+      });
+
+      it('should complete action with error if script execution failed', async () => {
+        const s1ScriptStatusResponse = new SentinelOneDataGenerator(
+          'seed'
+        ).generateSentinelOneApiRemoteScriptStatusResponse({
+          status: 'failed',
+        });
+        setGetRemoteScriptStatusConnectorResponse(s1ScriptStatusResponse);
+        await s1ActionsClient.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            error: {
+              message: expect.any(String),
+            },
+          })
+        );
+      });
+    });
+
     describe('telemetry events', () => {
       describe('for Isolate and Release', () => {
         let s1ActivityHits: Array<SearchHit<SentinelOneActivityEsDoc>>;
