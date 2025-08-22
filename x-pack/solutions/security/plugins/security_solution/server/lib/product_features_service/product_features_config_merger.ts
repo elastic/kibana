@@ -42,13 +42,13 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
       kibanaSubFeatureIds.map((id) => [id, true])
     );
     const subFeaturesPrivilegesToMerge: SubFeaturesPrivileges[] = [];
-    const featureConfigModifiers: FeatureConfigModifier[] = [];
+    const allFeatureConfigModifiers: FeatureConfigModifier[] = [];
 
     productFeaturesConfigs.forEach((productFeatureConfig) => {
       const {
         subFeaturesPrivileges,
         subFeatureIds,
-        featureConfigModifier,
+        featureConfigModifiers,
         ...productFeatureConfigToMerge
       } = productFeatureConfig;
 
@@ -60,8 +60,8 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
         subFeaturesPrivilegesToMerge.push(...subFeaturesPrivileges);
       }
 
-      if (featureConfigModifier) {
-        featureConfigModifiers.push(featureConfigModifier);
+      if (featureConfigModifiers) {
+        allFeatureConfigModifiers.push(...featureConfigModifiers);
       }
 
       mergeWith(mergedKibanaFeatureConfig, productFeatureConfigToMerge, featureConfigMerger);
@@ -83,7 +83,7 @@ export class ProductFeaturesConfigMerger<T extends string = string> {
     mergedKibanaFeatureConfig.subFeatures = mergedKibanaSubFeatures;
 
     // Apply custom modifications after merging all the product feature configs, including the subFeatures
-    featureConfigModifiers.forEach((modifier) => {
+    allFeatureConfigModifiers.forEach((modifier) => {
       modifier(mergedKibanaFeatureConfig);
     });
 

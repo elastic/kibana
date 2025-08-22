@@ -24,12 +24,12 @@ export const productFeaturesExtensions: ProductFeaturesConfiguratorExtensions = 
     version: {
       siem: {
         [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-          featureConfigModifier: updateGlobalArtifactManageReplacements,
+          featureConfigModifiers: [updateGlobalArtifactManageReplacements],
         },
       },
       siemV2: {
         [ProductFeatureSecurityKey.endpointArtifactManagement]: {
-          featureConfigModifier: updateGlobalArtifactManageReplacements,
+          featureConfigModifiers: [updateGlobalArtifactManageReplacements],
         },
       },
     },

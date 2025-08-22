@@ -50,14 +50,14 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
     subFeaturesPrivileges?: SubFeaturesPrivileges[];
 
     /**
-     * Function to apply free modifications to the resulting Kibana feature config when a specific ProductFeatureKey is enabled.
+     * Functions to apply free modifications to the resulting Kibana feature config when a specific ProductFeatureKey is enabled.
      * The `kibanaFeatureConfig` object received is a deep copy of the original configuration, it can be mutated safely.
      * The modifications are applied after merging the configs of all the ProductFeatureKeys, it includes the final `subFeatures` array.
      *
      * @param kibanaFeatureConfig to be mutated
      * @returns void
      */
-    featureConfigModifier?: FeatureConfigModifier;
+    featureConfigModifiers?: FeatureConfigModifier[];
   };
 
 /**
@@ -69,7 +69,7 @@ export type ProductFeatureKibanaConfig<T extends string = string> =
  * - `privileges`: the privileges that will be added directly into the main Security feature.
  * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
  * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
- * - `featureConfigModifier`: a function to apply free modifications to the resulting Kibana feature config when a specific ProductFeatureKey is enabled.
+ * - `featureConfigModifiers`: functions to apply free modifications to the resulting Kibana feature config when a specific ProductFeatureKey is enabled.
  */
 export type ProductFeaturesConfig<
   K extends ProductFeatureKeyType = ProductFeatureKeyType,
