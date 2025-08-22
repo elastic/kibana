@@ -35,7 +35,11 @@ export interface ESQLDataGridAttrs {
   columns: DatatableColumn[];
 }
 
-const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldName?: string) => {
+const getDSLFilter = (
+  queryService: DataPublicPluginStart['query'],
+  timeFieldName?: string,
+  allowLeadingWildcards?: boolean
+) => {
   const kqlQuery = queryService.queryString.getQuery();
   const filters = queryService.filterManager.getFilters();
   const timeFilter =
@@ -44,10 +48,14 @@ const getDSLFilter = (queryService: DataPublicPluginStart['query'], timeFieldNam
       fieldName: timeFieldName,
     });
 
-  return buildEsQuery(undefined, kqlQuery || [], [
-    ...(filters ?? []),
-    ...(timeFilter ? [timeFilter] : []),
-  ]);
+  return buildEsQuery(
+    undefined,
+    kqlQuery || [],
+    [...(filters ?? []), ...(timeFilter ? [timeFilter] : [])],
+    {
+      allowLeadingWildcards: Boolean(allowLeadingWildcards),
+    }
+  );
 };
 
 export const getGridAttrs = async (
@@ -55,7 +63,8 @@ export const getGridAttrs = async (
   adHocDataViews: DataViewSpec[],
   data: DataPublicPluginStart,
   abortController?: AbortController,
-  esqlVariables: ESQLControlVariable[] = []
+  esqlVariables: ESQLControlVariable[] = [],
+  allowLeadingWildcards?: boolean
 ): Promise<ESQLDataGridAttrs> => {
   const indexPattern = getIndexPatternFromESQLQuery(query.esql);
   const dataViewSpec = adHocDataViews.find((adHoc) => {
@@ -66,7 +75,7 @@ export const getGridAttrs = async (
     ? await data.dataViews.create(dataViewSpec)
     : await getESQLAdHocDataview(query.esql, data.dataViews);
 
-  const filter = getDSLFilter(data.query, dataView.timeFieldName);
+  const filter = getDSLFilter(data.query, dataView.timeFieldName, allowLeadingWildcards);
 
   const results = await getESQLResults({
     esqlQuery: query.esql,
@@ -105,7 +114,8 @@ export const getSuggestions = async (
   setDataGridAttrs?: (attrs: ESQLDataGridAttrs) => void,
   esqlVariables: ESQLControlVariable[] = [],
   shouldUpdateAttrs = true,
-  preferredVisAttributes?: TypedLensSerializedState['attributes']
+  preferredVisAttributes?: TypedLensSerializedState['attributes'],
+  allowLeadingWildcards?: boolean
 ) => {
   try {
     const { dataView, columns, rows } = await getGridAttrs(
@@ -113,7 +123,8 @@ export const getSuggestions = async (
       adHocDataViews,
       data,
       abortController,
-      esqlVariables
+      esqlVariables,
+      allowLeadingWildcards
     );
     const updatedWithVariablesColumns = esqlVariables.length
       ? mapVariableToColumn(query.esql, esqlVariables, columns)
