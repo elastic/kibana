@@ -10,9 +10,9 @@ import expect from '@kbn/expect';
 
 import { APIClientRequestParamsOf } from '@kbn/dataset-quality-plugin/common/rest';
 import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
 import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
-import { DataStreamDocsStat } from '@kbn/dataset-quality-plugin/common/api_types';
 import { closeDataStream, rolloverDataStream } from './utils';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
