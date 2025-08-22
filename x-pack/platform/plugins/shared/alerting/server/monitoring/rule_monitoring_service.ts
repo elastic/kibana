@@ -98,7 +98,7 @@ export class RuleMonitoringService {
       this.setLastRunMetricsGapRange({
         gte: previousStartedAtDate.toISOString(),
         lte: moment(previousStartedAt)
-          .add(gapDurationInSeconds - scheduleIntervalInSeconds)
+          .add((gapDurationInSeconds - scheduleIntervalInSeconds) * 1000)
           .toDate()
           .toISOString(),
       });
