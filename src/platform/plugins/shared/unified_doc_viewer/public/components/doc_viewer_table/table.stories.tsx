@@ -23,6 +23,8 @@ import {
   TRACE_ID,
   TRANSACTION_ID,
 } from '@kbn/apm-types';
+import React from 'react';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview';
 import type { DocViewerTableProps } from './table';
 import { DocViewerTable } from './table';
@@ -50,6 +52,28 @@ export const Default: Story = {
   },
 };
 
+const fieldNames = [
+  AT_TIMESTAMP,
+  SERVICE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  HTTP_RESPONSE_STATUS_CODE,
+  SPAN_TYPE,
+  SPAN_SUBTYPE,
+  EVENT_OUTCOME,
+  TRANSACTION_ID,
+  SPAN_DURATION,
+  HOST_NAME,
+  SERVICE_NODE_NAME,
+  TRACE_ID,
+  PARENT_ID,
+  TRANSACTION_ID,
+];
+
+const rows = fieldNames.map((fieldName) => ({
+  name: fieldName,
+  value: APMSpanFixture.fields[fieldName as keyof typeof APMSpanFixture.fields],
+}));
+
 export const Custom: Story = {
   args: {
     hit: APMSpanFixture,
@@ -66,21 +90,24 @@ export const Custom: Story = {
       hideNullValuesToggle: false,
       selectedOnlyToggle: false,
     },
-    fieldNames: [
-      AT_TIMESTAMP,
-      SERVICE_NAME,
-      SPAN_DESTINATION_SERVICE_RESOURCE,
-      HTTP_RESPONSE_STATUS_CODE,
-      SPAN_TYPE,
-      SPAN_SUBTYPE,
-      EVENT_OUTCOME,
-      TRANSACTION_ID,
-      SPAN_DURATION,
-      HOST_NAME,
-      SERVICE_NODE_NAME,
-      TRACE_ID,
-      PARENT_ID,
-      TRANSACTION_ID,
-    ],
+    fieldNames,
+    customRenderCellValue: ({ rowIndex, columnId }: { rowIndex: number; columnId: string }) => {
+      const row = rows[rowIndex];
+      return <p>Custom cell content: {columnId === 'name' ? row.name : row.value}</p>;
+    },
+    customRenderCellPopover: ({
+      columnId,
+      cellActions,
+      rowIndex,
+    }: EuiDataGridCellPopoverElementProps) => {
+      const row = rows[rowIndex];
+
+      return (
+        <>
+          <p>Custom popover content: {columnId === 'name' ? row.name : row.value}</p>
+          {cellActions}
+        </>
+      );
+    },
   },
 };
