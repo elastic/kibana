@@ -25,7 +25,7 @@ export const EditAgent: React.FC<EditAgentProps> = ({ agentId }) => {
         })}
       />
       <KibanaPageTemplate.Section>
-        <AgentForm agentId={agentId} />
+        <AgentForm editingAgentId={agentId} />
       </KibanaPageTemplate.Section>
     </KibanaPageTemplate>
   );
