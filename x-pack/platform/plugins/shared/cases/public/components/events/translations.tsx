@@ -36,3 +36,7 @@ export const EVENT_VALUE = i18n.translate('xpack.cases.caseView.events.value', {
 export const VALUE_PLACEHOLDER = i18n.translate('xpack.cases.caseView.events.valuePlaceholder', {
   defaultMessage: 'Event value',
 });
+
+export const DATA_VIEW_ERROR = i18n.translate('xpack.cases.caseView.events.dataViewError', {
+  defaultMessage: 'Data view error',
+});
