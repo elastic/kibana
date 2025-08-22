@@ -11,24 +11,21 @@ import { ShareBadge } from './share_badge';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { ConversationSharedState } from './utils';
 import { welcomeConvo } from '../../mock/conversation';
+import type { IToasts } from '@kbn/core-notifications-browser';
 
 const mockRefetchCurrentUserConversations = jest.fn();
 const mockRefetchCurrentConversation = jest.fn();
 const mockUpdateConversationUsers = jest.fn();
-const mockToasts = { addSuccess: jest.fn(), addError: jest.fn() };
 
 jest.mock('../use_conversation', () => ({
   useConversation: () => ({ updateConversationUsers: mockUpdateConversationUsers }),
 }));
-jest.mock('../../..', () => ({
-  useAssistantContext: () => ({
-    currentUser: { id: 'user1', name: 'User One' },
-    toasts: mockToasts,
-  }),
-}));
+
 jest.mock('./share_modal', () => ({
   ShareModal: () => <div data-test-subj="share-modal">{'ShareModal'}</div>,
 }));
+
+const toastsMock = { addSuccess: jest.fn(), addError: jest.fn() } as unknown as IToasts;
 const defaultProps = {
   conversationSharedState: ConversationSharedState.Private,
   selectedConversation: welcomeConvo,
@@ -44,7 +41,7 @@ describe('ShareBadge', () => {
 
   it('renders the badge with correct label', () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareBadge {...defaultProps} />
       </TestProviders>
     );
@@ -54,7 +51,7 @@ describe('ShareBadge', () => {
 
   it('opens popover when badge is clicked', () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareBadge {...defaultProps} />
       </TestProviders>
     );
@@ -65,7 +62,7 @@ describe('ShareBadge', () => {
 
   it('shows modal when Shared option is selected', async () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareBadge {...defaultProps} />
       </TestProviders>
     );
@@ -79,7 +76,7 @@ describe('ShareBadge', () => {
 
   it('calls unshareConversation when Private is selected', async () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.Global} />
       </TestProviders>
     );
@@ -88,13 +85,13 @@ describe('ShareBadge', () => {
     fireEvent.click(privateOption);
     await waitFor(() => {
       expect(mockUpdateConversationUsers).toHaveBeenCalled();
-      expect(mockToasts.addSuccess).toHaveBeenCalled();
+      expect(toastsMock.addSuccess).toHaveBeenCalled();
     });
   });
 
   it('calls shareConversationGlobal when Global is selected', async () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.Private} />
       </TestProviders>
     );
@@ -103,7 +100,7 @@ describe('ShareBadge', () => {
     fireEvent.click(globalOption);
     await waitFor(() => {
       expect(mockUpdateConversationUsers).toHaveBeenCalled();
-      expect(mockToasts.addSuccess).toHaveBeenCalled();
+      expect(toastsMock.addSuccess).toHaveBeenCalled();
     });
   });
 });

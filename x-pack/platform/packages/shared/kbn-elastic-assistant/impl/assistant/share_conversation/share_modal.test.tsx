@@ -10,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { ShareModal } from './share_modal';
 import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
+import type { IToasts } from '@kbn/core-notifications-browser';
 
 const mockRefetchCurrentConversation = jest.fn();
 const mockRefetchCurrentUserConversations = jest.fn();
@@ -27,12 +28,7 @@ jest.mock('../use_conversation', () => ({
   }),
 }));
 
-jest.mock('../../..', () => ({
-  useAssistantContext: () => ({
-    currentUser: { id: 'user1', name: 'User One' },
-    toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
-  }),
-}));
+const toastsMock = { addSuccess: mockAddSuccess, addError: mockAddError } as unknown as IToasts;
 
 const testProps = {
   refetchCurrentConversation: mockRefetchCurrentConversation,
@@ -47,7 +43,7 @@ describe('ShareModal', () => {
 
   it('renders modal with conversation title', () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareModal {...testProps} />
       </TestProviders>
     );
@@ -57,7 +53,7 @@ describe('ShareModal', () => {
 
   it('calls copyConversationUrl when copy button is clicked', () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareModal {...testProps} />
       </TestProviders>
     );
@@ -68,7 +64,7 @@ describe('ShareModal', () => {
   it('calls updateConversationUsers and closes modal on share', async () => {
     mockUpdateConversationUsers.mockResolvedValueOnce({});
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareModal
           {...testProps}
           selectedConversation={{
@@ -100,7 +96,7 @@ describe('ShareModal', () => {
   it('shows error toast if updateConversationUsers throws', async () => {
     mockUpdateConversationUsers.mockRejectedValueOnce(new Error('fail'));
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareModal {...testProps} />
       </TestProviders>
     );
@@ -112,7 +108,7 @@ describe('ShareModal', () => {
 
   it('closes modal when cancel is triggered', () => {
     render(
-      <TestProviders>
+      <TestProviders providerContext={{ toasts: toastsMock }}>
         <ShareModal {...testProps} />
       </TestProviders>
     );
