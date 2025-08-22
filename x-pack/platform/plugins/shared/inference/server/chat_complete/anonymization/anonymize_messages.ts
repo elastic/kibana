@@ -40,7 +40,7 @@ export async function anonymizeMessages({
     ...(system ? [{ system }] : []),
   ];
 
-  const { records, anonymizations } = await anonymizeRecords({
+  const { records: anonymizedRecords, anonymizations } = await anonymizeRecords({
     input: toAnonymize,
     anonymizationRules: rules,
     regexWorker,
@@ -48,12 +48,14 @@ export async function anonymizeMessages({
   });
 
   const anonymizedMessages = messages.map((original, index) => {
-    const anonymizedRecord = records[index];
+    const anonymizedRecord = anonymizedRecords[index];
 
     return messageFromAnonymizationRecords(original, anonymizedRecord);
   });
 
-  const anonymizedSystem = records.find((r) => 'system' in r) as { system?: string } | undefined;
+  const anonymizedSystem = anonymizedRecords.find((r) => 'system' in r) as
+    | { system?: string }
+    | undefined;
 
   return {
     system: anonymizedSystem?.system,
