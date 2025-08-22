@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { AttachmentItem } from '../../../common/types/domain';
+import type { SuggestionItem } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
@@ -19,7 +19,7 @@ export const useCaseSuggestionItem = ({
   setDismissedIds,
 }: {
   caseData: CaseUI;
-  suggestion: AttachmentItem;
+  suggestion: SuggestionItem;
   setDismissedIds: (callback: (prev: string[]) => string[]) => void;
 }) => {
   const { showSuccessToast } = useCasesToast();
@@ -44,9 +44,9 @@ export const useCaseSuggestionItem = ({
     createAttachments({
       caseId: caseData.id,
       caseOwner: caseData.owner,
-      attachments: [suggestion.attachment],
+      attachments: suggestion.data.map((d) => d.attachment),
     });
-  }, [createAttachments, caseData.id, caseData.owner, suggestion.attachment]);
+  }, [createAttachments, caseData.id, caseData.owner, suggestion.data]);
 
   return { isAddingSuggestionToCase, onAddSuggestionToCase, onDismissSuggestion };
 };

@@ -16,7 +16,7 @@ import {
   EuiPanel,
   EuiText,
 } from '@elastic/eui';
-import type { AttachmentItem } from '../../../../common/types/domain';
+import type { SuggestionItem } from '../../../../common/types/domain';
 import type { SuggestionType } from '../../..';
 import type { CaseUI } from '../../../../common';
 import * as i18n from '../../../common/translations';
@@ -29,7 +29,7 @@ export const CaseSuggestionItem = ({
   caseData,
   setDismissedIds,
 }: {
-  suggestion: AttachmentItem & {
+  suggestion: SuggestionItem & {
     injectedComponent: SuggestionType['children'];
   };
   caseData: CaseUI;
@@ -67,7 +67,7 @@ export const CaseSuggestionItem = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="s">{suggestion.description}</EuiText>
-        <suggestion.injectedComponent suggestion={{ data: [suggestion], id: suggestion.id }} />
+        <suggestion.injectedComponent suggestion={suggestion} />
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" color="primary" onClick={onDismissSuggestion}>

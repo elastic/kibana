@@ -35,8 +35,6 @@ export interface AttachmentItem<
   /* A plaintext description of the attachment */
   description: string;
   attachment: CaseAttachmentWithoutOwner;
-  /* Unique identifier for the attachment item */
-  id: string;
 }
 
 /* Corresponds to each individual suggestion box presented to the user on the Cases UI.
@@ -51,6 +49,7 @@ export interface SuggestionItem<
   /* Optional plaintext description of the entire suggestion payload.
    * This is used by the LLM to understand the context, but may also be used by the UI
    * to display a summary of all context items. */
+  componentId: string;
   description?: string;
   data: Array<AttachmentItem<TPayload>>; // The main data of the context, containing 1 or more context items
 }

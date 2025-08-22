@@ -7,7 +7,7 @@
 
 import { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import type { AttachmentItem } from '../../../common/types/domain';
+import type { SuggestionItem } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { getCaseSuggestions } from '../../containers/api';
@@ -32,18 +32,20 @@ export const useCaseSuggestions = ({ caseData }: { caseData: CaseUI }) => {
     [attachmentSuggestionRegistry]
   );
 
-  const suggestionAttachmentsWithInjectedComponent: (AttachmentItem & {
+  const suggestionAttachmentsWithInjectedComponent: (SuggestionItem & {
     injectedComponent: SuggestionType['children'];
   })[] = useMemo(() => {
     return (data?.suggestions ?? []).flatMap((suggestion) => {
-      const component = componentById.get(suggestion.id);
+      const component = componentById.get(suggestion.componentId);
       if (!component) {
         return [];
       }
-      return suggestion.data.map((d) => ({
-        ...d,
-        injectedComponent: component.children,
-      }));
+      return [
+        {
+          ...suggestion,
+          injectedComponent: component.children,
+        },
+      ];
     });
   }, [data?.suggestions, componentById]);
 

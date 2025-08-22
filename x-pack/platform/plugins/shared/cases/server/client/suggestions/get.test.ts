@@ -17,6 +17,7 @@ describe('getAllForOwners', () => {
       suggestions: [
         {
           id: 'test-id',
+          componentId: 'test-component',
           description: 'desc',
           data: [],
         },

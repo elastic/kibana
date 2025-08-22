@@ -73,6 +73,7 @@ describe('AttachmentSuggestionRegistry', () => {
         suggestions: [
           {
             id: 'suggestion-1',
+            componentId: 'test-component',
             description: 'Test suggestion 1',
             data: [],
           },
@@ -83,6 +84,7 @@ describe('AttachmentSuggestionRegistry', () => {
         suggestions: [
           {
             id: 'suggestion-2',
+            componentId: 'test-component',
             description: 'Test suggestion 2',
             data: [],
           },
@@ -141,6 +143,7 @@ describe('AttachmentSuggestionRegistry', () => {
         suggestions: [
           {
             id: 'suggestion-1',
+            componentId: 'test-component',
             description: 'Test suggestion 1',
             data: [],
           },

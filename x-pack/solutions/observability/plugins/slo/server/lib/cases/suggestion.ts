@@ -149,7 +149,6 @@ export function getSLOByServiceName(
             };
 
             const item: AttachmentItem<SLOSuggestion> = {
-              id: `${payload.id}-${payload.instanceId}`,
               description: `SLO "${payload.name}" is ${payload.summary.status} for the service "${svcName}"`,
               payload,
               attachment: {
@@ -180,11 +179,13 @@ export function getSLOByServiceName(
             }
           }
 
-          const suggestions = Array.from(itemsByService.entries()).map(([svcName, data]) => ({
-            id: 'slo',
-            description: `Found ${data.length} SLOs linked to service "${svcName}"`,
-            data,
-          }));
+          const suggestions = Array.from(itemsByService.entries()).flatMap(([svcName, data]) =>
+            data.map((item) => ({
+              id: `${item.payload.id}-${item.payload.instanceId}`,
+              componentId: 'slo',
+              data: [item],
+            }))
+          );
 
           return { suggestions };
         },
