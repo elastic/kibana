@@ -65,9 +65,6 @@ const TrustedDeviceEntriesSchema = schema.arrayOf(TrustedDeviceEntrySchema, {
   },
 });
 
-/**
- * Schema to validate Trusted Device data for create and update.
- */
 const TrustedDeviceDataSchema = schema.object(
   {
     entries: TrustedDeviceEntriesSchema,
@@ -97,7 +94,6 @@ export class TrustedDeviceValidator extends BaseValidator {
 
   /**
    * Override base validation to allow both Windows and Mac OS types for trusted devices
-   * CRITICAL: This is the key difference from trusted apps which only allow single OS
    */
   protected async validateBasicData(item: ExceptionItemLikeOptions) {
     const TrustedDeviceBasicDataSchema = schema.object(
@@ -107,7 +103,6 @@ export class TrustedDeviceValidator extends BaseValidator {
           schema.string({ minLength: 0, maxLength: 256, defaultValue: '' })
         ),
         namespaceType: schema.literal('agnostic'),
-        // CRITICAL: Allow 1 or 2 OS types (Windows and/or Mac) - unlike base validator
         osTypes: schema.arrayOf(
           schema.oneOf([
             schema.literal(OperatingSystem.WINDOWS),

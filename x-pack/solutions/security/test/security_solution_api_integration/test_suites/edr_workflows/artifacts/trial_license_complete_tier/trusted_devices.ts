@@ -451,9 +451,6 @@ export default function ({ getService }: FtrProviderContext) {
               .expect(anEndpointArtifactError)
               .expect(anErrorMessageWith(/invalid policy ids/));
           });
-
-          // NOTE: No advanced mode tests for trusted devices as it's not supported
-          // This is different from trusted apps which have advanced mode
         }
 
         for (const trustedDeviceApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
