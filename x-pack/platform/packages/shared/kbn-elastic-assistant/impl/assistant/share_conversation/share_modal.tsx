@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiModal,
@@ -17,6 +17,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import type { UserProfile } from '@kbn/core-user-profile-common';
+import { getCurrentConversationOwner } from '@kbn/elastic-assistant-common';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import { COPY_URL } from '../use_conversation/translations';
 import { useConversation } from '../use_conversation';
@@ -40,13 +41,20 @@ const ShareModalComponent: React.FC<Props> = ({
 }) => {
   const { copyConversationUrl, updateConversationUsers } = useConversation();
 
-  const { currentUser, toasts } = useAssistantContext();
+  const { toasts } = useAssistantContext();
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
+
+  const conversationOwner = useMemo(
+    () => getCurrentConversationOwner(selectedConversation),
+    [selectedConversation]
+  );
   useEffect(() => {
     const conversationUsers =
       selectedConversation?.users
         // do not show current user in UI
-        .filter((user) => user.id !== currentUser?.id && user.name !== currentUser?.name)
+        .filter(
+          (user) => user.id !== conversationOwner?.id && user.name !== conversationOwner?.name
+        )
         .map(({ name, id }) => ({
           // id or name will be defined, empty string is fallback for TS
           uid: id ?? name ?? '',
@@ -55,7 +63,7 @@ const ShareModalComponent: React.FC<Props> = ({
           data: {},
         })) || [];
     setNextUsers(conversationUsers);
-  }, [currentUser?.id, currentUser?.name, selectedConversation?.users]);
+  }, [conversationOwner, selectedConversation]);
   const handleCopyUrl = useCallback(
     () => copyConversationUrl(selectedConversation),
     [copyConversationUrl, selectedConversation]
@@ -81,7 +89,9 @@ const ShareModalComponent: React.FC<Props> = ({
               name: user?.user?.username ?? '',
             })),
             // readd current user
-            ...(currentUser ? [{ id: currentUser.id, name: currentUser.name }] : []),
+            ...(conversationOwner
+              ? [{ id: conversationOwner.id, name: conversationOwner.name }]
+              : []),
           ],
         });
         await refetchCurrentUserConversations();
@@ -98,7 +108,7 @@ const ShareModalComponent: React.FC<Props> = ({
       });
     }
   }, [
-    currentUser,
+    conversationOwner,
     nextUsers,
     refetchCurrentConversation,
     refetchCurrentUserConversations,
@@ -120,7 +130,7 @@ const ShareModalComponent: React.FC<Props> = ({
         <UserProfilesSearch
           onUsersSelect={onNextUsersSelect}
           selectedUsers={nextUsers}
-          forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
+          forbiddenUsers={[...(conversationOwner?.id ? [conversationOwner?.id] : [])]}
         />
       </EuiModalBody>
 

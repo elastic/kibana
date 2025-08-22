@@ -207,20 +207,16 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     const handleOnSharedSelectionChange = useCallback(
       (conversationSharedState: ConversationSharedState, nextUsers?: User[]) => {
         if (conversationUpdates != null) {
-          const newUsers = {
-            ...(conversationSharedState === ConversationSharedState.Private
-              ? { users: [getCurrentConversationOwner(selectedConversation)] }
-              : {}),
-            ...(conversationSharedState === ConversationSharedState.Global ? { users: [] } : {}),
-            ...(conversationSharedState === ConversationSharedState.Shared
-              ? {
-                  users: nextUsers,
-                }
-              : {}),
-          };
+          let users: User[] = [];
+          if (conversationSharedState === ConversationSharedState.Private) {
+            users = [getCurrentConversationOwner(selectedConversation)];
+          } else if (conversationSharedState === ConversationSharedState.Shared) {
+            users = nextUsers ?? [];
+          }
+          // For Global, users remains []
           const updatedConversation = {
             ...conversationUpdates,
-            ...newUsers,
+            users,
           };
           setConversationUpdates(updatedConversation);
           setConversationsSettingsBulkActions({
@@ -231,7 +227,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
                 ...(conversationsSettingsBulkActions.update
                   ? conversationsSettingsBulkActions.update[updatedConversation.id] ?? {}
                   : {}),
-                ...newUsers,
+                users,
                 id: updatedConversation.id,
               },
             },
@@ -296,21 +292,20 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           />
         </EuiFormRow>
 
-        {selectedConnector?.isPreconfigured === false &&
-          selectedProvider === OpenAiProviderType.OpenAi && (
-            <EuiFormRow
-              data-test-subj="model-field"
-              display="rowCompressed"
-              fullWidth
-              label={i18nModel.MODEL_TITLE}
-              helpText={i18nModel.HELP_LABEL}
-            >
-              <ModelSelector
-                onModelSelectionChange={handleOnModelSelectionChange}
-                selectedModel={selectedModel}
-              />
-            </EuiFormRow>
-          )}
+        {!selectedConnector?.isPreconfigured && selectedProvider === OpenAiProviderType.OpenAi && (
+          <EuiFormRow
+            data-test-subj="model-field"
+            display="rowCompressed"
+            fullWidth
+            label={i18nModel.MODEL_TITLE}
+            helpText={i18nModel.HELP_LABEL}
+          >
+            <ModelSelector
+              onModelSelectionChange={handleOnModelSelectionChange}
+              selectedModel={selectedModel}
+            />
+          </EuiFormRow>
+        )}
 
         <EuiFormRow
           data-test-subj="shared-field"

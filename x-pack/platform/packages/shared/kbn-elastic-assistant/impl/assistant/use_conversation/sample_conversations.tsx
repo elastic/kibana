@@ -8,6 +8,16 @@
 import type { Conversation } from '../../assistant_context/types';
 import { WELCOME_CONVERSATION_TITLE } from './translations';
 export const MOCK_CURRENT_USER = { id: '123', name: 'elastic' };
+export const MOCK_USER_PROFILE = {
+  data: {},
+  enabled: true,
+  uid: 'u_SIqviHw6akpDTNddWASJ4aylPSWusCGHlsXCoBkNo_Q_0',
+  user: {
+    email: 'test_vernie_borer@elastic.co',
+    full_name: 'Vernie Borer',
+    username: 'test_vernie_borer',
+  },
+};
 export const WELCOME_CONVERSATION: Conversation = {
   id: '',
   title: WELCOME_CONVERSATION_TITLE,

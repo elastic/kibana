@@ -8,7 +8,7 @@
 import type { ConversationResponse, User } from '../schemas';
 
 export const getCurrentConversationOwner = (
-  conversation: Pick<ConversationResponse, 'createdBy' | 'users'>
+  conversation?: Pick<ConversationResponse, 'createdBy' | 'users'>
 ) => {
   return (
     conversation?.createdBy ??

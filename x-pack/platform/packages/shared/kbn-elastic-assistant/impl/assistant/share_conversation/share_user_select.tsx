@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import { EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { User } from '@kbn/elastic-assistant-common';
+import { getCurrentConversationOwner } from '@kbn/elastic-assistant-common';
 import { SELECT_USERS } from './translations';
 import type { Conversation } from '../../..';
-import { useAssistantContext } from '../../..';
 import { UserProfilesSearch } from './user_profiles_search';
 
 interface Props {
@@ -21,13 +21,18 @@ interface Props {
 }
 
 const ShareUserSelectComponent: React.FC<Props> = ({ selectedConversation, onUsersUpdate }) => {
-  const { currentUser } = useAssistantContext();
   const [nextUsers, setNextUsers] = useState<UserProfile[]>([]);
+  const conversationOwner = useMemo(
+    () => getCurrentConversationOwner(selectedConversation),
+    [selectedConversation]
+  );
   useEffect(() => {
     const conversationUsers =
       selectedConversation?.users
         // do not show current user in UI
-        .filter((user) => user.id !== currentUser?.id && user.name !== currentUser?.name)
+        .filter(
+          (user) => user.id !== conversationOwner?.id && user.name !== conversationOwner?.name
+        )
         .map(({ name, id }) => ({
           // id or name will be defined, empty string is fallback for TS
           uid: id ?? name ?? '',
@@ -36,15 +41,15 @@ const ShareUserSelectComponent: React.FC<Props> = ({ selectedConversation, onUse
           data: {},
         })) || [];
     setNextUsers(conversationUsers);
-  }, [currentUser?.id, currentUser?.name, selectedConversation?.users]);
+  }, [conversationOwner?.id, conversationOwner?.name, selectedConversation?.users]);
 
   const onNextUsersSelect = useCallback(
     (updatedUsers: UserProfile[]) => {
       setNextUsers(updatedUsers);
       const users = updatedUsers.map((user) => ({ name: user.user.username, id: user.uid }));
-      onUsersUpdate([...users, ...(currentUser ? [currentUser] : [])]);
+      onUsersUpdate([...users, ...(conversationOwner ? [conversationOwner] : [])]);
     },
-    [currentUser, onUsersUpdate]
+    [conversationOwner, onUsersUpdate]
   );
 
   return (
@@ -54,6 +59,7 @@ const ShareUserSelectComponent: React.FC<Props> = ({ selectedConversation, onUse
           font-weight: bold;
         `}
         size="xs"
+        data-test-subj="shareUserSelect"
       >
         {SELECT_USERS}
       </EuiText>
@@ -67,7 +73,7 @@ const ShareUserSelectComponent: React.FC<Props> = ({ selectedConversation, onUse
         <UserProfilesSearch
           onUsersSelect={onNextUsersSelect}
           selectedUsers={nextUsers}
-          forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
+          forbiddenUsers={[...(conversationOwner?.id ? [conversationOwner?.id] : [])]}
         />
       </span>
     </>
