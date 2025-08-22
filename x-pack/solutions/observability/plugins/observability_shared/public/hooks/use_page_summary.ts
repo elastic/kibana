@@ -6,7 +6,7 @@
  */
 import dedent from 'dedent';
 import { v4 as uuidv4 } from 'uuid';
-import { useRef, useCallback, useState, useMemo } from 'react';
+import { useRef, useCallback, useState, useMemo, useEffect } from 'react';
 import {
   MessageRole,
   type ObservabilityAIAssistantPublicStart,
@@ -131,6 +131,13 @@ export const usePageSummary = ({
     chatServiceErrors,
     appInstructions,
   ]);
+
+  useEffect(() => {
+    const abortController = abortControllerRef.current;
+    return () => {
+      abortController.abort();
+    };
+  }, []);
 
   return {
     summary,
