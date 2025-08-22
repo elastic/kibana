@@ -24,13 +24,8 @@ import type {
   PrebootPlugin,
 } from '@kbn/core-plugins-server';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
-import { PluginSetup, PluginStart, Setup, Start } from '@kbn/core-di';
-import { toContainerModule } from '@kbn/core-di-internal';
-import {
-  CoreSetup as CoreSetupService,
-  CoreStart as CoreStartService,
-  PluginInitializer as PluginInitializerService,
-} from '@kbn/core-di-server';
+import { Setup, Start } from '@kbn/core-di';
+import { createSetupModule, createStartModule } from '@kbn/core-di-internal';
 
 const OSS_PATH_REGEX = /[\/|\\]src[\/|\\]plugins[\/|\\]/; // Matches src/plugins directory on POSIX and Windows
 const XPACK_PATH_REGEX = /[\/|\\]x-pack[\/|\\]plugins[\/|\\]/; // Matches x-pack/plugins directory on POSIX and Windows
@@ -144,9 +139,7 @@ export class PluginWrapper<
     if (this.definition.module) {
       this.container = (setupContext as CoreSetup).injection.getContainer();
       this.container.loadSync(this.definition.module);
-      this.container.loadSync(toContainerModule(this.initializerContext, PluginInitializerService));
-      this.container.loadSync(toContainerModule(setupContext, CoreSetupService));
-      this.container.loadSync(toContainerModule(plugins, PluginSetup));
+      this.container.loadSync(createSetupModule(this.initializerContext, setupContext, plugins));
     }
 
     return [
@@ -171,9 +164,7 @@ export class PluginWrapper<
       throw new Error(`Plugin "${this.name}" is a preboot plugin and cannot be started.`);
     }
 
-    this.container?.loadSync(toContainerModule(startContext, CoreStartService));
-    this.container?.loadSync(toContainerModule(plugins, PluginStart));
-
+    this.container?.loadSync(createStartModule(startContext, plugins));
     const contract = [
       this.instance?.start(startContext, plugins),
       this.container?.get<TStart>(Start),
