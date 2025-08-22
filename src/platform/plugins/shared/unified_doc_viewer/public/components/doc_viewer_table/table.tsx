@@ -136,7 +136,6 @@ export interface DocViewerTableProps extends DocViewRenderProps {
   };
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
-  filterNames?: string[];
 }
 
 export const DocViewerTable = ({
