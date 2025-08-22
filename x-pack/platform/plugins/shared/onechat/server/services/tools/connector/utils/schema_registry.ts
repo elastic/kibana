@@ -28,6 +28,24 @@ export function createOneChatCompatibleConnectorRegistry(): SchemaRegistry {
           .describe('City to ask about the weather for');
       }
 
+      if (connectorType === '.oauth_google_drive' && subaction === 'query') {
+        return z
+          .object({
+            query: z.string(),
+          })
+          .describe('A text query that will be used to search files by name or content');
+      }
+
+      if (connectorType === '.oauth_google_drive' && subaction === 'download') {
+        return z
+          .object({
+            fileId: z.string(),
+          })
+          .describe(
+            'FileId that will be passed to Google Drive API to get the content of the file'
+          );
+      }
+
       throw new Error('Unsupported connectorType and/or subaction');
     },
   };

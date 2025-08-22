@@ -11,7 +11,7 @@ import { ActionConnectorMode, ActionParamsProps } from '@kbn/triggers-actions-ui
 import { EuiFormRow } from '@elastic/eui';
 import { EuiFieldText } from '@elastic/eui';
 import { HelloWorldRunActionParams } from '../../../common/hello_world/everything';
-import { SUB_ACTION } from '../../../common/d3security/constants';
+import { SUB_ACTION } from '../../../common/hello_world/everything';
 import { HelloWorldActionParams } from '.';
 import { OptionalFieldLabel } from '../../common/optional_field_label';
 
