@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import equal from 'fast-deep-equal';
-import { MigrationInfoRecord, MigrationSnapshot } from '../types';
+import type { MigrationInfoRecord, MigrationSnapshot } from '../types';
 
 export async function assertValidUpdates({
   log,
