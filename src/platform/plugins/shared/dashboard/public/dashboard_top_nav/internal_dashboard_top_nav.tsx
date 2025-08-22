@@ -96,7 +96,7 @@ export function InternalDashboardTopNav({
     title,
     viewMode,
   ] = useBatchedPublishingSubjects(
-    dashboardApi.dataViews$,
+    dashboardApi.allDataViews$,
     dashboardApi.focusedPanelId$,
     dashboardApi.fullScreenMode$,
     dashboardApi.hasUnsavedChanges$,
