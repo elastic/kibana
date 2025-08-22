@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { isObject } from 'lodash';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
@@ -23,19 +23,21 @@ import {
   selectTabRuntimeState,
 } from '../../state_management/redux';
 
+export interface OnSaveDiscoverSessionParams {
+  services: DiscoverServices;
+  state: DiscoverStateContainer;
+  initialCopyOnSave?: boolean;
+  onClose?: () => void;
+  onSaveCb?: () => void;
+}
+
 export const onSaveDiscoverSession = async ({
   services,
   state,
   initialCopyOnSave,
   onClose,
   onSaveCb,
-}: {
-  services: DiscoverServices;
-  state: DiscoverStateContainer;
-  initialCopyOnSave?: boolean;
-  onClose?: () => void;
-  onSaveCb?: () => void;
-}) => {
+}: OnSaveDiscoverSessionParams) => {
   const internalState = state.internalState.getState();
   const persistedDiscoverSession = internalState.persistedDiscoverSession;
   const allTabs = selectAllTabs(internalState);
@@ -66,7 +68,7 @@ export const onSaveDiscoverSession = async ({
     return Boolean(dataViewListItem?.timeFieldName);
   });
 
-  const onSave = async ({
+  const onSave: DiscoverSessionSaveModalOnSaveCallback = async ({
     newTitle,
     newCopyOnSave,
     newTimeRestore,
@@ -74,14 +76,6 @@ export const onSaveDiscoverSession = async ({
     newTags,
     isTitleDuplicateConfirmed,
     onTitleDuplicate,
-  }: {
-    newTitle: string;
-    newTimeRestore: boolean;
-    newCopyOnSave: boolean;
-    newDescription: string;
-    newTags: string[];
-    isTitleDuplicateConfirmed: boolean;
-    onTitleDuplicate: () => void;
   }) => {
     let response: { discoverSession: DiscoverSession | undefined } = { discoverSession: undefined };
 
@@ -102,7 +96,7 @@ export const onSaveDiscoverSession = async ({
     } catch (error) {
       services.toastNotifications.addDanger({
         title: i18n.translate('discover.notifications.notSavedSearchTitle', {
-          defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved.`,
+          defaultMessage: `Discover session ''{savedSearchTitle}'' was not saved`,
           values: {
             savedSearchTitle: newTitle,
           },
@@ -151,7 +145,11 @@ export const onSaveDiscoverSession = async ({
   showSaveModal(saveModal);
 };
 
-const DiscoverSessionSaveModal: React.FC<{
+export type DiscoverSessionSaveModalOnSaveCallback = (
+  props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }
+) => Promise<SaveResult>;
+
+export interface DiscoverSessionSaveModalProps {
   isTimeBased: boolean;
   services: DiscoverServices;
   title: string;
@@ -160,10 +158,12 @@ const DiscoverSessionSaveModal: React.FC<{
   description?: string;
   timeRestore?: boolean;
   tags: string[];
-  onSave: (props: OnSaveProps & { newTimeRestore: boolean; newTags: string[] }) => void;
+  onSave: DiscoverSessionSaveModalOnSaveCallback;
   onClose: () => void;
   managed: boolean;
-}> = ({
+}
+
+const DiscoverSessionSaveModal: React.FC<DiscoverSessionSaveModalProps> = ({
   isTimeBased,
   services: { savedObjectsTagging },
   title,

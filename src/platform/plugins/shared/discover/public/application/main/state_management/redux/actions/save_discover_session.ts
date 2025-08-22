@@ -192,7 +192,7 @@ export const saveDiscoverSession = createInternalStateAsyncThunk(
       title: newTitle,
       description: newDescription,
       tabs: updatedTabs,
-      tags: services.savedObjectsTagging ? newTags : undefined,
+      tags: services.savedObjectsTagging ? newTags : state.persistedDiscoverSession?.tags,
     };
 
     const saveOptions: SaveDiscoverSessionOptions = {
