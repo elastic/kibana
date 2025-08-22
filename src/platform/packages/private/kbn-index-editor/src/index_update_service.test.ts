@@ -85,7 +85,11 @@ describe('IndexUpdateService', () => {
     ] as any;
 
     // mock success response
-    (http.post as jest.Mock).mockResolvedValue({ errors: false, items: [] } as BulkResponse);
+    (http.post as jest.Mock).mockResolvedValue({
+      errors: false,
+      items: [],
+      took: 0,
+    } satisfies BulkResponse);
 
     await service.bulkUpdate(updates);
 

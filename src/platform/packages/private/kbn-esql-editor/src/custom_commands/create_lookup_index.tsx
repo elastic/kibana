@@ -186,7 +186,6 @@ const hasPrivilege = (
 
 /**
  * Hook to determine if the current user has the necessary privileges to create a lookup index.
- * @returns {boolean}
  */
 export const useCanCreateLookupIndex = () => {
   const {
