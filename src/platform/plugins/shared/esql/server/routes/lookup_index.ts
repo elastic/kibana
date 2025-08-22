@@ -101,9 +101,9 @@ export const registerLookupIndexRoutes = (
 
   router.get(
     {
-      path: '/internal/esql/lookup_index/privileges/{indexName?}',
+      path: '/internal/esql/lookup_index/privileges',
       validate: {
-        params: schema.object({ indexName: schema.maybe(schema.string()) }),
+        query: schema.object({ indexName: schema.maybe(schema.string()) }),
       },
       security: {
         authz: {
@@ -116,7 +116,7 @@ export const registerLookupIndexRoutes = (
       },
     },
     async (requestHandlerContext, req, res) => {
-      const { indexName } = req.params;
+      const { indexName } = req.query;
 
       try {
         const core = await requestHandlerContext.core;

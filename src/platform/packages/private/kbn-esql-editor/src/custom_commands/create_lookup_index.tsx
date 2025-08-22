@@ -194,7 +194,9 @@ export const useCanCreateLookupIndex = () => {
 
   const memoizedFetchPrivileges = useRef(
     memoize(async (indexName: string) => {
-      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
+      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges`, {
+        query: { indexName },
+      });
     })
   );
 
@@ -276,7 +278,9 @@ export const useLookupIndexCommand = (
 
   const memoizedFetchPrivileges = useRef(
     memoize(async (indexName: string) => {
-      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges/${indexName}`);
+      return http!.get<IndexPrivileges>(`/internal/esql/lookup_index/privileges`, {
+        query: { indexName },
+      });
     })
   );
 
