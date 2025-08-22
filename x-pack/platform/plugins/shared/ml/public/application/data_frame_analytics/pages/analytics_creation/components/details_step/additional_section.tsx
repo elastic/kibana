@@ -12,7 +12,7 @@ import { EuiAccordion, EuiSpacer } from '@elastic/eui';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { DeepPartial } from '@kbn/utility-types';
-import { Description } from './description';
+import { DescriptionVertical } from '../../../../common/description_vertical';
 import { CustomUrlsWrapper } from '../../../../../components/custom_urls';
 import {
   getJobConfigFromFormState,
@@ -56,7 +56,17 @@ export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
       >
         <section data-test-subj="mlDataFrameAnalyticsDetailsStepAdditionalSection">
           <EuiSpacer />
-          <Description>
+          <DescriptionVertical
+            title={i18n.translate(
+              'xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrls.title',
+              {
+                defaultMessage: 'Custom URLs',
+              }
+            )}
+            descriptionMessageId="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.description"
+            descriptionDefaultMessage="Provide links from anomalies to Kibana dashboards, Discover, or other web pages. {learnMoreLink}"
+            learnMoreLinkMessageId="xpack.ml.newJob.wizard.jobDetailsStep.additionalSection.customUrlsSelection.learnMoreLinkText"
+          >
             <CustomUrlsWrapper
               job={analyticsJob as DataFrameAnalyticsConfig}
               jobCustomUrls={formMeta?.custom_urls ?? []}
@@ -64,7 +74,7 @@ export const AdditionalSection: FC<Props> = ({ formState, setFormState }) => {
               editMode="modal"
               isPartialDFAJob={true}
             />
-          </Description>
+          </DescriptionVertical>
         </section>
       </EuiAccordion>
     </>
