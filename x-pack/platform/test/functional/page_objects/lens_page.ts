@@ -2126,18 +2126,22 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getSecondaryMetricLabel(tile?: WebElementWrapper) {
       const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
-      const label = tile 
+      const label = tile
         ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
         : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
       return label ? label.getAttribute('innerText') : undefined;
     },
 
     async hasSecondaryMetricBadge(tile?: WebElementWrapper) {
-      return tile ? Boolean(this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile)) : find.existsByCssSelector(ECH_BADGE_SELECTOR);
+      return tile
+        ? Boolean(this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile))
+        : find.existsByCssSelector(ECH_BADGE_SELECTOR);
     },
 
     async getSecondaryMetricBadge(tile?: WebElementWrapper) {
-      return tile ? this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile) : find.byCssSelector(ECH_BADGE_SELECTOR);
+      return tile
+        ? this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile)
+        : find.byCssSelector(ECH_BADGE_SELECTOR);
     },
 
     async getSecondaryMetricBadgeText(tile?: WebElementWrapper) {
