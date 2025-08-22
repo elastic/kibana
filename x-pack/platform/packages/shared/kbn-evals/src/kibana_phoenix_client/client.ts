@@ -5,15 +5,16 @@
  * 2.0.
  */
 import pLimit from 'p-limit';
-import { PhoenixClient, createClient } from '@arizeai/phoenix-client';
-import { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
-import { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { SomeDevLog } from '@kbn/some-dev-log';
-import { withInferenceSpan } from '@kbn/inference-tracing';
-import { Model } from '@kbn/inference-common';
-import { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
+import type { PhoenixClient } from '@arizeai/phoenix-client';
+import { createClient } from '@arizeai/phoenix-client';
+import type { RanExperiment, TaskOutput } from '@arizeai/phoenix-client/dist/esm/types/experiments';
+import type { DatasetInfo, Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { SomeDevLog } from '@kbn/some-dev-log';
+import type { Model } from '@kbn/inference-common';
+import { withActiveInferenceSpan } from '@kbn/inference-tracing';
+import type { Evaluator, EvaluationDataset, ExperimentTask } from '../types';
 import { upsertDataset } from './upsert_dataset';
-import { PhoenixConfig } from '../utils/get_phoenix_config';
+import type { PhoenixConfig } from '../utils/get_phoenix_config';
 
 export class KibanaPhoenixClient {
   private readonly phoenixClient: PhoenixClient;
@@ -102,7 +103,7 @@ export class KibanaPhoenixClient {
     },
     evaluators: Evaluator[]
   ): Promise<RanExperiment> {
-    return await withInferenceSpan('run_experiment', async (span) => {
+    return await withActiveInferenceSpan('RunExperiment', async (span) => {
       const { datasetId } = await this.syncDataSet(dataset);
 
       const experiments = await import('@arizeai/phoenix-client/experiments');

@@ -19,11 +19,9 @@ export function installShutdownHandlers(
     timeout?: number;
   } = {}
 ) {
-  const originalExit = process.exit.bind(process);
-
   const timeout = options.timeout ?? 5000;
 
-  const shutdown = once((exitCode: string | number | null) => {
+  const shutdown = once(() => {
     Promise.race([
       cleanup(),
       new Promise((_resolve, reject) =>
@@ -36,22 +34,11 @@ export function installShutdownHandlers(
       })
       .then((response) => {
         return response;
-      })
-      .finally(() => {
-        originalExit(exitCode);
       });
   });
 
-  process.on('SIGINT', () => shutdown(0));
-  process.on('SIGTERM', () => shutdown(0));
-  process.on('uncaughtException', (err) => {
-    // eslint-disable-next-line no-console
-    console.error(err);
-    shutdown(1);
-  });
-
-  // @ts-expect-error
-  process.exit = (code = 0) => {
-    shutdown(code);
-  };
+  process.on('SIGINT', shutdown);
+  process.on('SIGTERM', shutdown);
+  process.on('beforeExit', shutdown);
+  process.on('uncaughtExceptionMonitor', shutdown);
 }

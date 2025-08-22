@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
-import { DefaultEvaluators, KibanaPhoenixClient } from '@kbn/evals';
-import { EvaluationDataset } from '@kbn/evals/src/types';
-import { OnechatEvaluationChatClient } from './chat_client';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import {
+  createQuantitativeCorrectnessEvaluators,
+  type DefaultEvaluators,
+  type KibanaPhoenixClient,
+} from '@kbn/evals';
+import type { EvaluationDataset } from '@kbn/evals/src/types';
+import type { OnechatEvaluationChatClient } from './chat_client';
 
 interface DatasetExample extends Example {
   input: {
@@ -56,21 +60,33 @@ export function createEvaluateDataset({
     await phoenixClient.runExperiment(
       {
         dataset,
-        task: async ({ input }) => {
+        task: async ({ input, output, metadata }) => {
           const response = await chatClient.converse({
             messages: input.question,
           });
 
+          // Running correctness evaluator as part of the task since quantitative correctness evaluators need its output
+          let correctnessAnalysis = null;
+          if (!response.errors?.length) {
+            const correctnessResult = await evaluators.correctnessAnalysis().evaluate({
+              input,
+              expected: output,
+              output: response,
+              metadata,
+            });
+            correctnessAnalysis = correctnessResult.metadata;
+          }
+
           return {
             errors: response.errors,
             messages: response.messages,
+            correctnessAnalysis,
           };
         },
       },
       [
-        // Simple, generic response evaluator until more specific evaluators are implemented
         {
-          name: 'response-evaluator',
+          name: 'Criteria',
           kind: 'LLM',
           evaluate: async ({ input, output, expected, metadata }) => {
             const result = await evaluators
@@ -85,6 +101,7 @@ export function createEvaluateDataset({
             return result;
           },
         },
+        ...createQuantitativeCorrectnessEvaluators(),
       ]
     );
   };

@@ -30,11 +30,14 @@ import {
 } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
+import { Minimap } from '../minimap/minimap';
 import type { EdgeViewModel, NodeViewModel } from '../types';
 import { ONLY_RENDER_VISIBLE_ELEMENTS, GRID_SIZE } from '../constants';
 
 import '@xyflow/react/dist/style.css';
+import { GlobalGraphStyles } from './styles';
 import { Controls } from '../controls/controls';
+import { GRAPH_ID } from '../test_ids';
 
 export interface GraphProps extends CommonProps {
   /**
@@ -54,6 +57,10 @@ export interface GraphProps extends CommonProps {
    * Determines whether the graph is locked. Nodes and edges are still interactive, but the graph itself is not.
    */
   isLocked?: boolean;
+  /**
+   * Determines whether the minimap is visible or not in interactive graphs
+   */
+  showMinimap?: boolean;
   /**
    * Additional children to be rendered inside the graph component.
    */
@@ -93,7 +100,15 @@ const fitViewOptions: FitViewOptions<Node<NodeViewModel>> = {
  * @returns {JSX.Element} The rendered Graph component.
  */
 export const Graph = memo<GraphProps>(
-  ({ nodes, edges, interactive, isLocked = false, children, ...rest }: GraphProps) => {
+  ({
+    nodes,
+    edges,
+    interactive,
+    isLocked = false,
+    showMinimap = false,
+    children,
+    ...rest
+  }: GraphProps) => {
     const backgroundId = useGeneratedHtmlId();
     const fitViewRef = useRef<FitView<Node<NodeViewModel>> | null>(null);
     const currNodesRef = useRef<NodeViewModel[]>([]);
@@ -142,6 +157,7 @@ export const Graph = memo<GraphProps>(
       <div {...rest}>
         <SvgDefsMarker />
         <ReactFlow
+          data-test-subj={GRAPH_ID}
           fitView={true}
           onInit={onInitCallback}
           nodeTypes={nodeTypes}
@@ -172,7 +188,11 @@ export const Graph = memo<GraphProps>(
           )}
           {children}
           <Background id={backgroundId} />
+          {interactive && showMinimap && (
+            <Minimap zoomable={!isLocked} pannable={!isLocked} nodesState={nodesState} />
+          )}
         </ReactFlow>
+        <GlobalGraphStyles />
       </div>
     );
   }

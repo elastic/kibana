@@ -11,8 +11,10 @@ import React from 'react';
 import { findTestSubject } from '@elastic/eui/lib/test';
 import { EuiTable, EuiButtonGroup } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { INDEX_PATTERN_TYPE, MatchedItem } from '@kbn/data-views-plugin/public';
-import { Props as PreviewPanelProps, PreviewPanel } from './preview_panel';
+import type { MatchedItem } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
+import type { Props as PreviewPanelProps } from './preview_panel';
+import { PreviewPanel } from './preview_panel';
 import { from } from 'rxjs';
 
 const indices = [

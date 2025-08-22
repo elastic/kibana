@@ -5,13 +5,6 @@
  * 2.0.
  */
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  ThreatMapping,
-  ThreatMappingEntries,
-  ThreatIndex,
-  ThreatLanguageOrUndefined,
-  ThreatIndicatorPath,
-} from '@kbn/securitysolution-io-ts-alerting-types';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type {
   OpenPointInTimeResponse,
@@ -31,8 +24,17 @@ import type {
 import type { ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
 import type { ScheduleNotificationResponseActionsService } from '../../../rule_response_actions/schedule_notification_response_actions';
+import type {
+  ThreatMappingEntry,
+  ThreatMapping,
+  ThreatIndex,
+  ThreatMatchRuleOptionalFields,
+  ThreatIndicatorPath,
+} from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export type SortOrderOrUndefined = 'asc' | 'desc' | undefined;
+
+export type ThreatMappingEntries = ThreatMappingEntry[];
 
 export interface CreateThreatSignalsOptions {
   sharedParams: SecuritySharedParams<ThreatRuleParams>;
@@ -143,7 +145,7 @@ export interface GetThreatListOptions {
 export interface ThreatListCountOptions {
   esClient: ElasticsearchClient;
   index: string[];
-  language: ThreatLanguageOrUndefined;
+  language: ThreatMatchRuleOptionalFields['threat_language'];
   query: string;
   threatFilters: unknown[];
   exceptionFilter: Filter | undefined;
@@ -170,6 +172,7 @@ interface BaseThreatNamedQuery {
   field: string;
   value: string;
   queryType: string;
+  negate?: boolean;
 }
 
 export interface ThreatMatchNamedQuery extends BaseThreatNamedQuery {
@@ -192,6 +195,7 @@ export interface BuildThreatEnrichmentOptions {
   reassignThreatPitId: (newPitId: OpenPointInTimeResponse['id'] | undefined) => void;
   threatIndexFields: DataViewFieldBase[];
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
+  threatMapping: ThreatMapping;
 }
 
 export interface EventsOptions {
@@ -214,7 +218,7 @@ export type EventItem = estypes.SearchHit<EventDoc>;
 export interface EventCountOptions {
   esClient: ElasticsearchClient;
   index: string[];
-  language: ThreatLanguageOrUndefined;
+  language: ThreatMatchRuleOptionalFields['threat_language'];
   query: string;
   filters: unknown[];
   tuple: RuleRangeTuple;

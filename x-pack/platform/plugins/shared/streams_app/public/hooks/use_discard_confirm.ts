@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OverlayModalConfirmOptions } from '@kbn/core/public';
+import type { OverlayModalConfirmOptions } from '@kbn/core/public';
 import { useKibana } from './use_kibana';
 
 export interface DiscardPromptOptions extends OverlayModalConfirmOptions {

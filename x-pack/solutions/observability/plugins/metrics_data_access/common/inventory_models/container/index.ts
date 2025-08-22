@@ -19,7 +19,7 @@ export const container = createInventoryModel('container', {
       defaultMessage: 'Docker Container',
     }
   ),
-  requiredModule: 'docker',
+  requiredIntegration: 'docker',
   crosslinkSupport: {
     details: true,
     logs: true,

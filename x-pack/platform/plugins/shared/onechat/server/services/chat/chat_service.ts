@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
+import type { Observable } from 'rxjs';
 import {
   filter,
   of,
@@ -16,13 +17,11 @@ import {
   merge,
   catchError,
   throwError,
-  Observable,
 } from 'rxjs';
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
-  AgentMode,
   type RoundInput,
   type ChatEvent,
   oneChatDefaultAgentId,
@@ -39,6 +38,7 @@ import {
   getChatModel$,
   executeAgent$,
   getConversation$,
+  conversationExists$,
   updateConversation$,
   createConversation$,
 } from './utils';
@@ -65,10 +65,6 @@ export interface ChatConverseParams {
    */
   agentId?: string;
   /**
-   * Agent mode to use for this round of conversation.
-   */
-  mode?: AgentMode;
-  /**
    * Id of the genAI connector to use.
    * If empty, will use the default connector.
    */
@@ -78,6 +74,11 @@ export interface ChatConverseParams {
    * If empty, will create a new conversation instead.
    */
   conversationId?: string;
+  /**
+   * Create conversation with specified ID if not found.
+   * Defaults to false. Has no effect when conversationId is not provided.
+   */
+  autoCreateConversationWithId?: boolean;
   /**
    * Optional abort signal to handle cancellation.
    * Canceled rounds will not be persisted.
@@ -120,17 +121,17 @@ class ChatServiceImpl implements ChatService {
 
   converse({
     agentId = oneChatDefaultAgentId,
-    mode = AgentMode.normal,
     conversationId,
     connectorId,
     request,
     abortSignal,
     nextInput,
+    autoCreateConversationWithId = false,
   }: ChatConverseParams): Observable<ChatEvent> {
     const { inference, actions } = this;
     const isNewConversation = !conversationId;
 
-    return withConverseSpan({ agentId, mode, conversationId }, (span) => {
+    return withConverseSpan({ agentId, conversationId }, (span) => {
       return forkJoin({
         conversationClient: defer(async () =>
           this.conversationService.getScopedClient({ request })
@@ -142,44 +143,62 @@ class ChatServiceImpl implements ChatService {
         chatModel: getChatModel$({ connectorId, request, inference, actions, span }),
       }).pipe(
         switchMap(({ conversationClient, chatModel, agent }) => {
+          const shouldCreateNewConversation$ = isNewConversation
+            ? of(true)
+            : autoCreateConversationWithId
+            ? conversationExists$({ conversationId, conversationClient }).pipe(
+                switchMap((exists) => of(!exists))
+              )
+            : of(false);
+
           const conversation$ = getConversation$({
             agentId,
             conversationId,
+            autoCreateConversationWithId,
             conversationClient,
           });
+
           const agentEvents$ = executeAgent$({
             agentId,
             request,
-            mode,
             conversation$,
             nextInput,
             abortSignal,
             agentService: this.agentService,
           });
 
-          const title$ = isNewConversation
-            ? generateTitle$({ chatModel, conversation$, nextInput })
-            : conversation$.pipe(
-                switchMap((conversation) => {
-                  return of(conversation.title);
-                })
-              );
+          const title$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? generateTitle$({ chatModel, conversation$, nextInput })
+                : conversation$.pipe(
+                    switchMap((conversation) => {
+                      return of(conversation.title);
+                    })
+                  )
+            )
+          );
 
           const roundCompletedEvents$ = agentEvents$.pipe(filter(isRoundCompleteEvent));
 
-          const saveOrUpdateAndEmit$ = isNewConversation
-            ? createConversation$({
-                agentId,
-                conversationClient,
-                title$,
-                roundCompletedEvents$,
-              })
-            : updateConversation$({
-                conversationClient,
-                conversation$,
-                title$,
-                roundCompletedEvents$,
-              });
+          const saveOrUpdateAndEmit$ = shouldCreateNewConversation$.pipe(
+            switchMap((shouldCreate) =>
+              shouldCreate
+                ? createConversation$({
+                    agentId,
+                    conversationClient,
+                    conversationId,
+                    title$,
+                    roundCompletedEvents$,
+                  })
+                : updateConversation$({
+                    conversationClient,
+                    conversation$,
+                    title$,
+                    roundCompletedEvents$,
+                  })
+            )
+          );
 
           return merge(agentEvents$, saveOrUpdateAndEmit$).pipe(
             handleCancellation(abortSignal),

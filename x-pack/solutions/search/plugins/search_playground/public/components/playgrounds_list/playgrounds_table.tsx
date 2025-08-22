@@ -7,21 +7,23 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import type {
+  CriteriaWithPagination,
+  EuiBasicTableColumn,
+  EuiTableSortingType,
+} from '@elastic/eui';
 import {
   formatDate,
-  CriteriaWithPagination,
   EuiBasicTable,
-  EuiBasicTableColumn,
   EuiLink,
   EuiText,
   EuiSpacer,
   EuiI18nNumber,
-  EuiTableSortingType,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { PlaygroundListObject, PlaygroundListResponse } from '../../types';
+import type { PlaygroundListObject, PlaygroundListResponse } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
 import { PLUGIN_ID, SearchPlaygroundQueryKeys } from '../../../common';
 import { DeletePlaygroundModal } from '../saved_playground/delete_playground_modal';
@@ -56,7 +58,7 @@ export const PlaygroundsTable = ({
     () => [
       {
         name: i18n.translate('xpack.searchPlayground.playgroundsList.table.columns.name.header', {
-          defaultMessage: 'Playground',
+          defaultMessage: 'RAG Playground',
         }),
         render: ({ id, name }: PlaygroundListObject) => (
           <EuiLink
@@ -92,7 +94,7 @@ export const PlaygroundsTable = ({
               i18n.translate(
                 'xpack.searchPlayground.playgroundsList.table.columns.actions.delete.description',
                 {
-                  defaultMessage: 'Delete playground {name}',
+                  defaultMessage: 'Delete RAG playground {name}',
                   values: { name: playground.name },
                 }
               ),

@@ -28,7 +28,7 @@ import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constant
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
 import { LicenseService } from '../../../../common/license';
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { registerActionListRoutes } from './list';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
