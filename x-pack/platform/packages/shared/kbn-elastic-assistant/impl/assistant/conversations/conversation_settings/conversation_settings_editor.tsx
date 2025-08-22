@@ -273,6 +273,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         <EuiFormRow
           data-test-subj="connector-field"
           display="rowCompressed"
+          fullWidth
           label={i18n.CONNECTOR_TITLE}
           helpText={
             <EuiLink
@@ -289,6 +290,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         >
           <ConnectorSelector
             isDisabled={isDisabled}
+            fullWidth
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
           />
@@ -299,6 +301,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
             <EuiFormRow
               data-test-subj="model-field"
               display="rowCompressed"
+              fullWidth
               label={i18nModel.MODEL_TITLE}
               helpText={i18nModel.HELP_LABEL}
             >
@@ -312,6 +315,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
         <EuiFormRow
           data-test-subj="shared-field"
           display="rowCompressed"
+          fullWidth
           label={i18n.SHARING_OPTIONS}
         >
           <ShareSelect

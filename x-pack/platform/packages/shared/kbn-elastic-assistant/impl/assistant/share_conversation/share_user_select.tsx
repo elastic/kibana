@@ -57,11 +57,19 @@ const ShareUserSelectComponent: React.FC<Props> = ({ selectedConversation, onUse
       >
         {SELECT_USERS}
       </EuiText>
-      <UserProfilesSearch
-        onUsersSelect={onNextUsersSelect}
-        selectedUsers={nextUsers}
-        forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
-      />
+      <span
+        css={css`
+          .euiSelectable .euiPanel {
+            padding: 8px 0;
+          }
+        `}
+      >
+        <UserProfilesSearch
+          onUsersSelect={onNextUsersSelect}
+          selectedUsers={nextUsers}
+          forbiddenUsers={[...(currentUser?.id ? [currentUser?.id] : [])]}
+        />
+      </span>
     </>
   );
 };

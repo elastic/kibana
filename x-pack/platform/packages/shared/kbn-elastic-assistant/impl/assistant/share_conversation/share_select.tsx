@@ -129,6 +129,7 @@ const ShareSelectComponent: React.FC<Props> = ({
       <EuiSuperSelect
         aria-label={i18n.VISIBILITY}
         data-test-subj="shareSelect"
+        fullWidth
         options={items}
         onChange={onChange}
         valueOfSelected={value}
