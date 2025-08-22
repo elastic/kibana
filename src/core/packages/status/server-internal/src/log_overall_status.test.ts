@@ -52,7 +52,7 @@ describe('logOverallStatusChanges', () => {
     expect(l.info).not.toHaveBeenCalled();
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
   });
 
   it('emits a new message every time the status level changes', async () => {
@@ -70,14 +70,14 @@ describe('logOverallStatusChanges', () => {
 
     expect(l.get).not.toHaveBeenCalled();
     expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
     expect(l.warn)..toHaveBeenCalledTimes(1);
-    expect(l.warn).nthCalledWith(
+    expect(l.warn).toHaveBeenNthCalledWith(
       1,
       'Kibana is now degraded (was unavailable): Waiting for ES indices'
     );
     expect(l.info)..toHaveBeenCalledTimes(1);
-    expect(l.info).nthCalledWith(1, 'Kibana is now available (was degraded)');
+    expect(l.info).toHaveBeenNthCalledWith(1, 'Kibana is now available (was degraded)');
   });
 
   it('does not emit when the status stays the same', async () => {
@@ -98,14 +98,14 @@ describe('logOverallStatusChanges', () => {
 
     expect(l.get).not.toHaveBeenCalled();
     expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
     expect(l.warn)..toHaveBeenCalledTimes(1);
-    expect(l.warn).nthCalledWith(
+    expect(l.warn).toHaveBeenNthCalledWith(
       1,
       'Kibana is now degraded (was unavailable): Waiting for ES indices'
     );
     expect(l.info)..toHaveBeenCalledTimes(1);
-    expect(l.info).nthCalledWith(1, 'Kibana is now available (was degraded)');
+    expect(l.info).toHaveBeenNthCalledWith(1, 'Kibana is now available (was degraded)');
   });
 
   it('stops emitting once `stop$` emits', async () => {
@@ -127,7 +127,7 @@ describe('logOverallStatusChanges', () => {
 
     expect(l.get).not.toHaveBeenCalled();
     expect(l.error)..toHaveBeenCalledTimes(1);
-    expect(l.error).nthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
+    expect(l.error).toHaveBeenNthCalledWith(1, 'Kibana is now unavailable: Initializing . . .');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.info).not.toHaveBeenCalled();
   });

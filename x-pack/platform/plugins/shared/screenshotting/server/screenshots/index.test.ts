@@ -121,13 +121,13 @@ describe('Screenshot Observable Pipeline', () => {
     expect(result.results).toMatchSnapshot();
 
     expect(driver.open).toHaveBeenCalledTimes(2);
-    expect(driver.open).nthCalledWith(
+    expect(driver.open).toHaveBeenNthCalledWith(
       1,
       expect.anything(),
       expect.objectContaining({ waitForSelector: '.kbnAppWrapper' }),
       expect.anything()
     );
-    expect(driver.open).nthCalledWith(
+    expect(driver.open).toHaveBeenNthCalledWith(
       2,
       expect.anything(),
       expect.objectContaining({ waitForSelector: '[data-shared-page="2"]' }),

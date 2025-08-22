@@ -392,11 +392,11 @@ describe('internalBulkResolve', () => {
       );
 
       expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenCalledTimes(2);
-      expect(migrationHelper.migrateAndDecryptStorageDocument).nthCalledWith(1, {
+      expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenNthCalledWith(1, {
         document: 'mock-obj-for-1',
         typeMap: undefined,
       });
-      expect(migrationHelper.migrateAndDecryptStorageDocument).nthCalledWith(2, {
+      expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenNthCalledWith(2, {
         document: 'mock-obj-for-2',
         typeMap: undefined,
       });

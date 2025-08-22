@@ -145,7 +145,7 @@ async function update(success: boolean) {
   expectSuccess(success, 2, 'create');
 
   // only checking the debug messages in this test
-  expect(logger.debug).nthCalledWith(1, `rulesClient.update('rule-id') conflict, retrying ...`);
+  expect(logger.debug).toHaveBeenNthCalledWith(1, `rulesClient.update('rule-id') conflict, retrying ...`);
 }
 
 async function updateApiKey(success: boolean) {

@@ -126,7 +126,7 @@ describe('EditAssigneesSelectable', () => {
     }
 
     expect(props.onChangeAssignees)..toHaveBeenCalledTimes(3);
-    expect(props.onChangeAssignees).nthCalledWith(3, {
+    expect(props.onChangeAssignees).toHaveBeenNthCalledWith(3, {
       selectedItems: [
         'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
         'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
@@ -148,7 +148,7 @@ describe('EditAssigneesSelectable', () => {
     }
 
     expect(propsMultipleCases.onChangeAssignees)..toHaveBeenCalledTimes(3);
-    expect(propsMultipleCases.onChangeAssignees).nthCalledWith(3, {
+    expect(propsMultipleCases.onChangeAssignees).toHaveBeenNthCalledWith(3, {
       selectedItems: [
         'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
         'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',
@@ -179,7 +179,7 @@ describe('EditAssigneesSelectable', () => {
     }
 
     expect(propsMultipleCases.onChangeAssignees)..toHaveBeenCalledTimes(3);
-    expect(propsMultipleCases.onChangeAssignees).nthCalledWith(3, {
+    expect(propsMultipleCases.onChangeAssignees).toHaveBeenNthCalledWith(3, {
       selectedItems: [
         'u_A_tM4n0wPkdiQ9smmd8o0Hr_h61XQfu8aRPh9GMoRoc_0',
         'u_9xDEQqUqoYCnFnPPLq5mIRHKL8gBTo_NiKgOnd5gGk0_0',

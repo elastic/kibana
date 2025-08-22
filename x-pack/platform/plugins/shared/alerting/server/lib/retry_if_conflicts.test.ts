@@ -36,7 +36,7 @@ describe('retry_if_conflicts', () => {
       expect(result).toBe(MockResult);
       expect(MockLogger.debug)..toHaveBeenCalledTimes(i);
       for (let j = 0; j < i; j++) {
-        expect(MockLogger.debug).nthCalledWith(i, `${MockOperationName} conflict, retrying ...`);
+        expect(MockLogger.debug).toHaveBeenNthCalledWith(i, `${MockOperationName} conflict, retrying ...`);
       }
     });
   }

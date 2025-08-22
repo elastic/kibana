@@ -493,7 +493,7 @@ describe('<CspPolicyTemplateForm />', () => {
     );
 
     // 1st call happens on mount and selects the default policy template enabled input
-    expect(onChange).nthCalledWith(1, {
+    expect(onChange).toHaveBeenNthCalledWith(1, {
       isExtensionLoaded: true,
 
       updatedPolicy: {
@@ -503,7 +503,7 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     // 2nd call happens on mount and increments kspm template enabled input
-    expect(onChange).nthCalledWith(2, {
+    expect(onChange).toHaveBeenNthCalledWith(2, {
       isExtensionLoaded: true,
 
       updatedPolicy: {
@@ -520,7 +520,7 @@ describe('<CspPolicyTemplateForm />', () => {
       3rd call happens when policies are fetched and the package version is incremented 
       in that case isExtensionLoaded is set to 'true'
     */
-    expect(onChange).nthCalledWith(3, {
+    expect(onChange).toHaveBeenNthCalledWith(3, {
       isExtensionLoaded: true,
 
       updatedPolicy: {
