@@ -51,7 +51,6 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         setIsLoading(true);
 
         await createLensWithAI(dashboardApi);
-        // await executeAddLensPanelAction(dashboardApi);
         if (isMounted()) {
           setIsLoading(false);
         }
@@ -69,7 +68,6 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
         setIsLoading(true);
 
         await createDashboardWithAI(dashboardApi);
-        // await executeAddLensPanelAction(dashboardApi);
         if (isMounted()) {
           setIsLoading(false);
         }

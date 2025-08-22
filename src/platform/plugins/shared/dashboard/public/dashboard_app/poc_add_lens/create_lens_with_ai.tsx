@@ -22,7 +22,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// import { addToDashboardTool } from './add_to_dashboard_tool';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { coreServices, inferenceService } from '../../services/kibana_services';
 import { dataService } from '../../services/kibana_services';
@@ -44,6 +43,10 @@ const chartTypes = [
 const PLACEHOLDER_USER_PROMPT =
   'Create a Lens XY bar chart visualization for index "kibana_sample_data_logstsdb" for count() vs top 10 values of clientip';
 
+/**
+ * Example of using purely Inference service, with default connector id
+ * To create a Lens visualization based on user's NLP and add to dashboard
+ */
 export const CreateWithAIFlyout = ({
   modalTitleId,
   dashboardApi,

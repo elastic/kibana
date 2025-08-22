@@ -21,7 +21,6 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-// import { addToDashboardTool } from './add_to_dashboard_tool';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { coreServices } from '../../services/kibana_services';
 import { dataService } from '../../services/kibana_services';
@@ -43,6 +42,13 @@ const chartTypes = [
 const PLACEHOLDER_USER_PROMPT =
   'Create a dashboard for index "kibana_sample_data_logstsdb". I want to analyze: count() vs top 10 values of clientip, bytes vs time, response vs time';
 
+/**
+ * Example of using OneChat's agents, with registered .add_to_dashboard tool along with other tools, with default model
+ * To create a new dashboard composed of multiple visualizations based on user's NLP and add to dashboard
+ * Call .get_index_mapping tool to get the metadata about the tool. Then call .generate_esql
+ * to generate multiple relevant ES|QL queries that answers the user's question. Then formulate the payload to call .add_to_dashboard with the esql, layers, title, type.
+ */
+
 export const CreateDashboardWithAIFlyout = ({
   modalTitleId,
   dashboardApi,
@@ -59,15 +65,18 @@ export const CreateDashboardWithAIFlyout = ({
     const resp = await http.post('/api/chat/converse', {
       body: JSON.stringify({
         input: text,
+        // This agent is composed of .add_to_dashboard tool, .get_index_mapping tool, .generate_esql tool
         agent_id: 'create_dashboard',
       }),
     });
 
     const conversationId = resp.conversation_id;
 
-    const toolCalls = resp.steps.filter((step) => step.tool_id === '.add_to_dashboard');
+    const toolCalls = resp.steps.filter((step) => step.tool_id === addToDashboardTool.id);
     const results = toolCalls.map((toolCall) => toolCall.results[0]);
 
+    // Based on the LLM's generated results, we trigger the callback to interact with dashboard's Kibana API
+    // to add new panels
     const postToolClientActions = await addToDashboardTool.getPostToolClientActions({
       dashboardApi,
       dataService,
