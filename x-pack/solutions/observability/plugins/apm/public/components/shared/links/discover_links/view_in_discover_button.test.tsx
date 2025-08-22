@@ -122,7 +122,7 @@ describe('ViewInDiscoverButton', () => {
       },
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockLocatorGet).toHaveBeenCalledWith(DISCOVER_APP_LOCATOR);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
@@ -149,7 +149,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -177,7 +177,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -202,7 +202,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -227,7 +227,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -250,7 +250,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -274,7 +274,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -298,7 +298,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -328,7 +328,7 @@ describe('ViewInDiscoverButton', () => {
       query,
     });
 
-    render(<ViewInDiscoverButton />);
+    render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
       timeRange: {
@@ -346,9 +346,9 @@ describe('ViewInDiscoverButton', () => {
       query: {},
     });
 
-    const { getByTestId } = render(<ViewInDiscoverButton />);
+    const { getByTestId } = render(<ViewInDiscoverButton dataTestSubj="testId" />);
 
-    const button = getByTestId('apmWaterfallWithSummaryViewInDiscoverButton');
+    const button = getByTestId('testId');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
     expect(button).toHaveTextContent('View in Discover');

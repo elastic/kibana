@@ -31,7 +31,7 @@ import {
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 
-export function ViewInDiscoverButton() {
+export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string }) {
   const { share } = useApmPluginContext();
   const { serviceName } = useApmServiceContext();
   const { services } = useKibana<ApmPluginStartDeps>();
@@ -129,7 +129,7 @@ export function ViewInDiscoverButton() {
       aria-label={i18n.translate('xpack.apm.waterfallWithSummary.viewInDiscoverButton.ariaLabel', {
         defaultMessage: 'View in Discover',
       })}
-      data-test-subj="apmWaterfallWithSummaryViewInDiscoverButton"
+      data-test-subj={dataTestSubj}
       iconType="discoverApp"
       href={discoverHref}
     >

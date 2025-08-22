@@ -329,7 +329,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
-          <ViewInDiscoverButton />
+          <ViewInDiscoverButton dataTestSubj="apmLatencyCorrelationsViewInDiscoverButton" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>
