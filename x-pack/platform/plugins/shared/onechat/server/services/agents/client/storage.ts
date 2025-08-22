@@ -47,6 +47,7 @@ export interface AgentProperties {
 
 export type AgentProfileStorageSettings = typeof storageSettings;
 
+// @ts-expect-error type mismatch for labels type
 export type AgentProfileStorage = StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>;
 
 export const createStorage = ({
@@ -56,6 +57,7 @@ export const createStorage = ({
   logger: Logger;
   esClient: ElasticsearchClient;
 }): AgentProfileStorage => {
+  // @ts-expect-error type mismatch for labels type
   return new StorageIndexAdapter<AgentProfileStorageSettings, AgentProperties>(
     esClient,
     logger,
