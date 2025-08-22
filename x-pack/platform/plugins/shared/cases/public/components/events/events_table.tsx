@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { EuiSkeletonText, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 
-import { DataLoadingState, UnifiedDataTable } from '@kbn/unified-data-table';
+import { DataLoadingState, type SortOrder, UnifiedDataTable } from '@kbn/unified-data-table';
 import { type DataView } from '@kbn/data-views-plugin/public';
 
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -20,11 +21,11 @@ import type { CaseUI } from '../../../common/ui';
 import * as i18n from './translations';
 import { useKibana } from '../../common/lib/kibana';
 import { useGetEvents } from '../../containers/use_get_events';
+import { EVENTS_TABLE } from './translations';
 
-const EmptyComponent = () => <></>;
-EmptyComponent.displayName = 'EmptyComponent';
+const defaultSort: SortOrder[] = [];
 
-const EmptyEventsTable = ({ caseData }: { caseData: CaseUI }) => (
+const EmptyEventsTable: FC<{ caseData: CaseUI }> = () => (
   <EuiEmptyPrompt
     title={<h3>{i18n.NO_EVENTS}</h3>}
     data-test-subj="cases-events-table-empty"
@@ -54,18 +55,17 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
   const [dataView, setDataView] = useState<DataView>();
 
   useEffect(() => {
-    const createDataView = async () => {
+    const createAdhocDataView = async () => {
       const title = events.map((event) => event.index).join(',');
 
       const adhocDataView = await services.data.dataViews.create({
         title,
-        id: 'adhoc_case_events',
       });
 
       setDataView(adhocDataView);
     };
 
-    createDataView();
+    createAdhocDataView();
   }, [events, services.data.dataViews, services.fieldFormats]);
 
   const eventsResponse = useGetEvents(
@@ -82,6 +82,21 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord>();
 
+  const handleRemoveColumn = useCallback(
+    (column: string): void =>
+      setColumns((previousColumns) =>
+        previousColumns.filter((previousColumn) => previousColumn !== column)
+      ),
+    []
+  );
+
+  const handleCloseFlyout = useCallback(() => setExpandedDoc(undefined), []);
+
+  const handleAddColumn = useCallback(
+    (column: string): void => setColumns((previousColumns) => [...previousColumns, column]),
+    []
+  );
+
   const handleRenderDocumentView = useCallback(() => {
     if (!expandedDoc) {
       return <></>;
@@ -93,22 +108,26 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
 
     return (
       <UnifiedDocViewerFlyout
-        onClose={() => setExpandedDoc(undefined)}
+        onClose={handleCloseFlyout}
         columns={columns}
-        onRemoveColumn={(column) =>
-          setColumns((previousColumns) =>
-            previousColumns.filter((previousColumn) => previousColumn !== column)
-          )
-        }
+        onRemoveColumn={handleRemoveColumn}
         setExpandedDoc={setExpandedDoc}
         dataView={dataView}
         isEsqlQuery={false}
         hit={expandedDoc}
         services={services}
-        onAddColumn={(column) => setColumns((previousColumns) => [...previousColumns, column])}
+        onAddColumn={handleAddColumn}
       />
     );
-  }, [columns, dataView, expandedDoc, services]);
+  }, [
+    columns,
+    dataView,
+    expandedDoc,
+    handleAddColumn,
+    handleCloseFlyout,
+    handleRemoveColumn,
+    services,
+  ]);
 
   return !dataView || eventsResponse.isFetching ? (
     <>
@@ -130,15 +149,15 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
         getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
       >
         <UnifiedDataTable
-          onSetColumns={(newColumns) => setColumns(newColumns)}
+          onSetColumns={setColumns}
           visibleCellActions={3}
           dataView={dataView}
           sampleSizeState={1000}
-          ariaLabelledBy="Events Table"
+          ariaLabelledBy={EVENTS_TABLE}
           loadingState={DataLoadingState.loaded}
           showTimeCol={true}
           columns={columns}
-          sort={[]}
+          sort={defaultSort}
           isSortEnabled={false}
           isPaginationEnabled={false}
           services={services}
