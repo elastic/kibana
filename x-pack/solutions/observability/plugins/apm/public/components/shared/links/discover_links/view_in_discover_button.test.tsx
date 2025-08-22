@@ -28,14 +28,50 @@ const MOCK_INDEX_PATTERN = 'traces-*';
 jest.mock('../../../../context/apm_service/use_apm_service_context');
 jest.mock('../../../../hooks/use_apm_params');
 jest.mock('../../../../context/apm_plugin/use_apm_plugin_context');
-jest.mock('../../../../hooks/use_adhoc_apm_data_view', () => ({
-  useAdHocApmDataView: () => ({
-    dataView: {
-      id: 'apm_0',
-      getIndexPattern: () => MOCK_INDEX_PATTERN,
+jest.mock('@kbn/kibana-react-plugin/public', () => ({
+  ...jest.requireActual('@kbn/kibana-react-plugin/public'),
+  useKibana: () => ({
+    services: {
+      apmSourcesAccess: {
+        getApmIndexSettings: jest.fn(),
+      },
     },
   }),
 }));
+jest.mock('../../../../hooks/use_fetcher', () => {
+  const originalUseFetcher = jest.requireActual('../../../../hooks/use_fetcher').useFetcher;
+  return {
+    ...jest.requireActual('../../../../hooks/use_fetcher'),
+    useFetcher: jest.fn((fn, deps) => {
+      // Only mock when used with apmSourcesAccess.getApmIndexSettings
+      if (deps && deps[0]?.getApmIndexSettings) {
+        return {
+          data: {
+            apmIndexSettings: [
+              {
+                configurationName: 'transaction',
+                defaultValue: MOCK_INDEX_PATTERN,
+              },
+              {
+                configurationName: 'span',
+                savedValue: MOCK_INDEX_PATTERN,
+                defaultValue: 'traces-otel-*',
+              },
+              {
+                configurationName: 'test',
+                savedValue: 'fake-index',
+                defaultValue: 'fake-*',
+              },
+            ],
+          },
+        };
+      }
+      // Use the real useFetcher for other calls
+      return originalUseFetcher(fn, deps);
+    }),
+  };
+});
+
 const mockUseApmServiceContext = useApmServiceContext as jest.MockedFunction<
   typeof useApmServiceContext
 >;
@@ -80,13 +116,20 @@ describe('ViewInDiscoverButton', () => {
 
   it('should generate ESQL query with service name only', () => {
     mockUseAnyOfApmParams.mockReturnValue({
-      query: {},
+      query: {
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
     });
 
     render(<ViewInDiscoverButton />);
 
     expect(mockLocatorGet).toHaveBeenCalledWith(DISCOVER_APP_LOCATOR);
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"`,
       },
@@ -98,6 +141,8 @@ describe('ViewInDiscoverButton', () => {
       transactionName: 'GET /api/test',
       transactionType: 'request',
       environment: 'production',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
 
     mockUseAnyOfApmParams.mockReturnValue({
@@ -107,6 +152,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_TYPE} == "${query.transactionType}"`,
       },
@@ -120,6 +169,8 @@ describe('ViewInDiscoverButton', () => {
       environment: 'staging',
       sampleRangeFrom: 1000,
       sampleRangeTo: 5000,
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
 
     mockUseAnyOfApmParams.mockReturnValue({
@@ -129,6 +180,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${SPAN_NAME} == "${query.spanName}"\n  | WHERE ${SPAN_DESTINATION_SERVICE_RESOURCE} == "${query.dependencyName}"\n  | WHERE ${SPAN_DURATION} >= ${query.sampleRangeFrom} AND ${SPAN_DURATION} <= ${query.sampleRangeTo}`,
       },
@@ -140,6 +195,8 @@ describe('ViewInDiscoverButton', () => {
       transactionName: 'POST /api/data',
       sampleRangeFrom: 1000,
       sampleRangeTo: 5000,
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -148,6 +205,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_DURATION} >= ${query.sampleRangeFrom} AND ${TRANSACTION_DURATION} <= ${query.sampleRangeTo}`,
       },
@@ -159,6 +220,8 @@ describe('ViewInDiscoverButton', () => {
       spanName: 'db-query',
       sampleRangeFrom: 500,
       sampleRangeTo: 2000,
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -167,6 +230,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SPAN_NAME} == "${query.spanName}"\n  | WHERE ${SPAN_DURATION} >= ${query.sampleRangeFrom} AND ${SPAN_DURATION} <= ${query.sampleRangeTo}`,
       },
@@ -176,6 +243,8 @@ describe('ViewInDiscoverButton', () => {
   it('should generate ESQL query with kuery filter', () => {
     const query = {
       kuery: 'user.id: "123" AND status_code: 200',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -184,6 +253,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE QSTR("user.id: \\"123\\" AND status_code: 200")`,
       },
@@ -194,6 +267,8 @@ describe('ViewInDiscoverButton', () => {
     const query = {
       environment: 'ENVIRONMENT_ALL',
       transactionName: 'test-transaction',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -202,6 +277,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"`,
       },
@@ -212,6 +291,8 @@ describe('ViewInDiscoverButton', () => {
     const query = {
       environment: 'ENVIRONMENT_NOT_DEFINED',
       transactionName: 'test-transaction',
+      rangeFrom: 'now-15m',
+      rangeTo: 'now',
     };
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -220,6 +301,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-15m',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"`,
       },
@@ -263,7 +348,7 @@ describe('ViewInDiscoverButton', () => {
 
     const { getByTestId } = render(<ViewInDiscoverButton />);
 
-    const button = getByTestId('apmWaterfallWithSummaryViewInDiscoverButtonButton');
+    const button = getByTestId('apmWaterfallWithSummaryViewInDiscoverButton');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
     expect(button).toHaveTextContent('View in Discover');

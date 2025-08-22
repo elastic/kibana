@@ -20,7 +20,9 @@ import {
   TRANSACTION_NAME,
   TRANSACTION_TYPE,
 } from '@kbn/apm-types';
-import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmPluginStartDeps } from '../../../../plugin';
+import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import {
   ENVIRONMENT_ALL_VALUE,
@@ -32,7 +34,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 export function ViewInDiscoverButton() {
   const { share } = useApmPluginContext();
   const { serviceName } = useApmServiceContext();
-  const { dataView } = useAdHocApmDataView();
+  const { services } = useKibana<ApmPluginStartDeps>();
 
   const { query: queryParams } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
@@ -66,13 +68,23 @@ export function ViewInDiscoverButton() {
     rangeTo: string;
   };
 
+  const { data = { apmIndexSettings: [] } } = useFetcher(
+    (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
+    [services.apmSourcesAccess]
+  );
+
+  const tracesIndices = data?.apmIndexSettings
+    .filter((indexSetting) => ['transaction', 'span'].includes(indexSetting.configurationName))
+    .map((indexSetting) => indexSetting.savedValue ?? indexSetting.defaultValue);
+  const dedupedIndices = Array.from(new Set(tracesIndices)).join(',');
+
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
     timeRange: {
       from: rangeFrom,
       to: rangeTo,
     },
     query: {
-      esql: from(dataView?.getIndexPattern() ?? 'traces-*')
+      esql: from(dedupedIndices)
         .pipe(
           serviceName
             ? where(`${SERVICE_NAME} == ?serviceName`, { serviceName })
