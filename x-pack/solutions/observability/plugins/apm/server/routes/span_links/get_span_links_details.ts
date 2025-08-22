@@ -206,6 +206,7 @@ async function fetchSpanLinksDetails({
           agentName: event.service.language.name as AgentName,
           spanName: event.span.name,
           duration: parseOtelDuration(event.duration),
+          environment: event.service.environment as Environment,
         },
       };
     });

@@ -14,7 +14,7 @@ export interface SpanLinkDetails {
     agentName: AgentName;
     serviceName: string;
     duration: number;
-    environment?: string;
+    environment: string;
     transactionId?: string;
     spanName?: string;
     spanSubtype?: string;
