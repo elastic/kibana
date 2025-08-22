@@ -21,25 +21,6 @@ Platform base configurations are available from:
 - `@kbn/test-suites-xpack-platform/functional/config.base.ts`
 - `@kbn/test-suites-xpack-platform/api_integration/config.ts`
 
-## Platform Services and Page Objects Integration
-
-Search tests leverage platform-shared services and page objects from the `@kbn/test-suites-xpack-platform` package, extending them with solution-specific functionality as needed.
-
-Platform services are available from:
-
-- `@kbn/test-suites-xpack-platform/api_integration/services`
-- `@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services`
-- `@kbn/test-suites-xpack-platform/functional/services`
-
-Platform page objects are available from:
-
-- `@kbn/test-suites-xpack-platform/functional/page_objects`
-
-Platform base configurations are available from:
-
-- `@kbn/test-suites-xpack-platform/functional/config.base.ts`
-- `@kbn/test-suites-xpack-platform/api_integration/config.ts`
-
 Example configuration:
 
 ```typescript

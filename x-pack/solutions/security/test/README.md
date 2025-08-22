@@ -4,25 +4,6 @@ This directory contains test suites specific to the Security solution. For compr
 
 ## Platform Services and Page Objects Integration
 
-Security tests leverage platform-shared services and page objects from the `@kbn/test-suites-xpack-platform` package, extending them with solution-specific functionality as needed.
-
-Platform services are available from:
-
-- `@kbn/test-suites-xpack-platform/api_integration/services`
-- `@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services`
-- `@kbn/test-suites-xpack-platform/functional/services`
-
-Platform page objects are available from:
-
-- `@kbn/test-suites-xpack-platform/functional/page_objects`
-
-Platform base configurations are available from:
-
-- `@kbn/test-suites-xpack-platform/functional/config.base.ts`
-- `@kbn/test-suites-xpack-platform/api_integration/config.ts`
-
-## Platform Services and Page Objects Integration
-
 Search tests leverage platform-shared services and page objects from the `@kbn/test-suites-xpack-platform` package, extending them with solution-specific functionality as needed.
 
 Platform services are available from:
@@ -90,10 +71,10 @@ node scripts/functional_tests_server.js --config x-pack/solutions/security/test/
 node scripts/functional_test_runner.js --config x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/config.ts
 
 # Start test server for functional tests
-node scripts/functional_tests_server.js --config x-pack/solutions/search/test/functional_search/config.ts
+node scripts/functional_tests_server.js --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 
 # Run functional tests
-node scripts/functional_test_runner.js --config x-pack/solutions/search/test/functional_search/config.ts
+node scripts/functional_test_runner.js --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 ```
 
 ## Best Practices
