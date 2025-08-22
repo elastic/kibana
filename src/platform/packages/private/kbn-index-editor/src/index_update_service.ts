@@ -423,7 +423,6 @@ export class IndexUpdateService {
   public readonly dataTableColumns$: Observable<DatatableColumn[]> = combineLatest([
     this.dataView$,
     this.pendingColumnsToBeSaved$.pipe(startWith([])),
-    this._refreshSubject$,
   ]).pipe(
     map(([dataView, pendingColumnsToBeSaved]) => {
       const unsavedFields = pendingColumnsToBeSaved
@@ -698,9 +697,9 @@ export class IndexUpdateService {
 
     // Subscribe to pendingColumnsToBeSaved$ and update _pendingColumnsToBeSaved$
     this._subscription.add(
-      this.dataView$
+      combineLatest([this.dataView$, this._refreshSubject$])
         .pipe(
-          switchMap((dataView) => {
+          switchMap(([dataView]) => {
             let placeholderIndex = 0;
             const columnsCount = dataView.fields.filter(
               // @ts-ignore
