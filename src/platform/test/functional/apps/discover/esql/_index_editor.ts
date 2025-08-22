@@ -89,6 +89,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.isDisplayed('indexEditorPreviewFile');
       await testSubjects.click('indexEditorImportButton');
 
+      // Check data grid has been populated correctly
+      await retry.tryForTime(6000, async () => {
+        const gridData = await dataGrid.getDataGridTableData();
+        expect(gridData.columns).to.eql([
+          'Select column',
+          'Stringcustomer_first_name',
+          'Stringcustomer_full_name',
+          'Stringcustomer_gender',
+          'Numbercustomer_id',
+          'Stringcustomer_last_name',
+          'Stringemail',
+        ]);
+        expect(gridData.rows[0]).to.eql([
+          '', // toggles column
+          'Elyssa',
+          'Elyssa Underwood',
+          'FEMALE',
+          27,
+          'Underwood',
+          'elyssa@underwood-family.zzz',
+        ]);
+      });
+
       // Close flyout and verify index content is correct
       await indexEditor.closeIndexEditor();
       await testSubjects.waitForDeleted('lookupIndexFlyout');

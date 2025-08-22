@@ -176,6 +176,8 @@ export class ESQLService extends FtrService {
       }
 
       await suggestionToSelect.click();
+
+      await this.testSubjects.waitForDeleted(suggestionToSelect);
     });
   }
 
