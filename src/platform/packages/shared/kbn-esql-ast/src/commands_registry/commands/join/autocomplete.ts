@@ -73,8 +73,11 @@ export async function autocomplete(
       const suggestions: ISuggestionItem[] = [];
 
       if (isCreateCommandEnabled) {
-        const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
-        suggestions.push(createIndexCommandSuggestion);
+        const canCreate = (await callbacks?.canCreateLookupIndex?.(indexNameInput)) ?? false;
+        if (canCreate) {
+          const createIndexCommandSuggestion = getLookupIndexCreateSuggestion(indexNameInput);
+          suggestions.push(createIndexCommandSuggestion);
+        }
       }
 
       if (joinSources?.length) {

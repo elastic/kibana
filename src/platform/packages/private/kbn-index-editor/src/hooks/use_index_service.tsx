@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  useLookupIndexCommand as useCreateLookupIndexCommand,
-  useCanCreateLookupIndex,
-} from './create_lookup_index';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { KibanaContextExtra } from '../types';
+
+export const useIndexService = () => {
+  const {
+    services: { indexUpdateService },
+  } = useKibana<KibanaContextExtra>();
+
+  return indexUpdateService;
+};

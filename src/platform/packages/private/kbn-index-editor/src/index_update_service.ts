@@ -112,7 +112,11 @@ interface PendingDocUpdate {
 export type PendingSave = Map<DocUpdate['id'], { type: 'delete-doc' } | PendingDocUpdate>;
 
 export class IndexUpdateService {
-  constructor(private readonly http: HttpStart, private readonly data: DataPublicPluginStart) {
+  constructor(
+    private readonly http: HttpStart,
+    private readonly data: DataPublicPluginStart,
+    public readonly canEditIndex: boolean
+  ) {
     this.listenForUpdates();
   }
 
@@ -812,7 +816,7 @@ export class IndexUpdateService {
   }
 
   /**
-   * Sends bulk update request to an index.
+   * Sends a bulk update request to an index.
    * @param updates
    */
   public bulkUpdate(updates: BulkUpdateOperations): Promise<BulkResponse> {
