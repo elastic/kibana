@@ -1910,7 +1910,6 @@
     "jest-mock": "^30.0.5",
     "jest-runtime": "^30.0.5",
     "jest-snapshot": "^30.0.5",
-    "jest-specific-snapshot": "^8.0.0",
     "jest-styled-components": "7.0.3",
     "jsdom": "^26.1.0",
     "json-schema-typed": "^8.0.1",
