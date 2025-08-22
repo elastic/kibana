@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiCard, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiCard, EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -23,44 +23,6 @@ interface Props {
 
 export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath }: Props) => {
   const { euiTheme } = useEuiTheme();
-
-  const styles = css({
-    '.linksGrid': {
-      display: 'flex',
-      flexWrap: 'wrap',
-      gap: euiTheme.size.m,
-    },
-
-    '.linkCard': {
-      textAlign: 'center',
-
-      '.euiCard__title': {
-        fontSize: euiTheme.size.m,
-        fontWeight: euiTheme.font.weight.bold,
-      },
-
-      '.euiIcon': {
-        marginBlockEnd: euiTheme.size.s,
-      },
-    },
-
-    '.linksGrid .linkCard': {
-      flex: '1 1 100%',
-      maxWidth: '100%',
-    },
-
-    [`@media (min-width: ${euiTheme.breakpoint.m}px)`]: {
-      '.linksGrid .linkCard': {
-        flex: `0 1 calc(50% - ${euiTheme.size.m})`,
-        maxWidth: `calc(50% - ${euiTheme.size.m})`,
-      },
-
-      '.linksGrid .linkCard:last-child:nth-child(odd)': {
-        marginLeft: 'auto',
-        marginRight: 'auto',
-      },
-    },
-  });
 
   const CURSOR_LINK = `cursor://file/${fileName}:${lineNumber}:${columnNumber}`;
   const GITHUB_DEV_LINK = `https://github.dev/elastic/kibana/blob/main/${relativePath}#L${lineNumber}`;
@@ -106,37 +68,56 @@ export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath
     },
   ];
 
-  return (
-    <EuiFlexItem grow={false} css={styles}>
-      <div className="linksGrid">
-        {ACTIONS.map(({ href, icon, id, i18nId, label }) => {
-          const ariaLabel = i18n.translate(
-            'kbnInspectComponent.inspectFlyout.linksSection.openFileInAriaLabel',
-            {
-              defaultMessage: 'Open file using {target}',
-              values: { target: label },
-            }
-          );
+  const iconCss = css`
+    margin-block-end: ${euiTheme.size.s};
+  `;
 
-          return (
-            <EuiCard
-              aria-label={ariaLabel}
-              className="linkCard"
-              href={href}
-              icon={<EuiIcon type={icon} size="xxl" />}
-              key={id}
-              layout="vertical"
-              title={
-                <EuiText color={euiTheme.colors.textPrimary} component="span">
-                  <FormattedMessage id={i18nId} defaultMessage={label} />
-                </EuiText>
-              }
-              titleSize="s"
-              target="'_blank'"
-            />
-          );
-        })}
-      </div>
-    </EuiFlexItem>
+  const titleCss = css`
+    font-weight: ${euiTheme.font.weight.bold};
+  `;
+
+  return (
+    <EuiFlexGroup gutterSize="m" wrap={true}>
+      {ACTIONS.map(({ href, icon, id, i18nId, label }, index) => {
+        const isLastOdd = index === ACTIONS.length - 1 && ACTIONS.length % 2 !== 0;
+
+        const cardCss = css({
+          [`@media (min-width: ${euiTheme.breakpoint.m}px)`]: {
+            flex: `0 1 calc(50% - ${euiTheme.size.m})`,
+            maxWidth: `calc(50% - ${euiTheme.size.m})`,
+            ...(isLastOdd && {
+              marginLeft: 'auto',
+              marginRight: 'auto',
+            }),
+          },
+        });
+
+        const ariaLabel = i18n.translate(
+          'kbnInspectComponent.inspectFlyout.linksSection.openFileInAriaLabel',
+          {
+            defaultMessage: 'Open file using {target}',
+            values: { target: label },
+          }
+        );
+
+        return (
+          <EuiCard
+            key={id}
+            aria-label={ariaLabel}
+            href={href}
+            css={cardCss}
+            layout="vertical"
+            icon={<EuiIcon type={icon} size="xxl" css={iconCss} />}
+            title={
+              <EuiText color={euiTheme.colors.textPrimary} component="span" css={titleCss}>
+                <FormattedMessage id={i18nId} defaultMessage={label} />
+              </EuiText>
+            }
+            titleSize="s"
+            target="_blank"
+          />
+        );
+      })}
+    </EuiFlexGroup>
   );
 };

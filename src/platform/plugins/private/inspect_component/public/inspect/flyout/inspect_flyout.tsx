@@ -27,7 +27,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   size: 's',
   'data-test-subj': INSPECT_FLYOUT_ID,
   id: INSPECT_FLYOUT_ID,
-  maxWidth: 600,
+  maxWidth: 480,
 };
 
 export const InspectFlyout = ({ componentData, target }: Props) => {
@@ -46,6 +46,7 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
   useEffect(() => {
     if (!target) return;
     const rectangle = target.getBoundingClientRect();
+    // TODO: Handle resizing
     setCurrentPosition({
       position: 'fixed',
       top: `${rectangle.top}px`,
