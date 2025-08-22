@@ -7,17 +7,62 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import { ContainerModule } from 'inversify';
+import { Logger, OnSetup, OnStart } from '@kbn/core-di';
+import { CapabilitiesProvider, SavedObjectsClient, Route } from '@kbn/core-di-server';
+import { capabilitiesProvider } from './capabilities_provider';
+import {
+  BulkDeleteRoute,
+  bulkGetClientFactory,
+  BulkGetRoute,
+  findClientFactory,
+  FindRoute,
+  GetAllowedTypesRoute,
+  relationshipsClientFactory,
+  RelationshipsRoute,
+  scrollCountClientFactory,
+  ScrollCountRoute,
+} from './routes';
+import { SavedObjectsManagement } from './services';
 
-export const plugin = async (context: PluginInitializerContext) => {
-  const { SavedObjectsManagementPlugin } = await import('./plugin');
-  return new SavedObjectsManagementPlugin(context);
-};
+export const module = new ContainerModule(({ bind }) => {
+  bind(CapabilitiesProvider).toConstantValue(capabilitiesProvider);
+  bind(SavedObjectsManagement).toSelf().inSingletonScope();
 
-export { module } from './module';
-export type {
-  SavedObjectsManagementPluginSetup,
-  SavedObjectsManagementPluginStart,
-  SavedObjectMetadata,
-  SavedObjectWithMetadata,
-} from './types';
+  bind(Route).toConstantValue(BulkDeleteRoute);
+  bind(Route).toConstantValue(BulkGetRoute);
+  bind(Route).toConstantValue(FindRoute);
+  bind(Route).toConstantValue(GetAllowedTypesRoute);
+  bind(Route).toConstantValue(RelationshipsRoute);
+  bind(Route).toConstantValue(ScrollCountRoute);
+
+  bind(SavedObjectsClient)
+    .toResolvedValue(bulkGetClientFactory, bulkGetClientFactory.inject)
+    .inRequestScope()
+    .whenParentIs(BulkGetRoute);
+  bind(SavedObjectsClient)
+    .toResolvedValue(findClientFactory, findClientFactory.inject)
+    .inRequestScope()
+    .whenParentIs(FindRoute);
+  bind(SavedObjectsClient)
+    .toResolvedValue(relationshipsClientFactory, relationshipsClientFactory.inject)
+    .inRequestScope()
+    .whenParentIs(RelationshipsRoute);
+  bind(SavedObjectsClient)
+    .toResolvedValue(scrollCountClientFactory, scrollCountClientFactory.inject)
+    .inRequestScope()
+    .whenParentIs(ScrollCountRoute);
+
+  bind(OnSetup).toResolvedValue(
+    (logger) => () => {
+      logger.debug('Setting up SavedObjectsManagement plugin');
+    },
+    [Logger]
+  );
+  bind(OnStart).toResolvedValue(
+    (logger) => () => {
+      logger.debug('Starting up SavedObjectsManagement plugin');
+    },
+    [Logger]
+  );
+});
