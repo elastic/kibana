@@ -20,7 +20,7 @@ import {
 } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
@@ -60,7 +60,7 @@ export function SpanOverview({
   columnsMeta,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: SpanOverviewProps) {
-  const containerRef = useRef<HTMLElement>(null);
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
@@ -86,8 +86,8 @@ export function SpanOverview({
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
   const spanId = flattenedDoc[SPAN_ID_FIELD];
 
-  const containerHeight = containerRef.current
-    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
+  const containerHeight = containerRef
+    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
     : 0;
 
   return (
@@ -103,16 +103,14 @@ export function SpanOverview({
             <EuiFlexGroup
               direction="column"
               gutterSize="m"
-              ref={containerRef}
+              ref={setContainerRef}
               css={
                 containerHeight
                   ? css`
-                      height: ${containerHeight}px;
+                      max-height: ${containerHeight}px;
                       overflow: auto;
                     `
-                  : css`
-                      display: block;
-                    `
+                  : undefined
               }
             >
               <EuiFlexItem>
