@@ -24,8 +24,7 @@ describe('IndexUpdateService', () => {
   beforeEach(() => {
     http = httpServiceMock.createStartContract();
     data = dataPluginMock.createStartContract();
-    // data = createFakeDataPluginStart();
-    service = new IndexUpdateService(http, data);
+    service = new IndexUpdateService(http, data, true);
   });
 
   afterEach(() => {
