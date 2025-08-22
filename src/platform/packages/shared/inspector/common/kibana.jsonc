@@ -3,5 +3,5 @@
   "id": "@kbn/inspector-common",
   "owner": "@elastic/kibana-presentation",
   "group": "platform",
-  "visibility": "private"
+  "visibility": "shared"
 }
