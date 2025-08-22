@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/react-hooks';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import type { Streams } from '@kbn/streams-schema';
+import type { GroupStreamRelationshipType } from '@kbn/streams-schema/src/models/group';
 import React from 'react';
 
 export function GroupStreamModificationFlyout({
@@ -42,10 +43,7 @@ export function GroupStreamModificationFlyout({
     description: existingStream?.description ?? '',
     owner: existingStream?.group.owner ?? '',
     tier: existingStream?.group.tier.toString() ?? '1',
-    relationships:
-      existingStream?.group.relationships.map((relationship) => ({
-        label: relationship.name,
-      })) ?? [],
+    ...splitRelationships(existingStream),
   });
 
   const [selectedTags, setSelectedTags] = React.useState<Array<{ label: string }>>(
@@ -118,11 +116,24 @@ export function GroupStreamModificationFlyout({
     const runbookLinks = selectedRunbookLinks.map((opt) => opt.label);
     const documentationLinks = selectedDocLinks.map((opt) => opt.label);
     const repositoryLinks = selectedRepoLinks.map((opt) => opt.label);
-    const relationships = formData.relationships.map((r) => ({
+
+    const parent = formData.parent.map((r) => ({
       name: r.label as string,
-      type: 'member' as const,
-      filter: '*',
+      type: 'parent' as const,
     }));
+    const child = formData.child.map((r) => ({
+      name: r.label as string,
+      type: 'child' as const,
+    }));
+    const dependency = formData.dependency.map((r) => ({
+      name: r.label as string,
+      type: 'dependency' as const,
+    }));
+    const related = formData.related.map((r) => ({
+      name: r.label as string,
+      type: 'related' as const,
+    }));
+    const relationships = [...parent, ...child, ...dependency, ...related];
 
     let streamBaseData: any = {};
 
@@ -146,7 +157,6 @@ export function GroupStreamModificationFlyout({
             stream: {
               description: formData.description,
               group: {
-                type: 'group',
                 owner: formData.owner,
                 tier: parseInt(
                   formData.tier,
@@ -216,7 +226,12 @@ export function GroupStreamModificationFlyout({
             }
           )}
         >
-          <EuiFieldText name="name" value={formData.name} onChange={handleInputChange} />
+          <EuiFieldText
+            name="name"
+            value={formData.name}
+            onChange={handleInputChange}
+            disabled={!!existingStream}
+          />
         </EuiFormRow>
         <EuiFormRow
           label={i18n.translate('xpack.streams.groupStreamModificationFlyout.descriptionLabel', {
@@ -363,21 +378,88 @@ export function GroupStreamModificationFlyout({
           />
         </EuiFormRow>
         <EuiFormRow
+          label={i18n.translate(
+            'xpack.streams.groupStreamModificationFlyout.parentRelationshipLabel',
+            {
+              defaultMessage: 'Parent',
+            }
+          )}
+        >
+          <EuiComboBox
+            placeholder={i18n.translate(
+              'xpack.streams.groupStreamModificationFlyout.parentRelationshipPlaceholder',
+              {
+                defaultMessage: 'Select parent',
+              }
+            )}
+            options={streamsOptions}
+            singleSelection={true}
+            selectedOptions={formData.parent}
+            onChange={(options) => {
+              setFormData({ ...formData, parent: options });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.streams.groupStreamModificationFlyout.childrenRelationshipsLabel',
+            {
+              defaultMessage: 'Children',
+            }
+          )}
+        >
+          <EuiComboBox
+            placeholder={i18n.translate(
+              'xpack.streams.groupStreamModificationFlyout.childrenRelationshipsPlaceholder',
+              {
+                defaultMessage: 'Select children',
+              }
+            )}
+            options={streamsOptions}
+            selectedOptions={formData.child}
+            onChange={(options) => {
+              setFormData({ ...formData, child: options });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
+          label={i18n.translate(
+            'xpack.streams.groupStreamModificationFlyout.dependencyRelationshipsLabel',
+            {
+              defaultMessage: 'Dependencies',
+            }
+          )}
+        >
+          <EuiComboBox
+            placeholder={i18n.translate(
+              'xpack.streams.groupStreamModificationFlyout.dependencyRelationshipsPlaceholder',
+              {
+                defaultMessage: 'Select dependencies',
+              }
+            )}
+            options={streamsOptions}
+            selectedOptions={formData.dependency}
+            onChange={(options) => {
+              setFormData({ ...formData, dependency: options });
+            }}
+          />
+        </EuiFormRow>
+        <EuiFormRow
           label={i18n.translate('xpack.streams.groupStreamModificationFlyout.relationshipsLabel', {
-            defaultMessage: 'Relationships',
+            defaultMessage: 'Other relationships',
           })}
         >
           <EuiComboBox
             placeholder={i18n.translate(
               'xpack.streams.groupStreamModificationFlyout.relationshipsPlaceholder',
               {
-                defaultMessage: 'Select relationships',
+                defaultMessage: 'Select related streams',
               }
             )}
             options={streamsOptions}
-            selectedOptions={formData.relationships}
+            selectedOptions={formData.related}
             onChange={(options) => {
-              setFormData({ ...formData, relationships: options });
+              setFormData({ ...formData, related: options });
             }}
           />
         </EuiFormRow>
@@ -394,4 +476,23 @@ export function GroupStreamModificationFlyout({
       </EuiModalBody>
     </>
   );
+}
+
+function splitRelationships(existingStream?: Streams.GroupStream.Definition) {
+  if (!existingStream) return { parent: [], child: [], dependency: [], related: [] };
+
+  const { parent, child, dependency, related } = existingStream.group.relationships.reduce(
+    (acc, current) => {
+      acc[current.type].push({ label: current.name });
+      return acc;
+    },
+    {
+      parent: [],
+      child: [],
+      dependency: [],
+      related: [],
+    } as { [key in GroupStreamRelationshipType]: Array<{ label: string }> }
+  );
+
+  return { parent, child, dependency, related };
 }

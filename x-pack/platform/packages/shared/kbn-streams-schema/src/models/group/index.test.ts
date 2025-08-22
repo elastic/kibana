@@ -14,7 +14,6 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
-          type: 'group',
           owner: 'test_user',
           tier: 1,
           tags: [],
@@ -61,7 +60,6 @@ describe('GroupStream', () => {
           name: 'group-stream',
           description: '',
           group: {
-            type: 'group',
             owner: 'test_user',
             tier: 1,
             tags: [],
@@ -121,7 +119,6 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
-            type: 'group',
             owner: 'test_user',
             tier: 1,
             tags: [],

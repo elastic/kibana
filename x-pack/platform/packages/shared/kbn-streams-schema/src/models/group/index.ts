@@ -11,20 +11,24 @@ import { validation } from '../validation/validation';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 
+export type GroupStreamRelationshipType = 'related' | 'child' | 'parent' | 'dependency';
+
 interface StreamRelationship {
   name: string;
-  type: 'related' | 'member';
-  filter?: string;
+  type: GroupStreamRelationshipType;
 }
 
 const streamRelationshipSchema = z.object({
   name: z.string(),
-  type: z.union([z.literal('related'), z.literal('member')]),
-  filter: z.string().optional(),
+  type: z.union([
+    z.literal('related'),
+    z.literal('child'),
+    z.literal('parent'),
+    z.literal('dependency'),
+  ]),
 });
 
 export interface Group {
-  type: 'group';
   owner: string;
   tier: 1 | 2 | 3 | 4;
   tags: string[];
@@ -37,7 +41,6 @@ export interface Group {
 export const Group: Validation<unknown, Group> = validation(
   z.unknown(),
   z.object({
-    type: z.literal('group'),
     owner: z.string(),
     tier: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
     tags: z.array(z.string()),

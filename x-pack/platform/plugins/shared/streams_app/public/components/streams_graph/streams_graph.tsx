@@ -13,13 +13,14 @@ import dagre from 'cytoscape-dagre';
 import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme } from '@elastic/eui';
 import { Streams } from '@kbn/streams-schema';
+import type { GroupStreamRelationshipType } from '@kbn/streams-schema/src/models/group';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 
 cytoscape.use(dagre);
 
 export interface StreamsGraphProps {
-  streams?: Array<{ stream: Streams.all.Definition }>;
-  currentStream?: Streams.all.Definition;
+  streams: Array<{ stream: Streams.all.Definition }>;
+  currentStream: Streams.all.Definition;
 }
 
 export function StreamsGraph({ streams, currentStream }: StreamsGraphProps) {
@@ -27,8 +28,8 @@ export function StreamsGraph({ streams, currentStream }: StreamsGraphProps) {
 
   const onNodeClick = useCallback(
     (id: string) => {
-      router.push('/{key}', {
-        path: { key: id },
+      router.push('/{key}/management/{tab}', {
+        path: { key: id, tab: 'relationships' },
         query: {},
       });
     },
@@ -39,47 +40,9 @@ export function StreamsGraph({ streams, currentStream }: StreamsGraphProps) {
 }
 
 function buildGraph(
-  streams?: Array<{ stream: Streams.all.Definition }>,
-  currentStream?: Streams.all.Definition
+  streams: Array<{ stream: Streams.all.Definition }>,
+  currentStream: Streams.all.Definition
 ): cytoscape.ElementDefinition[] {
-  if (!streams) {
-    return [];
-  }
-
-  if (!currentStream) {
-    return streams.flatMap((stream) => {
-      if (!Streams.GroupStream.Definition.is(stream.stream)) {
-        return [
-          {
-            data: {
-              id: stream.stream.name,
-              label: stream.stream.name,
-              type: 'ingest',
-            },
-          },
-        ];
-      }
-
-      return [
-        {
-          data: {
-            id: stream.stream.name,
-            label: stream.stream.name,
-            type: 'group',
-          },
-        },
-        ...stream.stream.group.relationships.map((relationship) => {
-          return {
-            data: {
-              source: stream.stream.name,
-              target: relationship.name,
-            },
-          };
-        }),
-      ];
-    });
-  }
-
   const relevantStreams = streams.filter((stream) => {
     if (stream.stream.name === currentStream.name) {
       return true;
@@ -138,6 +101,8 @@ function buildGraph(
         .map((relationship) => {
           return {
             data: {
+              label: typeToLabel(relationship.type),
+              type: relationship.type,
               source: stream.stream.name,
               target: relationship.name,
             },
@@ -145,6 +110,18 @@ function buildGraph(
         }),
     ];
   });
+}
+
+function typeToLabel(type: GroupStreamRelationshipType) {
+  if (type === 'parent') {
+    return 'Child of';
+  } else if (type === 'child') {
+    return 'Parent of';
+  } else if (type === 'dependency') {
+    return 'Depends on';
+  } else {
+    return 'Related to';
+  }
 }
 
 const Cytoscape = memo(CytoscapeComponent, (prevProps, nextProps) => {
@@ -299,11 +276,12 @@ const getStyle = (euiTheme: EuiThemeComputed): cytoscape.StylesheetJson => {
       selector: 'node',
       style: {
         shape: (el: cytoscape.NodeSingular) => (el.data('type') === 'group' ? 'ellipse' : 'barrel'),
-        'background-color': euiTheme.colors.backgroundBasePlain,
+        'background-color': (el: cytoscape.NodeSingular) =>
+          el.data('current') ? euiTheme.colors.borderBasePrimary : 'lightgray',
         'background-height': '40%',
         'background-width': '40%',
         'border-color': (el: cytoscape.NodeSingular) =>
-          el.data('current') ? euiTheme.colors.accent : euiTheme.colors.mediumShade,
+          el.data('current') ? euiTheme.colors.primary : 'gray',
         'border-style': 'solid',
         'border-width': 4,
         color: euiTheme.colors.textParagraph,
@@ -316,11 +294,19 @@ const getStyle = (euiTheme: EuiThemeComputed): cytoscape.StylesheetJson => {
       selector: 'edge',
       style: {
         width: 1,
-        'line-color': euiTheme.colors.mediumShade,
-        'curve-style': 'unbundled-bezier',
+        label: (el: cytoscape.EdgeSingular) => el.data('label'),
+        'font-size': '6px',
+        'line-color': (el: cytoscape.EdgeSingular) =>
+          el.data('type') === 'related' ? euiTheme.colors.mediumShade : 'black',
+        color: (el: cytoscape.EdgeSingular) =>
+          el.data('type') === 'related' ? euiTheme.colors.mediumShade : 'black',
+        'line-style': (el: cytoscape.EdgeSingular) =>
+          el.data('type') === 'related' ? 'dashed' : 'solid',
+        'curve-style': 'bezier',
         'source-arrow-shape': 'none',
         'target-arrow-shape': 'triangle',
-        'target-arrow-color': euiTheme.colors.mediumShade,
+        'target-arrow-color': (el: cytoscape.EdgeSingular) =>
+          el.data('type') === 'related' ? euiTheme.colors.mediumShade : 'black',
         // @ts-expect-error
         'target-distance-from-node': euiTheme.size.xs,
       },

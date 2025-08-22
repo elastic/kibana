@@ -7,6 +7,7 @@
 
 import type { Streams } from '@kbn/streams-schema';
 import React from 'react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { StreamsGraph } from '.';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../hooks/use_kibana';
@@ -33,6 +34,14 @@ export function StreamDetailRelationshipsView({
     },
     [streamsRepositoryClient]
   );
+
+  if (streamsListFetch.loading) {
+    return <EuiLoadingSpinner />;
+  }
+
+  if (!streamsListFetch.value) {
+    return null;
+  }
 
   return <StreamsGraph streams={streamsListFetch.value} currentStream={definition.stream} />;
 }

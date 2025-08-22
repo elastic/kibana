@@ -83,12 +83,17 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.name);
 
-    const indexPattern = Streams.GroupStream.Definition.is(streamEntity)
-      ? streamEntity.group.relationships.map((relationship) => relationship.name).join(',')
-      : streamEntity.name;
+    if (Streams.GroupStream.Definition.is(streamEntity)) {
+      return {
+        details: {
+          count: 0,
+        },
+      };
+    }
+
     // check doc count
     const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-      index: indexPattern,
+      index: streamEntity.name,
       track_total_hits: true,
       ignore_unavailable: true,
       query: {

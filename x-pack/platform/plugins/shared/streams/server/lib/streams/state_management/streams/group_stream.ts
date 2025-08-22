@@ -7,6 +7,7 @@
 
 import { cloneDeep } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
+import { isNotFoundError } from '@kbn/es-errors';
 import { StatusError } from '../../errors/status_error';
 import type { ElasticsearchAction } from '../execution_plan/types';
 import type { State } from '../state';
@@ -72,7 +73,40 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
     startingState: State
   ): Promise<ValidationResult> {
     if (this._definition.name.startsWith('logs.')) {
-      throw new StatusError('A group stream name can not start with [logs.]', 400);
+      throw new StatusError('A Group stream name can not start with [logs.]', 400);
+    }
+
+    const existsInStartingState = startingState.has(this._definition.name);
+    if (!existsInStartingState) {
+      // Check for conflicts
+      try {
+        const dataStreamResult =
+          await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream({
+            name: this._definition.name,
+          });
+
+        if (dataStreamResult.data_streams.length === 0) {
+          return {
+            isValid: false,
+            errors: [
+              new Error(`Cannot create Group stream ${this.definition.name} due to existing index`),
+            ],
+          };
+        }
+
+        return {
+          isValid: false,
+          errors: [
+            new Error(
+              `Cannot create Group stream ${this.definition.name} due to existing data stream`
+            ),
+          ],
+        };
+      } catch (error) {
+        if (!isNotFoundError(error)) {
+          throw error;
+        }
+      }
     }
 
     // validate relationships
@@ -91,7 +125,11 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
       if (!relatedStream || relatedStream.isDeleted()) {
         return {
           isValid: false,
-          errors: [new Error(`Related stream ${relationship.name} not found`)],
+          errors: [
+            new Error(
+              `Group stream${this.name} has a relationship to ${relationship.name} which was not found`
+            ),
+          ],
         };
       }
     }
@@ -113,6 +151,16 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
             )}`
           ),
         ],
+      };
+    }
+
+    const parentRelationships = this._definition.group.relationships.filter(
+      (relationship) => relationship.type === 'parent'
+    );
+    if (parentRelationships.length > 1) {
+      return {
+        isValid: false,
+        errors: [new Error(`Group stream ${this.name} cannot have more than one parent`)],
       };
     }
 
@@ -143,7 +191,7 @@ export class GroupStream extends StreamActiveRecord<Streams.GroupStream.Definiti
         errors: dependentGroupStreams.map(
           (stream) =>
             new Error(
-              `Cannot delete group stream ${this.name} because group stream ${stream.name} depends on it`
+              `Cannot delete Group stream ${this.name} because Group stream ${stream.name} depends on it`
             )
         ),
       };
