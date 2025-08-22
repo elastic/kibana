@@ -58,6 +58,26 @@ export default ({ getService }: FtrProviderContext) => {
         expect(res.status).eql(403);
       });
 
+      it('should not create a user if the maximum user limit is reached', async () => {
+        log.info(`creating a user when the maximum limit is reached`);
+        const userCreationPromises = Array.from({ length: 100 }, (_, i) =>
+          api.createPrivMonUser({
+            body: { user: { name: `privmon_testuser_${i + 1}` } },
+          })
+        );
+        await Promise.all(userCreationPromises);
+        const res = await api.createPrivMonUser({
+          body: { user: { name: 'privmon_testuser_maxPlusOne' } },
+        });
+
+        if (res.status !== 500) {
+          log.error(`Creating privmon user when the maximum limit is reached should fail`);
+          log.error(JSON.stringify(res.body));
+        }
+
+        expect(res.status).eql(500);
+        expect(res.body.message).to.match(/Maximum user limit of \d+ reached/);
+      });
       it('should update a user', async () => {
         log.info(`updating a user`);
         const { body } = await api.createPrivMonUser({
