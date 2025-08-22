@@ -304,9 +304,9 @@ export const useLookupIndexCommand = (
 
   monaco.editor.registerCommand(
     'esql.lookup_index.create',
-    async (_, args: { indexName: string; doesIndexExist?: boolean }) => {
-      const { indexName, doesIndexExist } = args;
-      await openFlyout(indexName, doesIndexExist);
+    async (_, args: { indexName: string; doesIndexExist?: boolean; canEditIndex?: boolean }) => {
+      const { indexName, doesIndexExist, canEditIndex } = args;
+      await openFlyout(indexName, doesIndexExist, canEditIndex);
     }
   );
 
@@ -375,7 +375,11 @@ export const useLookupIndexCommand = (
                 stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
                 hoverMessage: {
                   value: `[${actionLabel}](command:esql.lookup_index.create?${encodeURIComponent(
-                    JSON.stringify({ indexName: lookupIndex, doesIndexExist: isExistingIndex })
+                    JSON.stringify({
+                      indexName: lookupIndex,
+                      doesIndexExist: isExistingIndex,
+                      canEditIndex,
+                    })
                   )})`,
                   isTrusted: true,
                 },
@@ -425,10 +429,11 @@ export const useLookupIndexCommand = (
   );
 
   const openFlyout = useCallback(
-    async (indexName: string, doesIndexExist?: boolean) => {
+    async (indexName: string, doesIndexExist?: boolean, canEditIndex = true) => {
       await uiActions.getTrigger('EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID').exec({
         indexName,
         doesIndexExist,
+        canEditIndex,
         onClose: async ({ indexName: resultIndexName, indexCreatedDuringFlyout }) => {
           await onFlyoutClose(indexName, resultIndexName, indexCreatedDuringFlyout);
         },

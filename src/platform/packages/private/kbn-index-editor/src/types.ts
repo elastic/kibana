@@ -22,6 +22,7 @@ import type { IndexUpdateService } from './index_update_service';
 export interface EditLookupIndexContentContext {
   indexName?: string;
   doesIndexExist: boolean;
+  canEditIndex: boolean;
   onClose?: (result: {
     indexName: string | null;
     /** Indicates if the index was created */

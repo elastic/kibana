@@ -11,10 +11,12 @@ import { EuiButton, EuiText } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIndexService } from '../hooks/use_index_service';
 import { useFileSelectorContext } from './file_drop_zone';
 
 export const FilePicker = () => {
   const { onFileSelectorClick } = useFileSelectorContext();
+  const { canEditIndex } = useIndexService();
 
   return (
     <EuiButton
@@ -27,6 +29,7 @@ export const FilePicker = () => {
       aria-label={i18n.translate('indexEditor.filePicker.uploadButtonAriaLabel', {
         defaultMessage: 'Upload file button',
       })}
+      disabled={canEditIndex === false}
     >
       <EuiText size="xs">
         <FormattedMessage
