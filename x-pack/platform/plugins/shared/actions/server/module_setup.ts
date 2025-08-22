@@ -119,7 +119,7 @@ export class ModuleSetup implements PluginSetupContract {
     private cloud: ActionsPluginSetupDeps['plugins']['cloud']
   ) {
     this.logger = this.loggerFactory.get();
-    this.telemetryLogger = this.loggerFactory.get();
+    this.telemetryLogger = this.loggerFactory.get('usage');
     this.inMemoryMetrics = new InMemoryMetrics(this.loggerFactory.get('in_memory_metrics'));
 
     const plugins = {

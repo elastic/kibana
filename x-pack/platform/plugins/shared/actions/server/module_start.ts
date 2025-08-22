@@ -90,7 +90,7 @@ export class ModuleStart implements PluginStartContract {
   ) {
     this.logger = this.loggerFactory.get();
     const logger = this.logger;
-    this.telemetryLogger = this.loggerFactory.get();
+    this.telemetryLogger = this.loggerFactory.get('usage');
     const plugins = {
       licensing: this.licensing,
       encryptedSavedObjects: this.encryptedSavedObjects,
