@@ -296,7 +296,7 @@ export class TaskManagerPlugin
         this.eventLogger = service.getLogger({
           event: { provider: 'task_manager' },
         });
-        service.registerProviderActions('task_manager', ['execute']);
+        service.registerProviderActions('task_manager', ['execute', 'execute-start']);
       },
     };
   }

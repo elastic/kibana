@@ -27,7 +27,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-utils';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
-import { type IEventLogger, millisToNanos } from '@kbn/event-log-plugin/server';
+import { type IEventLogger, type IEvent, millisToNanos } from '@kbn/event-log-plugin/server';
 import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import {
@@ -358,15 +358,43 @@ export class TaskManagerRunner implements TaskRunner {
       );
     }
 
-    const start = Date.now();
-    // TODO: Look at retry at too?
-    const scheduled = this.instance.task.runAt.toISOString();
-    const scheduleDelay = millisToNanos(Date.now() - this.instance.task.runAt.getTime());
     this.logger.debug(`Running task ${this}`, { tags: ['task:start', this.id, this.taskType] });
+
+    const kibanaProperties = {
+      saved_objects: [
+        {
+          type: 'task',
+          id: this.id,
+        },
+      ],
+      task: {
+        id: this.instance.task.id,
+        scheduled: this.instance.task.scheduledAt.toISOString(),
+        schedule_delay: millisToNanos(Date.now() - this.instance.task.runAt.getTime()),
+        task_type: this.instance.task.taskType,
+      },
+    };
+    const startEvent: IEvent = {
+      event: {
+        kind: 'task',
+        action: 'execute-start',
+      },
+      kibana: kibanaProperties,
+    };
+    const doneEvent: IEvent = {
+      event: {
+        kind: 'task',
+        action: 'execute',
+        outcome: 'unknown',
+      },
+      kibana: kibanaProperties,
+    };
 
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    this.eventLogger.logEvent(startEvent);
+    this.eventLogger.startTiming(doneEvent);
     const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.config.event_loop_delay);
 
     // Validate state
@@ -384,34 +412,17 @@ export class TaskManagerRunner implements TaskRunner {
         )
       );
       if (apmTrans) apmTrans.end('failure');
-      this.eventLogger.logEvent({
-        event: {
-          kind: 'task',
-          action: 'execute',
-          outcome: 'failure',
-          duration: millisToNanos(Date.now() - start),
-          start: new Date(start).toISOString(),
-          end: new Date().toISOString(),
-        },
-        kibana: {
-          saved_objects: [
-            {
-              type: 'task',
-              id: this.id,
-            },
-          ],
-          task: {
-            scheduled,
-            schedule_delay: scheduleDelay,
-            task_type: this.instance.task.taskType,
-          },
-        },
-        message: `Task ${this} failed due to the task state being invalid: ${stateValidationResult.error.message}`,
-        error: {
-          message: stateValidationResult.error.message,
-          stack_trace: stateValidationResult.error.stack_trace
-        },
-      });
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'failure',
+      };
+      doneEvent.message = `Task ${this} failed due to the task state being invalid: ${stateValidationResult.error.message}`;
+      doneEvent.error = {
+        message: stateValidationResult.error.message,
+        stack_trace: stateValidationResult.error.stack_trace
+      };
+      this.eventLogger.logEvent(doneEvent);
       return processedResult;
     }
 
@@ -450,30 +461,13 @@ export class TaskManagerRunner implements TaskRunner {
         this.processResult(validatedResult, stopTaskTimer())
       );
       if (apmTrans) apmTrans.end('success');
-      this.eventLogger.logEvent({
-        event: {
-          kind: 'task',
-          action: 'execute',
-          outcome: 'success',
-          duration: millisToNanos(Date.now() - start),
-          start: new Date(start).toISOString(),
-          end: new Date().toISOString(),
-        },
-        kibana: {
-          saved_objects: [
-            {
-              type: 'task',
-              id: this.id,
-            },
-          ],
-          task: {
-            scheduled,
-            schedule_delay: scheduleDelay,
-            task_type: this.instance.task.taskType,
-          },
-        },
-        message: `Task ${this} ran successfully`,
-      });
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'success',
+      };
+      doneEvent.message = `Task ${this} ran successfully`;
+      this.eventLogger.logEvent(doneEvent);
       return processedResult;
     } catch (err) {
       const errorSource = isUserError(err) ? TaskErrorSource.USER : TaskErrorSource.FRAMEWORK;
@@ -490,34 +484,17 @@ export class TaskManagerRunner implements TaskRunner {
         )
       );
       if (apmTrans) apmTrans.end('failure');
-      this.eventLogger.logEvent({
-        event: {
-          kind: 'task',
-          action: 'execute',
-          outcome: 'failure',
-          duration: millisToNanos(Date.now() - start),
-          start: new Date(start).toISOString(),
-          end: new Date().toISOString(),
-        },
-        kibana: {
-          saved_objects: [
-            {
-              type: 'task',
-              id: this.id,
-            },
-          ],
-          task: {
-            scheduled,
-            schedule_delay: scheduleDelay,
-            task_type: this.instance.task.taskType,
-          },
-        },
-        message: `Task ${this} failed: ${err}`,
-        error: {
-          message: err.message,
-          stack_trace: err.stack_trace,
-        },
-      });
+      this.eventLogger.stopTiming(doneEvent);
+      doneEvent.event = {
+        ...doneEvent.event,
+        outcome: 'failure',
+      };
+      doneEvent.message = `Task ${this} failed: ${err}`;
+      doneEvent.error = {
+        message: err.message,
+        stack_trace: err.stack_trace,
+      };
+      this.eventLogger.logEvent(doneEvent);
       return processedResult;
     } finally {
       this.logger.debug(`Task ${this} ended`, { tags: ['task:end', this.id, this.taskType] });
