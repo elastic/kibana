@@ -14,10 +14,10 @@ import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import { BrowserRouter as Router } from '@kbn/shared-ux-router';
-import { WorkflowExecution } from '@kbn/workflows-management-plugin/public';
 import * as yaml from 'js-yaml';
 import React, { useEffect, useState } from 'react';
 import { PLUGIN_NAME } from '../../common';
+import { DebugGraph } from './debug-graph/debug-graph';
 
 interface WorkflowsAppDeps {
   basename: string;
@@ -61,32 +61,51 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
   // Use React hooks to manage state.
   const [workflowYaml, setWorkflowYaml] = useState<string>(
     `
-workflow:
-  name: New workflow
-  enabled: false
-  triggers:
-    - type: manual
-  steps:
-    - name: step-with-console-log-1
-      type: console
-      connector-id: console
-      with:
-        message: Step 1 executed for rule"{{event.ruleName}}"
-    
-    - name: slack-connector-step
-      type: slack
-      connector-id: keep-playground
-      with:
-        message: |
-          Hello from Kibana!
-          The user name from event is {{event.additionalData.userName}} and email is {{event.additionalData.user}}
-
-    - name: step-with-5-seconds-delay
-      type: delay
-      connector-id: delay
-      with:
-        delay: 5000
-    `
+name: Foreach tests
+enabled: false
+triggers:
+  - type: manual
+steps:
+  - name: ifstep
+    type: if
+    condition: 'true'
+    steps:
+      - name: true-step-1
+        type: console
+        with:
+          message: 'First step executed'
+      - name: true-step-2
+        type: console
+        with:
+          message: 'First step executed'
+    else:
+      - name: false-step
+        type: console
+        with:
+          message: 'First step executed'
+      
+      - name: false-step-2
+        type: console
+        with:
+          message: 'First step executed'
+  - name: outer_foreach
+    type: foreach
+    foreach: '["outer1", "outer2"]'
+    steps:
+      - name: inner_foreach
+        type: foreach
+        foreach: '["inner1", "inner2"]'
+        steps:
+          - name: log-step
+            type: console
+            with:
+              message: 'Index={{foreach.index}}; Item="{{foreach.item}}";Total={{foreach.total}};'
+          
+  - name: dummy-step
+    type: console
+    with:
+      message: 'First step executed'
+`
   );
 
   // Update workflow inputs with current user email
@@ -238,12 +257,13 @@ workflow:
                       ignoreTag
                     />
                   </EuiButton>
-                  {workflowExecutionId && (
+                  {workflowYaml && <DebugGraph workflowYaml={workflowYaml} />}
+                  {/* {workflowExecutionId && (
                     <WorkflowExecution
                       workflowExecutionId={workflowExecutionId}
                       workflowYaml={workflowYaml}
                     />
-                  )}
+                  )} */}
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiPageTemplate.Section>
