@@ -6,8 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiSpacer } from '@elastic/eui';
 import { Controller } from 'react-hook-form';
 import { ToolsSelection } from '../tools_selection';
 
@@ -29,14 +28,6 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
 
   return (
     <>
-      <EuiSpacer size="l" />
-      <EuiTitle size="m">
-        <h4>
-          {i18n.translate('xpack.onechat.agents.form.toolsSelectionTitle', {
-            defaultMessage: 'Configure Agent Tools',
-          })}
-        </h4>
-      </EuiTitle>
       <EuiSpacer size="l" />
       <Controller
         name="configuration.tools"

@@ -37,6 +37,7 @@ import { truncateAtNewline } from '../../../utils/truncate_at_newline';
 import { labels } from '../../../utils/i18n';
 import { ToolFilterOption } from '../../tools/table/tools_table_filter_option';
 import { OnechatToolTags } from '../../tools/tags/tool_tags';
+import { ActiveToolsStatus } from './active_tools_status';
 
 interface ToolsSelectionProps {
   tools: ToolDefinition[];
@@ -80,24 +81,20 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTools, setFilteredTools] = useState<ToolDefinition[]>(tools);
 
-  // Filter tools based on showActiveOnly and search
   const displayTools = useMemo(() => {
     let result = tools;
 
     if (showActiveOnly) {
-      // Show only selected tools
       result = tools.filter((tool) => isToolSelected(tool, selectedTools));
     }
 
     return result;
   }, [tools, showActiveOnly, selectedTools]);
 
-  // Update filtered tools when display tools change
   useEffect(() => {
     setFilteredTools(displayTools);
   }, [displayTools]);
 
-  // Group tools by type for enhanced display
   const toolsByType = useMemo(() => {
     const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
     filteredTools.forEach((tool) => {
@@ -110,7 +107,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return grouped;
   }, [filteredTools]);
 
-  // Get unique tags for filtering
   const allTags = useMemo(() => {
     const tagsSet = new Set<string>();
     displayTools.forEach((tool) => {
@@ -119,7 +115,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return Array.from(tagsSet);
   }, [displayTools]);
 
-  // Prepare search configuration
   const searchConfig: Search = useMemo(() => {
     if (!enableSearch && !enableFiltering) return {};
 
@@ -197,7 +192,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return config;
   }, [enableSearch, enableFiltering, displayTools, allTags, searchQuery]);
 
-  // Tool selection handlers (preserve existing logic)
   const handleToggleTypeTools = useCallback(
     (type: ToolType) => {
       const typeTools = toolsByType[type] || [];
@@ -269,7 +263,10 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
     return (
       <div>
-        {/* Enhanced header with search and filters */}
+        <ActiveToolsStatus activeToolsCount={11} warningThreshold={24} />
+
+        <EuiSpacer size="l" />
+
         <EuiFlexGroup alignItems="center" gutterSize="m">
           {(enableSearch || enableFiltering) && (
             <EuiFlexItem>
@@ -311,11 +308,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
         <EuiSpacer size="m" />
 
         <EuiInMemoryTable
-          css={css`
-            table {
-              background-color: transparent;
-            }
-          `}
           columns={columns}
           items={filteredTools}
           itemId="id"
@@ -343,6 +335,10 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
   return (
     <div>
+      <ActiveToolsStatus activeToolsCount={11} warningThreshold={24} />
+
+      <EuiSpacer size="l" />
+
       <EuiFlexGroup alignItems="center" gutterSize="m">
         {(enableSearch || enableFiltering) && (
           <EuiFlexItem>
@@ -387,7 +383,6 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
 
       <EuiSpacer size="m" />
 
-      {/* Grouped tool display */}
       {Object.entries(toolsByType).map(([type, typeTools]) => {
         const toolType = type as ToolType;
         const columns = [
