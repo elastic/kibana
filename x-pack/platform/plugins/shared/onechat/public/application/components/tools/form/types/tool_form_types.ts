@@ -5,22 +5,26 @@
  * 2.0.
  */
 
-import type { EsqlToolFieldTypes } from '@kbn/onechat-common';
+import type { EsqlToolFieldTypes, ToolType } from '@kbn/onechat-common';
 
-export interface OnechatEsqlParam {
+export interface EsqlParam {
   name: string;
   type: EsqlToolFieldTypes;
   description: string;
 }
 
-type EsqlParamFormData = OnechatEsqlParam & {
+type EsqlParamFormData = EsqlParam & {
   warning?: string;
 };
 
-export interface OnechatEsqlToolFormData {
-  name: string;
+export interface ToolFormData {
+  type: ToolType;
+  toolId: string;
   description: string;
+  labels: string[];
+}
+
+export interface EsqlToolFormData extends ToolFormData {
   esql: string;
-  tags: string[];
   params: EsqlParamFormData[];
 }

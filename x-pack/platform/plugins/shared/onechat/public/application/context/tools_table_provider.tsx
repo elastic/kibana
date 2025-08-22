@@ -12,7 +12,7 @@ import { appPaths } from '../utils/app_paths';
 import { useNavigation } from '../hooks/use_navigation';
 import { useDeleteTool, useDeleteTools } from '../hooks/tools/use_delete_tools';
 import { labels } from '../utils/i18n';
-import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/esql/create_esql_tool';
+import { TOOL_SOURCE_QUERY_PARAM } from '../components/tools/create_tool';
 
 export interface ToolsActionsContextType {
   createTool: () => void;
