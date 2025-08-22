@@ -1,0 +1,28 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import React from 'react';
+import { EuiImage, EuiSpacer } from '@elastic/eui';
+
+interface Props {
+  image?: string | null;
+}
+
+export const PreviewImage = ({ image }: Props) => {
+  if (!image) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiImage src={image} alt="Preview" size="fullWidth" hasShadow />
+      <EuiSpacer size="l" />
+    </>
+  );
+};

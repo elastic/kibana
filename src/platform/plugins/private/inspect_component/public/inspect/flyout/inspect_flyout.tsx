@@ -11,12 +11,12 @@ import React, { useEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
 import { EuiFlyoutBody, EuiPortal, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
-import { DataSection } from './data_section';
+import { DataSection } from './data_section/data_section';
 import { InspectHeader } from './inspect_header';
-import { LinksSection } from './links_section';
-import type { ComponentData } from '../../types';
+import { LinksSection } from './links_section/links_section';
 import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID } from '../../constants';
 import { InspectHighlight } from '../overlay/inspect_highlight';
+import type { ComponentData } from '../../types';
 
 interface Props {
   componentData: ComponentData;

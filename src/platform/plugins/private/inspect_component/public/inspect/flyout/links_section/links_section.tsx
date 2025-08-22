@@ -25,7 +25,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';
-import type { ActionLink, ComponentData } from '../../types';
+import type { ActionLink, ComponentData } from '../../../types';
 
 interface Props {
   componentData: ComponentData;
