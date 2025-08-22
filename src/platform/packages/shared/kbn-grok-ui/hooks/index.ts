@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './components';
-export * from './models';
-export * from './hooks';
+export { useResizeCheckerUtils } from './use_resize_checker_utils';
