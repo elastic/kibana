@@ -8,7 +8,7 @@ steps:
 
   # - wait
 
-  - group: 'Pre checks'
+  - group: 'Pre-Checks'
     key: prechecks
     steps:
       # - command: .buildkite/scripts/steps/build_kibana.sh
@@ -105,6 +105,13 @@ steps:
       #         limit: 3
       - command: exit 1
         key: build
+        agents:
+          machineType: n2-standard-2
+          preemptible: true
+          diskSizeGb: 85
+          timeout_in_minutes: 2
+      - command: exit 0
+        key: build_api_docs
         agents:
           machineType: n2-standard-2
           preemptible: true
