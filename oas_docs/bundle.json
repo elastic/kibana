@@ -58538,9 +58538,6 @@
                                         "items": {
                                           "additionalProperties": false,
                                           "properties": {
-                                            "filter": {
-                                              "type": "string"
-                                            },
                                             "name": {
                                               "type": "string"
                                             },
@@ -58554,7 +58551,19 @@
                                                 },
                                                 {
                                                   "enum": [
-                                                    "member"
+                                                    "child"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "enum": [
+                                                    "parent"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "enum": [
+                                                    "dependency"
                                                   ],
                                                   "type": "string"
                                                 }
@@ -58614,16 +58623,9 @@
                                             "type": "number"
                                           }
                                         ]
-                                      },
-                                      "type": {
-                                        "enum": [
-                                          "group"
-                                        ],
-                                        "type": "string"
                                       }
                                     },
                                     "required": [
-                                      "type",
                                       "owner",
                                       "tier",
                                       "tags",
@@ -59093,9 +59095,6 @@
                         "items": {
                           "additionalProperties": false,
                           "properties": {
-                            "filter": {
-                              "type": "string"
-                            },
                             "name": {
                               "type": "string"
                             },
@@ -59109,7 +59108,19 @@
                                 },
                                 {
                                   "enum": [
-                                    "member"
+                                    "child"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": [
+                                    "parent"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": [
+                                    "dependency"
                                   ],
                                   "type": "string"
                                 }
@@ -59169,16 +59180,9 @@
                             "type": "number"
                           }
                         ]
-                      },
-                      "type": {
-                        "enum": [
-                          "group"
-                        ],
-                        "type": "string"
                       }
                     },
                     "required": [
-                      "type",
                       "owner",
                       "tier",
                       "tags",
