@@ -19,14 +19,17 @@ import { registerInspectComponentRoutes } from './routes';
 export class InspectComponentPluginServer implements Plugin {
   private readonly logger: Logger;
   private readonly isDevMode: boolean;
+  private readonly isEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.isDevMode = initializerContext.env.mode.dev;
+    const { enabled } = initializerContext.config.get<{ enabled: boolean }>();
+    this.isEnabled = enabled;
   }
 
   public setup(core: CoreSetup) {
-    if (this.isDevMode) {
+    if (this.isDevMode && this.isEnabled) {
       registerInspectComponentRoutes({ http: core.http, logger: this.logger });
     }
 
