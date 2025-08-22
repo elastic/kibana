@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller } from 'react-hook-form';
@@ -24,6 +24,8 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
   isLoading,
   isFormDisabled,
 }) => {
+  const [showActiveOnly, setShowActiveOnly] = useState(false);
+
   return (
     <>
       <EuiSpacer size="l" />
@@ -45,6 +47,11 @@ export const ToolsTab: React.FC<ToolsTabProps> = ({
             selectedTools={field.value}
             onToolsChange={field.onChange}
             disabled={isFormDisabled}
+            enableSearch={true}
+            enableFiltering={true}
+            enableGrouping={true}
+            showActiveOnly={showActiveOnly}
+            onShowActiveOnlyChange={setShowActiveOnly}
           />
         )}
       />
