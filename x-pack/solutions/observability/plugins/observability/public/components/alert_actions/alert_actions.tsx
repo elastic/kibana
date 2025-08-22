@@ -23,10 +23,6 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { DefaultAlertActions } from '@kbn/response-ops-alerts-table/components/default_alert_actions';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import {
-  useDeletePropertyAction,
-  DeleteAttachmentConfirmationModal,
-} from '@kbn/cases-plugin/public';
 import { useCaseActions } from './use_case_actions';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import { paths, SLO_DETAIL_PATH } from '../../../common/locators/paths';
@@ -60,12 +56,6 @@ export function AlertActions({
 
   const userCasesPermissions = cases?.helpers.canUseCases([observabilityFeatureId]);
   const [viewInAppUrl, setViewInAppUrl] = useState<string>();
-
-  const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
-    onDelete: () => {
-      handleRemoveAlertsFromCase();
-    },
-  });
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),
@@ -103,14 +93,19 @@ export function AlertActions({
     [refresh, telemetryClient, tableId]
   );
 
+  const onRemoveAlertFromCase = useCallback(() => {
+    refresh?.();
+  }, [refresh]);
+
   const {
     isPopoverOpen,
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    handleRemoveAlertsFromCase,
+    handleRemoveAlertsFromCaseClick,
   } = useCaseActions({
     onAddToCase,
+    onRemoveAlertFromCase,
     alerts: [alert],
     services: {
       cases,
@@ -132,7 +127,7 @@ export function AlertActions({
           <EuiContextMenuItem
             data-test-subj="remove-from-case-action"
             key="removeFromCase"
-            onClick={onModalOpen}
+            onClick={handleRemoveAlertsFromCaseClick}
             size="s"
           >
             {i18n.translate('xpack.observability.alerts.actions.removeFromCase', {
@@ -293,21 +288,6 @@ export function AlertActions({
           />
         </EuiPopover>
       </EuiFlexItem>
-      {showDeletionModal && (
-        <DeleteAttachmentConfirmationModal
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          confirmButtonText={i18n.translate(
-            'xpack.observability.alerts.actions.removeFromCaseConfirm',
-            {
-              defaultMessage: 'Remove',
-            }
-          )}
-          title={i18n.translate('xpack.observability.alerts.actions.removeFromCaseTitle', {
-            defaultMessage: 'Remove alert from case',
-          })}
-        />
-      )}
     </>
   );
 }

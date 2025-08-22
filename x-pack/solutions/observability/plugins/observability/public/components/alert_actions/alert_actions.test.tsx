@@ -31,9 +31,6 @@ import type { GetObservabilityAlertsTableProp } from '../..';
 import { AlertsTableContextProvider } from '@kbn/response-ops-alerts-table/contexts/alerts_table_context';
 import type { AdditionalContext, RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { CaseUI } from '@kbn/cases-plugin/common';
-import { basicCase, caseComment } from './alert_actions_mock_data';
-
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
   open: () => {
@@ -67,23 +64,6 @@ const config: ConfigSchema = {
 };
 
 const getFormatterMock = jest.fn();
-
-export const mockDeleteAlertComment = jest.fn();
-
-jest.mock('@kbn/cases-plugin/public', () => ({
-  ...jest.requireActual('@kbn/cases-plugin/public'),
-  useRemoveAlertFromCase: jest.fn(() => ({
-    mutate: jest.fn(),
-    mutateAsync: () => mockDeleteAlertComment(),
-    isLoading: false,
-    isError: false,
-    isSuccess: false,
-    error: null,
-    data: null,
-    reset: jest.fn(),
-  })),
-}));
-
 const createRuleTypeRegistryMock = () => ({
   getFormatter: getFormatterMock,
   registerFormatter: () => {},
@@ -119,13 +99,7 @@ describe('ObservabilityActions component', () => {
     getFormatterMock.mockReturnValue(jest.fn().mockReturnValue('a reason'));
   });
 
-  const setup = async ({
-    pageId = 'nothing',
-    caseData = basicCase,
-  }: {
-    pageId?: string;
-    caseData?: CaseUI;
-  }) => {
+  const setup = async (pageId: string) => {
     const queryClient = new QueryClient({
       defaultOptions: {
         queries: {
@@ -146,7 +120,6 @@ describe('ObservabilityActions component', () => {
       | 'alert'
       | 'ecsAlert'
       | 'nonEcsData'
-      | 'caseData'
       | 'rowIndex'
       | 'cveProps'
       | 'clearSelection'
@@ -161,7 +134,6 @@ describe('ObservabilityActions component', () => {
       nonEcsData: [],
       rowIndex: 1,
       cveProps: {} as unknown as EuiDataGridCellValueElementProps,
-      caseData,
       clearSelection: noop,
       observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
       openAlertInFlyout: jest.fn(),
@@ -208,7 +180,7 @@ describe('ObservabilityActions component', () => {
   };
 
   it('should hide "View rule details" menu item for rule page id', async () => {
-    const wrapper = await setup({ pageId: RULE_DETAILS_PAGE_ID });
+    const wrapper = await setup(RULE_DETAILS_PAGE_ID);
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
@@ -216,7 +188,7 @@ describe('ObservabilityActions component', () => {
   });
 
   it('should show "View rule details" menu item', async () => {
-    const wrapper = await setup({ pageId: 'nothing' });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
@@ -224,7 +196,7 @@ describe('ObservabilityActions component', () => {
   });
 
   it('"View alert details" menu item should open alert details page', async () => {
-    const wrapper = await setup({ pageId: 'nothing' });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewAlertDetailsPage"]').hostNodes().length).toBe(1);
@@ -233,7 +205,7 @@ describe('ObservabilityActions component', () => {
   });
 
   it('should create a valid link for rule details page', async () => {
-    const wrapper = await setup({ pageId: 'nothing' });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
@@ -244,7 +216,7 @@ describe('ObservabilityActions component', () => {
   });
 
   it('should refresh when adding an alert to a new case', async () => {
-    const wrapper = await setup({ pageId: 'nothing' });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
@@ -255,7 +227,7 @@ describe('ObservabilityActions component', () => {
   });
 
   it('should refresh when when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
-    await setup({ pageId: 'nothing' });
+    await setup('nothing');
 
     // @ts-expect-error: The object will always be defined
     mockKibana.services.cases.hooks.useCasesAddToNewCaseFlyout.mock.calls[0][0].onSuccess();
@@ -264,7 +236,7 @@ describe('ObservabilityActions component', () => {
   });
 
   it('should refresh when adding an alert to an existing case', async () => {
-    const wrapper = await setup({ pageId: 'nothing' });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
     await waitFor(() => {
       expect(
@@ -276,28 +248,8 @@ describe('ObservabilityActions component', () => {
     });
   });
 
-  it('should update attachment when removing one of several alerts from an existing case', async () => {
-    const multiAlertCaseComment = {
-      ...caseComment,
-      alertId: ['6d4c6d74-d51a-495c-897d-88ced3b95e30', '6e4c6d74-e51b-495d-897e-99ced3b95e41'],
-      index: ['alert-index-1', 'alert-index-1'],
-    };
-    const multiAlertCase = { ...basicCase, comments: [multiAlertCaseComment] };
-    const wrapper = await setup({ pageId: 'nothing', caseData: multiAlertCase });
-    wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      expect(wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().length).toBe(1);
-    });
-    wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().simulate('click');
-    await waitFor(() => {
-      wrapper.find('[data-test-subj="confirmModalConfirmButton"]').hostNodes().simulate('click');
-    });
-
-    expect(mockDeleteAlertComment).toHaveBeenCalled();
-  });
-
   it('should refresh when when calling onSuccess of useCasesAddToExistingCaseModal', async () => {
-    await setup({ pageId: 'nothing' });
+    await setup('nothing');
 
     // @ts-expect-error: The object will always be defined
     mockKibana.services.cases.hooks.useCasesAddToExistingCaseModal.mock.calls[0][0].onSuccess();
@@ -308,14 +260,13 @@ describe('ObservabilityActions component', () => {
   it('should hide the case actions without permissions', async () => {
     mockKibana.services.cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
 
-    const wrapper = await setup({ pageId: 'nothing' });
+    const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
 
     expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(0);
     expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
       0
     );
-    expect(wrapper.find('[data-test-subj="remove-from-case-action"]').hostNodes().length).toBe(0);
   });
 
   it('should show a valid url when clicking  "View in app"', async () => {
@@ -326,7 +277,7 @@ describe('ObservabilityActions component', () => {
         hasBasePath: false,
       })
     );
-    const wrapper = await setup({ pageId: RULE_DETAILS_PAGE_ID });
+    const wrapper = await setup(RULE_DETAILS_PAGE_ID);
 
     expect(
       wrapper.find('[data-test-subj="o11yAlertActionsButton"]').first().getElement().props.onClick

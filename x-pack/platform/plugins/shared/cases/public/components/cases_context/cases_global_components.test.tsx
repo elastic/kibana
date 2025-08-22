@@ -83,4 +83,38 @@ describe('Cases context UI', () => {
       expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalled();
     });
   });
+
+  describe('removeAlertModal', () => {
+    it('should render the remove alert modal when isModalOpen is true', async () => {
+      const onRowClick = jest.fn();
+      const state = {
+        ...getInitialCasesContextState(),
+        removeAlertModal: {
+          isModalOpen: true,
+          props: {
+            caseId: 'case-id',
+            alertId: ['alert-id'],
+            onSuccess: jest.fn(),
+            onClose: jest.fn(),
+          },
+        },
+      };
+      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
+      expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalledWith({
+        attachments: [],
+        onRowClick,
+      });
+    });
+
+    it('should not render the select case modal when isModalOpen is false', async () => {
+      const state = {
+        ...getInitialCasesContextState(),
+        selectCaseModal: {
+          isModalOpen: false,
+        },
+      };
+      renderWithTestingProviders(<CasesGlobalComponents state={state} />);
+      expect(getAllCasesSelectorModalNoProviderLazyMock).toHaveBeenCalled();
+    });
+  });
 });

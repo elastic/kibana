@@ -20,6 +20,8 @@ interface MutationArgs {
   successToasterTitle: string;
 }
 
+export type UseRemoveAlertFromCase = (caseId: string) => ReturnType<typeof useRemoveAlertFromCase>;
+
 export const useRemoveAlertFromCase = (caseId: string) => {
   const { showErrorToast, showSuccessToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -84,5 +86,3 @@ export function isAlertAttachment(obj: AttachmentUI): obj is AlertAttachmentUI {
   // Adjust these checks based on the actual AlertAttachment structure
   return obj.type === 'alert';
 }
-
-export type UseRemoveAlertFromCase = ReturnType<typeof useRemoveAlertFromCase>;

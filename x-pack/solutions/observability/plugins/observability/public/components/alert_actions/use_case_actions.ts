@@ -6,10 +6,8 @@
  */
 
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
-import { useRemoveAlertFromCase } from '@kbn/cases-plugin/public';
 import { useCallback, useState } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import { i18n } from '@kbn/i18n';
 import type { Alert } from '@kbn/alerting-types';
 import type { CasesService } from '@kbn/response-ops-alerts-table/types';
 import type { EventNonEcsData } from '../../../common/typings';
@@ -17,11 +15,13 @@ import type { EventNonEcsData } from '../../../common/typings';
 export const useCaseActions = ({
   alerts,
   onAddToCase,
+  onRemoveAlertFromCase,
   services,
   caseId,
 }: {
   alerts: Alert[];
   onAddToCase?: ({ isNewCase }: { isNewCase: boolean }) => void;
+  onRemoveAlertFromCase: () => void;
   services: {
     /**
      * The cases service is optional: cases features will be disabled if not provided
@@ -37,23 +37,8 @@ export const useCaseActions = ({
     onAddToCase?.({ isNewCase: false });
   }, [onAddToCase]);
 
-  const { mutateAsync: removeAlertsFromCase } = useRemoveAlertFromCase(caseId ?? '');
-
-  const removalSuccessToast = i18n.translate(
-    'xpack.observability.alerts.actions.removeFromCaseSuccess',
-    { defaultMessage: 'Alert removed from case' }
-  );
-
-  const handleRemoveAlertsFromCase = () => {
-    alerts.forEach((alert) => {
-      if (alert._id) {
-        removeAlertsFromCase({
-          alertId: alert._id,
-          successToasterTitle: removalSuccessToast,
-        });
-        closeActionsPopover();
-      }
-    });
+  const handleRemoveAlertsFromCaseClick = () => {
+    removeAlertModal?.open();
   };
 
   const onAddToNewCase = useCallback(() => {
@@ -62,6 +47,15 @@ export const useCaseActions = ({
 
   const selectCaseModal = cases?.hooks.useCasesAddToExistingCaseModal({
     onSuccess: onAddToExistingCase,
+  });
+
+  const removeAlertModal = cases?.hooks.useRemoveAlertFromCaseModal({
+    caseId,
+    alertId: alerts.map((alert) => alert._id),
+    onSuccess: onRemoveAlertFromCase,
+    onClose: () => {
+      closeActionsPopover();
+    },
   });
 
   function getCaseAttachments(): CaseAttachmentsWithoutOwner {
@@ -102,6 +96,6 @@ export const useCaseActions = ({
     setIsPopoverOpen,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,
-    handleRemoveAlertsFromCase,
+    handleRemoveAlertsFromCaseClick,
   };
 };
