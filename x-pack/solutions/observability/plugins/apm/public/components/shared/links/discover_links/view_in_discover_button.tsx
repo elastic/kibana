@@ -49,6 +49,8 @@ export function ViewInDiscoverButton() {
     environment,
     dependencyName,
     kuery,
+    rangeFrom,
+    rangeTo,
     // we need to convert it here since /dependencies/operation uses span instead of transaction,
     // to avoid changing the routes, we do this workaround
   } = queryParams as unknown as {
@@ -60,9 +62,15 @@ export function ViewInDiscoverButton() {
     environment: string;
     dependencyName: string;
     kuery: string;
+    rangeFrom: string;
+    rangeTo: string;
   };
 
   const discoverHref = share.url.locators.get(DISCOVER_APP_LOCATOR)?.getRedirectUrl({
+    timeRange: {
+      from: rangeFrom,
+      to: rangeTo,
+    },
     query: {
       esql: from(dataView?.getIndexPattern() ?? 'traces-*')
         .pipe(

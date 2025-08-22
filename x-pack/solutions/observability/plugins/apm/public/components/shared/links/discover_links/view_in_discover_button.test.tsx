@@ -236,6 +236,8 @@ describe('ViewInDiscoverButton', () => {
       sampleRangeFrom: 1000,
       sampleRangeTo: 10000,
       kuery: 'error.message: "timeout"',
+      rangeFrom: 'now-1h',
+      rangeTo: 'now',
     };
     mockUseAnyOfApmParams.mockReturnValue({
       query,
@@ -244,6 +246,10 @@ describe('ViewInDiscoverButton', () => {
     render(<ViewInDiscoverButton />);
 
     expect(mockGetRedirectUrl).toHaveBeenCalledWith({
+      timeRange: {
+        from: 'now-1h',
+        to: 'now',
+      },
       query: {
         esql: `FROM ${MOCK_INDEX_PATTERN}\n  | WHERE ${SERVICE_NAME} == "${serviceName}"\n  | WHERE ${SERVICE_ENVIRONMENT} == "${query.environment}"\n  | WHERE ${TRANSACTION_NAME} == "${query.transactionName}"\n  | WHERE ${TRANSACTION_TYPE} == "${query.transactionType}"\n  | WHERE ${SPAN_DESTINATION_SERVICE_RESOURCE} == "${query.dependencyName}"\n  | WHERE ${TRANSACTION_DURATION} >= ${query.sampleRangeFrom} AND ${TRANSACTION_DURATION} <= ${query.sampleRangeTo}\n  | WHERE QSTR("error.message: \\"timeout\\"")`,
       },
