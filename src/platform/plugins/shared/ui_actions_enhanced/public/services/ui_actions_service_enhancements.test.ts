@@ -115,7 +115,7 @@ describe('UiActionsService', () => {
         extract,
       });
       service.extract(actionState);
-      expect(extract).toBeCalledWith(actionState.events[0]);
+      expect(extract).toHaveBeenCalledWith(actionState.events[0]);
     });
 
     test('action factory inject function gets called when calling uiactions inject', () => {
@@ -135,7 +135,7 @@ describe('UiActionsService', () => {
         inject,
       });
       service.inject(actionState, []);
-      expect(inject).toBeCalledWith(actionState.events[0], []);
+      expect(inject).toHaveBeenCalledWith(actionState.events[0], []);
     });
 
     test('action factory telemetry function gets called when calling uiactions telemetry', () => {
@@ -155,7 +155,7 @@ describe('UiActionsService', () => {
         telemetry,
       });
       service.telemetry(actionState);
-      expect(telemetry).toBeCalledWith(actionState.events[0], {});
+      expect(telemetry).toHaveBeenCalledWith(actionState.events[0], {});
     });
 
     describe('registerFeature for licensing', () => {
@@ -176,7 +176,7 @@ describe('UiActionsService', () => {
           minimalLicense: 'gold',
           licenseFeatureName: 'a name',
         });
-        expect(spy).toBeCalledWith('a name', 'gold');
+        expect(spy).toHaveBeenCalledWith('a name', 'gold');
       });
     });
   });

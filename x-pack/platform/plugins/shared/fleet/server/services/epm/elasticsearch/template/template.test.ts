@@ -1951,7 +1951,7 @@ describe('EPM template', () => {
           } as any,
         },
       ]);
-      expect(esClient.indices.getDataStream).toBeCalledWith({
+      expect(esClient.indices.getDataStream).toHaveBeenCalledWith({
         name: 'test.*-*',
         expand_wildcards: ['open', 'hidden'],
       });
@@ -2061,7 +2061,7 @@ describe('EPM template', () => {
           } as any,
         },
       ]);
-      expect(esClient.indices.get).toBeCalledWith({
+      expect(esClient.indices.get).toHaveBeenCalledWith({
         index: '.ds-test-constant.keyword-default-0002',
       });
       const putMappingsCalls = esClient.indices.putMapping.mock.calls;

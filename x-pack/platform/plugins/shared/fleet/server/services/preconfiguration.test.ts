@@ -463,7 +463,7 @@ describe('policy preconfiguration', () => {
       expect(packages).toEqual(expect.arrayContaining(['test_package-3.0.0']));
       expect(nonFatalErrors.length).toBe(0);
 
-      expect(mockedPackagePolicyService.create).toBeCalledWith(
+      expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -528,7 +528,7 @@ describe('policy preconfiguration', () => {
       expect(policies.length).toEqual(0);
       expect(packages).toEqual(expect.arrayContaining(['test_package-1.0.0']));
       expect(nonFatalErrors.length).toBe(0);
-      expect(jest.mocked(installPackage)).toBeCalledWith(
+      expect(jest.mocked(installPackage)).toHaveBeenCalledWith(
         expect.objectContaining({
           skipDataStreamRollover: true,
         })
@@ -636,7 +636,7 @@ describe('policy preconfiguration', () => {
       );
 
       expect(mockedPackagePolicyService.create)..toHaveBeenCalledTimes(1);
-      expect(mockedPackagePolicyService.create).toBeCalledWith(
+      expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
         expect.anything(), // so client
         expect.anything(), // es client
         expect.objectContaining({
@@ -693,7 +693,7 @@ describe('policy preconfiguration', () => {
       );
 
       expect(spyAgentPolicyServiceUpdate).toHaveBeenCalled();
-      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         expect.anything(), // soClient
         expect.anything(), // esClient
         'test-id',
@@ -756,7 +756,7 @@ describe('policy preconfiguration', () => {
       );
 
       expect(spyAgentPolicyServiceUpdate).toHaveBeenCalled();
-      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         expect.anything(), // soClient
         expect.anything(), // esClient
         'test-id',
@@ -1006,7 +1006,7 @@ describe('policy preconfiguration', () => {
           DEFAULT_SPACE_ID
         );
       expect(spyAgentPolicyServiceUpdate).toHaveBeenCalled();
-      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         expect.anything(), // soClient
         expect.anything(), // esClient
         'test-id',
@@ -1088,10 +1088,10 @@ describe('policy preconfiguration', () => {
       );
 
       expect(appContextService.getInternalUserSOClientForSpaceId)..toHaveBeenCalledTimes(1);
-      expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith(TEST_NAMESPACE);
+      expect(appContextService.getInternalUserSOClientForSpaceId).toHaveBeenCalledWith(TEST_NAMESPACE);
 
       expect(mockedPackagePolicyService.create)..toHaveBeenCalledTimes(1);
-      expect(mockedPackagePolicyService.create).toBeCalledWith(
+      expect(mockedPackagePolicyService.create).toHaveBeenCalledWith(
         namespacedSOClient, // namespaced so client
         expect.anything(), // es client
         expect.objectContaining({
@@ -1101,7 +1101,7 @@ describe('policy preconfiguration', () => {
       );
 
       expect(spyAgentPolicyServiceUpdate)..toHaveBeenCalledTimes(1);
-      expect(spyAgentPolicyServiceUpdate).toBeCalledWith(
+      expect(spyAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         namespacedSOClient, // namespaced so client
         expect.anything(), // es client
         expect.anything(), // id

@@ -37,7 +37,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       toasts,
     });
 
-    expect(sendInstallKibanaAssetsForRq).toBeCalledWith({
+    expect(sendInstallKibanaAssetsForRq).toHaveBeenCalledWith({
       pkgName: 'nginx',
       pkgVersion: '1.25.1',
     });
@@ -65,7 +65,7 @@ describe('ensurePackageKibanaAssetsInstalled', () => {
       toasts,
     });
 
-    expect(sendInstallKibanaAssetsForRq).toBeCalledWith({
+    expect(sendInstallKibanaAssetsForRq).toHaveBeenCalledWith({
       pkgName: 'nginx',
       pkgVersion: '1.25.1',
       spaceIds: ['test1', 'test2'],

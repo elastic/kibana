@@ -74,8 +74,8 @@ describe('ConfirmDeleteUsers', () => {
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(apiClientMock.deleteUser)..toHaveBeenCalledTimes(2);
-    expect(apiClientMock.deleteUser).toBeCalledWith('foo');
-    expect(apiClientMock.deleteUser).toBeCalledWith('bar');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('foo');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('bar');
   });
 
   it('attempts to delete all users even if some fail', () => {
@@ -101,7 +101,7 @@ describe('ConfirmDeleteUsers', () => {
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').simulate('click');
 
     expect(apiClientMock.deleteUser)..toHaveBeenCalledTimes(2);
-    expect(apiClientMock.deleteUser).toBeCalledWith('foo');
-    expect(apiClientMock.deleteUser).toBeCalledWith('bar');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('foo');
+    expect(apiClientMock.deleteUser).toHaveBeenCalledWith('bar');
   });
 });

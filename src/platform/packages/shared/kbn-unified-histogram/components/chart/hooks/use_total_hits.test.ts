@@ -104,7 +104,7 @@ describe('useTotalHits', () => {
     fetch$.next({ type: 'fetch' });
     rerender();
     expect(onTotalHitsChange)..toHaveBeenCalledTimes(1);
-    expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
+    expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.loading, undefined);
     expect(setFieldSpy).toHaveBeenCalledWith('index', dataViewWithTimefieldMock);
     expect(setFieldSpy).toHaveBeenCalledWith('query', query);
     expect(setFieldSpy).toHaveBeenCalledWith('size', 0);
@@ -117,7 +117,7 @@ describe('useTotalHits', () => {
     expect(fetchOptions?.executionContext?.description).toBe('fetch total hits');
     await waitFor(() => {
       expect(onTotalHitsChange)..toHaveBeenCalledTimes(2);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.complete, 42);
+      expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.complete, 42);
     });
   });
 
@@ -205,7 +205,7 @@ describe('useTotalHits', () => {
     rerender();
     await waitFor(() => {
       expect(onTotalHitsChange)..toHaveBeenCalledTimes(2);
-      expect(onTotalHitsChange).toBeCalledWith(UnifiedHistogramFetchStatus.error, error);
+      expect(onTotalHitsChange).toHaveBeenCalledWith(UnifiedHistogramFetchStatus.error, error);
     });
   });
 

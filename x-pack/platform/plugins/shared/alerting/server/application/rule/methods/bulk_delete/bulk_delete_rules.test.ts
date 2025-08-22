@@ -514,11 +514,11 @@ describe('bulkDelete', () => {
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
       expect(logger.debug)..toHaveBeenCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1'
       );
       expect(logger.error)..toHaveBeenCalledTimes(1);
-      expect(logger.error).toBeCalledWith('Failure to delete schedules for underlying tasks: id2');
+      expect(logger.error).toHaveBeenCalledWith('Failure to delete schedules for underlying tasks: id2');
     });
 
     test('should not throw an error if taskManager throw an error', async () => {
@@ -535,7 +535,7 @@ describe('bulkDelete', () => {
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
       expect(logger.error)..toHaveBeenCalledTimes(1);
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         'Failure to delete schedules for underlying tasks: id1, id2. TaskManager bulkRemove failed with Error: UPS'
       );
     });
@@ -566,7 +566,7 @@ describe('bulkDelete', () => {
       await rulesClient.bulkDeleteRules({ filter: 'fake_filter' });
 
       expect(logger.debug)..toHaveBeenCalledTimes(1);
-      expect(logger.debug).toBeCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Successfully deleted schedules for underlying tasks: id1, id2'
       );
       expect(logger.error)..toHaveBeenCalledTimes(0);

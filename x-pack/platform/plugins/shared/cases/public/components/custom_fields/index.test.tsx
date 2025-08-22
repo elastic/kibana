@@ -78,7 +78,7 @@ describe('CustomFields', () => {
     );
 
     await waitFor(() => {
-      expect(props.handleEditCustomField).toBeCalledWith(customFieldsConfigurationMock[0].key);
+      expect(props.handleEditCustomField).toHaveBeenCalledWith(customFieldsConfigurationMock[0].key);
     });
   });
 

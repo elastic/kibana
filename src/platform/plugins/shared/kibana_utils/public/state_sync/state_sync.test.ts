@@ -59,7 +59,7 @@ describe('state_sync', () => {
         text: 'Learning transitions...',
         completed: false,
       });
-      expect(testStateStorage.set).toBeCalledWith(key, container.getState());
+      expect(testStateStorage.set).toHaveBeenCalledWith(key, container.getState());
       stop();
     });
 

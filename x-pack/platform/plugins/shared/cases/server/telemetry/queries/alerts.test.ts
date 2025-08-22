@@ -158,7 +158,7 @@ describe('alerts', () => {
 
     it('should call find with correct arguments', async () => {
       await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
-      expect(savedObjectsClient.find).toBeCalledWith({
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
         aggs: {
           by_owner: {
             aggs: {

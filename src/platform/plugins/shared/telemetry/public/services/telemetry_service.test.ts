@@ -25,7 +25,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
 
       await telemetryService.fetchTelemetry();
-      expect(telemetryService['http'].post).toBeCalledWith(FetchSnapshotTelemetry, {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(FetchSnapshotTelemetry, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ unencrypted: false, refreshCache: false }),
       });
@@ -37,7 +37,7 @@ describe('TelemetryService', () => {
       const telemetryService = mockTelemetryService();
       telemetryService.fetchTelemetry = jest.fn();
       await telemetryService.fetchExample();
-      expect(telemetryService.fetchTelemetry).toBeCalledWith({
+      expect(telemetryService.fetchTelemetry).toHaveBeenCalledWith({
         unencrypted: true,
         refreshCache: true,
       });
@@ -73,7 +73,7 @@ describe('TelemetryService', () => {
       const optedIn = true;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(OptInRoute, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
@@ -87,7 +87,7 @@ describe('TelemetryService', () => {
       const optedIn = false;
       await telemetryService.setOptIn(optedIn);
 
-      expect(telemetryService['http'].post).toBeCalledWith(OptInRoute, {
+      expect(telemetryService['http'].post).toHaveBeenCalledWith(OptInRoute, {
         ...INTERNAL_VERSION,
         body: JSON.stringify({ enabled: optedIn }),
       });
@@ -366,7 +366,7 @@ describe('TelemetryService', () => {
 
     it('calls expected URL with expected headers', async () => {
       await telemetryService.updateLastReported();
-      expect(telemetryService['http'].put).toBeCalledWith(LastReportedRoute, INTERNAL_VERSION);
+      expect(telemetryService['http'].put).toHaveBeenCalledWith(LastReportedRoute, INTERNAL_VERSION);
     });
   });
 });

@@ -96,7 +96,7 @@ describe('OpsgenieConnectorFields renders', () => {
       });
 
       waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.opsgenie',
             name: 'opsgenie',

@@ -102,7 +102,7 @@ describe('CasesConnector', () => {
       templateId,
     });
 
-    expect(CasesConnectorExecutorMock).toBeCalledWith({
+    expect(CasesConnectorExecutorMock).toHaveBeenCalledWith({
       logger,
       casesClient: { foo: 'bar' },
       casesOracleService: expect.any(CasesOracleService),
@@ -125,7 +125,7 @@ describe('CasesConnector', () => {
       templateId,
     });
 
-    expect(mockExecute).toBeCalledWith({
+    expect(mockExecute).toHaveBeenCalledWith({
       alerts: [{ _id: 'alert-id-0', _index: 'alert-index-0' }],
       groupedAlerts,
       groupingBy,

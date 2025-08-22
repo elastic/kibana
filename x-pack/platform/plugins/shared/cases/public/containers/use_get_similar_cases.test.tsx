@@ -37,7 +37,7 @@ describe('useGetSimilarCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       caseId: mockCase.id,
       signal: abortCtrl.signal,
       page: 0,

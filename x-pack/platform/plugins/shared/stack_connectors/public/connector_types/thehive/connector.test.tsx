@@ -69,7 +69,7 @@ describe('TheHiveActionConnectorFields renders', () => {
       });
 
       waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.thehive',
             name: 'thehive',

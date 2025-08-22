@@ -287,7 +287,7 @@ describe('Agent policy', () => {
         },
         { id: 'test-agent-policy' }
       );
-      expect(soClient.create).toBeCalledWith(
+      expect(soClient.create).toHaveBeenCalledWith(
         AGENT_POLICY_SAVED_OBJECT_TYPE,
         expect.anything(),
         expect.anything()
@@ -690,7 +690,7 @@ describe('Agent policy', () => {
 
       await agentPolicyService.get(soClient, 'test-agent-policy', false);
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'test-agent-policy',
         name: 'Test',
@@ -906,13 +906,13 @@ describe('Agent policy', () => {
         },
       ] as any);
       await agentPolicyService.delete(soClient, esClient, 'policy_1');
-      expect(mockedPackagePolicyService.delete).toBeCalledWith(
+      expect(mockedPackagePolicyService.delete).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         ['package-2', 'package-3'],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -1558,7 +1558,7 @@ describe('Agent policy', () => {
       await agentPolicyService.copy(soClient, esClient, 'mocked', {
         name: 'copy mocked',
       });
-      expect(mockedPackagePolicyService.bulkCreate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkCreate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -1570,7 +1570,7 @@ describe('Agent policy', () => {
         ],
         expect.anything()
       );
-      expect(mockedPackagePolicyService.bulkUpdate).toBeCalledWith(
+      expect(mockedPackagePolicyService.bulkUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         [
@@ -1682,7 +1682,7 @@ describe('Agent policy', () => {
       });
       await agentPolicyService.deployPolicy(soClient, 'policy123');
 
-      expect(esClient.bulk).toBeCalledWith(
+      expect(esClient.bulk).toHaveBeenCalledWith(
         expect.objectContaining({
           index: AGENT_POLICY_INDEX,
           operations: [

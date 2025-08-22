@@ -1053,7 +1053,7 @@ describe('Action Scheduler', () => {
         ],
       ]
     `);
-    expect(alertingEventLogger.logAction).toBeCalledWith({
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
       uuid: '111-111',
@@ -1202,7 +1202,7 @@ describe('Action Scheduler', () => {
         ],
       ]
     `);
-    expect(alertingEventLogger.logAction).toBeCalledWith({
+    expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
       alertSummary: { new: 1, ongoing: 0, recovered: 0 },
       id: '1',
       uuid: '111-111',
@@ -2725,7 +2725,7 @@ describe('Action Scheduler', () => {
         ]
       `);
 
-      expect(alertingEventLogger.logAction).toBeCalledWith({
+      expect(alertingEventLogger.logAction).toHaveBeenCalledWith({
         alertSummary: { new: 1, ongoing: 0, recovered: 0 },
         id: '1',
         uuid: 'test',

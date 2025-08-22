@@ -32,14 +32,14 @@ describe('cleanUpOldFileIndices', () => {
     await cleanUpOldFileIndices(esClient, logger);
 
     expect(esClient.indices.delete)..toHaveBeenCalledTimes(1);
-    expect(esClient.indices.delete).toBeCalledWith(
+    expect(esClient.indices.delete).toHaveBeenCalledWith(
       expect.objectContaining({
         index: '.fleet-files-agent,.fleet-files-test',
       })
     );
 
     expect(esClient.indices.deleteIndexTemplate)..toHaveBeenCalledTimes(1);
-    expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
+    expect(esClient.indices.deleteIndexTemplate).toHaveBeenCalledWith(
       expect.objectContaining({
         name: '.fleet-files,.fleet-file-data,.fleet-filedelivery-data,.fleet-filedelivery-meta',
       })
@@ -54,7 +54,7 @@ describe('cleanUpOldFileIndices', () => {
 
     await cleanUpOldFileIndices(esClient, logger);
 
-    expect(logger.warn).toBeCalledWith('Old fleet indices cleanup failed: test error');
+    expect(logger.warn).toHaveBeenCalledWith('Old fleet indices cleanup failed: test error');
   });
 
   it('should handle 404 while deleting index template', async () => {

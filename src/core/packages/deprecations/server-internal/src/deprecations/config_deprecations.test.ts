@@ -56,7 +56,7 @@ describe('#registerConfigDeprecationsInfo', () => {
 
     expect(coreContext.configService.getHandledDeprecatedConfigs)..toHaveBeenCalledTimes(1);
     expect(deprecationsFactory.getRegistry)..toHaveBeenCalledTimes(1);
-    expect(deprecationsFactory.getRegistry).toBeCalledWith('testDomain');
+    expect(deprecationsFactory.getRegistry).toHaveBeenCalledWith('testDomain');
     expect(deprecationsRegistry.registerDeprecations)..toHaveBeenCalledTimes(1);
     const configDeprecations =
       await deprecationsRegistry.registerDeprecations.mock.calls[0][0].getDeprecations(

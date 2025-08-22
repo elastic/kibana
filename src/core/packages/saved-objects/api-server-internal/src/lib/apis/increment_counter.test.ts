@@ -491,7 +491,7 @@ describe('#incrementCounter', () => {
         await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 3 }]);
 
         expect(client.update)..toHaveBeenCalledTimes(1);
-        expect(client.update).toBeCalledWith(
+        expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               params: expect.objectContaining({
@@ -508,7 +508,7 @@ describe('#incrementCounter', () => {
         await incrementCounterSuccess(type, id, [{ fieldName: counterFields[0], incrementBy: 0 }]);
 
         expect(client.update)..toHaveBeenCalledTimes(1);
-        expect(client.update).toBeCalledWith(
+        expect(client.update).toHaveBeenCalledWith(
           expect.objectContaining({
             script: expect.objectContaining({
               params: expect.objectContaining({

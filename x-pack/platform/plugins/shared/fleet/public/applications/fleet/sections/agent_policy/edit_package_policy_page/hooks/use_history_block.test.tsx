@@ -39,7 +39,7 @@ describe('useHistoryBlock', () => {
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
-      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+      expect(renderer.startServices.application.navigateToUrl).toHaveBeenCalledWith(
         '/mock/mock/test',
         expect.anything()
       );
@@ -84,7 +84,7 @@ describe('useHistoryBlock', () => {
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
-      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+      expect(renderer.startServices.application.navigateToUrl).toHaveBeenCalledWith(
         '/mock/mock/test?param=test',
         expect.anything()
       );
@@ -130,7 +130,7 @@ describe('useHistoryBlock', () => {
       await waitFor(() => new Promise((resolve) => resolve(null)));
 
       expect(renderer.startServices.overlays.openConfirm).toHaveBeenCalled();
-      expect(renderer.startServices.application.navigateToUrl).toBeCalledWith(
+      expect(renderer.startServices.application.navigateToUrl).toHaveBeenCalledWith(
         '/mock/mock/test#/hash',
         expect.anything()
       );

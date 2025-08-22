@@ -95,7 +95,7 @@ describe('DeprecationsRegistry', () => {
       deprecationsRegistry.registerDeprecations(deprecationsConfig);
       const deprecations = await deprecationsRegistry.getDeprecations(mockContext);
       expect(deprecations).toHaveLength(1);
-      expect(deprecationsConfig.getDeprecations).toBeCalledWith(mockContext);
+      expect(deprecationsConfig.getDeprecations).toHaveBeenCalledWith(mockContext);
     });
   });
 });

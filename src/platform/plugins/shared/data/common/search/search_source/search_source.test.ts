@@ -904,7 +904,7 @@ describe('SearchSource', () => {
       searchSource.onRequestStart(fn);
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
-      expect(fn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
     });
 
     test('should not be called on parent searchSource', async () => {
@@ -918,7 +918,7 @@ describe('SearchSource', () => {
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
 
-      expect(fn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
       expect(parentFn).not.toHaveBeenCalled();
     });
 
@@ -938,8 +938,8 @@ describe('SearchSource', () => {
       const options = {};
       await firstValueFrom(searchSource.fetch$(options));
 
-      expect(fn).toBeCalledWith(searchSource, options);
-      expect(parentFn).toBeCalledWith(searchSource, options);
+      expect(fn).toHaveBeenCalledWith(searchSource, options);
+      expect(parentFn).toHaveBeenCalledWith(searchSource, options);
     });
   });
 

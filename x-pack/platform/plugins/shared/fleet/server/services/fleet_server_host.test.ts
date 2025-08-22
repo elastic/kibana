@@ -184,7 +184,7 @@ describe('migrateSettingsToFleetServerHost', () => {
 
     await migrateSettingsToFleetServerHost(soClient, esMock);
 
-    expect(soClient.create).toBeCalledWith(
+    expect(soClient.create).toHaveBeenCalledWith(
       FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
       expect.objectContaining({
         is_default: true,
@@ -257,7 +257,7 @@ describe('delete fleetServerHost', () => {
     const esMock = elasticsearchServiceMock.createInternalClient();
     await fleetServerHostService.delete(soMock, esMock, 'test1', {});
 
-    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
+    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
       esMock,
       'test1',
       {
@@ -273,7 +273,7 @@ describe('delete fleetServerHost', () => {
       fromPreconfiguration: true,
     });
 
-    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toBeCalledWith(
+    expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalledWith(
       esMock,
       'test1',
       {

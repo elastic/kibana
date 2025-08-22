@@ -61,7 +61,7 @@ describe('Options list sorting button', () => {
       const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
       expect(toggle.getAttribute('aria-checked')).toBe('false');
       await userEvent.click(toggle);
-      expect(updateState).toBeCalledWith({ runPastTimeout: true });
+      expect(updateState).toHaveBeenCalledWith({ runPastTimeout: true });
       expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
 
@@ -86,7 +86,7 @@ describe('Options list sorting button', () => {
     expect(component.container.querySelector('input#single')).toBeChecked();
 
     await userEvent.click(multiSelect!);
-    expect(updateState).toBeCalledWith({ singleSelect: false });
+    expect(updateState).toHaveBeenCalledWith({ singleSelect: false });
     expect(multiSelect).toBeChecked();
     expect(component.container.querySelector('input#single')).not.toBeChecked();
   });
@@ -192,7 +192,7 @@ describe('Options list sorting button', () => {
           />
         );
 
-        expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ searchTechnique: 'exact' });
         expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(component.container.querySelector('input#exact')).toBeChecked();
         expect(component.container.querySelector('input#wildcard')).toBeNull();
@@ -219,7 +219,7 @@ describe('Options list sorting button', () => {
         /** responds to change in search technique */
         const exactSearch = component.container.querySelector('input#exact');
         await userEvent.click(exactSearch!);
-        expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ searchTechnique: 'exact' });
         expect(component.container.querySelector('input#prefix')).not.toBeChecked();
         expect(exactSearch).toBeChecked();
         expect(component.container.querySelector('input#wildcard')).not.toBeChecked();
@@ -235,7 +235,7 @@ describe('Options list sorting button', () => {
           />
         );
 
-        expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ searchTechnique: 'exact' });
       });
 
       test('if neither the initial or current search technique is valid, revert to the default', async () => {
@@ -254,7 +254,7 @@ describe('Options list sorting button', () => {
         /** responds to change in search technique */
         const prefixSearch = component.container.querySelector('input#prefix');
         await userEvent.click(prefixSearch!);
-        expect(updateState).toBeCalledWith({ searchTechnique: 'prefix' });
+        expect(updateState).toHaveBeenCalledWith({ searchTechnique: 'prefix' });
 
         /** responds to the field type changing */
         component.rerender(
@@ -267,7 +267,7 @@ describe('Options list sorting button', () => {
           />
         );
 
-        expect(updateState).toBeCalledWith({ searchTechnique: 'exact' });
+        expect(updateState).toHaveBeenCalledWith({ searchTechnique: 'exact' });
       });
     });
   });

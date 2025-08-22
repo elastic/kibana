@@ -240,7 +240,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 
@@ -259,7 +259,7 @@ describe('SLO Edit Page', () => {
 
       render(<SloEditPage />);
 
-      expect(mockNavigate).not.toBeCalledWith(mockBasePathPrepend(paths.slos));
+      expect(mockNavigate).not.toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
     });
   });
 
@@ -289,7 +289,7 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+        expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
       });
     });
 
@@ -314,7 +314,7 @@ describe('SLO Edit Page', () => {
 
         render(<SloEditPage />);
 
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slosWelcome));
+        expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slosWelcome));
       });
     });
 
@@ -477,7 +477,7 @@ describe('SLO Edit Page', () => {
           fireEvent.click(getByTestId('sloFormSubmitButton'));
         });
 
-        expect(mockNavigate).toBeCalledWith(mockBasePathPrepend(paths.slos));
+        expect(mockNavigate).toHaveBeenCalledWith(mockBasePathPrepend(paths.slos));
       });
     });
   });

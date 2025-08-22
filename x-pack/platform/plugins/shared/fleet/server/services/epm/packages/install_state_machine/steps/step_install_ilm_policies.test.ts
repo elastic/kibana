@@ -464,7 +464,7 @@ describe('cleanupILMPoliciesStep', () => {
       initialState: 'install_ilm_policies' as any,
     });
 
-    expect(mockDeletePrerequisiteAssets).toBeCalledWith(
+    expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
         indexAssets: [
           {
@@ -496,7 +496,7 @@ describe('cleanupILMPoliciesStep', () => {
       },
       esClient
     );
-    expect(mockDeleteILMPolicies).toBeCalledWith(installedEs, esClient);
+    expect(mockDeleteILMPolicies).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {

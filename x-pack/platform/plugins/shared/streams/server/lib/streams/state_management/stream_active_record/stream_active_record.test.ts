@@ -61,7 +61,7 @@ describe('StreamActiveRecord', () => {
       stateMock
     );
 
-    expect(stream.doHandleUpsertChange).toBeCalledWith(
+    expect(stream.doHandleUpsertChange).toHaveBeenCalledWith(
       { test: 'definition' },
       stateMock,
       stateMock
@@ -79,7 +79,7 @@ describe('StreamActiveRecord', () => {
       stateMock
     );
 
-    expect(stream.doHandleDeleteChange).toBeCalledWith('test', stateMock, stateMock);
+    expect(stream.doHandleDeleteChange).toHaveBeenCalledWith('test', stateMock, stateMock);
     expect(cascadingChanges).toEqual([cascadingDelete]);
     expect(stream.changeStatus).toEqual('deleted');
   });
@@ -90,7 +90,7 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(stream.doValidateUpsertion).toBeCalledWith(stateMock, stateMock);
+    expect(stream.doValidateUpsertion).toHaveBeenCalledWith(stateMock, stateMock);
     expect(validationResult).toEqual({ isValid: false, errors: ['test_upserted'] });
   });
 
@@ -100,7 +100,7 @@ describe('StreamActiveRecord', () => {
 
     const validationResult = await stream.validate(stateMock, stateMock);
 
-    expect(stream.doValidateDeletion).toBeCalledWith(stateMock, stateMock);
+    expect(stream.doValidateDeletion).toHaveBeenCalledWith(stateMock, stateMock);
     expect(validationResult).toEqual({ isValid: false, errors: ['test_deleted'] });
   });
 

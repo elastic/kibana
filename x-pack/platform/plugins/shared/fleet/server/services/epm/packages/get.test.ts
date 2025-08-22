@@ -410,7 +410,7 @@ test: invalid manifest
       ]);
 
       expect(jest.mocked(appContextService.getLogger().warn))..toHaveBeenCalledTimes(1);
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
+      expect(jest.mocked(appContextService.getLogger().warn)).toHaveBeenCalledWith(
         'Installed package invalidpackage 0.0.1 is not a valid package anymore'
       );
     });

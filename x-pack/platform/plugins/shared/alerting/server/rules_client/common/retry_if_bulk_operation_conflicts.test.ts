@@ -89,7 +89,7 @@ describe('retryIfBulkOperationConflicts', () => {
     });
 
     expect(result.errors).toEqual([error409]);
-    expect(mockLogger.warn).toBeCalledWith('Bulk enable rules conflicts, exceeded retries');
+    expect(mockLogger.warn).toHaveBeenCalledWith('Bulk enable rules conflicts, exceeded retries');
   });
 
   for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS; i++) {

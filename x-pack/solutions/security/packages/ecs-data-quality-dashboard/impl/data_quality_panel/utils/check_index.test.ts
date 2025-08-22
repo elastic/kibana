@@ -168,7 +168,7 @@ describe('checkIndex', () => {
     });
 
     test('it invokes `onLoadMappingsSuccess` with mappings response', () => {
-      expect(onLoadMappingsSuccess).toBeCalledWith(mockMappingsResponse);
+      expect(onLoadMappingsSuccess).toHaveBeenCalledWith(mockMappingsResponse);
     });
 
     test('it invokes `onLoadUnallowedValuesStart`', () => {
@@ -176,7 +176,7 @@ describe('checkIndex', () => {
     });
 
     test('it invokes `onLoadUnallowedValuesSuccess` with unallowed value search results', () => {
-      expect(onLoadUnallowedValuesSuccess).toBeCalledWith(mockUnallowedValuesResponse);
+      expect(onLoadUnallowedValuesSuccess).toHaveBeenCalledWith(mockUnallowedValuesResponse);
     });
 
     test('it invokes `onSuccess` with the expected arguments', () => {
@@ -197,7 +197,7 @@ describe('checkIndex', () => {
         mappingsProperties,
         unallowedValues,
       });
-      expect(onSuccess).toBeCalledWith({
+      expect(onSuccess).toHaveBeenCalledWith({
         partitionedFieldMetadata,
         mappingsProperties,
         unallowedValues,
@@ -251,7 +251,7 @@ describe('checkIndex', () => {
       });
 
       test('it invokes `onError` with mappings error', () => {
-        expect(onError).toBeCalledWith(new Error(error));
+        expect(onError).toHaveBeenCalledWith(new Error(error));
       });
 
       test('it does NOT invoke `onSuccess`', () => {
@@ -295,7 +295,7 @@ describe('checkIndex', () => {
       });
 
       test('it invokes `onError` with unallowed values error', () => {
-        expect(onError).toBeCalledWith(new Error(error));
+        expect(onError).toHaveBeenCalledWith(new Error(error));
       });
 
       test('it does NOT invoke `onSuccess`', () => {

@@ -85,7 +85,7 @@ describe('upgradeManagedPackagePolicies', () => {
       { packagePolicyId: 'managed-package-id', diff: [{ id: 'foo' }, { id: 'bar' }], errors: [] },
     ]);
 
-    expect(packagePolicyService.upgrade).toBeCalledWith(
+    expect(packagePolicyService.upgrade).toHaveBeenCalledWith(
       soClient,
       esClient,
       'managed-package-id',

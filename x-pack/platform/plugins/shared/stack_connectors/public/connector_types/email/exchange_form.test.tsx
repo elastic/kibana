@@ -91,7 +91,7 @@ describe('ExchangeFormFields renders', () => {
       });
 
       await waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             secrets: {
               clientSecret: 'secret',

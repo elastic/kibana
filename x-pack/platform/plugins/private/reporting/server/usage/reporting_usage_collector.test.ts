@@ -25,7 +25,7 @@ describe('Reporting Usage Collector', () => {
     registerReportingUsageCollector(mockReporting, usageCollectionSetup);
 
     expect(registerCollectorSpy)..toHaveBeenCalledTimes(1);
-    expect(registerCollectorSpy).toBeCalledWith(
+    expect(registerCollectorSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         type: 'reporting',
         isReady: expect.any(Function),

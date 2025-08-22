@@ -77,7 +77,7 @@ describe('CSV Export Search Cursor', () => {
       await cursor.getPage(searchSource);
 
       expect(dataSearchSpy)..toHaveBeenCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],
@@ -130,7 +130,7 @@ describe('CSV Export Search Cursor', () => {
       await cursor.getPage(searchSource);
 
       expect(dataSearchSpy)..toHaveBeenCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],

@@ -34,7 +34,7 @@ describe('QuickFilters', () => {
 
     fireEvent.click(getByText(status));
 
-    expect(updateUrlParamsMock).toBeCalledWith({
+    expect(updateUrlParamsMock).toHaveBeenCalledWith({
       statusFilter: status.toLowerCase(),
     });
   });
@@ -48,7 +48,7 @@ describe('QuickFilters', () => {
 
     fireEvent.click(getByText(status));
 
-    expect(updateUrlParamsMock).toBeCalledWith({
+    expect(updateUrlParamsMock).toHaveBeenCalledWith({
       statusFilter: undefined,
     });
   });

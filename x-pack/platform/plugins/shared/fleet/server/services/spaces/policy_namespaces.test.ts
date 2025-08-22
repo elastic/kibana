@@ -54,7 +54,7 @@ describe('validatePolicyNamespaceForSpace', () => {
       namespace: 'test',
     });
 
-    expect(soClient.get).toBeCalledWith('fleet-space-settings', 'test1-default-settings');
+    expect(soClient.get).toHaveBeenCalledWith('fleet-space-settings', 'test1-default-settings');
   });
 
   it('should retrieve default space settings based if no spaceId is provided', async () => {
@@ -63,7 +63,7 @@ describe('validatePolicyNamespaceForSpace', () => {
       namespace: 'test',
     });
 
-    expect(soClient.get).toBeCalledWith('fleet-space-settings', 'default-default-settings');
+    expect(soClient.get).toHaveBeenCalledWith('fleet-space-settings', 'default-default-settings');
   });
 
   it('should accept valid namespace if there is some allowed_namespace_prefixes configured', async () => {

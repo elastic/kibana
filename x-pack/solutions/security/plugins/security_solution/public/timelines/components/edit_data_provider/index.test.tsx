@@ -482,7 +482,7 @@ describe('StatefulEditDataProvider', () => {
 
     await userEvent.click(screen.getByTestId('save'));
 
-    expect(onDataProviderEdited).toBeCalledWith({
+    expect(onDataProviderEdited).toHaveBeenCalledWith({
       andProviderId: undefined,
       excluded: false,
       field: 'client.address',

@@ -107,7 +107,7 @@ describe('Dashboard link component', () => {
 
     // calls `navigate` on click
     await userEvent.click(link);
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       filters: [],
       timeRange: {
@@ -175,7 +175,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       timeRange: { from: 'now-7d', to: 'now' },
       filters: initialFilters,
@@ -212,7 +212,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       filters: initialFilters,
       query: initialQuery,
@@ -248,7 +248,7 @@ describe('Dashboard link component', () => {
       parentApi,
     });
 
-    expect(parentApi.locator?.getRedirectUrl).toBeCalledWith({
+    expect(parentApi.locator?.getRedirectUrl).toHaveBeenCalledWith({
       dashboardId: '456',
       timeRange: { from: 'now-7d', to: 'now' },
       filters: [],

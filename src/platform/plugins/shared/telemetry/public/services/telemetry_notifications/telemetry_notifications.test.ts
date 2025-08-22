@@ -21,7 +21,7 @@ describe('setOptedInNoticeSeen', () => {
     await telemetryNotifications.setOptInStatusNoticeSeen();
 
     expect(telemetryNotifications['overlays'].banners.remove)..toHaveBeenCalledTimes(1);
-    expect(telemetryNotifications['overlays'].banners.remove).toBeCalledWith(bannerId);
+    expect(telemetryNotifications['overlays'].banners.remove).toHaveBeenCalledWith(bannerId);
     expect(telemetryService.setUserHasSeenNotice)..toHaveBeenCalledTimes(1);
   });
 });

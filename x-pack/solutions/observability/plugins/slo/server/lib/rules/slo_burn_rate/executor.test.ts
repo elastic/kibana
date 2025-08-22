@@ -409,7 +409,7 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'foo,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -440,7 +440,7 @@ describe('BurnRateRuleExecutor', () => {
           'client.geo.continent_name': 'asia',
         },
       });
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'bar,asia',
         actionGroup: ALERT_ACTION.id,
         state: {
@@ -574,7 +574,7 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'foo',
         actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
         state: {
@@ -599,7 +599,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       });
-      expect(servicesMock.alertsClient?.report).toBeCalledWith({
+      expect(servicesMock.alertsClient?.report).toHaveBeenCalledWith({
         id: 'bar',
         actionGroup: SUPPRESSED_PRIORITY_ACTION.id,
         state: {
@@ -713,7 +713,7 @@ describe('BurnRateRuleExecutor', () => {
         isServerless: false,
       });
 
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: 'foo',
         actionGroup: HIGH_PRIORITY_ACTION_ID,
         state: {
@@ -738,7 +738,7 @@ describe('BurnRateRuleExecutor', () => {
           },
         },
       });
-      expect(servicesMock.alertsClient!.report).toBeCalledWith({
+      expect(servicesMock.alertsClient!.report).toHaveBeenCalledWith({
         id: 'bar',
         actionGroup: HIGH_PRIORITY_ACTION_ID,
         state: {

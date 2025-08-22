@@ -117,7 +117,7 @@ describe('FieldBrowserModal', () => {
     onChange?.(changeEvent);
     searchField.simulate('change').update();
 
-    expect(onSearchInputChange).toBeCalledWith(inputText);
+    expect(onSearchInputChange).toHaveBeenCalledWith(inputText);
   });
 
   test('it renders the CreateFieldButton when it is provided', () => {

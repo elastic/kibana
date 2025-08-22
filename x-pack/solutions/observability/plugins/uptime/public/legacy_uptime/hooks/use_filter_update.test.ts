@@ -30,7 +30,7 @@ describe('useFilterUpdate', () => {
 
     it('does update url when filters have been updated', () => {
       renderHook(() => useFilterUpdate('testField', ['tag1', 'tag2'], []));
-      expect(updateUrlSpy).toBeCalledWith({
+      expect(updateUrlSpy).toHaveBeenCalledWith({
         filters: '[["testField",["tag1","tag2"]]]',
         excludedFilters: '',
         pagination: '',

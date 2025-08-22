@@ -350,7 +350,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.bulkUpdateCases({ alerts, caseIds });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -359,7 +359,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -368,7 +368,7 @@ describe('updateAlertsStatus', () => {
         caseIds,
       });
 
-      expect(alertsClient.bulkUpdateCases).toBeCalledWith({ alerts, caseIds });
+      expect(alertsClient.bulkUpdateCases).toHaveBeenCalledWith({ alerts, caseIds });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -393,7 +393,7 @@ describe('updateAlertsStatus', () => {
     it('update case info', async () => {
       await alertService.removeCaseIdFromAlerts({ alerts, caseId });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty id', async () => {
@@ -402,7 +402,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('filters out alerts with empty index', async () => {
@@ -411,7 +411,7 @@ describe('updateAlertsStatus', () => {
         caseId,
       });
 
-      expect(alertsClient.removeCaseIdFromAlerts).toBeCalledWith({ alerts, caseId });
+      expect(alertsClient.removeCaseIdFromAlerts).toHaveBeenCalledWith({ alerts, caseId });
     });
 
     it('does not call the alerts client with no alerts', async () => {
@@ -442,7 +442,7 @@ describe('updateAlertsStatus', () => {
     it('remove all case ids from alerts', async () => {
       await alertService.removeCaseIdsFromAllAlerts({ caseIds });
 
-      expect(alertsClient.removeCaseIdsFromAllAlerts).toBeCalledWith({ caseIds });
+      expect(alertsClient.removeCaseIdsFromAllAlerts).toHaveBeenCalledWith({ caseIds });
     });
 
     it('does not call the alerts client with no case ids', async () => {

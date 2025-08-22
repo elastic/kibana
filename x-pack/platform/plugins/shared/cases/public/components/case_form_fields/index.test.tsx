@@ -145,7 +145,7 @@ describe('CaseFormFields', () => {
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: 'new',
           tags: ['template-1'],
@@ -175,7 +175,7 @@ describe('CaseFormFields', () => {
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: ['case-tag-1', 'case-tag-2'],
@@ -227,7 +227,7 @@ describe('CaseFormFields', () => {
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],
@@ -266,7 +266,7 @@ describe('CaseFormFields', () => {
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],
@@ -305,7 +305,7 @@ describe('CaseFormFields', () => {
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],
@@ -337,7 +337,7 @@ describe('CaseFormFields', () => {
     await user.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],

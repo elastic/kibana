@@ -218,12 +218,12 @@ describe('validateAndAuthorizeSystemActions', () => {
 
     expect(res).toBe(undefined);
 
-    expect(actionsClient.getBulk).toBeCalledWith({
+    expect(actionsClient.getBulk).toHaveBeenCalledWith({
       ids: ['system_action-id', 'system_action-id-2'],
       throwIfSystemAction: false,
     });
 
-    expect(actionsAuthorization.ensureAuthorized).toBeCalledWith({
+    expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
       operation: 'execute',
       additionalPrivileges: [],
     });
@@ -284,7 +284,7 @@ describe('validateAndAuthorizeSystemActions', () => {
       rule: { consumer: 'stackAlerts', producer: 'alerts' },
     });
 
-    expect(actionsAuthorization.ensureAuthorized).toBeCalledWith({
+    expect(actionsAuthorization.ensureAuthorized).toHaveBeenCalledWith({
       operation: 'execute',
       additionalPrivileges: ['my-priv-2:stackAlerts'],
     });

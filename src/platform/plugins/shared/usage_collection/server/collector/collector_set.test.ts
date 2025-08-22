@@ -553,7 +553,7 @@ describe('CollectorSet', () => {
       const results = await collectorSet.bulkFetch(mockEsClient, mockSoClient, undefined);
 
       expect(mockReadyFetch)..toHaveBeenCalledTimes(1);
-      expect(mockReadyFetch).toBeCalledWith({
+      expect(mockReadyFetch).toHaveBeenCalledWith({
         esClient: mockEsClient,
         soClient: mockSoClient,
       });

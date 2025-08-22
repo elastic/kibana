@@ -54,7 +54,7 @@ describe('useDeleteComment', () => {
     });
 
     await waitFor(() =>
-      expect(spyOnDeleteComment).toBeCalledWith({
+      expect(spyOnDeleteComment).toHaveBeenCalledWith({
         caseId: basicCaseId,
         commentId,
       })
@@ -115,7 +115,7 @@ describe('useDeleteComment', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnDeleteComment).toBeCalledWith({
+      expect(spyOnDeleteComment).toHaveBeenCalledWith({
         caseId: basicCaseId,
         commentId,
       });

@@ -80,12 +80,12 @@ describe('combineRenderers', () => {
         scopeId,
       });
 
-      expect(a.renderRow).toBeCalledWith({
+      expect(a.renderRow).toHaveBeenCalledWith({
         contextId,
         data,
         scopeId,
       });
-      expect(b.renderRow).toBeCalledWith({
+      expect(b.renderRow).toHaveBeenCalledWith({
         contextId,
         data,
         scopeId,
@@ -102,7 +102,7 @@ describe('combineRenderers', () => {
         scopeId,
       });
 
-      expect(a.renderRow).toBeCalledWith({
+      expect(a.renderRow).toHaveBeenCalledWith({
         contextId,
         data,
         scopeId,
@@ -121,7 +121,7 @@ describe('combineRenderers', () => {
       });
 
       expect(a.renderRow).not.toHaveBeenCalled();
-      expect(b.renderRow).toBeCalledWith({
+      expect(b.renderRow).toHaveBeenCalledWith({
         contextId,
         data,
         scopeId,

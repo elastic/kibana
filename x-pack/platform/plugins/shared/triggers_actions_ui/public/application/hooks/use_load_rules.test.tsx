@@ -296,7 +296,7 @@ describe('useLoadRules', () => {
     expect(result.current.hasData).toBeTruthy();
 
     expect(onPage)..toHaveBeenCalledTimes(0);
-    expect(loadRulesWithKueryFilter).toBeCalledWith(
+    expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
       expect.objectContaining({
         page: {
           index: 0,
@@ -343,7 +343,7 @@ describe('useLoadRules', () => {
 
     rerender();
     await waitFor(() =>
-      expect(loadRulesWithKueryFilter).toBeCalledWith(
+      expect(loadRulesWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           page: {
             index: 0,

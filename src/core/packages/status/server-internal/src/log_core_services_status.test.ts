@@ -135,8 +135,8 @@ describe('logCoreStatusChanges', () => {
     // give the 'bufferTime' operator enough time to emit and log
     await delay(1_000);
 
-    expect(l.get).toBeCalledWith('elasticsearch');
-    expect(l.get).toBeCalledWith('savedObjects');
+    expect(l.get).toHaveBeenCalledWith('elasticsearch');
+    expect(l.get).toHaveBeenCalledWith('savedObjects');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.info).toHaveBeenCalledTimes(4);
     expect(l.error).toHaveBeenCalledTimes(3);
@@ -232,8 +232,8 @@ describe('logCoreStatusChanges', () => {
       elasticsearch: { ...serviceAvailable, summary: `attempt #${++attempt}` },
     });
 
-    expect(l.get).toBeCalledWith('elasticsearch');
-    expect(l.get).toBeCalledWith('savedObjects');
+    expect(l.get).toHaveBeenCalledWith('elasticsearch');
+    expect(l.get).toHaveBeenCalledWith('savedObjects');
     expect(l.info).toHaveBeenCalledTimes(5);
     expect(l.error).toHaveBeenCalledTimes(4);
     expect(l.warn).toHaveBeenCalledTimes(1);

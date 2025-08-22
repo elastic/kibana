@@ -30,7 +30,7 @@ test('Emit onEdit() when clicking on edit drilldown', () => {
   const editButtons = screen.getAllByText('Edit');
   expect(editButtons).toHaveLength(drilldowns.length);
   fireEvent.click(editButtons[1]);
-  expect(fn).toBeCalledWith(drilldowns[1].id);
+  expect(fn).toHaveBeenCalledWith(drilldowns[1].id);
 });
 
 test('Emit onCreate() when clicking on create drilldown', () => {
@@ -61,7 +61,7 @@ test('Can delete drilldowns', () => {
 
   fireEvent.click(screen.getByText(/Delete \(2\)/i));
 
-  expect(fn).toBeCalledWith([drilldowns[1].id, drilldowns[2].id]);
+  expect(fn).toHaveBeenCalledWith([drilldowns[1].id, drilldowns[2].id]);
 });
 
 test('Error is displayed', () => {

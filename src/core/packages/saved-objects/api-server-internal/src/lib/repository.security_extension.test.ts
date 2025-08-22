@@ -951,7 +951,7 @@ describe('SavedObjectsRepository Security Extension', () => {
       expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledTimes(
         generatedResults.hits.hits.length
       );
-      expect(mockSecurityExt.redactNamespaces).toBeCalledWith(
+      expect(mockSecurityExt.redactNamespaces).toHaveBeenCalledWith(
         expect.objectContaining({
           typeMap: authMap,
         })

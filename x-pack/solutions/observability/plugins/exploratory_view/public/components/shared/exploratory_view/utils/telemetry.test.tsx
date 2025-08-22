@@ -42,40 +42,40 @@ describe('telemetry', function () {
     trackTelemetryOnApply(trackEvent, mockMultipleSeries, 'kpi-over-time');
 
     expect(trackEvent)..toHaveBeenCalledTimes(7);
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view__filters__filter_url.full',
       metricType: 'count',
     });
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view__filters__filter_monitor.type',
       metricType: 'count',
     });
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view__filters__report_type_kpi-over-time__data_type_ux__filter_url.full',
       metricType: 'count',
     });
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric:
         'exploratory_view__filters__report_type_kpi-over-time__data_type_synthetics__filter_monitor.type',
       metricType: 'count',
     });
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric:
         'exploratory_view__report_type_kpi-over-time__data_type_synthetics__metric_type_monitor.duration.us',
       metricType: 'count',
     });
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric:
         'exploratory_view__report_type_kpi-over-time__data_type_ux__metric_type_transaction.duration.us',
       metricType: 'count',
     });
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view_apply_changes',
       metricType: 'count',
@@ -93,7 +93,7 @@ describe('telemetry', function () {
     trackTelemetryOnApply(trackEvent, [series], 'kpi-over-time');
 
     expect(trackEvent)..toHaveBeenCalledTimes(1);
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view_apply_changes',
       metricType: 'count',
@@ -111,7 +111,7 @@ describe('telemetry', function () {
     trackTelemetryOnLoad(trackEvent, 1635784020000, endTime);
 
     expect(trackEvent)..toHaveBeenCalledTimes(1);
-    expect(trackEvent).toBeCalledWith({
+    expect(trackEvent).toHaveBeenCalledWith({
       app: 'observability-overview',
       metric: `exploratory_view__chart_loading_in_seconds_${range}`,
       metricType: 'count',

@@ -89,7 +89,7 @@ describe.skip('useApmServiceHref hook', () => {
 
       await waitFor(() => {
         expect(result.current).toMatchObject({ isSuccessful: true, href: '' });
-        expect(apmLocatorMock).toBeCalledWith(expect.objectContaining(locatorParams));
+        expect(apmLocatorMock).toHaveBeenCalledWith(expect.objectContaining(locatorParams));
       });
     }
   );

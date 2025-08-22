@@ -163,7 +163,7 @@ describe('FilterValueButton', function () {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(1);
-      expect(spy).toBeCalledWith(
+      expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: [
             {
@@ -199,7 +199,7 @@ describe('FilterValueButton', function () {
 
     await waitFor(() => {
       expect(spy).toHaveBeenCalledTimes(5);
-      expect(spy).toBeCalledWith(
+      expect(spy).toHaveBeenCalledWith(
         expect.objectContaining({
           filters: [
             {

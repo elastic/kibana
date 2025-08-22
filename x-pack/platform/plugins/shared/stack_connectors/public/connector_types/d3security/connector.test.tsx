@@ -82,7 +82,7 @@ describe('D3ActionConnectorFields renders', () => {
       });
 
       waitFor(() => {
-        expect(onSubmit).toBeCalledWith({
+        expect(onSubmit).toHaveBeenCalledWith({
           data: {
             actionTypeId: '.d3security',
             name: 'd3security',

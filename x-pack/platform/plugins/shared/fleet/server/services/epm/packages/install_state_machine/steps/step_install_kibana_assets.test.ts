@@ -266,7 +266,7 @@ describe('cleanUpKibanaAssetsStep', () => {
       initialState: 'install_kibana_assets' as any,
     });
 
-    expect(mockedDeleteKibanaAssets).toBeCalledWith({
+    expect(mockedDeleteKibanaAssets).toHaveBeenCalledWith({
       installedObjects: installedKibana,
       spaceId: 'default',
       packageSpecConditions: { kibana: { version: 'x.y.z' } },
@@ -447,7 +447,7 @@ describe('cleanUpUnusedKibanaAssetsStep', () => {
       installedKibanaAssetsRefs: newAssets,
     });
 
-    expect(mockedDeleteKibanaAssets).toBeCalledWith({
+    expect(mockedDeleteKibanaAssets).toHaveBeenCalledWith({
       installedObjects: [installedAssets[1]],
       spaceId: 'default',
       packageSpecConditions: { kibana: { version: 'x.y.z' } },

@@ -41,7 +41,7 @@ describe('useGetCurrentUserProfile', () => {
       expect(spyOnGetCurrentUserProfile).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCurrentUserProfile).toBeCalledWith({
+    expect(spyOnGetCurrentUserProfile).toHaveBeenCalledWith({
       security: expect.anything(),
     });
   });

@@ -159,7 +159,7 @@ describe('Actions component', () => {
 
       expect(getByText(SEARCH_BAR_TOUR_TITLE)).toBeInTheDocument();
       expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalled();
-      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+      expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalledWith(false);
     });
 
     it('does not open the search bar tour when searchFilterCounter is greater than 0 and shouldShowSearchBarButtonTour is false', () => {
@@ -185,7 +185,7 @@ describe('Actions component', () => {
 
       expect(defaultProps.onSearchToggle).toHaveBeenCalledWith(true);
       expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalled();
-      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+      expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalledWith(false);
     });
 
     it('closes the search bar tour when the search toggle button is clicked', async () => {
@@ -211,7 +211,7 @@ describe('Actions component', () => {
       });
 
       expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalled();
-      expect(setShouldShowSearchBarButtonTourMock).toBeCalledWith(false);
+      expect(setShouldShowSearchBarButtonTourMock).toHaveBeenCalledWith(false);
     });
   });
 });

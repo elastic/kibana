@@ -844,7 +844,7 @@ describe('<UseField />', () => {
       });
 
       expect(onChange)..toHaveBeenCalledTimes(1);
-      expect(onChange).toBeCalledWith('foo');
+      expect(onChange).toHaveBeenCalledWith('foo');
     });
 
     test('calls onError() prop when validation state changes', async () => {
@@ -863,12 +863,12 @@ describe('<UseField />', () => {
         setInputValue('myField', '0');
       });
       expect(onError)..toHaveBeenCalledTimes(1);
-      expect(onError).toBeCalledWith(['oops!']);
+      expect(onError).toHaveBeenCalledWith(['oops!']);
       await act(async () => {
         setInputValue('myField', '1');
       });
       expect(onError)..toHaveBeenCalledTimes(2);
-      expect(onError).toBeCalledWith(null);
+      expect(onError).toHaveBeenCalledWith(null);
     });
   });
 });

@@ -61,7 +61,7 @@ describe('<ScriptRecorderFields />', () => {
     });
 
     await waitFor(() => {
-      expect(onChange).toBeCalledWith({ scriptText: testScript, fileName: 'samplescript.js' });
+      expect(onChange).toHaveBeenCalledWith({ scriptText: testScript, fileName: 'samplescript.js' });
     });
   });
 
@@ -116,7 +116,7 @@ describe('<ScriptRecorderFields />', () => {
     fireEvent.click(removeScriptBtn);
 
     await waitFor(() => {
-      expect(onChange).toBeCalledWith({ scriptText: '', fileName: '' });
+      expect(onChange).toHaveBeenCalledWith({ scriptText: '', fileName: '' });
     });
   });
 });

@@ -34,7 +34,7 @@ describe('useSuggestUserProfiles', () => {
 
     await waitFor(() => {
       expect(result.current.isSuccess).toBeDefined();
-      expect(spyOnSuggestUserProfiles).toBeCalledWith({
+      expect(spyOnSuggestUserProfiles).toHaveBeenCalledWith({
         ...props,
         size: 10,
         http: expect.anything(),

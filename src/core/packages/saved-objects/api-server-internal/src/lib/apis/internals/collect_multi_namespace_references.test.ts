@@ -597,7 +597,7 @@ describe('collectMultiNamespaceReferences', () => {
           enforceError
         );
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toBeCalledWith(
+        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledWith(
           expect.objectContaining({
             options: { purpose: 'collectMultiNamespaceReferences' },
           })
@@ -613,7 +613,7 @@ describe('collectMultiNamespaceReferences', () => {
           enforceError
         );
         expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledTimes(1);
-        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toBeCalledWith(
+        expect(mockSecurityExt.authorizeAndRedactMultiNamespaceReferences).toHaveBeenCalledWith(
           expect.objectContaining({
             options: { purpose: 'updateObjectsSpaces' },
           })

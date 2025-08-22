@@ -31,7 +31,7 @@ describe('NoMonitorsFound', () => {
     fireEvent.click(getByText('Clear filters'));
 
     await waitFor(() => {
-      expect(updateUrlParamsMock).toBeCalledWith(null);
+      expect(updateUrlParamsMock).toHaveBeenCalledWith(null);
     });
   });
 });

@@ -134,7 +134,7 @@ describe('Case View Page files tab', () => {
     await userEvent.click(await screen.findByRole('switch'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         type: CustomFieldTypes.TOGGLE,
         key: 'test_key_2',
         value: false,
@@ -155,7 +155,7 @@ describe('Case View Page files tab', () => {
     await userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         type: CustomFieldTypes.TOGGLE,
         key: 'test_key_2',
         value: false,
@@ -176,7 +176,7 @@ describe('Case View Page files tab', () => {
     await userEvent.click((await screen.findAllByRole('switch'))[0]);
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         type: CustomFieldTypes.TOGGLE,
         key: 'test_key_2',
         value: true,
@@ -208,7 +208,7 @@ describe('Case View Page files tab', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customFieldsMock[0],
         value: 'My text test value 1!!!',
       });
@@ -243,7 +243,7 @@ describe('Case View Page files tab', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customFieldsMock[0],
         value: `${customFieldsConfigurationMock[0].defaultValue} updated!!`,
       });

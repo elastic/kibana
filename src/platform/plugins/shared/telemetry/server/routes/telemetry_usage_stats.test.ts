@@ -62,7 +62,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
 
       const { mockResponse } = await runRequest(mockRouter);
-      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+      expect(telemetryCollectionManager.getStats).toHaveBeenCalledWith({
         unencrypted: undefined,
         refreshCache: undefined,
       });
@@ -74,7 +74,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
 
       await runRequest(mockRouter, { unencrypted: true });
-      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+      expect(telemetryCollectionManager.getStats).toHaveBeenCalledWith({
         unencrypted: true,
         refreshCache: true,
       });
@@ -83,7 +83,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
     it('calls getStats with refreshCache when set in body', async () => {
       registerTelemetryUsageStatsRoutes(mockRouter, telemetryCollectionManager, true, getSecurity);
       await runRequest(mockRouter, { refreshCache: true });
-      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+      expect(telemetryCollectionManager.getStats).toHaveBeenCalledWith({
         unencrypted: undefined,
         refreshCache: true,
       });
@@ -95,7 +95,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         refreshCache: false,
         unencrypted: true,
       });
-      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+      expect(telemetryCollectionManager.getStats).toHaveBeenCalledWith({
         unencrypted: true,
         refreshCache: true,
       });
@@ -112,7 +112,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         refreshCache: false,
         unencrypted: true,
       });
-      expect(telemetryCollectionManager.getStats).toBeCalledWith({
+      expect(telemetryCollectionManager.getStats).toHaveBeenCalledWith({
         unencrypted: true,
         refreshCache: true,
       });
@@ -150,7 +150,7 @@ describe('registerTelemetryUsageStatsRoutes', () => {
         unencrypted: true,
       });
       expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
-      expect(mockResponse.customError).toBeCalledWith({
+      expect(mockResponse.customError).toHaveBeenCalledWith({
         statusCode: 503,
         body: `Can't fetch telemetry at the moment because some services are down. Check the /status page for more details.`,
       });

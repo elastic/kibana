@@ -25,8 +25,8 @@ describe('debounceByKey', () => {
     debouncedFn2('b')(1);
 
     expect(fn)..toHaveBeenCalledTimes(1);
-    expect(fn).toBeCalledWith(1);
+    expect(fn).toHaveBeenCalledWith(1);
     expect(fn2)..toHaveBeenCalledTimes(1);
-    expect(fn2).toBeCalledWith(2);
+    expect(fn2).toHaveBeenCalledWith(2);
   });
 });

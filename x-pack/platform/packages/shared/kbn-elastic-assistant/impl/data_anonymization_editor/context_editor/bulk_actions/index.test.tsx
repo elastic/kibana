@@ -48,7 +48,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Allow$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'add', update: 'allow' },
       { field: 'user.name', operation: 'add', update: 'allow' },
     ]);
@@ -60,7 +60,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Deny$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'remove', update: 'allow' },
       { field: 'user.name', operation: 'remove', update: 'allow' },
     ]);
@@ -72,7 +72,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Anonymize$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'add', update: 'allowReplacement' },
       { field: 'user.name', operation: 'add', update: 'allowReplacement' },
     ]);
@@ -84,7 +84,7 @@ describe('BulkActions', () => {
     await userEvent.click(getByTestId('bulkActionsButton'));
     fireEvent.click(getByText(/^Unanonymize$/));
 
-    expect(defaultProps.onListUpdated).toBeCalledWith([
+    expect(defaultProps.onListUpdated).toHaveBeenCalledWith([
       { field: 'process.args', operation: 'remove', update: 'allowReplacement' },
       { field: 'user.name', operation: 'remove', update: 'allowReplacement' },
     ]);

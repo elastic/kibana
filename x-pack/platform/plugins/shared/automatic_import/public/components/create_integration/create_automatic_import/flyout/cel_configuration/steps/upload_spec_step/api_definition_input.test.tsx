@@ -73,7 +73,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           apiSpec: expect.any(Oas),
           apiSpecFileName: 'test.json',
         });
@@ -91,7 +91,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           apiSpec: undefined,
           apiSpecFileName: undefined,
         });
@@ -108,7 +108,7 @@ describe('SampleLogsInput', () => {
         });
 
         it('should set the integrationSetting correctly', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
             apiSpec: expect.any(Oas),
             apiSpecFileName: 'test.yaml',
           });
@@ -127,7 +127,7 @@ bar: 2`;
         });
 
         it('should set the integrationSetting correctly', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
             apiSpec: undefined,
             apiSpecFileName: undefined,
           });
@@ -169,7 +169,7 @@ bar: 2`;
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           apiSpec: undefined,
           apiSpecFileName: undefined,
         });

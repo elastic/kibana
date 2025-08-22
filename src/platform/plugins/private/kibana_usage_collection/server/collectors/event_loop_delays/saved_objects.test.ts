@@ -39,7 +39,7 @@ describe('storeHistogram', () => {
     const pid = process.pid;
     const id = serializeSavedObjectId({ date: mockNow, pid, instanceUuid });
 
-    expect(mockInternalRepository.create).toBeCalledWith(
+    expect(mockInternalRepository.create).toHaveBeenCalledWith(
       'event_loop_delays_daily',
       { ...mockHistogram, processId: pid, instanceUuid },
       { id, overwrite: true }

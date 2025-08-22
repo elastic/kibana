@@ -294,7 +294,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         checkedAt: 'Feb 26, 2023 @ 00:00:00.000',
@@ -384,7 +384,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -469,7 +469,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -542,7 +542,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -619,7 +619,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: true,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,
@@ -697,7 +697,7 @@ describe('setRecoveredAlertsContext', () => {
       groupByLocation: false,
       stalePendingConfigs: {},
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       id: idWithLocation,
       context: {
         configId,

@@ -43,7 +43,7 @@ describe('AWS', () => {
       const response = await awsService['_checkIfService']();
       expect(readFile)..toHaveBeenCalledTimes(0);
       expect(fetchMock)..toHaveBeenCalledTimes(1);
-      expect(fetchMock).toBeCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         'http://169.254.169.254/2016-09-02/dynamic/instance-identity/document',
         {
           method: 'GET',

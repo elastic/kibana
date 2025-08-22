@@ -184,7 +184,7 @@ describe('ExpressionRenderHandler', () => {
       const promise1 = expressionRenderHandler.render$.pipe(first()).toPromise();
       expressionRenderHandler.render(false as unknown as SerializableRecord);
       await expect(promise1).resolves.toEqual(1);
-      expect(mockNotificationService.toasts.addError).toBeCalledWith(
+      expect(mockNotificationService.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'invalid data provided to the expression renderer',
         }),

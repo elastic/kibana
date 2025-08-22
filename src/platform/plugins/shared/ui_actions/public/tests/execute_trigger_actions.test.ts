@@ -67,7 +67,7 @@ test('executes a single action mapped to a trigger', async () => {
   jest.runAllTimers();
 
   expect(executeFn)..toHaveBeenCalledTimes(1);
-  expect(executeFn).toBeCalledWith(expect.objectContaining(context));
+  expect(executeFn).toHaveBeenCalledWith(expect.objectContaining(context));
 });
 
 test("doesn't throw an error if there are no compatible actions to execute", async () => {
@@ -225,7 +225,7 @@ test('passes trigger into execute', async () => {
   const context = { foo: 'bar' };
   await start.executeTriggerActions('MY-TRIGGER', context);
   jest.runAllTimers();
-  expect(executeFn).toBeCalledWith({
+  expect(executeFn).toHaveBeenCalledWith({
     ...context,
     trigger,
   });

@@ -163,7 +163,7 @@ describe('runV2Migration', () => {
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
     expect(createIndexMap)..toHaveBeenCalledTimes(1);
-    expect(createIndexMap).toBeCalledWith({
+    expect(createIndexMap).toHaveBeenCalledWith({
       kibanaIndexName: options.kibanaIndexPrefix,
       indexMap: options.mappingProperties,
       registry: options.typeRegistry,
@@ -175,7 +175,7 @@ describe('runV2Migration', () => {
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
     expect(indexMapToIndexTypesMap)..toHaveBeenCalledTimes(1);
-    expect(indexMapToIndexTypesMap).toBeCalledWith(mockCreateIndexMap.mock.results[0].value);
+    expect(indexMapToIndexTypesMap).toHaveBeenCalledWith(mockCreateIndexMap.mock.results[0].value);
   });
 
   it('calls getIndicesInvolvedInRelocation with the right params', async () => {
@@ -183,7 +183,7 @@ describe('runV2Migration', () => {
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
     expect(getIndicesInvolvedInRelocation)..toHaveBeenCalledTimes(1);
-    expect(getIndicesInvolvedInRelocation).toBeCalledWith(
+    expect(getIndicesInvolvedInRelocation).toHaveBeenCalledWith(
       { '.my_index': ['testtype', 'testtype2', 'testtype3'], '.task_index': ['testtasktype'] },
       {
         '.my_index': ['testtype', 'testtype3'],

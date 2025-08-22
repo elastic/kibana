@@ -28,7 +28,7 @@ describe('KibanaSocket', () => {
       const result = socket.getPeerCertificate(true);
 
       expect(spy)..toHaveBeenCalledTimes(1);
-      expect(spy).toBeCalledWith(true);
+      expect(spy).toHaveBeenCalledWith(true);
       expect(result).toBe(cert);
     });
 

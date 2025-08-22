@@ -77,7 +77,7 @@ describe('#logout', () => {
 
     const next = `&next=${encodeURIComponent(CURRENT_URL)}`;
     const provider = `&provider=${providerName}`;
-    await expect(application.navigateToUrl).toBeCalledWith(
+    await expect(application.navigateToUrl).toHaveBeenCalledWith(
       `${LOGOUT_URL}?msg=SESSION_EXPIRED${next}${provider}`,
       { forceRedirect: true, skipAppLeave: true }
     );

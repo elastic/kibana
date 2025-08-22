@@ -400,7 +400,7 @@ describe('helpers', () => {
         requestItems,
       });
 
-      expect(mockFetch).toBeCalledWith(
+      expect(mockFetch).toHaveBeenCalledWith(
         '/internal/ecs_data_quality_dashboard/unallowed_field_values',
         {
           body: JSON.stringify(requestItems),

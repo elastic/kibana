@@ -304,7 +304,7 @@ describe('Package policy service', () => {
         { id: 'test-package-policy', skipUniqueNameVerification: true }
       );
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'create',
         id: 'test-package-policy',
         name: 'Test Package Policy',
@@ -522,7 +522,7 @@ describe('Package policy service', () => {
 
       await packagePolicyService.get(soClient, 'test-package-policy');
 
-      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toBeCalledWith({
+      expect(mockedAuditLoggingService.writeCustomSoAuditLog).toHaveBeenCalledWith({
         action: 'get',
         id: 'test-package-policy',
         name: 'Test',

@@ -58,7 +58,7 @@ describe('registerEventLoopDelaysCollector', () => {
 
   it('registers savedObjectType "event_loop_delays_daily"', () => {
     expect(mockRegisterType)..toHaveBeenCalledTimes(1);
-    expect(mockRegisterType).toBeCalledWith(
+    expect(mockRegisterType).toHaveBeenCalledWith(
       expect.objectContaining({
         name: 'event_loop_delays_daily',
       })

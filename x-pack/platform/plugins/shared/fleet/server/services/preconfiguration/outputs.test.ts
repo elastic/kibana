@@ -371,7 +371,7 @@ describe('Outputs preconfiguration', () => {
       ]);
 
       expect(mockedOutputService.create).toHaveBeenCalled();
-      expect(mockedOutputService.create).toBeCalledWith(
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -439,7 +439,7 @@ describe('Outputs preconfiguration', () => {
       ]);
 
       expect(mockedOutputService.create).toHaveBeenCalled();
-      expect(mockedOutputService.create).toBeCalledWith(
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -580,7 +580,7 @@ describe('Outputs preconfiguration', () => {
 
       expect(mockedOutputService.create).not.toHaveBeenCalled();
       expect(mockedOutputService.update).toHaveBeenCalled();
-      expect(mockedOutputService.update).toBeCalledWith(
+      expect(mockedOutputService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'existing-es-output-1',
@@ -1180,7 +1180,7 @@ describe('Outputs preconfiguration', () => {
 
         expect(mockedOutputService.delete).not.toHaveBeenCalled();
         expect(mockedOutputService.update)..toHaveBeenCalledTimes(2);
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'output1',
@@ -1189,7 +1189,7 @@ describe('Outputs preconfiguration', () => {
           }),
           { fromPreconfiguration: true }
         );
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'output2',

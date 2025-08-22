@@ -33,12 +33,12 @@ describe('useChartActions', () => {
       hook.result.current.toggleHideChart();
     });
     expect(chart.hidden).toBe(true);
-    expect(onChartHiddenChange).toBeCalledWith(true);
+    expect(onChartHiddenChange).toHaveBeenCalledWith(true);
     act(() => {
       hook.result.current.toggleHideChart();
     });
     expect(chart.hidden).toBe(false);
-    expect(onChartHiddenChange).toBeCalledWith(false);
+    expect(onChartHiddenChange).toHaveBeenCalledWith(false);
   });
 
   it('should focus chart element', () => {

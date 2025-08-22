@@ -74,7 +74,7 @@ describe('usePushToService', () => {
       await result.current.handlePushToService();
     });
 
-    expect(pushCaseToExternalService).toBeCalledWith({
+    expect(pushCaseToExternalService).toHaveBeenCalledWith({
       caseId,
       connector: defaultArgs.connector,
     });

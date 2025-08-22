@@ -188,7 +188,7 @@ describe('Table', () => {
       editingComponent.update();
 
       // Ensure we call saveFilter properly
-      expect(saveFilter).toBeCalledWith({
+      expect(saveFilter).toHaveBeenCalledWith({
         clientId,
         value: 'ti*',
       });

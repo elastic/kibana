@@ -134,7 +134,7 @@ describe('useSecurityJobsHelpers', () => {
       await act(async () => {
         await result.current.enableDatafeed(JOB, TIMESTAMP);
       });
-      expect(mockStartDatafeeds).toBeCalledWith({
+      expect(mockStartDatafeeds).toHaveBeenCalledWith({
         datafeedIds: [`datafeed-test_job_id`],
         start: new Date('1989-02-21').getTime(),
       });

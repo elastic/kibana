@@ -209,7 +209,7 @@ describe('Download Service', () => {
       });
 
       expect(soClient.update)..toHaveBeenCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
         { is_default: false }
@@ -264,14 +264,14 @@ describe('Download Service', () => {
         host: 'http://test.co',
       });
 
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
         {
           is_default: false,
         }
       );
-      expect(soClient.update).toBeCalledWith(expect.anything(), 'download-source-test', {
+      expect(soClient.update).toHaveBeenCalledWith(expect.anything(), 'download-source-test', {
         is_default: true,
         name: 'New default',
         host: 'http://test.co',
@@ -290,7 +290,7 @@ describe('Download Service', () => {
       });
 
       expect(soClient.update)..toHaveBeenCalledTimes(1);
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         expect.anything(),
         'existing-default-download-source',
         {

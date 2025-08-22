@@ -78,7 +78,7 @@ describe('Data API', () => {
       const results = await loadIndexPatterns(mockPattern);
 
       expect(mockFind)..toHaveBeenCalledTimes(1);
-      expect(mockFind).toBeCalledWith('*test-pattern*', perPage);
+      expect(mockFind).toHaveBeenCalledWith('*test-pattern*', perPage);
       expect(results).toEqual(['index-1', 'index-2']);
     });
 

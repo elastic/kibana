@@ -55,7 +55,7 @@ describe('DeprecationsService', () => {
       const deprecationsService = new DeprecationsService(coreContext);
       await deprecationsService.setup(deprecationsCoreSetupDeps);
       // registers correct base api path
-      expect(http.createRouter).toBeCalledWith('/api/deprecations');
+      expect(http.createRouter).toHaveBeenCalledWith('/api/deprecations');
       // registers get route '/'
       expect(router.get).toHaveBeenCalledTimes(1);
       expect(router.get).toHaveBeenCalledWith(

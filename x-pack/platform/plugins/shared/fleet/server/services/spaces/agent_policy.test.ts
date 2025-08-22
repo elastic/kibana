@@ -109,7 +109,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).toBeCalledWith(
+    ).toHaveBeenCalledWith(
       [
         { id: 'policy1', type: 'fleet-agent-policies' },
         { id: 'package-policy-1', type: 'fleet-package-policies' },
@@ -122,7 +122,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       jest.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension()).bulkUpdate
-    ).toBeCalledWith([
+    ).toHaveBeenCalledWith([
       {
         id: 'token1',
         type: 'fleet-uninstall-tokens',

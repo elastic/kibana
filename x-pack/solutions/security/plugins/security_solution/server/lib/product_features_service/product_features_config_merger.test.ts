@@ -377,10 +377,10 @@ describe('ProductFeaturesConfigMerger', () => {
       enabledProductFeaturesConfigs
     );
 
-    expect(enabledProductFeaturesConfigs[0].baseFeatureConfigModifier).toBeCalledWith(
+    expect(enabledProductFeaturesConfigs[0].baseFeatureConfigModifier).toHaveBeenCalledWith(
       baseKibanaFeature
     );
-    expect(enabledProductFeaturesConfigs[1].baseFeatureConfigModifier).toBeCalledWith({
+    expect(enabledProductFeaturesConfigs[1].baseFeatureConfigModifier).toHaveBeenCalledWith({
       ...baseKibanaFeature,
       name: 'NEW NAME',
     });

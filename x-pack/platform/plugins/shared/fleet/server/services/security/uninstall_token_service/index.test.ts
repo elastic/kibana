@@ -623,7 +623,7 @@ describe('UninstallTokenService', () => {
             const so = getDefaultSO(canEncrypt);
             await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id, true);
 
-            expect(soClientMock.bulkCreate).toBeCalledWith([
+            expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
@@ -632,7 +632,7 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
+            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
               so.attributes.policy_id,
             ]);
           });
@@ -645,7 +645,7 @@ describe('UninstallTokenService', () => {
               [so.attributes.policy_id, so2.attributes.policy_id],
               true
             );
-            expect(soClientMock.bulkCreate).toBeCalledWith([
+            expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
@@ -661,7 +661,7 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
+            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
               so.attributes.policy_id,
               so2.attributes.policy_id,
             ]);
@@ -674,7 +674,7 @@ describe('UninstallTokenService', () => {
             mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
             await uninstallTokenService.generateTokensForAllPolicies(true);
-            expect(soClientMock.bulkCreate).toBeCalledWith([
+            expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
               {
                 type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
                 attributes: {
@@ -690,7 +690,7 @@ describe('UninstallTokenService', () => {
                 },
               },
             ]);
-            expect(agentPolicyService.deployPolicies).toBeCalledWith(soClientMock, [
+            expect(agentPolicyService.deployPolicies).toHaveBeenCalledWith(soClientMock, [
               so.attributes.policy_id,
               so2.attributes.policy_id,
             ]);
@@ -707,7 +707,7 @@ describe('UninstallTokenService', () => {
         it('creates a new token when calling generateTokenForPolicyId', async () => {
           const so = getDefaultSO(canEncrypt);
           await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
+          expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
@@ -726,7 +726,7 @@ describe('UninstallTokenService', () => {
             so.attributes.policy_id,
             so2.attributes.policy_id,
           ]);
-          expect(soClientMock.bulkCreate).toBeCalledWith([
+          expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
@@ -751,7 +751,7 @@ describe('UninstallTokenService', () => {
           mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
 
           await uninstallTokenService.generateTokensForAllPolicies();
-          expect(soClientMock.bulkCreate).toBeCalledWith([
+          expect(soClientMock.bulkCreate).toHaveBeenCalledWith([
             {
               type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
               attributes: {
@@ -798,7 +798,7 @@ describe('UninstallTokenService', () => {
             await uninstallTokenService.checkTokenValidityForAllPolicies();
 
             expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser)..toHaveBeenCalledTimes(1);
-            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledWith({
+            expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toHaveBeenCalledWith({
               filter:
                 'fleet-uninstall-tokens.id: "test-so-id" or fleet-uninstall-tokens.id: "test-so-id-two"',
               perPage: 10000,

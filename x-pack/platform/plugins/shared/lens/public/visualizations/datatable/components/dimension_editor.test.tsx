@@ -280,7 +280,7 @@ describe('data table dimension editor', () => {
     });
 
     jest.advanceTimersByTime(256);
-    expect(props.setState).toBeCalledWith({
+    expect(props.setState).toHaveBeenCalledWith({
       ...state,
       columns: [
         expect.objectContaining({

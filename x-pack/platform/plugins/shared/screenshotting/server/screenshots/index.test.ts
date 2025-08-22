@@ -209,7 +209,7 @@ describe('Screenshot Observable Pipeline', () => {
         screenshots.getScreenshots(options as PngScreenshotOptions)
       );
 
-      expect(driverFactory.createPage).toBeCalledWith(
+      expect(driverFactory.createPage).toHaveBeenCalledWith(
         expect.objectContaining({
           defaultViewport: {
             width: layout.width,

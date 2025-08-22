@@ -102,7 +102,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
       expect(() => urlStateStorage.get(key)).not.toThrow();
-      expect(cb).toBeCalledWith(expect.any(Error));
+      expect(cb).toHaveBeenCalledWith(expect.any(Error));
     });
 
     it('should notify about errors throttled', () => {
@@ -187,7 +187,7 @@ describe('KbnUrlStateStorage', () => {
         const cb = jest.fn();
         urlStateStorage = createKbnUrlStateStorage({ useHash: true, history, onSetError: cb });
         await expect(urlStateStorage.set('_s', { test: 'test' })).resolves; // not rejects
-        expect(cb).toBeCalledWith(expect.any(Error));
+        expect(cb).toHaveBeenCalledWith(expect.any(Error));
       });
 
       describe('withNotifyOnErrors integration', () => {
@@ -293,7 +293,7 @@ describe('KbnUrlStateStorage', () => {
       const key = '_s';
       history.replace(`/?${key}=(ok:2,test:`); // malformed rison
       expect(() => urlStateStorage.get(key)).not.toThrow();
-      expect(cb).toBeCalledWith(expect.any(Error));
+      expect(cb).toHaveBeenCalledWith(expect.any(Error));
     });
 
     describe('withNotifyOnErrors integration', () => {

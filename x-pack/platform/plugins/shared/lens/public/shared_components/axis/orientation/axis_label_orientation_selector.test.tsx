@@ -39,6 +39,6 @@ describe('AxisLabelOrientationSelector', () => {
     await userEvent.click(button);
 
     expect(setLabelOrientation)..toHaveBeenCalledTimes(1);
-    expect(setLabelOrientation).toBeCalledWith(-90);
+    expect(setLabelOrientation).toHaveBeenCalledWith(-90);
   });
 });

@@ -166,7 +166,7 @@ describe('Endpoint Policy Settings Form', () => {
           userEvent.click(renderResult.getByTestId(selector).querySelector('input')!);
 
         expectOnChangeToBeCalledWith = (updatedPolicy) =>
-          expect(formProps.onChange).toBeCalledWith({
+          expect(formProps.onChange).toHaveBeenCalledWith({
             isValid: true,
             updatedPolicy,
           });

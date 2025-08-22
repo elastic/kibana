@@ -67,7 +67,7 @@ describe('EditModal', () => {
     });
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
 
-    expect(onSave).toBeCalledWith({
+    expect(onSave).toHaveBeenCalledWith({
       name: 'New list name',
       description: 'New description name',
     });
@@ -88,7 +88,7 @@ describe('EditModal', () => {
     });
     fireEvent.submit(wrapper.getByTestId('editModalForm'));
 
-    expect(onSave).toBeCalledWith({
+    expect(onSave).toHaveBeenCalledWith({
       name: 'New list name',
       description: 'New description name',
     });

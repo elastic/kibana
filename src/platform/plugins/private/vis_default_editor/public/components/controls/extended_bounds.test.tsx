@@ -42,7 +42,7 @@ describe('ExtendedBoundsParamEditor', () => {
       );
 
       expect(comp.children().props().isInvalid).toBeFalsy();
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
     });
 
     test('should change its validity due to passed props and show error if it is invalid', () => {
@@ -55,21 +55,21 @@ describe('ExtendedBoundsParamEditor', () => {
 
       expect(comp.children().props().error).toEqual(expect.any(String));
       expect(comp.children().props().isInvalid).toBeTruthy();
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
 
       // set valid bounds
       comp.setProps({ value: { min: 0, max: 10 } });
 
       expect(comp.props().error).toBeUndefined();
       expect(comp.children().props().isInvalid).toBeFalsy();
-      expect(defaultProps.setValidity).toBeCalledWith(true);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(true);
 
       // set invalid bounds - min > max
       comp.setProps({ value: { min: 10, max: 2 } });
 
       expect(comp.children().props().error).toEqual(expect.any(String));
       expect(comp.children().props().isInvalid).toBeTruthy();
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
     });
 
     test('should set valid state after removing from the DOM tree', () => {
@@ -80,7 +80,7 @@ describe('ExtendedBoundsParamEditor', () => {
         />
       );
 
-      expect(defaultProps.setValidity).toBeCalledWith(false);
+      expect(defaultProps.setValidity).toHaveBeenCalledWith(false);
 
       comp.unmount();
 
@@ -120,7 +120,7 @@ describe('ExtendedBoundsParamEditor', () => {
       const maxBound = comp.find('input').last();
       maxBound.simulate('change', { target: { value: '30' } });
 
-      expect(defaultProps.setValue).toBeCalledWith({ min: 10, max: 30 });
+      expect(defaultProps.setValue).toHaveBeenCalledWith({ min: 10, max: 30 });
 
       maxBound.simulate('change', { target: { value: '' } });
 

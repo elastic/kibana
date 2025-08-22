@@ -330,7 +330,7 @@ describe('cleanupArchiveEntriesStep', () => {
       initialState: 'save_archive_entries_from_assets_map' as any,
     });
 
-    expect(mockedRemoveArchiveEntries).toBeCalledWith({
+    expect(mockedRemoveArchiveEntries).toHaveBeenCalledWith({
       savedObjectsClient: expect.anything(),
       refs: packageAssets,
     });

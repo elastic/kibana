@@ -31,7 +31,7 @@ describe('Point visibility option', () => {
     await userEvent.click(button);
 
     expect(onChange)..toHaveBeenCalledTimes(1);
-    expect(onChange).toBeCalledWith('always');
+    expect(onChange).toHaveBeenCalledWith('always');
   });
 
   it(`should be hidden when not enabled`, async () => {

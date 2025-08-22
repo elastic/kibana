@@ -60,7 +60,7 @@ describe('inflight middleware', () => {
 
         testMiddleware(loadingAction);
 
-        expect(dispatch).toBeCalledWith(inFlightActive());
+        expect(dispatch).toHaveBeenCalledWith(inFlightActive());
       });
 
       it('adds path to pendingCache for loadingValue actions', () => {
@@ -87,7 +87,7 @@ describe('inflight middleware', () => {
         expect(dispatch).not.toHaveBeenCalled();
 
         testMiddleware(setAction2);
-        expect(dispatch).toBeCalledWith(inFlightComplete());
+        expect(dispatch).toHaveBeenCalledWith(inFlightComplete());
       });
     });
   });

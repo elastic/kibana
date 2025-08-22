@@ -53,7 +53,7 @@ describe('UserList ', () => {
 
     await userEvent.click(screen.getByTestId('user-list-email-button'));
 
-    expect(open).toBeCalledWith(
+    expect(open).toHaveBeenCalledWith(
       `mailto:${user.email}?subject=${i18n.EMAIL_SUBJECT(title)}&body=${i18n.EMAIL_BODY(caseLink)}`,
       '_blank'
     );

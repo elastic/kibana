@@ -83,35 +83,35 @@ describe('createInitListener', () => {
 
     expect(jest.mocked(mockDataViewsService.getAllDataViewLazy)).toHaveBeenCalled();
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViews([])
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       sharedDataViewManagerSlice.actions.setDataViewId({
         defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
       })
     );
 
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.default,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.timeline,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.detections,
       })
     );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+    expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
         scope: DataViewManagerScopeName.analyzer,
@@ -129,7 +129,7 @@ describe('createInitListener', () => {
     it('should dispatch error correctly', async () => {
       await listener.effect(sharedDataViewManagerSlice.actions.init([]), mockListenerApi);
 
-      expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      expect(jest.mocked(mockListenerApi.dispatch)).toHaveBeenCalledWith(
         sharedDataViewManagerSlice.actions.error()
       );
     });

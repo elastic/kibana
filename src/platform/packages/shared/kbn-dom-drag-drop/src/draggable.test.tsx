@@ -112,7 +112,7 @@ describe('Draggable', () => {
     const { startDragging } = renderDraggable();
 
     startDragging();
-    expect(dataTransfer.setData).toBeCalledWith('text', 'drag_this');
+    expect(dataTransfer.setData).toHaveBeenCalledWith('text', 'drag_this');
   });
   test('className is added when draggable is being dragged', async () => {
     const { startDragging, draggable, endDragging } = renderDraggable({

@@ -133,7 +133,7 @@ describe('AddComment ', () => {
 
     await waitFor(() => expect(onCommentSaving).toHaveBeenCalled());
     await waitFor(() =>
-      expect(createAttachmentsMock).toBeCalledWith(
+      expect(createAttachmentsMock).toHaveBeenCalledWith(
         {
           caseId: addCommentProps.caseId,
           attachments: [
@@ -279,7 +279,7 @@ describe('draft comment ', () => {
       expect(onCommentSaving).toHaveBeenCalled();
     });
 
-    expect(createAttachmentsMock).toBeCalledWith(
+    expect(createAttachmentsMock).toHaveBeenCalledWith(
       {
         caseId: addCommentProps.caseId,
         attachments: [
@@ -353,7 +353,7 @@ describe('submit comment by key press', () => {
         expect(onCommentSaving).toHaveBeenCalled();
       });
 
-      expect(createAttachmentsMock).toBeCalledWith(
+      expect(createAttachmentsMock).toHaveBeenCalledWith(
         {
           caseId: addCommentProps.caseId,
           attachments: [

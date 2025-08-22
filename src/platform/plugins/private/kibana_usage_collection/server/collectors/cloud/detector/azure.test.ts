@@ -37,7 +37,7 @@ describe('AzureCloudService', () => {
       const response = await azureCloudService['_checkIfService']();
 
       expect(fetchMock)..toHaveBeenCalledTimes(1);
-      expect(fetchMock).toBeCalledWith(
+      expect(fetchMock).toHaveBeenCalledWith(
         'http://169.254.169.254/metadata/instance?api-version=2017-04-02',
         {
           method: 'GET',

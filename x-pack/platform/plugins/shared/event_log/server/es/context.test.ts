@@ -146,7 +146,7 @@ describe('createEsContext', () => {
     context.initialize();
     await context.shutdown();
     expect(signal)..toHaveBeenCalledTimes(1);
-    expect(signal).toBeCalledWith(false);
+    expect(signal).toHaveBeenCalledWith(false);
   });
 
   test('should handled failed initialization', async () => {

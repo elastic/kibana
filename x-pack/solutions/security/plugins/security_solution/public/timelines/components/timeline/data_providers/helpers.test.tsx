@@ -300,7 +300,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -455,7 +455,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(dispatch).toBeCalledWith({
+        expect(dispatch).toHaveBeenCalledWith({
           payload: {
             id: 'timeline-1',
             providers: unFlattenGroups([
@@ -494,7 +494,7 @@ describe('helpers', () => {
             timelineId,
           });
 
-          expect(dispatch).toBeCalledWith({
+          expect(dispatch).toHaveBeenCalledWith({
             payload: {
               id: 'timeline-1',
               providers: unFlattenGroups([
@@ -540,7 +540,7 @@ describe('helpers', () => {
             timelineId,
           });
 
-          expect(dispatch).toBeCalledWith({
+          expect(dispatch).toHaveBeenCalledWith({
             payload: {
               id: 'timeline-1',
               providers: unFlattenGroups([
@@ -626,7 +626,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -657,7 +657,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+      expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
     });
   });
 
@@ -703,7 +703,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -784,7 +784,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -938,7 +938,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -979,7 +979,7 @@ describe('helpers', () => {
         timelineId,
       });
 
-      expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+      expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
     });
   });
 
@@ -1003,7 +1003,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(dispatch).toBeCalledWith({
+        expect(dispatch).toHaveBeenCalledWith({
           payload: {
             id: 'timeline-1',
             providers: [
@@ -1035,7 +1035,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+        expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
       });
     });
 
@@ -1059,7 +1059,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(dispatch).toBeCalledWith({
+        expect(dispatch).toHaveBeenCalledWith({
           payload: {
             id: 'timeline-1',
             providers: [
@@ -1100,7 +1100,7 @@ describe('helpers', () => {
           timelineId,
         });
 
-        expect(onAddedToTimeline).toBeCalledWith(providerToAdd.name);
+        expect(onAddedToTimeline).toHaveBeenCalledWith(providerToAdd.name);
       });
     });
   });

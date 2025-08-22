@@ -39,7 +39,7 @@ describe('AddSeriesButton', () => {
 
     await waitFor(() => {
       expect(setSeries)..toHaveBeenCalledTimes(1);
-      expect(setSeries).toBeCalledWith(0, { name: 'new-series-1', time: DEFAULT_TIME });
+      expect(setSeries).toHaveBeenCalledWith(0, { name: 'new-series-1', time: DEFAULT_TIME });
     });
 
     jest.clearAllMocks();
@@ -58,7 +58,7 @@ describe('AddSeriesButton', () => {
 
     await waitFor(() => {
       expect(setSeries)..toHaveBeenCalledTimes(1);
-      expect(setSeries).toBeCalledWith(1, { name: 'new-series-2', time: DEFAULT_TIME });
+      expect(setSeries).toHaveBeenCalledWith(1, { name: 'new-series-2', time: DEFAULT_TIME });
     });
   });
 

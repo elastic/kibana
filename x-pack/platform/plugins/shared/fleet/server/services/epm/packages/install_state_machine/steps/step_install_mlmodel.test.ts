@@ -244,7 +244,7 @@ describe('cleanUpMlModelStep', () => {
       initialState: 'install_ml_model' as any,
     });
 
-    expect(mockDeletePrerequisiteAssets).toBeCalledWith(
+    expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
         indexAssets: [
           {
@@ -276,7 +276,7 @@ describe('cleanUpMlModelStep', () => {
       },
       esClient
     );
-    expect(mockDeleteMLModels).toBeCalledWith(installedEs, esClient);
+    expect(mockDeleteMLModels).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {

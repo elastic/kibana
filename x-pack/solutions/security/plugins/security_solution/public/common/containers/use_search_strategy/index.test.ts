@@ -110,7 +110,7 @@ describe('useSearchStrategy', () => {
     );
 
     result.current.search(request);
-    expect(start).toBeCalledWith(expect.objectContaining({ request }));
+    expect(start).toHaveBeenCalledWith(expect.objectContaining({ request }));
   });
 
   it('returns inspect', () => {
@@ -148,7 +148,7 @@ describe('useSearchStrategy', () => {
       useSearchStrategy<FactoryQueryTypes>({ ...userSearchStrategyProps, errorMessage })
     );
 
-    expect(mockAddToastError).toBeCalledWith(error, { title: errorMessage });
+    expect(mockAddToastError).toHaveBeenCalledWith(error, { title: errorMessage });
   });
 
   it('does not show toast error if showErrorToast = false', () => {
@@ -245,7 +245,7 @@ describe('useSearchStrategy', () => {
 
     result.current.search(request);
 
-    expect(start).toBeCalledWith(
+    expect(start).toHaveBeenCalledWith(
       expect.objectContaining({ abortSignal: mockAbortController.signal })
     );
   });
@@ -268,7 +268,7 @@ describe('useSearchStrategy', () => {
 
       expect(mockStartTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking)..toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toBeCalledWith('success');
+      expect(mockEndTracking).toHaveBeenCalledWith('success');
     });
 
     it('should handle search error', () => {
@@ -281,7 +281,7 @@ describe('useSearchStrategy', () => {
       result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
       expect(mockStartTracking)..toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toBeCalledWith('error');
+      expect(mockEndTracking).toHaveBeenCalledWith('error');
     });
 
     it('should track error search result', () => {
@@ -294,7 +294,7 @@ describe('useSearchStrategy', () => {
 
       expect(mockStartTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking)..toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toBeCalledWith('error');
+      expect(mockEndTracking).toHaveBeenCalledWith('error');
     });
 
     it('should track aborted search result', () => {
@@ -309,7 +309,7 @@ describe('useSearchStrategy', () => {
 
       expect(mockStartTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking)..toHaveBeenCalledTimes(1);
-      expect(mockEndTracking).toBeCalledWith('aborted');
+      expect(mockEndTracking).toHaveBeenCalledWith('aborted');
     });
   });
 });

@@ -85,7 +85,7 @@ describe('ValueAxesPanel component', () => {
     const comp = mountWithIntl(<ValueAxesPanel {...defaultProps} />);
     comp.find('[data-test-subj="removeValueAxisBtn"] button').first().simulate('click');
 
-    expect(removeValueAxis).toBeCalledWith(axisLeft);
+    expect(removeValueAxis).toHaveBeenCalledWith(axisLeft);
   });
 
   it('should call addValueAxis', () => {

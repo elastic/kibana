@@ -122,7 +122,7 @@ describe('stepStepSelectAgentPolicy', () => {
       await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
       await act(async () => {
         expect(updateAgentPoliciesMock)..toHaveBeenCalledTimes(1);
-        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
+        expect(updateAgentPoliciesMock).toHaveBeenCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
     });
   });
@@ -160,7 +160,7 @@ describe('stepStepSelectAgentPolicy', () => {
       render();
       await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
       await act(async () => {
-        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
+        expect(updateAgentPoliciesMock).toHaveBeenCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
     });
 
@@ -191,7 +191,7 @@ describe('stepStepSelectAgentPolicy', () => {
       render(undefined, ['policy-1']);
       await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
       await act(async () => {
-        expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
+        expect(updateAgentPoliciesMock).toHaveBeenCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
     });
 
@@ -208,7 +208,7 @@ describe('stepStepSelectAgentPolicy', () => {
       await act(async () => {
         result.getByText('Policy 2').click();
       });
-      expect(updateAgentPoliciesMock).toBeCalledWith([
+      expect(updateAgentPoliciesMock).toHaveBeenCalledWith([
         { id: 'policy-1', package_policies: [] },
         { id: 'policy-2', package_policies: [] },
       ]);

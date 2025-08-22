@@ -266,7 +266,7 @@ describe('Telemetry Collection Manager', () => {
             await setupApi.getStats(config);
 
             expect(getStatsCollectionConfig)..toHaveBeenCalledTimes(1);
-            expect(getStatsCollectionConfig).toBeCalledWith(
+            expect(getStatsCollectionConfig).toHaveBeenCalledWith(
               expect.not.objectContaining({ refreshCache: true }),
               usageCollection
             );

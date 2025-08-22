@@ -77,7 +77,7 @@ describe('TorqActionConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.torq',
           name: 'torq',
@@ -112,7 +112,7 @@ describe('TorqActionConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.torq',
           name: 'torq',
@@ -150,7 +150,7 @@ describe('TorqActionConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });
@@ -178,7 +178,7 @@ describe('TorqActionConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });
@@ -206,7 +206,7 @@ describe('TorqActionConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });

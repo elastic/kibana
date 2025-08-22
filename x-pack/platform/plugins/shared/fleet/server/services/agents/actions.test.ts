@@ -133,7 +133,7 @@ describe('Agent actions', () => {
           agents: ['agent1'],
         });
 
-        expect(esClient.create).toBeCalledWith(
+        expect(esClient.create).toHaveBeenCalledWith(
           expect.objectContaining({
             document: expect.objectContaining({
               signed: {
@@ -178,7 +178,7 @@ describe('Agent actions', () => {
         agents: ['agent1'],
       });
 
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.not.objectContaining({
             signed: expect.any(Object),
@@ -348,7 +348,7 @@ describe('Agent actions', () => {
       await cancelAgentAction(esClient, soClient, 'action1');
 
       expect(esClient.create)..toHaveBeenCalledTimes(2);
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -357,7 +357,7 @@ describe('Agent actions', () => {
           }),
         })
       );
-      expect(esClient.create).toBeCalledWith(
+      expect(esClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({
             type: 'CANCEL',
@@ -388,7 +388,7 @@ describe('Agent actions', () => {
       await cancelAgentAction(esClient, soClient, 'action1');
 
       expect(mockedBulkUpdateAgents).toHaveBeenCalled();
-      expect(mockedBulkUpdateAgents).toBeCalledWith(
+      expect(mockedBulkUpdateAgents).toHaveBeenCalledWith(
         expect.anything(),
         [
           expect.objectContaining({ agentId: 'agent1' }),

@@ -99,7 +99,7 @@ describe('CSV Export Search Cursor', () => {
       await cursor.getPage(searchSource);
 
       expect(dataSearchSpy)..toHaveBeenCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: expect.objectContaining({
             pit: { id: 'somewhat-pit-id', keep_alive: '10m' },
@@ -157,7 +157,7 @@ describe('CSV Export Search Cursor', () => {
       await cursor.getPage(searchSource);
 
       expect(dataSearchSpy)..toHaveBeenCalledTimes(1);
-      expect(dataSearchSpy).toBeCalledWith(
+      expect(dataSearchSpy).toHaveBeenCalledWith(
         {
           params: {
             fields: [],

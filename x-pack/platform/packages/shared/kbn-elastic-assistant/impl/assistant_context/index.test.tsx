@@ -25,6 +25,6 @@ describe('AssistantContext', () => {
     const path = '/path/to/resource';
     await result.current.http.fetch(path);
 
-    expect(result.current.http.fetch).toBeCalledWith(path);
+    expect(result.current.http.fetch).toHaveBeenCalledWith(path);
   });
 });

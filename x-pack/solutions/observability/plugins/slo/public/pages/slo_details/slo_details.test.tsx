@@ -173,7 +173,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -190,7 +190,7 @@ describe('SLO Details Page', () => {
 
       render(<SloDetailsPage />);
 
-      expect(mockNavigate).toBeCalledWith(paths.slosWelcome);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slosWelcome);
     });
   });
 
@@ -303,7 +303,7 @@ describe('SLO Details Page', () => {
     fireEvent.click(button!);
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(
+      expect(mockNavigate).toHaveBeenCalledWith(
         paths.sloCreateWithEncodedForm(encodeURIComponent(encode(transformSloToCloneState(slo))))
       );
     });
@@ -331,13 +331,13 @@ describe('SLO Details Page', () => {
 
     fireEvent.click(deleteModalConfirmButton!);
 
-    expect(mockDelete).toBeCalledWith({
+    expect(mockDelete).toHaveBeenCalledWith({
       id: slo.id,
       name: slo.name,
     });
 
     await waitFor(() => {
-      expect(mockNavigate).toBeCalledWith(paths.slos);
+      expect(mockNavigate).toHaveBeenCalledWith(paths.slos);
     });
   });
 

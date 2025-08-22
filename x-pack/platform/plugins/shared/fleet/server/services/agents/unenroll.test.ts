@@ -368,7 +368,7 @@ describe('unenroll', () => {
       ]);
 
       expect(mockedInvalidateAPIKeys)..toHaveBeenCalledTimes(1);
-      expect(mockedInvalidateAPIKeys).toBeCalledWith([
+      expect(mockedInvalidateAPIKeys).toHaveBeenCalledWith([
         'accessApiKey1',
         'defaultApiKey1',
         'defaultApiKeyHistory1',

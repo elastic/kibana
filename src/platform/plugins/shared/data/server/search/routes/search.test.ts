@@ -202,6 +202,6 @@ describe('Search service', () => {
     await runMockDelete(mockContext, mockRequest, mockResponse);
 
     expect(mockContext.search.cancel).toHaveBeenCalled();
-    expect(mockContext.search.cancel).toBeCalledWith(id, { strategy });
+    expect(mockContext.search.cancel).toHaveBeenCalledWith(id, { strategy });
   });
 });

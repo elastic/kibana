@@ -194,7 +194,7 @@ describe('_stateMachineInstallPackage', () => {
         retryFromLastState: true,
       });
       expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockHandleState).toHaveBeenCalledWith(
         'create_restart_installation',
         expect.any(Object),
         expect.any(Object)
@@ -243,7 +243,7 @@ describe('_stateMachineInstallPackage', () => {
         },
       });
       expect(mockCleanupLatestExecutedState).not.toHaveBeenCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockHandleState).toHaveBeenCalledWith(
         'create_restart_installation',
         expect.any(Object),
         expect.any(Object)
@@ -291,7 +291,7 @@ describe('_stateMachineInstallPackage', () => {
         },
       });
       expect(mockCleanupLatestExecutedState).toHaveBeenCalled();
-      expect(mockHandleState).toBeCalledWith(
+      expect(mockHandleState).toHaveBeenCalledWith(
         'remove_legacy_templates',
         expect.any(Object),
         expect.any(Object)

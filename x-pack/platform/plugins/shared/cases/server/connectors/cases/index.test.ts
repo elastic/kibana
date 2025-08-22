@@ -552,7 +552,7 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
-        expect(mockLogger.error).toBeCalledWith(
+        expect(mockLogger.error).toHaveBeenCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: Circuit breaker: Attack discovery alerts grouping would create more than the maximum number of allowed cases 20.'
         );
       });
@@ -571,7 +571,7 @@ describe('getCasesConnectorType', () => {
         expect(connectorParams.subActionParams.groupedAlerts).toBeNull();
         expect(connectorParams.subActionParams.internallyManagedAlerts).toBe(false);
         expect(connectorParams.subActionParams.maximumCasesToOpen).toBe(DEFAULT_MAX_OPEN_CASES);
-        expect(mockLogger.error).toBeCalledWith(
+        expect(mockLogger.error).toHaveBeenCalledWith(
           'Could not setup grouped Attack Discovery alerts, because of error: Error: [0.kibana.alert.attack_discovery.alert_ids]: expected value of type [array] but got [undefined]'
         );
       });

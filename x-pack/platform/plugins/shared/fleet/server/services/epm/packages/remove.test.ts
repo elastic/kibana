@@ -139,7 +139,7 @@ describe('deleteESAsset', () => {
       esClient
     );
 
-    expect(esClient.cluster.deleteComponentTemplate).toBeCalledWith(
+    expect(esClient.cluster.deleteComponentTemplate).toHaveBeenCalledWith(
       { name: 'logs-nginx.access@package' },
       expect.anything()
     );
@@ -219,7 +219,7 @@ describe('deleteESAsset', () => {
         soClientMock
       );
 
-      expect(soClientMock.update).toBeCalledWith('epm-packages', 'test', {
+      expect(soClientMock.update).toHaveBeenCalledWith('epm-packages', 'test', {
         installed_es: [
           {
             id: 'logs@custom',

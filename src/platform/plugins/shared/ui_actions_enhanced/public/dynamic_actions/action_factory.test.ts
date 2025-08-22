@@ -113,7 +113,7 @@ describe('License & ActionFactory', () => {
         licenseFeatureName: 'feature',
       }).create({ name: 'fake', config: {} });
       await action.execute({});
-      expect(spy).toBeCalledWith('feature');
+      expect(spy).toHaveBeenCalledWith('feature');
     });
   });
 });

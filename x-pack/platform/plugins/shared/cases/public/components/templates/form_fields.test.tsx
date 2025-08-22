@@ -233,7 +233,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           connectorId: 'none',
@@ -274,7 +274,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: 'new',
           tags: ['template-1'],
@@ -333,7 +333,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           category: null,
           tags: [],
@@ -386,7 +386,7 @@ describe('form fields', () => {
     await userEvent.click(screen.getByText('Submit'));
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           tags: [],
           category: null,

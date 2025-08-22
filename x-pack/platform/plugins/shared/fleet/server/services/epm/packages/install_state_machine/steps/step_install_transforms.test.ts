@@ -246,7 +246,7 @@ describe('cleanupTransformsStep', () => {
       initialState: 'install_transforms' as any,
     });
 
-    expect(mockCleanupTransforms).toBeCalledWith(installedEs, esClient);
+    expect(mockCleanupTransforms).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {

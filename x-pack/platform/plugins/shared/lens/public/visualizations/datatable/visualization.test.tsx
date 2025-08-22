@@ -986,7 +986,7 @@ describe('Datatable Visualization', () => {
 
           getDatatableExpressionArgs(colorExpressionTableState());
 
-          expect(mockServices.paletteService.get).toBeCalledWith(paletteName);
+          expect(mockServices.paletteService.get).toHaveBeenCalledWith(paletteName);
         }
       );
 

@@ -58,7 +58,7 @@ describe('useUnsavedChangesPrompt', () => {
     expect(history.location.pathname).toBe('/test');
     expect(history.location.search).toBe('');
     expect(coreStart.overlays.openConfirm).not.toHaveBeenCalled();
-    expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
+    expect(addSpy).not.toHaveBeenCalledWith('beforeunload', expect.anything());
   });
 
   it('should block if edited', async () => {
@@ -79,9 +79,9 @@ describe('useUnsavedChangesPrompt', () => {
     // needed because we have an async useEffect
     await waitFor(() => new Promise((resolve) => resolve(null)));
 
-    expect(navigateToUrl).toBeCalledWith('/mock/test', expect.anything());
+    expect(navigateToUrl).toHaveBeenCalledWith('/mock/test', expect.anything());
     expect(coreStart.overlays.openConfirm).toHaveBeenCalled();
-    expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
+    expect(addSpy).toHaveBeenCalledWith('beforeunload', expect.anything());
   });
 
   it('beforeunload event should be cleaned up', async () => {
@@ -97,8 +97,8 @@ describe('useUnsavedChangesPrompt', () => {
       })
     );
     cleanup();
-    expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
-    expect(removeSpy).toBeCalledWith('beforeunload', expect.anything());
+    expect(addSpy).toHaveBeenCalledWith('beforeunload', expect.anything());
+    expect(removeSpy).toHaveBeenCalledWith('beforeunload', expect.anything());
   });
 
   it('should not block SPA navigation if blockSpaNavigation is false', async () => {
@@ -109,7 +109,7 @@ describe('useUnsavedChangesPrompt', () => {
       })
     );
 
-    expect(addSpy).toBeCalledWith('beforeunload', expect.anything());
+    expect(addSpy).toHaveBeenCalledWith('beforeunload', expect.anything());
 
     act(() => history.push('/test'));
 
@@ -137,6 +137,6 @@ describe('useUnsavedChangesPrompt', () => {
     expect(history.location.pathname).toBe('/test');
     expect(history.location.search).toBe('');
     expect(coreStart.overlays.openConfirm).not.toHaveBeenCalled();
-    expect(addSpy).not.toBeCalledWith('beforeunload', expect.anything());
+    expect(addSpy).not.toHaveBeenCalledWith('beforeunload', expect.anything());
   });
 });

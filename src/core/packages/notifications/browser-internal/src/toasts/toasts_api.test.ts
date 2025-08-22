@@ -235,7 +235,7 @@ describe('#addDanger()', () => {
   it('adds a danger toast', async () => {
     const toasts = new ToastsApi(toastDeps());
     expect(toasts.addDanger({})).toHaveProperty('color', 'danger');
-    expect(apm.captureError).toBeCalledWith('No title or text is provided.', {
+    expect(apm.captureError).toHaveBeenCalledWith('No title or text is provided.', {
       labels: { error_type: 'ToastDanger' },
     });
   });
@@ -245,7 +245,7 @@ describe('#addDanger()', () => {
     const toast = toasts.addDanger({});
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
-    expect(apm.captureError).toBeCalledWith('No title or text is provided.', {
+    expect(apm.captureError).toHaveBeenCalledWith('No title or text is provided.', {
       labels: { error_type: 'ToastDanger' },
     });
   });
@@ -258,7 +258,7 @@ describe('#addDanger()', () => {
       toastLifeTimeMs: undefined,
     });
     expect(toast.toastLifeTimeMs).toEqual(10000);
-    expect(apm.captureError).toBeCalledWith('Title: toast title, Text: toast text', {
+    expect(apm.captureError).toHaveBeenCalledWith('Title: toast title, Text: toast text', {
       labels: { error_type: 'ToastDanger' },
     });
   });
@@ -271,7 +271,7 @@ describe('#addDanger()', () => {
       toastLifeTimeMs: undefined,
     });
     expect(toast.toastLifeTimeMs).toEqual(10000);
-    expect(apm.captureError).toBeCalledWith(
+    expect(apm.captureError).toHaveBeenCalledWith(
       'Title: Toast Title MountPoint, Text: Toast Text MountPoint',
       {
         labels: { error_type: 'ToastDanger' },
@@ -282,7 +282,7 @@ describe('#addDanger()', () => {
   it('passes correct title to the apm.captureError', async () => {
     const toasts = new ToastsApi(toastDeps());
     toasts.addDanger('Danger toast title');
-    expect(apm.captureError).toBeCalledWith('Danger toast title', {
+    expect(apm.captureError).toHaveBeenCalledWith('Danger toast title', {
       labels: { error_type: 'ToastDanger' },
     });
   });
@@ -300,7 +300,7 @@ describe('#addError', () => {
     expect(toast).toHaveProperty('color', 'danger');
     expect(toast).toHaveProperty('title', 'Something went wrong');
     expect(toast).toHaveProperty('toastMessage', 'Please try again later.');
-    expect(apm.captureError).toBeCalledWith(error, {
+    expect(apm.captureError).toHaveBeenCalledWith(error, {
       labels: {
         error_type: 'ToastError',
         title: 'Something went wrong',
@@ -316,7 +316,7 @@ describe('#addError', () => {
     const toast = toasts.addError(error, { title: 'Something went wrong' });
     const currentToasts = await getCurrentToasts(toasts);
     expect(currentToasts[0]).toBe(toast);
-    expect(apm.captureError).toBeCalledWith(error, {
+    expect(apm.captureError).toHaveBeenCalledWith(error, {
       labels: { error_type: 'ToastError', title: 'Something went wrong' },
     });
   });

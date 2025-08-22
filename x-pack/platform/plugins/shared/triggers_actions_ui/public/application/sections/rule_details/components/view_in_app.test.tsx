@@ -35,7 +35,7 @@ describe('view in app', () => {
         expect(component!.find('button').prop('disabled')).toBe(true);
         expect(component!.text()).toBe('View in app');
 
-        expect(alerting!.getNavigation).toBeCalledWith(rule.id);
+        expect(alerting!.getNavigation).toHaveBeenCalledWith(rule.id);
       });
     });
 
@@ -58,7 +58,7 @@ describe('view in app', () => {
           currentTarget: {},
         } as React.MouseEvent<{}, MouseEvent>);
 
-        expect(navigateToApp).toBeCalledWith('siem', '/rule');
+        expect(navigateToApp).toHaveBeenCalledWith('siem', '/rule');
       });
     });
   });

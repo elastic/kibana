@@ -48,12 +48,12 @@ describe('upgradePackageInstallVersion', () => {
     });
 
     expect(mockedReinstallPackageForInstallation)..toHaveBeenCalledTimes(2);
-    expect(mockedReinstallPackageForInstallation).toBeCalledWith(
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledWith(
       expect.objectContaining({
         installation: expect.objectContaining({ name: 'test1' }),
       })
     );
-    expect(mockedReinstallPackageForInstallation).toBeCalledWith(
+    expect(mockedReinstallPackageForInstallation).toHaveBeenCalledWith(
       expect.objectContaining({
         installation: expect.objectContaining({ name: 'test2' }),
       })

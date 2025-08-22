@@ -102,7 +102,7 @@ describe('workpad route context', () => {
 
       const result = await canvasContext.workpad.create(injectedWorkpad as CanvasWorkpad);
 
-      expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
+      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith(
         CANVAS_TYPE,
         expectedBody,
         {
@@ -136,7 +136,7 @@ describe('workpad route context', () => {
       const result = await canvasContext.workpad.get(id);
       const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
 
-      expect(mockContext.core.savedObjects.client.get).toBeCalledWith(CANVAS_TYPE, id);
+      expect(mockContext.core.savedObjects.client.get).toHaveBeenCalledWith(CANVAS_TYPE, id);
 
       expect(result.attributes).toEqual(expectedAttributes);
     });
@@ -161,7 +161,7 @@ describe('workpad route context', () => {
       const result = await canvasContext.workpad.resolve(id);
       const { id: ingnoredId, ...expectedAttributes } = injectedWorkpad;
 
-      expect(mockContext.core.savedObjects.client.resolve).toBeCalledWith(CANVAS_TYPE, id);
+      expect(mockContext.core.savedObjects.client.resolve).toHaveBeenCalledWith(CANVAS_TYPE, id);
 
       expect(result.saved_object.attributes).toEqual(expectedAttributes);
     });
@@ -225,7 +225,7 @@ describe('workpad route context', () => {
 
       await canvasContext.workpad.update(id, updatedWorkpad as CanvasWorkpad);
 
-      expect(mockContext.core.savedObjects.client.create).toBeCalledWith(
+      expect(mockContext.core.savedObjects.client.create).toHaveBeenCalledWith(
         CANVAS_TYPE,
         expectedWorkpad,
         {

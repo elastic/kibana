@@ -30,7 +30,7 @@ describe('useGetTags', () => {
       ),
     });
     await waitFor(() =>
-      expect(spyOnGetTags).toBeCalledWith({
+      expect(spyOnGetTags).toHaveBeenCalledWith({
         owner: [SECURITY_SOLUTION_OWNER],
         signal: abortCtrl.signal,
       })

@@ -147,7 +147,7 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any,
     });
 
-    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toBeCalledWith(
+    expect(jest.mocked(optimisticallyAddEsAssetReferences)).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       expect.anything(),
@@ -235,7 +235,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         es_index_patterns: { test: 'logs-udp.test-*' },
@@ -293,7 +293,7 @@ describe('removeAssetsForInputPackagePolicy', () => {
       esClient: {} as ElasticsearchClient,
       logger: mockedLogger,
     });
-    expect(cleanupAssetsMock).toBeCalledWith(
+    expect(cleanupAssetsMock).toHaveBeenCalledWith(
       'test',
       {
         installed_es: [

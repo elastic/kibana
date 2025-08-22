@@ -65,7 +65,7 @@ describe('useFindMaintenanceWindows', () => {
     });
 
     await waitFor(() =>
-      expect(mockAddDanger).toBeCalledWith('Unable to load maintenance windows.')
+      expect(mockAddDanger).toHaveBeenCalledWith('Unable to load maintenance windows.')
     );
   });
 

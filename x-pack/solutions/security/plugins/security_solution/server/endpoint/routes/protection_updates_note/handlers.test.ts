@@ -125,7 +125,7 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockSavedObjectClient.create).toBeCalledWith(
+      expect(mockSavedObjectClient.create).toHaveBeenCalledWith(
         'policy-settings-protection-updates-note',
         { note: 'note' },
         {
@@ -159,7 +159,7 @@ describe('test protection updates note handler', () => {
       );
 
       expect(mockResponse.ok).toHaveBeenCalled();
-      expect(mockSavedObjectClient.update).toBeCalledWith(...mockedSOSuccessfulUpdateResponse);
+      expect(mockSavedObjectClient.update).toHaveBeenCalledWith(...mockedSOSuccessfulUpdateResponse);
     });
 
     it('should return the note if one exists', async () => {
@@ -229,7 +229,7 @@ describe('test protection updates note handler', () => {
           mockRequest,
           mockResponse
         );
-        expect(mockEnsureInCurrentSpace).toBeCalledWith({
+        expect(mockEnsureInCurrentSpace).toHaveBeenCalledWith({
           integrationPolicyIds: ['integration-policy-id'],
         });
       });

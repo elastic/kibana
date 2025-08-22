@@ -313,7 +313,7 @@ describe('EditAssigneesSelectable', () => {
     });
 
     await user.click(screen.getByTestId(searchedUserDataTestSubj));
-    expect(props.onChangeAssignees).toBeCalledWith({
+    expect(props.onChangeAssignees).toHaveBeenCalledWith({
       selectedItems: [
         'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
         'u_IbBVXpDtrjOByJ-syBdr425fLGqwpzY_xdQqCFAFXLI_0',
@@ -341,7 +341,7 @@ describe('EditAssigneesSelectable', () => {
       )
     ).toBeInTheDocument();
 
-    expect(props.onChangeAssignees).toBeCalledWith({
+    expect(props.onChangeAssignees).toHaveBeenCalledWith({
       selectedItems: [],
       unSelectedItems: ['u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0'],
     });
@@ -421,7 +421,7 @@ describe('EditAssigneesSelectable', () => {
 
     await user.click(screen.getByText('Unknown'));
 
-    expect(props.onChangeAssignees).toBeCalledWith({
+    expect(props.onChangeAssignees).toHaveBeenCalledWith({
       selectedItems: ['123'],
       unSelectedItems: [],
     });
@@ -439,7 +439,7 @@ describe('EditAssigneesSelectable', () => {
 
     await user.click(screen.getByText('Unknown'));
 
-    expect(props.onChangeAssignees).toBeCalledWith({
+    expect(props.onChangeAssignees).toHaveBeenCalledWith({
       selectedItems: [],
       unSelectedItems: ['123'],
     });
@@ -456,7 +456,7 @@ describe('EditAssigneesSelectable', () => {
     await user.click(screen.getByRole('button', { name: 'Remove all assignees' }));
 
     expect(propsMultipleCases.onChangeAssignees)..toHaveBeenCalledTimes(1);
-    expect(propsMultipleCases.onChangeAssignees).toBeCalledWith({
+    expect(propsMultipleCases.onChangeAssignees).toHaveBeenCalledWith({
       selectedItems: [],
       unSelectedItems: [
         'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',

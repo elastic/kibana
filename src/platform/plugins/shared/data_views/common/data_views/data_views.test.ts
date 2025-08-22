@@ -198,16 +198,16 @@ describe('IndexPatterns', () => {
 
     await indexPatterns.get(id);
     expect(apiClient.getFieldsForWildcard)..toHaveBeenCalledTimes(1);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith(args);
     await indexPatterns.get(id, undefined, true);
     expect(apiClient.getFieldsForWildcard)..toHaveBeenCalledTimes(2);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith(args);
   });
 
   test('getFieldsForWildcard called with allowNoIndex set to true as default', async () => {
     const id = '1';
     await indexPatterns.get(id);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith({
       allowHidden: undefined,
       allowNoIndex: true,
       indexFilter: undefined,
@@ -221,7 +221,7 @@ describe('IndexPatterns', () => {
 
   test('getFieldsForIndexPattern called with allowHidden set to undefined as default', async () => {
     await indexPatterns.getFieldsForIndexPattern({ id: '1' } as DataViewSpec);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith({
       allowHidden: undefined,
       allowNoIndex: true,
       metaFields: false,
@@ -233,7 +233,7 @@ describe('IndexPatterns', () => {
 
   test('getFieldsForIndexPattern called with allowHidden set to true', async () => {
     await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: true } as DataViewSpec);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith({
       allowHidden: true,
       allowNoIndex: true,
       metaFields: false,
@@ -245,7 +245,7 @@ describe('IndexPatterns', () => {
 
   test('getFieldsForIndexPattern called with allowHidden set to false', async () => {
     await indexPatterns.getFieldsForIndexPattern({ id: '1', allowHidden: false } as DataViewSpec);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith({
       allowHidden: false,
       allowNoIndex: true,
       metaFields: false,
@@ -260,7 +260,7 @@ describe('IndexPatterns', () => {
       id: '1',
       getAllowHidden: () => true,
     } as DataView);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith({
       allowHidden: true,
       allowNoIndex: true,
       metaFields: false,
@@ -275,7 +275,7 @@ describe('IndexPatterns', () => {
       id: '1',
       getAllowHidden: () => false,
     } as DataView);
-    expect(apiClient.getFieldsForWildcard).toBeCalledWith({
+    expect(apiClient.getFieldsForWildcard).toHaveBeenCalledWith({
       allowHidden: false,
       allowNoIndex: true,
       metaFields: false,
@@ -795,8 +795,8 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
 
-      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, displayErrors, refreshFields);
-      expect(indexPatterns.refreshFields).toBeCalledWith(dataView, displayErrors);
+      expect(indexPatterns.get).toHaveBeenCalledWith(indexPatternObj.id, displayErrors, refreshFields);
+      expect(indexPatterns.refreshFields).toHaveBeenCalledWith(dataView, displayErrors);
     });
 
     test('gets default data view and passes down undefined arguments (refreshFields and displayErrors)', async () => {
@@ -812,7 +812,7 @@ describe('IndexPatterns', () => {
       expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
       expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
 
-      expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, true, undefined);
+      expect(indexPatterns.get).toHaveBeenCalledWith(indexPatternObj.id, true, undefined);
       expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
     });
 

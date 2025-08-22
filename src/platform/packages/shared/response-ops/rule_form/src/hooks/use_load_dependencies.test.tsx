@@ -301,7 +301,7 @@ describe('useLoadDependencies', () => {
       return expect(result.current.isInitialLoading).toEqual(false);
     });
 
-    expect(useGetRuleTypesPermissions).toBeCalledWith({
+    expect(useGetRuleTypesPermissions).toHaveBeenCalledWith({
       http: httpMock,
       toasts: toastsMock,
       filteredRuleTypes: ['test-rule-type'],
@@ -332,7 +332,7 @@ describe('useLoadDependencies', () => {
       return expect(result.current.isInitialLoading).toEqual(false);
     });
 
-    expect(useResolveRule).toBeCalledWith({
+    expect(useResolveRule).toHaveBeenCalledWith({
       http: httpMock,
       id: 'test-rule-id',
       cacheTime: 0,

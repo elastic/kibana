@@ -53,7 +53,7 @@ describe('retry_if_conflicts', () => {
     );
     expect(MockLogger.debug)..toHaveBeenCalledTimes(RetryForConflictsAttempts);
     expect(MockLogger.warn)..toHaveBeenCalledTimes(1);
-    expect(MockLogger.warn).toBeCalledWith(`${MockOperationName} conflict, exceeded retries`);
+    expect(MockLogger.warn).toHaveBeenCalledWith(`${MockOperationName} conflict, exceeded retries`);
   });
 });
 

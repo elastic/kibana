@@ -270,14 +270,14 @@ describe('Drag and drop reordering', () => {
       await reorderDownByKeyboard();
       await reorderDownByKeyboard();
       await dropByKeyboard();
-      expect(onDrop).toBeCalledWith(expectLabel('0'), 'reorder');
+      expect(onDrop).toHaveBeenCalledWith(expectLabel('0'), 'reorder');
 
       // 2 --> 0
       await startDraggingByKeyboard(2);
       await reorderUpByKeyboard();
       await reorderUpByKeyboard();
       await dropByKeyboard();
-      expect(onDrop).toBeCalledWith(expectLabel('2'), 'reorder');
+      expect(onDrop).toHaveBeenCalledWith(expectLabel('2'), 'reorder');
     });
     test('reordered elements get extra styling showing the new position from element 0 to element 2', async () => {
       const { startDraggingByKeyboard, reorderDownByKeyboard } = renderDragAndDropGroup();

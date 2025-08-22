@@ -86,7 +86,7 @@ describe('useLoadRuleAggregations', () => {
     rerender();
 
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           searchText: '',
           actionTypesFilter: [],
@@ -126,7 +126,7 @@ describe('useLoadRuleAggregations', () => {
     rerender();
 
     await waitFor(() => {
-      expect(loadRuleAggregationsWithKueryFilter).toBeCalledWith(
+      expect(loadRuleAggregationsWithKueryFilter).toHaveBeenCalledWith(
         expect.objectContaining({
           searchText: 'test',
           actionTypesFilter: ['action1', 'action2'],

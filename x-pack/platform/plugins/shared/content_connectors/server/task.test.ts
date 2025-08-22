@@ -164,8 +164,8 @@ describe('infraSyncTaskRunner', () => {
 
     expect(serviceMock.deployConnector).not.toHaveBeenCalled();
     expect(serviceMock.removeDeployment).not.toHaveBeenCalled();
-    expect(logger.warn).toBeCalledWith(expect.stringMatching(/.*not compatible.*/));
-    expect(logger.warn).toBeCalledWith(expect.stringMatching(/.*license.*/));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/.*not compatible.*/));
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringMatching(/.*license.*/));
   });
 
   test('Does nothing if all connectors and package policies are in-sync', async () => {
@@ -203,8 +203,8 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).toBeCalledWith(mysqlConnector);
-    expect(serviceMock.deployConnector).toBeCalledWith(githubConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(mysqlConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(githubConnector);
   });
 
   test('Deploys connectors even if another connectors failed to be deployed', async () => {
@@ -229,9 +229,9 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.deployConnector).toBeCalledWith(mysqlConnector);
-    expect(serviceMock.deployConnector).toBeCalledWith(githubConnector);
-    expect(serviceMock.deployConnector).toBeCalledWith(sharepointConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(mysqlConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(githubConnector);
+    expect(serviceMock.deployConnector).toHaveBeenCalledWith(sharepointConnector);
   });
 
   test('Removes a package policy if connectors has been soft-deleted', async () => {
@@ -249,7 +249,7 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).toBeCalledWith(sharepointPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(sharepointPackagePolicy.package_policy_id);
   });
 
   test('Does not remove a package policy if no connectors match the policy', async () => {
@@ -293,8 +293,8 @@ describe('infraSyncTaskRunner', () => {
       agentlessConnectorsInfraServiceFactory
     )({ taskInstance: taskInstanceStub }).run();
 
-    expect(serviceMock.removeDeployment).toBeCalledWith(sharepointPackagePolicy.package_policy_id);
-    expect(serviceMock.removeDeployment).toBeCalledWith(mysqlPackagePolicy.package_policy_id);
-    expect(serviceMock.removeDeployment).toBeCalledWith(githubPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(sharepointPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(mysqlPackagePolicy.package_policy_id);
+    expect(serviceMock.removeDeployment).toHaveBeenCalledWith(githubPackagePolicy.package_policy_id);
   });
 });

@@ -139,7 +139,7 @@ describe('retryIfBulkEditConflicts', () => {
         },
       },
     ]);
-    expect(mockLogger.warn).toBeCalledWith(`${mockOperationName} conflicts, exceeded retries`);
+    expect(mockLogger.warn).toHaveBeenCalledWith(`${mockOperationName} conflicts, exceeded retries`);
   });
 
   for (let i = 1; i <= RETRY_IF_CONFLICTS_ATTEMPTS + 1; i++) {

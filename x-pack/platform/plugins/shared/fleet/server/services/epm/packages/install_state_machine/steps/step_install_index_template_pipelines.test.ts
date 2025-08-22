@@ -731,7 +731,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       initialState: 'install_index_template_pipelines' as any,
     });
 
-    expect(mockDeletePrerequisiteAssets).toBeCalledWith(
+    expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
         indexAssets: [
           {
@@ -763,7 +763,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       },
       esClient
     );
-    expect(mockCleanupComponentTemplate).toBeCalledWith(installedEs, esClient);
+    expect(mockCleanupComponentTemplate).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {

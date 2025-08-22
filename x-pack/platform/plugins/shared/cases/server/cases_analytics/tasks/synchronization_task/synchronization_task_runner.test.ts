@@ -100,15 +100,15 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.tasks.get).toBeCalledWith({ task_id: esReindexTaskId });
-    expect(esClient.cluster.health).toBeCalledWith({
+    expect(esClient.tasks.get).toHaveBeenCalledWith({ task_id: esReindexTaskId });
+    expect(esClient.cluster.health).toHaveBeenCalledWith({
       index: destIndex,
       wait_for_status: 'green',
       timeout: '30s',
     });
-    expect(esClient.indices.getMapping).toBeCalledWith({ index: destIndex });
-    expect(esClient.getScript).toBeCalledWith({ id: painlessScriptId });
-    expect(esClient.reindex).toBeCalledWith({
+    expect(esClient.indices.getMapping).toHaveBeenCalledWith({ index: destIndex });
+    expect(esClient.getScript).toHaveBeenCalledWith({ id: painlessScriptId });
+    expect(esClient.reindex).toHaveBeenCalledWith({
       source: {
         index: sourceIndex,
         /*
@@ -189,7 +189,7 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.reindex).toBeCalledWith({
+    expect(esClient.reindex).toHaveBeenCalledWith({
       source: {
         index: sourceIndex,
         /*
@@ -265,7 +265,7 @@ describe('SynchronizationTaskRunner', () => {
 
     const result = await taskRunner.run();
 
-    expect(esClient.reindex).toBeCalledWith({
+    expect(esClient.reindex).toHaveBeenCalledWith({
       source: {
         index: sourceIndex,
         /*
@@ -367,7 +367,7 @@ describe('SynchronizationTaskRunner', () => {
     expect(result).toBe(undefined);
 
     expect(logger.error).not.toHaveBeenCalled();
-    expect(logger.debug).toBeCalledWith(
+    expect(logger.debug).toHaveBeenCalledWith(
       '[.internal.cases] Destination index does not exist, skipping synchronization task.',
       { tags: ['cai-synchronization', '.internal.cases'] }
     );
@@ -392,7 +392,7 @@ describe('SynchronizationTaskRunner', () => {
         expect(isRetryableError(e)).toBe(true);
       }
 
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         '[.internal.cases] Synchronization reindex failed. Error: My retryable error',
         { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );
@@ -416,7 +416,7 @@ describe('SynchronizationTaskRunner', () => {
         expect(isRetryableError(e)).toBe(null);
       }
 
-      expect(logger.error).toBeCalledWith(
+      expect(logger.error).toHaveBeenCalledWith(
         '[.internal.cases] Synchronization reindex failed. Error: My unrecoverable error',
         { tags: ['cai-synchronization', 'cai-synchronization-error', '.internal.cases'] }
       );

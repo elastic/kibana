@@ -146,9 +146,9 @@ describe('logPluginsStatusChanges', () => {
     // give the 'bufferTime' operator enough time to emit and log
     await delay(1_000);
 
-    expect(l.get).toBeCalledWith('A');
-    expect(l.get).toBeCalledWith('B');
-    expect(l.get).not.toBeCalledWith('C');
+    expect(l.get).toHaveBeenCalledWith('A');
+    expect(l.get).toHaveBeenCalledWith('B');
+    expect(l.get).not.toHaveBeenCalledWith('C');
     expect(l.warn).not.toHaveBeenCalled();
     expect(l.info).toHaveBeenCalledTimes(4);
     expect(l.error).toHaveBeenCalledTimes(3);
@@ -193,8 +193,8 @@ describe('logPluginsStatusChanges', () => {
     // emit a last message (some time after)
     plugins$.next({ A: { ...reportedAvailable, summary: `attempt #${++attempt}` } });
 
-    expect(l.get).toBeCalledWith('A');
-    expect(l.get).not.toBeCalledWith('B');
+    expect(l.get).toHaveBeenCalledWith('A');
+    expect(l.get).not.toHaveBeenCalledWith('B');
     expect(l.info).toHaveBeenCalledTimes(5);
     expect(l.error).toHaveBeenCalledTimes(3);
     expect(l.warn).toHaveBeenCalledTimes(1);

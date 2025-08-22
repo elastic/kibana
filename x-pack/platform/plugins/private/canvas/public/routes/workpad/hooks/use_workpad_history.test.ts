@@ -46,7 +46,7 @@ describe('useRestoreHistory', () => {
 
       renderHook(() => useWorkpadHistory());
 
-      expect(history.replace).toBeCalledWith(history.location.pathname, encode(state.persistent));
+      expect(history.replace).toHaveBeenCalledWith(history.location.pathname, encode(state.persistent));
       expect(history.push).not.toHaveBeenCalled();
     });
 
@@ -127,7 +127,7 @@ describe('useRestoreHistory', () => {
       history.location.pathname = 'newpath';
       rerender();
 
-      expect(history.replace).toBeCalledWith('newpath', encode(newState.persistent));
+      expect(history.replace).toHaveBeenCalledWith('newpath', encode(newState.persistent));
     });
 
     test('does a push if location state does not match store state', () => {
@@ -156,7 +156,7 @@ describe('useRestoreHistory', () => {
       mockGetState.mockReturnValue(newState);
       rerender();
 
-      expect(history.push).toBeCalledWith(history.location.pathname, encode(newState.persistent));
+      expect(history.push).toHaveBeenCalledWith(history.location.pathname, encode(newState.persistent));
     });
 
     test('does nothing if new state matches location state', () => {
@@ -250,7 +250,7 @@ describe('useRestoreHistory', () => {
       rerender();
 
       expect(history.push).not.toHaveBeenCalled();
-      expect(history.replace).toBeCalledWith(
+      expect(history.replace).toHaveBeenCalledWith(
         `somepath?${history.location.search}`,
         encode(state.persistent)
       );

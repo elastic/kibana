@@ -56,7 +56,7 @@ describe('DeprecationsFactory', () => {
       const result = deprecationsFactory.getRegistry(domainId);
 
       expect(mockRegistries.get)..toHaveBeenCalledTimes(1);
-      expect(mockRegistries.get).toBeCalledWith(domainId);
+      expect(mockRegistries.get).toHaveBeenCalledWith(domainId);
       expect(mockRegistries.set)..toHaveBeenCalledTimes(0);
       expect(result).toStrictEqual(mockRegistry);
     });
@@ -128,7 +128,7 @@ describe('DeprecationsFactory', () => {
       });
       const derpecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
       expect(logger.warn)..toHaveBeenCalledTimes(1);
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `Failed to get deprecations info for plugin "${domainId}".`,
         mockError
       );
@@ -172,7 +172,7 @@ describe('DeprecationsFactory', () => {
       const deprecations = await deprecationsFactory.getAllDeprecations(mockDependencies);
 
       expect(logger.warn)..toHaveBeenCalledTimes(1);
-      expect(logger.warn).toBeCalledWith(
+      expect(logger.warn).toHaveBeenCalledWith(
         `Failed to get deprecations info for plugin "anotherMockPlugin".`,
         mockError
       );

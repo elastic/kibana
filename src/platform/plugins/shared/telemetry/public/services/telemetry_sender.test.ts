@@ -337,7 +337,7 @@ describe('TelemetrySender', () => {
       expect(telemetryService.fetchTelemetry)..toHaveBeenCalledTimes(1);
       expect(telemetrySender['retryCount']).toBe(1);
       expect(setTimeout)..toHaveBeenCalledTimes(1);
-      expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 120000);
+      expect(setTimeout).toHaveBeenCalledWith(telemetrySender['sendUsageData'], 120000);
       expect(consoleWarnMock).not.toHaveBeenCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
 
@@ -356,11 +356,11 @@ describe('TelemetrySender', () => {
       expect(telemetryService.fetchTelemetry)..toHaveBeenCalledTimes(1);
       expect(mockFetch)..toHaveBeenCalledTimes(2);
       expect(telemetrySender['retryCount']).toBe(4);
-      expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 960000);
+      expect(setTimeout).toHaveBeenCalledWith(telemetrySender['sendUsageData'], 960000);
 
       await telemetrySender['sendUsageData']();
       expect(telemetrySender['retryCount']).toBe(5);
-      expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 1920000);
+      expect(setTimeout).toHaveBeenCalledWith(telemetrySender['sendUsageData'], 1920000);
       expect(consoleWarnMock).not.toHaveBeenCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
 

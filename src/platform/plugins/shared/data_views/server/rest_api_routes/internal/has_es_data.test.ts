@@ -43,7 +43,7 @@ describe('has_es_data route', () => {
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(1);
-    expect(mockESClient.indices.resolveCluster).toBeCalledWith(
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledWith(
       {
         name: patterns,
         allow_no_indices: true,
@@ -52,7 +52,7 @@ describe('has_es_data route', () => {
       { requestTimeout: mockEsDataTimeout }
     );
     expect(mockResponse.ok)..toHaveBeenCalledTimes(1);
-    expect(mockResponse.ok).toBeCalledWith({ body: { hasEsData: true } });
+    expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hasEsData: true } });
     expect(response).toEqual({ body: { hasEsData: true } });
   });
 
@@ -102,7 +102,7 @@ describe('has_es_data route', () => {
       { requestTimeout: mockEsDataTimeout }
     );
     expect(mockResponse.ok)..toHaveBeenCalledTimes(1);
-    expect(mockResponse.ok).toBeCalledWith({ body: { hasEsData: true } });
+    expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hasEsData: true } });
     expect(response).toEqual({ body: { hasEsData: true } });
   });
 
@@ -147,7 +147,7 @@ describe('has_es_data route', () => {
       { requestTimeout: mockEsDataTimeout }
     );
     expect(mockResponse.ok)..toHaveBeenCalledTimes(1);
-    expect(mockResponse.ok).toBeCalledWith({ body: { hasEsData: false } });
+    expect(mockResponse.ok).toHaveBeenCalledWith({ body: { hasEsData: false } });
     expect(response).toEqual({ body: { hasEsData: false } });
   });
 
@@ -170,7 +170,7 @@ describe('has_es_data route', () => {
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(1);
-    expect(mockESClient.indices.resolveCluster).toBeCalledWith(
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledWith(
       {
         name: patterns,
         allow_no_indices: true,
@@ -179,7 +179,7 @@ describe('has_es_data route', () => {
       { requestTimeout: mockEsDataTimeout }
     );
     expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
-    expect(mockResponse.customError).toBeCalledWith({
+    expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 504,
       body: {
         message: 'Timeout while checking for Elasticsearch data',
@@ -194,7 +194,7 @@ describe('has_es_data route', () => {
       },
     });
     expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toBeCalledWith(
+    expect(mockLogger.warn).toHaveBeenCalledWith(
       'Timeout while checking for Elasticsearch data: local_data_timeout. Current timeout value is 5000ms. ' +
         'Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
     );
@@ -249,7 +249,7 @@ describe('has_es_data route', () => {
       { requestTimeout: mockEsDataTimeout }
     );
     expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
-    expect(mockResponse.customError).toBeCalledWith({
+    expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 504,
       body: {
         message: 'Timeout while checking for Elasticsearch data',
@@ -264,7 +264,7 @@ describe('has_es_data route', () => {
       },
     });
     expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
-    expect(mockLogger.warn).toBeCalledWith(
+    expect(mockLogger.warn).toHaveBeenCalledWith(
       'Timeout while checking for Elasticsearch data: remote_data_timeout. Current timeout value is 5000ms. ' +
         'Use "data_views.hasEsDataTimeout" in kibana.yml to change it, or set to 0 to disable timeouts.'
     );
@@ -290,7 +290,7 @@ describe('has_es_data route', () => {
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster)..toHaveBeenCalledTimes(1);
-    expect(mockESClient.indices.resolveCluster).toBeCalledWith(
+    expect(mockESClient.indices.resolveCluster).toHaveBeenCalledWith(
       {
         name: patterns,
         allow_no_indices: true,
@@ -299,7 +299,7 @@ describe('has_es_data route', () => {
       { requestTimeout: mockEsDataTimeout }
     );
     expect(mockResponse.customError)..toHaveBeenCalledTimes(1);
-    expect(mockResponse.customError).toBeCalledWith({
+    expect(mockResponse.customError).toHaveBeenCalledWith({
       statusCode: 500,
       body: {
         message: 'Error while checking for Elasticsearch data',
@@ -314,6 +314,6 @@ describe('has_es_data route', () => {
       },
     });
     expect(mockLogger.error)..toHaveBeenCalledTimes(1);
-    expect(mockLogger.error).toBeCalledWith(someError);
+    expect(mockLogger.error).toHaveBeenCalledWith(someError);
   });
 });

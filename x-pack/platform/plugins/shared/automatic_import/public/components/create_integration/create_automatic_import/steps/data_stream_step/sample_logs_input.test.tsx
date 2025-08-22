@@ -158,7 +158,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           logSamples: logsSampleRaw.split(','),
           samplesFormat: { name: 'json', json_path: [] },
         });
@@ -171,7 +171,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           logSamples: splitNDJSON,
           samplesFormat: { name: 'json', json_path: ['events'] },
         });
@@ -193,7 +193,7 @@ describe('SampleLogsInput', () => {
         });
 
         it('should set the integrationSetting correctly', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
             logSamples: undefined,
             samplesFormat: undefined,
           });
@@ -211,7 +211,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: false },
         });
@@ -224,7 +224,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           logSamples: [splitNDJSON[0]],
           samplesFormat: { name: 'ndjson', multiline: false },
         });
@@ -237,7 +237,7 @@ describe('SampleLogsInput', () => {
       });
 
       it('should set the integrationSetting correctly', () => {
-        expect(mockActions.setIntegrationSettings).toBeCalledWith({
+        expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
           logSamples: splitNDJSON,
           samplesFormat: { name: 'ndjson', multiline: true },
         });
@@ -279,7 +279,7 @@ describe('SampleLogsInput', () => {
         });
 
         it('should set the integrationSetting correctly', () => {
-          expect(mockActions.setIntegrationSettings).toBeCalledWith({
+          expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
             logSamples: undefined,
             samplesFormat: undefined,
           });
@@ -322,7 +322,7 @@ describe('SampleLogsInput', () => {
     });
 
     it('should set the integrationSetting correctly', () => {
-      expect(mockActions.setIntegrationSettings).toBeCalledWith({
+      expect(mockActions.setIntegrationSettings).toHaveBeenCalledWith({
         logSamples: plainTextFile.split('\n'),
         samplesFormat: undefined,
       });

@@ -100,7 +100,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
+    expect(trackMetric).toHaveBeenCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
   });
 
   it('only tracks loaded once', () => {
@@ -145,7 +145,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, [
+    expect(trackMetric).toHaveBeenCalledWith(METRIC_TYPE.LOADED, [
       WorkpadLoadedMetric,
       WorkpadLoadedWithErrorsMetric,
     ]);
@@ -180,7 +180,7 @@ describe('Elements Loaded Telemetry', () => {
     });
 
     rerender(<Component workpad={mockWorkpad} />);
-    expect(trackMetric).toBeCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
+    expect(trackMetric).toHaveBeenCalledWith(METRIC_TYPE.LOADED, WorkpadLoadedMetric);
   });
 
   it('does not track if workpad has no elements', () => {
