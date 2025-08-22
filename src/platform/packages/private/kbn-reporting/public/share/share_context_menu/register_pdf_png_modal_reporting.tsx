@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { Capabilities } from '@kbn/core/public';
 import { ShareContext, ShareMenuItemV2, ShareMenuProvider } from '@kbn/share-plugin/public';
 import React from 'react';
 import { firstValueFrom } from 'rxjs';
@@ -39,6 +40,13 @@ const getJobParams = (opts: JobParamsProviderOptions, type: 'pngV2' | 'printable
   return { ...baseParams, locatorParams };
 };
 
+const hasCapabilityByKey = (capabilities: Capabilities, capabilityKey: keyof Capabilities) => {
+  return (
+    capabilities[capabilityKey]?.generateScreenshot === true ||
+    capabilities.reportingLegacy?.generateReport === true
+  );
+};
+
 /**
  * This is used by Dashboard and Visualize apps (sharing modal)
  */
@@ -63,10 +71,14 @@ export const reportingExportModalProvider = ({
     const licenseHasScreenshotReporting = showLinks;
     const licenseDisabled = !enableLinks;
 
-    const capabilityHasDashboardScreenshotReporting =
-      application.capabilities.dashboard_v2?.generateScreenshot === true;
-    const capabilityHasVisualizeScreenshotReporting =
-      application.capabilities.visualize_v2?.generateScreenshot === true;
+    const capabilityHasDashboardReporting = hasCapabilityByKey(
+      application.capabilities,
+      'dashboard_v2'
+    );
+    const capabilityHasVisualizeReporting = hasCapabilityByKey(
+      application.capabilities,
+      'visualize_v2'
+    );
 
     if (!licenseHasScreenshotReporting) {
       return [];
@@ -78,15 +90,11 @@ export const reportingExportModalProvider = ({
       return [];
     }
 
-    if (objectType === 'dashboard' && !capabilityHasDashboardScreenshotReporting) {
+    if (objectType === 'dashboard' && !capabilityHasDashboardReporting) {
       return [];
     }
 
-    if (
-      isSupportedType &&
-      !capabilityHasVisualizeScreenshotReporting &&
-      !capabilityHasDashboardScreenshotReporting
-    ) {
+    if (isSupportedType && !capabilityHasVisualizeReporting && !capabilityHasDashboardReporting) {
       return [];
     }
 

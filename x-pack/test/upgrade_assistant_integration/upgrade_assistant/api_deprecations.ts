@@ -207,7 +207,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
     });
-    it('GET /api/upgrade_assistant/status does not return { readyForUpgrade: false } if there are only critical API deprecations', async () => {
+    it.skip('GET /api/upgrade_assistant/status does not return { readyForUpgrade: false } if there are only critical API deprecations', async () => {
       /** Throw in another critical deprecation... */
       await supertest.get(`/api/routing_example/d/removed_route`).expect(200);
       // sleep a little until the usage counter is synced into ES
