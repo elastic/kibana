@@ -20,6 +20,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
   const esClient = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
+  // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+  // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
   const supertestWithAuth = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const esDeleteAllIndices = getService('esDeleteAllIndices');

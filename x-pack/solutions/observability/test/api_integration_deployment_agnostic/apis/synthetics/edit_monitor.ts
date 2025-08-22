@@ -25,6 +25,8 @@ import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('EditMonitorAPI - Public Location', function () {
     this.tags(['skipCloud', 'skipMKI']);
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const supertest = getService('supertestWithoutAuth');
     const kibanaServer = getService('kibanaServer');
