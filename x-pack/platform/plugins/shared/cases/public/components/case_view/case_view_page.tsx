@@ -7,6 +7,9 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useEffect } from 'react';
+
+import { CaseSummary } from '@kbn/cases-components';
+
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useUrlParams } from '../../common/navigation';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -23,8 +26,7 @@ import type { CaseViewPageProps } from './types';
 import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
-import { CaseSummary } from './components/case_summary';
-import { KibanaServices } from '../../common/lib/kibana';
+import { KibanaServices, useKibana } from '../../common/lib/kibana';
 
 const getActiveTabId = (tabId?: string) => {
   if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
@@ -45,6 +47,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
     onAlertsTableLoaded,
     renderAlertsTable,
   }) => {
+    const { http } = useKibana().services;
     const { features } = useCasesContext();
     const { urlParams } = useUrlParams();
     const refreshCaseViewPage = useRefreshCaseViewPage();
@@ -114,7 +117,7 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
         </EuiFlexGroup>
         <EuiSpacer size="l" />
         {KibanaServices.getConfig()?.unsafe?.enableCaseSummary && (
-          <CaseSummary caseId={caseData.id} />
+          <CaseSummary http={http} caseId={caseData.id} />
         )}
         <EuiFlexGroup data-test-subj={`case-view-tab-content-${activeTabId}`} alignItems="baseline">
           {activeTabId === CASE_VIEW_PAGE_TABS.ACTIVITY && (
