@@ -332,7 +332,7 @@ export const MetricVis = ({
               {
                 background: { color: defaultColor },
                 metric: {
-                  barBackground: colors.lightShade,
+                  barBackground: colors.lightestShade,
                   emptyBackground: colors.emptyShade,
                   blendingBackground: colors.emptyShade,
                   titlesTextAlign: config.metric.titlesTextAlign,
