@@ -37,6 +37,7 @@ export const getCellValueRenderer =
       <EuiFlexGroup gutterSize="s" responsive={false} style={{ height: '100%', width: '100%' }}>
         <EuiFlexItem>
           <div
+            data-test-subj={`indexEditorCellValue-${rowIndex}-${colIndex}`}
             css={{
               cursor: canEditIndex ? 'pointer' : 'inherit',
               height: '100%',

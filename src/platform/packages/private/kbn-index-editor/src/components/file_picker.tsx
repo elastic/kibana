@@ -20,6 +20,7 @@ export const FilePicker = () => {
 
   return (
     <EuiButton
+      data-test-subj="indexEditorFilePickerButton"
       size={'s'}
       color={'text'}
       onClick={() => {

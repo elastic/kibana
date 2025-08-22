@@ -305,6 +305,7 @@ const ResultsPreview: FC<ResultsPreviewProps> = ({ filePreview, columnNames }) =
       ) : null}
       {filePreview.sampleDocs?.length ? (
         <EuiBasicTable
+          data-test-subj="indexEditorPreviewFile"
           tableLayout="auto"
           columns={columns}
           items={items}

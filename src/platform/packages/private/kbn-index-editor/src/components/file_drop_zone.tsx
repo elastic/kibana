@@ -190,7 +190,7 @@ export const FileDropzone: FC<PropsWithChildren<{ noResults: boolean }>> = ({
           <div {...getRootProps({ css: { height: '100%', cursor: 'default' } })}>
             {isDragActive ? <div css={overlayDraggingFile} /> : null}
             {showLoadingOverlay ? loadingIndicator : null}
-            <input {...getInputProps()} />
+            <input {...getInputProps()} data-test-subj="indexEditorFileInput" />
             {content}
           </div>
         ) : (
