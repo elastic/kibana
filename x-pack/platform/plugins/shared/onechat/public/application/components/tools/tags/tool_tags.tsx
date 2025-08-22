@@ -13,7 +13,7 @@ interface OnechatToolTagsProps {
 }
 
 export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
-  return (
+  return tags?.length > 0 ? (
     <EuiBadgeGroup>
       {tags.map((tag) => (
         <EuiBadge key={tag} color="hollow">
@@ -21,5 +21,5 @@ export const OnechatToolTags: React.FC<OnechatToolTagsProps> = ({ tags }) => {
         </EuiBadge>
       ))}
     </EuiBadgeGroup>
-  );
+  ) : null;
 };

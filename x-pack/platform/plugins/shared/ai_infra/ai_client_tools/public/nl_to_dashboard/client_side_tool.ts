@@ -224,6 +224,7 @@ interface AddToDashboardClientToolDependencies {
 export const addToDashboardTool: OneChatToolWithClientCallback<AddToDashboardClientToolDependencies> =
   {
     ...addToDashboardServerSideTool,
+    tags: ['dashboard'],
     parameters: convertSchemaToObservabilityParameters(schema),
     getPreToolClientActions: async (dependencies: AddToDashboardClientToolDependencies) => {},
     getPostToolClientActions: async (dependencies: AddToDashboardClientToolDependencies) => {

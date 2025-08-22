@@ -22,6 +22,7 @@ import { AddPanelButton } from './add_panel_button/components/add_panel_button';
 import { executeAddLensPanelAction } from '../../dashboard_actions/execute_add_lens_panel_action';
 import { addFromLibrary } from '../../dashboard_renderer/add_panel_from_library';
 import { createLensWithAI } from '../poc_add_lens/create_lens_with_ai';
+import { createDashboardWithAI } from '../poc_add_lens/create_dashboard_with_ai';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const { euiTheme } = useEuiTheme();
@@ -55,7 +56,25 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
           setIsLoading(false);
         }
       }}
-      label={'Create with AI'}
+      label={'Add Lens with AI'}
+      data-test-subj="dashboardAddNewPanelButton"
+    />,
+    <ToolbarButton
+      type="secondary"
+      isDisabled={isDisabled || isLoading}
+      isLoading={isLoading}
+      iconType="lensApp"
+      size="s"
+      onClick={async () => {
+        setIsLoading(true);
+
+        await createDashboardWithAI(dashboardApi);
+        // await executeAddLensPanelAction(dashboardApi);
+        if (isMounted()) {
+          setIsLoading(false);
+        }
+      }}
+      label={'Create dashboard with AI'}
       data-test-subj="dashboardAddNewPanelButton"
     />,
   ];

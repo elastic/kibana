@@ -26,8 +26,7 @@
       "uiActions",
       "urlForwarding",
       "presentationUtil",
-      "unifiedSearch",
-
+      "unifiedSearch"
     ],
     "optionalPlugins": [
       "home",
@@ -42,6 +41,7 @@
       "observabilityAIAssistant",
       "lens",
       "inference",
+      "onechat"
     ],
     "requiredBundles": [
       "kibanaReact",

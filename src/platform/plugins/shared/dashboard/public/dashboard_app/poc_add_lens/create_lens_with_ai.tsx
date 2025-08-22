@@ -118,6 +118,8 @@ export const CreateWithAIFlyout = ({
             values: { placeholder: PLACEHOLDER_USER_PROMPT },
           })}
         />
+        <EuiSpacer size="m" />
+
         <EuiButton isLoading={isLoading} onClick={executeCreateWithAI}>
           Generate visualization
         </EuiButton>

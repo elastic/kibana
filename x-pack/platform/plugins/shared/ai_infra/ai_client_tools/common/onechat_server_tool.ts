@@ -94,13 +94,7 @@ export const addToDashboardServerSideTool: OneChatToolWithClientCallback<AddToDa
     schema,
     screenDescription:
       'The user is looking at the dashboard app. Here they can add visualizations to a dashboard and save them',
-    handler: async ({ indexPattern }, { modelProvider, esClient }) => {
-      // const indices = await esClient.asCurrentUser.cat.indices({ index: indexPattern });
-
-      // const model = await modelProvider.getDefaultModel();
-      // const response = await model.inferenceClient.chatComplete(somethingWith(indices));
-
-      // return response;
-      return [];
+    handler: async ({ esql, type, layers, title }, { modelProvider, esClient }) => {
+      return { results: [{ esql, type, layers, title }] };
     },
   };
