@@ -6,7 +6,7 @@
  */
 
 import rehypeRaw from 'rehype-raw';
-import rehypeSanitize from 'rehype-sanitize';
+import { defaultSchema } from 'hast-util-sanitize';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
@@ -27,6 +27,7 @@ import {
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
 // import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
+import { cloneDeep } from 'lodash';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
@@ -116,6 +117,10 @@ const esqlLanguagePlugin = () => {
   };
 };
 
+const customSanitizationSchema = cloneDeep(defaultSchema);
+customSanitizationSchema.tagNames!.push('toolresult');
+customSanitizationSchema.attributes!.toolresult = ['id', 'chart-type'];
+
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
@@ -136,8 +141,8 @@ export function ChatMessageText({ content }: Props) {
     const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
     const processingPlugins = [
-      [remarkToRehypePlugin, { ...remarkToRehypeOptions, allowDangerousHtml: true }], // allow html
-      [rehypeRaw], // add rehypeRaw plugin
+      [remarkToRehypePlugin, { ...remarkToRehypeOptions, sanitize: customSanitizationSchema }],
+      [rehypeRaw], // inject rehypeRaw
       [rehypeToReactPlugin, rehypeToReactOptions],
     ];
 
