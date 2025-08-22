@@ -1698,15 +1698,18 @@ describe('SentinelOneActionsClient class', () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         true;
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        true;
     });
 
-    it('should throw error if feature flag is disabled', async () => {
+    it('should throw error if getFile feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         false;
 
       await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
-        'File downloads are not supported for sentinel_one agent type. Feature disabled'
+        'File downloads are not supported for sentinel_one get-file. Feature disabled'
       );
     });
 
@@ -1753,6 +1756,47 @@ describe('SentinelOneActionsClient class', () => {
         index: ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN,
         response: SentinelOneDataGenerator.toEsSearchResponse([]),
       });
+
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).resolves.toEqual({
+        actionId: 'abc',
+        agentId: '123',
+        agentType: 'sentinel_one',
+        created: '',
+        id: '123',
+        mimeType: '',
+        name: '',
+        size: 0,
+        status: 'AWAITING_UPLOAD',
+      });
+    });
+
+    it('should throw an error if command is `runscript` and feature flag is disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        false;
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: SentinelOneDataGenerator.toEsSearchResponse([
+          new SentinelOneDataGenerator('seed').generateActionEsHit({
+            agent: { id: '123' },
+            EndpointActions: {
+              data: {
+                command: 'runscript',
+                parameters: {
+                  scriptId: '123',
+                  inputParams: '',
+                },
+              },
+              input_type: 'sentinel_one',
+            },
+          }),
+        ]),
+      });
+
+      await expect(s1ActionsClient.getFileInfo('abc', '123')).rejects.toThrow(
+        'File downloads are not supported for sentinel_one runscript. Feature disabled'
+      );
     });
   });
 
@@ -1764,6 +1808,9 @@ describe('SentinelOneActionsClient class', () => {
 
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
+        true;
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
         true;
 
       const actionRequestsSearchResponse = s1DataGenerator.toEsSearchResponse([
@@ -1813,7 +1860,7 @@ describe('SentinelOneActionsClient class', () => {
       );
     });
 
-    it('should throw error if feature flag is disabled', async () => {
+    it('should throw error if get-file feature flag is disabled', async () => {
       // @ts-expect-error updating readonly attribute
       classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneGetFileEnabled =
         false;
@@ -1822,7 +1869,7 @@ describe('SentinelOneActionsClient class', () => {
         false;
 
       await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
-        'File downloads are not supported for sentinel_one agent type. Feature disabled'
+        'File downloads are not supported for sentinel_one get-file. Feature disabled'
       );
     });
 
@@ -1900,6 +1947,35 @@ describe('SentinelOneActionsClient class', () => {
         fileName: 'foo.zip',
         mimeType: undefined,
       });
+    });
+
+    it('should throw an error if command is `runscript` and feature flag is disabled', async () => {
+      // @ts-expect-error updating readonly attribute
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsSentinelOneRunScriptEnabled =
+        false;
+      applyEsClientSearchMock({
+        esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+        index: ENDPOINT_ACTIONS_INDEX,
+        response: SentinelOneDataGenerator.toEsSearchResponse([
+          new SentinelOneDataGenerator('seed').generateActionEsHit({
+            agent: { id: '123' },
+            EndpointActions: {
+              data: {
+                command: 'runscript',
+                parameters: {
+                  scriptId: '123',
+                  inputParams: '',
+                },
+              },
+              input_type: 'sentinel_one',
+            },
+          }),
+        ]),
+      });
+
+      await expect(s1ActionsClient.getFileDownload('abc', '123')).rejects.toThrow(
+        'File downloads are not supported for sentinel_one runscript. Feature disabled'
+      );
     });
   });
 

@@ -714,7 +714,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       (command === 'runscript' && !isRunScriptEnabled)
     ) {
       throw new ResponseActionsClientError(
-        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
       );
     }
@@ -827,7 +827,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       (command === 'runscript' && !isRunScriptEnabled)
     ) {
       throw new ResponseActionsClientError(
-        `File downloads are not supported for ${this.agentType} agent type. Feature disabled`,
+        `File downloads are not supported for ${this.agentType} ${command}. Feature disabled`,
         400
       );
     }
