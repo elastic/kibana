@@ -7,26 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { graphlib } from '@dagrejs/dagre';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { ConnectorStep, EsWorkflowExecution, ForEachStep, WorkflowYaml } from '@kbn/workflows';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
 describe('WorkflowContextManager', () => {
-  let underTest: WorkflowContextManager;
-
-  let event: any;
-  // New properties for logging
-  let workflowExecutionGraph: graphlib.Graph;
-  let workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
-
   function createTestContainer(workflow: WorkflowYaml) {
-    event = { type: 'test_event' };
-    workflowExecutionGraph = convertToWorkflowGraph(workflow);
-    workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
+    const event = { type: 'test_event' };
+    const workflowExecutionGraph = convertToWorkflowGraph(workflow);
+    const workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
 
-    underTest = new WorkflowContextManager({
+    const underTest = new WorkflowContextManager({
       spaceId: 'default',
       workflow,
       event,
