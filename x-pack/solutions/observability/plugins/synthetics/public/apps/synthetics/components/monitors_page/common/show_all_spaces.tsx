@@ -77,7 +77,6 @@ const SelectablePopover = ({ space }: { space: Space }) => {
 
   const updateState = (val: boolean) => {
     setShowFromAllSpacesVal(val);
-    // dispatch(clearOverviewStatusState());
     dispatch(
       setOverviewPageStateAction({
         showFromAllSpaces: val,
