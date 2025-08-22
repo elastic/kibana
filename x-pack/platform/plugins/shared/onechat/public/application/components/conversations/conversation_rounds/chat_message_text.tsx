@@ -6,8 +6,8 @@
  */
 
 import rehypeRaw from 'rehype-raw';
-import { defaultSchema } from 'hast-util-sanitize';
 import rehypeSanitize from 'rehype-sanitize';
+import { defaultSchema } from 'hast-util-sanitize';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
@@ -32,6 +32,7 @@ import { cloneDeep } from 'lodash';
 import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { type PluggableList } from 'unified';
 
 interface Props {
   content: string;
@@ -149,7 +150,7 @@ export function ChatMessageText({ content }: Props) {
       [rehypeRaw], // use rehypeRaw to parse raw HTML strings (necessary for rendering `<toolresult />`)
       [rehypeSanitize, customSchema], // sanitize after parsing raw HTML (important!)
       [rehypeToReactPlugin, rehypeToReactOptions],
-    ];
+    ] as PluggableList;
 
     rehypeToReactOptions.components = {
       ...rehypeToReactOptions.components,
