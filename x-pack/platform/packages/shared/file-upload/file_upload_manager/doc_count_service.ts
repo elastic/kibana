@@ -53,25 +53,6 @@ export class DocCountService {
     );
   }
 
-  private async getDocumentCount(): Promise<number> {
-    const response = await this.data.search
-      .search({
-        params: {
-          index: this.indexName,
-          size: 0,
-          body: { 
-            query: { match_all: {} },
-            track_total_hits: true
-          },
-        },
-      })
-      .toPromise();
-
-    return typeof response?.rawResponse.hits.total === 'number' 
-      ? response.rawResponse.hits.total 
-      : response?.rawResponse.hits.total?.value ?? 0;
-  }
-
   private isSearchable$() {
     return this.data.search
       .search({
