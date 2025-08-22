@@ -3044,8 +3044,10 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/saved_obje
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_monitor.ts @elastic/obs-ux-management-team @elastic/kibana-security
 x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics_param.ts @elastic/obs-ux-management-team @elastic/kibana-security
 
-# OpenTelemetry semantic conventions workflows and scripts
-/.github/workflows/update-otel-semconv.yml @elastic/obs-ux-logs-team
+# OpenTelemetry semantic conventions Buildkite pipeline and scripts
+/.buildkite/pipeline-resource-definitions/kibana-otel-semconv-sync.yml @elastic/obs-ux-logs-team
+/.buildkite/pipelines/otel_semconv_sync.yml @elastic/obs-ux-logs-team
+/.buildkite/scripts/steps/otel_semconv_sync.sh @elastic/obs-ux-logs-team
 /scripts/generate_otel_semconv.js @elastic/obs-ux-logs-team
 
 # Specialised GitHub workflows for the Observability robots
