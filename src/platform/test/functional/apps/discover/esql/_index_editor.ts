@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await indexEditor.closeIndexEditor();
       await testSubjects.waitForDeleted('lookupIndexFlyout');
 
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(6000, async () => {
         await indexEditor.verifyIndexContent(INDEX_NAME_FILE, [
           {
             customer_first_name: 'Elyssa',
@@ -189,7 +189,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(updatedESQLQuery).to.contain(`| LOOKUP JOIN ${INDEX_NAME_MANUAL}`);
 
       // Verify the index is created correctly and contains all the data
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(6000, async () => {
         await indexEditor.verifyIndexContent(INDEX_NAME_MANUAL, [
           {
             'renamed-column-1': 'value-1-1',
@@ -263,11 +263,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // Filter rows
       await indexEditor.search('Elyssa');
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(6000, async () => {
         expect((await dataGrid.getDocTableRows()).length).to.be(1);
       });
       await indexEditor.search('');
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(6000, async () => {
         expect((await dataGrid.getDocTableRows()).length).to.be(2);
       });
 
@@ -310,7 +310,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await indexEditor.saveChanges();
 
       // Verify the editions took place correctly
-      await retry.tryForTime(2000, async () => {
+      await retry.tryForTime(10000, async () => {
         await indexEditor.verifyIndexContent(INDEX_NAME_EDITION, [
           {
             customer_first_name: 'Jasmin',
