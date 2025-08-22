@@ -28,6 +28,7 @@ export interface EsWorkflowExecution {
   spaceId: string;
   id: string;
   workflowId: string;
+  isTestRun: boolean;
   status: ExecutionStatus;
   context: Record<string, string>;
   workflowDefinition: WorkflowYaml;
@@ -203,6 +204,7 @@ export interface WorkflowListDto {
 }
 export interface WorkflowExecutionEngineModel
   extends Pick<EsWorkflow, 'id' | 'name' | 'enabled' | 'definition'> {
+  isTestRun?: boolean;
   /** Serialized graphlib.Graph */
   executionGraph?: any;
 }

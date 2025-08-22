@@ -13,7 +13,6 @@ import type { z } from '@kbn/zod';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
-  spaceId: string;
   workflow: z.infer<typeof WorkflowSchema>;
   event: any;
   // New properties for logging
@@ -22,23 +21,16 @@ export interface ContextManagerInit {
 }
 
 export class WorkflowContextManager {
-  // 'now' will be added by the templating engine
-  private context: Omit<WorkflowContext, 'now'>;
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
   private workflow: WorkflowYaml;
+  private event: unknown;
 
   constructor(init: ContextManagerInit) {
-    this.context = {
-      spaceId: init.spaceId,
-      event: init.event,
-      consts: init.workflow.consts || {},
-      steps: {},
-    } as Partial<typeof this.context> as WorkflowContext;
-
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
     this.workflow = init.workflow;
+    this.event = init.event;
   }
 
   public getContext(): StepContext {
@@ -81,10 +73,6 @@ export class WorkflowContextManager {
     return this.enrichStepContextAccordingToStepScope(stepContext);
   }
 
-  public getContextKey(key: string): any {
-    return this.context[key as keyof typeof this.context];
-  }
-
   public readContextPath(propertyPath: string): { pathExists: boolean; value: any } {
     const propertyPathSegments = propertyPath.split('.');
     let result: any = this.getContext();
@@ -104,10 +92,9 @@ export class WorkflowContextManager {
     const workflowExecution = this.workflowExecutionRuntime.getWorkflowExecution();
 
     return {
-      ...this.context,
       execution: {
         id: workflowExecution.id,
-        isTestRun: false, // This can be set based on the execution type
+        isTestRun: !!workflowExecution.isTestRun, // This can be set based on the execution type
         startedAt: new Date(workflowExecution.startedAt),
       },
       workflow: {
@@ -116,6 +103,8 @@ export class WorkflowContextManager {
         enabled: this.workflow.enabled,
         spaceId: workflowExecution.spaceId,
       },
+      consts: this.workflow.consts || {},
+      event: this.event,
     };
   }
 

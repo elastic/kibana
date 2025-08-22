@@ -117,6 +117,7 @@ export class WorkflowsExecutionEnginePlugin
       const workflowExecution = {
         id: workflowRunId,
         workflowId: workflow.id,
+        isTestRun: workflow.isTestRun,
         workflowDefinition: workflow.definition,
         context,
         executionGraph: workflow.executionGraph,

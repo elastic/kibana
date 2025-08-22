@@ -7,27 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { graphlib } from '@dagrejs/dagre';
 import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_execution_runtime_manager';
 import type { ConnectorStep, EsWorkflowExecution, ForEachStep, WorkflowYaml } from '@kbn/workflows';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 
 describe('WorkflowContextManager', () => {
-  let underTest: WorkflowContextManager;
+  function createTestContainer(workflow: WorkflowYaml, event: unknown) {
+    const workflowExecutionGraph = convertToWorkflowGraph(workflow);
+    const workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
+    workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
+      id: 'testStep',
+    });
+    workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+      stack: [] as string[],
+    } as EsWorkflowExecution);
 
-  let event: any;
-  // New properties for logging
-  let workflowExecutionGraph: graphlib.Graph;
-  let workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
-
-  function createTestContainer(workflow: WorkflowYaml) {
-    event = { type: 'test_event' };
-    workflowExecutionGraph = convertToWorkflowGraph(workflow);
-    workflowExecutionRuntime = {} as WorkflowExecutionRuntimeManager;
-
-    underTest = new WorkflowContextManager({
-      spaceId: 'default',
+    const underTest = new WorkflowContextManager({
       workflow,
       event,
       workflowExecutionGraph,
@@ -42,6 +38,47 @@ describe('WorkflowContextManager', () => {
     };
   }
 
+  it('should have consts from workflow', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {
+        CONST_1: 'value1',
+        CONST_2: 42,
+      },
+      triggers: [],
+      steps: [],
+    };
+    const { underTest } = createTestContainer(workflow, { some: 'event' });
+
+    const stepContext = underTest.getContext();
+    expect(stepContext.consts).toEqual({
+      CONST_1: 'value1',
+      CONST_2: 42,
+    });
+  });
+
+  it('should have event from workflow', () => {
+    const workflow: WorkflowYaml = {
+      name: 'Test Workflow',
+      version: '1',
+      description: 'A test workflow',
+      enabled: true,
+      consts: {},
+      triggers: [],
+      steps: [],
+    };
+    const { underTest } = createTestContainer(workflow, { name: 'alert', severity: 'high' });
+
+    const stepContext = underTest.getContext();
+    expect(stepContext.event).toEqual({
+      name: 'alert',
+      severity: 'high',
+    });
+  });
+
   describe('workflow context', () => {
     let testContainer: ReturnType<typeof createTestContainer>;
     const workflow: WorkflowYaml = {
@@ -55,7 +92,7 @@ describe('WorkflowContextManager', () => {
     };
 
     beforeEach(() => {
-      testContainer = createTestContainer(workflow);
+      testContainer = createTestContainer(workflow, { some: 'event' });
       testContainer.workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
         id: 'testStep',
       });
@@ -109,7 +146,7 @@ describe('WorkflowContextManager', () => {
     };
 
     beforeEach(() => {
-      testContainer = createTestContainer(workflow);
+      testContainer = createTestContainer(workflow, { some: 'event' });
       testContainer.workflowExecutionRuntime.getCurrentStep = jest.fn().mockReturnValue({
         id: 'testStep',
       });
@@ -128,6 +165,29 @@ describe('WorkflowContextManager', () => {
     it('should return startedAt', () => {
       const context = testContainer.underTest.getContext();
       expect(context.execution.startedAt).toEqual(new Date('2023-01-01T00:00:00Z'));
+    });
+
+    describe('isTestRun flag', () => {
+      it('should return true in isTestRun flag if isTestRun in workflow execution is true', () => {
+        testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+          stack: [] as string[],
+          isTestRun: true,
+        } as EsWorkflowExecution);
+        const context = testContainer.underTest.getContext();
+        expect(context.execution.isTestRun).toBe(true);
+      });
+
+      it.each([undefined, null, false])(
+        'should return false in isTestRun flag if isTestRun in workflow execution is %s',
+        (isTestRun) => {
+          testContainer.workflowExecutionRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
+            stack: [] as string[],
+            isTestRun,
+          } as EsWorkflowExecution);
+          const context = testContainer.underTest.getContext();
+          expect(context.execution.isTestRun).toBe(false);
+        }
+      );
     });
   });
 
@@ -173,7 +233,7 @@ describe('WorkflowContextManager', () => {
     let testContainer: ReturnType<typeof createTestContainer>;
 
     beforeEach(() => {
-      testContainer = createTestContainer(workflow);
+      testContainer = createTestContainer(workflow, { some: 'event' });
 
       testContainer.workflowExecutionRuntime.getStepResult = jest.fn().mockReturnValue({
         output: 'test output',
@@ -275,7 +335,7 @@ describe('WorkflowContextManager', () => {
     let testContainer: ReturnType<typeof createTestContainer>;
 
     beforeEach(() => {
-      testContainer = createTestContainer(workflow);
+      testContainer = createTestContainer(workflow, { some: 'event' });
 
       testContainer.workflowExecutionRuntime.getStepResult = jest.fn().mockReturnValue({
         output: 'test output',

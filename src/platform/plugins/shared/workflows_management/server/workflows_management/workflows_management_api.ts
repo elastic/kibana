@@ -164,6 +164,7 @@ export class WorkflowsManagementApi {
         name: workflowToCreate.name,
         enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
+        isTestRun: true,
       },
       spaceId,
       inputs
