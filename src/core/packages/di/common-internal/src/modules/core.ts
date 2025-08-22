@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { CoreDiServiceSetup, CoreDiServiceStart } from './src/contracts';
-export { Logger, LoggerFactory } from './src/services/logging';
-export { OnSetup, OnStart, PluginSetup, PluginStart, Setup, Start } from './src/services/plugin';
+import { ContainerModule } from 'inversify';
+import { loadLogging } from './logging';
+
+export const core = new ContainerModule((options) => {
+  loadLogging(options);
+});
