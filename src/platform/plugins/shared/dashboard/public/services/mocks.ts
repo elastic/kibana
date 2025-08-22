@@ -49,10 +49,16 @@ export const setStubKibanaServices = () => {
   const core = coreMock.createStart();
   (core.application.capabilities as any).dashboard_v2 = defaultDashboardCapabilities;
 
+  const dataServiceMock = dataPluginMock.createStartContract();
+  dataServiceMock.dataViews.getDefaultDataView = jest.fn().mockImplementation(async () => ({
+    isPersisted: () => true, // provide isPersisted implement when not provided by original mock
+    ...(await dataServiceMock.dataViews.getDefaultDataView()),
+  }));
+
   setKibanaServices(core, {
     contentManagement: contentManagementMock.createStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
-    data: dataPluginMock.createStartContract(),
+    data: dataServiceMock,
     dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
     embeddable: embeddablePluginMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
