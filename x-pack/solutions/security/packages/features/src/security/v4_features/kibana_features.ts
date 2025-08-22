@@ -34,6 +34,7 @@ export const getSecurityV4BaseKibanaFeature = ({
   app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
+    // TODO should it be inside the rules feature?
     insightsAndAlerting: ['triggersActions'],
   },
   description: i18n.translate(

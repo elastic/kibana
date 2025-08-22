@@ -13,6 +13,7 @@ export const rulesDefaultProductFeaturesConfig: Record<
   ProductFeatureKibanaConfig
 > = {
   [ProductFeatureRulesFeatureKey.rules]: {
+    // TODO what's the difference between these privileges and ./kibana_features.ts?
     privileges: {
       all: {
         api: ['rules_read', 'rules_write'],

@@ -10,14 +10,43 @@ import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
 import {
+  ESQL_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
+} from '@kbn/securitysolution-rules';
+import {
   APP_ID,
   BOOTSTRAP_API_ALL,
+  LEGACY_NOTIFICATIONS_ID,
   RULES_API_ALL,
   RULES_API_READ,
   RULES_FEATURE_ID,
+  SERVER_APP_ID,
 } from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 import type { SecurityFeatureParams } from '../security/types';
+
+const SECURITY_RULE_TYPES = [
+  LEGACY_NOTIFICATIONS_ID,
+  ESQL_RULE_TYPE_ID,
+  EQL_RULE_TYPE_ID,
+  INDICATOR_RULE_TYPE_ID,
+  ML_RULE_TYPE_ID,
+  QUERY_RULE_TYPE_ID,
+  SAVED_QUERY_RULE_TYPE_ID,
+  THRESHOLD_RULE_TYPE_ID,
+  NEW_TERMS_RULE_TYPE_ID,
+];
+
+const alertingFeatures = SECURITY_RULE_TYPES.map((ruleTypeId) => ({
+  ruleTypeId,
+  consumers: [SERVER_APP_ID],
+}));
 
 export const getRulesBaseKibanaFeature = (
   params: SecurityFeatureParams
@@ -34,6 +63,7 @@ export const getRulesBaseKibanaFeature = (
   scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
   app: [RULES_FEATURE_ID, 'kibana'],
   catalogue: [APP_ID],
+  alerting: alertingFeatures,
   privileges: {
     all: {
       app: [RULES_FEATURE_ID, 'kibana'],
@@ -42,7 +72,11 @@ export const getRulesBaseKibanaFeature = (
         all: params.savedObjects,
         read: params.savedObjects,
       },
-      ui: [],
+      alerting: {
+        rule: { all: alertingFeatures },
+        alert: { all: alertingFeatures },
+      },
+      ui: ['show', 'crud'],
       api: [RULES_API_ALL, RULES_API_READ, BOOTSTRAP_API_ALL],
     },
     read: {
@@ -52,7 +86,11 @@ export const getRulesBaseKibanaFeature = (
         all: [],
         read: params.savedObjects,
       },
-      ui: [],
+      alerting: {
+        rule: { read: alertingFeatures },
+        alert: { read: alertingFeatures },
+      },
+      ui: ['show'],
       api: [RULES_API_READ, BOOTSTRAP_API_ALL],
     },
   },

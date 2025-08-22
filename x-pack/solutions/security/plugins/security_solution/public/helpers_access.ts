@@ -10,7 +10,8 @@ import { SECURITY_FEATURE_ID, CASES_FEATURE_ID } from '../common/constants';
 export function hasAccessToSecuritySolution(capabilities: Capabilities): boolean {
   return Boolean(
     capabilities[SECURITY_FEATURE_ID]?.show ||
-      capabilities.securitySolutionAttackDiscovery?.['attack-discovery']
+      capabilities.securitySolutionAttackDiscovery?.['attack-discovery'] ||
+      capabilities.securitySolutionRulesV1?.read
   );
 }
 
