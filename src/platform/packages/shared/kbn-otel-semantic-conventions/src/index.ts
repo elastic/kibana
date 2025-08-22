@@ -16,10 +16,7 @@ export type {
 } from './types/semconv_types';
 
 // Export generated data (will be available after build)
-export {
-  semconvFlat,
-  semconvStats,
-} from './generated/resolved-semconv';
+export { semconvFlat, semconvStats } from './generated/resolved-semconv';
 
 // Export processing functionality
 export { processSemconvYaml } from './lib/generate_semconv';
