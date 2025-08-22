@@ -95,6 +95,7 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
+    unpublishedFilters,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.focusedPanelId$,
@@ -103,8 +104,10 @@ export function InternalDashboardTopNav({
     dashboardApi.savedObjectId$,
     dashboardApi.query$,
     dashboardApi.title$,
-    dashboardApi.viewMode$
+    dashboardApi.viewMode$,
+    dashboardApi.unpublishedChildFilters$
   );
+  // console.log({ unpublishedFilters });
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -367,6 +370,10 @@ export function InternalDashboardTopNav({
         indexPatterns={allDataViews ?? []}
         allowSavingQueries
         appName={DASHBOARD_APP_ID}
+        // isLoading={true}
+        // additionalQueryBarMenuItems={{ items: [{ renderItem: () => <>test</> }] }}
+        // prependFilterBar={<>test</>}
+        draft={{ query: { query: 'test', language: 'kql' } }}
         visible={viewMode !== 'print'}
         setMenuMountPoint={
           embedSettings || fullScreenMode
@@ -381,11 +388,19 @@ export function InternalDashboardTopNav({
             : undefined
         }
         onQuerySubmit={(_payload, isUpdate) => {
+          console.log('ON SUBMIT ', isUpdate);
           if (isUpdate === false) {
             dashboardApi.forceRefresh();
           }
+          dashboardApi.publishFilters();
         }}
         onSavedQueryIdChange={setSavedQueryId}
+        // onFiltersUpdated={(newFilters) => {
+        //   console.log('TEST', newFilters);
+        //   dashboardApi.setFilters(cleanFiltersForSerialize(newFilters));
+        // }}
+
+        dirtyState={unpublishedFilters?.length ? { filters: unpublishedFilters } : undefined}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

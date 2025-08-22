@@ -60,6 +60,7 @@ const defaultFiltersUpdated = (
     if (onFiltersUpdated) {
       onFiltersUpdated(filters);
     } else {
+      // console.log('SET FITERS');
       queryService.filterManager.setFilters(filters);
     }
   };
@@ -209,7 +210,7 @@ export function createSearchBar({
       query,
       core,
     });
-
+    // console.log('draft', props.draft);
     return (
       <KibanaContextProvider
         services={{
@@ -245,7 +246,6 @@ export function createSearchBar({
             onCancel={props.onCancel}
             filters={filters}
             query={query}
-            draft={props.draft}
             onDraftChange={props.onDraftChange}
             onFiltersUpdated={defaultFiltersUpdated(data.query, props.onFiltersUpdated)}
             onRefreshChange={
@@ -278,6 +278,7 @@ export function createSearchBar({
             onESQLDocsFlyoutVisibilityChanged={props.onESQLDocsFlyoutVisibilityChanged}
             esqlEditorInitialState={props.esqlEditorInitialState}
             onEsqlEditorInitialStateChange={props.onEsqlEditorInitialStateChange}
+            dirtyState={props.dirtyState}
           />
         </core.i18n.Context>
       </KibanaContextProvider>
