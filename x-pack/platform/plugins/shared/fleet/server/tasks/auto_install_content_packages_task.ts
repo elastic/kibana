@@ -166,9 +166,6 @@ export class AutoInstallContentPackagesTask {
       ) {
         this.lastPrerelease = prerelease;
         this.discoveryMapLastFetched = Date.now();
-        this.logger.info(
-          `[AutoInstallContentPackagesTask] Fetching content packages to get discovery fields`
-        );
         this.discoveryMap = await this.getContentPackagesDiscoveryMap(prerelease);
         this.logger.info(
           `[AutoInstallContentPackagesTask] Fetched content packages discovery map: ${JSON.stringify(
@@ -311,10 +308,7 @@ export class AutoInstallContentPackagesTask {
       | WHERE @timestamp > NOW() - ${this.intervalToEsql(this.taskInterval)} 
       | STATS COUNT(*) BY data_stream.dataset ${whereClause}`;
     const response = await esClient.esql.query({ query });
-    this.logger.debug(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
-    this.logger.info(
-      `[AutoInstallContentPackagesTask] dataset query response: ${JSON.stringify(response)}`
-    );
+    this.logger.info(`[AutoInstallContentPackagesTask] ESQL query took: ${response.took}ms`);
 
     const datasetsWithData: string[] = response.values.map((value: any[]) => value[1]);
     this.logger.info(
