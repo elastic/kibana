@@ -35,11 +35,7 @@ export function getAnonymizableMessageParts(message: Message) {
   }
 
   const content = message.content;
-  if (typeof content === 'string') {
-    return {
-      content,
-    };
-  } else if (Array.isArray(content)) {
+  if (Array.isArray(content)) {
     return {
       content: content
         // only return text content and don't return image content
@@ -47,6 +43,8 @@ export function getAnonymizableMessageParts(message: Message) {
         .map((item) => ({ text: item.text })),
     };
   }
+
+  return { content };
 
   return {
     content,
