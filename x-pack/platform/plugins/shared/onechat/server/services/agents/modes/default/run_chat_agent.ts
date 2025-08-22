@@ -7,39 +7,32 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { from, filter, shareReplay } from 'rxjs';
+import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import { allToolsSelection } from '@kbn/onechat-common';
 import type { AgentHandlerContext } from '@kbn/onechat-server';
-import { isStreamEvent, toolsToLangchain } from '@kbn/onechat-genai-utils/langchain';
 import {
   addRoundCompleteEvent,
   extractRound,
-  conversationToLangchainMessages,
   selectProviderTools,
+  conversationToLangchainMessages,
 } from '../utils';
-import { createPlannerAgentGraph } from './graph';
+import { createAgentGraph } from './graph';
 import { convertGraphEvents } from './convert_graph_events';
 import type { RunAgentParams, RunAgentResponse } from '../run_agent';
 
-export type RunPlannerAgentParams = Omit<RunAgentParams, 'mode'> & {
-  /**
-   * Budget, in number of steps.
-   * Defaults to 5.
-   */
-  cycleBudget?: number;
-};
+const chatAgentGraphName = 'default-onechat-agent';
 
-export type RunPlannerAgentFn = (
-  params: RunPlannerAgentParams,
+export type RunChatAgentParams = Omit<RunAgentParams, 'mode'>;
+
+export type RunChatAgentFn = (
+  params: RunChatAgentParams,
   context: AgentHandlerContext
 ) => Promise<RunAgentResponse>;
-
-const agentGraphName = 'researcher-agent';
-const defaultCycleBudget = 3;
 
 /**
  * Create the handler function for the default onechat agent.
  */
-export const runPlannerAgent: RunPlannerAgentFn = async (
+export const runDefaultAgentMode: RunChatAgentFn = async (
   {
     nextInput,
     conversation = [],
@@ -48,11 +41,11 @@ export const runPlannerAgent: RunPlannerAgentFn = async (
     runId = uuidv4(),
     agentId,
     abortSignal,
-    cycleBudget = defaultCycleBudget,
   },
   { logger, request, modelProvider, toolProvider, events }
 ) => {
   const model = await modelProvider.getDefaultModel();
+  logger.debug(`Running chat agent with connector: ${model.connector.name}, runId: ${runId}`);
 
   const selectedTools = await selectProviderTools({
     provider: toolProvider,
@@ -69,38 +62,40 @@ export const runPlannerAgent: RunPlannerAgentFn = async (
   const initialMessages = conversationToLangchainMessages({
     nextInput,
     previousRounds: conversation,
-    ignoreSteps: true,
   });
 
-  const agentGraph = await createPlannerAgentGraph({
+  const agentGraph = createAgentGraph({
     logger,
     chatModel: model.chatModel,
     tools: langchainTools,
     customInstructions,
   });
 
+  logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);
+
   const eventStream = agentGraph.streamEvents(
-    {
-      initialMessages,
-      remainingCycles: cycleBudget,
-    },
+    { initialMessages },
     {
       version: 'v2',
       signal: abortSignal,
-      runName: agentGraphName,
+      runName: chatAgentGraphName,
       metadata: {
-        graphName: agentGraphName,
+        graphName: chatAgentGraphName,
         agentId,
         runId,
       },
-      recursionLimit: cycleBudget * 10,
+      recursionLimit: 25,
       callbacks: [],
     }
   );
 
   const events$ = from(eventStream).pipe(
     filter(isStreamEvent),
-    convertGraphEvents({ graphName: agentGraphName, toolIdMapping, logger }),
+    convertGraphEvents({
+      graphName: chatAgentGraphName,
+      toolIdMapping,
+      logger,
+    }),
     addRoundCompleteEvent({ userInput: nextInput }),
     shareReplay()
   );

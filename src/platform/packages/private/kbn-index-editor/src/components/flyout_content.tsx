@@ -56,21 +56,7 @@ export const FlyoutContent: FC<FlyoutContentProps> = ({ deps, props }) => {
     deps.data,
     coreStart.application,
     coreStart.http,
-    coreStart.notifications,
-    // On upload complete callback
-    (res) => {
-      deps.indexUpdateService.setIndexName(res!.index);
-      deps.indexUpdateService.setIndexCreated(true);
-
-      deps.indexUpdateService.setIsFetching(true);
-
-      // temp fix to fetch docs when the index is ready
-      setTimeout(() => {
-        if (res?.files.some((v) => v.docCount > 0)) {
-          deps.indexUpdateService.refresh();
-        }
-      }, 3000);
-    }
+    coreStart.notifications
   );
 
   const columnsWithoutPlaceholders = dataViewColumns?.filter(
