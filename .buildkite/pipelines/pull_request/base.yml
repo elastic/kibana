@@ -9,7 +9,7 @@ steps:
   - wait
 
   - group: 'Pre checks'
-    key: 'prechecks'
+    key: prechecks
     steps:
       # - command: .buildkite/scripts/steps/build_kibana.sh
       #   label: Build Kibana Distribution
@@ -113,6 +113,7 @@ steps:
       - wait
 
       - command: .buildkite/scripts/steps/agents/kibana_healer.sh
+        depends_on: prechecks
         if: "step.outcome == 'hard_failed'"
         label: Run Kibana healer
         key: kibana_healer
