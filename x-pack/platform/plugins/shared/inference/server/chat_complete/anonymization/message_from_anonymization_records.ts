@@ -39,7 +39,7 @@ function setByPointer(root: Message, pointer: string, value: string): void {
     } else if (cursor && typeof cursor === 'object') {
       cursor = (cursor as Record<string, unknown>)[pathPart];
     } else {
-      throw new Error('Failed to set anonymized value');
+      throw new Error(`Failed to set anonymized value at ${pointer}`);
     }
   }
 
@@ -52,7 +52,7 @@ function setByPointer(root: Message, pointer: string, value: string): void {
     // Set object property
     (cursor as Record<string, unknown>)[leaf] = value;
   } else {
-    throw new Error('Failed to set anonymized value');
+    throw new Error(`Failed to set anonymized value at ${pointer}`);
   }
 }
 
