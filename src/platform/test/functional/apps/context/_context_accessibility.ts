@@ -38,9 +38,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const rowActions = await dataGrid.getRowActions();
       await rowActions[1].click();
       await PageObjects.header.waitUntilLoadingHasFinished();
+      // Skip to main content button
       await browser.pressKeys(browser.keys.TAB);
-      await browser.pressKeys(browser.keys.SPACE);
+      await browser.pressKeys(browser.keys.ENTER);
       await browser.pressKeys(browser.keys.TAB);
+
       const loadMoreLink = await testSubjects.find('predecessorsLoadMoreButton');
       const activeElement = await find.activeElement();
       expect(await loadMoreLink.getAttribute('data-test-subj')).to.eql(
