@@ -87,6 +87,8 @@ function buildTrendConfig(
   };
 }
 
+const DEFAULT_TILE_SIDE_LENGTH = 310;
+
 export const MetricVis = ({
   data,
   config,
@@ -111,7 +113,8 @@ export const MetricVis = ({
   );
 
   const onWillRender = useCallback(() => {
-    const maxTileSideLength = grid.current.length * grid.current[0]?.length > 1 ? 200 : 300;
+    const maxTileSideLength =
+      grid.current.length * grid.current[0]?.length > 1 ? 200 : DEFAULT_TILE_SIDE_LENGTH;
     const event: ChartSizeEvent = {
       name: 'chartSize',
       data: {
