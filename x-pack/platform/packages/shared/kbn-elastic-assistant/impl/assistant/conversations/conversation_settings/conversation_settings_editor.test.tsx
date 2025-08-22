@@ -17,7 +17,11 @@ import { TestProviders } from '../../../mock/test_providers/test_providers';
 
 // Mocks for child components
 jest.mock('../../prompt_editor/system_prompt/select_system_prompt', () => ({
-  SelectSystemPrompt: ({ onSystemPromptSelectionChange }: any) => (
+  SelectSystemPrompt: ({
+    onSystemPromptSelectionChange,
+  }: {
+    onSystemPromptSelectionChange: (p: string) => void;
+  }) => (
     <button
       type="button"
       data-test-subj="system-prompt"

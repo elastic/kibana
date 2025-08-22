@@ -64,7 +64,7 @@ describe('UserProfilesSearch', () => {
     ).toEqual('false');
   });
 
-  it.only('calls onUsersSelect when user is selected', async () => {
+  it('calls onUsersSelect when user is selected', async () => {
     render(
       <TestProviders>
         <UserProfilesSearch {...testProps} />
