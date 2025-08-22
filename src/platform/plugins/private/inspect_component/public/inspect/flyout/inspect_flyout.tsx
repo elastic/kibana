@@ -7,28 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import type { CSSProperties, RefObject } from 'react';
+import React, { useEffect, useState } from 'react';
+import type { CSSProperties } from 'react';
 import { EuiFlyoutBody, EuiPortal, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section';
 import { InspectHeader } from './inspect_header';
 import { LinksSection } from './links_section';
 import type { ComponentData } from '../../types';
-import { EUI_PORTAL_ATTRIBUTE } from '../../constants';
+import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID } from '../../constants';
 import { InspectHighlight } from '../overlay/inspect_highlight';
-
-const setFlyoutZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
-  setTimeout(() => {
-    const node = flyoutRef.current;
-
-    if (node) {
-      const portalParent: HTMLElement | null = node.closest(EUI_PORTAL_ATTRIBUTE);
-
-      if (portalParent) portalParent.style.zIndex = zIndex;
-    }
-  }, 0);
-};
 
 interface Props {
   componentData: ComponentData;
@@ -37,16 +25,23 @@ interface Props {
 
 export const flyoutOptions: OverlayFlyoutOpenOptions = {
   size: 's',
-  'data-test-subj': 'inspectComponentFlyout',
+  'data-test-subj': INSPECT_FLYOUT_ID,
+  id: INSPECT_FLYOUT_ID,
+  maxWidth: 600,
 };
 
 export const InspectFlyout = ({ componentData, target }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [currentPosition, setCurrentPosition] = useState<CSSProperties | null>(null);
-  const ref = useRef<HTMLDivElement>(null);
-  const flyoutZIndex = (Number(euiTheme.levels.modal) * 2).toString();
+  const modalZIndex = Number(euiTheme.levels.modal);
 
-  setFlyoutZIndex(ref, flyoutZIndex);
+  requestAnimationFrame(() => {
+    const flyoutElement = document.getElementById(INSPECT_FLYOUT_ID);
+    const portalParent = flyoutElement?.closest(EUI_PORTAL_ATTRIBUTE);
+    if (portalParent instanceof HTMLElement) {
+      portalParent.style.zIndex = (modalZIndex + 2).toString();
+    }
+  });
 
   useEffect(() => {
     if (!target) return;
@@ -57,14 +52,13 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
       left: `${rectangle.left}px`,
       width: `${rectangle.width}px`,
       height: `${rectangle.height}px`,
-      zIndex: Number(euiTheme.levels.modal) + 1,
+      zIndex: modalZIndex + 1,
     });
-  }, [target, euiTheme.levels.modal]);
+  }, [target, modalZIndex]);
 
   return (
     <>
       <InspectHeader />
-      <div ref={ref} />
       <EuiFlyoutBody>
         <DataSection componentData={componentData} />
         <EuiSpacer size="xxl" />
