@@ -95,7 +95,6 @@ if is_pr; then
   export BUILD_URL="$BUILDKITE_BUILD_URL"
 
   set_git_merge_base
-  set_serverless_release_sha
 
   # For backwards compatibility
   export PR_MERGE_BASE="$GITHUB_PR_MERGE_BASE"

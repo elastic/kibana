@@ -8,6 +8,8 @@ source .buildkite/scripts/common/util.sh
 
 echo "Check Saved Object types (Serverless)"
 
+set_serverless_release_sha
+
 if [[ ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
   echo "Couldn't determine current serverless release SHA. Skipping Saved Objects checks ❌"
   exit 1
