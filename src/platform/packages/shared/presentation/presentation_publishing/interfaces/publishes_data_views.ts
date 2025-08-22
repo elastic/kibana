@@ -18,7 +18,7 @@ export interface PublishesDataViews {
   /**
    * Excludes ad-hoc data views.
    */
-  dataViews$: PublishingSubject<DataView[] | undefined>; 
+  dataViews$: PublishingSubject<DataView[] | undefined>;
 }
 
 export type PublishesWritableDataViews = PublishesDataViews & {
