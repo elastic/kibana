@@ -5,16 +5,25 @@
  * 2.0.
  */
 
-import { SuggestionType } from '@kbn/cases-plugin/public';
+import type { SuggestionType } from '@kbn/cases-plugin/public';
 import React from 'react';
-import { SyntheticsSuggestion } from '../../common/types';
+import { Provider } from 'react-redux';
+import type { SyntheticsSuggestion } from '../../common/types';
+// TODO: adjust this import to the actual store export for the synthetics plugin
+import { store } from '../apps/synthetics/state';
 
 export const syntheticsSuggestionDefinition: SuggestionType<SyntheticsSuggestion> = {
   id: 'synthetics',
   owner: 'observability',
   children: React.lazy(() =>
-    import('./suggestion_component').then((m) => ({
-      default: m.SyntheticsSuggestionChildren,
-    }))
+    import('./suggestion_component').then((m) => {
+      const Inner = m.SyntheticsSuggestionChildren;
+      const Wrapped: React.FC<React.ComponentProps<typeof Inner>> = (props) => (
+        <Provider store={store}>
+          <Inner {...props} />
+        </Provider>
+      );
+      return { default: Wrapped };
+    })
   ),
 };
