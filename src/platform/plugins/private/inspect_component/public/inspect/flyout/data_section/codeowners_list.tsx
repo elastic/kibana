@@ -9,7 +9,7 @@
 
 import React from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
-import { EuiListGroup, EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiListGroup, EuiSpacer, EuiText, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 
@@ -42,6 +42,7 @@ export const CodeownersList = ({ codeowners }: Props) => {
         />
       </EuiText>
       <EuiListGroup listItems={listItems} color="primary" size="s" flush={true} />
+      <EuiSpacer size="m" />
     </>
   );
 };

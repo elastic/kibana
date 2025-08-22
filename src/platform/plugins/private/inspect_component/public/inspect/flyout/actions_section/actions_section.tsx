@@ -8,29 +8,30 @@
  */
 
 import React from 'react';
-import { EuiDocsLink } from './eui_docs_link';
-import { PreviewImage } from './preview_image';
-import { ComponentTitle } from './component_title';
-import { IconData } from './icon_data';
-import { CodeownersList } from './codeowners_list';
+import { ActionButtons } from './action_buttons';
+import { ActionsSubtitle } from './actions_subtitle';
+import { ActionsTitle } from './actions_title';
 import type { ComponentData } from '../../../types';
 
 interface Props {
   componentData: ComponentData;
 }
 
-export const DataSection = ({ componentData }: Props) => {
+export const ActionsSection = ({ componentData }: Props) => {
   if (!componentData) return null;
 
-  const { codeowners, euiInfo, iconType, sourceComponent, image } = componentData;
+  const { columnNumber, fileName, lineNumber, relativePath, baseFileName } = componentData;
 
   return (
     <>
-      <PreviewImage image={image} />
-      <ComponentTitle sourceComponent={sourceComponent} />
-      <CodeownersList codeowners={codeowners} />
-      <IconData iconType={iconType} />
-      <EuiDocsLink euiInfo={euiInfo} />
+      <ActionsTitle />
+      <ActionsSubtitle relativePath={relativePath} baseFileName={baseFileName} />
+      <ActionButtons
+        fileName={fileName}
+        lineNumber={lineNumber}
+        columnNumber={columnNumber}
+        relativePath={relativePath}
+      />
     </>
   );
 };

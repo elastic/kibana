@@ -12,8 +12,8 @@ import type { CSSProperties } from 'react';
 import { EuiFlyoutBody, EuiPortal, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section/data_section';
-import { InspectHeader } from './inspect_header';
-import { LinksSection } from './links_section/links_section';
+import { InspectFlyoutHeader } from './inspect_flyout_header';
+import { ActionsSection } from './actions_section/actions_section';
 import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID } from '../../constants';
 import { InspectHighlight } from '../overlay/inspect_highlight';
 import type { ComponentData } from '../../types';
@@ -58,11 +58,11 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
 
   return (
     <>
-      <InspectHeader />
+      <InspectFlyoutHeader />
       <EuiFlyoutBody>
         <DataSection componentData={componentData} />
         <EuiSpacer size="xxl" />
-        <LinksSection componentData={componentData} />
+        <ActionsSection componentData={componentData} />
       </EuiFlyoutBody>
       {currentPosition && (
         <EuiPortal>

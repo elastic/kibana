@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { EuiCode, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiCode, EuiSpacer, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -25,19 +25,22 @@ export const ComponentTitle = ({ sourceComponent }: Props) => {
   `;
 
   return (
-    <EuiTitle size="s">
-      <h3>
-        {sourceComponent ? (
-          <EuiCode transparentBackground css={titleCss}>
-            {sourceComponent}
-          </EuiCode>
-        ) : (
-          <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.componentDataTitle"
-            defaultMessage="Data"
-          />
-        )}
-      </h3>
-    </EuiTitle>
+    <>
+      <EuiTitle size="s">
+        <h3>
+          {sourceComponent ? (
+            <EuiCode transparentBackground css={titleCss}>
+              {sourceComponent}
+            </EuiCode>
+          ) : (
+            <FormattedMessage
+              id="kbnInspectComponent.inspectFlyout.componentDataTitle"
+              defaultMessage="Data"
+            />
+          )}
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="m" />
+    </>
   );
 };

@@ -8,18 +8,19 @@
  */
 
 import React from 'react';
-import { EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const InspectHeader = () => (
-  <EuiFlyoutHeader hasBorder>
+export const ActionsTitle = () => (
+  <>
     <EuiTitle size="s">
-      <h2>
+      <h3>
         <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.title"
-          defaultMessage="Inspect component"
+          id="kbnInspectComponent.inspectFlyout.linksSection.title"
+          defaultMessage="Actions"
         />
-      </h2>
+      </h3>
     </EuiTitle>
-  </EuiFlyoutHeader>
+    <EuiSpacer size="s" />
+  </>
 );
