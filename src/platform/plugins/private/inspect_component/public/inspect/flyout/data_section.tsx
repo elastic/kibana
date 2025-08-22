@@ -14,6 +14,7 @@ import {
   EuiFlexGroup,
   EuiIcon,
   EuiImage,
+  EuiLink,
   EuiListGroup,
   EuiSpacer,
   EuiText,
@@ -33,7 +34,7 @@ export const DataSection = ({ componentData }: Props) => {
 
   if (!componentData) return null;
 
-  const { codeowners, iconType, sourceComponent, image } = componentData;
+  const { codeowners, euiInfo, iconType, sourceComponent, image } = componentData;
 
   const listItem: EuiListGroupItemProps[] = codeowners.map((codeowner) => ({
     label: codeowner,
@@ -110,6 +111,26 @@ export const DataSection = ({ componentData }: Props) => {
           )}
         </EuiText>
         {iconType && <EuiIcon type={iconType} size="m" />}
+      </EuiFlexGroup>
+      <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+        <EuiText color={euiTheme.colors.textSubdued} size="s">
+          <FormattedMessage
+            id="kbnInspectComponent.inspectFlyout.euiDocsLabel"
+            defaultMessage="EUI Docs:"
+          />
+        </EuiText>
+        {euiInfo ? (
+          <EuiLink href={euiInfo.docsLink} target="_blank">
+            {euiInfo.componentName}
+          </EuiLink>
+        ) : (
+          <EuiText color={euiTheme.colors.textSubdued} size="s">
+            <FormattedMessage
+              id="kbnInspectComponent.inspectFlyout.noDocsFound"
+              defaultMessage="N/A"
+            />
+          </EuiText>
+        )}
       </EuiFlexGroup>
     </>
   );

@@ -16,6 +16,7 @@ import { flyoutOptions, InspectFlyout } from './inspect';
 
 export const getComponentData = async ({
   core,
+  euiInfo,
   fileData,
   iconType,
   target,
@@ -40,6 +41,7 @@ export const getComponentData = async ({
 
     const componentData = {
       ...fileData,
+      euiInfo,
       iconType,
       relativePath,
       codeowners,
