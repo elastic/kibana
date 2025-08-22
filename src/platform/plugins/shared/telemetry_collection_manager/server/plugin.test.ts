@@ -270,7 +270,7 @@ describe('Telemetry Collection Manager', () => {
               expect.not.objectContaining({ refreshCache: true }),
               usageCollection
             );
-            expect(getStatsCollectionConfig).toReturnWith(
+            expect(getStatsCollectionConfig).toHaveReturnedWith(
               expect.objectContaining({
                 refreshCache: true,
               })
