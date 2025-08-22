@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { isRetryableEsClientError } from './src/is_retryable_es_client_errors';
+export { isRetryableEsClientError } from './src/is_retryable_es_client_error';

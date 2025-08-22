@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/es-errors"
+    "@kbn/es-errors",
+    "@kbn/core-elasticsearch-client-server-mocks"
   ],
   "exclude": [
     "target/**/*",
