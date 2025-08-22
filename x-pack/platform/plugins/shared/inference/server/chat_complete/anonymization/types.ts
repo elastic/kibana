@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Anonymization } from '@kbn/inference-common';
+import type { Anonymization, RegexAnonymizationRule } from '@kbn/inference-common';
 
 /**
  * AnonymizationRecord maps JSON Pointer paths to string values that need anonymization.
@@ -35,4 +35,9 @@ export interface DetectedMatch {
   matchValue: string;
   class_name: string;
   ruleIndex: number;
+}
+
+export interface AnonymizationRegexWorkerTaskPayload {
+  rules: RegexAnonymizationRule[];
+  records: Array<Record<string, string>>;
 }

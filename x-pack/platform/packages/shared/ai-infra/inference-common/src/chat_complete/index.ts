@@ -80,5 +80,4 @@ export type {
   RegexAnonymizationRule,
   NamedEntityRecognitionRule,
   AnonymizationSettings,
-  AnonymizationRegexWorkerTaskPayload,
 } from './anonymization';
