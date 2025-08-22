@@ -302,7 +302,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
       }
 
-      let docLoaderPromises: Array<Promise<boolean>> = [];
+      const docLoaderPromises: Array<Promise<boolean>> = [];
 
       if (!ignoreSecurityLabs) {
         this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
