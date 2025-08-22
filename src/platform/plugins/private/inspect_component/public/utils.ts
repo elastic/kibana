@@ -22,6 +22,82 @@ const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | u
   return fiberKey ? (node as any)[fiberKey] : undefined;
 };
 
+const getFiberType = (fiber: ReactFiberNode): string | null => {
+  if (typeof fiber.type === 'string') {
+    return fiber.type;
+  } else if (typeof fiber.type?.name === 'string') {
+    return fiber.type?.name;
+  } else if (typeof fiber.type?.displayName === 'string') {
+    return fiber.type?.displayName;
+  } else if (typeof fiber.elementType === 'string') {
+    return fiber.elementType;
+  }
+
+  return null;
+};
+
+// TODO - this logic probably needs some work.
+export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
+  const path: string[] = [];
+  let source: FileData | null | undefined;
+  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
+
+  while (current && source !== null) {
+    const fiber = getFiberFromDomNode(current);
+
+    if (fiber) {
+      let fiberCursor: ReactFiberNode | null | undefined = fiber;
+      while (fiberCursor && source !== null) {
+        const type = getFiberType(fiberCursor);
+
+        if (fiberCursor._debugSource) {
+          if (source === undefined) {
+            source = fiberCursor._debugSource;
+          } else if (source.fileName !== fiberCursor._debugSource.fileName) {
+            source = null;
+          }
+        }
+
+        // Emotion injects a lot of wrapper components, so we need to filter them out.
+        if (type && !type.startsWith('Emotion')) {
+          path.push(type);
+        }
+
+        fiberCursor = fiberCursor._debugOwner;
+      }
+    }
+
+    current = current.parentElement;
+  }
+
+  if (path.length === 0) {
+    return undefined;
+  }
+
+  if (path.length === 1) {
+    return {
+      sourceComponent: path[0],
+      path: null,
+    };
+  }
+
+  const [sourceComponent, ...rest] = path.reverse();
+
+  let restItems = rest;
+
+  // React will always include the literal DOM node rendered, even if it's a
+  // component, (e.g. EuiPanel > div).  Trim off the DOM node if we have a literal
+  // component.
+  if (rest.length > 1 && /^[a-z]/.test(rest[rest.length - 1])) {
+    restItems = rest.slice(0, -1);
+  }
+
+  return {
+    path: [sourceComponent + ' : ', ...restItems.join(' > ')].join(''),
+    sourceComponent,
+  };
+};
+
 const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
   let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
 
@@ -81,11 +157,13 @@ export const getInspectedElementData = async ({
   euiTheme,
   setFlyoutRef,
   setIsInspecting,
+  sourceComponent,
 }: GetInspectedElementOptions) => {
   event.preventDefault();
   event.stopPropagation();
 
   const target = getElementFromPoint({ event, overlayId });
+
   if (!target) {
     setIsInspecting(false);
     return;
@@ -111,6 +189,7 @@ export const getInspectedElementData = async ({
     euiTheme,
     setFlyoutRef,
     setIsInspecting,
+    sourceComponent,
   });
 };
 

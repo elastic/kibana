@@ -10,27 +10,26 @@
 import html2canvas from 'html2canvas';
 
 import { DEFAULT_CONTAINER_SELECTOR, getPreviewDimensions, storePreviewScreenshot } from './lib';
-import type { TakePreviewScreenshotOptions } from './types';
+import type { TakePreviewScreenshotOptions, CapturePreviewScreenshotOptions } from './types';
 
 /**
- * Takes a screenshot of a preview container and stores it using the provided storage function.
+ * Captures a screenshot of a preview container and returns the image data.
  *
- * Returns `true` if the screenshot was successfully taken and stored, false otherwise.
+ * Returns the base64-encoded data URL of the screenshot, or null if the screenshot failed.
  */
-export const takePreviewScreenshot = async ({
-  savedObjectId,
+export const capturePreviewScreenshot = async ({
+  target,
   querySelector = DEFAULT_CONTAINER_SELECTOR,
   scrollX = 0,
   scrollY = 0,
-  storeScreenshot = storePreviewScreenshot,
   maxHeight,
   maxWidth,
   aspectRatio,
-}: TakePreviewScreenshotOptions): Promise<boolean> => {
-  const container = document.querySelector(querySelector);
+}: CapturePreviewScreenshotOptions): Promise<string | null> => {
+  const container = target || document.querySelector(querySelector);
 
   if (!container || !(container instanceof HTMLElement)) {
-    return false;
+    return null;
   }
 
   try {
@@ -63,21 +62,54 @@ export const takePreviewScreenshot = async ({
     if (!ctx) {
       /* eslint-disable-next-line no-console */
       console.error('Failed to create 2d context for preview screenshot');
-      return false;
+      return null;
     }
 
     ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(capture, ...drawImageParams);
     dataUrl = resizedCanvas.toDataURL('image/png');
 
-    return storeScreenshot({
-      savedObjectId,
-      dataUrl,
-    });
+    return dataUrl;
   } catch (e) {
     /* eslint-disable-next-line no-console */
-    console.error('Failed to take preview screenshot', e);
+    console.error('Failed to capture preview screenshot', e);
   }
 
-  return false;
+  return null;
+};
+
+/**
+ * Takes a screenshot of a preview container and stores it using the provided storage function.
+ *
+ * Returns `true` if the screenshot was successfully taken and stored, false otherwise.
+ */
+export const takePreviewScreenshot = async ({
+  savedObjectId,
+  target,
+  querySelector = DEFAULT_CONTAINER_SELECTOR,
+  scrollX = 0,
+  scrollY = 0,
+  storeScreenshot = storePreviewScreenshot,
+  maxHeight,
+  maxWidth,
+  aspectRatio,
+}: TakePreviewScreenshotOptions): Promise<boolean> => {
+  const dataUrl = await capturePreviewScreenshot({
+    target,
+    querySelector,
+    scrollX,
+    scrollY,
+    maxHeight,
+    maxWidth,
+    aspectRatio,
+  });
+
+  if (!dataUrl) {
+    return false;
+  }
+
+  return storeScreenshot({
+    savedObjectId,
+    dataUrl,
+  });
 };

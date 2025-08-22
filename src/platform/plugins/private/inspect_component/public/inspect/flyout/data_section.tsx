@@ -10,8 +10,10 @@
 import React from 'react';
 import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
+  EuiCode,
   EuiFlexGroup,
   EuiIcon,
+  EuiImage,
   EuiListGroup,
   EuiSpacer,
   EuiText,
@@ -31,7 +33,7 @@ export const DataSection = ({ componentData }: Props) => {
 
   if (!componentData) return null;
 
-  const { codeowners, iconType } = componentData;
+  const { codeowners, iconType, sourceComponent, image } = componentData;
 
   const listItem: EuiListGroupItemProps[] = codeowners.map((codeowner) => ({
     label: codeowner,
@@ -45,12 +47,30 @@ export const DataSection = ({ componentData }: Props) => {
 
   return (
     <>
+      {image && (
+        <>
+          <EuiImage src={image} alt="Preview" size="fullWidth" hasShadow />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiTitle size="s">
         <h3>
-          <FormattedMessage
-            id="kbnInspectComponent.inspectFlyout.componentDataTitle"
-            defaultMessage="Data"
-          />
+          {sourceComponent ? (
+            <EuiCode
+              transparentBackground
+              css={css`
+                color: ${euiTheme.colors.textHeading};
+                padding: 0;
+              `}
+            >
+              {sourceComponent}
+            </EuiCode>
+          ) : (
+            <FormattedMessage
+              id="kbnInspectComponent.inspectFlyout.componentDataTitle"
+              defaultMessage="Data"
+            />
+          )}
         </h3>
       </EuiTitle>
       <EuiSpacer size="m" />

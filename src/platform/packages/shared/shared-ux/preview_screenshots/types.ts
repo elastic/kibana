@@ -34,6 +34,8 @@ export interface PreviewScreenshot {
  * Common options for taking a preview screenshot.
  */
 interface CommonOptions {
+  /** The HTML element to target.  If not provided, the `querySelector` will be used. */
+  target?: HTMLElement | SVGElement;
   /** A query selector to find the HTML container to target.  Default is `.kbnAppWrapper`. */
   querySelector?: string;
   /** A function to store the screenshot.  Default stores to session storage. */
@@ -68,3 +70,11 @@ export interface TakePreviewScreenshotOptions extends CommonOptions {
   /** The ID of the Saved Object.  This can actually be any known identifier. */
   savedObjectId: string;
 }
+
+/**
+ * Options for the `capturePreviewScreenshot` function.
+ */
+export type CapturePreviewScreenshotOptions = Omit<
+  CommonOptions,
+  'savedObjectId' | 'storeScreenshot'
+>;

@@ -8,5 +8,9 @@
  */
 
 export { usePreviewScreenshot } from './use_preview_screenshot';
-export { takePreviewScreenshot } from './take_screenshot';
-export type { TakePreviewScreenshotOptions, UsePreviewScreenshotOptions } from './types';
+export { takePreviewScreenshot, capturePreviewScreenshot } from './take_screenshot';
+export type {
+  TakePreviewScreenshotOptions,
+  CapturePreviewScreenshotOptions,
+  UsePreviewScreenshotOptions,
+} from './types';
