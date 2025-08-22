@@ -10,7 +10,7 @@ import {
   ContentPack,
   ContentPackIncludedObjects,
   StreamChanges,
-  StreamConflict,
+  StreamConflicts,
 } from '@kbn/content-packs-schema';
 import { HttpSetup } from '@kbn/core/public';
 import { Streams } from '@kbn/streams-schema';
@@ -44,7 +44,7 @@ export async function importContent({
   return response;
 }
 
-export async function previewContent({
+export async function parseContent({
   http,
   file,
   definition,
@@ -57,7 +57,7 @@ export async function previewContent({
   body.append('content', file);
 
   const contentPack = await http.post<ContentPack>(
-    `/internal/streams/${definition.stream.name}/content/preview`,
+    `/internal/streams/${definition.stream.name}/content/parse`,
     {
       body,
       headers: {
@@ -70,7 +70,7 @@ export async function previewContent({
   return contentPack;
 }
 
-export async function diffContent({
+export async function previewContent({
   file,
   http,
   definition,
@@ -85,8 +85,8 @@ export async function diffContent({
   body.append('content', file);
   body.append('include', JSON.stringify(include));
 
-  const response = await http.post<{ changes: StreamChanges[]; conflicts: StreamConflict[] }>(
-    `/internal/streams/${definition.stream.name}/content/diff`,
+  const response = await http.post<{ changes: StreamChanges[]; conflicts: StreamConflicts[] }>(
+    `/internal/streams/${definition.stream.name}/content/preview`,
     {
       body,
       headers: {

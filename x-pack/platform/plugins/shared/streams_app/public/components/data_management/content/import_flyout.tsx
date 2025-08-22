@@ -13,7 +13,7 @@ import {
   ContentPackIncludedObjects,
   ContentPackManifest,
   StreamChanges,
-  StreamConflict,
+  StreamConflicts,
 } from '@kbn/content-packs-schema';
 import {
   EuiButtonEmpty,
@@ -31,7 +31,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ContentPackObjectsList } from './objects_list';
-import { diffContent, importContent, previewContent } from './requests';
+import { previewContent, importContent, parseContent } from './requests';
 import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
 import { Diff } from './diff';
@@ -59,7 +59,7 @@ export function ImportContentPackFlyout({
   const [diffsAndConflicts, setDiffsAndConflicts] = useState<
     | {
         changes: StreamChanges[];
-        conflicts: StreamConflict[];
+        conflicts: StreamConflicts[];
       }
     | undefined
   >();
@@ -135,24 +135,24 @@ export function ImportContentPackFlyout({
                 setFile(archiveFile);
 
                 try {
-                  const contentPackParsed = await previewContent({
+                  const contentPack = await parseContent({
                     http,
                     definition,
                     file: archiveFile,
                   });
 
                   setManifest({
-                    name: contentPackParsed.name,
-                    version: contentPackParsed.version,
-                    description: contentPackParsed.description,
+                    name: contentPack.name,
+                    version: contentPack.version,
+                    description: contentPack.description,
                   });
-                  setContentPackObjects(contentPackParsed.entries);
+                  setContentPackObjects(contentPack.entries);
                 } catch (err) {
                   setFile(null);
 
                   notifications.toasts.addError(err, {
-                    title: i18n.translate('xpack.streams.failedToPreviewContentError', {
-                      defaultMessage: 'Failed to preview content pack',
+                    title: i18n.translate('xpack.streams.failedToParseContentError', {
+                      defaultMessage: 'Failed to parse content pack',
                     }),
                     toastMessage: getFormattedError(err).message,
                   });
@@ -194,13 +194,13 @@ export function ImportContentPackFlyout({
                 onClick={async () => {
                   if (!file) return;
 
-                  const response = await diffContent({
+                  const previewResponse = await previewContent({
                     http,
                     file,
                     definition,
                     include: includedObjects,
                   });
-                  setDiffsAndConflicts(response);
+                  setDiffsAndConflicts(previewResponse);
                 }}
               >
                 {i18n.translate('xpack.streams.importContentPackFlyout.diffContent', {

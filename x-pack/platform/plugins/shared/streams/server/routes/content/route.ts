@@ -174,8 +174,7 @@ const importContentRoute = createServerRoute({
       throw new StatusError('All conflicts must be resolved by user', 400);
     }
 
-    const streams = flattenTree(merged);
-    const result = await streamsClient.bulkUpsert(streams);
+    const result = await streamsClient.bulkUpsert(flattenTree(merged));
     await contentClient.upsertInstallation(params.path.name, {
       name: contentPack.name,
       streams: flattenTree(incoming),
@@ -185,11 +184,11 @@ const importContentRoute = createServerRoute({
   },
 });
 
-const previewContentRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/content/preview',
+const parseContentRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/content/parse',
   options: {
     access: 'internal',
-    summary: 'Preview a content pack',
+    summary: 'Parse a content pack',
     description: 'Returns a json representation of a content pack.',
     body: {
       accepts: 'multipart/form-data',
@@ -218,8 +217,8 @@ const previewContentRoute = createServerRoute({
   },
 });
 
-const diffContentRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/content/diff',
+const previewContentRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/content/preview',
   options: {
     access: 'internal',
     body: {
@@ -280,6 +279,6 @@ const diffContentRoute = createServerRoute({
 export const contentRoutes = {
   ...exportContentRoute,
   ...importContentRoute,
+  ...parseContentRoute,
   ...previewContentRoute,
-  ...diffContentRoute,
 };

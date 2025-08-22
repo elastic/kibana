@@ -128,7 +128,7 @@ export interface StreamChanges {
   changes: PropertyChange[];
 }
 
-export interface StreamConflict {
+export interface StreamConflicts {
   name: string;
   conflicts: PropertyConflict[];
 }
