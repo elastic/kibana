@@ -252,31 +252,34 @@ const EUI_COMPONENT_SLUG_OVERRIDES: Record<string, string> = {
   EuiWrappingPopover: '/components/containers/popover/#popover-using-an-htmlelement-as-the-anchor',
 };
 
-const camelToKebab = (str: string) =>
-  str
-    .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
-    .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
-    .toLowerCase();
+const splitPascalSegments = (str: string): string[] =>
+  str.match(/[A-Z]+(?=[A-Z][a-z]|$)|[A-Z][a-z0-9]*/g) || [];
 
-export const getEuiComponentDocLink = (componentName?: string): string | undefined => {
-  if (!componentName || !componentName.startsWith('Eui')) return;
+export const getEuiComponentDocLink = (componentName?: string): string | null => {
+  if (!componentName || !componentName.startsWith('Eui')) return null;
 
-  const override = EUI_COMPONENT_SLUG_OVERRIDES[componentName];
-  if (override) {
+  const toUrl = (name: string): string | null => {
+    const override = EUI_COMPONENT_SLUG_OVERRIDES[name];
+    if (!override) return null;
     return override.startsWith('http') ? override : `${EUI_DOCS_BASE}${override}`;
-  }
+  };
+
+  const exact = toUrl(componentName);
+  if (exact) return exact;
 
   const core = componentName.slice(3);
-  if (!core) return;
+  const segments = splitPascalSegments(core);
+  while (segments.length > 1) {
+    segments.pop();
+    const candidate = `Eui${segments.join('')}`;
+    const url = toUrl(candidate);
+    if (url) return url;
+  }
 
-  const slug = camelToKebab(core);
-
-  return `${EUI_DOCS_BASE}/${slug}`;
+  return null;
 };
 
-export const getEuiComponentDocLinkAtNode = (
-  node: HTMLElement | SVGElement
-): string | undefined => {
+export const getEuiComponentDocLinkAtNode = (node: HTMLElement | SVGElement): string | null => {
   const name = getEuiComponentNameAtNode(node);
   return getEuiComponentDocLink(name);
 };
@@ -317,8 +320,10 @@ export const isEuiComponentAtNode = (node: HTMLElement | SVGElement): boolean =>
 
 export const getEuiComponentNameAtNode = (node: HTMLElement | SVGElement): string | undefined => {
   let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
-
   while (current) {
+    const byClasses = getEuiComponentNameFromDomClasses(current);
+    if (byClasses) return byClasses;
+
     const fiber = getFiberFromDomNode(current);
 
     if (fiber) {
@@ -456,6 +461,126 @@ export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.u
   .toLowerCase()
   .includes('mac');
 
+const debugSourceEquals = (a?: FileData, b?: FileData) =>
+  !!a &&
+  a.fileName === b?.fileName &&
+  a.lineNumber === b?.lineNumber &&
+  a.columnNumber === b?.columnNumber;
+
+interface MatchedFiberAndDom {
+  fiber: ReactFiberNode;
+  dom: HTMLElement;
+}
+
+const findFiberAndDomByDebugSource = (
+  node: HTMLElement | SVGElement,
+  fileData: FileData
+): MatchedFiberAndDom | undefined => {
+  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
+
+  while (current) {
+    const fiber = getFiberFromDomNode(current);
+    if (fiber) {
+      let cursor: ReactFiberNode | null | undefined = fiber;
+      while (cursor) {
+        if (debugSourceEquals(cursor._debugSource, fileData)) {
+          return { fiber: cursor, dom: current };
+        }
+        cursor = cursor._debugOwner;
+      }
+    }
+    current = current.parentElement;
+  }
+  return;
+};
+
+const stripEuiClassModifiers = (cls: string): string => {
+  let base = cls.split(/__|--/)[0];
+
+  if (/^eui[A-Z]/.test(base)) {
+    base = base.split('-')[0];
+  }
+
+  base = base.replace(/-(is|has|with|without)[A-Z][A-Za-z0-9_-]*/g, '');
+
+  return base;
+};
+
+const isMeaningfulEuiBase = (base: string): boolean => {
+  return (
+    base.startsWith('eui') && !base.includes('__') && !base.includes('--') && !/^eui-/.test(base)
+  );
+};
+
+const getMostFrequentEuiBaseClass = (el: Element): string | undefined => {
+  const tokens = el.classList ? Array.from(el.classList) : [];
+  const euiTokens = tokens.filter((t) => t && t.startsWith('eui'));
+  if (euiTokens.length === 0) return undefined;
+
+  const meaningfulCounts = new Map<string, number>();
+  const allCounts = new Map<string, number>();
+
+  for (const t of euiTokens) {
+    const base = stripEuiClassModifiers(t);
+    allCounts.set(base, (allCounts.get(base) || 0) + 1);
+    if (isMeaningfulEuiBase(base)) {
+      meaningfulCounts.set(base, (meaningfulCounts.get(base) || 0) + 1);
+    }
+  }
+
+  const pickByCounts = (
+    counts: Map<string, number>,
+    tieBreakerPredicate?: (base: string) => boolean
+  ): string | undefined => {
+    if (counts.size === 0) return undefined;
+    let max = 0;
+    for (const n of counts.values()) max = Math.max(max, n);
+    const topBases = [...counts.entries()].filter(([, n]) => n === max).map(([b]) => b);
+
+    if (topBases.length === 1) return topBases[0];
+
+    for (let i = euiTokens.length - 1; i >= 0; i--) {
+      const candidate = stripEuiClassModifiers(euiTokens[i]);
+      if (
+        topBases.includes(candidate) &&
+        (!tieBreakerPredicate || tieBreakerPredicate(candidate))
+      ) {
+        return candidate;
+      }
+    }
+    return topBases[topBases.length - 1];
+  };
+
+  const meaningful = pickByCounts(meaningfulCounts, (b) => isMeaningfulEuiBase(b));
+  if (meaningful) return meaningful;
+
+  return pickByCounts(allCounts);
+};
+
+const euiCssClassToComponentName = (euiBase: string): string | undefined => {
+  if (!euiBase.startsWith('eui')) return;
+  const rest = euiBase.replace(/^eui-?/, '');
+  if (!rest) return 'Eui';
+
+  if (/-|_/.test(rest)) {
+    const pascal = rest
+      .split(/[-_]/g)
+      .filter(Boolean)
+      .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+      .join('');
+    return `Eui${pascal}`;
+  }
+
+  const head = rest.charAt(0).toUpperCase() + rest.slice(1);
+  return `Eui${head}`;
+};
+
+const getEuiComponentNameFromDomClasses = (el: Element): string | undefined => {
+  const base = getMostFrequentEuiBaseClass(el);
+  if (!base) return;
+  return euiCssClassToComponentName(base);
+};
+
 export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
   const rectangle = target.getBoundingClientRect();
   const isInsidePortal = Boolean(target.closest('[data-euiportal="true"]'));
@@ -524,7 +649,12 @@ export const getInspectedElementData = async ({
     return;
   }
 
-  const euiComponentName = getEuiComponentNameAtNode(target);
+  const matched = findFiberAndDomByDebugSource(target, fileData);
+
+  const euiComponentName =
+    (matched && getEuiComponentNameFromDomClasses(matched.dom)) ||
+    (matched && getEuiComponentNameFromFiberChain(matched.fiber)) ||
+    getEuiComponentNameAtNode(target);
 
   const iconType =
     target instanceof SVGElement
