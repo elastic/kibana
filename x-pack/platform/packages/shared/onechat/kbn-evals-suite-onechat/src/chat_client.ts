@@ -59,12 +59,16 @@ export class OnechatEvaluationChatClient {
         steps: any[];
         response: string;
       };
-      const { conversation_id: conversationIdFromResponse, response: latestResponse } =
-        chatResponse;
+      const {
+        conversation_id: conversationIdFromResponse,
+        response: latestResponse,
+        steps,
+      } = chatResponse;
 
       return {
         conversationId: conversationIdFromResponse,
         messages: [messages, latestResponse],
+        steps,
         errors: [],
       };
     } catch (error) {
@@ -72,6 +76,7 @@ export class OnechatEvaluationChatClient {
       return {
         conversationId,
         messages: [messages],
+        steps: [],
         errors: [
           {
             error: {
