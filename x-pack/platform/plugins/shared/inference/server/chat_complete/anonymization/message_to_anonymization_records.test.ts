@@ -10,7 +10,7 @@ import { MessageRole } from '@kbn/inference-common';
 import { messageToAnonymizationRecords } from './message_to_anonymization_records';
 
 describe('messageToAnonymizationRecords', () => {
-  test('User message string content becomes /content', () => {
+  it('User message string content becomes /content', () => {
     const msg: Message = {
       role: MessageRole.User,
       content: 'email a@example.com',
@@ -23,7 +23,7 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  test('User message array/object content flattens to leaf strings', () => {
+  it('User message array/object content flattens to leaf strings', () => {
     const msg: Message = {
       role: MessageRole.User,
       content: [
@@ -40,7 +40,7 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  test('Tool message only /response subtree is considered; non-strings ignored', () => {
+  it('Tool message only /response subtree is considered; non-strings ignored', () => {
     const msg: Message = {
       role: MessageRole.Tool,
       name: 'tool-1',
@@ -55,7 +55,7 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  test('Assistant message /content and /toolCalls/*/function/arguments', () => {
+  it('Assistant message /content and /toolCalls/*/function/arguments', () => {
     const msg: Message = {
       role: MessageRole.Assistant,
       content: 'See results',
@@ -80,7 +80,7 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  test('Escaping in keys — "/" → "~1", "~" → "~0"', () => {
+  it('Escaping in keys — "/" → "~1", "~" → "~0"', () => {
     const msg: Message = {
       role: MessageRole.Tool,
       name: 'tool-1',
@@ -101,7 +101,7 @@ describe('messageToAnonymizationRecords', () => {
     });
   });
 
-  test('Non-string leaves are ignored', () => {
+  it('Non-string leaves are ignored', () => {
     const msg: Message = {
       role: MessageRole.Tool,
       name: 'tool-1',
@@ -119,5 +119,36 @@ describe('messageToAnonymizationRecords', () => {
     expect(rec).toEqual({
       '/response/d/0': 'x',
     });
+  });
+
+  it('User message with mixed text/image content only processes text', () => {
+    const msg: Message = {
+      role: MessageRole.User,
+      content: [
+        { type: 'text', text: 'a@example.com' },
+        { type: 'image', source: { data: 'image data', mimeType: 'image/png' } },
+        { type: 'text', text: 'ok' },
+      ],
+    };
+
+    const rec = messageToAnonymizationRecords(msg);
+
+    expect(rec).toEqual({
+      '/content/0/text': 'a@example.com',
+      '/content/2/text': 'ok',
+    });
+  });
+
+  it('User message with image-only content yields an empty record', () => {
+    const msg: Message = {
+      role: MessageRole.User,
+      content: [
+        { type: 'image', source: { data: 'img1', mimeType: 'image/png' } },
+        { type: 'image', source: { data: 'img2', mimeType: 'image/jpeg' } },
+      ],
+    };
+
+    const rec = messageToAnonymizationRecords(msg);
+    expect(rec).toEqual({});
   });
 });

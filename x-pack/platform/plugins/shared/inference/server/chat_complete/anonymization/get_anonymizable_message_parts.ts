@@ -7,7 +7,6 @@
 
 import type { Message } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
-import type { MessageContentText } from '@kbn/inference-common';
 
 /**
  * getAnonymizableMessageParts returns just the data of a
@@ -34,19 +33,5 @@ export function getAnonymizableMessageParts(message: Message) {
     };
   }
 
-  const content = message.content;
-  if (Array.isArray(content)) {
-    return {
-      content: content
-        // only return text content and don't return image content
-        .filter((item): item is MessageContentText => item.type === 'text')
-        .map((item) => ({ text: item.text })),
-    };
-  }
-
-  return { content };
-
-  return {
-    content,
-  };
+  return { content: message.content };
 }

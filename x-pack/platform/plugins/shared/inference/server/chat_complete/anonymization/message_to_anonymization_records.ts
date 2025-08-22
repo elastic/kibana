@@ -33,12 +33,26 @@ function collectStringEntries(value: unknown, basePointer: string): Array<[strin
   }
 
   if (value && typeof value === 'object') {
-    return Object.entries(value).flatMap(([k, v]) => {
+    const obj = value as Record<string, unknown>;
+
+    // Skip images entirely (do not traverse into source.{data,mimeType})
+    if (obj.type === 'image') {
+      return [];
+    }
+
+    // For text content objects, only collect the text field to avoid adding pointers
+    // for the `type` property.
+    if (obj.type === 'text' && typeof obj.text === 'string') {
+      return [[`${basePointer}/text`, obj.text]];
+    }
+
+    return Object.entries(obj).flatMap(([k, v]) => {
       const next = `${basePointer}/${escapePointerToken(k)}`;
       return collectStringEntries(v, next);
     });
   }
 
+  // Non-string primitives (number/boolean/null/undefined) are ignored
   return [];
 }
 

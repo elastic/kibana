@@ -385,4 +385,35 @@ describe('anonymizeMessages', () => {
       'my name is PER_ee4587b4ba681e38996a1b716facbf375786bff7 and I live in los angeles'
     );
   });
+
+  it('mixed text/image content preserves indices and masks correct leaf', async () => {
+    const messages: Message[] = [
+      {
+        role: MessageRole.User,
+        content: [
+          { type: 'text', text: 'hello' },
+          { type: 'image', source: { data: 'img', mimeType: 'image/png' } },
+          { type: 'text', text: 'my email is a@example.com' },
+        ],
+      },
+    ];
+
+    const result = await anonymizeMessages({
+      messages,
+      anonymizationRules: [regexRule],
+      regexWorker,
+      esClient: mockEsClient,
+    });
+
+    const anonymizedContent = result.messages[0] as UserMessage;
+    const content = anonymizedContent.content;
+
+    const emailMask = getEntityMask({ class_name: 'EMAIL', value: 'a@example.com' });
+    const expected = [
+      { type: 'text', text: 'hello' },
+      { type: 'image', source: { data: 'img', mimeType: 'image/png' } },
+      { type: 'text', text: `my email is ${emailMask}` },
+    ];
+    expect(content).toEqual(expected);
+  });
 });
