@@ -48,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Index editor', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
-      await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
+      await security.testUser.setRoles(['superuser']);
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
