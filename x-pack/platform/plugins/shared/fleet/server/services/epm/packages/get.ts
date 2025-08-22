@@ -84,6 +84,7 @@ import {
   getAgentTemplateAssetsMapCache,
   setAgentTemplateAssetsMapCache,
 } from './cache';
+import { shouldIncludePackageWithDatastreamTypes } from './exclude_datastreams_helper';
 
 export { getFile } from '../registry';
 
@@ -212,11 +213,7 @@ function filterOutExcludedDataStreamTypes(
   if (excludeDataStreamTypes.length > 0) {
     // filter out packages where all data streams have excluded types e.g. metrics
     return packageList.reduce((acc, pkg) => {
-      const shouldInclude =
-        (pkg.data_streams || [])?.length === 0 ||
-        pkg.data_streams?.some((dataStream: any) => {
-          return !excludeDataStreamTypes.includes(dataStream.type);
-        });
+      const shouldInclude = shouldIncludePackageWithDatastreamTypes(pkg, excludeDataStreamTypes);
       if (shouldInclude) {
         // filter out excluded data stream types
         const filteredDataStreams =
@@ -574,6 +571,17 @@ export async function getPackageInfo({
   const { filteredDataStreams, filteredPolicyTemplates } =
     getFilteredDataStreamsAndPolicyTemplates(packageInfo);
 
+  const excludeDataStreamTypes =
+    appContextService.getConfig()?.internal?.excludeDataStreamTypes ?? [];
+
+  if (
+    !savedObject &&
+    !shouldIncludePackageWithDatastreamTypes(packageInfo, excludeDataStreamTypes)
+  ) {
+    throw new PackageNotFoundError(
+      'Package is not compatible with the current project data stream types'
+    );
+  }
   const updated = {
     ...packageInfo,
     ...additions,
