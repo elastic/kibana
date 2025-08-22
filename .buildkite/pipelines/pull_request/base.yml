@@ -111,10 +111,12 @@ steps:
           diskSizeGb: 85
           timeout_in_minutes: 2
 
-  - wait
+  - wait: ~
+    continue_on_failure: true
 
   - label: Run Kibana Healer
     depends_on: prechecks
+    allow_dependency_failure: true
     key: kibana_healer_conditional
     agents:
       machineType: n2-standard-2
@@ -130,7 +132,8 @@ steps:
       YAML
       fi
 
-  - wait
+  - wait: ~
+    depends_on: prechecks
 
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
