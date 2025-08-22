@@ -22,8 +22,8 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 
-import { RequestStatus } from '../../../../common/adapters';
-import type { Request } from '../../../../common/adapters/request/types';
+import type { Request } from '@kbn/inspector-common';
+import { RequestStatus } from '@kbn/inspector-common';
 
 interface RequestSelectorProps {
   requests: Request[];

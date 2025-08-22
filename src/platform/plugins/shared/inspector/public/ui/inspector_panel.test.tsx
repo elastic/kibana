@@ -13,7 +13,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { InspectorPanel } from './inspector_panel';
 import type { InspectorViewDescription } from '../types';
-import type { Adapters } from '../../common';
+import type { Adapters } from '@kbn/inspector-common';
 import type { ApplicationStart, HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';

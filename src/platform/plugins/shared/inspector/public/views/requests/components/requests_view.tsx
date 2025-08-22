@@ -11,8 +11,8 @@ import React, { Component } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiEmptyPrompt, EuiSpacer, EuiText, EuiTextColor } from '@elastic/eui';
 
-import { RequestStatus } from '../../../../common/adapters';
-import type { Request } from '../../../../common/adapters/request/types';
+import { RequestStatus } from '@kbn/inspector-common';
+import type { Request } from '@kbn/inspector-common';
 import type { InspectorViewProps } from '../../../types';
 
 import { RequestSelector } from './request_selector';

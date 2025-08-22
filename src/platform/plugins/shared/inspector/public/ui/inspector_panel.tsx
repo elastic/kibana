@@ -28,8 +28,8 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { css } from '@emotion/react';
+import type { Adapters } from '@kbn/inspector-common';
 import type { InspectorViewDescription } from '../types';
-import type { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
 
 function hasAdaptersChanged(oldAdapters: Adapters, newAdapters: Adapters) {

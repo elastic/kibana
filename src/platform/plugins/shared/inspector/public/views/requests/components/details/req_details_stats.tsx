@@ -19,9 +19,8 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { Request, RequestStatistic } from '@kbn/inspector-common';
 import type { DetailViewProps } from './types';
-import type { Request, RequestStatistic } from '../../../../../common/adapters/request/types';
-
 // TODO: Replace by property once available
 interface RequestDetailsStatRow extends RequestStatistic {
   id: string;

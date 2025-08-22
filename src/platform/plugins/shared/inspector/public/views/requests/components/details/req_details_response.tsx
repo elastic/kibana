@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import type { Request } from '../../../../../common/adapters/request/types';
+import type { Request } from '@kbn/inspector-common';
 import type { DetailViewProps } from './types';
 import { RequestCodeViewer } from './req_code_viewer';
 

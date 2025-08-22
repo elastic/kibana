@@ -17,7 +17,8 @@
     "@kbn/std",
     "@kbn/code-editor",
     "@kbn/core-lifecycle-browser",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/inspector-common"
   ],
   "exclude": [
     "target/**/*",
