@@ -14,7 +14,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { IEventLogService } from '@kbn/event-log-plugin/server';
+import type { IEventLogService, IEventLogClientService } from '@kbn/event-log-plugin/server';
 
 export interface TaskManagerDependenciesPluginSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
@@ -25,6 +25,7 @@ export interface TaskManagerDependenciesPluginSetup {
 export interface TaskManagerDependenciesPluginStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   taskManager: TaskManagerStartContract;
+  eventLog: IEventLogClientService;
 }
 
 export class TaskManagerDependenciesPlugin {

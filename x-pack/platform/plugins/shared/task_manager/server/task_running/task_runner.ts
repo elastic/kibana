@@ -380,6 +380,7 @@ export class TaskManagerRunner implements TaskRunner {
         action: 'execute-start',
       },
       kibana: kibanaProperties,
+      message: `Task ${this} is starting to run`,
     };
     const doneEvent: IEvent = {
       event: {
@@ -420,7 +421,7 @@ export class TaskManagerRunner implements TaskRunner {
       doneEvent.message = `Task ${this} failed due to the task state being invalid: ${stateValidationResult.error.message}`;
       doneEvent.error = {
         message: stateValidationResult.error.message,
-        stack_trace: stateValidationResult.error.stack_trace
+        stack_trace: stateValidationResult.error.stack,
       };
       this.eventLogger.logEvent(doneEvent);
       return processedResult;
@@ -492,7 +493,7 @@ export class TaskManagerRunner implements TaskRunner {
       doneEvent.message = `Task ${this} failed: ${err}`;
       doneEvent.error = {
         message: err.message,
-        stack_trace: err.stack_trace,
+        stack_trace: err.stack,
       };
       this.eventLogger.logEvent(doneEvent);
       return processedResult;
