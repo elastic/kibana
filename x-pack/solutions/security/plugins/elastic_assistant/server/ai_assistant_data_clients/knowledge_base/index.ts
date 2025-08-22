@@ -302,6 +302,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
       }
 
+      let docLoaderPromises: Array<Promise<boolean>> = [];
+
       if (!ignoreSecurityLabs) {
         this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
@@ -327,9 +329,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
           this.options.logger.debug(`Loading Security Labs KB docs...`);
 
-          void loadSecurityLabs(this, this.options.logger)?.then(() => {
-            this.options.setIsKBSetupInProgress(this.spaceId, false);
-          });
+          docLoaderPromises.push(loadSecurityLabs(this, this.options.logger));
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
@@ -364,9 +364,15 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
 
         this.options.logger.debug(`Loading Defend Insights KB docs...`);
-        void loadDefendInsights(this, this.options.logger);
+        docLoaderPromises.push(loadDefendInsights(this, this.options.logger));
       } else {
         this.options.logger.debug(`Defend Insights Knowledge Base docs already loaded!`);
+      }
+
+      if (docLoaderPromises.length > 0) {
+        Promise.all(docLoaderPromises).then(() => {
+          this.options.setIsKBSetupInProgress(this.spaceId, false);
+        });
       }
 
       // If loading security labs, we need to wait for the docs to be loaded
@@ -544,7 +550,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       return response.count ?? 0;
     } catch (e) {
-      this.options.logger.info(`Error checking if Security Labs docs are loaded: ${e.message}`);
+      this.options.logger.info(`Error checking if Defend Insights docs are loaded: ${e.message}`);
       return 0;
     }
   };
