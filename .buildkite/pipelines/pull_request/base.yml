@@ -121,7 +121,7 @@ steps:
   - wait: ~
     continue_on_failure: true
 
-  - label: Run Kibana Healer
+  - label: Upload Kibana Healer
     depends_on: prechecks
     allow_dependency_failure: true
     key: kibana_healer_conditional
@@ -134,7 +134,7 @@ steps:
       if [ $$(buildkite-agent step get "outcome" --step "prechecks") == "hard_failed" ]; then
           cat <<- YAML | buildkite-agent pipeline upload
           steps:
-            - label: Upload Kibana Healer
+            - label: Run Kibana Healer
               command: .buildkite/scripts/steps/agents/kibana_healer.sh
       YAML
       fi
