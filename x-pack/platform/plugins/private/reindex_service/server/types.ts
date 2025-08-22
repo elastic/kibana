@@ -7,7 +7,7 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { ReindexOperation, Version } from '@kbn/upgrade-assistant-pkg-common';
-import type { IndicesIndexSettingsKeys } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   ReindexServiceScopedClient,
   ReindexServiceScopedClientArgs,
@@ -32,5 +32,3 @@ export interface PostBatchResponse {
 export interface GetBatchQueueResponse {
   queue: ReindexOperation[];
 }
-
-export type IndexSettings = Partial<Pick<IndicesIndexSettingsKeys, 'mode'>>;

@@ -13,6 +13,7 @@ import type {
 } from '@kbn/upgrade-assistant-pkg-common';
 import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
 import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
+import type { ReindexArgs } from '../../common';
 
 export class ReindexService {
   private client: HttpSetup;
@@ -28,14 +29,11 @@ export class ReindexService {
     });
   }
 
-  public async startReindex(indexName: string, newIndexName: string) {
+  public async startReindex(reindexArgs: Omit<ReindexArgs, 'reindexOptions'>) {
     return sendRequest<ReindexOperation>(this.client, {
       method: 'post',
       path: `${UA_BASE_PATH}/reindex`,
-      body: {
-        indexName,
-        newIndexName,
-      },
+      body: reindexArgs,
     });
   }
 

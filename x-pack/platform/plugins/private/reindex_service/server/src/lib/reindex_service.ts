@@ -13,7 +13,7 @@ import type { IndicesAlias, IndicesIndexSettings } from '@elastic/elasticsearch/
 import { esIndicesStateCheck, getReindexWarnings } from '@kbn/upgrade-assistant-pkg-server';
 import type { ReindexSavedObject, IndexWarning, Version } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import type { IndexSettings } from '../../types';
+import type { IndexSettings } from '../../../common';
 
 import type { ReindexActions } from './reindex_actions';
 
@@ -583,7 +583,8 @@ export const reindexServiceFactory = (
       return actions.createReindexOp({
         indexName,
         newIndexName,
-        opts: opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined,
+        // todo this is a wrong turn, queueSettings need to be accepted
+        reindexOptions: opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined,
         settings,
       });
     },

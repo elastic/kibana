@@ -28,22 +28,14 @@ import { reindexActionsFactory } from './reindex_actions';
 import { reindexServiceFactory } from './reindex_service';
 import { error } from './error';
 import { sortAndOrderReindexOperations } from './op_utils';
-import type { GetBatchQueueResponse, PostBatchResponse, IndexSettings } from '../../types';
+import type { GetBatchQueueResponse, PostBatchResponse } from '../../types';
 import { reindexHandler } from './reindex_handler';
+import type { ReindexArgs } from '../../../common';
 
 export interface ReindexServiceScopedClientArgs {
   savedObjects: SavedObjectsClientContract;
   dataClient: IScopedClusterClient;
   request: KibanaRequest;
-}
-
-interface ReindexArgs {
-  indexName: string;
-  newIndexName: string;
-  reindexOptions?: {
-    enqueue?: boolean;
-  };
-  settings?: IndexSettings;
 }
 
 export interface ReindexServiceScopedClient {
@@ -103,12 +95,12 @@ export class ReindexServiceWrapper {
 
     this.reindexWorker = ReindexWorker.create(
       soClient,
-      credentialStore, //
+      credentialStore,
       clusterClient,
-      logger, //
-      licensing, //
-      security, //
-      version //
+      logger,
+      licensing,
+      security,
+      version
     );
 
     this.reindexWorker.start();
@@ -159,8 +151,6 @@ export class ReindexServiceWrapper {
           queue: queue.map((savedObject) => savedObject.attributes),
         };
       },
-      // this will be annoying
-      // needs to take array of objects
       addToBatch: async (reindexJobs: ReindexArgs[]): Promise<PostBatchResponse> => {
         const results: PostBatchResponse = {
           enqueued: [],
@@ -171,6 +161,7 @@ export class ReindexServiceWrapper {
         asyncForEach(reindexJobs, async ({ indexName, newIndexName, settings }) => {
           try {
             // todo this duplicates code in reindex method and reindexOrResume method
+            // todo this should do a bunch of adds in batch style
             const result = await reindexHandler({
               savedObjects,
               dataClient,
@@ -267,7 +258,7 @@ export class ReindexServiceWrapper {
         return reindexOp.attributes;
       },
 
-      // todo I'm not sure if it makes sense to pass both names but it works for now
+      // todo - Previously this checked for access on the existing and new indices BUT we might not know the name of the new index
       getStatus: async (indexName: string): Promise<ReindexStatusResponse> => {
         // todo in theory this should check privs on new index as well
         const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges([indexName]);
