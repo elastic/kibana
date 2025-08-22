@@ -14,6 +14,7 @@ export {
   InternalCoreSetup,
   InternalCoreStart,
   InternalPluginInitializer,
+  type InternalPluginInitializerContext,
   type ServiceIdentifierFactory,
 } from './src/modules/lifecycle';
 export { Global } from './src/modules/plugin';

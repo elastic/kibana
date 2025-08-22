@@ -12,7 +12,13 @@ import {
   type ContainerModuleLoadOptions,
   type ServiceIdentifier,
 } from 'inversify';
+import type { LoggerFactory } from '@kbn/logging';
 import { PluginSetup, PluginStart } from '@kbn/core-di';
+
+/** @internal */
+export interface InternalPluginInitializerContext {
+  logger: LoggerFactory;
+}
 
 /** @internal */
 export type ServiceIdentifierFactory<T> = <K extends keyof T>(key: K) => ServiceIdentifier<T[K]>;
@@ -32,7 +38,8 @@ function createServiceIdentifierFactory<T>(...prefix: string[]): ServiceIdentifi
 }
 
 /** @internal */
-export const InternalPluginInitializer = createServiceIdentifierFactory('plugin', 'initializer');
+export const InternalPluginInitializer =
+  createServiceIdentifierFactory<InternalPluginInitializerContext>('plugin', 'initializer');
 
 /** @internal */
 export const InternalCoreSetup = createServiceIdentifierFactory('core', 'setup');
