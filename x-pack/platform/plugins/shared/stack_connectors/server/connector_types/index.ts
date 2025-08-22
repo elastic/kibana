@@ -31,6 +31,7 @@ import { getConnectorType as getWebhookConnectorType } from './webhook';
 import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
+import { getConnectorType as getHelloWorldConnectorType } from './hello_world';
 import { getConnectorType as getTheHiveConnectorType } from './thehive';
 import { getConnectorType as getXSOARConnectorType } from './xsoar';
 import { getOpsgenieConnectorType } from './opsgenie';
@@ -113,6 +114,7 @@ export function registerConnectorTypes({
   actions.registerSubActionConnectorType(getBedrockConnectorType());
   actions.registerSubActionConnectorType(getGeminiConnectorType());
   actions.registerSubActionConnectorType(getD3SecurityConnectorType());
+  actions.registerSubActionConnectorType(getHelloWorldConnectorType());
   actions.registerSubActionConnectorType(getResilientConnectorType());
   actions.registerSubActionConnectorType(getTheHiveConnectorType());
   actions.registerSubActionConnectorType(getXSOARConnectorType());

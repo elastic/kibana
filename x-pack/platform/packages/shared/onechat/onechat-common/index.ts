@@ -23,6 +23,7 @@ export {
   type ToolSelectionRelevantFields,
   allToolsSelectionWildcard,
   allToolsSelection,
+  type ConnectorToolConfig,
   type EsqlToolConfig,
   type EsqlToolFieldTypes,
   type EsqlToolParam,

@@ -19,6 +19,10 @@ export enum ToolType {
    * Tools based on ES|QL templates
    */
   esql = 'esql',
+  /**
+   * Tools based on Kibana connectors
+   */
+  connector = 'connector',
 }
 
 /**

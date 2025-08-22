@@ -65,6 +65,7 @@ export class ServiceManager {
     const tools = this.services.tools.start({
       getRunner,
       elasticsearch,
+      actions,
     });
 
     const agents = this.services.agents.start({
