@@ -142,10 +142,7 @@ export const useElasticsearchBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   ]);
 
 export const useEnterpriseSearchContentBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
-  useSearchBreadcrumbs([
-    { text: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE, path: '/' },
-    ...breadcrumbs,
-  ]);
+  useSearchBreadcrumbs([{ text: ENTERPRISE_SEARCH_DATA_PLUGIN.NAV_TITLE }, ...breadcrumbs]);
 
 export const useSearchExperiencesBreadcrumbs = (breadcrumbs: Breadcrumbs = []) =>
   useSearchBreadcrumbs([{ text: SEARCH_EXPERIENCES_PLUGIN.NAV_TITLE, path: '/' }, ...breadcrumbs]);
