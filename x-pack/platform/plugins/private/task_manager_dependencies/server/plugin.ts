@@ -14,10 +14,12 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import type { IEventLogService } from '@kbn/event-log-plugin/server';
 
 export interface TaskManagerDependenciesPluginSetup {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   taskManager: TaskManagerSetupContract;
+  eventLog: IEventLogService;
 }
 
 export interface TaskManagerDependenciesPluginStart {
@@ -26,20 +28,21 @@ export interface TaskManagerDependenciesPluginStart {
 }
 
 export class TaskManagerDependenciesPlugin {
-  public setup(core: CoreSetup, plugin: TaskManagerDependenciesPluginSetup) {
-    plugin.encryptedSavedObjects.registerType({
+  public setup(core: CoreSetup, plugins: TaskManagerDependenciesPluginSetup) {
+    plugins.encryptedSavedObjects.registerType({
       type: 'task',
       attributesToEncrypt: new Set(['apiKey']),
       attributesToIncludeInAAD: new Set(['id', 'taskType']),
       enforceRandomId: false,
     });
 
-    plugin.taskManager.registerCanEncryptedSavedObjects(plugin.encryptedSavedObjects.canEncrypt);
+    plugins.taskManager.registerCanEncryptedSavedObjects(plugins.encryptedSavedObjects.canEncrypt);
+    plugins.taskManager.registerEventLogService(plugins.eventLog);
   }
 
-  public start(core: CoreStart, plugin: TaskManagerDependenciesPluginStart) {
-    plugin.taskManager.registerEncryptedSavedObjectsClient(
-      plugin.encryptedSavedObjects.getClient({
+  public start(core: CoreStart, plugins: TaskManagerDependenciesPluginStart) {
+    plugins.taskManager.registerEncryptedSavedObjectsClient(
+      plugins.encryptedSavedObjects.getClient({
         includedHiddenTypes: ['task'],
       })
     );

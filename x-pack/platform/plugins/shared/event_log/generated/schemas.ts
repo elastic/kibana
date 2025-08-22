@@ -109,6 +109,8 @@ export const EventSchema = schema.maybe(
             id: ecsString(),
             scheduled: ecsDate(),
             schedule_delay: ecsStringOrNumber(),
+            // TODO: Properly re-generate schema
+            task_type: ecsString(),
           })
         ),
         alerting: schema.maybe(

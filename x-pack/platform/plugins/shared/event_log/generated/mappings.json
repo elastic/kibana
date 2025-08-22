@@ -251,6 +251,9 @@
                         },
                         "schedule_delay": {
                             "type": "long"
+                        },
+                        "task_type": {
+                            "type": "keyword"
                         }
                     }
                 },
