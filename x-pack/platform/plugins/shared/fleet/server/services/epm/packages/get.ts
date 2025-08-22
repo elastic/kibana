@@ -578,8 +578,12 @@ export async function getPackageInfo({
   const { filteredDataStreams, filteredPolicyTemplates } =
     getFilteredDataStreamsAndPolicyTemplates(packageInfo);
 
+  // Remove knowledge_base from packageInfo since it's handled separately by step_save_knowledge_base
+  // and shouldn't be exposed at the package level in API responses
+  const { knowledge_base: knowledgeBase, ...packageInfoWithoutKB } = packageInfo;
+
   const updated = {
-    ...packageInfo,
+    ...packageInfoWithoutKB,
     ...additions,
     data_streams: filteredDataStreams,
     policy_templates: filteredPolicyTemplates,

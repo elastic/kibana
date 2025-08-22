@@ -75,6 +75,8 @@ export async function stepSaveKnowledgeBase(context: InstallContext): Promise<vo
       throw new FleetError(`Error saving knowledge base content: ${error}`);
     }
   }
+  // Update context with the new esReferences
+  context.esReferences = esReferences;
 }
 
 export async function cleanupKnowledgeBaseStep(context: InstallContext) {
