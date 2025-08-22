@@ -7,7 +7,7 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import { Version } from '@kbn/upgrade-assistant-pkg-common';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexStatusResponse, IndexWarning } from '../../../../../../common/types';
 import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
@@ -115,12 +115,14 @@ export const useReindex = ({
   isInDataStream,
   isClosedIndex,
   api,
+  kibanaVersion,
 }: {
   indexName: string;
   isFrozen: boolean;
   isInDataStream: boolean;
   isClosedIndex: boolean;
   api: ApiService;
+  kibanaVersion: Version;
 }) => {
   const [reindexState, setReindexState] = useState<ReindexState>({
     loadingState: LoadingState.Loading,
@@ -242,11 +244,8 @@ export const useReindex = ({
       };
     });
 
-    const version = new Version();
-    version.setup('9.0.0');
-
     // todo get version string correctly, check to make sure semver package isn't adding too much to bundle
-    const newIndexName = generateNewIndexName(indexName, version);
+    const newIndexName = generateNewIndexName(indexName, kibanaVersion);
 
     const { data: reindexOp, error } = await api.startReindexTask({ indexName, newIndexName });
 
@@ -269,7 +268,7 @@ export const useReindex = ({
       });
     });
     updateStatus();
-  }, [api, indexName, updateStatus]);
+  }, [api, indexName, updateStatus, kibanaVersion]);
 
   const cancelReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {

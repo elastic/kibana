@@ -583,7 +583,6 @@ export const reindexServiceFactory = (
       return actions.createReindexOp({
         indexName,
         newIndexName,
-        // todo this is a wrong turn, queueSettings need to be accepted
         reindexOptions: opts?.enqueue ? { queueSettings: { queuedAt: Date.now() } } : undefined,
         settings,
       });
