@@ -24,6 +24,7 @@ import { PentagonHoverShape, PentagonShape } from './shapes/pentagon_shape';
 import { NodeExpandButton } from './node_expand_button';
 import { NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { NodeDetails } from './node_details';
+import { GRAPH_ENTITY_NODE_ID } from '../test_ids';
 
 const PentagonShapeOnHover = styled(NodeShapeOnHoverSvg)`
   transform: translate(-50%, -51.5%);
@@ -49,7 +50,7 @@ export const PentagonNode = memo<NodeProps>((props: NodeProps) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
   return (
-    <NodeContainer>
+    <NodeContainer data-test-subj={GRAPH_ENTITY_NODE_ID}>
       <NodeShapeContainer>
         {interactive && (
           <PentagonShapeOnHover

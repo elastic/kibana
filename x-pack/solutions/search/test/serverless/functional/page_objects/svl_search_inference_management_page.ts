@@ -112,6 +112,7 @@ export function SvlSearchInferenceManagementPageProvider({ getService }: FtrProv
         await testSubjects.click('provider');
 
         await testSubjects.existOrFail('api_key-password');
+        await testSubjects.click('inference-endpoint-additional-settings-button');
         await testSubjects.click('completion');
         await testSubjects.existOrFail('inference-endpoint-input-field');
         (await testSubjects.getVisibleText('inference-endpoint-input-field')).includes(
