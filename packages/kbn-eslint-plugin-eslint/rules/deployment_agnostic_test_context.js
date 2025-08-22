@@ -32,22 +32,6 @@ module.exports = {
     },
   },
   create: (context) => {
-    const filename = context.getFilename();
-
-    // Only apply this rule to files in the deployment-agnostic test directories
-    if (
-      !filename.includes('x-pack/platform/test/api_integration_deployment_agnostic/apis') &&
-      !filename.includes('x-pack/platform/test/api_integration_deployment_agnostic/services') &&
-      !filename.includes(
-        'x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis'
-      ) &&
-      !filename.includes(
-        'x-pack/solutions/observability/test/api_integration_deployment_agnostic/services'
-      )
-    ) {
-      return {};
-    }
-
     return {
       // Check function parameter types for DeploymentAgnosticFtrProviderContext
       FunctionDeclaration(node) {

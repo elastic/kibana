@@ -23,15 +23,6 @@ const ruleTester = new RuleTester({
 
 ruleTester.run('deployment_agnostic_test_context', rule, {
   valid: [
-    // Files not in deployment-agnostic directory should be ignored
-    {
-      filename: 'x-pack/test/api_integration/apis/test.ts',
-      code: `
-        export default function ({ getService }: FtrProviderContext) {
-          const supertest = getService('supertest');
-        }
-      `,
-    },
     // Correct usage in deployment-agnostic apis directory
     {
       filename: 'x-pack/platform/test/api_integration_deployment_agnostic/apis/test.ts',
