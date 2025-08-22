@@ -173,27 +173,7 @@ function matchesPatternPart(segment, patternPart) {
   return false;
 }
 
-/**
- * Handle globstar pattern matching
- * @param {string[]} patternParts - Pattern parts starting with **
- * @param {string[]} segments - Remaining path segments
- * @returns {string|null} Remaining pattern or null if no match
- */
-function matchGlobstarPattern(patternParts, segments) {
-  if (patternParts.length === 0) {
-    return segments.length === 0 ? '' : null;
-  }
-
-  // Special case: single globstar
-  if (patternParts.length === 1 && patternParts[0] === '**') {
-    return '**/*';
-  }
-
-  return patternParts.join('/');
-}
-
 module.exports = {
   removeConsumedSegments,
   matchesPatternPart,
-  matchGlobstarPattern,
 };

@@ -29,92 +29,28 @@
  */
 
 const path = require('path');
-const minimatch = require('minimatch');
+const {
+  transformOverridesForNestedContext,
+} = require('../utils/transform_overrides_for_nested_context');
+const { mergeRestrictedImports } = require('./utils/merge_restricted_imports');
 
 // eslint-disable-next-line import/no-dynamic-require, @kbn/imports/no_boundary_crossing
 const rootConfig = require('../../../../.eslintrc');
-const { transformSinglePattern } = require('./utils/pattern_transformer');
 
 const rootDir = path.resolve(__dirname, '..', '..', '..', '..');
 
-/** @type {typeof rootConfig} */
-const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
-
 /**
- * Transform file patterns (files and excludedFiles) for nested context
- * @param {string|string[]} patterns - File patterns to transform
- * @param {string} rootDir - Root directory path
- * @param {string} targetDir - Target nested directory path
- * @param {boolean} isExcludedFiles - Whether these are excludedFiles patterns
- * @returns {string[]|null} Transformed patterns array or null if not applicable
- */
-function transformFilePatterns(patterns, rootDir, targetDir, isExcludedFiles = false) {
-  if (!patterns) return null;
-
-  const patternArray = Array.isArray(patterns) ? patterns : [patterns];
-  const transformedPatterns = [];
-
-  for (const pattern of patternArray) {
-    try {
-      // Handle empty or invalid patterns
-      if (!pattern || typeof pattern !== 'string') {
-        console.warn(`Invalid pattern encountered: ${pattern}`);
-        continue;
-      }
-
-      // Handle negation at top level
-      const isNegated = pattern.startsWith('!');
-      const cleanPattern = isNegated ? pattern.slice(1) : pattern;
-
-      // Expand braces first (for both positive and negative patterns)
-      let expandedPatterns;
-      try {
-        expandedPatterns = minimatch.braceExpand(cleanPattern);
-      } catch (error) {
-        console.warn(`Pattern expansion failed for: ${cleanPattern}`, error);
-        expandedPatterns = [cleanPattern];
-      }
-
-      // For negated FILES patterns (not excludedFiles), check if ANY expanded pattern would exclude target
-      if (isNegated && !isExcludedFiles) {
-        for (const expandedPattern of expandedPatterns) {
-          const wouldMatch = minimatch(targetDir, path.resolve(rootDir, expandedPattern), {
-            partial: true,
-            matchBase: true,
-            dot: true,
-            nocase: process.platform === 'win32',
-          });
-
-          if (wouldMatch) {
-            // This negated pattern excludes our target directory
-            // Return null to exclude the entire override
-            return null;
-          }
-        }
-      }
-
-      // Transform each expanded pattern normally
-      for (const expandedPattern of expandedPatterns) {
-        const transformed = transformSinglePattern(expandedPattern, rootDir, targetDir);
-        if (transformed) {
-          const result = isNegated ? `!${transformed}` : transformed;
-          transformedPatterns.push(result);
-        }
-      }
-    } catch (error) {
-      console.warn(`Error processing pattern '${pattern}':`, error);
-      // Continue processing other patterns
-    }
-  }
-
-  return transformedPatterns.length > 0 ? transformedPatterns : null;
-}
-
-/**
- * Creates an ESLint configuration override for no-restricted-imports rule
- * that merges with existing root configuration and applies to the current directory context.
+ * Creates root eslint configuration deepclone
+ * and merges additional restricted imports into
+ * it's overrides while also localizing files and excludedFiles
+ * glob patterns to the nested context.
+ *
+ * Returns an array of overrides that contain
+ * the 'no-restricted-imports' rule with the merged
+ * restricted imports.
+ *
  * @param {CreateOverrideOptions} options - Configuration options
- * @returns {Array<Object>} Array of ESLint override configurations
+ * @returns {Array<Object>} Array of updated root eslint config overrides
  */
 function createNoRestrictedImportsOverride(options = {}) {
   const { restrictedImports = [], childConfigDir } = options;
@@ -132,101 +68,28 @@ function createNoRestrictedImportsOverride(options = {}) {
     );
   }
 
-  const overridesWithNoRestrictedImportRule = (clonedRootConfig.overrides || []).filter(
+  // Deep clone the root config to avoid mutating it
+  // from nested context
+  const clonedRootConfig = JSON.parse(JSON.stringify(rootConfig));
+
+  if (!clonedRootConfig.overrides || clonedRootConfig.overrides.length === 0) {
+    return [];
+  }
+
+  // find overrides with no-restricted-imports rules in root config
+  // and merge our restricted imports into them
+  mergeRestrictedImports(clonedRootConfig, restrictedImports);
+
+  // rule merging is done, now we need to transform
+  // all clonedRootConfig.overrides[].files and clonedRootConfig.overrides[].excludedFiles
+  // to match the nested context so that all overrides
+  // can be equally applied correctly on the nested context level
+  return transformOverridesForNestedContext(
+    clonedRootConfig.overrides,
+    rootDir,
+    childConfigDir,
     (override) => Boolean(override.rules && 'no-restricted-imports' in override.rules)
   );
-
-  // Process and merge restricted imports into existing rules
-  for (const override of overridesWithNoRestrictedImportRule) {
-    const noRestrictedImportsRule = override.rules['no-restricted-imports'];
-
-    if (Array.isArray(noRestrictedImportsRule) && noRestrictedImportsRule.length >= 2) {
-      const [severity, ...rawOptions] = noRestrictedImportsRule;
-
-      const modernConfig = { paths: [], patterns: [] };
-
-      // Normalize all inputs into modern config format
-      for (const opt of rawOptions) {
-        if (typeof opt === 'string' || (typeof opt === 'object' && opt && 'name' in opt)) {
-          modernConfig.paths.push(opt);
-        } else if (typeof opt === 'object' && opt && ('paths' in opt || 'patterns' in opt)) {
-          const optConfig = opt;
-          if (optConfig.paths) modernConfig.paths.push(...optConfig.paths);
-          if (optConfig.patterns) modernConfig.patterns.push(...optConfig.patterns);
-        }
-      }
-
-      // Remove duplicates and add new restricted imports
-      const existingPaths = modernConfig.paths.filter(
-        (existing) =>
-          !restrictedImports.some((restriction) => {
-            if (typeof existing === 'string') {
-              return typeof restriction === 'string'
-                ? existing === restriction
-                : existing === restriction.name;
-            } else if (existing && typeof existing === 'object' && 'name' in existing) {
-              return typeof restriction === 'string'
-                ? existing.name === restriction
-                : existing.name === restriction.name;
-            }
-            return false;
-          })
-      );
-
-      const newRuleConfig = [
-        severity,
-        {
-          paths: [...existingPaths, ...restrictedImports],
-          patterns: modernConfig.patterns,
-        },
-      ];
-
-      override.rules['no-restricted-imports'] = newRuleConfig;
-    }
-  }
-
-  // Transform file patterns for nested context
-  const transformedOverrides = [];
-
-  for (const override of overridesWithNoRestrictedImportRule) {
-    try {
-      // Transform files patterns (negated patterns may exclude entire override)
-      const transformedFiles = transformFilePatterns(
-        override.files,
-        rootDir,
-        childConfigDir,
-        false
-      );
-
-      // Skip this override if files pattern doesn't apply or is excluded
-      if (!transformedFiles) continue;
-
-      // Transform excludedFiles patterns (negated patterns are treated normally)
-      const transformedExcludedFiles = transformFilePatterns(
-        override.excludedFiles,
-        rootDir,
-        childConfigDir,
-        true
-      );
-
-      const newOverride = {
-        ...override,
-        files: transformedFiles,
-      };
-
-      // Add excludedFiles only if they exist and were successfully transformed
-      if (transformedExcludedFiles) {
-        newOverride.excludedFiles = transformedExcludedFiles;
-      }
-
-      transformedOverrides.push(newOverride);
-    } catch (error) {
-      console.warn(`Error processing override:`, error);
-      // Continue processing other overrides
-    }
-  }
-
-  return transformedOverrides;
 }
 
 module.exports = {
