@@ -53,7 +53,7 @@ export interface SuggestionItem<
   data: Array<AttachmentItem<TPayload>>; // The main data of the context, containing 1 or more context items
 }
 
-export interface SuggestionResponse<
+export interface SuggestionHandlerResponse<
   TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
 > {
   suggestions: SuggestionItem<TPayload>[]; // Array of suggestions

@@ -10,21 +10,13 @@ import { AttachmentRegistry } from '../../common/registry';
 import type {
   SuggestionContext,
   SuggestionOwner,
-  SuggestionResponse,
+  SuggestionHandlerResponse,
 } from '../../common/types/domain';
 import type { SuggestionType } from './types';
 
 export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionType> {
   constructor() {
     super('AttachmentSuggestionRegistry');
-  }
-
-  public register(suggestionType: SuggestionType): void {
-    super.register(suggestionType);
-  }
-
-  public getAll(): SuggestionType[] {
-    return super.list();
   }
 
   public getAllForOwners(owners: SuggestionOwner[]): SuggestionType[] {
@@ -36,8 +28,8 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
     context: SuggestionContext,
     request: KibanaRequest,
     logger: Logger
-  ): Promise<SuggestionResponse> {
-    const promises: Array<Promise<SuggestionResponse>> = [];
+  ): Promise<SuggestionHandlerResponse> {
+    const promises: Array<Promise<SuggestionHandlerResponse>> = [];
     for (const suggestion of this.getAllForOwners(owners)) {
       for (const handlerDefinition of Object.values(suggestion.handlers)) {
         promises.push(
@@ -50,7 +42,7 @@ export class AttachmentSuggestionRegistry extends AttachmentRegistry<SuggestionT
     }
     const allSettledResponses = await Promise.allSettled(promises);
 
-    return allSettledResponses.reduce<SuggestionResponse>(
+    return allSettledResponses.reduce<SuggestionHandlerResponse>(
       (acc, r) => {
         if (r.status === 'rejected') {
           logger.error('Failed to get suggestion.', { error: r.reason });

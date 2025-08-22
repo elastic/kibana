@@ -36,7 +36,7 @@ describe('AttachmentSuggestionRegistry', () => {
 
       registry.register(suggestionType);
 
-      const allSuggestions = registry.getAll();
+      const allSuggestions = registry.list();
       expect(allSuggestions).toHaveLength(1);
       expect(allSuggestions[0]).toEqual(suggestionType);
     });
