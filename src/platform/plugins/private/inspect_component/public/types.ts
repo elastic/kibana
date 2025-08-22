@@ -27,11 +27,20 @@ export interface ComponentData extends FileData {
   relativePath: string;
   codeowners: string[];
   baseFileName: string;
+  image?: string | null;
+  sourceComponent?: string;
 }
 
 export interface ReactFiberNode {
   _debugSource?: FileData;
   _debugOwner?: ReactFiberNode | null;
+  elementType: string | null;
+  type:
+    | string
+    | {
+        name?: string;
+        displayName?: string;
+      };
 }
 
 export interface GetComponentDataOptions {
@@ -42,6 +51,7 @@ export interface GetComponentDataOptions {
   iconType?: string;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
+  sourceComponent?: string;
 }
 
 export interface GetInspectedElementOptions {
@@ -51,6 +61,7 @@ export interface GetInspectedElementOptions {
   euiTheme: EuiThemeComputed;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
+  sourceComponent?: string;
 }
 
 export interface InspectComponentResponse {

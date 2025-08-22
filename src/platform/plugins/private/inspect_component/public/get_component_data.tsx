@@ -9,6 +9,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { capturePreviewScreenshot } from '../../../../packages/shared/shared-ux/preview_screenshots';
 import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
@@ -21,6 +22,7 @@ export const getComponentData = async ({
   euiTheme,
   setFlyoutRef,
   setIsInspecting,
+  sourceComponent,
 }: GetComponentDataOptions) => {
   try {
     const { codeowners, relativePath, baseFileName }: InspectComponentResponse =
@@ -28,12 +30,22 @@ export const getComponentData = async ({
         body: JSON.stringify({ path: fileData.fileName }),
       });
 
+    const { width: maxWidth, height: maxHeight } = target.getBoundingClientRect();
+    const image = await capturePreviewScreenshot({
+      target,
+      maxWidth,
+      maxHeight,
+      aspectRatio: maxHeight / maxWidth,
+    });
+
     const componentData = {
       ...fileData,
       iconType,
       relativePath,
       codeowners,
       baseFileName,
+      image,
+      sourceComponent,
     };
 
     const flyout = core.overlays.openFlyout(

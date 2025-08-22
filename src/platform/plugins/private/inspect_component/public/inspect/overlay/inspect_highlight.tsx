@@ -9,23 +9,48 @@
 
 import React from 'react';
 import type { CSSProperties } from 'react';
-import { transparentize, useEuiTheme } from '@elastic/eui';
+import { EuiBadge, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 interface Props {
   currentPosition: CSSProperties;
+  path?: string;
 }
 
-export const InspectHighlight = ({ currentPosition }: Props) => {
+export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const { euiTheme } = useEuiTheme();
+  const { transform, ...rest } = currentPosition;
+
+  const containerCss = css({
+    position: 'absolute',
+    transform,
+    pointerEvents: 'none',
+  });
 
   const highlightCss = css({
     position: 'absolute',
     backgroundColor: transparentize(euiTheme.colors.primary, 0.3),
     border: `2px solid ${euiTheme.colors.primary}`,
     pointerEvents: 'none',
-    ...currentPosition,
+    top: 0,
+    left: 0,
+    ...rest,
   });
 
-  return <div className={highlightCss} />;
+  const badgeCss = css({
+    position: 'relative',
+    top: rest.height,
+    left: 0,
+  });
+
+  return (
+    <div className={containerCss}>
+      <div className={highlightCss} />
+      {path && (
+        <EuiBadge color="primary" className={badgeCss}>
+          {path}
+        </EuiBadge>
+      )}
+    </div>
+  );
 };
