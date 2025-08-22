@@ -90,51 +90,21 @@ GET /kibana_sample_data_basics/_mapping
 # Response includes the new ‘language’ field in the mapping.
 
 # -----------------------------------------------
-# Step 7: Define explicit mapping
-# -----------------------------------------------
-# Create an index with explicit mappings to control field data types and properties.
-# Fields not defined in the mapping will still be stored in the document's
-# _source field, but they won’t be indexed or searchable
-
-PUT /my-explicit-mappings-kibana_sample_data_basics
-{
-  "mappings": {
-    "dynamic": false,
-    "properties": {
-      "name": {
-        "type": "text"
-      },
-      "author": {
-        "type": "text"
-      },
-      "release_date": {
-        "type": "date"
-      },
-      "page_count": {
-        "type": "integer"
-      }
-    }
-  }
-}
-
-# Response includes a confirmation that the index was created.
-
-# -----------------------------------------------
-# Step 8: Search all documents
+# Step 7: Search all documents
 # -----------------------------------------------
 # Run a search query to retrieve all documents from the kibana_sample_data_basics index.
 
-GET kibana_sample_data_basics/_search
+GET /kibana_sample_data_basics/_search
 
 # Response includes a list of all documents in the index.
 
 # -----------------------------------------------
-# Step 9: Use match query
+# Step 8: Use match query
 # -----------------------------------------------
 # Search for documents that contain a specific value in a specific field.
 # This is the standard query for full-text searches.
 
-GET kibana_sample_data_basics/_search
+GET /kibana_sample_data_basics/_search
 {
   "query": {
     "match": {
@@ -145,6 +115,60 @@ GET kibana_sample_data_basics/_search
 
 # Response includes a list of matching documents for the "brave" search term.
 
+# You can match against any field in these documents because this index uses dynamic mapping.
+# While dynamic mapping is helpful to get started, you may want to define explicit mappings
+# for better performance and control over your search behavior.
+
+# -----------------------------------------------
+# Step 9: Explicit mappings
+# -----------------------------------------------
+# Create an index with explicit mappings to control which fields are indexed.
+# Fields not defined in the mapping will still be stored in the document's
+# _source field, but they won’t be indexed or searchable.
+
+PUT /kibana_sample_data_basics_explicit_mapping
+{
+  "mappings": {
+    "dynamic": false,
+    "properties": {
+      "author": {
+        "type": "text"
+      }
+    }
+  }
+}
+
+
+# Add a single document to the explicitly mapped index.
+
+POST /kibana_sample_data_basics_explicit_mapping/_doc
+{"name": "Brave New World", "author": "Aldous Huxley", "release_date": "1932-06-01", "page_count": 268}
+
+# Since the explicit mapping only indexes the 'author' field,
+# searching by 'name' will not return any results.
+
+GET /kibana_sample_data_basics_explicit_mapping/_search
+{
+  "query": {
+    "match": {
+      "name": "brave"
+    }
+  }
+}
+
+# You can search across multiple indices using a wildcard (*) in the path
+
+GET /kibana_sample_data_basics*/_search
+{
+  "query": {
+    "match": {
+      "author": "Aldous Huxley"
+    }
+  }
+}
+
+# Notice the results include documents from both indices.
+
 # -----------------------------------------------
 # Step 10: Delete your indices (optional)
 # -----------------------------------------------
@@ -152,7 +176,7 @@ GET kibana_sample_data_basics/_search
 # Warning: Deleting an index permanently deletes its documents, shards, and metadata.
 
 DELETE /kibana_sample_data_basics
-DELETE /my-explicit-mappings-kibana_sample_data_basics
+DELETE /kibana_sample_data_basics_explicit_mapping
 
 # Response includes a confirmation that the indices were deleted.
 
