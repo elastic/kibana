@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import { SemVer } from 'semver';
-
-const kibanaVersion = new SemVer('8.0.0');
-
 export const getMockVersionInfo = () => {
-  const currentMajor = kibanaVersion.major;
+  const currentMajor = 8;
 
   return {
-    currentVersion: kibanaVersion,
+    currentVersion: {},
     currentMajor,
     prevMajor: currentMajor - 1,
     nextMajor: currentMajor + 1,
