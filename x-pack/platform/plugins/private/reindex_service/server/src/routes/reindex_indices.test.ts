@@ -42,10 +42,6 @@ jest.mock('../lib/reindex_service', () => ({
   reindexServiceFactory: () => mockReindexService,
 }));
 
-jest.mock('../lib/index_settings', () => ({
-  generateNewIndexName: () => 'reindexed-foo',
-}));
-
 import type { ReindexSavedObject } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import { credentialStoreFactory } from '../lib/credential_store';
