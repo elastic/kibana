@@ -18,7 +18,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { ItemDocument, Stored } from '../types';
 import {
   SiemMigrationStatus,
-  RuleTranslationResult,
+  MigrationTranslationResult,
 } from '../../../../../common/siem_migrations/constants';
 import { SiemMigrationsDataBaseClient } from './siem_migrations_data_base_client';
 import { MAX_ES_SEARCH_SIZE } from './constants';
@@ -326,15 +326,16 @@ export abstract class SiemMigrationsDataItemClient<
 
   protected translationResultAggCount(
     resultAgg: AggregationsStringTermsAggregate
-  ): Record<RuleTranslationResult, number> {
+  ): Record<MigrationTranslationResult, number> {
     const buckets = resultAgg.buckets as AggregationsStringTermsBucket[];
     return {
-      [RuleTranslationResult.FULL]:
-        buckets.find(({ key }) => key === RuleTranslationResult.FULL)?.doc_count ?? 0,
-      [RuleTranslationResult.PARTIAL]:
-        buckets.find(({ key }) => key === RuleTranslationResult.PARTIAL)?.doc_count ?? 0,
-      [RuleTranslationResult.UNTRANSLATABLE]:
-        buckets.find(({ key }) => key === RuleTranslationResult.UNTRANSLATABLE)?.doc_count ?? 0,
+      [MigrationTranslationResult.FULL]:
+        buckets.find(({ key }) => key === MigrationTranslationResult.FULL)?.doc_count ?? 0,
+      [MigrationTranslationResult.PARTIAL]:
+        buckets.find(({ key }) => key === MigrationTranslationResult.PARTIAL)?.doc_count ?? 0,
+      [MigrationTranslationResult.UNTRANSLATABLE]:
+        buckets.find(({ key }) => key === MigrationTranslationResult.UNTRANSLATABLE)?.doc_count ??
+        0,
     };
   }
 

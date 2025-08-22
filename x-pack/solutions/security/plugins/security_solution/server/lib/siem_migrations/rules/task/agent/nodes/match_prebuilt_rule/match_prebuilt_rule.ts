@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { JsonOutputParser } from '@langchain/core/output_parsers';
 import type { ChatModel } from '../../../../../common/task/util/actions_client_chat';
-import { RuleTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../../../../common/siem_migrations/constants';
 import type { RuleMigrationsRetriever } from '../../../retrievers';
 import type { RuleMigrationTelemetryClient } from '../../../rule_migrations_telemetry_client';
 import { cleanMarkdown, generateAssistantComment } from '../../../../../common/task/util/comments';
@@ -103,7 +103,7 @@ export const getMatchPrebuiltRuleNode = ({
             severity: matchedRule.target?.severity ?? DEFAULT_TRANSLATION_SEVERITY,
             risk_score: matchedRule.target?.risk_score ?? DEFAULT_TRANSLATION_RISK_SCORE,
           },
-          translation_result: RuleTranslationResult.FULL,
+          translation_result: MigrationTranslationResult.FULL,
         };
       }
     }
