@@ -200,7 +200,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'unifiedDocViewerFieldsTableFieldTypeFilterToggle'
         );
         if ((await filterToggle.getVisibleText()) !== '0') {
+          await discover.openFilterByFieldTypeInDocViewer();
           await testSubjects.click('unifiedDocViewerFieldsTableFieldTypeFilterClearAll');
+          await discover.closeFilterByFieldTypeInDocViewer();
         }
 
         const initialFieldsCount = (await find.allByCssSelector('.kbnDocViewer__fieldName')).length;
