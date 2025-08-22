@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 
 import type { QueryRulesQueryRuleset } from '@elastic/elasticsearch/lib/api/types';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiButton, EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { QueryRuleDraggableList } from './query_rule_draggable_list/query_rule_draggable_list';
@@ -26,6 +26,8 @@ interface QueryRuleDetailPanelProps {
   updateRule: (updatedRule: SearchQueryRulesQueryRule) => void;
   addNewRule: (newRule: SearchQueryRulesQueryRule) => void;
   deleteRule?: (ruleId: string) => void;
+  searchFilter?: string;
+  setSearchFilter?: (searchFilter: string) => void;
   rulesetId: QueryRulesQueryRuleset['ruleset_id'];
   tourInfo?: {
     title: string;
@@ -43,6 +45,8 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
   updateRule,
   addNewRule,
   deleteRule,
+  searchFilter = '',
+  setSearchFilter = () => {},
   createMode = false,
 }) => {
   const [ruleIdToEdit, setRuleIdToEdit] = React.useState<string | null>(null);
@@ -125,11 +129,29 @@ export const QueryRuleDetailPanel: React.FC<QueryRuleDetailPanelProps> = ({
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiFlexItem>
+                <EuiFieldSearch
+                  data-test-subj="queryRulesetDetailSearchFilter"
+                  placeholder={'Search rules...'}
+                  value={searchFilter}
+                  onChange={(e) => {
+                    setSearchFilter(e.target.value);
+                    if (setIsFormDirty) {
+                      setIsFormDirty(true);
+                    }
+                  }}
+                  fullWidth
+                  incremental={true}
+                  aria-label="Search rules"
+                />
+              </EuiFlexItem>
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          {rules.length === 0 && <RulesetDetailEmptyPrompt />}
-          {rules.length > 0 && (
+          {rules.length === 0 && <RulesetDetailEmptyPrompt isFilter={searchFilter.trim() !== ''} />}
+          {rules.length > 0 && searchFilter.trim() === '' && (
             <QueryRuleDraggableList
               rules={rules}
               rulesetId={rulesetId}

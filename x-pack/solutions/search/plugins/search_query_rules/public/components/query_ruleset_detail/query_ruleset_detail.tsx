@@ -90,6 +90,8 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
     isInitialLoading,
     isError,
     error,
+    setSearchFilter,
+    searchFilter,
   } = useQueryRulesetDetailState({
     rulesetId,
     createMode,
@@ -409,6 +411,8 @@ export const QueryRulesetDetail: React.FC<QueryRulesetDetailProps> = ({ createMo
               tourInfo={tourStepsInfo[1]}
               setIsFormDirty={setIsFormDirty}
               createMode={createMode}
+              searchFilter={searchFilter}
+              setSearchFilter={setSearchFilter}
             />
 
             {tourStepsInfo[1]?.tourTargetRef?.current !== null && (

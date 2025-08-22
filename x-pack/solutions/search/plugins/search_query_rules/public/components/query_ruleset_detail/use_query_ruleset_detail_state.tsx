@@ -23,6 +23,35 @@ interface UseQueryRulesetDetailStateProps {
   createMode: boolean;
 }
 
+const filterRules = (
+  rules: SearchQueryRulesQueryRule[],
+  searchFilter: string
+): SearchQueryRulesQueryRule[] => {
+  if (searchFilter.trim() === '') {
+    return rules;
+  }
+
+  const lowerCaseFilter = searchFilter.toLowerCase();
+  const shouldFilter = (rule: SearchQueryRulesQueryRule) => {
+    return (
+      rule.actions.docs?.some(
+        (doc) =>
+          doc._id.toLowerCase().includes(lowerCaseFilter) ||
+          doc._index?.toLowerCase().includes(lowerCaseFilter)
+      ) ||
+      rule.actions.ids?.some((id) => id.toLowerCase().includes(lowerCaseFilter)) ||
+      rule.criteria.some((criterion) => {
+        return (
+          criterion.type.toLowerCase().includes(lowerCaseFilter) ||
+          criterion.values?.some((value) => value.toLowerCase().includes(lowerCaseFilter)) ||
+          criterion.metadata?.toLowerCase().includes(lowerCaseFilter)
+        );
+      })
+    );
+  };
+  return rules.filter(shouldFilter);
+};
+
 export const useQueryRulesetDetailState = ({
   rulesetId,
   createMode,
@@ -32,6 +61,17 @@ export const useQueryRulesetDetailState = ({
     createMode ? createEmptyRuleset(rulesetId) : null
   );
   const [rules, setRules] = useState<SearchQueryRulesQueryRule[]>([]);
+  const [filteredRules, setFilteredRules] = useState<SearchQueryRulesQueryRule[]>([]);
+
+  const [searchFilter, setSearchFilter] = useState<string>('');
+
+  useEffect(() => {
+    if (searchFilter.trim() === '') {
+      setFilteredRules(rules);
+    } else {
+      setFilteredRules(filterRules(rules, searchFilter));
+    }
+  }, [rules, searchFilter]);
 
   useEffect(() => {
     if (!createMode && !isError && data) {
@@ -64,7 +104,9 @@ export const useQueryRulesetDetailState = ({
 
   return {
     queryRuleset,
-    rules,
+    rules: filteredRules,
+    setSearchFilter,
+    searchFilter,
     setNewRules: setRules,
     updateRule,
     addNewRule,
