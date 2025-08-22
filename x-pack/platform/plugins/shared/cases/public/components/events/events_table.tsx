@@ -134,10 +134,10 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
         getTriggerCompatibleActions={services.uiActions.getTriggerCompatibleActions}
       >
         <UnifiedDataTable
+          consumer="cases"
           onSetColumns={setColumns}
-          visibleCellActions={3}
           dataView={eventsDataView}
-          sampleSizeState={1000}
+          sampleSizeState={events.length}
           ariaLabelledBy={EVENTS_TABLE}
           loadingState={DataLoadingState.loaded}
           showTimeCol={true}
