@@ -154,7 +154,7 @@ export function StreamsTreeTable({
           dataType: 'number',
           render: (_: unknown, item: TableRow) => (
             <RetentionColumn
-              lifecycle={item.effective_lifecycle}
+              lifecycle={item.effective_lifecycle!}
               aria-label={i18n.translate('xpack.streams.streamsTreeTable.retentionCellAriaLabel', {
                 defaultMessage: 'Retention policy for {name}',
                 values: { name: item.stream.name },

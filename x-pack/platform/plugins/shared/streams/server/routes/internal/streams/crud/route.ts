@@ -17,7 +17,7 @@ import { getDataStreamLifecycle } from '../../../../lib/streams/stream_crud';
 
 export interface ListStreamDetail {
   stream: Streams.all.Definition;
-  effective_lifecycle: ClassicIngestStreamEffectiveLifecycle;
+  effective_lifecycle?: ClassicIngestStreamEffectiveLifecycle;
   data_stream?: estypes.IndicesDataStream;
 }
 
@@ -43,6 +43,11 @@ export const listStreamsRoute = createServerRoute({
     );
 
     const enrichedStreams = streams.reduce<ListStreamDetail[]>((acc, { stream }) => {
+      if (Streams.GroupStream.Definition.is(stream)) {
+        acc.push({ stream });
+        return acc;
+      }
+
       const match = dataStreams.data_streams.find((dataStream) => dataStream.name === stream.name);
       acc.push({
         stream,
