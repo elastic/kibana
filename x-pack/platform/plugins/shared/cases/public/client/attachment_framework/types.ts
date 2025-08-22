@@ -13,7 +13,6 @@ import type {
   SuggestionOwner,
   SuggestionItem,
   GenericSuggestionPayload,
-  AttachmentItem,
 } from '../../../common/types/domain';
 import type { CaseUI } from '../../containers/types';
 
@@ -91,7 +90,6 @@ export interface SuggestionChildrenProps<
   TPayload extends GenericSuggestionPayload = GenericSuggestionPayload
 > {
   suggestion: SuggestionItem<TPayload>;
-  attachment: AttachmentItem<TPayload>;
 }
 
 export interface AttachmentFramework {
