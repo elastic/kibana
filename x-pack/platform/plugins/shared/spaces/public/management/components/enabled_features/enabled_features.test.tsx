@@ -32,6 +32,15 @@ const features: KibanaFeatureConfig[] = [
     category: DEFAULT_APP_CATEGORIES.kibana,
     privileges: null,
   },
+  {
+    id: 'feature-3',
+    name: 'Feature 3 (hidden)',
+    hidden: true,
+    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+    app: [],
+    category: DEFAULT_APP_CATEGORIES.kibana,
+    privileges: null,
+  },
 ];
 
 describe('EnabledFeatures', () => {
