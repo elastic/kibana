@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiSelectOption } from '@elastic/eui';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useBoolean } from '@kbn/react-hooks';
 
-interface WhenExpressionProps {
-  value: InventoryItemType;
-  options: { [key: string]: { text: string; value: InventoryItemType } };
-  onChange: (value: InventoryItemType) => void;
+interface WhenExpressionProps<TDropDownType extends string> {
+  value: TDropDownType;
+  options: Record<TDropDownType, EuiSelectOption>;
+  onChange: (value: TDropDownType) => void;
   popupPosition?:
     | 'upCenter'
     | 'upLeft'
@@ -29,60 +29,55 @@ interface WhenExpressionProps {
     | 'rightCenter'
     | 'rightUp'
     | 'rightDown';
+
+  description: string;
+  popoverTitle: string;
+
+  'aria-label'?: string;
+  'data-test-subj'?: string;
 }
 
-export const NodeTypeExpression = ({
+export const ExpressionDropDown = <TDropDownType extends string>({
   value,
   options,
   onChange,
   popupPosition,
-}: WhenExpressionProps) => {
-  const [aggTypePopoverOpen, setAggTypePopoverOpen] = useState(false);
+  description,
+  popoverTitle,
+  ...props
+}: WhenExpressionProps<TDropDownType>) => {
+  const [popoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
 
   return (
     <EuiPopover
       button={
         <EuiExpression
           data-test-subj="nodeTypeExpression"
-          description={i18n.translate(
-            'xpack.infra.metrics.alertFlyout.expression.for.descriptionLabel',
-            {
-              defaultMessage: 'For',
-            }
-          )}
+          description={description}
           value={options[value].text}
-          isActive={aggTypePopoverOpen}
-          onClick={() => {
-            setAggTypePopoverOpen(true);
-          }}
+          isActive={popoverOpen}
+          onClick={togglePopover}
         />
       }
-      isOpen={aggTypePopoverOpen}
-      closePopover={() => {
-        setAggTypePopoverOpen(false);
-      }}
+      isOpen={popoverOpen}
+      closePopover={closePopover}
       ownFocus
       anchorPosition={popupPosition ?? 'downLeft'}
     >
-      <div>
-        <ClosablePopoverTitle onClose={() => setAggTypePopoverOpen(false)}>
-          <FormattedMessage
-            id="xpack.infra.metrics.alertFlyout.expression.for.popoverTitle"
-            defaultMessage="Node Type"
-          />
+      <div onBlur={closePopover}>
+        <ClosablePopoverTitle onClose={closePopover}>
+          <>{popoverTitle}</>
         </ClosablePopoverTitle>
         <EuiSelect
-          aria-label={i18n.translate('xpack.infra.nodeTypeExpression.select.ariaLabel', {
-            defaultMessage: 'Select a node type',
-          })}
-          data-test-subj="forExpressionSelect"
+          aria-label={props['aria-label']}
+          data-test-subj={props['data-test-subj']}
           value={value}
           fullWidth
           onChange={(e) => {
-            onChange(e.target.value as InventoryItemType);
-            setAggTypePopoverOpen(false);
+            onChange(e.target.value as TDropDownType);
+            closePopover();
           }}
-          options={Object.values(options).map((o) => o)}
+          options={Object.values(options).map((o) => o) as EuiSelectOption[]}
         />
       </div>
     </EuiPopover>
