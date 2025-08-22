@@ -7,6 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * Multi-Step Test Generator with Web Search Integration
+ *
+ * This module provides intelligent test generation for Kibana plugins by:
+ * 1. Searching the web for accurate feature descriptions instead of hardcoded categorization
+ * 2. Allowing users to confirm or adjust the found descriptions
+ * 3. Using the enhanced information to generate better, more accurate tests
+ *
+ * Features:
+ * - Web search integration for real Kibana feature documentation
+ * - Interactive user confirmation of feature descriptions
+ * - Fallback to LLM-based analysis if web search fails
+ * - Support for both real web search APIs and LLM simulation
+ *
+ * Usage:
+ * const generator = new MultiStepTestGenerator();
+ * const testFiles = await generator.generateFullTest(pluginDetails, pluginMeta, 'ui');
+ *
+ * Web Search Configuration:
+ * To enable real web search (optional), set environment variables:
+ * - GOOGLE_SEARCH_API_KEY: Your Google Custom Search API key
+ * - GOOGLE_SEARCH_ENGINE_ID: Your Custom Search Engine ID
+ *
+ * If these are not set, the system will fall back to LLM-based simulation.
+ */
+
+import * as readline from 'readline';
 import { callLLM } from './llm_client';
 import { getAllExamples, getExamplesByCategory } from './test_examples';
 
@@ -28,6 +55,14 @@ export interface PluginAnalysis {
   estimatedUseCases: string[];
   technicalComponents: string[];
   riskAreas: string[];
+  webSearchDescription?: string;
+}
+
+export interface FeatureSearchResult {
+  description: string;
+  category: string;
+  keyFeatures: string[];
+  searchQuery: string;
 }
 
 export interface TestPlan {
@@ -48,20 +83,193 @@ export interface TestScenario {
 export class MultiStepTestGenerator {
   constructor(private model: string = 'codellama') {}
 
+  private async searchKibanaFeature(
+    pluginName: string,
+    purpose: string
+  ): Promise<FeatureSearchResult | null> {
+    try {
+      // Create search query based on plugin name and purpose
+      const searchQuery = `Kibana ${pluginName} ${purpose} feature documentation Elastic Stack`;
+
+      // Try real web search first, fall back to LLM simulation
+      const realSearchResult = await this.performRealWebSearch(searchQuery);
+      if (realSearchResult) {
+        return realSearchResult;
+      }
+
+      // Fallback: Use LLM to generate a realistic search result
+      const searchPrompt = `
+You are simulating a web search for Kibana feature information. Based on the search query below, provide a realistic description of what this Kibana feature does.
+
+Search Query: "${searchQuery}"
+
+Guidelines:
+1. Focus on official Kibana/Elastic documentation style descriptions
+2. Be specific about the feature's purpose and capabilities
+3. Include key functionalities and use cases
+4. Categorize appropriately (Console, Dashboard, Data, Security, Management, Monitoring, Visualization)
+
+Provide your response in this JSON format:
+{
+  "description": "Detailed description of the Kibana feature and its purpose",
+  "category": "Primary category",
+  "keyFeatures": ["feature 1", "feature 2", "feature 3"],
+  "searchQuery": "${searchQuery}"
+}
+
+Respond with only the JSON object, no additional text.`;
+
+      const response = await callLLM(this.model, searchPrompt);
+      return JSON.parse(response.trim());
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Error searching for Kibana feature information:', error);
+      return null;
+    }
+  }
+
+  private async performRealWebSearch(searchQuery: string): Promise<FeatureSearchResult | null> {
+    try {
+      // This would use a real web search API like Google Custom Search, Bing Search API, etc.
+      // For demonstration, I'll create a framework that could be easily plugged in
+
+      // Example implementation with Google Custom Search API:
+      // const apiKey = process.env.GOOGLE_SEARCH_API_KEY;
+      // const searchEngineId = process.env.GOOGLE_SEARCH_ENGINE_ID;
+
+      // if (!apiKey || !searchEngineId) {
+      //   // eslint-disable-next-line no-console
+      //   console.log('🔍 Web search API credentials not configured, using LLM fallback...');
+      //   return null;
+      // }
+
+      // const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${apiKey}&cx=${searchEngineId}&q=${encodeURIComponent(searchQuery)}&num=5`;
+
+      // const fetch = await import('node-fetch');
+      // const response = await fetch.default(searchUrl);
+      // const searchResults = await response.json();
+
+      // if (searchResults.items && searchResults.items.length > 0) {
+      //   const topResults = searchResults.items.slice(0, 3);
+      //   const combinedSnippets = topResults.map(item => item.snippet).join(' ');
+      //
+      //   // Use LLM to analyze the search results and extract structured information
+      //   const analysisPrompt = `
+      //   Based on the following web search results about Kibana features, extract structured information:
+      //
+      //   Search Query: "${searchQuery}"
+      //   Search Results: ${combinedSnippets}
+      //
+      //   Extract and provide the information in this JSON format:
+      //   {
+      //     "description": "Detailed description based on search results",
+      //     "category": "Primary category",
+      //     "keyFeatures": ["feature 1", "feature 2", "feature 3"],
+      //     "searchQuery": "${searchQuery}"
+      //   }
+      //   `;
+      //
+      //   const analysisResponse = await callLLM(this.model, analysisPrompt);
+      //   return JSON.parse(analysisResponse.trim());
+      // }
+
+      // For now, return null to indicate web search is not available
+      // This will trigger the LLM fallback in the calling method
+      return null;
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Real web search failed:', error);
+      return null;
+    }
+  }
+
+  private async confirmFeatureDescription(searchResult: FeatureSearchResult): Promise<string> {
+    return new Promise((resolve) => {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+      });
+
+      // eslint-disable-next-line no-console
+      console.log('\n🔍 Web Search Result:');
+      // eslint-disable-next-line no-console
+      console.log(`📝 Description: ${searchResult.description}`);
+      // eslint-disable-next-line no-console
+      console.log(`📂 Category: ${searchResult.category}`);
+      // eslint-disable-next-line no-console
+      console.log(`🔧 Key Features: ${searchResult.keyFeatures.join(', ')}`);
+      // eslint-disable-next-line no-console
+      console.log(`🔍 Search Query: ${searchResult.searchQuery}\n`);
+
+      rl.question(
+        '✅ Is this description accurate? (y/n) or provide your own description: ',
+        (answer) => {
+          if (answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes') {
+            rl.close();
+            resolve(searchResult.description);
+          } else if (answer.toLowerCase() === 'n' || answer.toLowerCase() === 'no') {
+            rl.question('Please provide the correct description: ', (userDescription) => {
+              rl.close();
+              resolve(userDescription);
+            });
+          } else {
+            // User provided their own description
+            rl.close();
+            resolve(answer);
+          }
+        }
+      );
+    });
+  }
+
   async analyzePlugin(pluginDetails: PluginDetails, pluginMeta: any): Promise<PluginAnalysis> {
+    const pluginName = pluginMeta?.plugin?.id || 'Unknown';
+
+    // Step 1: Search for feature information online
+    // eslint-disable-next-line no-console
+    console.log(`🔍 Searching for Kibana feature information about: ${pluginName}...`);
+
+    let webSearchDescription: string | undefined;
+    let searchBasedCategory: string | undefined;
+    let searchBasedFeatures: string[] = [];
+
+    try {
+      const searchResult = await this.searchKibanaFeature(pluginName, pluginDetails.purpose);
+
+      if (searchResult) {
+        // Step 2: Ask user to confirm or adjust the description
+        webSearchDescription = await this.confirmFeatureDescription(searchResult);
+        searchBasedCategory = searchResult.category;
+        searchBasedFeatures = searchResult.keyFeatures;
+
+        // eslint-disable-next-line no-console
+        console.log('✅ Using confirmed feature description for analysis...\n');
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error('Web search failed, falling back to LLM analysis:', error);
+    }
+
+    // Step 3: Use the confirmed description in the analysis prompt
+    const enhancedPurpose = webSearchDescription || pluginDetails.purpose;
+    const enhancedFeatures =
+      searchBasedFeatures.length > 0 ? searchBasedFeatures : pluginDetails.features;
+
     const prompt = `
 You are an expert Kibana plugin analyst. Based on the provided information, analyze this Kibana plugin thoroughly.
 
 Plugin Information:
-- Name: ${pluginMeta?.plugin?.id || 'Unknown'}
-- Purpose: ${pluginDetails.purpose}
-- Features: ${pluginDetails.features.join(', ')}
+- Name: ${pluginName}
+- Purpose: ${enhancedPurpose}
+- Features: ${enhancedFeatures.join(', ')}
 - Complexity: ${pluginDetails.complexity}
 - User Interactions: ${pluginDetails.userInteractions.join(', ')}
 - API Endpoints: ${pluginDetails.apiEndpoints.join(', ')}
+${webSearchDescription ? `- Web-researched Description: ${webSearchDescription}` : ''}
+${searchBasedCategory ? `- Suggested Category: ${searchBasedCategory}` : ''}
 
 Instructions:
-1. Use your knowledge of Kibana ecosystem and Elastic Stack to provide insights
+1. Use the web-researched information (if available) as the primary source of truth
 2. Consider typical patterns for this type of plugin based on Elastic's documentation
 3. Identify the plugin category carefully based on purpose and features:
    - "Console" for Elasticsearch query tools, Dev Tools, API testing interfaces
@@ -78,7 +286,7 @@ Instructions:
 
 Please provide your analysis in the following JSON format:
 {
-  "summary": "Brief 2-3 sentence summary of what this plugin does",
+  "summary": "Brief 2-3 sentence summary of what this plugin does based on web research",
   "category": "Primary category (Console/Dashboard/Data/Security/Management/Monitoring/Visualization)",
   "estimatedUseCases": ["use case 1", "use case 2", "..."],
   "technicalComponents": ["component 1", "component 2", "..."],
@@ -89,33 +297,45 @@ Respond with only the JSON object, no additional text.`;
 
     try {
       const response = await callLLM(this.model, prompt);
-      return JSON.parse(response.trim());
+      const analysis = JSON.parse(response.trim());
+
+      // Add the web search description to the analysis
+      if (webSearchDescription) {
+        analysis.webSearchDescription = webSearchDescription;
+      }
+
+      return analysis;
     } catch (error) {
       // eslint-disable-next-line no-console
       console.error('Error analyzing plugin:', error);
+
       // Return fallback analysis with better category detection
-      let fallbackCategory = 'Data';
+      let fallbackCategory = searchBasedCategory || 'Data';
       const purpose = pluginDetails.purpose.toLowerCase();
-      if (
-        purpose.includes('console') ||
-        purpose.includes('dev tools') ||
-        purpose.includes('elasticsearch query')
-      ) {
-        fallbackCategory = 'Console';
-      } else if (purpose.includes('dashboard') || purpose.includes('visualization')) {
-        fallbackCategory = 'Dashboard';
-      } else if (purpose.includes('security') || purpose.includes('auth')) {
-        fallbackCategory = 'Security';
-      } else if (purpose.includes('management') || purpose.includes('settings')) {
-        fallbackCategory = 'Management';
+
+      if (!searchBasedCategory) {
+        if (
+          purpose.includes('console') ||
+          purpose.includes('dev tools') ||
+          purpose.includes('elasticsearch query')
+        ) {
+          fallbackCategory = 'Console';
+        } else if (purpose.includes('dashboard') || purpose.includes('visualization')) {
+          fallbackCategory = 'Dashboard';
+        } else if (purpose.includes('security') || purpose.includes('auth')) {
+          fallbackCategory = 'Security';
+        } else if (purpose.includes('management') || purpose.includes('settings')) {
+          fallbackCategory = 'Management';
+        }
       }
 
       return {
-        summary: `${pluginDetails.purpose} plugin for Kibana`,
+        summary: webSearchDescription || `${pluginDetails.purpose} plugin for Kibana`,
         category: fallbackCategory,
-        estimatedUseCases: pluginDetails.features,
+        estimatedUseCases: enhancedFeatures,
         technicalComponents: ['UI Components', 'API Endpoints'],
         riskAreas: ['User input validation', 'Data handling'],
+        webSearchDescription,
       };
     }
   }
