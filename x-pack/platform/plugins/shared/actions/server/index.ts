@@ -13,15 +13,8 @@ import type { ActionsConfig } from './config';
 import { configSchema, getValidatedConfig } from './config';
 import type { ActionsClient as ActionsClientClass } from './actions_client';
 import type { ActionsAuthorization as ActionsAuthorizationClass } from './authorization/actions_authorization';
-import {
-  ACTIONS_CONFIG,
-  IN_MEMORY_CONNECTORS_SERVICE,
-  IN_MEMORY_METRICS_SERVICE,
-  LOGGER,
-  TELEMETRY_LOGGER,
-} from './constants';
+import { ACTIONS_CONFIG, IN_MEMORY_CONNECTORS_SERVICE } from './constants';
 import { resolveCustomHosts } from './lib/custom_host_settings';
-import { InMemoryMetrics } from './monitoring';
 import { ModuleSetup } from './module_setup';
 import { ModuleStart } from './module_start';
 
@@ -74,28 +67,16 @@ export { urlAllowListValidator } from './sub_action_framework/helpers';
 export { ActionExecutionSourceType } from './lib/action_execution_source';
 
 export const module = new ContainerModule(({ bind }) => {
-  bind(LOGGER).toDynamicValue(({ get }) => {
-    const loggerFactory = get(PluginInitializer('logger'));
-    return loggerFactory.get();
-  });
-  bind(TELEMETRY_LOGGER).toDynamicValue(({ get }) => {
-    const loggerFactory = get(PluginInitializer('logger'));
-    return loggerFactory.get('usage');
-  });
   bind(ACTIONS_CONFIG).toDynamicValue(({ get }) => {
-    const logger = get(LOGGER);
+    const loggerFactory = get(PluginInitializer('logger'));
     const configService = get(PluginInitializer('config'));
+    const logger = loggerFactory.get();
     return getValidatedConfig(
       logger,
       resolveCustomHosts(logger, configService.get<ActionsConfig>())
     );
   });
   bind(IN_MEMORY_CONNECTORS_SERVICE).toConstantValue([]);
-  bind(IN_MEMORY_METRICS_SERVICE).toDynamicValue(({ get }) => {
-    const loggerFactory = get(PluginInitializer('logger'));
-    return new InMemoryMetrics(loggerFactory.get('in_memory_metrics'));
-  });
-
   bind(Setup).to(ModuleSetup).inSingletonScope();
   bind(Start).to(ModuleStart).inSingletonScope();
 });

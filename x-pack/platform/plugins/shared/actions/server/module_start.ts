@@ -15,7 +15,7 @@ import type {
 import { SECURITY_EXTENSION_ID, type Logger } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
 import { PluginStart, Setup } from '@kbn/core-di';
-import { CoreStart } from '@kbn/core-di-server';
+import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
 import type {
   ActionTypeParams,
@@ -25,12 +25,7 @@ import type {
   UnsecuredServices,
 } from './types';
 import type { ActionsConfig } from './config';
-import {
-  ACTIONS_CONFIG,
-  IN_MEMORY_CONNECTORS_SERVICE,
-  LOGGER,
-  TELEMETRY_LOGGER,
-} from './constants';
+import { ACTIONS_CONFIG, IN_MEMORY_CONNECTORS_SERVICE } from './constants';
 import { UnsecuredActionsClient, type PluginStartContract } from '.';
 import type { ModuleSetup } from './module_setup';
 import {
@@ -61,12 +56,13 @@ const includedHiddenTypes = [
 
 @injectable()
 export class ModuleStart implements PluginStartContract {
+  public logger: Logger;
+  public telemetryLogger: Logger;
   public getActionsClientWithRequest: PluginStartContract['getActionsClientWithRequest'];
   public getUnsecuredActionsClient: PluginStartContract['getUnsecuredActionsClient'];
 
   constructor(
-    @inject(LOGGER) private logger: Logger,
-    @inject(TELEMETRY_LOGGER) private telemetryLogger: Logger,
+    @inject(PluginInitializer('logger')) private loggerFactory: Logger,
     @inject(ACTIONS_CONFIG) private actionsConfig: ActionsConfig,
     @inject(IN_MEMORY_CONNECTORS_SERVICE) public inMemoryConnectors: InMemoryConnector[],
     @inject(CoreStart('savedObjects'))
@@ -92,6 +88,9 @@ export class ModuleStart implements PluginStartContract {
     private spaces: ActionsPluginStartDeps['plugins']['spaces'],
     @inject(Setup) private setup: ModuleSetup
   ) {
+    this.logger = this.loggerFactory.get();
+    const logger = this.logger;
+    this.telemetryLogger = this.loggerFactory.get();
     const plugins = {
       licensing: this.licensing,
       encryptedSavedObjects: this.encryptedSavedObjects,

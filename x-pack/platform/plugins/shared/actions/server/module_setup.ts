@@ -15,7 +15,7 @@ import {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { inject, injectable } from 'inversify';
 import { PluginSetup } from '@kbn/core-di';
-import { CoreSetup } from '@kbn/core-di-server';
+import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ActionType, PluginSetupContract } from '.';
 import { CaseConnector, SubActionConnector } from '.';
 import { ActionExecutor, LicenseState, TaskRunnerFactory } from './lib';
@@ -33,11 +33,7 @@ import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './lib/event_based_telemetry';
 import { ConnectorRateLimiter } from './lib/connector_rate_limiter';
 import type { ActionsConfig, EnabledConnectorTypes } from './config';
-import {
-  registerClusterCollector,
-  registerNodeCollector,
-  type InMemoryMetrics,
-} from './monitoring';
+import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
 import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 import { getAlertHistoryEsIndex } from './preconfigured_connectors/alert_history_es_index/alert_history_es_index';
@@ -64,13 +60,7 @@ import { defineRoutes } from './routes';
 import { ensureSufficientLicense } from './lib/ensure_sufficient_license';
 import type { SubActionConnectorType } from './sub_action_framework/types';
 import { AllowedHosts } from './config';
-import {
-  ACTIONS_CONFIG,
-  IN_MEMORY_CONNECTORS_SERVICE,
-  IN_MEMORY_METRICS_SERVICE,
-  LOGGER,
-  TELEMETRY_LOGGER,
-} from './constants';
+import { ACTIONS_CONFIG, IN_MEMORY_CONNECTORS_SERVICE } from './constants';
 
 const includedHiddenTypes = [
   ACTION_SAVED_OBJECT_TYPE,
@@ -81,6 +71,8 @@ const includedHiddenTypes = [
 
 @injectable()
 export class ModuleSetup implements PluginSetupContract {
+  public logger: Logger;
+  public telemetryLogger: Logger;
   public licenseState: ILicenseState | null = null;
   public isESOCanEncrypt?: boolean;
   public eventLogService?: IEventLogService;
@@ -91,6 +83,7 @@ export class ModuleSetup implements PluginSetupContract {
   public actionTypeRegistry?: ActionTypeRegistry;
   public connectorUsageReportingTask?: ConnectorUsageReportingTask | undefined;
   public usageCounter?: UsageCounter;
+  public inMemoryMetrics?: InMemoryMetrics;
   private subActionFramework: {
     registerConnector: <Config extends ActionTypeConfig, Secrets extends ActionTypeSecrets>(
       connector: SubActionConnectorType<Config, Secrets>
@@ -98,10 +91,8 @@ export class ModuleSetup implements PluginSetupContract {
   };
 
   constructor(
-    @inject(LOGGER) private logger: Logger,
-    @inject(TELEMETRY_LOGGER) private telemetryLogger: Logger,
+    @inject(PluginInitializer('logger')) private loggerFactory: Logger,
     @inject(ACTIONS_CONFIG) private actionsConfig: ActionsConfig,
-    @inject(IN_MEMORY_METRICS_SERVICE) private inMemoryMetrics: InMemoryMetrics,
     @inject(IN_MEMORY_CONNECTORS_SERVICE) private inMemoryConnectors: InMemoryConnector[],
     @inject(CoreSetup('http')) private http: ActionsPluginSetupDeps['core']['http'],
     @inject(CoreSetup('analytics')) private analytics: ActionsPluginSetupDeps['core']['analytics'],
@@ -127,6 +118,10 @@ export class ModuleSetup implements PluginSetupContract {
     @inject(PluginSetup('cloud'))
     private cloud: ActionsPluginSetupDeps['plugins']['cloud']
   ) {
+    this.logger = this.loggerFactory.get();
+    this.telemetryLogger = this.loggerFactory.get();
+    this.inMemoryMetrics = new InMemoryMetrics(this.loggerFactory.get('in_memory_metrics'));
+
     const plugins = {
       licensing: this.licensing,
       encryptedSavedObjects: this.encryptedSavedObjects,
