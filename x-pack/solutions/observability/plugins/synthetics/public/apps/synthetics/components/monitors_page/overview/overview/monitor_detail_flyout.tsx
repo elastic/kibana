@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiProgress,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -77,7 +78,6 @@ export function MonitorDetailFlyout(props: MonitorDetailsFlyoutProps) {
       const locOverview = allConfigs.find(
         (cfg) => cfg.configId === configId && cfg.locationId === locationIdNew
       )!;
-
       onLocationChange(locOverview);
     },
     [allConfigs, onLocationChange, configId]
@@ -127,47 +127,51 @@ export function MonitorDetailFlyout(props: MonitorDetailsFlyoutProps) {
       type={isOverlay ? 'overlay' : 'push'}
       onClose={props.onClose}
       paddingSize="none"
+      aria-label={i18n.translate('xpack.synthetics.monitorList.monitorDetailFlyoutAriaLabel', {
+        defaultMessage: 'Monitor details flyout for {monitorName}',
+        values: { monitorName: overviewItem.name ?? monitorObject?.[ConfigKey.NAME] },
+      })}
     >
       {error && !isLoading && <ErrorCallout {...error} />}
-      {!monitorObject ? (
-        <LoadingState />
-      ) : (
-        <>
-          <EuiFlyoutHeader hasBorder>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
-              <EuiFlexGroup responsive={false} gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="s">
-                    <h2>{overviewItem.name ?? monitorObject?.[ConfigKey.NAME]}</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  {overviewItem && (
-                    <ActionsPopover
-                      isPopoverOpen={isActionsPopoverOpen}
-                      isInspectView
-                      monitor={overviewItem}
-                      setIsPopoverOpen={setIsActionsPopoverOpen}
-                      position="default"
-                      iconHasPanel={false}
-                      iconSize="xs"
-                      locationId={locationId}
-                    />
-                  )}
-                </EuiFlexItem>
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-              <DetailedFlyoutHeader
-                currentLocationId={locationId}
-                setCurrentLocation={setLocation}
-                configId={configId}
-                monitor={monitorObject}
-                onEnabledChange={props.onEnabledChange}
-              />
-            </EuiPanel>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <DetailFlyoutDurationChart {...props} />
+      <EuiFlyoutHeader hasBorder>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
+          <EuiFlexGroup responsive={false} gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="s">
+                <h2>{overviewItem.name ?? monitorObject?.[ConfigKey.NAME]}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {overviewItem && (
+                <ActionsPopover
+                  isPopoverOpen={isActionsPopoverOpen}
+                  isInspectView
+                  monitor={overviewItem}
+                  setIsPopoverOpen={setIsActionsPopoverOpen}
+                  position="default"
+                  iconHasPanel={false}
+                  iconSize="xs"
+                  locationId={locationId}
+                />
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+          <DetailedFlyoutHeader
+            overviewItem={overviewItem}
+            currentLocationId={locationId}
+            setCurrentLocation={setLocation}
+            configId={configId}
+            monitor={monitorObject}
+            onEnabledChange={props.onEnabledChange}
+          />
+        </EuiPanel>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <DetailFlyoutDurationChart {...props} />
+        {isLoading && monitorObject && <EuiProgress size="xs" color="accent" />}
+        {monitorObject ? (
+          <>
             <MonitorDetailsPanel
               hasBorder={false}
               hideEnabled
@@ -179,36 +183,38 @@ export function MonitorDetailFlyout(props: MonitorDetailsFlyoutProps) {
               }}
               loading={Boolean(isLoading)}
             />
-          </EuiFlyoutBody>
-          <EuiFlyoutFooter>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                    onClick={props.onClose}
-                  >
-                    {CLOSE_FLYOUT_TEXT}
-                  </EuiButtonEmpty>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    data-test-subj="syntheticsMonitorDetailFlyoutButton"
-                    // `detailLink` can be undefined, in this case, disable the button
-                    isDisabled={!detailLink}
-                    href={detailLink}
-                    iconType="sortRight"
-                    iconSide="right"
-                    fill
-                  >
-                    {GO_TO_MONITOR_LINK_TEXT}
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlyoutFooter>
-        </>
-      )}
+          </>
+        ) : (
+          <LoadingState />
+        )}
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l" color="transparent">
+          <EuiFlexGroup justifyContent="spaceBetween">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                onClick={props.onClose}
+              >
+                {CLOSE_FLYOUT_TEXT}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj="syntheticsMonitorDetailFlyoutButton"
+                // `detailLink` can be undefined, in this case, disable the button
+                isDisabled={!detailLink}
+                href={detailLink}
+                iconType="sortRight"
+                iconSide="right"
+                fill
+              >
+                {GO_TO_MONITOR_LINK_TEXT}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
+      </EuiFlyoutFooter>
     </EuiFlyout>
   );
 }

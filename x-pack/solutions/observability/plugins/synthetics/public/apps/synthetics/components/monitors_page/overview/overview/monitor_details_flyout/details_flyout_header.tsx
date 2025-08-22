@@ -15,7 +15,10 @@ import {
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EncryptedSyntheticsMonitor } from '../../../../../../../../common/runtime_types';
+import type {
+  EncryptedSyntheticsMonitor,
+  OverviewStatusMetaData,
+} from '../../../../../../../../common/runtime_types';
 import { selectServiceLocationsState } from '../../../../../state';
 import { MonitorStatus } from '../../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../../common/components/monitor_location_select';
@@ -23,15 +26,17 @@ import { MonitorEnabled } from '../../../management/monitor_list_table/monitor_e
 import { useOverviewStatusByLocation } from './use_overview_status_by_location';
 
 export function DetailedFlyoutHeader({
+  overviewItem,
   currentLocationId,
   configId,
   setCurrentLocation,
   monitor,
   onEnabledChange,
 }: {
+  overviewItem: OverviewStatusMetaData;
   currentLocationId: string;
   configId: string;
-  monitor: EncryptedSyntheticsMonitor;
+  monitor?: EncryptedSyntheticsMonitor | null;
   onEnabledChange: () => void;
   setCurrentLocation: (location: string, locationId: string) => void;
 }) {
@@ -48,12 +53,12 @@ export function DetailedFlyoutHeader({
   return (
     <EuiFlexGroup wrap={true} responsive={false}>
       <EuiFlexItem grow={false}>
-        <MonitorStatus status={status} monitor={monitor} />
+        <MonitorStatus status={status} monitorType={overviewItem.type} />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <MonitorLocationSelect
           compressed
-          monitorLocations={monitor.locations}
+          monitorLocations={monitor?.locations}
           configId={configId}
           selectedLocation={selectedLocation}
           onChange={useCallback(
@@ -68,7 +73,9 @@ export function DetailedFlyoutHeader({
         <EuiDescriptionList align="left" compressed>
           <EuiDescriptionListTitle>{ENABLED_ITEM_TEXT}</EuiDescriptionListTitle>
           <EuiDescriptionListDescription>
-            <MonitorEnabled configId={configId} monitor={monitor} reloadPage={onEnabledChange} />
+            {monitor && (
+              <MonitorEnabled configId={configId} monitor={monitor} reloadPage={onEnabledChange} />
+            )}
           </EuiDescriptionListDescription>
         </EuiDescriptionList>
       </EuiFlexItem>
