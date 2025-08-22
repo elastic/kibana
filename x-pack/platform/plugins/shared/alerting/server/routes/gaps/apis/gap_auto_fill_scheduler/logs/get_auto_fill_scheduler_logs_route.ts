@@ -6,10 +6,15 @@
  */
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { ILicenseState } from '../../../../lib';
-import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext } from '../../../../types';
-import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
+import type { GapAutoFillSchedulerLogsResponseV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import { autoFillSchedulerLogsQuerySchemaV1 } from '../../../../../../common/routes/gaps/apis/gap_auto_fill_scheduler_logs';
+import type { ILicenseState } from '../../../../../lib';
+import { verifyAccessAndContext } from '../../../../lib';
+import type { AlertingRequestHandlerContext } from '../../../../../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../../types';
+import { transformRequestV1, transformResponseV1 } from './transforms';
+import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../../constants';
+import { GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE } from '../../../../../saved_objects';
 
 export const getGapFillAutoSchedulerLogsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -17,39 +22,32 @@ export const getGapFillAutoSchedulerLogsRoute = (
 ) => {
   router.get(
     {
-      path: '/internal/alerting/rules/gaps/auto_fill_scheduler/{id}/logs',
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/gaps/gap_auto_fill_scheduler/{id}/logs`,
+      security: DEFAULT_ALERTING_ROUTE_SECURITY,
+      options: { access: 'internal' },
       validate: {
         params: schema.object({
           id: schema.string(),
         }),
-        query: schema.object({
-          start: schema.maybe(schema.string()),
-          end: schema.maybe(schema.string()),
-          page: schema.maybe(schema.number({ defaultValue: 1, min: 1 })),
-          perPage: schema.maybe(schema.number({ defaultValue: 50, min: 1, max: 1000 })),
-          sort: schema.maybe(
-            schema.arrayOf(
-              schema.object({
-                field: schema.string(),
-                direction: schema.oneOf([schema.literal('asc'), schema.literal('desc')]),
-              })
-            )
-          ),
-          filter: schema.maybe(schema.string()),
-        }),
+        query: autoFillSchedulerLogsQuerySchemaV1,
       },
-      options: { access: 'internal' },
-      security: DEFAULT_ALERTING_ROUTE_SECURITY,
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         try {
-          const { id } = req.params;
-          const { start, end, page = 1, perPage = 50, sort, filter } = req.query;
-          const taskId = `${id}`;
-
+          const { id } = req.params as { id: string };
+          const query = req.query;
           const alertingContext = await context.alerting;
           const rulesClient = await alertingContext.getRulesClient();
+
+          // Access the unsecuredSavedObjectsClient through the rulesClient context
+          const soClient = (rulesClient as any).context.unsecuredSavedObjectsClient;
+
+          // Resolve the scheduled task id from the scheduler SO
+          const so = await soClient.get(GAP_FILL_AUTO_SCHEDULER_SAVED_OBJECT_TYPE, id);
+          const taskId = (so.attributes as { scheduledTaskId?: string }).scheduledTaskId || id;
+
+          const { start, end, page, perPage, sort, filter } = transformRequestV1(query);
 
           // Build sort
           const sortOptions = sort || [{ field: '@timestamp', direction: 'desc' }];
@@ -71,14 +69,16 @@ export const getGapFillAutoSchedulerLogsRoute = (
               : 'event.action:gap-fill-auto-schedule',
           });
 
-          return res.ok({
-            body: {
+          const response: GapAutoFillSchedulerLogsResponseV1 = {
+            body: transformResponseV1({
               data: result.data,
               total: result.total,
               page,
               perPage,
-            },
-          });
+            }),
+          };
+
+          return res.ok(response);
         } catch (error) {
           return res.customError({
             statusCode: 500,

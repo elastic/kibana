@@ -31,8 +31,8 @@ export const rawGapFillAutoSchedulerSchemaV1 = schema.object(
       schema.object({
         status: schema.oneOf([
           schema.literal('success'),
+          schema.literal('failure'),
           schema.literal('warning'),
-          schema.literal('error'),
         ]),
         message: schema.maybe(schema.string()),
         metrics: schema.maybe(

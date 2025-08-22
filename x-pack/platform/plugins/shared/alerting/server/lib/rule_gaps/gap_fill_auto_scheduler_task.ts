@@ -14,7 +14,7 @@ import dateMath from '@kbn/datemath';
 import { getRuleIdsWithGaps } from '../../application/rule/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps';
 import { findGaps } from './find_gaps';
 import { processGapsBatchFromRules } from '../../application/rule/methods/bulk_fill_gaps_by_rule_ids/process_gaps_batch_from_rules';
-import { partiallyUpdateRule } from '../../saved_objects/partially_update_rule';
+import { bulkPartiallyUpdateRules } from '../../saved_objects';
 import type { RulesClient } from '../../rules_client/rules_client';
 import { gapStatus } from '../../../common/constants';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
@@ -132,46 +132,59 @@ export function registerGapFillAutoSchedulerTask({
   eventLogger: IEventLogger;
 }) {
   taskManager.registerTaskDefinitions({
-    'gap-fill-auto-scheduler': {
+    'gap-fill-auto-scheduler-task': {
       title: 'Gap Fill Auto Scheduler',
       timeout: '1h',
       createTaskRunner: ({ taskInstance, fakeRequest }) => ({
         async run() {
-          console.log('gap fill task running 1');
           const startTime = new Date();
           // Get the RulesClient using the fake request
           const rulesClient = await getRulesClientWithRequest(fakeRequest!);
           const context = rulesClient.context;
-          const currentState = taskInstance.state as GapFillTaskState;
-          const config = currentState.config || {
-            name: 'gap-fill-auto-fill-name',
-            maxAmountOfGapsToProcessPerRun: 100,
-            maxAmountOfRulesToProcessPerRun: 50,
-            amountOfRetries: 3,
-            rulesFilter: '',
-            gapFillRange: 'now-7d',
-            schedule: {
-              interval: '1h',
-            },
+          const { configId } =
+            (taskInstance.params as { configId?: string; spaceId?: string }) || {};
+          // Load scheduler SO for config
+          const soClient = rulesClient.context.unsecuredSavedObjectsClient;
+          console.log('----- configId -------');
+          console.log(configId);
+          const schedulerSo = configId
+            ? await soClient.get('gap_fill_auto_scheduler', configId)
+            : null;
+
+          console.log('----- scheduler so -------');
+          console.log(JSON.stringify(schedulerSo, null, 2));
+          interface SchedulerSoAttributes {
+            name?: string;
+            maxAmountOfGapsToProcessPerRun?: number;
+            maxAmountOfRulesToProcessPerRun?: number;
+            amountOfRetries?: number;
+            rulesFilter?: string;
+            gapFillRange?: string;
+            schedule?: { interval: string };
+            enabled?: boolean;
+          }
+          const soAttrs: SchedulerSoAttributes =
+            (schedulerSo?.attributes as SchedulerSoAttributes) || {};
+          const config = {
+            name: soAttrs.name ?? 'gap-fill-auto-fill-name',
+            maxAmountOfGapsToProcessPerRun: soAttrs.maxAmountOfGapsToProcessPerRun ?? 10000,
+            maxAmountOfRulesToProcessPerRun: soAttrs.maxAmountOfRulesToProcessPerRun ?? 100,
+            amountOfRetries: soAttrs.amountOfRetries ?? 3,
+            rulesFilter: soAttrs.rulesFilter ?? '',
+            gapFillRange: soAttrs.gapFillRange ?? 'now-7d',
+            schedule: soAttrs.schedule ?? { interval: '1h' },
           };
+
+          console.log('----- config -------');
+          console.log(JSON.stringify(config, null, 2));
           if (!context) {
             return {
-              state: {
-                config,
-                lastRun: {
-                  results: [],
-                  status: 'error',
-                  error: 'RulesClientContext not found',
-                  date: new Date().toISOString(),
-                },
-              },
+              state: {},
             };
           }
 
           try {
-            console.log('context', rulesClient.context.spaceId);
             // Create the event logger function once
-            console.log('gap fill task running 2');
             const logEvent = createGapFillAutoSchedulerEventLogger({
               eventLogger,
               context: rulesClient.context,
@@ -193,15 +206,26 @@ export function registerGapFillAutoSchedulerTask({
                 },
                 message,
               });
+              if (schedulerSo) {
+                soClient
+                  .update('gap_fill_auto_scheduler', schedulerSo.id, {
+                    lastRun: {
+                      status: 'success',
+                      message,
+                      metrics: {
+                        totalRules: 0,
+                        successfulRules: 0,
+                        failedRules: 0,
+                        totalGapsProcessed: 0,
+                      },
+                    },
+                    running: false,
+                    updatedAt: endTime.toISOString(),
+                  })
+                  .catch(() => {});
+              }
               return {
-                state: {
-                  config,
-                  lastRun: {
-                    results: [],
-                    status: 'success',
-                    date: endTime.toISOString(),
-                  },
-                },
+                state: {},
               };
             };
 
@@ -322,18 +346,15 @@ export function registerGapFillAutoSchedulerTask({
             );
             // TODO: think about status etc.'
 
-            let overallStatus = '';
-            let overallError = '';
+            let overallStatus: 'success' | 'failure' | 'warning' = 'success';
             const allSuccess = results.every((r) => r.status === 'success');
             const allError = results.every((r) => r.status === 'error');
             if (allSuccess) {
               overallStatus = 'success';
             } else if (allError) {
-              overallStatus = 'error';
-              overallError = 'All rules failed to schedule backfills';
-            } else if (allInProgress) {
+              overallStatus = 'failure';
+            } else {
               overallStatus = 'warning';
-              overallError = 'Some rules failed to schedule backfills';
             }
             const summary = {
               totalRules: results.length,
@@ -385,17 +406,19 @@ export function registerGapFillAutoSchedulerTask({
               message: `Gap fill execution completed - ${summary.successfulRules}/${summary.totalRules} rules processed successfully`,
             });
 
-            return {
-              state: {
-                config,
+            if (schedulerSo) {
+              await soClient.update('gap_fill_auto_scheduler', schedulerSo.id, {
                 lastRun: {
-                  results,
                   status: overallStatus,
-                  error: overallError,
-                  date: new Date().toISOString(),
+                  message: `Processed ${summary.successfulRules}/${summary.totalRules}, ${summary.failedRules} failed; ${summary.totalGapsProcessed} gaps`,
+                  metrics: summary,
                 },
-              },
-            };
+                running: false,
+                updatedAt: new Date().toISOString(),
+              });
+            }
+
+            return { state: {} };
           } catch (error) {
             const endTime = new Date();
             const logEvent = createGapFillAutoSchedulerEventLogger({
@@ -419,17 +442,14 @@ export function registerGapFillAutoSchedulerTask({
             });
 
             logger.error(`gap-fill-auto-scheduler error: ${error && error.message}`);
-            return {
-              state: {
-                config: currentState.config,
-                lastRun: {
-                  results: [],
-                  status: 'error',
-                  error: error.message,
-                  date: endTime.toISOString(),
-                },
-              },
-            };
+            if (schedulerSo) {
+              await soClient.update('gap_fill_auto_scheduler', schedulerSo.id, {
+                lastRun: { status: 'failure', message: error.message },
+                running: false,
+                updatedAt: endTime.toISOString(),
+              });
+            }
+            return { state: {} };
           }
         },
       }),

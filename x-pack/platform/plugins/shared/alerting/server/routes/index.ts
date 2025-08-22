@@ -92,10 +92,10 @@ import { getRuleIdsWithGapsRoute } from './gaps/apis/get_rule_ids_with_gaps/get_
 import { getGapsSummaryByRuleIdsRoute } from './gaps/apis/get_gaps_summary_by_rule_ids/get_gaps_summary_by_rule_ids_route';
 import { getGlobalExecutionSummaryRoute } from './get_global_execution_summary';
 import type { AlertingPluginsStart } from '../plugin';
-import { createAutoFillSchedulerRoute } from './gaps/apis/auto_fill/create_auto_fill_scheduler_route';
-import { getAutoFillSchedulerRoute } from './gaps/apis/auto_fill/get_auto_fill_scheduler_route';
-import { updateAutoFillSchedulerRoute } from './gaps/apis/auto_fill/update_auto_fill_scheduler_route';
-import { getGapFillAutoSchedulerLogsRoute } from './gaps/apis/auto_fill/get_auto_fill_scheduler_logs_route';
+import { createAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_scheduler/create/create_auto_fill_scheduler_route';
+import { getAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_scheduler/get/get_auto_fill_scheduler_route';
+import { updateAutoFillSchedulerRoute } from './gaps/apis/gap_auto_fill_scheduler/update/update_auto_fill_scheduler_route';
+import { getGapFillAutoSchedulerLogsRoute } from './gaps/apis/gap_auto_fill_scheduler/logs/get_auto_fill_scheduler_logs_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
