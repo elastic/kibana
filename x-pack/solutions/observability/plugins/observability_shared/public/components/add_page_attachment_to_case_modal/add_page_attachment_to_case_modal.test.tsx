@@ -24,6 +24,7 @@ jest.mock('../../hooks/use_page_summary', () => ({
     errors: [],
     abortController: { signal: new AbortController().signal, abort: jest.fn() },
     screenContexts: [],
+    isComplete: false,
   })),
 }));
 
@@ -43,16 +44,6 @@ describe('AddPageAttachmentToCaseModal', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
-      isObsAIAssistantEnabled: true,
-      generateSummary: jest.fn(),
-      isLoading: false,
-      summary: '',
-      errors: [],
-      abortController: { signal: new AbortController().signal, abort: jest.fn() },
-      screenContexts: [],
-      isComplete: false,
-    });
 
     mockCases.helpers = {
       canUseCases: jest.fn().mockReturnValue({
