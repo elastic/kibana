@@ -7,5 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-console.log(process.env);
 require('../src/cli/dev');
