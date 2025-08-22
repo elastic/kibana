@@ -56,6 +56,15 @@ export const slo: SavedObjectsType = {
       id: { type: 'keyword' },
       name: { type: 'text' },
       description: { type: 'text' },
+      artifacts: {
+        properties: {
+          dashboards: {
+            properties: {
+              refId: { type: 'keyword' },
+            },
+          },
+        },
+      },
       indicator: {
         properties: {
           type: { type: 'keyword' },
