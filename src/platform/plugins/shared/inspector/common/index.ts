@@ -7,5 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/**
+ * The `common/index` file re-exports types and interfaces from
+ * the `@kbn/inspector-common` package.
+ *
+ * Please do not export any static code from this file. All static code
+ * should be exported from the `@kbn/inspector-common` package.
+ *
+ * Types can be exported from this file, but plugins and packages may prefer to
+ * import them from the `@kbn/inspector-common` packages to avoid circular
+ * graph issues.
+ */
+
 export type { Adapters, Request, RequestStatistic, RequestStatistics } from '@kbn/inspector-common';
 export { RequestAdapter, RequestStatus, RequestResponder } from '@kbn/inspector-common';
