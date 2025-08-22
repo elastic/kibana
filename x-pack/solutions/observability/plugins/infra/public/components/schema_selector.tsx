@@ -16,6 +16,8 @@ import {
   EuiText,
   EuiToken,
   EuiToolTip,
+  useEuiFontSize,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -125,6 +127,7 @@ export const SchemaSelector = ({
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
+  const { euiTheme } = useEuiTheme();
   const options = useMemo(
     () =>
       schemas.map((schema) => ({
@@ -206,8 +209,8 @@ export const SchemaSelector = ({
                   isLoading={isLoading}
                   fullWidth
                   css={{
-                    fontSize: '0.85em',
-                    fontWeight: 450,
+                    fontSize: useEuiFontSize('xs').fontSize,
+                    fontWeight: euiTheme.font.weight.medium,
                   }}
                   prepend={<PrependLabel />}
                 />
