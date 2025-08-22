@@ -351,7 +351,7 @@ For the Elastic Security 9.1.0 release information, refer to [Elastic Security S
 * Updates the built-in `reporting_user` role to leverage a new  `reporting_user` reserved privilege [#231533]({{kib-pull}}231533).
 
 **Search**:
-* Fixes an incorrect link in the `Build` breadcrumb when navigating to the **Connectors** and **Elasticsearch indices** pages [#232504]({{kib-pull}}232504).
+* Fixes an incorrect link in the **Build** breadcrumb when navigating to the **Connectors** and **{{es}} indices** pages [#232504]({{kib-pull}}232504).
 
 ## 9.0.5 [kibana-9.0.5-release-notes]
 
