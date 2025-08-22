@@ -370,7 +370,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       }
 
       if (docLoaderPromises.length > 0) {
-        Promise.all(docLoaderPromises).then(() => {
+        void Promise.all(docLoaderPromises).then(() => {
           this.options.setIsKBSetupInProgress(this.spaceId, false);
         });
       }
