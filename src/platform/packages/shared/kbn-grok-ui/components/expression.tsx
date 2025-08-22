@@ -37,12 +37,15 @@ export const Expression = ({
   const divRef = useRef<HTMLDivElement | null>(null);
   const { setupResizeChecker, destroyResizeChecker } = useResizeCheckerUtils();
 
-  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
-    grokEditorRef.current = editor;
-    if (divRef.current) {
-      setupResizeChecker(divRef.current, editor);
-    }
-  }, [setupResizeChecker]);
+  const onGrokEditorMount: CodeEditorProps['editorDidMount'] = useCallback(
+    (editor: monaco.editor.IStandaloneCodeEditor) => {
+      grokEditorRef.current = editor;
+      if (divRef.current) {
+        setupResizeChecker(divRef.current, editor);
+      }
+    },
+    [setupResizeChecker]
+  );
 
   const onGrokEditorWillUnmount: CodeEditorProps['editorWillUnmount'] = useCallback(() => {
     destroyResizeChecker();
@@ -58,7 +61,7 @@ export const Expression = ({
       ref={divRef}
       style={{
         width: '100%',
-        height: height,
+        height,
         overflow: 'hidden',
       }}
     >
