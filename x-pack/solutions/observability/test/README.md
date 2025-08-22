@@ -59,7 +59,6 @@ When extending functionality:
 
 **✅ Create solution-specific services** only for Observability-unique functionality
 
-
 ## Test Organization
 
 ### API Integration Tests
@@ -97,7 +96,9 @@ node scripts/functional_tests_server.js --config x-pack/solutions/observability/
 
 # Run functional tests
 node scripts/functional_test_runner.js --config x-pack/solutions/observability/test/functional/apps/apm/config.ts
-````
+```
+
+**Note**: The config paths shown above are examples. Replace it with the actual path to the config file for the test suite you want to run.
 
 ## Best Practices
 

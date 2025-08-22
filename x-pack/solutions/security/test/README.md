@@ -77,6 +77,8 @@ node scripts/functional_tests_server.js --config x-pack/solutions/security/test/
 node scripts/functional_test_runner.js --config x-pack/solutions/security/test/cloud_security_posture_functional/config.ts
 ```
 
+**Note**: The config paths shown above are examples. Replace it with the actual path to the config file for the test suite you want to run.
+
 ## Best Practices
 
 - **Reuse platform services** whenever possible to maintain consistency

@@ -98,6 +98,8 @@ node scripts/functional_tests_server.js --config x-pack/solutions/search/test/fu
 node scripts/functional_test_runner.js --config x-pack/solutions/search/test/functional_search/config.ts
 ```
 
+**Note**: The config paths shown above are examples. Replace it with the actual path to the config file for the test suite you want to run.
+
 ## Best Practices
 
 - **Reuse platform services** whenever possible to maintain consistency

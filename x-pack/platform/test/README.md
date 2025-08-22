@@ -145,12 +145,14 @@ Reusable UI interaction patterns organized by application:
 ### Local Development
 
 ```bash
-# Start test server
+# Start test server (replace with your actual config file path)
 node scripts/functional_tests_server.js --config x-pack/platform/test/functional/apps/advanced_settings/config.ts
 
-# Run tests
+# Run tests (replace with your actual config file path)
 node scripts/functional_test_runner.js --config x-pack/platform/test/functional/apps/advanced_settings/config.ts
 ```
+
+**Note**: The config paths shown above are examples. Replace it with the actual path to the config file for the test suite you want to run.
 
 ## Best Practices
 
