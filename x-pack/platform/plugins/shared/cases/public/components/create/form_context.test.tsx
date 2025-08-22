@@ -228,7 +228,7 @@ describe('Create case', () => {
       iconClass: 'logoSecurity',
     });
 
-    useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
+    useLicenseMock.mockReturnValue({ isAtLeastGold: () => true, isAtLeastPlatinum: () => true });
   });
 
   afterAll(() => {
@@ -1121,7 +1121,10 @@ describe('Create case', () => {
     });
 
     it('should not render the assignees on basic license', async () => {
-      useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
+      useLicenseMock.mockReturnValue({
+        isAtLeastGold: () => false,
+        isAtLeastPlatinum: () => false,
+      });
 
       renderWithTestingProviders(
         <FormContext
