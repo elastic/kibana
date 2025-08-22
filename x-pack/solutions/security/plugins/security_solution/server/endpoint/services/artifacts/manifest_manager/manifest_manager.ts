@@ -331,6 +331,34 @@ export class ManifestManager {
   }
 
   /**
+   * Builds an array of artifacts (one per supported OS) based on the current state of the
+   * Trusted Devices list
+   * @protected
+   */
+  protected async buildTrustedDevicesArtifacts(
+    allPolicyIds: string[]
+  ): Promise<ArtifactsBuildResult> {
+    const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
+    const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedDevices.id,
+      name: ArtifactConstants.GLOBAL_TRUSTED_DEVICES_NAME,
+    };
+
+    for (const os of ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS) {
+      defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
+    }
+
+    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> =
+      await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+
+    return { defaultArtifacts, policySpecificArtifacts };
+  }
+
+  /**
    * Builds an array of endpoint event filters (one per supported OS) based on the current state of the
    * Event Filters list
    * @protected
@@ -629,6 +657,9 @@ export class ManifestManager {
     const results = await Promise.all([
       this.buildExceptionListArtifacts(allPolicyIds),
       this.buildTrustedAppsArtifacts(allPolicyIds),
+      ...(this.experimentalFeatures.trustedDevices
+        ? [this.buildTrustedDevicesArtifacts(allPolicyIds)]
+        : []),
       this.buildEventFiltersArtifacts(allPolicyIds),
       this.buildHostIsolationExceptionsArtifacts(allPolicyIds),
       this.buildBlocklistArtifacts(allPolicyIds),
