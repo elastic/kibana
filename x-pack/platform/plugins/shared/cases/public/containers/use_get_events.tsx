@@ -15,14 +15,20 @@ import { casesQueriesKeys } from './constants';
 import * as i18n from './translations';
 
 export const useGetEvents = (
-  caseId: string,
   dataView: DataView | undefined,
-  columns: string[],
-  eventIds: string[]
+  parameters: {
+    caseId: string;
+    columns: string[];
+    eventIds: string[];
+  }
 ) => {
   const toasts = useToasts();
   return useQuery(
-    casesQueriesKeys.caseEvents(caseId, [dataView?.getIndexPattern(), ...eventIds, ...columns]),
+    casesQueriesKeys.caseEvents(parameters.caseId, [
+      dataView?.getIndexPattern(),
+      ...parameters.eventIds,
+      ...parameters.columns,
+    ]),
     ({ signal }) => {
       const { data } = KibanaServices.get();
 
@@ -32,11 +38,11 @@ export const useGetEvents = (
           body: {
             query: {
               ids: {
-                values: eventIds,
+                values: parameters.eventIds,
               },
             },
           },
-          fields: columns,
+          fields: parameters.columns,
         },
       });
 

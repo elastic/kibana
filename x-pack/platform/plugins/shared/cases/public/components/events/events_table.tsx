@@ -54,16 +54,15 @@ export const EventsTable = ({ caseData }: EventsTableProps) => {
   const indexPattern = events.map((event) => event.index).join(',');
   const { dataView: eventsDataView } = useEventsDataView(indexPattern);
 
-  const eventsResponse = useGetEvents(
-    caseData.id,
-    eventsDataView,
+  const eventsResponse = useGetEvents(eventsDataView, {
+    caseId: caseData.id,
     columns,
-    events.flatMap((event) => event.eventId)
-  );
+    eventIds: events.flatMap((event) => event.eventId),
+  });
 
   const rows = buildDataTableRecordList({
-    records: eventsResponse.data?.rawResponse?.hits?.hits ?? [],
     dataView: eventsDataView,
+    records: eventsResponse.data?.rawResponse?.hits?.hits ?? [],
   });
 
   const [expandedDoc, setExpandedDoc] = useState<DataTableRecord>();
