@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { Dispatch, SetStateAction } from 'react';
 
@@ -54,11 +53,10 @@ export interface GetComponentDataOptions {
   euiInfo: EuiInfo;
   fileData: FileData;
   target: HTMLElement | SVGElement;
-  euiTheme: EuiThemeComputed;
   iconType?: string;
-  setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
-  setIsInspecting: Dispatch<SetStateAction<boolean>>;
   sourceComponent?: string;
+  setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
+  setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface GetInspectedElementOptions {
@@ -66,10 +64,9 @@ export interface GetInspectedElementOptions {
   core: CoreStart;
   componentPath: string | undefined;
   overlayId: string;
-  euiTheme: EuiThemeComputed;
-  setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
-  setIsInspecting: Dispatch<SetStateAction<boolean>>;
   sourceComponent?: string;
+  setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
+  setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
 export interface InspectComponentResponse {
@@ -86,26 +83,14 @@ export interface ActionLink {
   label: string;
 }
 
-export interface SetElementHighlightOptions {
-  target: HTMLElement | SVGElement;
-  euiTheme: EuiThemeComputed;
-}
-
-export type StorePreviewScreenshotFn = ({
-  id,
-  dataUrl,
-}: {
-  id: string;
-  dataUrl: string;
-}) => boolean;
-
-export interface ScreenshotCommonOptions {
+/**
+ * Options for the `capturePreviewScreenshot` function.
+ */
+export interface CapturePreviewScreenshotOptions {
   /** The HTML element to target.  If not provided, the `querySelector` will be used. */
   target?: HTMLElement | SVGElement;
   /** A query selector to find the HTML container to target.  Default is `.kbnAppWrapper`. */
   querySelector?: string;
-  /** A function to store the screenshot.  Default stores to session storage. */
-  storeScreenshot?: StorePreviewScreenshotFn;
   /** The scroll distance from the left of the window.  Default is `0`. */
   scrollX?: number;
   /** The scroll distance from the top of the window.  Default is `0`. */
@@ -119,20 +104,27 @@ export interface ScreenshotCommonOptions {
 }
 
 /**
- * Options for the `usePreviewScreenshot` hook.
+ * Parameters for the `getPreviewDimensions` function.
  */
-export interface UsePreviewScreenshotOptions extends ScreenshotCommonOptions {
-  /**
-   * The ID of the Saved Object.  This can actually be any known identifier.  It can
-   * be `undefined`, since it may not be immediately available.
-   */
-  savedObjectId?: string;
+export interface GetPreviewDimensionsParams {
+  /** The `canvas` element to target. */
+  capture: HTMLCanvasElement;
+  /** The maximum `width` for the preview image. Defaults to `400`. */
+  maxWidth?: number;
+  /** The maximum `height` for the preview image. Defaults to `Infinity`. */
+  maxHeight?: number;
+  /** The desired aspect ratio for the preview image. Defaults to `0.75`. */
+  aspectRatio?: number;
 }
 
 /**
- * Options for the `capturePreviewScreenshot` function.
+ * Result type for the `getPreviewDimensions` function.
  */
-export type CapturePreviewScreenshotOptions = Omit<
-  ScreenshotCommonOptions,
-  'id' | 'storeScreenshot'
->;
+export interface GetPreviewDimensionsResult {
+  /** The calculated `width` for the preview image. */
+  width: number;
+  /** The calculated `height` for the preview image. */
+  height: number;
+  /** Parameters for the `drawImage` function. */
+  drawImageParams: Readonly<[number, number, number, number, number, number, number, number]>;
+}

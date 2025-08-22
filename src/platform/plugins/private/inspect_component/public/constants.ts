@@ -9,3 +9,6 @@
 
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
 export const DEFAULT_CONTAINER_SELECTOR = '.kbnAppWrapper';
+export const SCREENSHOT_DEFAULT_ASPECT_RATIO = 0.75;
+export const SCREENSHOT_DEFAULT_MAX_WIDTH = 400;
+export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';

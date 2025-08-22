@@ -31,7 +31,7 @@ interface Props {
 
 export const InspectButton = ({ core }: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
-  const [flyoutRef, setFlyoutRef] = useState<OverlayRef | undefined>(undefined);
+  const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef>();
 
   const buttonStyle = css`
     background-color: ${isInspecting ? '#0a233c' : 'transparent'};
@@ -48,9 +48,9 @@ export const InspectButton = ({ core }: Props) => {
   };
 
   const handleInspectClick = () => {
-    if (flyoutRef) {
-      flyoutRef.close();
-      setFlyoutRef(undefined);
+    if (flyoutOverlayRef) {
+      flyoutOverlayRef.close();
+      setFlyoutOverlayRef(undefined);
     }
     setIsInspecting((prev) => !prev);
   };
@@ -76,7 +76,11 @@ export const InspectButton = ({ core }: Props) => {
         />
       </EuiToolTip>
       {isInspecting && (
-        <InspectOverlay core={core} setFlyoutRef={setFlyoutRef} setIsInspecting={setIsInspecting} />
+        <InspectOverlay
+          core={core}
+          setFlyoutOverlayRef={setFlyoutOverlayRef}
+          setIsInspecting={setIsInspecting}
+        />
       )}
     </>
   );

@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize } from '@elastic/eui';
 import { EUI_DATA_ICON_TYPE } from './constants';
 import { getComponentData } from './get_component_data';
 import type {
@@ -16,7 +15,6 @@ import type {
   GetElementFromPointOptions,
   GetInspectedElementOptions,
   ReactFiberNode,
-  SetElementHighlightOptions,
 } from './types';
 import EUI_DOCS_MAP from './eui_docs_links.json';
 
@@ -187,12 +185,11 @@ export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null 
 export const getInspectedElementData = async ({
   componentPath,
   core,
-  euiTheme,
   event,
   overlayId,
-  setFlyoutRef,
-  setIsInspecting,
   sourceComponent,
+  setFlyoutOverlayRef,
+  setIsInspecting,
 }: GetInspectedElementOptions) => {
   event.preventDefault();
   event.stopPropagation();
@@ -224,60 +221,16 @@ export const getInspectedElementData = async ({
       componentName: euiDocsInfo?.componentName || 'N/A',
       docsLink: euiDocsInfo?.docsLink || 'https://eui.elastic.co/docs/components',
     },
-    euiTheme,
     fileData,
     iconType: iconType || undefined,
-    setFlyoutRef,
-    setIsInspecting,
     sourceComponent,
     target,
+    setFlyoutOverlayRef,
+    setIsInspecting,
   });
 };
-
-export const isKeyboardShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && isSingleQuote(event);
 
 const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
 
-export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
-  const rectangle = target.getBoundingClientRect();
-  const isInsidePortal = Boolean(target.closest('[data-euiportal="true"]'));
-
-  const overlay = document.createElement('div');
-  Object.assign(overlay.style, {
-    position: 'absolute',
-    top: `${rectangle.top + window.scrollY}px`,
-    left: `${rectangle.left + window.scrollX}px`,
-    width: `${rectangle.width}px`,
-    height: `${rectangle.height}px`,
-    background: transparentize(euiTheme.colors.primary, 0.3),
-    border: `2px solid ${euiTheme.colors.primary}`,
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
-    borderRadius: getComputedStyle(target).borderRadius,
-    zIndex: isInsidePortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout) - 1,
-  });
-
-  document.body.appendChild(overlay);
-
-  // Removes the overlay when the element is no longer visible, which can happen when using components like accordions or tabs
-  // This won't add the overlay back if the element becomes visible again
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const isVisible = entries.some((entry) => entry.isIntersecting);
-      if (overlay.parentNode && !isVisible) {
-        overlay.parentNode.removeChild(overlay);
-      }
-    },
-    { threshold: 0 }
-  );
-
-  observer.observe(target);
-
-  return () => {
-    if (overlay.parentNode) {
-      overlay.parentNode.removeChild(overlay);
-    }
-    observer.disconnect();
-  };
-};
+export const isKeyboardShortcut = (event: KeyboardEvent) =>
+  (event.metaKey || event.ctrlKey) && isSingleQuote(event);

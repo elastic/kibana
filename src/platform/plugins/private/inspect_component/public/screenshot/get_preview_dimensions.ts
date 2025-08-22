@@ -7,34 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const DEFAULT_ASPECT_RATIO = 0.75;
-const DEFAULT_MAX_WIDTH = 400;
-
-/**
- * Parameters for the `getPreviewDimensions` function.
- */
-export interface GetPreviewDimensionsParams {
-  /** The `canvas` element to target. */
-  capture: HTMLCanvasElement;
-  /** The maximum `width` for the preview image. Defaults to `400`. */
-  maxWidth?: number;
-  /** The maximum `height` for the preview image. Defaults to `Infinity`. */
-  maxHeight?: number;
-  /** The desired aspect ratio for the preview image. Defaults to `0.75`. */
-  aspectRatio?: number;
-}
-
-/**
- * Result type for the `getPreviewDimensions` function.
- */
-export interface GetPreviewDimensionsResult {
-  /** The calculated `width` for the preview image. */
-  width: number;
-  /** The calculated `height` for the preview image. */
-  height: number;
-  /** Parameters for the `drawImage` function. */
-  drawImageParams: Readonly<[number, number, number, number, number, number, number, number]>;
-}
+import { SCREENSHOT_DEFAULT_ASPECT_RATIO, SCREENSHOT_DEFAULT_MAX_WIDTH } from '../constants';
+import type { GetPreviewDimensionsParams, GetPreviewDimensionsResult } from '../types';
 
 /**
  * Utility function to calculate dimensions for a preview screenshot.
@@ -50,7 +24,7 @@ export const getPreviewDimensions = ({
   capture,
   maxWidth,
   maxHeight,
-  aspectRatio = DEFAULT_ASPECT_RATIO,
+  aspectRatio = SCREENSHOT_DEFAULT_ASPECT_RATIO,
 }: GetPreviewDimensionsParams): GetPreviewDimensionsResult => {
   const { width: captureWidth, height: captureHeight } = capture;
 
@@ -75,7 +49,7 @@ export const getPreviewDimensions = ({
   sourceWidth = Math.min(sourceWidth, captureWidth);
 
   // Fit within maxWidth and maxHeight, honoring aspectRatio.
-  const boundWidth = maxWidth ?? (maxHeight ? Infinity : DEFAULT_MAX_WIDTH);
+  const boundWidth = maxWidth ?? (maxHeight ? Infinity : SCREENSHOT_DEFAULT_MAX_WIDTH);
   const boundHeight = maxHeight ?? Infinity;
 
   // Calculate final dimensions to fit inside the bounds while preserving the aspect ratio.

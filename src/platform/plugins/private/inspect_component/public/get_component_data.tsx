@@ -7,25 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { createRef } from 'react';
-import type { RefObject } from 'react';
+import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { capturePreviewScreenshot } from './screenshot/capture_screenshot';
-import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
-
-const setFlyoutZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
-  setTimeout(() => {
-    const node = flyoutRef.current;
-
-    if (node) {
-      const portalParent: HTMLElement | null = node.closest('[data-euiportal="true"]');
-
-      if (portalParent) portalParent.style.zIndex = zIndex;
-    }
-  }, 0);
-};
 
 export const getComponentData = async ({
   core,
@@ -33,14 +19,11 @@ export const getComponentData = async ({
   fileData,
   iconType,
   target,
-  euiTheme,
   sourceComponent,
-  setFlyoutRef,
+  setFlyoutOverlayRef,
   setIsInspecting,
 }: GetComponentDataOptions) => {
   try {
-    const flyoutRef = createRef<HTMLDivElement>();
-
     const { codeowners, relativePath, baseFileName }: InspectComponentResponse =
       await core.http.post('/internal/inspect_component/inspect', {
         body: JSON.stringify({ path: fileData.fileName }),
@@ -67,24 +50,15 @@ export const getComponentData = async ({
     };
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(<InspectFlyout componentData={componentData} ref={flyoutRef} />, core.rendering),
+      toMountPoint(<InspectFlyout componentData={componentData} target={target} />, core.rendering),
       flyoutOptions
     );
 
-    const flyoutZIndex = (Number(euiTheme.levels.modal) * 2).toString();
-    setFlyoutZIndex(flyoutRef, flyoutZIndex);
-
-    const restore = setElementHighlight({
-      target,
-      euiTheme,
-    });
-
     flyout.onClose.then(() => {
-      restore();
-      setFlyoutRef(undefined);
+      setFlyoutOverlayRef(undefined);
     });
 
-    setFlyoutRef(flyout);
+    setFlyoutOverlayRef(flyout);
   } catch (e) {
     return;
   } finally {

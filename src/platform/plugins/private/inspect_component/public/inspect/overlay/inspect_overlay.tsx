@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React, { useState, useCallback, useMemo } from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { CSSProperties, Dispatch, SetStateAction } from 'react';
-import React, { useState, useCallback, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/css';
 import { EuiWindowEvent, transparentize, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
@@ -18,11 +18,11 @@ import { InspectHighlight } from './inspect_highlight';
 
 interface Props {
   core: CoreStart;
-  setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
+  setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
-export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) => {
+export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
   const [componentPath, setComponentPath] = useState<string | undefined>();
   const [sourceComponent, setSourceComponent] = useState<string | undefined>();
@@ -51,13 +51,12 @@ export const InspectOverlay = ({ core, setFlyoutRef, setIsInspecting }: Props) =
         core,
         componentPath,
         overlayId,
-        euiTheme,
-        setFlyoutRef,
-        setIsInspecting,
         sourceComponent,
+        setFlyoutOverlayRef,
+        setIsInspecting,
       });
     },
-    [componentPath, core, overlayId, euiTheme, setFlyoutRef, setIsInspecting, sourceComponent]
+    [core, componentPath, overlayId, setFlyoutOverlayRef, setIsInspecting, sourceComponent]
   );
 
   const handlePointerMove = useCallback(
