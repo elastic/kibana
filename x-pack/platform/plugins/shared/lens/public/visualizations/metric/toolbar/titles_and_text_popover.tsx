@@ -45,11 +45,24 @@ const DEFAULT_LAYOUT_CONFIG: Record<
   },
 };
 
+const getDefaultLayoutConfig = (
+  newPrimaryPosition: 'top' | 'bottom',
+  hasSecondaryMetric: boolean
+): Pick<MetricVisualizationState, 'titleWeight' | 'primaryAlign' | 'secondaryAlign'> => {
+  return {
+    ...DEFAULT_LAYOUT_CONFIG[newPrimaryPosition],
+    ...(hasSecondaryMetric && newPrimaryPosition === 'top'
+      ? { secondaryAlign: 'left' }
+      : { secondaryAlign: 'right' }),
+  };
+};
+
 export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
   state,
   setState,
   groupPosition,
 }) => {
+  const hasSecondaryMetric = !!state.secondaryMetricAccessor;
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.metric.toolbarTitlesText.label', {
@@ -103,7 +116,7 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
           setState({
             ...state,
             primaryPosition: newPrimaryPosition,
-            ...DEFAULT_LAYOUT_CONFIG[newPrimaryPosition],
+            ...getDefaultLayoutConfig(newPrimaryPosition, hasSecondaryMetric),
           });
         }}
       />
@@ -137,7 +150,7 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
         }}
       />
 
-      {state.secondaryMetricAccessor && (
+      {hasSecondaryMetric && (
         <SecondaryAlignmentOption
           value={state.secondaryAlign ?? metricStateDefaults.secondaryAlign}
           onChange={(newSecondaryAlign) => {

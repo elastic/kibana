@@ -248,6 +248,7 @@ describe('TitlesAndTextPopover', () => {
         primaryPosition: 'top',
         primaryAlign: 'left',
         titleWeight: 'normal',
+        secondaryAlign: 'left',
       })
     );
   });
@@ -266,6 +267,7 @@ describe('TitlesAndTextPopover', () => {
         primaryPosition: 'bottom',
         primaryAlign: 'right',
         titleWeight: 'bold',
+        secondaryAlign: 'right',
       })
     );
   });
