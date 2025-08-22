@@ -103,7 +103,7 @@ describe('<SnapshotList />', () => {
     describe('url parameters', () => {
       test('query is updated with repository name from the url', async () => {
         testBed = await setup('?repository=test_repo');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'repository',
           searchValue: 'test_repo',
@@ -114,7 +114,7 @@ describe('<SnapshotList />', () => {
 
       test('query is updated with snapshot policy name from the url', async () => {
         testBed = await setup('?policy=test_policy');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'policyName',
           searchValue: 'test_policy',
@@ -125,7 +125,7 @@ describe('<SnapshotList />', () => {
 
       test('query is not updated with unknown params from the url', async () => {
         testBed = await setup('?some_param=test_param');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
       });
@@ -136,7 +136,7 @@ describe('<SnapshotList />', () => {
         const ADVANCE_TIME = false;
         await setSearchText('snapshot=test_snapshot', ADVANCE_TIME);
         // the last request was without any search params
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         // advance the timers until after the debounce timeout
@@ -144,7 +144,7 @@ describe('<SnapshotList />', () => {
         act(() => {
           jest.advanceTimersByTime(500);
         });
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
           searchField: 'snapshot',
           searchValue: 'test_snapshot',
@@ -158,7 +158,7 @@ describe('<SnapshotList />', () => {
       describe('snapshot', () => {
         test('term search is converted to partial snapshot search', async () => {
           await setSearchText('term_snapshot_search');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'term_snapshot_search',
@@ -169,7 +169,7 @@ describe('<SnapshotList />', () => {
 
         test('term search with a date is parsed', async () => {
           await setSearchText('2022.02.10');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: '2022.02.10',
@@ -180,7 +180,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding term search is converted to partial excluding snapshot search', async () => {
           await setSearchText('-test_snapshot');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'test_snapshot',
@@ -191,7 +191,7 @@ describe('<SnapshotList />', () => {
 
         test('partial snapshot search is parsed', async () => {
           await setSearchText('snapshot:test_snapshot');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'test_snapshot',
@@ -202,7 +202,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding partial snapshot search is parsed', async () => {
           await setSearchText('-snapshot:test_snapshot');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'test_snapshot',
@@ -213,7 +213,7 @@ describe('<SnapshotList />', () => {
 
         test('exact snapshot search is parsed', async () => {
           await setSearchText('snapshot=test_snapshot');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'test_snapshot',
@@ -224,7 +224,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding exact snapshot search is parsed', async () => {
           await setSearchText('-snapshot=test_snapshot');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'snapshot',
             searchValue: 'test_snapshot',
@@ -237,7 +237,7 @@ describe('<SnapshotList />', () => {
       describe('repository', () => {
         test('partial repository search is parsed', async () => {
           await setSearchText('repository:test_repository');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'repository',
             searchValue: 'test_repository',
@@ -248,7 +248,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding partial repository search is parsed', async () => {
           await setSearchText('-repository:test_repository');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'repository',
             searchValue: 'test_repository',
@@ -259,7 +259,7 @@ describe('<SnapshotList />', () => {
 
         test('exact repository search is parsed', async () => {
           await setSearchText('repository=test_repository');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'repository',
             searchValue: 'test_repository',
@@ -270,7 +270,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding exact repository search is parsed', async () => {
           await setSearchText('-repository=test_repository');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'repository',
             searchValue: 'test_repository',
@@ -283,7 +283,7 @@ describe('<SnapshotList />', () => {
       describe('policy', () => {
         test('partial policy search is parsed', async () => {
           await setSearchText('policyName:test_policy');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'policyName',
             searchValue: 'test_policy',
@@ -294,7 +294,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding partial policy search is parsed', async () => {
           await setSearchText('-policyName:test_policy');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'policyName',
             searchValue: 'test_policy',
@@ -305,7 +305,7 @@ describe('<SnapshotList />', () => {
 
         test('exact policy search is parsed', async () => {
           await setSearchText('policyName=test_policy');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'policyName',
             searchValue: 'test_policy',
@@ -316,7 +316,7 @@ describe('<SnapshotList />', () => {
 
         test('excluding exact policy search is parsed', async () => {
           await setSearchText('-policyName=test_policy');
-          expect(useLoadSnapshots).lastCalledWith({
+          expect(useLoadSnapshots).toHaveBeenLastCalledWith({
             ...DEFAULT_SNAPSHOT_LIST_PARAMS,
             searchField: 'policyName',
             searchValue: 'test_policy',
@@ -330,7 +330,7 @@ describe('<SnapshotList />', () => {
     describe('error handling', () => {
       test(`doesn't allow more than 1 terms in the query`, async () => {
         await setSearchText('term1 term2');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         expect(searchErrorExists()).toBeTruthy();
@@ -341,7 +341,7 @@ describe('<SnapshotList />', () => {
 
       test(`doesn't allow more than 1 clauses in the query`, async () => {
         await setSearchText('snapshot=test_snapshot policyName:test_policy');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         expect(searchErrorExists()).toBeTruthy();
@@ -352,7 +352,7 @@ describe('<SnapshotList />', () => {
 
       test(`doesn't allow unknown properties in the query`, async () => {
         await setSearchText('unknown_field=test');
-        expect(useLoadSnapshots).lastCalledWith({
+        expect(useLoadSnapshots).toHaveBeenLastCalledWith({
           ...DEFAULT_SNAPSHOT_LIST_PARAMS,
         });
         expect(searchErrorExists()).toBeTruthy();

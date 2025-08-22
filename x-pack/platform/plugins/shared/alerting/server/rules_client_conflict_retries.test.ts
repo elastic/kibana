@@ -139,7 +139,7 @@ async function update(success: boolean) {
     });
   } catch (err) {
     // only checking the warn messages in this test
-    expect(logger.warn).lastCalledWith(`rulesClient.update('rule-id') conflict, exceeded retries`);
+    expect(logger.warn).toHaveBeenLastCalledWith(`rulesClient.update('rule-id') conflict, exceeded retries`);
     return expectConflict(success, err, 'create');
   }
   expectSuccess(success, 2, 'create');

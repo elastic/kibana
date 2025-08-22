@@ -255,7 +255,7 @@ describe('Custom Query Alerts', () => {
     expect(eventsTelemetry.sendAsync).toHaveBeenCalled();
     // ensures that the last status written is a warning status
     // and that status contains the error message
-    expect(mockedStatusLogger.logStatusChange).lastCalledWith(
+    expect(mockedStatusLogger.logStatusChange).toHaveBeenLastCalledWith(
       expect.objectContaining({
         newStatus: RuleExecutionStatusEnum['partial failure'],
         message:

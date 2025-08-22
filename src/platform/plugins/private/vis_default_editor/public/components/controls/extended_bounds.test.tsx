@@ -84,7 +84,7 @@ describe('ExtendedBoundsParamEditor', () => {
 
       comp.unmount();
 
-      expect(defaultProps.setValidity).lastCalledWith(true);
+      expect(defaultProps.setValidity).toHaveBeenLastCalledWith(true);
       expect(defaultProps.setValidity)..toHaveBeenCalledTimes(2);
     });
   });
@@ -101,11 +101,11 @@ describe('ExtendedBoundsParamEditor', () => {
       const minBound = comp.find('input').first();
       minBound.simulate('change', { target: { value: '2' } });
 
-      expect(defaultProps.setValue).lastCalledWith({ min: 2 });
+      expect(defaultProps.setValue).toHaveBeenLastCalledWith({ min: 2 });
 
       minBound.simulate('change', { target: { value: '' } });
 
-      expect(defaultProps.setValue).lastCalledWith({ min: '' });
+      expect(defaultProps.setValue).toHaveBeenLastCalledWith({ min: '' });
     });
 
     test('should set numeric "max" or an empty string on change event', () => {
@@ -124,7 +124,7 @@ describe('ExtendedBoundsParamEditor', () => {
 
       maxBound.simulate('change', { target: { value: '' } });
 
-      expect(defaultProps.setValue).lastCalledWith({ min: 10, max: '' });
+      expect(defaultProps.setValue).toHaveBeenLastCalledWith({ min: 10, max: '' });
     });
   });
 });

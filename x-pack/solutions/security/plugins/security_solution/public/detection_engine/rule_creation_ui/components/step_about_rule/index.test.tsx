@@ -427,7 +427,7 @@ describe('StepAboutRuleComponent', () => {
     });
 
     const indexNames = ['.ml-anomalies-shared'];
-    expect(useFetchIndex).lastCalledWith(indexNames);
+    expect(useFetchIndex).toHaveBeenLastCalledWith(indexNames);
   });
 
   it('should use default rule index if selected ML jobs are not installed when creating/editing ML rule', async () => {
@@ -447,6 +447,6 @@ describe('StepAboutRuleComponent', () => {
       wrappingComponent: TestProviders as EnzymeComponentType<{}>,
     });
 
-    expect(useFetchIndex).lastCalledWith(stepDefineStepMLRule.index);
+    expect(useFetchIndex).toHaveBeenLastCalledWith(stepDefineStepMLRule.index);
   });
 });

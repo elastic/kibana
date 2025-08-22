@@ -547,7 +547,7 @@ describe('IndexPatterns', () => {
 
     expect(result[0]).toBeInstanceOf(DataView);
 
-    expect(savedObjectsClient.find).lastCalledWith({
+    expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
       fields: ['title'],
       search,
       searchFields: ['title', 'name'],
@@ -562,7 +562,7 @@ describe('IndexPatterns', () => {
 
     expect(result[0]).toBeInstanceOf(DataViewLazy);
 
-    expect(savedObjectsClient.find).lastCalledWith({
+    expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
       fields: ['title'],
       search,
       searchFields: ['title', 'name'],

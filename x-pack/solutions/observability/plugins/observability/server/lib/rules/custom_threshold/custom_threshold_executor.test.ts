@@ -1682,7 +1682,7 @@ describe('The custom threshold alert type', () => {
           },
           id: 'a',
         });
-        expect(getViewInAppUrl).lastCalledWith({
+        expect(getViewInAppUrl).toHaveBeenLastCalledWith({
           dataViewId: 'valid-index-name',
           spaceId: MOCKED_SPACE_ID,
           groups: [
