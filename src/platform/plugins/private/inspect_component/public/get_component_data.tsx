@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { capturePreviewScreenshot } from '../../../../packages/shared/shared-ux/preview_screenshots';
+import { capturePreviewScreenshot } from '@kbn/preview-screenshots';
 import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
