@@ -9,7 +9,7 @@ import dedent from 'dedent';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedMonitor } from './use_selected_monitor';
 import { useSelectedLocation } from './use_selected_location';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const useMonitorScreenContext = () => {
   const { monitor } = useSelectedMonitor();

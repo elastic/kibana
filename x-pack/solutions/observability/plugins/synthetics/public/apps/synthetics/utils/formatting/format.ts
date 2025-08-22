@@ -53,9 +53,6 @@ export const formatDuration = (durationMicros: number, { noSpace }: { noSpace?: 
 };
 
 export const getErrorDuration = (startedAt: Moment, endsAt: Moment) => {
-  // const endsAt = state.ends ? moment(state.ends) : moment();
-  // const startedAt = moment(state?.started_at);
-
   const diffInDays = endsAt.diff(startedAt, 'days');
   if (diffInDays > 1) {
     return i18n.translate('xpack.synthetics.errorDetails.errorDuration.days', {
