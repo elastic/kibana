@@ -823,6 +823,31 @@ describe('convertToWorkflowGraph', () => {
         'exitCondition(if_testForeachConnectorStep)',
       ]);
     });
+
+    it('should have correct edges', () => {
+      const executionGraph = convertToWorkflowGraph(workflowDefinition as any);
+      const edges = executionGraph.edges();
+      expect(edges).toEqual(
+        expect.arrayContaining([
+          { v: 'if_testForeachConnectorStep', w: 'enterThen(if_testForeachConnectorStep)' },
+          { v: 'enterThen(if_testForeachConnectorStep)', w: 'foreach_testForeachConnectorStep' },
+          { v: 'foreach_testForeachConnectorStep', w: 'testForeachConnectorStep' },
+          {
+            v: 'testForeachConnectorStep',
+            w: 'exitForeach(foreach_testForeachConnectorStep)',
+          },
+          {
+            v: 'exitForeach(foreach_testForeachConnectorStep)',
+            w: 'exitThen(if_testForeachConnectorStep)',
+          },
+          {
+            v: 'exitThen(if_testForeachConnectorStep)',
+            w: 'exitCondition(if_testForeachConnectorStep)',
+          },
+        ])
+      );
+      expect(edges).toHaveLength(6);
+    });
   });
 
   describe('step level foreach in if step', () => {

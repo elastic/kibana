@@ -107,12 +107,10 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
   graph.setNode(enterThenBranchNode.id, enterThenBranchNode);
   graph.setEdge(enterConditionNodeId, enterThenBranchNode.id);
   let thenPreviousStep: any = enterThenBranchNode;
-  trueSteps.forEach((ifTrueCurrentStep: any) => {
-    const currentNode = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep);
-    graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(thenPreviousStep), getNodeId(currentNode));
-    thenPreviousStep = currentNode;
-  });
+  trueSteps.forEach(
+    (ifTrueCurrentStep: any) =>
+      (thenPreviousStep = visitAbstractStep(graph, thenPreviousStep, ifTrueCurrentStep))
+  );
   const exitThenBranchNode: ExitConditionBranchNode = {
     id: `exitThen(${enterConditionNodeId})`,
     type: 'exit-condition-branch',
@@ -130,12 +128,10 @@ export function visitIfStep(graph: graphlib.Graph, previousStep: any, currentSte
     graph.setNode(enterElseBranchNode.id, enterElseBranchNode);
     graph.setEdge(enterConditionNodeId, enterElseBranchNode.id);
     let elsePreviousStep: any = enterElseBranchNode;
-    falseSteps.forEach((ifFalseCurrentStep: any) => {
-      const currentNode = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep);
-      graph.setNode(getNodeId(currentNode), currentNode);
-      graph.setEdge(getNodeId(elsePreviousStep), getNodeId(currentNode));
-      elsePreviousStep = currentNode;
-    });
+    falseSteps.forEach(
+      (ifFalseCurrentStep: any) =>
+        (elsePreviousStep = visitAbstractStep(graph, elsePreviousStep, ifFalseCurrentStep))
+    );
     const exitElseBranchNode: ExitConditionBranchNode = {
       id: `exitElse(${enterConditionNodeId})`,
       type: 'exit-condition-branch',
@@ -179,8 +175,7 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   let previousNodeToLink: any = enterForeachNode;
   foreachNestedSteps.forEach((step: any) => {
     enterForeachNode.itemNodeIds.push(getNodeId(step));
-    const currentNode = visitAbstractStep(graph, previousNodeToLink, step);
-    previousNodeToLink = currentNode;
+    previousNodeToLink = visitAbstractStep(graph, previousNodeToLink, step);
   });
 
   graph.setNode(exitForeachNode.id, exitForeachNode);
