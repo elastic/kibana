@@ -13,7 +13,7 @@ import { uiActionsPluginMock } from '../mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
 import { waitFor } from '@testing-library/react';
 
-jest.mock('@kbn/ui-actions-browser/src/context_menu');
+jest.mock('@kbn/ui-actions-browser/src/context_menu/open_context_menu');
 
 const executeFn = jest.fn();
 const openContextMenuSpy = openContextMenu as unknown as jest.SpyInstance;
@@ -41,7 +41,6 @@ const reset = () => {
   uiActions.setup.registerTrigger({
     id: CONTACT_USER_TRIGGER,
   });
-  // uiActions.setup.attachAction(CONTACT_USER_TRIGGER, 'ACTION_SEND_MESSAGE');
 
   executeFn.mockReset();
   openContextMenuSpy.mockReset();
