@@ -95,7 +95,8 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
             ? where(`${SERVICE_ENVIRONMENT} == ?environment`, { environment })
             : (query) => query,
           transactionName || spanName
-            ? where(`${transactionName ? TRANSACTION_NAME : SPAN_NAME} == ?name`, {
+            ? where(`??nameField == ?name`, {
+                nameField: transactionName ? TRANSACTION_NAME : SPAN_NAME,
                 name: transactionName ?? spanName,
               })
             : (query) => query,
@@ -106,17 +107,11 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
             ? where(`${SPAN_DESTINATION_SERVICE_RESOURCE} == ?dependencyName`, { dependencyName })
             : (query) => query,
           sampleRangeFrom && sampleRangeTo
-            ? where(
-                `${
-                  transactionName ? TRANSACTION_DURATION : SPAN_DURATION
-                } >= ?sampleRangeFrom AND ${
-                  transactionName ? TRANSACTION_DURATION : SPAN_DURATION
-                } <= ?sampleRangeTo`,
-                {
-                  sampleRangeFrom,
-                  sampleRangeTo,
-                }
-              )
+            ? where(`??durationField >= ?sampleRangeFrom AND ??durationField <= ?sampleRangeTo`, {
+                durationField: transactionName ? TRANSACTION_DURATION : SPAN_DURATION,
+                sampleRangeFrom,
+                sampleRangeTo,
+              })
             : (query) => query,
           kuery ? where(`QSTR("${kuery.replaceAll('"', '\\"')}")`) : (query) => query
         )
