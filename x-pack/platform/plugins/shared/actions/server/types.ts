@@ -5,6 +5,24 @@
  * 2.0.
  */
 
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import type {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { SpacesPluginStart, SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
+import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
+
+import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type {
@@ -16,20 +34,24 @@ import type {
   Logger,
   ISavedObjectsRepository,
   IScopedClusterClient,
-  StartServicesAccessor,
   CoreSetup,
   CoreStart,
 } from '@kbn/core/server';
 import type { AnySchema } from 'joi';
+import type { EnabledConnectorTypes } from './config';
+
+import type { ActionsAuthorization } from './authorization/actions_authorization';
+import type {
+  ICaseServiceAbstract,
+  IServiceAbstract,
+  SubActionConnectorType,
+} from './sub_action_framework/types';
+
+import type { IUnsecuredActionsClient } from './unsecured_actions_client/unsecured_actions_client';
+
 import type { SubActionConnector } from './sub_action_framework/sub_action_connector';
 import type { ServiceParams } from './sub_action_framework/types';
 import type { ActionTypeRegistry } from './action_type_registry';
-import type {
-  ActionsPluginsSetup,
-  ActionsPluginsStart,
-  PluginSetupContract,
-  PluginStartContract,
-} from './plugin';
 import type { ActionsClient } from './actions_client';
 import type { ActionTypeExecutorResult, SubFeature } from '../common';
 import type { TaskInfo } from './lib/action_executor';
@@ -311,3 +333,89 @@ export type AwsSesConfig = {
   port: number;
   secure: boolean;
 } | null;
+
+export interface PluginSetupContract {
+  registerType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets,
+    Params extends ActionTypeParams = ActionTypeParams,
+    ExecutorResultData = void
+  >(
+    actionType: ActionType<Config, Secrets, Params, ExecutorResultData>
+  ): void;
+
+  registerSubActionConnectorType<
+    Config extends ActionTypeConfig = ActionTypeConfig,
+    Secrets extends ActionTypeSecrets = ActionTypeSecrets
+  >(
+    connector: SubActionConnectorType<Config, Secrets>
+  ): void;
+
+  isPreconfiguredConnector(connectorId: string): boolean;
+
+  getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
+  getCaseConnectorClass: <Config, Secrets, Incident, GetIncidentResponse>() => ICaseServiceAbstract<
+    Config,
+    Secrets,
+    Incident,
+    GetIncidentResponse
+  >;
+  getActionsHealth: () => { hasPermanentEncryptionKey: boolean };
+  getActionsConfigurationUtilities: () => ActionsConfigurationUtilities;
+  setEnabledConnectorTypes: (connectorTypes: EnabledConnectorTypes) => void;
+
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
+}
+
+export interface PluginStartContract {
+  isActionTypeEnabled(id: string, options?: { notifyUsage: boolean }): boolean;
+
+  isActionExecutable(
+    actionId: string,
+    actionTypeId: string,
+    options?: { notifyUsage: boolean }
+  ): boolean;
+
+  getAllTypes: ActionTypeRegistry['getAllTypes'];
+
+  getActionsClientWithRequest(request: KibanaRequest): Promise<PublicMethodsOf<ActionsClient>>;
+
+  getActionsAuthorizationWithRequest(request: KibanaRequest): PublicMethodsOf<ActionsAuthorization>;
+
+  inMemoryConnectors: InMemoryConnector[];
+
+  getUnsecuredActionsClient(): IUnsecuredActionsClient;
+
+  renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
+    actionTypeId: string,
+    actionId: string,
+    params: Params,
+    variables: Record<string, unknown>
+  ): Params;
+
+  isSystemActionConnector: (connectorId: string) => boolean;
+}
+
+export interface ActionsPluginsSetup {
+  taskManager: TaskManagerSetupContract;
+  encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
+  licensing: LicensingPluginSetup;
+  eventLog: IEventLogService;
+  usageCollection?: UsageCollectionSetup;
+  security?: SecurityPluginSetup;
+  features: FeaturesPluginSetup;
+  spaces?: SpacesPluginSetup;
+  monitoringCollection?: MonitoringCollectionSetup;
+  serverless?: ServerlessPluginSetup;
+  cloud: CloudSetup;
+}
+
+export interface ActionsPluginsStart {
+  encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
+  taskManager: TaskManagerStartContract;
+  licensing: LicensingPluginStart;
+  eventLog: IEventLogClientService;
+  spaces?: SpacesPluginStart;
+  security?: SecurityPluginStart;
+  serverless?: ServerlessPluginStart;
+}

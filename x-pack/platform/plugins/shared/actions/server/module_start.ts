@@ -23,6 +23,7 @@ import type {
   InMemoryConnector,
   Services,
   UnsecuredServices,
+  ActionsPluginsStart,
 } from './types';
 import type { ActionsConfig } from './config';
 import { ACTIONS_CONFIG, IN_MEMORY_CONNECTORS_SERVICE } from './constants';
@@ -43,7 +44,6 @@ import { ActionsClient } from './actions_client';
 import { createBulkUnsecuredExecutionEnqueuerFunction } from './create_unsecured_execute_function';
 import { scheduleActionsTelemetry } from './usage/task';
 import { createAlertHistoryIndexTemplate } from './preconfigured_connectors/alert_history_es_index/create_alert_history_index_template';
-import type { ActionsPluginsStart } from './plugin';
 import type { ActionTypeRegistry } from './action_type_registry';
 import { renderMustacheObject } from './lib/mustache_renderer';
 

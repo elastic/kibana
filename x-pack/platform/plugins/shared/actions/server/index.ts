@@ -35,7 +35,7 @@ export type {
 
 export type { ConnectorWithExtraFindData as FindActionResult } from './application/connector/types';
 
-export type { PluginSetupContract, PluginStartContract } from './plugin';
+export type { PluginSetupContract, PluginStartContract } from './types';
 
 export {
   asSavedObjectExecutionSource,
