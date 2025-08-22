@@ -30,18 +30,8 @@ const relevanceSearchSchema = z.object({
     .number()
     .optional()
     .default(10)
-    .describe('Number of documents to return. Defaults to 10.'),
+    .describe('Maximum number of documents to return. Defaults to 10.'),
 });
-
-export interface SearchFulltextResult {
-  id: string;
-  index: string;
-  highlights: string[];
-}
-
-export interface SearchFulltextResponse {
-  results: SearchFulltextResult[];
-}
 
 export const relevanceSearchTool = (): BuiltinToolDefinition<typeof relevanceSearchSchema> => {
   return {
@@ -73,9 +63,7 @@ export const relevanceSearchTool = (): BuiltinToolDefinition<typeof relevanceSea
             index: result.index,
           },
           partial: true,
-          content: {
-            highlights: result.highlights,
-          },
+          content: result.content,
         },
       }));
 

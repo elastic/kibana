@@ -10,10 +10,21 @@ import type { ScopedModel } from '@kbn/onechat-server';
 import { indexExplorer } from './index_explorer';
 import type { MappingField } from './utils';
 import { flattenMappings } from './utils';
-import type { MatchResult, PerformMatchSearchResponse } from './steps';
+import type { MatchResult } from './steps';
 import { getIndexMappings, performMatchSearch, scoreRelevance, RelevanceScore } from './steps';
 
-export type RelevanceSearchResponse = PerformMatchSearchResponse;
+export interface RelevanceSearchResult {
+  /** id of the doc */
+  id: string;
+  /** index the doc is coming from */
+  index: string;
+  /** relevant content which was found on the doc */
+  content: Record<string, string>;
+}
+
+export interface RelevanceSearchResponse {
+  results: RelevanceSearchResult[];
+}
 
 export const relevanceSearch = async ({
   term,
@@ -73,7 +84,7 @@ export const relevanceSearch = async ({
     size,
     esClient,
   });
-  let results: MatchResult[] = matchResult.results;
+  let results = convertRawResult({ results: matchResult.results, fields: selectedFields });
 
   if (relevanceFiltering && results.length > 0) {
     results = await filterResultsByRelevance({
@@ -87,6 +98,40 @@ export const relevanceSearch = async ({
   return { results };
 };
 
+const convertRawResult = ({
+  results,
+  fields,
+}: {
+  results: MatchResult[];
+  fields: MappingField[];
+}): RelevanceSearchResult[] => {
+  const fieldMap = fields.reduce((c, field) => {
+    c[field.path] = field.type;
+    return c;
+  }, {} as Record<string, string>);
+  return results.map<RelevanceSearchResult>((result) => {
+    const matchFields =
+      Object.keys(result.highlights).length > 0
+        ? Object.keys(result.highlights)
+        : fields.map((field) => field.path);
+    const content = matchFields.reduce((c, field) => {
+      const fieldType = fieldMap[field] ?? 'text';
+      c[field] =
+        fieldType === 'semantic_text' &&
+        result.highlights[field] &&
+        result.highlights[field].length > 0
+          ? result.highlights[field].join('\n\n')
+          : (result.content[field] as string);
+      return c;
+    }, {} as Record<string, string>);
+    return {
+      id: result.id,
+      index: result.index,
+      content,
+    };
+  });
+};
+
 const filterResultsByRelevance = async ({
   term,
   results: unfilteredResults,
@@ -94,13 +139,18 @@ const filterResultsByRelevance = async ({
   model,
 }: {
   term: string;
-  results: MatchResult[];
+  results: RelevanceSearchResult[];
   threshold: RelevanceScore;
   model: ScopedModel;
-}): Promise<MatchResult[]> => {
+}): Promise<RelevanceSearchResult[]> => {
+  const resources = unfilteredResults.map((result) => {
+    return {
+      content: result.content,
+    };
+  });
   const relevanceScores = await scoreRelevance({
     query: term,
-    resources: unfilteredResults.map((result) => ({ content: result.highlights.join('\n\n') })),
+    resources,
     model,
   });
   return unfilteredResults.filter((result, idx) => {
