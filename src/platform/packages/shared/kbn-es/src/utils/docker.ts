@@ -204,6 +204,8 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.enabled', 'true'],
 
+  [`data_streams.failure_store.refresh_interval`, `5s`],
+
   // JWT realm settings are to closer emulate a real ES serverless env
   ['xpack.security.authc.realms.jwt.jwt1.allowed_audiences', 'elasticsearch'],
 
@@ -802,10 +804,6 @@ export async function runServerlessEsNode(
     ['--name', name, '--env', `node.name=${name}`],
     image
   );
-
-  log.info(`Params:
-      ${SHARED_SERVERLESS_PARAMS.concat(params).join('\n')}
-    `);
 
   log.info(chalk.bold(`Running serverless ES node: ${name}`));
   log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));

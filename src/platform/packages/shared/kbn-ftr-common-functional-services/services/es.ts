@@ -8,14 +8,14 @@
  */
 
 import type { Client } from '@elastic/elasticsearch';
-
+import { omit } from 'lodash';
 import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
+import { castArray } from 'lodash';
 import type { FtrProviderContext } from './ftr_provider_context';
 
-export function EsProvider({ getService }: FtrProviderContext): Client {
+export async function EsProvider({ getService }: FtrProviderContext): Promise<Client> {
   const config = getService('config');
   const isServerless = !!config.get('serverless');
-  const log = getService('log');
 
   const lifecycle = getService('lifecycle');
 
@@ -29,50 +29,82 @@ export function EsProvider({ getService }: FtrProviderContext): Client {
         }
   );
 
-  const idxPatterns = ['.kibana*', '.internal*', 'logs*', 'metrics*', 'traces*'];
+  const idxPatterns = [
+    '.kibana*',
+    '.internal*',
+    'logs*',
+    'metrics*',
+    'traces*',
+    'filebeat*',
+    'metricbeat*',
+  ];
+
+  function wrap<T, U extends keyof T>(obj: T, prop: U, cb: (m: T[U]) => T[U]) {
+    const original = obj[prop];
+    obj[prop] = cb(original);
+  }
+
+  await client.cluster.putComponentTemplate({
+    name: 'fast_refresh',
+    template: {
+      settings: {
+        refresh_interval: '1ms',
+      },
+    },
+  });
+
+  await client.indices.putSettings({
+    index: idxPatterns,
+    allow_no_indices: true,
+    expand_wildcards: ['all'],
+    settings: {
+      index: {
+        refresh_interval: '1ms',
+      },
+    },
+  });
+
+  const { index_templates: idxTemplates } = await client.indices.getIndexTemplate({
+    name: '*',
+  });
+
+  await Promise.all(
+    idxTemplates.map(async (tpl) => {
+      await client.indices.putIndexTemplate({
+        name: tpl.name,
+        ...omit(tpl.index_template, 'created_date_millis', 'modified_date_millis', 'version'),
+        ignore_missing_component_templates: castArray(
+          tpl.index_template.ignore_missing_component_templates ?? []
+        ),
+      });
+    })
+  );
+
+  // Wrap putIndexTemplate to always include 'fast_refresh' in composed_of
+  // @ts-expect-error
+  wrap(client.indices, 'putIndexTemplate', function putIndexTemplate(originalPutIndexTemplate) {
+    return function (indexTemplateRequest, options) {
+      const nextRequest = {
+        ...indexTemplateRequest,
+        composed_of: [...(indexTemplateRequest.composed_of ?? []), 'fast_refresh'],
+      };
+
+      // Call original with both arguments to preserve signature
+      return originalPutIndexTemplate.call(this, nextRequest, options);
+    };
+  });
 
   lifecycle.beforeTests.add(async () => {
-    client.indices.putIndexTemplate({
-      name: 'refresh-1ms-default',
-      index_patterns: idxPatterns,
-      priority: 0,
-      template: {
-        settings: {
-          index: {
-            refresh_interval: '1ms',
-          },
+    await client.indices.putSettings({
+      index: idxPatterns,
+      allow_no_indices: true,
+      expand_wildcards: ['all'],
+      settings: {
+        index: {
+          refresh_interval: '1ms',
         },
       },
     });
-
-    const { indices: internalIndices } = await client.indices.resolveIndex({
-      name: idxPatterns,
-      allow_no_indices: true,
-    });
-
-    await Promise.all(
-      internalIndices.map(async ({ name: index }) => {
-        const settings = (await client.indices.getSettings({ index }))[index].settings ?? {};
-
-        if (settings.refresh_interval === '1ms') {
-          return;
-        }
-
-        await client.indices
-          .putSettings({
-            index,
-            settings: {
-              refresh_interval: '1ms',
-            },
-          })
-          .then(() => {
-            log.success(`Set refresh_interval to 1ms for ${index}`);
-          })
-          .catch((error) => {
-            log.warning(`Failed to set refresh_interval to 1ms for ${index}`);
-          });
-      })
-    );
   });
 
   return client;

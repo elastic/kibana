@@ -200,7 +200,11 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
       }).finally(async () => {
         tx.end();
 
-        await apm.flush();
+        if (apm.isStarted()) {
+          await apm.flush().catch((error) => {
+            log.error(error);
+          });
+        }
       });
     });
   }

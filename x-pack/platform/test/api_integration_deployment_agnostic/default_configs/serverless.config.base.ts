@@ -116,6 +116,8 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
       kbnTestServer: {
         ...svlSharedConfig.get('kbnTestServer'),
         serverArgs: [
+          '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+          '--xpack.alerting.healthCheck.interval="1s"',
           ...svlSharedConfig.get('kbnTestServer.serverArgs'),
           ...kbnServerArgsFromController[options.serverlessProject],
           `--serverless=${options.serverlessProject}`,

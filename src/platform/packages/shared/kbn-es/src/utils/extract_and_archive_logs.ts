@@ -37,7 +37,15 @@ export async function extractAndArchiveLogs({
       '--format',
       '{{.Names}}',
     ]);
-    nodeNames = nodeNamesString.split('\n').filter(Boolean);
+    nodeNames = nodeNamesString
+      .split('\n')
+      .filter(Boolean)
+      .filter(
+        (nodeName) =>
+          nodeName.includes('elasticsearch') ||
+          nodeName.includes('es') ||
+          nodeName.includes('kibana')
+      );
   }
 
   if (!nodeNames.length) {
