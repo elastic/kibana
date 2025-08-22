@@ -350,6 +350,10 @@ const removeBreakdownByDimension = (state: MetricVisualizationState) => {
   delete state.maxCols;
 };
 
+/**
+ * Checks if the given MetricVisualizationState contains any legacy properties
+ * that require migration to the latest state shape.
+ */
 const hasLegacyStateProperties = (state: MetricVisualizationState) => {
   return (
     typeof state.secondaryPrefix !== 'undefined' || typeof state.valuesTextAlign !== 'undefined'

@@ -30,6 +30,21 @@ export interface TitlesAndTextPopoverProps {
   groupPosition?: ToolbarPopoverProps['groupPosition'];
 }
 
+/** Default config based on Primary Metric position */
+const DEFAULT_LAYOUT_CONFIG: Record<
+  string,
+  Pick<MetricVisualizationState, 'titleWeight' | 'primaryAlign'>
+> = {
+  top: {
+    titleWeight: 'normal',
+    primaryAlign: 'left',
+  },
+  bottom: {
+    titleWeight: 'bold',
+    primaryAlign: 'right',
+  },
+};
+
 export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
   state,
   setState,
@@ -78,11 +93,17 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
 
       <PrimaryPositionOption
         value={state.primaryPosition ?? metricStateDefaults.primaryPosition}
-        onChange={(primaryPosition) => {
+        onChange={(newPrimaryPosition) => {
+          // Avoid changing the configuration when the position option clicked is already selected
+          if (
+            newPrimaryPosition === state.primaryPosition ||
+            (newPrimaryPosition === 'bottom' && !state.primaryPosition)
+          )
+            return;
           setState({
             ...state,
-            primaryPosition,
-            titleWeight: primaryPosition === 'top' ? 'normal' : 'bold',
+            primaryPosition: newPrimaryPosition,
+            ...DEFAULT_LAYOUT_CONFIG[newPrimaryPosition],
           });
         }}
       />

@@ -234,7 +234,7 @@ describe('TitlesAndTextPopover', () => {
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
   });
 
-  it('should set title weight normal when primary metric postion is selected to top', () => {
+  it('should set default config when primary metric postion is selected to top', () => {
     renderToolbarOptions({ ...fullState });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
@@ -246,13 +246,14 @@ describe('TitlesAndTextPopover', () => {
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
         primaryPosition: 'top',
+        primaryAlign: 'left',
         titleWeight: 'normal',
       })
     );
   });
 
-  it('should set title weight bold when primary metric postion is selected to bottom', () => {
-    renderToolbarOptions({ ...fullState });
+  it('should set deafault config when primary metric postion is selected to bottom', () => {
+    renderToolbarOptions({ ...fullState, primaryPosition: 'top' });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
     textOptionsButton.click();
 
@@ -263,6 +264,7 @@ describe('TitlesAndTextPopover', () => {
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
         primaryPosition: 'bottom',
+        primaryAlign: 'right',
         titleWeight: 'bold',
       })
     );
