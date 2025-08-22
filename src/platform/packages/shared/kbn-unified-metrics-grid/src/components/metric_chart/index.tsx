@@ -25,7 +25,7 @@ interface MetricChartProps {
   filters?: Array<{ field: string; value: string }>;
 }
 
-export const MetricChart: React.FC<MetricChartProps> = ({
+export const MetricChart = ({
   metric,
   timeRange,
   byDimension,
@@ -33,7 +33,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
   colorIndex,
   displayDensity = 'normal',
   filters = [],
-}) => {
+}: MetricChartProps) => {
   const isSupported = metric.type !== 'unsigned_long' && metric.type !== 'histogram';
 
   // Generate ESQL query using the same logic as the hook
@@ -41,12 +41,12 @@ export const MetricChart: React.FC<MetricChartProps> = ({
     if (!isSupported) return '';
     return createESQLQuery({
       metricName: metric.name,
-      timeSeriesMetric: metric.time_series_metric,
+      instrument: metric.instrument,
       index: metric.index,
       dimensions,
       filters,
     });
-  }, [isSupported, metric.name, metric.time_series_metric, metric.index, dimensions, filters]);
+  }, [isSupported, metric.name, metric.instrument, metric.index, dimensions, filters]);
 
   const {
     data: queryData,
@@ -55,7 +55,7 @@ export const MetricChart: React.FC<MetricChartProps> = ({
   } = useMetricDataQuery({
     metricName: isSupported ? metric.name : '',
     timeRange,
-    timeSeriesMetric: metric.time_series_metric,
+    instrument: metric.instrument,
     index: metric.index,
     dimensions,
     filters,

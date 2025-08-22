@@ -133,7 +133,6 @@ export const DimensionsSelector = ({
       }}
       options={options}
       singleSelection={false}
-      anchorPosition="downCenter"
       onChange={handleChange}
     />
   );

@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api/types';
 import type { Dimension } from '../dimensions/types';
 
 export interface MetricField {
@@ -14,13 +15,13 @@ export interface MetricField {
   index: string;
   dimensions: Array<Dimension>;
   type: string;
-  time_series_metric?: string;
+  instrument?: MappingTimeSeriesMetricType;
   unit?: string;
   description?: string;
   source?: string;
   stability?: string;
   display?: string;
-  no_data?: boolean;
+  noData?: boolean;
 }
 
 export interface MetricFieldsResponse {

@@ -12,14 +12,14 @@ import { synth, Parser, BasicPrettyPrinter } from '@kbn/esql-ast';
 interface CreateESQLQueryParams {
   metricName: string;
   index?: string;
-  timeSeriesMetric?: string;
+  instrument?: string;
   dimensions?: string[];
   filters?: Array<{ field: string; value: string }>;
 }
 
 export function createESQLQuery({
   index = 'metrics-*',
-  timeSeriesMetric,
+  instrument,
   dimensions = [],
   metricName,
   filters,
@@ -54,14 +54,14 @@ export function createESQLQuery({
   }
 
   // Choose ES|QL query based on time_series_metric type
-  if (timeSeriesMetric === 'counter') {
+  if (instrument === 'counter') {
     root.commands.push(
       synth.cmd(`
         STATS SUM(RATE(\`${metricName}\`)) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
         dimensionFields ? `, ${dimensionFields}` : ''
       }`)
     );
-  } else if (timeSeriesMetric === 'gauge') {
+  } else if (instrument === 'gauge') {
     root.commands.push(
       synth.cmd(`
         STATS AVG(\`${metricName}\`) BY BUCKET(\`@timestamp\`, 100, ?_tstart, ?_tend)${
