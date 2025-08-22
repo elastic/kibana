@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod';
-import type { OneChatToolWithClientCallback } from '@kbn/ai-client-tools-plugin/common/types';
+import type { OneChatToolWithClientCallback } from './types';
 export const chartTypes = [
   'bar',
   'xy',
@@ -85,7 +85,6 @@ export const schema = z.object({
     .optional(),
   title: z.string().describe('An optional title for the visualization.').optional(),
 });
-
 export const addToDashboardServerSideTool: OneChatToolWithClientCallback<AddToDashboardClientToolDependencies> =
   {
     id: '.add_to_dashboard',

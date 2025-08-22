@@ -1,12 +1,18 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import React from 'react';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { useState } from 'react';
 import { useCallback, useMemo } from 'react';
-import {  usePostToolClientActions } from '@kbn/ai-client-tools-plugin/public';
+import { addToDashboardTool, usePostToolClientActions } from '@kbn/ai-client-tools-plugin/public';
 import { correctCommonEsqlMistakes } from '@kbn/inference-plugin/public';
-import { DashboardApi } from '../../dashboard_api/types';
-import { coreServices, inferenceService } from '../../services/kibana_services';
-import { addToDashboardTool } from './add_to_dashboard_tool';
 import {
   EuiFlyoutHeader,
   EuiTextArea,
@@ -16,12 +22,27 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { convertSchemaToObservabilityParameters } from '../hooks/schema_adapters';
+// import { addToDashboardTool } from './add_to_dashboard_tool';
+import type { DashboardApi } from '../../dashboard_api/types';
+import { coreServices, inferenceService } from '../../services/kibana_services';
 import { dataService } from '../../services/kibana_services';
+const chartTypes = [
+  'bar',
+  'xy',
+  'pie',
+  'heatmap',
+  'metric',
+  'gauge',
+  'donut',
+  'mosaic',
+  'regionmap',
+  'table',
+  'tagcloud',
+  'treemap',
+] as const;
 
 const PLACEHOLDER_USER_PROMPT =
   'Create a Lens XY bar chart visualization for index "kibana_sample_data_logstsdb" for count() vs top 10 values of clientip';
-
 
 export const CreateWithAIFlyout = ({
   modalTitleId,
@@ -34,7 +55,7 @@ export const CreateWithAIFlyout = ({
   const [response, setResponse] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const dependencies = useMemo(() => ({ dashboardApi, dataService }), [dashboardApi, dataService]);
+  const dependencies = useMemo(() => ({ dashboardApi, dataService }), [dashboardApi]);
   const actions = usePostToolClientActions(addToDashboardTool, dependencies);
   const executeCreateWithAI = useCallback(async () => {
     try {
@@ -42,9 +63,10 @@ export const CreateWithAIFlyout = ({
       const defaultConnectorId = await coreServices.uiSettings.get('genAI:defaultConnectorId');
 
       const resp = await inferenceService?.output({
-        id: addToDashboardTool.toolId,
+        id: addToDashboardTool.id,
         connectorId: defaultConnectorId,
-        schema: convertSchemaToObservabilityParameters(addToDashboardTool.schema),
+        // Inference service's schema is jsonified, not zod object
+        schema: addToDashboardTool.parameters,
         input: `Generate Elasticsearch Piped Query Language (ES|QL) for the following user input. ${addToDashboardTool.description}
         ES|QL should start with 'from' and never 'select'
 
@@ -62,13 +84,13 @@ export const CreateWithAIFlyout = ({
       args.esql.query = correctedQuery.output;
 
       const controller = new AbortController();
+
       for (const action of actions) {
         await action({ args, signal: controller.signal });
       }
-
     } catch (e) {
       // eslint-disable-next-line no-console
-      console.log(`--@@e`, e);
+      console.log(`--@@CreateWithAIFlyout error`, e);
       // Handle error if needed
     } finally {
       setIsLoading(false);
@@ -103,7 +125,6 @@ export const CreateWithAIFlyout = ({
     </>
   );
 };
-
 
 export async function createLensWithAI(dashboardApi: DashboardApi) {
   openLazyFlyout({

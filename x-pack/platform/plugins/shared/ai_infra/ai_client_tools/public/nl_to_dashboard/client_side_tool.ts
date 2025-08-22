@@ -22,10 +22,9 @@ import type {
   LensTreeMapConfig,
   LensEmbeddableInput,
 } from '@kbn/lens-plugin/public';
-import { LensConfigBuilder } from '@kbn/lens-plugin/public';
-import { getESQLQueryColumns } from '@kbn/esql-ast';
-import { dataService } from '@kbn/data-plugin/public';
-import type { OneChatToolWithClientCallback } from '@kbn/ai-client-tools-plugin/common/types';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
+import { getESQLQueryColumns } from '@kbn/esql-utils';
+import type { OneChatToolWithClientCallback } from '../../common/types';
 import { convertSchemaToObservabilityParameters } from '../../common/schema_adapters';
 import { schema, addToDashboardServerSideTool } from '../../common/onechat_server_tool';
 
@@ -33,7 +32,7 @@ const NO_ACTIONS = [];
 const executeAddToDashboard =
   (dependencies: { dashboardApi: DashboardApi | undefined }) =>
   async ({ args, signal }: { args: z.infer<typeof schema>; signal: AbortSignal }) => {
-    const { dashboardApi } = dependencies;
+    const { dashboardApi, dataService } = dependencies;
     const {
       title = '',
       type: chartType = 'xy',
