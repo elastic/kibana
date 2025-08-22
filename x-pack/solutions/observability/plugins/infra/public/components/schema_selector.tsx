@@ -32,10 +32,12 @@ const PrependLabel = () => {
   return (
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          {i18n.translate('xpack.infra.schemaSelector.label', {
-            defaultMessage: 'Schema',
-          })}
+        <EuiText size="xs">
+          <strong>
+            {i18n.translate('xpack.infra.schemaSelector.label', {
+              defaultMessage: 'Schema',
+            })}
+          </strong>
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -186,7 +188,7 @@ export const SchemaSelector = ({
                 aria-label={i18n.translate('xpack.infra.schemaSelector.select.ariaLabel', {
                   defaultMessage: 'Schema selector for data collection',
                 })}
-                css={{ minWidth: '356px' }}
+                css={{ minWidth: '300px' }}
                 helpText={
                   (options.length > 1 || isInvalid) &&
                   i18n.translate('xpack.infra.schemaSelector.select.helpText', {
@@ -203,6 +205,10 @@ export const SchemaSelector = ({
                   onChange={onSelect}
                   isLoading={isLoading}
                   fullWidth
+                  css={{
+                    fontSize: '0.85em',
+                    fontWeight: 450,
+                  }}
                   prepend={<PrependLabel />}
                 />
               </EuiFormRow>
@@ -210,7 +216,7 @@ export const SchemaSelector = ({
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
     </>
   );
 };
