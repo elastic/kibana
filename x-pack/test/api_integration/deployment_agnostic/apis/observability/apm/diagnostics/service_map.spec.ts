@@ -79,28 +79,40 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
         before(async () => {
           synthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-          const events = timerange(start, end)
-            .interval('10s')
-            .rate(3)
-            .generator(
-              serviceMap({
-                services: [
-                  { 'frontend-rum': 'rum-js' },
-                  { 'frontend-node': 'nodejs' },
-                  { advertService: 'java' },
-                ],
-                definePaths([rum, node, adv]) {
-                  return [
-                    [
-                      [rum, 'fetchAd'],
-                      [node, 'GET /nodejs/adTag'],
-                      [adv, 'APIRestController#getAd'],
-                      ['elasticsearch', 'GET ad-*/_search'],
-                    ],
-                  ];
-                },
-              })
-            );
+          const web = apm
+            .service({ name: 'web', environment: 'prod', agentName: 'rum-js' })
+            .instance('my-instance');
+          const proxy = apm
+            .service({ name: 'frontend-proxy', environment: 'prod', agentName: 'nodejs' })
+            .instance('my-instance');
+
+          const range = timerange(start, end).interval('10s').rate(1);
+
+          const events = range.generator((timestamp) =>
+            web
+              .transaction({ transactionName: 'Initial transaction in web' })
+              .duration(400)
+              .timestamp(timestamp)
+              .children(
+                // web -> proxy
+                web
+                  .span(
+                    httpExitSpan({
+                      spanName: 'Missing span.destination.service.resource',
+                      destinationUrl: 'http://proxy:3000',
+                    })
+                  )
+                  .duration(300)
+                  .timestamp(timestamp + 10)
+                  .children(
+                    // procy
+                    proxy
+                      .transaction({ transactionName: 'Initial transaction in proxy' })
+                      .duration(300)
+                      .timestamp(timestamp + 20)
+                  )
+              )
+          );
 
           return synthtraceEsClient.index(Readable.from(Array.from(events)));
         });
@@ -116,8 +128,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               body: {
                 start,
                 end,
-                sourceNode: 'frontend-node',
-                destinationNode: 'advertService',
+                sourceNode: 'web',
+                destinationNode: 'frontend-proxy',
               },
             },
           });
@@ -128,7 +140,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           expect(body.analysis.exitSpans.hasMatchingDestinationResources).toBe(true);
           expect(body.analysis.parentRelationships.found).toBe(true);
           expect(body.analysis.parentRelationships.documentCount).toBe(1);
-          expect(body.analysis.parentRelationships.sourceSpanIds.length).toBe(4);
+          expect(body.analysis.parentRelationships.sourceSpanIds.length).toBe(1);
           expect(body.elasticsearchResponses.exitSpansQuery).toBeDefined();
           expect(body.elasticsearchResponses.sourceSpansQuery).toBeDefined();
           expect(body.elasticsearchResponses.destinationParentIdsQuery).toBeDefined();
