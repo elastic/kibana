@@ -9,7 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { UserProfilesSearch } from './user_profiles_search';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { MOCK_USER_PROFILE } from '../use_conversation/sample_conversations';
+import { MOCK_USER_PROFILE } from '../../mock/conversation';
 
 const mockSecondUser = {
   ...MOCK_USER_PROFILE,

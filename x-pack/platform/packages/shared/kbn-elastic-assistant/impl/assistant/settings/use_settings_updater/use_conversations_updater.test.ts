@@ -11,7 +11,7 @@ import { useAssistantContext } from '../../../assistant_context';
 import { bulkUpdateConversations } from '../../api/conversations/bulk_update_actions_conversations';
 import type { Conversation } from '../../../..';
 import { deleteAllConversations } from '../../api/conversations/delete_all_conversations';
-import { MOCK_CURRENT_USER } from '../../use_conversation/sample_conversations';
+import { MOCK_CURRENT_USER } from '../../../mock/conversation';
 
 jest.mock('../../../assistant_context');
 jest.mock('../../api/conversations/bulk_update_actions_conversations');

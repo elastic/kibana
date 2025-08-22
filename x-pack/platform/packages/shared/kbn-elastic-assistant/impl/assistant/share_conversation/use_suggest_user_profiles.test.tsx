@@ -8,7 +8,7 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useSuggestUserProfiles } from './use_suggest_user_profiles';
 import { TestProviders } from '../../mock/test_providers/test_providers';
-import { MOCK_CURRENT_USER, MOCK_USER_PROFILE } from '../use_conversation/sample_conversations';
+import { MOCK_CURRENT_USER, MOCK_USER_PROFILE } from '../../mock/conversation';
 import { useAssistantContext } from '../../..';
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type { UserProfile } from '@kbn/core-user-profile-common';

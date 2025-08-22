@@ -14,7 +14,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { Conversation } from '../../..';
 import { find } from 'lodash';
 import type { AIConnector } from '../../connectorland/connector_selector';
-import { MOCK_CURRENT_USER } from '../use_conversation/sample_conversations';
+import { MOCK_CURRENT_USER } from '../../mock/conversation';
 
 // Mock dependencies
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn());
