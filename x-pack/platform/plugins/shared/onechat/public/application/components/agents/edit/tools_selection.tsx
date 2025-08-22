@@ -206,7 +206,7 @@ const createTypeColumn = () => ({
   field: 'type',
   name: labels.tools.typeLabel,
   width: '80px',
-  render: (type: string) => <EuiText size="s">{toolTypeDisplays[type].label}</EuiText>,
+  render: (type: ToolType) => <EuiText size="s">{toolTypeDisplays[type].label}</EuiText>,
 });
 
 const createTagsColumn = () => ({
@@ -454,11 +454,11 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
                     <EuiFlexGroup gutterSize="s" alignItems="center">
                       <EuiFlexItem grow={false}>
                         <EuiTitle size="xs">
-                          <h4>{toolTypeDisplays[type].label}</h4>
+                          <h4>{toolTypeDisplays[toolType].label}</h4>
                         </EuiTitle>
                       </EuiFlexItem>
                       <EuiFlexItem grow={false}>
-                        <EuiIcon type={toolTypeDisplays[type].icon} size="l" />
+                        <EuiIcon type={toolTypeDisplays[toolType].icon} size="l" />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   </EuiFlexItem>
