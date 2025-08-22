@@ -90,5 +90,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await transformHelper.assertExist(getSLOTransformId(sloId, 2));
       await transformHelper.assertExist(getSLOSummaryTransformId(sloId, 2));
     });
+
+    it('updates dashboard artifacts and returns them', async () => {
+      const createResp = await sloApi.create(DEFAULT_SLO, adminRoleAuthc);
+      const sloId = createResp.id;
+
+      const updated = await sloApi.update(
+        {
+          sloId,
+          slo: {
+            artifacts: { dashboards: [{ id: 'dash-x' }, { id: 'dash-y' }] },
+          },
+        },
+        adminRoleAuthc
+      );
+
+      expect(updated.artifacts).eql({ dashboards: [{ id: 'dash-x' }, { id: 'dash-y' }] });
+    });
   });
 }
