@@ -9,10 +9,15 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import type { CSSProperties, Dispatch, SetStateAction } from 'react';
-import { createPortal } from 'react-dom';
 import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import { EuiWindowEvent, transparentize, useEuiTheme, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiPortal,
+  EuiWindowEvent,
+  transparentize,
+  useEuiTheme,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import { findReactComponentPath, getElementFromPoint, getInspectedElementData } from '../../utils';
 import { InspectHighlight } from './inspect_highlight';
 
@@ -97,5 +102,5 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     [overlayCss, overlayId, highlightPosition, componentPath, handlePointerMove, handleClick]
   );
 
-  return createPortal(overlayContent, document.body);
+  return <EuiPortal>{overlayContent}</EuiPortal>;
 };

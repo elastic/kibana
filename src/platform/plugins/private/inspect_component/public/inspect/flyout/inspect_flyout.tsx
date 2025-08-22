@@ -9,8 +9,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import type { CSSProperties, RefObject } from 'react';
-import { createPortal } from 'react-dom';
-import { EuiFlyoutBody, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutBody, EuiPortal, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section';
 import { InspectHeader } from './inspect_header';
@@ -71,8 +70,11 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
         <EuiSpacer size="xxl" />
         <LinksSection componentData={componentData} />
       </EuiFlyoutBody>
-      {currentPosition &&
-        createPortal(<InspectHighlight currentPosition={currentPosition} />, document.body)}
+      {currentPosition && (
+        <EuiPortal>
+          <InspectHighlight currentPosition={currentPosition} />
+        </EuiPortal>
+      )}
     </>
   );
 };
