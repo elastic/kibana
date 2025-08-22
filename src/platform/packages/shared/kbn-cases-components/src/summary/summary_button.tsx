@@ -9,6 +9,13 @@
 
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+
+// TODO: relocate the CaseStatuses enum to a common package.
+// This package has been marked as shared-common because it contains a common
+// enum type that is used in browser and server packages and plugins.  That
+// enum needs to be moved to a common package, rather than this browser package
+// of React components.
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { SummaryDescription } from './summary_description';
 

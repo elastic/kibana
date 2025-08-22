@@ -20,7 +20,7 @@ export const SummaryDescription: React.FC<SummaryDescriptionProps> = ({ date, ti
   return (
     <EuiText size="xs" css={({ euiTheme }) => ({ color: euiTheme.colors.textSubdued })}>
       <FormattedMessage
-        id="xpack.cases.caseSummary.description"
+        id="cases.caseSummary.description"
         defaultMessage="Generated on {date} at {time}"
         values={{ date, time }}
       />

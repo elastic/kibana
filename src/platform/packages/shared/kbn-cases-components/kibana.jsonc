@@ -1,5 +1,5 @@
 {
-  "type": "shared-browser",
+  "type": "shared-common",
   "id": "@kbn/cases-components",
   "owner": [
     "@elastic/kibana-cases"

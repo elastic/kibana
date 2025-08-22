@@ -9,6 +9,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const CASE_SUMMARY_TITLE = i18n.translate('xpack.cases.caseSummary.title', {
+export const CASE_SUMMARY_TITLE = i18n.translate('cases.components.caseSummary.title', {
   defaultMessage: 'Case summary',
 });
