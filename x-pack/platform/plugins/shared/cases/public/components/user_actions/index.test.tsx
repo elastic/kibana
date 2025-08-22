@@ -24,13 +24,17 @@ import { waitForComponentToUpdate } from '../../common/test_utils';
 import { useInfiniteFindCaseUserActions } from '../../containers/use_infinite_find_case_user_actions';
 import { getMockBuilderArgs } from './mock';
 import { renderWithTestingProviders } from '../../common/mock';
+import type { CaseUserActionsStats } from '../../containers/types';
 
 const onUpdateField = jest.fn();
 
-const userActionsStats = {
+const userActionsStats: CaseUserActionsStats = {
   total: 25,
+  totalDeletions: 0,
   totalComments: 9,
+  totalCommentDeletions: 0,
   totalOtherActions: 16,
+  totalOtherActionDeletions: 0,
 };
 
 const userActivityQueryParams: UserActivityParams = {
