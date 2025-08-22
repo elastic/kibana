@@ -196,7 +196,7 @@ const main = async () => {
       },
       apiKey: {
         alias: 'apiKey',
-        describe: 'Api key to pass as an authorization header. Necessary for serverless',
+        describe: 'API key to pass as an authorization header. Necessary for serverless',
         type: 'string',
         default: '',
       },
