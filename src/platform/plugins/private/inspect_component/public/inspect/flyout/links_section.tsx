@@ -143,7 +143,7 @@ export const LinksSection = ({ componentData }: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiText size="s">
+          <EuiText component="div" size="s">
             <FormattedMessage
               id="kbnInspectComponent.inspectFlyout.linksSection.subtitle"
               defaultMessage="Open {baseFileName}"
@@ -209,7 +209,7 @@ export const LinksSection = ({ componentData }: Props) => {
                 key={id}
                 layout="vertical"
                 title={
-                  <EuiText color={euiTheme.colors.textPrimary}>
+                  <EuiText color={euiTheme.colors.textPrimary} component="span">
                     <FormattedMessage id={i18nId} defaultMessage={label} />
                   </EuiText>
                 }

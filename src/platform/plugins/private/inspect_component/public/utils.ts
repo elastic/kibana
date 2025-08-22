@@ -8,35 +8,53 @@
  */
 
 import { transparentize } from '@elastic/eui';
+import { EUI_DATA_ICON_TYPE } from './constants';
+import { getComponentData } from './get_component_data';
 import type {
+  EuiInfo,
   FileData,
   GetElementFromPointOptions,
   GetInspectedElementOptions,
   ReactFiberNode,
   SetElementHighlightOptions,
 } from './types';
-import { getComponentData } from './get_component_data';
-import { EUI_DATA_ICON_TYPE } from './constants';
+import EUI_DOCS_MAP from './eui_docs_links.json';
 
-const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
+const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
 
-const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | undefined => {
-  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
-  return fiberKey ? (node as any)[fiberKey] : undefined;
+export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
+  .toLowerCase()
+  .includes('mac');
+
+const extractEuiComponentsFromPath = (value: string): string[] => {
+  if (!value) return [];
+
+  const euiComponentPart = value.includes(':') ? value.split(':').slice(1).join(':') : value;
+
+  return euiComponentPart
+    .split('>')
+    .map((t) => t.trim())
+    .filter((t) => t.startsWith('Eui'));
 };
 
-const getFiberType = (fiber: ReactFiberNode): string | null => {
-  if (typeof fiber.type === 'string') {
-    return fiber.type;
-  } else if (typeof fiber.type?.name === 'string') {
-    return fiber.type?.name;
-  } else if (typeof fiber.type?.displayName === 'string') {
-    return fiber.type?.displayName;
-  } else if (typeof fiber.elementType === 'string') {
-    return fiber.elementType;
-  }
+const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
+  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
 
-  return null;
+  while (current) {
+    const fiber = getFiberFromDomNode(current);
+    if (fiber) {
+      let fiberCursor: ReactFiberNode | null | undefined = fiber;
+      while (fiberCursor) {
+        if (fiberCursor._debugSource) {
+          return fiberCursor._debugSource;
+        }
+
+        fiberCursor = fiberCursor._debugOwner;
+      }
+    }
+    current = current.parentElement;
+  }
+  return;
 };
 
 // TODO - this logic probably needs some work.
@@ -101,27 +119,23 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
   };
 };
 
-const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
-  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
+const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | undefined => {
+  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
+  return fiberKey ? (node as any)[fiberKey] : undefined;
+};
 
-  while (current) {
-    const fiber = getFiberFromDomNode(current);
-    if (fiber) {
-      // Traverse fiber chain to find _debugSource
-      let fiberCursor: ReactFiberNode | null | undefined = fiber;
-      while (fiberCursor) {
-        if (fiberCursor._debugSource) {
-          return fiberCursor._debugSource;
-        }
-        fiberCursor = fiberCursor._debugOwner;
-      }
-    }
-
-    // Move up the DOM tree - this is necessary to find the fiber node on third-party components
-    current = current.parentElement;
+const getFiberType = (fiber: ReactFiberNode): string | null => {
+  if (typeof fiber.type === 'string') {
+    return fiber.type;
+  } else if (typeof fiber.type?.name === 'string') {
+    return fiber.type?.name;
+  } else if (typeof fiber.type?.displayName === 'string') {
+    return fiber.type?.displayName;
+  } else if (typeof fiber.elementType === 'string') {
+    return fiber.elementType;
   }
 
-  return;
+  return null;
 };
 
 export const getElementFromPoint = ({
@@ -144,12 +158,86 @@ export const getElementFromPoint = ({
   return undefined;
 };
 
+export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
+  if (!componentPath) return null;
+
+  const toUrl = (name: string): string | null => {
+    const docsLink = EUI_DOCS_MAP[name];
+
+    if (!docsLink) return null;
+
+    return `${EUI_DOCS_BASE}${docsLink}`;
+  };
+
+  const candidates = extractEuiComponentsFromPath(componentPath);
+
+  if (candidates.length === 0 && componentPath.startsWith('Eui')) {
+    candidates.push(componentPath);
+  }
+
+  for (const candidate of candidates) {
+    const exactUrl = toUrl(candidate);
+
+    if (exactUrl) return { componentName: candidate, docsLink: exactUrl };
+  }
+
+  return null;
+};
+
+export const getInspectedElementData = async ({
+  componentPath,
+  core,
+  euiTheme,
+  event,
+  overlayId,
+  setFlyoutRef,
+  setIsInspecting,
+  sourceComponent,
+}: GetInspectedElementOptions) => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  const target = getElementFromPoint({ event, overlayId });
+
+  if (!target) {
+    setIsInspecting(false);
+    return;
+  }
+
+  const fileData = findDebugSource(target);
+
+  if (!fileData) {
+    setIsInspecting(false);
+    return;
+  }
+
+  const iconType =
+    target instanceof SVGElement
+      ? target.getAttribute(EUI_DATA_ICON_TYPE)
+      : target.querySelector('svg')?.getAttribute(EUI_DATA_ICON_TYPE);
+
+  const euiDocsInfo = getEuiComponentDocsInfo(componentPath);
+
+  await getComponentData({
+    core,
+    euiInfo: {
+      componentName: euiDocsInfo?.componentName || 'N/A',
+      docsLink: euiDocsInfo?.docsLink || 'https://eui.elastic.co/docs/components',
+    },
+    euiTheme,
+    fileData,
+    iconType: iconType || undefined,
+    setFlyoutRef,
+    setIsInspecting,
+    sourceComponent,
+    target,
+  });
+};
+
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
   (event.metaKey || event.ctrlKey) && isSingleQuote(event);
 
-export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
-  .toLowerCase()
-  .includes('mac');
+const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
 
 export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
   const rectangle = target.getBoundingClientRect();
@@ -192,47 +280,4 @@ export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOpt
     }
     observer.disconnect();
   };
-};
-
-export const getInspectedElementData = async ({
-  event,
-  core,
-  overlayId,
-  euiTheme,
-  setFlyoutRef,
-  setIsInspecting,
-  sourceComponent,
-}: GetInspectedElementOptions) => {
-  event.preventDefault();
-  event.stopPropagation();
-
-  const target = getElementFromPoint({ event, overlayId });
-
-  if (!target) {
-    setIsInspecting(false);
-    return;
-  }
-
-  const fileData = findDebugSource(target);
-
-  if (!fileData) {
-    setIsInspecting(false);
-    return;
-  }
-
-  const iconType =
-    target instanceof SVGElement
-      ? target.getAttribute(EUI_DATA_ICON_TYPE)
-      : target.querySelector('svg')?.getAttribute(EUI_DATA_ICON_TYPE);
-
-  await getComponentData({
-    core,
-    fileData,
-    iconType: iconType || undefined,
-    target,
-    euiTheme,
-    setFlyoutRef,
-    setIsInspecting,
-    sourceComponent,
-  });
 };

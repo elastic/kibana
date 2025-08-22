@@ -22,10 +22,16 @@ export interface FileData {
   fileName: string;
 }
 
+export interface EuiInfo {
+  componentName: string;
+  docsLink: string;
+}
+
 export interface ComponentData extends FileData {
+  codeowners: string[];
+  euiInfo: EuiInfo;
   iconType?: string;
   relativePath: string;
-  codeowners: string[];
   baseFileName: string;
   image?: string | null;
   sourceComponent?: string;
@@ -45,6 +51,7 @@ export interface ReactFiberNode {
 
 export interface GetComponentDataOptions {
   core: CoreStart;
+  euiInfo: EuiInfo;
   fileData: FileData;
   target: HTMLElement | SVGElement;
   euiTheme: EuiThemeComputed;
@@ -57,6 +64,7 @@ export interface GetComponentDataOptions {
 export interface GetInspectedElementOptions {
   event: PointerEvent;
   core: CoreStart;
+  componentPath: string | undefined;
   overlayId: string;
   euiTheme: EuiThemeComputed;
   setFlyoutRef: Dispatch<SetStateAction<OverlayRef | undefined>>;
