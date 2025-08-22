@@ -989,7 +989,8 @@ export function defineRoutes(
       security: {
         authz: {
           enabled: false,
-          reason: 'This route is opted out from authorization',
+          reason:
+            'This route is opted out from authorization because it is used solely for functional testing',
         },
       },
       validate: {
