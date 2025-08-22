@@ -201,6 +201,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               control={control}
               render={({ field }) => (
                 <EuiComboBox
+                  fullWidth
                   placeholder={i18n.translate('xpack.onechat.agents.form.labelsPlaceholder', {
                     defaultMessage: 'Add one or more labels',
                   })}
