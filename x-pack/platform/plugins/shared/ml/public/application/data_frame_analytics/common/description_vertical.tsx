@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// x-pack/platform/plugins/shared/ml/public/application/components/common/description_panel/index.tsx
 import type { FC, PropsWithChildren } from 'react';
 import React, { memo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
