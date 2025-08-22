@@ -151,10 +151,6 @@ function AddToCaseButtonContent({
     });
   }, [casesModal, comment, pageAttachmentState, screenContexts]);
 
-  const handleCommentChange = useCallback((change: string) => {
-    setComment((prevComment) => (prevComment || '') + change);
-  }, []);
-
   return isCommentModalOpen ? (
     <EuiConfirmModal
       onCancel={handleCloseModal}
@@ -190,7 +186,7 @@ function AddToCaseButtonContent({
       </EuiModalHeader>
       <EuiModalBody>
         <AddToCaseComment
-          onCommentChange={handleCommentChange}
+          setComment={setComment}
           comment={comment}
           setIsLoading={setIsCommentLoading}
           notifications={notifications}

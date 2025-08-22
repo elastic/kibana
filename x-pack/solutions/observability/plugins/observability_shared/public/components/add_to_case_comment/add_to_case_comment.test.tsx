@@ -44,43 +44,44 @@ describe('AddToCaseComment', () => {
       errors: [],
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
+      isComplete: false,
     });
   });
 
   it('renders the input field with placeholder text', () => {
     render(
       <AddToCaseComment
-        comment=""
-        onCommentChange={jest.fn()}
+        comment="test comment"
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={undefined}
         notifications={notificationsMock}
       />
     );
 
-    expect(screen.getByPlaceholderText('Add a comment (optional)')).toBeInTheDocument();
+    expect(screen.getByLabelText('Add a comment (optional)')).toBeInTheDocument();
   });
 
   it('updates the comment when text is entered', () => {
     const onCommentChangeMock = jest.fn();
     render(
       <AddToCaseComment
-        comment=""
-        onCommentChange={onCommentChangeMock}
+        comment="test comment"
+        setComment={onCommentChangeMock}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={undefined}
         notifications={notificationsMock}
       />
     );
 
-    fireEvent.change(screen.getByPlaceholderText('Add a comment (optional)'), {
+    fireEvent.change(screen.getByLabelText('Add a comment (optional)'), {
       target: { value: 'New comment' },
     });
 
     expect(onCommentChangeMock).toHaveBeenCalledWith('New comment');
   });
 
-  it('shows skeleton loader when AI assistant is enabled and loading', () => {
+  it('shows input when AI assistant is enabled and comment is defined', () => {
     jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
       isObsAIAssistantEnabled: true,
       generateSummary: jest.fn(),
@@ -89,12 +90,63 @@ describe('AddToCaseComment', () => {
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
       errors: [],
+      isComplete: false,
+    });
+
+    render(
+      <AddToCaseComment
+        comment="a comment"
+        setComment={jest.fn()}
+        setIsLoading={jest.fn()}
+        observabilityAIAssistant={mockObservabilityAIAssistant}
+        notifications={notificationsMock}
+      />
+    );
+
+    expect(screen.getByLabelText('Add a comment (optional)')).toBeInTheDocument();
+  });
+
+  it('shows input when AI assistant is enabled and isComplete is true', () => {
+    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
+      isObsAIAssistantEnabled: true,
+      generateSummary: jest.fn(),
+      isLoading: true,
+      summary: '',
+      abortController: { signal: new AbortController().signal, abort: jest.fn() },
+      screenContexts: [],
+      errors: [],
+      isComplete: true,
     });
 
     render(
       <AddToCaseComment
         comment=""
-        onCommentChange={jest.fn()}
+        setComment={jest.fn()}
+        setIsLoading={jest.fn()}
+        observabilityAIAssistant={mockObservabilityAIAssistant}
+        notifications={notificationsMock}
+      />
+    );
+
+    expect(screen.getByLabelText('Add a comment (optional)')).toBeInTheDocument();
+  });
+
+  it('shows skeleton loader when AI assistant is enabled and comment is empty and isComplete is false', () => {
+    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
+      isObsAIAssistantEnabled: true,
+      generateSummary: jest.fn(),
+      isLoading: true,
+      summary: '',
+      abortController: { signal: new AbortController().signal, abort: jest.fn() },
+      screenContexts: [],
+      errors: [],
+      isComplete: false,
+    });
+
+    render(
+      <AddToCaseComment
+        comment=""
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={mockObservabilityAIAssistant}
         notifications={notificationsMock}
@@ -108,7 +160,7 @@ describe('AddToCaseComment', () => {
     render(
       <AddToCaseComment
         comment=""
-        onCommentChange={jest.fn()}
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={mockObservabilityAIAssistant}
         notifications={notificationsMock}
@@ -131,12 +183,13 @@ describe('AddToCaseComment', () => {
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
       errors: [],
+      isComplete: false,
     });
 
     render(
       <AddToCaseComment
         comment=""
-        onCommentChange={jest.fn()}
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={undefined}
         notifications={notificationsMock}
@@ -159,12 +212,13 @@ describe('AddToCaseComment', () => {
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
       errors: [new Error('Test error')],
+      isComplete: false,
     });
 
     render(
       <AddToCaseComment
         comment=""
-        onCommentChange={jest.fn()}
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={undefined}
         notifications={notificationsMock}
@@ -178,7 +232,7 @@ describe('AddToCaseComment', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('calls generateSummary when isObsAIAssistantEnabled is true', () => {
+  it('calls generateSummary when isObsAIAssistantEnabled is true and isComplete is false', () => {
     const generateSummaryMock = jest.fn();
     jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
       isObsAIAssistantEnabled: true,
@@ -188,12 +242,13 @@ describe('AddToCaseComment', () => {
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
       errors: [],
+      isComplete: false,
     });
 
     render(
       <AddToCaseComment
         comment=""
-        onCommentChange={jest.fn()}
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={mockObservabilityAIAssistant}
         notifications={notificationsMock}
@@ -201,6 +256,32 @@ describe('AddToCaseComment', () => {
     );
 
     expect(generateSummaryMock).toHaveBeenCalled();
+  });
+
+  it('does not generateSummary when isObsAIAssistantEnabled is true and isComplete is true', () => {
+    const generateSummaryMock = jest.fn();
+    jest.spyOn(usePageSummaryHook, 'usePageSummary').mockReturnValue({
+      isObsAIAssistantEnabled: false,
+      generateSummary: generateSummaryMock,
+      isLoading: false,
+      summary: '',
+      abortController: { signal: new AbortController().signal, abort: jest.fn() },
+      screenContexts: [],
+      errors: [],
+      isComplete: false,
+    });
+
+    render(
+      <AddToCaseComment
+        comment=""
+        setComment={jest.fn()}
+        setIsLoading={jest.fn()}
+        observabilityAIAssistant={mockObservabilityAIAssistant}
+        notifications={notificationsMock}
+      />
+    );
+
+    expect(generateSummaryMock).not.toHaveBeenCalled();
   });
 
   it('appends partial summaries to the comment using handleStreamingUpdate', () => {
@@ -214,12 +295,13 @@ describe('AddToCaseComment', () => {
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
       errors: [],
+      isComplete: false,
     });
 
     render(
       <AddToCaseComment
         comment="Existing comment"
-        onCommentChange={onCommentChangeMock}
+        setComment={onCommentChangeMock}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={mockObservabilityAIAssistant}
         notifications={notificationsMock}
@@ -247,12 +329,13 @@ describe('AddToCaseComment', () => {
       abortController: { signal: new AbortController().signal, abort: jest.fn() },
       screenContexts: [],
       errors: [new Error('Test error')],
+      isComplete: false,
     });
 
     render(
       <AddToCaseComment
         comment=""
-        onCommentChange={jest.fn()}
+        setComment={jest.fn()}
         setIsLoading={jest.fn()}
         observabilityAIAssistant={mockObservabilityAIAssistant}
         notifications={notificationsMock}

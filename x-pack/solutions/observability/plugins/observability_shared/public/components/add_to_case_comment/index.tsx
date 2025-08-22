@@ -15,7 +15,7 @@ import { usePageSummary } from '../../hooks/use_page_summary';
 
 interface AddToCaseCommentProps {
   comment: string;
-  onCommentChange: (change: string) => void;
+  setComment: React.Dispatch<React.SetStateAction<string>>;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
   notifications: NotificationsStart;
@@ -23,36 +23,36 @@ interface AddToCaseCommentProps {
 
 export function AddToCaseComment({
   comment,
-  onCommentChange,
+  setComment,
   setIsLoading,
   observabilityAIAssistant,
   notifications,
 }: AddToCaseCommentProps) {
   const handleStreamingUpdate = useCallback(
     (partialSummary: string) => {
-      onCommentChange(partialSummary); // Append new data
+      setComment((prevComment) => prevComment + partialSummary);
     },
-    [onCommentChange]
+    [setComment]
   );
 
-  const { generateSummary, isObsAIAssistantEnabled, isLoading, errors } = usePageSummary({
-    onChunk: handleStreamingUpdate, // Add streaming update handler
+  const { generateSummary, isObsAIAssistantEnabled, errors, isComplete } = usePageSummary({
+    onChunk: handleStreamingUpdate,
     observabilityAIAssistant,
   });
 
   useEffect(() => {
-    if (isObsAIAssistantEnabled) {
+    if (isObsAIAssistantEnabled && !isComplete) {
       generateSummary();
     }
-  }, [generateSummary, isObsAIAssistantEnabled]);
+  }, [generateSummary, isObsAIAssistantEnabled, isComplete]);
 
   useEffect(() => {
-    if (isObsAIAssistantEnabled && isLoading) {
+    if (isObsAIAssistantEnabled && !isComplete) {
       setIsLoading(true);
     } else {
       setIsLoading(false);
     }
-  }, [isObsAIAssistantEnabled, isLoading, setIsLoading]);
+  }, [isObsAIAssistantEnabled, isComplete, setIsLoading]);
 
   useEffect(() => {
     if (errors.length > 0) {
@@ -72,14 +72,8 @@ export function AddToCaseComment({
   const input = (
     <EuiTextArea
       data-test-subj="syntheticsAddToCaseCommentTextArea"
-      placeholder={i18n.translate(
-        'xpack.observabilityShared.cases.addPageToCaseModal.commentPlaceholder',
-        {
-          defaultMessage: 'Add a comment (optional)',
-        }
-      )}
       onChange={(e) => {
-        onCommentChange(e.target.value);
+        setComment(e.target.value);
       }}
       value={comment}
       fullWidth
@@ -107,7 +101,7 @@ export function AddToCaseComment({
         fullWidth
       >
         {showAIEnhancedExperience ? (
-          !isLoading ? (
+          comment || isComplete ? (
             input
           ) : (
             <EuiSkeletonText data-test-subj="addPageToCaseCommentSkeleton" lines={5} />

@@ -30,6 +30,7 @@ export const usePageSummary = ({
   const [errors, setErrors] = useState<Error[]>([]);
   const [summary, setSummary] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isComplete, setIsComplete] = useState<boolean>(false);
   const abortControllerRef = useRef(new AbortController());
   const {
     chatService,
@@ -107,6 +108,7 @@ export const usePageSummary = ({
           if (result.type === 'chatCompletionMessage' && result.message.content) {
             setIsLoading(false);
             onSuccess?.(result.message.content);
+            setIsComplete(true);
           }
           if (result.type === 'chatCompletionChunk' && result.message.content) {
             setIsLoading(false);
@@ -115,6 +117,7 @@ export const usePageSummary = ({
         },
         error: (error: Error) => {
           setErrors((prevErrors) => [...prevErrors, error]);
+          setIsComplete(true);
           setIsLoading(false);
         },
       });
@@ -136,8 +139,7 @@ export const usePageSummary = ({
     generateSummary,
     isObsAIAssistantEnabled: Boolean(isObsAIAssistantEnabled),
     isLoading,
+    isComplete,
     errors,
   };
 };
-
-// Create a 1 sentence summary of the key insights and critical information from the current page with exact values and time ranges. Report any anomalies or issues. Start with the most critical findings. No introductory text.
