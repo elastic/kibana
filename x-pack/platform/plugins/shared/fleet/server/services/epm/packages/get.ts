@@ -39,12 +39,15 @@ import type {
   PackageSpecManifest,
   AssetsMap,
   PackagePolicyAssetsMap,
+  PackageKnowledgeBase,
   RegistryPolicyIntegrationTemplate,
 } from '../../../../common/types';
+
 import {
   PACKAGES_SAVED_OBJECT_TYPE,
   MAX_CONCURRENT_EPM_PACKAGES_INSTALLATIONS,
 } from '../../../constants';
+
 import type {
   ArchivePackage,
   RegistryPackage,
@@ -76,6 +79,7 @@ import { airGappedUtils } from '../airgapped';
 import type { RegistryPolicyTemplate } from '../../../../common/types/models/epm';
 
 import { createInstallableFrom } from '.';
+import { getPackageKnowledgeBaseFromIndex } from './knowledge_base_index';
 import {
   getPackageAssetsMapCache,
   setPackageAssetsMapCache,
@@ -574,8 +578,12 @@ export async function getPackageInfo({
   const { filteredDataStreams, filteredPolicyTemplates } =
     getFilteredDataStreamsAndPolicyTemplates(packageInfo);
 
+  // Remove knowledge_base from packageInfo since it's handled separately by step_save_knowledge_base
+  // and shouldn't be exposed at the package level in API responses
+  const { knowledge_base: knowledgeBase, ...packageInfoWithoutKB } = packageInfo;
+
   const updated = {
-    ...packageInfo,
+    ...packageInfoWithoutKB,
     ...additions,
     data_streams: filteredDataStreams,
     policy_templates: filteredPolicyTemplates,
@@ -957,5 +965,44 @@ export async function getAgentTemplateAssetsMap({
   } catch (error) {
     logger.warn(`getAgentTemplateAssetsMap error: ${error}`);
     throw error;
+  }
+}
+
+/**
+ * Get knowledge base content for a package
+ * @param options Object with esClient and package name
+ * @returns The knowledge base content or undefined if not found
+ */
+export async function getPackageKnowledgeBase(options: {
+  esClient: ElasticsearchClient;
+  pkgName: string;
+}): Promise<PackageKnowledgeBase | undefined> {
+  const { esClient, pkgName } = options;
+
+  try {
+    const knowledgeBaseItems = await getPackageKnowledgeBaseFromIndex(esClient, pkgName);
+
+    if (knowledgeBaseItems.length === 0) {
+      return undefined;
+    }
+
+    // Use the installed_at timestamp from the first knowledge base item
+    // All items for the same package should have the same installation timestamp
+    const installedAt = knowledgeBaseItems[0]?.installed_at || new Date().toISOString();
+    const pkgVersion = knowledgeBaseItems[0]?.version;
+
+    return {
+      package: {
+        package_name: pkgName,
+        version: pkgVersion || 'unknown',
+        installed_at: installedAt,
+      },
+      items: knowledgeBaseItems,
+    };
+  } catch (error) {
+    appContextService
+      .getLogger()
+      .warn(`Error fetching knowledge base for package ${pkgName}: ${error.message}`);
+    return undefined;
   }
 }

@@ -29,6 +29,7 @@ import type {
   RegistryDataStreamRoutingRules,
   RegistryDataStreamLifecycle,
   PackageSpecTags,
+  KnowledgeBaseItem,
 } from '../../../../common/types';
 import {
   RegistryInputKeys,
@@ -50,7 +51,7 @@ export const DATASTREAM_LIFECYCLE_NAME = 'lifecycle.yml';
 
 export const KIBANA_FOLDER_NAME = 'kibana';
 export const TAGS_NAME = 'tags.yml';
-
+export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
 const DEFAULT_RELEASE_VALUE = 'ga';
 
 // Ingest pipelines are specified in a `data_stream/<name>/elasticsearch/ingest_pipeline/` directory where a `default`
@@ -149,7 +150,15 @@ const PARSE_AND_VERIFY_ASSETS_NAME = [
  * Filter assets needed for the parse and verify archive function
  */
 export function filterAssetPathForParseAndVerifyArchive(assetPath: string): boolean {
-  return PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) => assetPath.endsWith(endWithPath));
+  // Check for specific asset files
+  const isSpecificAsset = PARSE_AND_VERIFY_ASSETS_NAME.some((endWithPath) =>
+    assetPath.endsWith(endWithPath)
+  );
+
+  // Check for knowledge base markdown files
+  const isKnowledgeBaseFile = assetPath.includes(KNOWLEDGE_BASE_PATH) && assetPath.endsWith('.md');
+
+  return isSpecificAsset || isKnowledgeBaseFile;
 }
 
 /*
@@ -324,6 +333,17 @@ export function parseAndVerifyArchive(
     } catch (error) {
       throw new PackageInvalidArchiveError(`Could not parse tags file kibana/tags.yml: ${error}.`);
     }
+  }
+
+  // Extract knowledge base files
+  const knowledgeBaseFiles = extractKnowledgeBaseFiles(
+    paths,
+    assetsMap,
+    parsed.name,
+    parsed.version
+  );
+  if (knowledgeBaseFiles) {
+    parsed.knowledge_base = knowledgeBaseFiles;
   }
 
   return parsed;
@@ -756,4 +776,43 @@ export function parseDefaultIngestPipeline(fullDataStreamPath: string, paths: st
   if (!defaultIngestPipelinePaths.length) return undefined;
 
   return DEFAULT_INGEST_PIPELINE_VALUE;
+}
+
+/**
+ * Extracts knowledge base files from the docs/knowledge_base directory
+ * @param paths - List of package file paths
+ * @param assetsMap - Map of file paths to file content buffers
+ * @param pkgName - Package name
+ * @param pkgVersion - Package version
+ * @returns Array of KnowledgeBaseItem objects or null if no knowledge base files exist
+ */
+export function extractKnowledgeBaseFiles(
+  paths: string[],
+  assetsMap: Record<string, Buffer>,
+  pkgName: string,
+  pkgVersion: string
+): KnowledgeBaseItem[] | null {
+  const knowledgeBasePaths = paths.filter(
+    (p) => p.includes(KNOWLEDGE_BASE_PATH) && p.endsWith('.md')
+  );
+
+  if (knowledgeBasePaths.length === 0) {
+    return null;
+  }
+
+  return knowledgeBasePaths.map((p) => {
+    const buffer = assetsMap[p];
+    const content = buffer ? buffer.toString('utf8') : '';
+    const knowledgeBaseIndex = p.indexOf(KNOWLEDGE_BASE_PATH);
+    // remove the leading path (docs/knowledge_base/) so we arent storing it in the field in ES
+    const fileName =
+      knowledgeBaseIndex >= 0
+        ? p.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length)
+        : path.basename(p);
+
+    return {
+      fileName,
+      content,
+    };
+  });
 }

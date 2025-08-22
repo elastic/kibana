@@ -32,12 +32,15 @@ import * as Registry from '../registry';
 import { getEsPackage } from '../archive/storage';
 import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
 
+import * as knowledgeBaseIndex from './knowledge_base_index';
+
 import {
   getAgentTemplateAssetsMap,
   getInstalledPackages,
   getPackageInfo,
   getPackages,
   getPackageUsageStats,
+  getPackageKnowledgeBase,
 } from './get';
 
 const mockPackagePolicySavedObjectType = PACKAGE_POLICY_SAVED_OBJECT_TYPE;
@@ -46,6 +49,7 @@ jest.mock('../registry');
 jest.mock('../../settings');
 jest.mock('../../audit_logging');
 jest.mock('../../data_streams');
+jest.mock('./knowledge_base_index');
 jest.mock('../archive/storage', () => {
   return {
     ...jest.requireActual('../archive/storage'),
@@ -63,6 +67,7 @@ jest.mock('../../package_policy', () => {
 });
 
 const MockRegistry = jest.mocked(Registry);
+const mockKnowledgeBaseIndex = jest.mocked(knowledgeBaseIndex);
 
 const mockedAuditLoggingService = auditLoggingService as jest.Mocked<typeof auditLoggingService>;
 
@@ -1491,6 +1496,159 @@ owner: elastic`,
           "test-1.0.0/data_stream/stubstatus/agent/stream/stream.yml.hbs",
         ]
       `);
+    });
+  });
+
+  describe('getPackageKnowledgeBase', () => {
+    let esClient: ReturnType<typeof elasticsearchServiceMock.createInternalClient>;
+
+    beforeEach(() => {
+      esClient = elasticsearchServiceMock.createInternalClient();
+      jest.clearAllMocks();
+    });
+
+    it('should return knowledge base content when found', async () => {
+      const mockInstalledAt = '2023-01-01T00:00:00.000Z';
+      const mockKnowledgeBaseItems = [
+        {
+          fileName: 'setup.md',
+          content: 'Setup instructions for nginx package',
+          path: 'docs/knowledge_base/setup.md',
+          installed_at: mockInstalledAt,
+          version: '1.0.0',
+        },
+        {
+          fileName: 'troubleshooting.md',
+          content: 'Common troubleshooting steps',
+          path: 'docs/knowledge_base/troubleshooting.md',
+          installed_at: mockInstalledAt,
+          version: '1.0.0',
+        },
+      ];
+
+      mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockResolvedValue(
+        mockKnowledgeBaseItems
+      );
+
+      const result = await getPackageKnowledgeBase({
+        esClient,
+        pkgName: 'nginx',
+      });
+
+      expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
+        esClient,
+        'nginx'
+      );
+
+      expect(result).toEqual({
+        package: {
+          package_name: 'nginx',
+          version: '1.0.0',
+          installed_at: mockInstalledAt,
+        },
+        items: mockKnowledgeBaseItems,
+      });
+
+      // Validate that installed_at matches the expected timestamp
+      expect(result!.package.installed_at).toBe(mockInstalledAt);
+    });
+
+    it('should return knowledge base content with latest version', async () => {
+      const mockInstalledAt = '2023-01-01T00:00:00.000Z';
+      const mockKnowledgeBaseItems = [
+        {
+          fileName: 'setup.md',
+          content: 'Setup instructions for nginx package',
+          path: 'docs/knowledge_base/setup.md',
+          installed_at: mockInstalledAt,
+          version: '1.2.0',
+        },
+      ];
+
+      mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockResolvedValue(
+        mockKnowledgeBaseItems
+      );
+
+      const result = await getPackageKnowledgeBase({
+        esClient,
+        pkgName: 'nginx',
+      });
+
+      expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
+        esClient,
+        'nginx'
+      );
+
+      expect(result).toEqual({
+        package: {
+          package_name: 'nginx',
+          version: '1.2.0',
+          installed_at: mockInstalledAt,
+        },
+
+        items: mockKnowledgeBaseItems,
+      });
+    });
+
+    it('should return undefined when no knowledge base items are found', async () => {
+      mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockResolvedValue([]);
+
+      const result = await getPackageKnowledgeBase({
+        esClient,
+        pkgName: 'nginx',
+      });
+
+      expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
+        esClient,
+        'nginx'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should return undefined and log warning when getPackageKnowledgeBaseFromIndex throws an error', async () => {
+      const error = new Error('Elasticsearch connection failed');
+      mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockRejectedValue(error);
+
+      const mockLogger = {
+        warn: jest.fn(),
+      };
+      jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger as any);
+
+      const result = await getPackageKnowledgeBase({
+        esClient,
+        pkgName: 'nginx',
+      });
+
+      expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
+        esClient,
+        'nginx'
+      );
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Error fetching knowledge base for package nginx: Elasticsearch connection failed'
+      );
+
+      expect(result).toBeUndefined();
+    });
+
+    it('should handle empty package name gracefully', async () => {
+      const mockKnowledgeBaseItems: any[] = [];
+      mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex.mockResolvedValue(
+        mockKnowledgeBaseItems
+      );
+
+      const result = await getPackageKnowledgeBase({
+        esClient,
+        pkgName: '',
+      });
+
+      expect(mockKnowledgeBaseIndex.getPackageKnowledgeBaseFromIndex).toHaveBeenCalledWith(
+        esClient,
+        ''
+      );
+
+      expect(result).toBeUndefined();
     });
   });
 });

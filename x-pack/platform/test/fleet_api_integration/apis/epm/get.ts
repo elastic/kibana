@@ -36,6 +36,56 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
+  // Helper function to install package and create mock knowledge base content
+  const installPackageWithKnowledgeBase = async (name: string, version: string) => {
+    // First install the package normally
+    await installPackage(name, version);
+
+    // Then add mock knowledge base content to ES directly for testing
+    await es.index({
+      index: '.integration_knowledge',
+      id: `${name}-overview.md`,
+      document: {
+        package_name: name,
+        filename: 'overview.md',
+        content: `# ${name} Integration Overview\n\nThis is an overview of the ${name} integration for testing purposes.\n\n## Features\n- Log collection\n- Metric collection\n- Error monitoring`,
+        version,
+        path: 'docs/knowledge_base/overview.md',
+        installed_at: new Date().toISOString(),
+      },
+      refresh: 'wait_for',
+    });
+
+    await es.index({
+      index: '.integration_knowledge',
+      id: `${name}-troubleshooting.md`,
+      document: {
+        package_name: name,
+        filename: 'troubleshooting.md',
+        content: `# ${name} Troubleshooting Guide\n\n## Common Issues\n\n### Configuration Problems\nCheck your configuration files...\n\n### Connection Issues\nVerify network connectivity...`,
+        version,
+        path: 'docs/knowledge_base/troubleshooting.md',
+        installed_at: new Date().toISOString(),
+      },
+      refresh: 'wait_for',
+    });
+  };
+
+  // Helper function to clean up knowledge base content
+  const cleanupKnowledgeBase = async (name: string) => {
+    try {
+      await es.deleteByQuery({
+        index: '.integration_knowledge',
+        query: {
+          term: { 'package_name.keyword': name },
+        },
+        refresh: true,
+      });
+    } catch (error) {
+      // Ignore errors if index doesn't exist or documents aren't found
+    }
+  };
+
   const testPkgArchiveZip = path.join(
     path.dirname(__filename),
     '../fixtures/direct_upload_packages/apache_0.1.4.zip'
@@ -302,6 +352,90 @@ export default function (providerContext: FtrProviderContext) {
         ({ dataset }) => dataset === 'non_epr_fields.test_metrics_2'
       );
       expect(dataStream?.elasticsearch?.source_mode).equal(undefined);
+    });
+
+    describe('Knowledge Base', () => {
+      afterEach(async () => {
+        // Clean up knowledge base content after each test to avoid conflicts
+        await cleanupKnowledgeBase(testPkgName);
+      });
+
+      it('returns knowledge base content for an installed package', async function () {
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .expect(200);
+
+        expect(res.body).to.have.property('package.package_name');
+        expect(res.body).to.have.property('package.version');
+        expect(res.body).to.have.property('package.installed_at');
+        expect(res.body).to.have.property('items');
+        expect(res.body.package.package_name).to.equal(testPkgName);
+        expect(res.body.items).to.be.an('array');
+        expect(res.body.items).to.have.length(2);
+
+        // Verify the content structure
+        const overviewDoc = res.body.items.find((item: any) => item.fileName === 'overview.md');
+        const troubleshootingDoc = res.body.items.find(
+          (item: any) => item.fileName === 'troubleshooting.md'
+        );
+
+        expect(overviewDoc).to.not.be(undefined);
+        expect(troubleshootingDoc).to.not.be(undefined);
+        expect(overviewDoc.content).to.contain('Integration Overview');
+        expect(troubleshootingDoc.content).to.contain('Troubleshooting Guide');
+
+        await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
+      });
+
+      it('returns 404 for knowledge base of non-existent package', async function () {
+        await supertest.get(`/internal/fleet/epm/packages/nonexistent/knowledge_base`).expect(404);
+      });
+
+      it('validates knowledge base content structure', async function () {
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        const res = await supertest
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .expect(200);
+
+        // Validate response structure matches schema
+        expect(res.body.package.package_name).to.be.a('string');
+        expect(res.body.package.version).to.be.a('string');
+        expect(res.body.package.installed_at).to.be.a('string');
+        expect(res.body.items).to.be.an('array');
+
+        // Validate knowledge base content items structure
+        res.body.items.forEach((item: any) => {
+          expect(item).to.have.property('fileName');
+          expect(item).to.have.property('content');
+          expect(item.fileName).to.be.a('string');
+          expect(item.content).to.be.a('string');
+        });
+
+        await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
+      });
+
+      it('allows user with integrations read permission to access knowledge base', async () => {
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        await supertestWithoutAuth
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
+          .expect(200);
+        await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
+      });
+
+      it('allows user with fleet permission to access knowledge base', async () => {
+        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        await supertestWithoutAuth
+          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
+          .expect(200);
+        await uninstallPackage(testPkgName, testPkgVersion);
+        await cleanupKnowledgeBase(testPkgName);
+      });
     });
   });
 }
