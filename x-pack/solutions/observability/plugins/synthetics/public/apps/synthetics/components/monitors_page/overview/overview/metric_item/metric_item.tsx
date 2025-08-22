@@ -16,7 +16,6 @@ import moment from 'moment';
 import { useDispatch, useSelector } from 'react-redux';
 import { MetricItemExtra } from './metric_item_extra';
 import type { OverviewStatusMetaData } from '../../../../../../../../common/runtime_types';
-import type { ClientPluginsStart } from '../../../../../../../plugin';
 import { useLocationName, useStatusByLocationOverview } from '../../../../../hooks';
 import {
   selectErrorPopoverState,
