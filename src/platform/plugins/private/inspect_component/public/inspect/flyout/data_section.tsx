@@ -113,7 +113,12 @@ export const DataSection = ({ componentData }: Props) => {
         {iconType && <EuiIcon type={iconType} size="m" />}
       </EuiFlexGroup>
       <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
-        <EuiText size="s">
+        <EuiText
+          css={css`
+            font-weight: ${euiTheme.font.weight.bold};
+          `}
+          size="s"
+        >
           <FormattedMessage
             id="kbnInspectComponent.inspectFlyout.euiDocsLabel"
             defaultMessage="EUI Docs:"

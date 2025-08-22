@@ -8,6 +8,7 @@
     "id": "inspectComponent",
     "browser": true,
     "server": true,
+    "configPath": "inspect_component",
     "requiredPlugins": [],
     "requiredBundles": [],
   }

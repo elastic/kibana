@@ -7,8 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { schema } from '@kbn/config-schema';
 import { InspectComponentPluginServer } from './plugin';
+
+export const config: PluginConfigDescriptor<{ enabled: boolean }> = {
+  exposeToBrowser: {
+    enabled: true,
+  },
+  schema: schema.object({
+    enabled: schema.boolean({ defaultValue: false }),
+  }),
+};
 
 export const plugin = (initializerContext: PluginInitializerContext) => {
   return new InspectComponentPluginServer(initializerContext);

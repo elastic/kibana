@@ -14,8 +14,11 @@ import { InspectButton } from './inspect';
 
 export class InspectComponentPluginPublic implements Plugin {
   private readonly isDevMode: boolean;
+  private readonly isEnabled: boolean;
 
   constructor(initializerContext: PluginInitializerContext) {
+    const { enabled } = initializerContext.config.get<{ enabled: boolean }>();
+    this.isEnabled = enabled;
     this.isDevMode = initializerContext.env.mode.dev;
   }
 
@@ -24,7 +27,7 @@ export class InspectComponentPluginPublic implements Plugin {
   }
 
   public start(core: CoreStart) {
-    if (this.isDevMode) {
+    if (this.isDevMode && this.isEnabled) {
       core.chrome.navControls.registerRight({
         order: 1002,
         mount: toMountPoint(<InspectButton core={core} />, core.rendering),
