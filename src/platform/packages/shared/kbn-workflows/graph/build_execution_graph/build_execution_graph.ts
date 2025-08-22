@@ -180,8 +180,6 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   foreachNestedSteps.forEach((step: any) => {
     enterForeachNode.itemNodeIds.push(getNodeId(step));
     const currentNode = visitAbstractStep(graph, previousNodeToLink, step);
-    graph.setNode(getNodeId(currentNode), currentNode);
-    graph.setEdge(getNodeId(previousNodeToLink), getNodeId(currentNode));
     previousNodeToLink = currentNode;
   });
 

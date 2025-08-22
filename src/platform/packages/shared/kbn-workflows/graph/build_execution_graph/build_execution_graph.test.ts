@@ -603,6 +603,20 @@ describe('convertToWorkflowGraph', () => {
           ],
         } as Partial<WorkflowYaml>;
 
+        it('should have correct edges', () => {
+          const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
+          const edges = executionGraph.edges();
+          expect(edges).toEqual(
+            expect.arrayContaining([
+              { v: 'outerForeachStep', w: 'innerForeachStep' },
+              { v: 'innerForeachStep', w: 'nestedConnectorStep' },
+              { v: 'nestedConnectorStep', w: 'exitForeach(innerForeachStep)' },
+              { v: 'exitForeach(innerForeachStep)', w: 'exitForeach(outerForeachStep)' },
+            ])
+          );
+          expect(edges).toHaveLength(4);
+        });
+
         it('should handle nested foreach steps correctly', () => {
           const executionGraph = convertToWorkflowGraph(nestedWorkflowDefinition as any);
           const topSort = graphlib.alg.topsort(executionGraph);
