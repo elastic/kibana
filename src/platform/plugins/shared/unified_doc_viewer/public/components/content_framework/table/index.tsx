@@ -7,14 +7,75 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
-import { EuiText } from '@elastic/eui';
+import type {
+  EuiDataGridCellPopoverElementProps,
+  EuiDataGridCellValueElementProps,
+  EuiThemeFontSize,
+} from '@elastic/eui';
+import { EuiSpacer, EuiText, useEuiFontSize } from '@elastic/eui';
 import { getFormattedFields } from '@kbn/discover-utils/src/utils/get_formatted_fields';
 import { getFlattenedFields } from '@kbn/discover-utils/src/utils/get_flattened_fields';
+import { css } from '@emotion/react';
 import { getUnifiedDocViewerServices } from '../../../plugin';
-import type { KeyValueDataGridField } from './components/key_value_data_grid';
-import { KeyValueDataGrid } from './components/key_value_data_grid';
+import DocViewerTable from '../../doc_viewer_table';
+import { GRID_COLUMN_FIELD_NAME } from '../../doc_viewer_table/table';
+
+interface RenderFieldConfig {
+  displayName: string;
+  value: unknown;
+  description?: string;
+  valueCellContent?: React.ReactNode;
+}
+
+function renderNamePopover(
+  fieldName: string,
+  fieldConfig: RenderFieldConfig,
+  cellActions: React.ReactNode
+) {
+  return (
+    <>
+      <EuiText size="s" className="eui-textTruncate">
+        {fieldName}
+      </EuiText>
+      {fieldConfig?.description && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" className="eui-textTruncate">
+            {fieldConfig.description}
+          </EuiText>
+        </>
+      )}
+      {cellActions}
+    </>
+  );
+}
+
+function renderValuePopover(
+  fieldConfig: RenderFieldConfig,
+  cellActions: React.ReactNode,
+  fontSize: EuiThemeFontSize['fontSize']
+) {
+  return (
+    <>
+      <EuiText
+        css={
+          fontSize
+            ? css`
+                * {
+                  font-size: ${fontSize} !important;
+                }
+              `
+            : undefined
+        }
+      >
+        {fieldConfig?.valueCellContent}
+      </EuiText>
+      {cellActions}
+    </>
+  );
+}
 
 export interface ContentFrameworkTableProps
   extends Pick<
@@ -46,6 +107,7 @@ export function ContentFrameworkTable({
   onAddColumn,
   onRemoveColumn,
 }: ContentFrameworkTableProps) {
+  const { fontSize: smallFontSize } = useEuiFontSize('s');
   const {
     fieldsMetadata: { useFieldsMetadata },
     fieldFormats,
@@ -63,10 +125,6 @@ export function ContentFrameworkTable({
     [dataView, fieldFormats, hit, fieldNames]
   );
 
-  if (Object.keys(hit.flattened).length === 0) {
-    return null;
-  }
-
   const FormattedValue = ({ value }: { value: string }) => (
     <EuiText
       className="eui-textTruncate"
@@ -76,44 +134,72 @@ export function ContentFrameworkTable({
     />
   );
 
-  const fields: Record<string, KeyValueDataGridField> = fieldNames.reduce<
-    Record<string, KeyValueDataGridField>
-  >((acc, fieldName) => {
+  const rows = fieldNames.map((fieldName) => {
     const value = flattenedHit[fieldName];
+    if (!value) return undefined;
     const fieldConfiguration = fieldConfigurations?.[fieldName];
     const fieldDescription = fieldConfiguration?.description || fieldsMetadata[fieldName]?.short;
     const formattedValue = formattedHit[fieldName];
 
-    if (!value) return acc;
-
-    acc[fieldName] = {
-      name: fieldConfiguration?.title || fieldName,
+    return {
+      displayName: fieldConfiguration?.title || fieldName,
       value,
       description: fieldDescription,
       valueCellContent: fieldConfiguration?.formatter ? (
-        <>{fieldConfiguration?.formatter(value, formattedValue)}</>
+        <>{fieldConfiguration.formatter(value, formattedValue)}</>
       ) : (
         <FormattedValue value={formattedValue} />
       ),
     };
+  });
 
-    return acc;
-  }, {});
+  const customRenderCellValue = ({ rowIndex, columnId }: EuiDataGridCellValueElementProps) => {
+    const row = rows[rowIndex];
+
+    if (!row) {
+      return null;
+    }
+
+    if (columnId === GRID_COLUMN_FIELD_NAME) {
+      return row.displayName;
+    }
+
+    return row.valueCellContent;
+  };
+
+  const customRenderCellPopover = useCallback(
+    ({ rowIndex, columnId, cellActions }: EuiDataGridCellPopoverElementProps) => {
+      const fieldName = fieldNames[rowIndex];
+      const fieldConfig = rows[rowIndex];
+
+      if (!fieldConfig) return null;
+      if (columnId === 'name') {
+        return renderNamePopover(fieldName, fieldConfig, cellActions);
+      }
+      return renderValuePopover(fieldConfig, cellActions, smallFontSize);
+    },
+    [fieldNames, rows, smallFontSize]
+  );
 
   return (
     <div>
-      <KeyValueDataGrid
+      <DocViewerTable
         hit={hit}
-        fields={fields}
+        fieldNames={fieldNames}
         dataView={dataView}
         columns={columns}
         columnsMeta={columnsMeta}
         onAddColumn={onAddColumn}
         onRemoveColumn={onRemoveColumn}
         filter={filter}
-        isEsqlMode={false}
-        title={title}
-        data-test-subj="ContentFrameworkTableKeyValueDataGrid"
+        availableFeatures={{
+          dataGridHeader: false,
+          pinColumn: false,
+          hideNullValuesToggle: false,
+          selectedOnlyToggle: false,
+        }}
+        customRenderCellValue={customRenderCellValue}
+        customRenderCellPopover={customRenderCellPopover}
       />
     </div>
   );
