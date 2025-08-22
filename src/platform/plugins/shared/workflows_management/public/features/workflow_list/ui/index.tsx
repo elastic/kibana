@@ -71,10 +71,15 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
       runWorkflow.mutate(
         { id: item.id, inputs: {} },
         {
-          onSuccess: () => {
+          onSuccess: ({ workflowExecutionId }) => {
             notifications?.toasts.addSuccess('Workflow run started', {
               toastLifeTimeMs: 3000,
             });
+            application!.navigateToUrl(
+              application!.getUrlForApp('workflows', {
+                path: `/${item.id}?tab=executions&executionId=${workflowExecutionId}`,
+              })
+            );
           },
           onError: (err: unknown) => {
             notifications?.toasts.addError(err as Error, {
@@ -85,7 +90,7 @@ export function WorkflowList({ search, setSearch }: WorkflowListProps) {
         }
       );
     },
-    [notifications, runWorkflow]
+    [application, notifications, runWorkflow]
   );
 
   const handleDeleteWorkflow = useCallback(

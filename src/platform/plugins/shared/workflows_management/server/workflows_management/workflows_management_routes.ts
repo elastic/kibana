@@ -365,9 +365,11 @@ export function defineRoutes(
           return response.notFound();
         }
         const { inputs } = request.body as { inputs: Record<string, any> };
-        const workflowRunId = await api.runWorkflow(workflow, spaceId, inputs);
+        const workflowExecutionId = await api.runWorkflow(workflow, spaceId, inputs);
         return response.ok({
-          body: workflowRunId,
+          body: {
+            workflowExecutionId,
+          },
         });
       } catch (error) {
         return response.customError({

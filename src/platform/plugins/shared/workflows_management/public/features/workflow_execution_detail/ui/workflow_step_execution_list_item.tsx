@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import { useFormattedDateTime } from '../../../shared/ui/use_formatted_date';
-import { getExecutionStatusColor, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
+import { getExecutionStatusColors, getExecutionStatusIcon } from '../../../shared/ui/status_badge';
 
 export interface WorkflowStepExecutionListItemProps {
   stepExecution: EsWorkflowStepExecution;
@@ -28,23 +28,25 @@ export const WorkflowStepExecutionListItem = ({
 
   const formattedStartedAt = useFormattedDateTime(new Date(stepExecution.startedAt));
 
+  const { color, backgroundColor } = getExecutionStatusColors(euiTheme, stepExecution.status);
+
   return (
     <EuiFlexGroup
       css={{
         padding: euiTheme.size.m,
-        backgroundColor: selected
-          ? euiTheme.colors.backgroundBaseInteractiveSelect
-          : euiTheme.colors.backgroundBasePlain,
+        backgroundColor: selected ? backgroundColor : euiTheme.colors.backgroundBasePlain,
         borderWidth: 1,
         borderStyle: 'solid',
-        borderColor: getExecutionStatusColor(euiTheme, stepExecution.status),
+        borderColor: color,
         borderRadius: euiTheme.border.radius.medium,
         gap: euiTheme.size.m,
         flexGrow: 0,
-        cursor: 'pointer',
-        '&:hover': {
-          backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
-        },
+        cursor: selected ? 'default' : 'pointer',
+        '&:hover': selected
+          ? {}
+          : {
+              backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+            },
       }}
       alignItems="center"
       justifyContent="flexStart"

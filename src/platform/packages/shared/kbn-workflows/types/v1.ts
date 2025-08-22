@@ -158,6 +158,16 @@ export const SearchWorkflowCommandSchema = z.object({
   _full: z.boolean().default(false),
 });
 
+export const RunWorkflowCommandSchema = z.object({
+  inputs: z.record(z.any()),
+});
+export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
+
+export const RunWorkflowResponseSchema = z.object({
+  workflowExecutionId: z.string(),
+});
+export type RunWorkflowResponseDto = z.infer<typeof RunWorkflowResponseSchema>;
+
 export type CreateWorkflowCommand = z.infer<typeof CreateWorkflowCommandSchema>;
 
 export interface UpdatedWorkflowResponseDto {

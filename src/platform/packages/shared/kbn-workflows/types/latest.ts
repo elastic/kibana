@@ -27,6 +27,8 @@ export type {
   // commands
   CreateWorkflowCommand,
   UpdatedWorkflowResponseDto,
+  RunWorkflowCommand,
+  RunWorkflowResponseDto,
 
   // execution engine
   Provider,

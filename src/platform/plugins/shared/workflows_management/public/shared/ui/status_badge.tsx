@@ -19,22 +19,48 @@ import React from 'react';
 import type { EuiIconType } from '@elastic/eui/src/components/icon/icon';
 import { getStatusLabel } from '../translations';
 
-const getExecutionStatusColorMap = (
+interface ExecutionStatusColors {
+  color: string;
+  backgroundColor: string;
+}
+
+const getExecutionStatusColorsMap = (
   euiTheme: EuiThemeComputed
-): Record<ExecutionStatus, string> => {
+): Record<ExecutionStatus, ExecutionStatusColors> => {
   return {
-    [ExecutionStatus.COMPLETED]: euiTheme.colors.vis.euiColorVis0,
-    [ExecutionStatus.FAILED]: euiTheme.colors.danger,
-    [ExecutionStatus.PENDING]: euiTheme.colors.textSubdued,
-    [ExecutionStatus.RUNNING]: euiTheme.colors.borderBaseSubdued,
-    [ExecutionStatus.WAITING_FOR_INPUT]: euiTheme.colors.warning,
-    [ExecutionStatus.CANCELLED]: euiTheme.colors.danger,
-    [ExecutionStatus.SKIPPED]: euiTheme.colors.textSubdued,
+    [ExecutionStatus.COMPLETED]: {
+      color: euiTheme.colors.vis.euiColorVis0,
+      backgroundColor: euiTheme.colors.backgroundBaseSuccess,
+    },
+    [ExecutionStatus.FAILED]: {
+      color: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+    },
+    [ExecutionStatus.PENDING]: {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    },
+    [ExecutionStatus.RUNNING]: {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    },
+    [ExecutionStatus.WAITING_FOR_INPUT]: {
+      color: euiTheme.colors.warning,
+      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+    },
+    [ExecutionStatus.CANCELLED]: {
+      color: euiTheme.colors.danger,
+      backgroundColor: euiTheme.colors.backgroundBaseDanger,
+    },
+    [ExecutionStatus.SKIPPED]: {
+      color: euiTheme.colors.textSubdued,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    },
   };
 };
 
-export const getExecutionStatusColor = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {
-  return getExecutionStatusColorMap(euiTheme)[status];
+export const getExecutionStatusColors = (euiTheme: EuiThemeComputed, status: ExecutionStatus) => {
+  return getExecutionStatusColorsMap(euiTheme)[status];
 };
 
 const ExecutionStatusIconTypeMap: Record<ExecutionStatus, EuiIconType> = {
@@ -59,7 +85,7 @@ export const getExecutionStatusIcon = (euiTheme: EuiThemeComputed, status: Execu
   return (
     <EuiIcon
       type={ExecutionStatusIconTypeMap[status]}
-      color={getExecutionStatusColor(euiTheme, status)}
+      color={getExecutionStatusColors(euiTheme, status).color}
     />
   );
 };

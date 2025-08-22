@@ -132,10 +132,15 @@ export function WorkflowDetailPage({ id }: { id: string }) {
     runWorkflow.mutate(
       { id, inputs: event },
       {
-        onSuccess: () => {
+        onSuccess: ({ workflowExecutionId }) => {
           notifications?.toasts.addSuccess('Workflow run started', {
             toastLifeTimeMs: 3000,
           });
+          application!.navigateToUrl(
+            application!.getUrlForApp('workflows', {
+              path: `/${id}?tab=executions&executionId=${workflowExecutionId}`,
+            })
+          );
         },
         onError: (err: unknown) => {
           notifications?.toasts.addError(err as Error, {
