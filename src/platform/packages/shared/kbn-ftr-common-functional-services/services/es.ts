@@ -65,6 +65,9 @@ export function EsProvider({ getService }: FtrProviderContext): Client {
               refresh_interval: '1ms',
             },
           })
+          .then(() => {
+            log.success(`Set refresh_interval to 1ms for ${index}`);
+          })
           .catch((error) => {
             log.warning(`Failed to set refresh_interval to 1ms for ${index}`);
           });

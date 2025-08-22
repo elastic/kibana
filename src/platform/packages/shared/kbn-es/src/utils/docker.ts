@@ -234,11 +234,17 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 // Temporary workaround for https://github.com/elastic/elasticsearch/issues/118583
 if (process.arch === 'arm64') {
   DEFAULT_SERVERLESS_ESARGS.push(
-    ['ES_JAVA_OPTS', '-Xms1g -Xmx1g -XX:UseSVE=0'],
+    [
+      'ES_JAVA_OPTS',
+      '-Xms1g -Xmx1g -XX:UseSVE=0 -Des.stateless.allow.index.refresh_interval.override=true',
+    ],
     ['CLI_JAVA_OPTS', '-XX:UseSVE=0']
   );
 } else {
-  DEFAULT_SERVERLESS_ESARGS.push(['ES_JAVA_OPTS', '-Xms1g -Xmx1g']);
+  DEFAULT_SERVERLESS_ESARGS.push([
+    'ES_JAVA_OPTS',
+    '-Xms1g -Xmx1g -Des.stateless.allow.index.refresh_interval.override=true',
+  ]);
 }
 
 const DEFAULT_SSL_ESARGS: Array<[string, string]> = [
@@ -796,6 +802,10 @@ export async function runServerlessEsNode(
     ['--name', name, '--env', `node.name=${name}`],
     image
   );
+
+  log.info(`Params:
+      ${SHARED_SERVERLESS_PARAMS.concat(params).join('\n')}
+    `);
 
   log.info(chalk.bold(`Running serverless ES node: ${name}`));
   log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));
