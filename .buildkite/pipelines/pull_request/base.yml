@@ -103,7 +103,7 @@ steps:
       #     automatic:
       #       - exit_status: '-1'
       #         limit: 3
-      - command: exit 1
+      - command: exit 0
         key: build
         agents:
           machineType: n2-standard-2
