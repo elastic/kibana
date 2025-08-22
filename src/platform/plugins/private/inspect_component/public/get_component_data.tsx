@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RefObject } from 'react';
 import React, { createRef } from 'react';
+import type { RefObject } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { capturePreviewScreenshot } from '../../../../packages/shared/shared-ux/preview_screenshots';
 import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
 
-const setPortalzIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
+const setPortalZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
   setTimeout(() => {
     const node = flyoutRef.current;
 
@@ -71,7 +71,7 @@ export const getComponentData = async ({
       flyoutOptions
     );
 
-    setPortalzIndex(flyoutRef, '9000');
+    setPortalZIndex(flyoutRef, '9000');
 
     const restore = setElementHighlight({
       target,
@@ -80,7 +80,6 @@ export const getComponentData = async ({
 
     flyout.onClose.then(() => {
       restore();
-      setPortalzIndex(flyoutRef, '1000');
       setFlyoutRef(undefined);
     });
 
