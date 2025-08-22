@@ -1901,7 +1901,7 @@
     "http2-proxy": "^5.0.53",
     "http2-wrapper": "^2.2.1",
     "ignore": "^7.0.4",
-    "jest": "^30.0.05",
+    "jest": "^30.0.5",
     "jest-canvas-mock": "^2.5.2",
     "jest-cli": "^30.0.5",
     "jest-config": "^30.0.5",
