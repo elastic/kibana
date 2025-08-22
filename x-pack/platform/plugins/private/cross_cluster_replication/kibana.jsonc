@@ -21,7 +21,8 @@
       "management",
       "remoteClusters",
       "indexManagement",
-      "features"
+      "features",
+      "dataViews"
     ],
     "optionalPlugins": [
       "usageCollection"
