@@ -9,6 +9,7 @@
 
 import { useAbortableAsync } from '@kbn/react-hooks';
 import type { SpanLinks } from '@kbn/apm-types';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 const INITIAL_VALUE: SpanLinks = {
@@ -16,7 +17,15 @@ const INITIAL_VALUE: SpanLinks = {
   outgoingSpanLinks: [],
 };
 
-export function useFetchSpanLinks({ docId, traceId }: { docId: string; traceId: string }) {
+export function useFetchSpanLinks({
+  docId,
+  traceId,
+  processorEvent,
+}: {
+  docId: string;
+  traceId: string;
+  processorEvent?: ProcessorEvent;
+}) {
   const { discoverShared, data } = getUnifiedDocViewerServices();
   const timeFilter = data.query.timefilter.timefilter.getAbsoluteTime();
 
@@ -31,7 +40,7 @@ export function useFetchSpanLinks({ docId, traceId }: { docId: string; traceId: 
       }
 
       return fetchSpanLinks.fetchSpanLinks(
-        { docId, traceId, start: timeFilter.from, end: timeFilter.to },
+        { docId, traceId, start: timeFilter.from, end: timeFilter.to, processorEvent },
         signal
       );
     },

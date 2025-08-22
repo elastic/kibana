@@ -30,6 +30,7 @@ import {
 } from '@kbn/discover-utils';
 import type { SpanLinkDetails } from '@kbn/apm-types';
 import { SPAN_LINKS_SPAN_ID } from '@kbn/apm-types';
+import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import { ContentFrameworkSection } from '../../../../content_framework/section';
 import { useDataSourcesContext } from '../../hooks/use_data_sources';
 import {
@@ -42,6 +43,7 @@ import { useFetchSpanLinks } from './use_fetch_span_links';
 export interface Props {
   traceId: string;
   docId: string;
+  processorEvent?: ProcessorEvent;
 }
 
 export type SpanLinkType = 'incoming' | 'outgoing';
@@ -50,11 +52,11 @@ const sorting: EuiInMemoryTableProps['sorting'] = {
   sort: { field: 'duration', direction: 'desc' as const },
 };
 
-export function SpanLinks({ docId, traceId }: Props) {
+export function SpanLinks({ docId, traceId, processorEvent }: Props) {
   const { indexes } = useDataSourcesContext();
   const { generateDiscoverLink } = useGetGenerateDiscoverLink({ indexPattern: indexes.apm.traces });
   const [type, setType] = useState<SpanLinkType>('incoming');
-  const { loading, error, value } = useFetchSpanLinks({ docId, traceId });
+  const { loading, error, value } = useFetchSpanLinks({ docId, traceId, processorEvent });
   const spanLinks = type === 'incoming' ? value.incomingSpanLinks : value.outgoingSpanLinks;
 
   useEffect(() => {

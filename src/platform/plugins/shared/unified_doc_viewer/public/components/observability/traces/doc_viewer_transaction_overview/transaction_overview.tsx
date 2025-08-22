@@ -21,6 +21,7 @@ import {
 } from '@kbn/discover-utils';
 import { getFlattenedTransactionDocumentOverview } from '@kbn/discover-utils/src';
 import { css } from '@emotion/react';
+import { ProcessorEvent } from '@kbn/apm-types-shared';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { transactionFields, allTransactionFields } from './resources/fields';
@@ -159,7 +160,11 @@ export function TransactionOverview({
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiSpacer size="m" />
-              <SpanLinks traceId={traceId} docId={transactionId} />
+              <SpanLinks
+                traceId={traceId}
+                docId={transactionId}
+                processorEvent={ProcessorEvent.transaction}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </FieldActionsProvider>

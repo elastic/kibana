@@ -16,6 +16,7 @@ import {
   TRANSACTION_ID,
   OTEL_SPAN_LINKS_SPAN_ID,
   OTEL_SPAN_LINKS_TRACE_ID,
+  PROCESSOR_EVENT,
 } from '../../../common/es_fields/apm';
 import type { SpanRaw } from '../../../typings/es_schemas/raw/span_raw';
 import type { TransactionRaw } from '../../../typings/es_schemas/raw/transaction_raw';
@@ -28,12 +29,14 @@ export async function getLinkedParentsOfSpan({
   spanId,
   start,
   end,
+  processorEvent,
 }: {
   traceId: string;
   spanId: string;
   apmEventClient: APMEventClient;
   start: number;
   end: number;
+  processorEvent?: ProcessorEvent;
 }) {
   const optionalFields = asMutableArray([
     OTEL_SPAN_LINKS_SPAN_ID,
@@ -43,7 +46,7 @@ export async function getLinkedParentsOfSpan({
   const response = await apmEventClient.search(
     'get_linked_parents_of_span',
     {
-      apm: { events: [ProcessorEvent.span] },
+      apm: { events: [ProcessorEvent.span, ProcessorEvent.transaction] },
       _source: [SPAN_LINKS],
       fields: [...optionalFields],
       track_total_hits: false,
@@ -59,12 +62,10 @@ export async function getLinkedParentsOfSpan({
                 minimum_should_match: 1,
               },
             },
-            {
-              bool: {
-                should: [...termQuery(TRANSACTION_ID, spanId), ...termQuery(SPAN_ID, spanId)],
-                minimum_should_match: 1,
-              },
-            },
+            ...(processorEvent ? [{ term: { [PROCESSOR_EVENT]: processorEvent } }] : []),
+            ...(processorEvent === ProcessorEvent.transaction
+              ? [{ term: { [TRANSACTION_ID]: spanId } }]
+              : [{ term: { [SPAN_ID]: spanId } }]),
           ],
         },
       },

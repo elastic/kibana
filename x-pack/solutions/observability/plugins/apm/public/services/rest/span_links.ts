@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { callApmApi } from './create_call_apm_api';
 export const fetchSpanLinks = (
   {
@@ -12,16 +13,18 @@ export const fetchSpanLinks = (
     docId,
     start,
     end,
+    processorEvent,
   }: {
     traceId: string;
     docId: string;
     start: string;
     end: string;
     kuery?: string;
+    processorEvent?: ProcessorEvent;
   },
   signal: AbortSignal
 ) =>
   callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}', {
-    params: { path: { traceId, spanId: docId }, query: { kuery: '', start, end } },
+    params: { path: { traceId, spanId: docId }, query: { kuery: '', start, end, processorEvent } },
     signal,
   });

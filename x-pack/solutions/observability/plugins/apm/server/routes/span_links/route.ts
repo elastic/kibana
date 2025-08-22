@@ -12,6 +12,7 @@ import { getLinkedChildrenOfSpan } from './get_linked_children';
 import { kueryRt, rangeRt } from '../default_api_types';
 import { getLinkedParentsOfSpan } from './get_linked_parents';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
+import { processorEventRt } from '../../../common/processor_event';
 
 const linkedParentsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents',
@@ -20,7 +21,7 @@ const linkedParentsRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([kueryRt, rangeRt, t.type({ processorEvent: processorEventRt })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
@@ -38,6 +39,7 @@ const linkedParentsRoute = createApmServerRoute({
       spanId: path.spanId,
       start: query.start,
       end: query.end,
+      processorEvent: query.processorEvent,
     });
 
     return {
@@ -98,7 +100,7 @@ const spanLinksRoute = createApmServerRoute({
       traceId: t.string,
       spanId: t.string,
     }),
-    query: t.intersection([kueryRt, rangeRt]),
+    query: t.intersection([kueryRt, rangeRt, t.partial({ processorEvent: processorEventRt })]),
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   handler: async (
@@ -118,6 +120,7 @@ const spanLinksRoute = createApmServerRoute({
         spanId: path.spanId,
         start: query.start,
         end: query.end,
+        processorEvent: query.processorEvent,
       }).then(
         (linkedParents): Promise<SpanLinkDetails[]> =>
           getSpanLinksDetails({

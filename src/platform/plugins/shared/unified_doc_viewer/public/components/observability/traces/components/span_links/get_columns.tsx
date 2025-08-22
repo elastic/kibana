@@ -14,7 +14,12 @@ import { Duration } from '@kbn/apm-ui-shared';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import type { SpanLinkDetails } from '@kbn/apm-types';
-import { SERVICE_NAME_FIELD, SPAN_ID_FIELD, TRACE_ID_FIELD } from '@kbn/discover-utils';
+import {
+  SERVICE_NAME_FIELD,
+  SPAN_ID_FIELD,
+  TRACE_ID_FIELD,
+  TRANSACTION_ID_FIELD,
+} from '@kbn/discover-utils';
 import type { SpanLinkType } from '.';
 import { ServiceNameWithIcon } from '../service_name_with_icon';
 import type { GenerateDiscoverLink } from '../../hooks/use_get_generate_discover_link';
@@ -47,7 +52,11 @@ export const getColumns = ({
           text={item.details?.spanName || NOT_AVAILABLE_LABEL}
         />
       );
-      const href = generateDiscoverLink({ [SPAN_ID_FIELD]: item.spanId });
+      const href = generateDiscoverLink(
+        item.details?.transactionId
+          ? { [TRANSACTION_ID_FIELD]: item.details.transactionId }
+          : { [SPAN_ID_FIELD]: item.spanId }
+      );
       return (
         <span
           css={css`

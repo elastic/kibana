@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { Readable } from 'stream';
 import { type ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import moment from 'moment';
@@ -161,10 +162,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
             kuery,
             traceId,
             spanId,
+            processorEvent,
           }: {
             kuery: string;
             traceId: string;
             spanId: string;
+            processorEvent: ProcessorEvent;
           }) {
             const [childrenLinksResponse, parentsLinksResponse] = await Promise.all([
               await apmApiClient.readUser({
@@ -186,6 +189,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                     kuery,
                     start: start.toISOString(),
                     end: end.toISOString(),
+                    processorEvent,
                   },
                 },
               }),
@@ -209,11 +213,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                     kuery: '',
                     traceId: ids.producerInternalOnly.traceId,
                     spanId: ids.producerInternalOnly.transactionAId,
+                    processorEvent: ProcessorEvent.transaction,
                   }),
                   fetchChildrenAndParentsDetails({
                     kuery: '',
                     traceId: ids.producerInternalOnly.traceId,
                     spanId: ids.producerInternalOnly.spanAId,
+                    processorEvent: ProcessorEvent.span,
                   }),
                 ]);
               transactionALinksDetails = transactionALinksDetailsResponse;
@@ -279,11 +285,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                     kuery: '',
                     traceId: ids.producerExternalOnly.traceId,
                     spanId: ids.producerExternalOnly.transactionBId,
+                    processorEvent: ProcessorEvent.transaction,
                   }),
                   fetchChildrenAndParentsDetails({
                     kuery: '',
                     traceId: ids.producerExternalOnly.traceId,
                     spanId: ids.producerExternalOnly.spanBId,
+                    processorEvent: ProcessorEvent.span,
                   }),
                 ]);
               transactionBLinksDetails = transactionALinksDetailsResponse;
@@ -340,11 +348,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                     kuery: '',
                     traceId: ids.producerConsumer.traceId,
                     spanId: ids.producerConsumer.transactionCId,
+                    processorEvent: ProcessorEvent.transaction,
                   }),
                   fetchChildrenAndParentsDetails({
                     kuery: '',
                     traceId: ids.producerConsumer.traceId,
                     spanId: ids.producerConsumer.spanCId,
+                    processorEvent: ProcessorEvent.span,
                   }),
                 ]);
               transactionCLinksDetails = transactionALinksDetailsResponse;
@@ -446,11 +456,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
                     kuery: '',
                     traceId: ids.producerMultiple.traceId,
                     spanId: ids.producerMultiple.transactionDId,
+                    processorEvent: ProcessorEvent.transaction,
                   }),
                   fetchChildrenAndParentsDetails({
                     kuery: '',
                     traceId: ids.producerMultiple.traceId,
                     spanId: ids.producerMultiple.spanEId,
+                    processorEvent: ProcessorEvent.span,
                   }),
                 ]);
               transactionDLinksDetails = transactionALinksDetailsResponse;

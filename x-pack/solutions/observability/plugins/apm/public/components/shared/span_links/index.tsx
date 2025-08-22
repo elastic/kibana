@@ -8,6 +8,7 @@ import type { EuiSelectOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useState } from 'react';
+import type { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../hooks/use_time_range';
@@ -21,11 +22,12 @@ interface Props {
   spanLinksCount: SpanLinksCount;
   traceId: string;
   spanId: string;
+  processorEvent: ProcessorEvent;
 }
 
 type LinkType = 'children' | 'parents';
 
-export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
+export function SpanLinks({ spanLinksCount, traceId, spanId, processorEvent }: Props) {
   const {
     query: { rangeFrom, rangeTo },
   } = useAnyOfApmParams(
@@ -60,11 +62,11 @@ export function SpanLinks({ spanLinksCount, traceId, spanId }: Props) {
       return callApmApi('GET /internal/apm/traces/{traceId}/span_links/{spanId}/parents', {
         params: {
           path: { traceId, spanId },
-          query: { kuery, start, end },
+          query: { kuery, start, end, processorEvent },
         },
       });
     },
-    [selectedLinkType, kuery, traceId, spanId, start, end]
+    [selectedLinkType, kuery, traceId, spanId, start, end, processorEvent]
   );
 
   const selectOptions: EuiSelectOption[] = useMemo(
