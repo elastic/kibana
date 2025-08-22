@@ -14,6 +14,18 @@ import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
 
+const setPortalzIndex = (flyoutRef: React.RefObject<HTMLDivElement>) => {
+  setTimeout(() => {
+    const node = flyoutRef.current;
+
+    if (node) {
+      const portalParent: HTMLElement | null = node.closest('[data-euiportal="true"]');
+
+      if (portalParent) portalParent.style.zIndex = '9000';
+    }
+  }, 0);
+};
+
 export const getComponentData = async ({
   core,
   euiInfo,
@@ -26,12 +38,15 @@ export const getComponentData = async ({
   sourceComponent,
 }: GetComponentDataOptions) => {
   try {
+    const flyoutRef = React.createRef<HTMLDivElement>();
+
     const { codeowners, relativePath, baseFileName }: InspectComponentResponse =
       await core.http.post('/internal/inspect_component/inspect', {
         body: JSON.stringify({ path: fileData.fileName }),
       });
 
     const { width: maxWidth, height: maxHeight } = target.getBoundingClientRect();
+
     const image = await capturePreviewScreenshot({
       target,
       maxWidth,
@@ -41,19 +56,21 @@ export const getComponentData = async ({
 
     const componentData = {
       ...fileData,
+      baseFileName,
+      codeowners,
       euiInfo,
       iconType,
-      relativePath,
-      codeowners,
-      baseFileName,
       image,
+      relativePath,
       sourceComponent,
     };
 
     const flyout = core.overlays.openFlyout(
-      toMountPoint(<InspectFlyout componentData={componentData} />, core.rendering),
+      toMountPoint(<InspectFlyout componentData={componentData} ref={flyoutRef} />, core.rendering),
       flyoutOptions
     );
+
+    setPortalzIndex(flyoutRef);
 
     const restore = setElementHighlight({
       target,
