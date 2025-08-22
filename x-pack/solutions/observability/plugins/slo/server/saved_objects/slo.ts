@@ -49,6 +49,25 @@ export const slo: SavedObjectsType = {
         },
       ],
     },
+
+    2: {
+      changes: [
+        {
+          type: 'mappings_addition',
+          addedMappings: {
+            artifacts: {
+              properties: {
+                dashboards: {
+                  properties: {
+                    refId: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+    },
   },
   mappings: {
     dynamic: false,
