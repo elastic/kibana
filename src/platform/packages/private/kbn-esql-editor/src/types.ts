@@ -108,6 +108,7 @@ export interface ESQLEditorProps {
   fullHeight?: boolean;
   allowQueryRefresh?: boolean;
   runQueryButtonText?: string;
+  hideLimitInfo?: boolean;
 }
 
 interface ESQLVariableService {

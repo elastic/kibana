@@ -54,7 +54,6 @@ import {
   onMouseDownResizeHandler,
   getEditorOverwrites,
   type MonacoMessage,
-  filterDataErrors,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
 import { ResizableButton } from './resizable_button';
@@ -128,6 +127,7 @@ const ESQLEditorInternal = function ESQLEditor({
   barElement,
   text,
   onTextChange,
+  hideLimitInfo,
 }: ESQLEditorPropsInternal) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const editorModel = useRef<monaco.editor.ITextModel>();
@@ -179,7 +179,7 @@ const ESQLEditorInternal = function ESQLEditor({
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
   }>({
-    errors: serverErrors ? parseErrors(serverErrors, code) : [],
+    errors: [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
   const onQueryUpdate = useCallback(
@@ -611,7 +611,14 @@ const ESQLEditorInternal = function ESQLEditor({
       iconType: 'refresh',
       color: 'primary',
     };
-  }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading, runQueryButtonText, allowQueryRefresh]);
+  }, [
+    allowQueryCancellation,
+    code,
+    codeWhenSubmitted,
+    isLoading,
+    runQueryButtonText,
+    allowQueryRefresh,
+  ]);
 
   const parseMessages = useCallback(async () => {
     if (editorModel.current) {
@@ -644,29 +651,6 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
-  const queryValidation = useCallback(
-    async ({ active }: { active: boolean }) => {
-      if (!editorModel.current || editorModel.current.isDisposed()) return;
-      monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
-      const markers = [];
-
-      if (parserErrors.length) {
-        if (dataErrorsControl?.enabled === false) {
-          markers.push(...filterDataErrors(parserErrors));
-        } else {
-          markers.push(...parserErrors);
-        }
-      }
-      if (active) {
-        setEditorMessages({ errors: parserErrors, warnings: parserWarnings });
-        monaco.editor.setModelMarkers(editorModel.current, 'Unified search', markers);
-        return;
-      }
-    },
-    [parseMessages, dataErrorsControl?.enabled]
-  );
-
   useDebounceWithOptions(
     async () => {
       if (!editorModel.current) return;
@@ -684,19 +668,17 @@ const ESQLEditorInternal = function ESQLEditor({
           parsedErrors.length ? parsedErrors : []
         );
         return;
-      } else {
-        queryValidation(subscription).catch(() => {});
       }
       return () => (subscription.active = false);
     },
     { skipFirstRender: false },
     256,
-    [serverErrors, serverWarning, code, queryValidation]
+    [serverErrors, serverWarning, code]
   );
 
   const suggestionProvider = useMemo(
     () => ESQLLang.getSuggestionProvider?.(esqlCallbacks, text !== undefined),
-    [esqlCallbacks]
+    [esqlCallbacks, text]
   );
 
   const hoverProvider = useMemo(() => ESQLLang.getHoverProvider?.(esqlCallbacks), [esqlCallbacks]);
@@ -1005,6 +987,7 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
+        hideLimitInfo={hideLimitInfo}
       />
       {createPortal(
         Object.keys(popoverPosition).length !== 0 && popoverPosition.constructor === Object && (

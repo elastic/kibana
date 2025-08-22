@@ -124,18 +124,20 @@ export class EsqlEditorActionsProvider {
       return Promise.resolve([]);
     }
     const result: ParsedQuery[] = [];
-    this.selectedLines.toSorted().forEach((line) => {
-      const query = model.getLineContent(line);
-      if (
-        query &&
-        (query.startsWith('FROM') || query.startsWith('ROW') || query.startsWith('SHOW'))
-      ) {
-        result.push({
-          query,
-          lineNumber: line,
-        });
-      }
-    });
+    this.selectedLines
+      .sort((a, b) => Number(a) - Number(b))
+      .forEach((line) => {
+        const query = model.getLineContent(line);
+        if (
+          query &&
+          (query.startsWith('FROM') || query.startsWith('ROW') || query.startsWith('SHOW'))
+        ) {
+          result.push({
+            query,
+            lineNumber: line,
+          });
+        }
+      });
     return Promise.resolve(result);
   }
 
@@ -170,8 +172,13 @@ export class EsqlEditorActionsProvider {
     } = context;
 
     const { toasts } = notifications;
-    const requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }> =
-      [];
+    const requests: Array<{
+      url: string;
+      method: string;
+      data: string[];
+      lineNumber?: number;
+      query: string;
+    }> = [];
     const queries = await this.getQueries();
     queries.forEach(({ query, lineNumber }) => {
       const formattedQuery = timeRange
@@ -179,15 +186,18 @@ export class EsqlEditorActionsProvider {
             .replace('?_tend', '\\"' + timeRange.end + '\\"')
             .replace('?_tstart', '\\"' + timeRange.start + '\\"')
         : query;
-      console.log(formattedQuery);
       const request = {
         method: 'POST',
         url: '_query',
         lineNumber,
         data: ['{"query":"' + formattedQuery + '"}'],
+        query: formattedQuery,
       };
       requests.push(request);
     });
+    if (requests.length === 0) {
+      return;
+    }
     try {
       dispatch({ type: 'sendRequest', payload: undefined });
 

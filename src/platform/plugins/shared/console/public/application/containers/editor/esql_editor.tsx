@@ -18,7 +18,8 @@ import { EsqlEditorActionsProvider } from './esql_editor_actions_provider';
 import { useServicesContext, useRequestActionContext } from '../../contexts';
 
 const INITIAL_TEXT =
-  '// Welcome to ES|QL Console!\n\n// Send ES|QL queries to search, aggregate, and visualize your data.\n// Here are a few examples to get you started:\n\n// Retrieve data\nFROM kibana_sample_data_ecommerce | LIMIT 10';
+  '// Welcome to ES|QL Console!\n\n// Send ES|QL queries to search and aggregate your data.\n\n// Here is a simple example of an ES|QL query:\nFROM kibana_sample_data_ecommerce | SORT order_date | LIMIT 3';
+const LOCAL_STORAGE_KEY = 'esqlConsole';
 
 export const EsqlEditor = () => {
   const context = useServicesContext();
@@ -27,13 +28,12 @@ export const EsqlEditor = () => {
   const dispatch = useRequestActionContext();
 
   const actionsProvider = useRef<EsqlEditorActionsProvider | null>(null);
-  const [text, setText] = useState<string>(INITIAL_TEXT);
+  const [text, setText] = useState<string>(localStorage.getItem(LOCAL_STORAGE_KEY) ?? INITIAL_TEXT);
   const query = actionsProvider.current?.getCurrentQuery() ?? '';
   const [timeRange, setTimeRange] = useState<{ start: string; end: string }>({
     start: 'now-15m',
     end: 'now',
   });
-  console.log(timeRange);
 
   const editorDidMountCallback = useCallback((editor: monaco.editor.IStandaloneCodeEditor) => {
     const provider = new EsqlEditorActionsProvider(editor);
@@ -57,7 +57,10 @@ export const EsqlEditor = () => {
     >
       <ESQLLangEditor
         text={text}
-        onTextChange={setText}
+        onTextChange={(newText) => {
+          localStorage.setItem(LOCAL_STORAGE_KEY, newText);
+          setText(newText);
+        }}
         query={{ esql: query }}
         onTextLangQueryChange={(q: AggregateQuery) => {}}
         barElement={
@@ -74,7 +77,7 @@ export const EsqlEditor = () => {
             timeFormat="absolute"
           />
         }
-        onTextLangQuerySubmit={() => sendRequestsCallback()}
+        onTextLangQuerySubmit={sendRequestsCallback}
         expandToFitQueryOnMount={true}
         hasOutline={true}
         editorIsInline={true}
@@ -85,6 +88,10 @@ export const EsqlEditor = () => {
         allowQueryCancellation={true}
         allowQueryRefresh={false}
         runQueryButtonText="Run selected queries"
+        hideLimitInfo={true}
+        hideQueryHistory={true}
+        displayDocumentationAsFlyout={true}
+        dataErrorsControl={{ enabled: false, onChange: () => {} }}
       />
     </div>
   );
