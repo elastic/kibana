@@ -90,3 +90,49 @@ export interface SetElementHighlightOptions {
   target: HTMLElement | SVGElement;
   euiTheme: EuiThemeComputed;
 }
+
+export type StorePreviewScreenshotFn = ({
+  id,
+  dataUrl,
+}: {
+  id: string;
+  dataUrl: string;
+}) => boolean;
+
+export interface ScreenshotCommonOptions {
+  /** The HTML element to target.  If not provided, the `querySelector` will be used. */
+  target?: HTMLElement | SVGElement;
+  /** A query selector to find the HTML container to target.  Default is `.kbnAppWrapper`. */
+  querySelector?: string;
+  /** A function to store the screenshot.  Default stores to session storage. */
+  storeScreenshot?: StorePreviewScreenshotFn;
+  /** The scroll distance from the left of the window.  Default is `0`. */
+  scrollX?: number;
+  /** The scroll distance from the top of the window.  Default is `0`. */
+  scrollY?: number;
+  /** The aspect ratio of the resulting image.  Default is `0.75`. */
+  aspectRatio?: number;
+  /** The maximum width of the resulting image.  Default is `400`. */
+  maxWidth?: number;
+  /** The maximum height of the resulting image.  Overriden if aspect ratio is provided. */
+  maxHeight?: number;
+}
+
+/**
+ * Options for the `usePreviewScreenshot` hook.
+ */
+export interface UsePreviewScreenshotOptions extends ScreenshotCommonOptions {
+  /**
+   * The ID of the Saved Object.  This can actually be any known identifier.  It can
+   * be `undefined`, since it may not be immediately available.
+   */
+  savedObjectId?: string;
+}
+
+/**
+ * Options for the `capturePreviewScreenshot` function.
+ */
+export type CapturePreviewScreenshotOptions = Omit<
+  ScreenshotCommonOptions,
+  'id' | 'storeScreenshot'
+>;

@@ -8,15 +8,10 @@
  */
 
 import html2canvas from 'html2canvas';
+import { DEFAULT_CONTAINER_SELECTOR } from '../constants';
+import { getPreviewDimensions } from './get_preview_dimensions';
+import type { CapturePreviewScreenshotOptions } from '../types';
 
-import { DEFAULT_CONTAINER_SELECTOR, getPreviewDimensions, storePreviewScreenshot } from './lib';
-import type { TakePreviewScreenshotOptions, CapturePreviewScreenshotOptions } from './types';
-
-/**
- * Captures a screenshot of a preview container and returns the image data.
- *
- * Returns the base64-encoded data URL of the screenshot, or null if the screenshot failed.
- */
 export const capturePreviewScreenshot = async ({
   target,
   querySelector = DEFAULT_CONTAINER_SELECTOR,
@@ -76,40 +71,4 @@ export const capturePreviewScreenshot = async ({
   }
 
   return null;
-};
-
-/**
- * Takes a screenshot of a preview container and stores it using the provided storage function.
- *
- * Returns `true` if the screenshot was successfully taken and stored, false otherwise.
- */
-export const takePreviewScreenshot = async ({
-  savedObjectId,
-  target,
-  querySelector = DEFAULT_CONTAINER_SELECTOR,
-  scrollX = 0,
-  scrollY = 0,
-  storeScreenshot = storePreviewScreenshot,
-  maxHeight,
-  maxWidth,
-  aspectRatio,
-}: TakePreviewScreenshotOptions): Promise<boolean> => {
-  const dataUrl = await capturePreviewScreenshot({
-    target,
-    querySelector,
-    scrollX,
-    scrollY,
-    maxHeight,
-    maxWidth,
-    aspectRatio,
-  });
-
-  if (!dataUrl) {
-    return false;
-  }
-
-  return storeScreenshot({
-    savedObjectId,
-    dataUrl,
-  });
 };

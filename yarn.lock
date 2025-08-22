@@ -7072,10 +7072,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/preview-screenshots@link:src/platform/packages/shared/shared-ux/preview_screenshots":
-  version "0.0.0"
-  uid ""
-
 "@kbn/product-doc-artifact-builder@link:x-pack/packages/ai-infra/product-doc-artifact-builder":
   version "0.0.0"
   uid ""

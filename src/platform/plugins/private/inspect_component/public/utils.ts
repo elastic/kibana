@@ -162,7 +162,7 @@ export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null 
   if (!componentPath) return null;
 
   const toUrl = (name: string): string | null => {
-    const docsLink = EUI_DOCS_MAP[name];
+    const docsLink = (EUI_DOCS_MAP as any)[name];
 
     if (!docsLink) return null;
 

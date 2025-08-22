@@ -8,3 +8,4 @@
  */
 
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
+export const DEFAULT_CONTAINER_SELECTOR = '.kbnAppWrapper';

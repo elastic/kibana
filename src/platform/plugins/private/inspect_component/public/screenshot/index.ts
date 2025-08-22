@@ -7,8 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/**
- * Generates a storage key for a preview screenshot based on a `savedObjectId`,
- * but could be any predictable, unique identifier.
- */
-export const getStorageKey = (savedObjectId: string) => `kibana:preview:${savedObjectId}`;
+export { capturePreviewScreenshot } from './capture_screenshot';
+export { getPreviewDimensions } from './get_preview_dimensions';

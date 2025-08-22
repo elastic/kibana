@@ -10,12 +10,12 @@
 import React, { createRef } from 'react';
 import type { RefObject } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { capturePreviewScreenshot } from '@kbn/preview-screenshots';
+import { capturePreviewScreenshot } from './screenshot/capture_screenshot';
 import { setElementHighlight } from './utils';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 import { flyoutOptions, InspectFlyout } from './inspect';
 
-const setPortalZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
+const setFlyoutZIndex = (flyoutRef: RefObject<HTMLDivElement>, zIndex: string) => {
   setTimeout(() => {
     const node = flyoutRef.current;
 
@@ -34,9 +34,9 @@ export const getComponentData = async ({
   iconType,
   target,
   euiTheme,
+  sourceComponent,
   setFlyoutRef,
   setIsInspecting,
-  sourceComponent,
 }: GetComponentDataOptions) => {
   try {
     const flyoutRef = createRef<HTMLDivElement>();
@@ -71,7 +71,8 @@ export const getComponentData = async ({
       flyoutOptions
     );
 
-    setPortalZIndex(flyoutRef, '9000');
+    const flyoutZIndex = (Number(euiTheme.levels.modal) * 2).toString();
+    setFlyoutZIndex(flyoutRef, flyoutZIndex);
 
     const restore = setElementHighlight({
       target,
