@@ -79,7 +79,7 @@ describe('reindex API', () => {
       getReindexService: async () => {
         return new ReindexServiceWrapper({
           soClient: savedObjectsClientMock.create(),
-          credentialStore: {} as any,
+          credentialStore,
           clusterClient: elasticsearchServiceMock.createClusterClient(),
           logger: logMock,
           licensing: licensingMockInstance,
@@ -188,7 +188,7 @@ describe('reindex API', () => {
     });
   });
 
-  describe('POST /api/upgrade_assistant/reindex/{indexName}', () => {
+  describe('POST /api/upgrade_assistant/reindex', () => {
     it('creates a new reindexOp', async () => {
       mockReindexService.createReindexOperation.mockResolvedValueOnce({
         attributes: { indexName: 'theIndex' },
@@ -196,15 +196,20 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: '/api/upgrade_assistant/reindex',
       })(
         routeHandlerContextMock,
-        createRequestMock({ body: { indexName: 'theIndex' } }),
+        createRequestMock({ body: { indexName: 'theIndex', newIndexName: 'theIndexReindexed' } }),
         kibanaResponseFactory
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith('theIndex', undefined);
+      expect(mockReindexService.createReindexOperation).toHaveBeenCalledWith({
+        indexName: 'theIndex',
+        newIndexName: 'theIndexReindexed',
+        opts: undefined,
+        settings: undefined,
+      });
 
       // It returned the right results
       expect(resp.status).toEqual(200);
@@ -220,7 +225,7 @@ describe('reindex API', () => {
 
       await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: '/api/upgrade_assistant/reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -245,7 +250,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: '/api/upgrade_assistant/reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
@@ -268,7 +273,7 @@ describe('reindex API', () => {
 
       const resp = await routeDependencies.router.getHandler({
         method: 'post',
-        pathPattern: '/api/upgrade_assistant/reindex/{indexName}',
+        pathPattern: '/api/upgrade_assistant/reindex',
       })(
         routeHandlerContextMock,
         createRequestMock({
