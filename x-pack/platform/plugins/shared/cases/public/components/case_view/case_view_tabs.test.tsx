@@ -81,6 +81,7 @@ describe('CaseViewTabs', () => {
     expect(await screen.findByTestId('case-view-tab-title-activity')).toBeInTheDocument();
     expect(await screen.findByTestId('case-view-tab-title-alerts')).toBeInTheDocument();
     expect(await screen.findByTestId('case-view-tab-title-files')).toBeInTheDocument();
+    expect(await screen.findByTestId('case-view-tab-title-events')).toBeInTheDocument();
   });
 
   it('renders the activity tab by default', async () => {
@@ -117,6 +118,20 @@ describe('CaseViewTabs', () => {
     );
 
     expect(await screen.findByTestId('case-view-tab-title-files')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('shows the events tab as active', async () => {
+    renderWithTestingProviders(
+      <CaseViewTabs {...caseProps} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />,
+      {
+        wrapperProps: { license: basicLicense },
+      }
+    );
+
+    expect(await screen.findByTestId('case-view-tab-title-events')).toHaveAttribute(
       'aria-selected',
       'true'
     );
@@ -218,6 +233,22 @@ describe('CaseViewTabs', () => {
       expect(navigateToCaseViewMock).toHaveBeenCalledWith({
         detailName: caseData.id,
         tabId: CASE_VIEW_PAGE_TABS.FILES,
+      });
+    });
+  });
+
+  it('navigates to the events tab when the events tab is clicked', async () => {
+    const navigateToCaseViewMock = useCaseViewNavigationMock().navigateToCaseView;
+    renderWithTestingProviders(<CaseViewTabs {...caseProps} />, {
+      wrapperProps: { license: basicLicense },
+    });
+
+    await userEvent.click(await screen.findByTestId('case-view-tab-title-events'));
+
+    await waitFor(() => {
+      expect(navigateToCaseViewMock).toHaveBeenCalledWith({
+        detailName: caseData.id,
+        tabId: CASE_VIEW_PAGE_TABS.EVENTS,
       });
     });
   });
