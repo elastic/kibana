@@ -35,6 +35,9 @@ import { themeServiceMock } from '@kbn/core/public/mocks';
 const paletteService = chartPluginMock.createPaletteRegistry();
 const theme = themeServiceMock.createStartContract();
 
+const LEGACY_SECONDARY_PREFIX = 'legacySecondaryPrefix';
+const LEGACY_VALUES_TEXT_ALIGN = 'center';
+
 describe('metric visualization', () => {
   const visualization = getMetricVisualization({
     paletteService,
@@ -72,6 +75,8 @@ describe('metric visualization', () => {
       | 'trendlineTimeAccessor'
       | 'trendlineBreakdownByAccessor'
       | 'secondaryColor'
+      | 'secondaryPrefix'
+      | 'valuesTextAlign'
     >
   > = {
     layerId: 'first',
@@ -102,7 +107,10 @@ describe('metric visualization', () => {
   };
 
   const fullStateWTrend: Required<
-    Omit<MetricVisualizationState, 'secondaryTrend' | 'secondaryColor'>
+    Omit<
+      MetricVisualizationState,
+      'secondaryTrend' | 'secondaryColor' | 'secondaryPrefix' | 'valuesTextAlign'
+    >
   > = {
     ...fullState,
     ...trendlineProps,
@@ -120,6 +128,76 @@ describe('metric visualization', () => {
 
     test('returns persisted state', () => {
       expect(visualization.initialize(() => fullState.layerId, fullState)).toEqual(fullState);
+    });
+
+    test('migrates legacy state properties secondaryPrefix and valuesTextAlign', () => {
+      const { secondaryLabel, primaryAlign, secondaryAlign, ...restFullState } = fullState;
+      const stateWithLegacyProperties: MetricVisualizationState = {
+        ...restFullState,
+        secondaryPrefix: LEGACY_SECONDARY_PREFIX,
+        valuesTextAlign: LEGACY_VALUES_TEXT_ALIGN,
+      };
+      const result = visualization.initialize(
+        () => stateWithLegacyProperties.layerId,
+        stateWithLegacyProperties
+      );
+      expect(result).toEqual({
+        ...fullState,
+        secondaryLabel: LEGACY_SECONDARY_PREFIX,
+        primaryAlign: LEGACY_VALUES_TEXT_ALIGN,
+        secondaryAlign: LEGACY_VALUES_TEXT_ALIGN,
+      });
+    });
+
+    test('migrates legacy state property secondaryPrefix', () => {
+      const { secondaryLabel, ...restFullState } = fullState;
+      const stateWithLegacyProperties: MetricVisualizationState = {
+        ...restFullState,
+        secondaryPrefix: LEGACY_SECONDARY_PREFIX,
+      };
+      const result = visualization.initialize(
+        () => stateWithLegacyProperties.layerId,
+        stateWithLegacyProperties
+      );
+      expect(result).toEqual({
+        ...fullState,
+        secondaryLabel: LEGACY_SECONDARY_PREFIX,
+      });
+    });
+
+    test('migrates legacy state property valuesTextAlign', () => {
+      const { primaryAlign, secondaryAlign, ...restFullState } = fullState;
+      const stateWithLegacyProperties: MetricVisualizationState = {
+        ...restFullState,
+        valuesTextAlign: LEGACY_VALUES_TEXT_ALIGN,
+      };
+      const result = visualization.initialize(
+        () => stateWithLegacyProperties.layerId,
+        stateWithLegacyProperties
+      );
+      expect(result).toEqual({
+        ...fullState,
+        primaryAlign: LEGACY_VALUES_TEXT_ALIGN,
+        secondaryAlign: LEGACY_VALUES_TEXT_ALIGN,
+      });
+    });
+
+    test('does not overwrite new properties if already set', () => {
+      const stateWithBoth: MetricVisualizationState = {
+        ...fullState,
+        secondaryPrefix: LEGACY_SECONDARY_PREFIX,
+        secondaryLabel: 'secondaryLabel',
+        valuesTextAlign: LEGACY_VALUES_TEXT_ALIGN,
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
+      };
+      const result = visualization.initialize(() => stateWithBoth.layerId, stateWithBoth);
+      expect(result).toEqual({
+        ...fullState,
+        secondaryLabel: 'secondaryLabel',
+        primaryAlign: 'right',
+        secondaryAlign: 'right',
+      });
     });
   });
 

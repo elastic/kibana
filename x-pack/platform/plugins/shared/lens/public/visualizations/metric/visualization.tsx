@@ -350,6 +350,26 @@ const removeBreakdownByDimension = (state: MetricVisualizationState) => {
   delete state.maxCols;
 };
 
+const hasLegacyStateProperties = (state: MetricVisualizationState) => {
+  return (
+    typeof state.secondaryPrefix !== 'undefined' || typeof state.valuesTextAlign !== 'undefined'
+  );
+};
+
+const migrateLegacyStateIfNeeded = (state: MetricVisualizationState) => {
+  if (hasLegacyStateProperties(state)) {
+    const { secondaryPrefix, valuesTextAlign, ...restState } = state;
+    return {
+      ...restState,
+      secondaryLabel:
+        secondaryPrefix && !state.secondaryLabel ? secondaryPrefix : state.secondaryLabel,
+      primaryAlign: state.primaryAlign ?? valuesTextAlign,
+      secondaryAlign: state.secondaryAlign ?? valuesTextAlign,
+    };
+  }
+  return state;
+};
+
 export const getMetricVisualization = ({
   paletteService,
   theme,
@@ -400,14 +420,16 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    return (
-      state ?? {
+    if (!state) {
+      return {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      }
-    );
+      };
+    }
+    return migrateLegacyStateIfNeeded(state);
   },
+
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {

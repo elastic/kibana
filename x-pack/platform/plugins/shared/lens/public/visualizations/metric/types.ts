@@ -36,11 +36,13 @@ export interface MetricVisualizationState {
   // computed by collapsing all rows
   collapseFn?: CollapseFunction;
   subtitle?: string;
+  secondaryPrefix?: string; // legacy state property
   secondaryLabel?: string;
   secondaryTrend?: SecondaryTrend;
   progressDirection?: LayoutDirection;
   showBar?: boolean;
   titlesTextAlign?: MetricStyle['titlesTextAlign'];
+  valuesTextAlign?: 'left' | 'right' | 'center'; // legacy state property
   secondaryAlign?: MetricStyle['extraTextAlign'];
   primaryAlign?: MetricStyle['valueTextAlign'];
   iconAlign?: MetricStyle['iconAlign'];
