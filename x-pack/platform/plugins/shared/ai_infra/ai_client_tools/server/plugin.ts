@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { AIClientToolsBaseConfig } from './config';
-import {
+import type {
   AIClientToolsBaseSetupContract,
   AIClientToolsBaseStartContract,
   AIClientToolsBaseSetupDependencies,
@@ -16,6 +16,7 @@ import {
   InternalServices,
 } from './types';
 import { registerRoutes } from './routes';
+import { addToDashboardServerSideTool } from '../common/onechat_server_tool';
 
 export class AIClientToolsBasePlugin
   implements
@@ -34,8 +35,9 @@ export class AIClientToolsBasePlugin
   }
   setup(
     coreSetup: CoreSetup<AIClientToolsBaseStartDependencies, AIClientToolsBaseStartContract>,
-    { taskManager }: AIClientToolsBaseSetupDependencies
+    { taskManager, onechat }: AIClientToolsBaseSetupDependencies
   ): AIClientToolsBaseSetupContract {
+    onechat?.tools.register(addToDashboardServerSideTool);
     const getServices = () => {
       if (!this.internalServices) {
         throw new Error('getServices called before #start');
@@ -54,8 +56,12 @@ export class AIClientToolsBasePlugin
 
   start(
     core: CoreStart,
-    { licensing, taskManager }: AIClientToolsBaseStartDependencies
+    { licensing, taskManager, onechat }: AIClientToolsBaseStartDependencies
   ): AIClientToolsBaseStartContract {
+    // const tool = await onechat.tools.registry.get({ toolId: '.add_to_dashboard', request });
+
+    // // @TODO: remove
+    // console.log(`--@@server side registered onechat`, onechat);
     return {};
   }
 }

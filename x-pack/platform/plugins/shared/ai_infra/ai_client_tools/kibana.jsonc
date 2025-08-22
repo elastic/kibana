@@ -10,7 +10,7 @@
     "server": true,
     "browser": true,
     "configPath": ["xpack", "aiClientTools"],
-    "requiredPlugins": ["licensing", "inference"],
+    "requiredPlugins": ["licensing", "inference", "onechat"],
     "requiredBundles": ["data", "lens"],
     "optionalPlugins": [],
     "extraPublicDirs": []
