@@ -148,10 +148,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           .get(`${EXCEPTION_LIST_ITEM_URL}/_find?list_id=endpoint_list&namespace_type=agnostic`)
           .set('kbn-xsrf', 'true');
 
-        for (const exceptionListItem of (body as FoundExceptionListItemSchema).data) {
-          await supertest
-            .delete(`${EXCEPTION_LIST_ITEM_URL}?id=${exceptionListItem.id}&namespace_type=agnostic`)
-            .set('kbn-xsrf', 'true');
+        if (Array.isArray(body.data)) {
+          for (const exceptionListItem of (body as FoundExceptionListItemSchema).data) {
+            await supertest
+              .delete(
+                `${EXCEPTION_LIST_ITEM_URL}?id=${exceptionListItem.id}&namespace_type=agnostic`
+              )
+              .set('kbn-xsrf', 'true');
+          }
         }
       };
 
