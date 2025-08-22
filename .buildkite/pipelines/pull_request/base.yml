@@ -113,7 +113,7 @@ steps:
       - wait
 
       - command: .buildkite/scripts/steps/agents/kibana_healer.sh
-        if: step.outcome == "hard_failed"
+        if: "step.outcome == 'hard_failed'"
         label: Run Kibana healer
         key: kibana_healer
         agents:
