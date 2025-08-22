@@ -18,7 +18,8 @@ import type {
 } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { I18nStart } from '@kbn/core-i18n-browser';
-import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-common';
 import type {
   SearchResponseIncompleteWarning,
   SearchResponseWarning,

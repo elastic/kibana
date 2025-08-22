@@ -78,7 +78,8 @@
     "@kbn/ui-actions-browser",
     "@kbn/deeplinks-analytics",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/inspector-browser"
   ],
   "exclude": ["target/**/*"]
 }

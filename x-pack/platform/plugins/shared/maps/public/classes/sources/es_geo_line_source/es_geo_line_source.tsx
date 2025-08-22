@@ -12,7 +12,7 @@ import type { GeoJsonProperties } from 'geojson';
 import { i18n } from '@kbn/i18n';
 import { type Filter, buildPhraseFilter } from '@kbn/es-query';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import {
   EMPTY_FEATURE_COLLECTION,
   FIELD_ORIGIN,

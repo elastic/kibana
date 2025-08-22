@@ -32,7 +32,8 @@ import type {
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import { type Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-common';
 
 import type {
   AnalyticsServiceStart,

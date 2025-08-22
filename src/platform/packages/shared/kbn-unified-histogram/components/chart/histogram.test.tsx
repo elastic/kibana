@@ -18,7 +18,7 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import { createDefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { UnifiedHistogramInput$ } from '../../types';
 import { act } from 'react-dom/test-utils';
-import { RequestStatus } from '@kbn/inspector-plugin/public';
+import { RequestStatus } from '@kbn/inspector-common';
 import { getLensProps, useLensProps } from './hooks/use_lens_props';
 
 const getMockLensAttributes = async () => {

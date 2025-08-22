@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Adapters, InspectorViewDescription } from '@kbn/inspector-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-common';
 import { VegaAdapter } from './vega_adapter';
 import type { VegaDataInspectorProps } from './vega_data_inspector';
 

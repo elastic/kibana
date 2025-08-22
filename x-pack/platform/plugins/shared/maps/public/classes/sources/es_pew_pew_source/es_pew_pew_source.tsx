@@ -8,7 +8,7 @@
 import React from 'react';
 import turfBbox from '@turf/bbox';
 import { multiPoint } from '@turf/helpers';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { type Filter, buildExistsFilter } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';

@@ -18,7 +18,7 @@ import type {
   PersistableStateService,
   VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 import { Executor } from '../executor';
 import type { AnyExpressionRenderDefinition } from '../expression_renderers';

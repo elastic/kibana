@@ -6,7 +6,7 @@
  */
 
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type { HasInspectorAdapters } from '@kbn/inspector-plugin/public';
+import type { HasInspectorAdapters } from '@kbn/inspector-browser';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,

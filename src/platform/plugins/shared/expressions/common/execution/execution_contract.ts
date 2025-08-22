@@ -10,7 +10,7 @@
 import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { catchError } from 'rxjs';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Execution, ExecutionResult } from './execution';
 import type { ExpressionValueError } from '../expression_types/specs';
 import type { ExpressionAstExpression } from '../ast';

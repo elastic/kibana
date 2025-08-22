@@ -9,8 +9,8 @@ import { useCallback, useEffect, useState } from 'react';
 import type {
   Start as InspectorPublicPluginStart,
   InspectorSession,
-  RequestAdapter,
 } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-common';
 
 export const useInspector = ({
   inspect,
