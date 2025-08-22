@@ -6,20 +6,30 @@
  */
 
 import type { SuggestionType } from '@kbn/cases-plugin/public';
-import React from 'react';
-import { AttachmentFramework } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import { lazy } from 'react';
+import type { AttachmentFramework } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { SLOSuggestion } from '../../common/cases/suggestions';
+import type { LazyWithContextProviders } from '../utils/get_lazy_with_context_providers';
 
-const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
-  id: 'slo',
-  owner: 'observability',
-  children: React.lazy(() =>
+export const registerSloSuggestion = (
+  attachmentFramework: AttachmentFramework,
+  lazyWithContextProviders: LazyWithContextProviders
+) => {
+  const lazySuggestionComponent = lazy(() =>
     import('./suggestion_component').then((m) => ({
       default: m.SLOSuggestionChildren,
     }))
-  ),
-};
+  );
 
-export const registerSloSuggestion = (attachmentFramework: AttachmentFramework) => {
+  const SuggestionWithProviders = lazyWithContextProviders(lazySuggestionComponent);
+  const LazySuggestionWithProviders = lazy(() =>
+    Promise.resolve({ default: SuggestionWithProviders })
+  );
+
+  const sloSuggestionDefinition: SuggestionType<SLOSuggestion> = {
+    id: 'slo',
+    owner: 'observability',
+    children: LazySuggestionWithProviders,
+  };
   attachmentFramework.registerSuggestion(sloSuggestionDefinition);
 };

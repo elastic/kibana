@@ -16,8 +16,36 @@ import { sloPaths } from '../../../common';
 import type { SLOSuggestion } from '../../../common/cases/suggestions';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import type { EsSummaryDocument } from '../../services/summary_transform_generator/helpers/create_temp_summary';
-import { getFlattenedGroupings } from '../../services/utils';
-import { toHighPrecision } from '../../utils/number';
+
+const buildPayload = (src: EsSummaryDocument): SLOSuggestion => ({
+  id: src.slo.id,
+  name: src.slo.name,
+  instanceId: src.slo.instanceId,
+  summary: { status: src.status },
+});
+
+const buildItem = (svcName: string, payload: SLOSuggestion): AttachmentItem<SLOSuggestion> => ({
+  description: `SLO "${payload.name}" is ${payload.summary.status} for the service "${svcName}"`,
+  payload,
+  attachment: {
+    type: AttachmentType.persistableState,
+    persistableStateAttachmentTypeId: '.page',
+    persistableStateAttachmentState: {
+      type: 'slo_history',
+      url: {
+        pathAndQuery: sloPaths.sloDetailsHistory({
+          id: payload.id,
+          instanceId: payload.instanceId,
+        }),
+        label: payload.name,
+        actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
+          defaultMessage: 'Go to SLO history',
+        }),
+        iconType: 'metricbeatApp',
+      },
+    },
+  },
+});
 
 export function getSLOByServiceName(
   coreStart: CoreStart,
@@ -93,94 +121,22 @@ export function getSLOByServiceName(
             },
           });
 
-          const itemsByService = new Map<string, AttachmentItem<SLOSuggestion>[]>();
+          const itemsByService = results.hits.hits.reduce<
+            Record<string, AttachmentItem<SLOSuggestion>[]>
+          >((acc, { _source: src }) => {
+            if (!src) return acc;
+            const svcName = (src.slo?.groupings?.service as { name: string }).name;
+            if (!svcName) return acc;
 
-          // TODO: remove all casting and any
-          for (const doc of results.hits.hits) {
-            const src = doc._source;
-            if (!src) continue;
-            const svcName = (src.slo.groupings as { service: { name: string } }).service.name;
+            const payload = buildPayload(src);
+            const item = buildItem(svcName, payload);
 
-            const payload: SLOSuggestion = {
-              id: src.slo.id,
-              name: src.slo.name,
-              description: src.slo.description,
-              indicator: src.slo.indicator as any,
-              timeWindow: src.slo.timeWindow,
-              budgetingMethod: src.slo.budgetingMethod,
-              objective: {
-                target: src.slo.objective.target,
-                timesliceTarget: src.slo.objective.timesliceTarget ?? undefined,
-                timesliceWindow: src.slo.objective.timesliceWindow ?? undefined,
-              },
-              settings: {
-                syncDelay: '1m',
-                frequency: '1m',
-                preventInitialBackfill: false,
-              },
-              revision: src.slo.revision,
-              enabled: true,
-              tags: src.slo.tags,
-              createdAt: src.slo.createdAt ?? '2024-01-01T00:00:00.000Z',
-              updatedAt: src.slo.updatedAt ?? '2024-01-01T00:00:00.000Z',
-              groupBy: src.slo.groupBy,
-              version: 1,
-              ...(src.slo.createdBy ? { createdBy: src.slo.createdBy } : {}),
-              ...(src.slo.updatedBy ? { updatedBy: src.slo.updatedBy } : {}),
-              instanceId: src.slo.instanceId,
-              groupings: getFlattenedGroupings({
-                groupings: src.slo.groupings,
-                groupBy: src.slo.groupBy,
-              }),
-              summary: {
-                status: src.status,
-                sliValue: toHighPrecision(src.sliValue),
-                errorBudget: {
-                  initial: toHighPrecision(src.errorBudgetInitial),
-                  consumed: toHighPrecision(src.errorBudgetConsumed),
-                  remaining: toHighPrecision(src.errorBudgetRemaining),
-                  isEstimated: src.errorBudgetEstimated,
-                },
-                fiveMinuteBurnRate: toHighPrecision(src.fiveMinuteBurnRate?.value ?? 0),
-                oneHourBurnRate: toHighPrecision(src.oneHourBurnRate?.value ?? 0),
-                oneDayBurnRate: toHighPrecision(src.oneDayBurnRate?.value ?? 0),
-                summaryUpdatedAt: src.summaryUpdatedAt,
-              },
-            };
+            (acc[svcName] ??= []).push(item);
+            return acc;
+          }, {});
 
-            const item: AttachmentItem<SLOSuggestion> = {
-              description: `SLO "${payload.name}" is ${payload.summary.status} for the service "${svcName}"`,
-              payload,
-              attachment: {
-                type: AttachmentType.persistableState,
-                persistableStateAttachmentTypeId: '.page',
-                persistableStateAttachmentState: {
-                  type: 'slo_history',
-                  url: {
-                    pathAndQuery: sloPaths.sloDetailsHistory({
-                      id: payload.id,
-                      instanceId: payload.instanceId,
-                    }),
-                    label: payload.name,
-                    actionLabel: i18n.translate('xpack.slo.addToCase.caseAttachmentLabel', {
-                      defaultMessage: 'Go to SLO history',
-                    }),
-                    iconType: 'metricbeatApp',
-                  },
-                },
-              },
-            };
-
-            const existing = itemsByService.get(svcName);
-            if (existing) {
-              existing.push(item);
-            } else {
-              itemsByService.set(svcName, [item]);
-            }
-          }
-
-          const suggestions = Array.from(itemsByService.entries()).flatMap(([svcName, data]) =>
-            data.map((item) => ({
+          const suggestions = Object.values(itemsByService).flatMap((items) =>
+            items.map((item) => ({
               id: `${item.payload.id}-${item.payload.instanceId}`,
               componentId: 'slo',
               data: [item],

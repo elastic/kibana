@@ -105,7 +105,7 @@ export class SLOPlugin
     // Register an application into the side navigation menu
     core.application.register(app);
 
-    const registerRules = async () => {
+    const registerRulesAndSuggestions = async () => {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const lazyWithContextProviders = getLazyWithContextProviders({
         core: coreStart,
@@ -123,8 +123,12 @@ export class SLOPlugin
         plugins.observability.observabilityRuleTypeRegistry,
         lazyWithContextProviders
       );
+
+      if (plugins.cases?.attachmentFramework) {
+        registerSloSuggestion(plugins.cases.attachmentFramework, lazyWithContextProviders);
+      }
     };
-    registerRules();
+    registerRulesAndSuggestions();
 
     const registerEmbeddables = async () => {
       const licensing = plugins.licensing;
@@ -191,10 +195,6 @@ export class SLOPlugin
       }
     };
     registerEmbeddables();
-
-    if (plugins.cases?.attachmentFramework) {
-      registerSloSuggestion(plugins.cases.attachmentFramework);
-    }
 
     return {
       sloDetailsLocator,

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-
-export type SLOSuggestion = SLOWithSummaryResponse;
+export interface SLOSuggestion {
+  id: string;
+  instanceId: string;
+  name: string;
+  summary: { status: string };
+}

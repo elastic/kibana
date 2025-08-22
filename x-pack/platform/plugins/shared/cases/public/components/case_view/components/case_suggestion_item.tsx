@@ -67,7 +67,9 @@ export const CaseSuggestionItem = ({
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiText size="s">{suggestion.description}</EuiText>
-        <suggestion.injectedComponent suggestion={suggestion} />
+        <div style={{ height: '100%', display: 'flex' }}>
+          <suggestion.injectedComponent suggestion={suggestion} />
+        </div>
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" alignItems="center">
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty size="s" color="primary" onClick={onDismissSuggestion}>
