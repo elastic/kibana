@@ -111,7 +111,7 @@ steps:
           diskSizeGb: 85
           timeout_in_minutes: 2
       - command: exit 0
-        key: build_api_docs
+        key: build_2
         agents:
           machineType: n2-standard-2
           preemptible: true
