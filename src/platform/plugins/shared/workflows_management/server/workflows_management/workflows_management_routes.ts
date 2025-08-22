@@ -43,7 +43,8 @@ export function defineRoutes(
     },
     async (context, request, response) => {
       try {
-        const stats = await api.getWorkflowStats();
+        const spaceId = spaces.getSpaceId(request);
+        const stats = await api.getWorkflowStats(spaceId);
 
         return response.ok({ body: stats || {} });
       } catch (error) {
@@ -76,7 +77,8 @@ export function defineRoutes(
     async (context, request, response) => {
       try {
         const { fields } = request.query as { fields: string[] };
-        const aggs = await api.getWorkflowAggs(fields);
+        const spaceId = spaces.getSpaceId(request);
+        const aggs = await api.getWorkflowAggs(fields, spaceId);
 
         return response.ok({ body: aggs || {} });
       } catch (error) {
