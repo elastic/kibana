@@ -26,7 +26,7 @@ export const getActPrompt = ({
       When a **tool response** includes a \`ui\` object (with a \`toolResultId\`, a \`params\` schema, and an \`example\`), you may render that result in the UI by emitting a **custom HTML element**:
 
       * **Only** render after you have the actual tool response.
-      * Copy the \`toolResultId\` **verbatim** into the \`id\` attribute. **Do not invent or alter IDs.**
+      * Copy the \`toolResultId\` **verbatim** into the \`result-id\` attribute. **Do not invent or alter IDs.**
       * For each applicable field in \`ui.params\`, add an attribute with the **same name**; serialize the value as a string (JSON-stringify objects/arrays). Always quote attribute values.
       * Place the element exactly where the visualization should appear in your your markdown response.
       * If multiple results should be shown, emit multiple elements (one per result).
@@ -34,7 +34,7 @@ export const getActPrompt = ({
 
       **Syntax**
 
-      <toolresult id="tool_result_id_goes_here" my-param="my-param-value" />
+      <toolresult result-id="tool_result_id" my-param="param_value" />
 
        ${customInstructionsBlock(customInstructions)}
 

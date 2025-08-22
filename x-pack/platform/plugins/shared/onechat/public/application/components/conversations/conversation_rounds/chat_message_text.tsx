@@ -7,6 +7,7 @@
 
 import rehypeRaw from 'rehype-raw';
 import { defaultSchema } from 'hast-util-sanitize';
+import rehypeSanitize from 'rehype-sanitize';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
@@ -117,9 +118,12 @@ const esqlLanguagePlugin = () => {
   };
 };
 
-const customSanitizationSchema = cloneDeep(defaultSchema);
-customSanitizationSchema.tagNames!.push('toolresult');
-customSanitizationSchema.attributes!.toolresult = ['id', 'chart-type'];
+const customSchema = cloneDeep(defaultSchema);
+customSchema.tagNames = [...(defaultSchema.tagNames ?? []), 'toolresult'];
+customSchema.attributes = {
+  ...defaultSchema.attributes,
+  toolresult: ['result-id', 'chart-type'],
+};
 
 /**
  * Component handling markdown support to the assistant's responses.
@@ -141,8 +145,9 @@ export function ChatMessageText({ content }: Props) {
     const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
     const processingPlugins = [
-      [remarkToRehypePlugin, { ...remarkToRehypeOptions, sanitize: customSanitizationSchema }],
-      [rehypeRaw], // inject rehypeRaw
+      [remarkToRehypePlugin, { ...remarkToRehypeOptions, allowDangerousHtml: true }], // enabling custom html elements. Must use `rehypeSanitize` to sanitize html afterwards
+      [rehypeRaw], // use rehypeRaw to parse raw HTML strings (necessary for rendering `<toolresult />`)
+      [rehypeSanitize, customSchema], // sanitize after parsing raw HTML (important!)
       [rehypeToReactPlugin, rehypeToReactOptions],
     ];
 
@@ -192,9 +197,9 @@ export function ChatMessageText({ content }: Props) {
         );
       },
       toolresult: (props) => {
-        const { id, 'chart-type': chartType } = props;
+        const { 'result-id': resultId, 'chart-type': chartType } = props;
 
-        if (!id) {
+        if (!resultId) {
           return <p>Visualization requires a tool result ID.</p>;
         }
 
@@ -202,12 +207,12 @@ export function ChatMessageText({ content }: Props) {
           .flatMap((r) => r.steps || [])
           .filter((s) => s.type === 'tool_call')
           .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
-          .find((r) => r.ui?.toolResultId === id && r.type === 'tabular_data') as
+          .find((r) => r.ui?.toolResultId === resultId && r.type === 'tabular_data') as
           | TabularDataResult
           | undefined;
 
         if (!toolResult) {
-          return <p>Unable to find visualization for tool result ID: {id}</p>;
+          return <p>Unable to find visualization for tool result ID: {resultId}</p>;
         }
 
         const { esqlQuery, esqlResult } = toolResult.data;

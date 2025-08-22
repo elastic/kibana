@@ -48,7 +48,7 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
                   required: false,
                 },
               },
-              example: `<toolresult id="${toolResultId}" chart-type="${ChartType.Bar}" />`,
+              example: `<toolresult result-id="${toolResultId}" chart-type="${ChartType.Bar}" />`,
             },
           },
         ],
