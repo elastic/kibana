@@ -4,7 +4,7 @@ set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
 
-echo "--- Running Kibana healer"
+echo "--- Running Kibana Healer"
 
 echo "Configuring Gemini CLI"
 GEMINI_API_KEY="$(vault_get kibana-healer gemini)"
