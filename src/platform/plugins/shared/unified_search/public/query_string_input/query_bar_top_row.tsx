@@ -12,6 +12,7 @@ import classNames from 'classnames';
 import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
 import type { Filter, TimeRange, Query, AggregateQuery } from '@kbn/es-query';
@@ -25,7 +26,7 @@ import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
-import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
+import type { EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -37,7 +38,9 @@ import {
   EuiButton,
   EuiButtonIcon,
   useEuiTheme,
-  EuiFieldSearch,
+  EuiLink,
+  EuiFieldText,
+  EuiPanel,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getQueryLog } from '@kbn/data-plugin/public';
@@ -254,6 +257,11 @@ export const QueryBarTopRow = React.memo(
     const isMobile = useIsWithinBreakpoints(['xs', 's']);
     const [isXXLarge, setIsXXLarge] = useState<boolean>(false);
     const [nlToesqlIsLoading, setNlToesqlIsLoading] = useState<boolean>(false);
+    const [isNLToESQLModalVisible, setIsNLToESQLModalVisible] = useState(false);
+    const [nlToesqlInputValue, setNlToesqlInputValue] = useState<string>('');
+    const [nlToesqlAbortController, setNlToesqlAbortController] = useState<AbortController | null>(
+      null
+    );
     const { onTextLangQueryChange } = props;
     const submitButtonStyle: QueryBarTopRowProps['submitButtonStyle'] =
       props.submitButtonStyle ?? 'auto';
@@ -373,24 +381,57 @@ export const QueryBarTopRow = React.memo(
       async (value: string) => {
         setNlToesqlIsLoading(true);
 
-        const message: { content: string } = await http.post('/internal/esql/nl_to_esql', {
-          body: JSON.stringify({ query: value }),
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
-        if (message && 'content' in message) {
-          const query = extractQueryFromLLMMessage(message.content);
-          if (query) {
-            onTextLangQueryChange({
-              esql: query,
-            });
+        const abortController = new AbortController();
+        setNlToesqlAbortController(abortController);
+
+        try {
+          const message: { content: string } = await http.post('/internal/esql/nl_to_esql', {
+            body: JSON.stringify({ query: value }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            signal: abortController.signal,
+          });
+          if (message && 'content' in message) {
+            const query = extractQueryFromLLMMessage(message.content);
+            if (query) {
+              onTextLangQueryChange({
+                esql: query,
+              });
+            }
           }
+          setNlToesqlInputValue('');
+          setIsNLToESQLModalVisible(false);
+        } catch (error) {
+          // Don't show error if request was cancelled
+          if (error.name !== 'AbortError') {
+            // Request failed for reasons other than cancellation
+            // Error handling could be added here if needed
+          }
+        } finally {
+          setNlToesqlIsLoading(false);
+          setNlToesqlAbortController(null);
         }
-        setNlToesqlIsLoading(false);
       },
       [http, onTextLangQueryChange]
     );
+
+    const cancelNLToESQLRequest = useCallback(() => {
+      if (nlToesqlAbortController) {
+        nlToesqlAbortController.abort();
+        setNlToesqlAbortController(null);
+        setNlToesqlIsLoading(false);
+      }
+    }, [nlToesqlAbortController]);
+
+    // Cleanup: cancel any pending request when component unmounts
+    useEffect(() => {
+      return () => {
+        if (nlToesqlAbortController) {
+          nlToesqlAbortController.abort();
+        }
+      };
+    }, [nlToesqlAbortController]);
 
     const onClickSubmitButton = useCallback(
       (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -861,6 +902,7 @@ export const QueryBarTopRow = React.memo(
                   : 0};
               `}
               justifyContent={shouldShowDatePickerAsBadge() ? 'flexStart' : 'flexEnd'}
+              alignItems="center"
             >
               {props.dataViewPickerOverride || renderDataViewsPicker()}
               {Boolean(isQueryLangSelected) && (
@@ -875,31 +917,71 @@ export const QueryBarTopRow = React.memo(
                   adHocDataview={props.indexPatterns?.[0]}
                 />
               )}
-
-              {Boolean(props.isNLToESQLConversionEnabled) && (
-                <div
-                  css={css`
-                    width: 500px;
-                  `}
-                >
-                  <EuiFieldSearch
-                    placeholder="Describe your data in plain English and get an ES|QL query..."
-                    onSearch={onNLToESQLHandler}
-                    isClearable={true}
-                    compressed
-                    isLoading={nlToesqlIsLoading}
-                    fullWidth
-                  />
-                </div>
-              )}
-
               {renderQueryInput()}
               {props.renderQueryInputAppend?.()}
               {shouldShowDatePickerAsBadge() && props.filterBar}
+              {Boolean(props.isNLToESQLConversionEnabled) &&
+                isQueryLangSelected &&
+                props.query &&
+                isOfAggregateQueryType(props.query) && (
+                  <EuiLink onClick={() => setIsNLToESQLModalVisible(true)}>
+                    <AssistantBeacon size="m" backgroundColor="emptyShade" />
+                  </EuiLink>
+                )}
               {renderUpdateButton()}
             </EuiFlexGroup>
             {!shouldShowDatePickerAsBadge() && props.filterBar}
             {renderTextLangEditor()}
+            {isNLToESQLModalVisible && (
+              <EuiPanel
+                aria-label="Natural Language to ESQL"
+                css={css`
+                  position: absolute;
+                  z-index: 1000;
+                  top: 90%;
+                  right: 0;
+                  padding: ${euiTheme.size.xs};
+                  max-width: 500px;
+                  left: 50%;
+                  transform: translate(-50%, -90%);
+                `}
+                onKeyDown={(e: React.KeyboardEvent) => {
+                  if (e.key === 'Enter' && !nlToesqlIsLoading && nlToesqlInputValue) {
+                    onNLToESQLHandler(nlToesqlInputValue);
+                  }
+
+                  if (e.key === 'Escape') {
+                    cancelNLToESQLRequest();
+                    setNlToesqlInputValue('');
+                    setIsNLToESQLModalVisible(false);
+                  }
+                }}
+                tabIndex={0}
+                role="button"
+              >
+                <EuiFieldText
+                  placeholder="Ask about your data in plain English..."
+                  compressed
+                  isLoading={nlToesqlIsLoading}
+                  fullWidth
+                  value={nlToesqlInputValue}
+                  onChange={(e) => setNlToesqlInputValue(e.target.value)}
+                  append={
+                    <EuiButtonIcon
+                      iconType={!nlToesqlIsLoading ? 'kqlFunction' : 'stopFilled'}
+                      onClick={() => {
+                        if (nlToesqlIsLoading) {
+                          cancelNLToESQLRequest();
+                        } else {
+                          onNLToESQLHandler(nlToesqlInputValue);
+                        }
+                      }}
+                      color="primary"
+                    />
+                  }
+                />
+              </EuiPanel>
+            )}
           </>
         )}
       </>
