@@ -12,7 +12,12 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 
 const searchSchema = z.object({
   query: z.string().describe('A natural language query expressing the search request'),
-  index: z.string().describe('The elasticsearch index to search against.'),
+  index: z
+    .string()
+    .optional()
+    .describe(
+      '(optional) Index to search against. If not provided, will automatically select the best index to use based on the query.'
+    ),
 });
 
 export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
@@ -30,6 +35,12 @@ export const searchTool = (): BuiltinToolDefinition<typeof searchSchema> => {
                  - "list all products where the category is 'electronics'"
                  - "show me the last 5 documents from that index"
                  - "show me the sales over the last year break down by month"
+
+                 Note:
+                 - The 'index' parameter can be used to specify which index to search against.
+                   If not provided, the tool will use the index explorer to find the best index to use.
+                 - It is perfectly fine not to not specify the 'index' parameter. It should only be specified when you already
+                   know about the index and fields you want to search on, e.g. if the user explicitly specified it.
     `,
     schema: searchSchema,
     handler: async ({ query: nlQuery, index }, { esClient, modelProvider }) => {

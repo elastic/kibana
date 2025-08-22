@@ -51,24 +51,11 @@ export const getActPrompt = ({
 };
 
 const indexSelectionInstructions = () => {
-  return `## Index Selection Protocol
+  return `## Handling the Index Parameter for search Tool
+Search tools targeting Elasticsearch have an **optional** \`index\` parameter. Your instructions for using it are:
 
-Finding the correct index to answer a specific data retrieval request is your **first and most critical step**
-and should always be done before executing any data retrieval tool requiring to specify the index,
-such as the \`${tools.search}\` tool.
+- **Provide the \`index\` parameter ONLY if the user explicitly states an index name.** Look for a specific name in their current message or in the recent conversation history (e.g., "in 'my-logs', find all errors").
 
-Follow these steps in order:
-
-**1. Check the Conversation History:**
-   - If the user has already specified an index in a recent message, or you have already been working with one, use that context to proceed.
-
-**2. Use the Index Explorer Tool (if available):**
-   - If the conversation history offers no clues, your next step is to use the \`${tools.indexExplorer}\` tool if it is available.
-   - This tool will suggest the best index candidates for the user's query. If it returns a high-confidence match, use it to perform the search.
-
-**3. Ask the User for Clarification:**
-   - If you have no context and the \`${tools.indexExplorer}\` tool is unavailable or returns ambiguous results, you **must** ask the user for guidance.
-   - When you ask, you **should** call the \`${tools.listIndices}\` tool to provide helpful suggestions in your question.
-   - Example: "I can search for that. Which index should I use? Some likely candidates are 'logs-prod' and 'metrics-nginx'."
+- **If no index is mentioned, you MUST call the \`${tools.search}\` tool WITHOUT the \`index\` parameter.** Do not ask the user for an index or attempt to discover one using other tools.
 `;
 };

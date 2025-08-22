@@ -19,7 +19,7 @@ export const runSearchTool = async ({
   esClient,
 }: {
   nlQuery: string;
-  index: string;
+  index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
 }): Promise<ToolResult[]> => {
