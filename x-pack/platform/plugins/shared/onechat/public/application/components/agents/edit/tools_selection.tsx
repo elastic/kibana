@@ -6,7 +6,12 @@
  */
 
 import React, { useMemo, useCallback, useState, useEffect } from 'react';
-import type { EuiSearchBarOnChangeArgs, EuiSearchBarProps, Search } from '@elastic/eui';
+import type {
+  EuiSearchBarOnChangeArgs,
+  EuiSearchBarProps,
+  Search,
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiSearchBar,
@@ -24,9 +29,14 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { countBy } from 'lodash';
 import type { ToolSelection, ToolDefinition, ToolType } from '@kbn/onechat-common';
-import { ToolType as ToolTypeEnum } from '@kbn/onechat-common';
+import {
+  ToolType as ToolTypeEnum,
+  filterToolsBySelection,
+  activeToolsCountWarningThreshold,
+} from '@kbn/onechat-common';
 import {
   toggleTypeSelection,
   toggleToolSelection,
@@ -47,8 +57,6 @@ interface ToolsSelectionProps {
   disabled?: boolean;
   showActiveOnly?: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
-  enableSearch?: boolean;
-  enableFiltering?: boolean;
   showGroupedView?: boolean;
   onShowGroupedViewChange?: (showGroupedView: boolean) => void;
 }
@@ -64,6 +72,149 @@ const toolTypeDisplays = {
   },
 };
 
+interface ControlsSectionProps {
+  searchConfig: Search;
+  showGroupedView: boolean;
+  onShowGroupedViewChange?: (showGroupedView: boolean) => void;
+  showActiveOnly: boolean;
+  onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
+  disabled: boolean;
+}
+
+const ControlsSection: React.FC<ControlsSectionProps> = ({
+  searchConfig,
+  showGroupedView,
+  onShowGroupedViewChange,
+  showActiveOnly,
+  onShowActiveOnlyChange,
+  disabled,
+}) => (
+  <EuiFlexGroup alignItems="center" gutterSize="m">
+    {Object.keys(searchConfig).length > 0 && (
+      <EuiFlexItem>
+        <EuiSearchBar {...(searchConfig as EuiSearchBarProps)} />
+      </EuiFlexItem>
+    )}
+    {onShowGroupedViewChange && (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('xpack.onechat.tools.groupByType', {
+                defaultMessage: 'Group by type',
+              })}
+              checked={showGroupedView}
+              onChange={(e) => onShowGroupedViewChange(e.target.checked)}
+              disabled={disabled}
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    )}
+    {onShowActiveOnlyChange && (
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup alignItems="center" gutterSize="s">
+          <EuiFlexItem grow={false}>
+            <EuiSwitch
+              label={i18n.translate('xpack.onechat.tools.showActiveOnly', {
+                defaultMessage: 'Show active only',
+              })}
+              checked={showActiveOnly}
+              onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
+              disabled={disabled}
+              compressed
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    )}
+  </EuiFlexGroup>
+);
+
+interface PaginationHeaderProps {
+  pageIndex: number;
+  pageSize: number;
+  totalItems: number;
+  filteredItems: number;
+}
+
+const PaginationHeader: React.FC<PaginationHeaderProps> = ({
+  pageIndex,
+  pageSize,
+  totalItems,
+  filteredItems,
+}) => {
+  return (
+    <EuiFlexGroup justifyContent="flexStart">
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.onechat.tools.toolsSelectionSummary"
+          defaultMessage="Showing {start}-{end} of {total} {tools}"
+          values={{
+            start: <strong>{Math.min(pageIndex * pageSize + 1, filteredItems)}</strong>,
+            end: <strong>{Math.min((pageIndex + 1) * pageSize, filteredItems)}</strong>,
+            total: totalItems,
+            tools: <strong>{labels.tools.toolsLabel}</strong>,
+          }}
+        />
+      </EuiText>
+    </EuiFlexGroup>
+  );
+};
+
+const createCheckboxColumn = (
+  selectedTools: ToolSelection[],
+  onToggleTool: (toolId: string, toolType: ToolType) => void,
+  disabled: boolean,
+  toolType?: ToolType
+) => ({
+  width: '40px',
+  render: (tool: ToolDefinition) => (
+    <EuiCheckbox
+      id={`tool-${tool.id}`}
+      checked={isToolSelected(tool, selectedTools)}
+      onChange={() => onToggleTool(tool.id, toolType || tool.type)}
+      disabled={disabled}
+    />
+  ),
+});
+
+const createToolDetailsColumn = (euiTheme: any, includeType: boolean = true) => ({
+  field: 'id',
+  name: labels.tools.toolIdLabel,
+  sortable: includeType,
+  width: includeType ? '60%' : undefined,
+  render: (_: any, tool: ToolDefinition) => (
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiText
+        size="s"
+        css={css`
+          font-weight: ${euiTheme.font.weight.semiBold};
+        `}
+      >
+        {tool.id}
+      </EuiText>
+      <EuiText size="s" color="subdued">
+        {truncateAtNewline(tool.description)}
+      </EuiText>
+    </EuiFlexGroup>
+  ),
+});
+
+const createTypeColumn = () => ({
+  field: 'type',
+  name: labels.tools.typeLabel,
+  width: '80px',
+  render: (type: string) => <EuiText size="s">{toolTypeDisplays[type].label}</EuiText>,
+});
+
+const createTagsColumn = () => ({
+  field: 'tags',
+  name: labels.tools.tagsLabel,
+  render: (tags: string[]) => <OnechatToolTags tags={tags} />,
+});
+
 export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   tools,
   toolsLoading,
@@ -72,14 +223,15 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   disabled = false,
   showActiveOnly = false,
   onShowActiveOnlyChange,
-  enableSearch = true,
-  enableFiltering = true,
   showGroupedView = true,
   onShowGroupedViewChange,
 }) => {
   const { euiTheme } = useEuiTheme();
   const [searchQuery, setSearchQuery] = useState('');
   const [filteredTools, setFilteredTools] = useState<ToolDefinition[]>(tools);
+  const [pageIndex, setPageIndex] = useState(0);
+
+  const pageSize = 10;
 
   const displayTools = useMemo(() => {
     let result = tools;
@@ -94,6 +246,10 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
   useEffect(() => {
     setFilteredTools(displayTools);
   }, [displayTools]);
+
+  useEffect(() => {
+    setPageIndex(0);
+  }, [filteredTools]);
 
   const toolsByType = useMemo(() => {
     const grouped: Partial<Record<ToolType, ToolDefinition[]>> = {};
@@ -115,63 +271,49 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     return Array.from(tagsSet);
   }, [displayTools]);
 
-  const searchConfig: Search = useMemo(() => {
-    if (!enableSearch && !enableFiltering) return {};
+  const activeToolsCount = useMemo(() => {
+    return filterToolsBySelection(tools, selectedTools).length;
+  }, [tools, selectedTools]);
 
+  const searchConfig: Search = useMemo(() => {
     const matchesByType = countBy(displayTools, 'type') as Record<ToolType, number>;
     const matchesByTag = countBy(displayTools.flatMap((tool) => tool.tags));
 
     const config: EuiSearchBarProps = {
-      box: enableSearch
-        ? {
-            incremental: true,
-            placeholder: labels.tools.searchToolsPlaceholder,
-          }
-        : undefined,
-      filters: enableFiltering
-        ? [
-            {
-              type: 'field_value_selection',
-              field: 'type',
-              name: labels.tools.typeFilter,
-              multiSelect: false,
-              options: [
-                {
-                  value: ToolTypeEnum.esql,
-                  name: labels.tools.esqlLabel,
-                  view: (
-                    <ToolFilterOption
-                      name={labels.tools.esqlLabel}
-                      matches={matchesByType[ToolTypeEnum.esql] ?? 0}
-                    />
-                  ),
-                },
-                {
-                  value: ToolTypeEnum.builtin,
-                  name: labels.tools.builtinLabel,
-                  view: (
-                    <ToolFilterOption
-                      name={labels.tools.builtinLabel}
-                      matches={matchesByType[ToolTypeEnum.builtin] ?? 0}
-                    />
-                  ),
-                },
-              ],
-            },
-            {
-              type: 'field_value_selection',
-              field: 'tags',
-              name: labels.tools.tagsFilter,
-              multiSelect: 'or',
-              options: allTags.map((tag) => ({
-                value: tag,
-                name: tag,
-                view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
-              })),
-              searchThreshold: 1,
-            },
-          ]
-        : [],
+      box: {
+        incremental: true,
+        placeholder: labels.tools.searchToolsPlaceholder,
+      },
+      filters: [
+        {
+          type: 'field_value_selection',
+          field: 'type',
+          name: labels.tools.typeFilter,
+          multiSelect: true,
+          options: Object.entries(toolTypeDisplays).map(([type, display]) => ({
+            value: type as ToolType,
+            name: display.label,
+            view: (
+              <ToolFilterOption
+                name={display.label}
+                matches={matchesByType[type as ToolType] ?? 0}
+              />
+            ),
+          })),
+        },
+        {
+          type: 'field_value_selection',
+          field: 'tags',
+          name: labels.tools.tagsFilter,
+          multiSelect: 'or',
+          options: allTags.map((tag) => ({
+            value: tag,
+            name: tag,
+            view: <ToolFilterOption name={tag} matches={matchesByTag[tag] ?? 0} />,
+          })),
+          searchThreshold: 1,
+        },
+      ],
       onChange: ({ query, queryText, error: searchError }: EuiSearchBarOnChangeArgs) => {
         if (searchError) {
           return;
@@ -190,7 +332,7 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     };
 
     return config;
-  }, [enableSearch, enableFiltering, displayTools, allTags, searchQuery]);
+  }, [displayTools, allTags, searchQuery]);
 
   const handleToggleTypeTools = useCallback(
     (type: ToolType) => {
@@ -210,273 +352,148 @@ export const ToolsSelection: React.FC<ToolsSelectionProps> = ({
     [selectedTools, onToolsChange, toolsByType]
   );
 
+  const handleTableChange = useCallback(
+    ({ page: { index } }: CriteriaWithPagination<ToolDefinition>) => {
+      setPageIndex(index);
+    },
+    []
+  );
+
+  const flatTableColumns = useMemo(
+    () => [
+      createCheckboxColumn(selectedTools, handleToggleTool, disabled),
+      createToolDetailsColumn(euiTheme, true),
+      createTypeColumn(),
+      createTagsColumn(),
+    ],
+    [selectedTools, handleToggleTool, disabled, euiTheme]
+  );
+
+  const groupedTableColumns = useMemo(
+    () => [
+      createCheckboxColumn(selectedTools, handleToggleTool, disabled),
+      createToolDetailsColumn(euiTheme, false),
+      createTagsColumn(),
+    ],
+    [selectedTools, handleToggleTool, disabled, euiTheme]
+  );
+
   if (toolsLoading) {
     return <EuiLoadingSpinner size="l" />;
   }
 
-  if (!showGroupedView) {
-    const columns = [
-      {
-        width: '40px',
-        render: (tool: ToolDefinition) => (
-          <EuiCheckbox
-            id={`tool-${tool.id}`}
-            checked={isToolSelected(tool, selectedTools)}
-            onChange={() => handleToggleTool(tool.id, tool.type)}
-            disabled={disabled}
-          />
-        ),
-      },
-      {
-        field: 'id',
-        name: labels.tools.toolIdLabel,
-        sortable: true,
-        width: '60%',
-        render: (_, tool: ToolDefinition) => (
-          <EuiFlexGroup direction="column" gutterSize="xs">
-            <EuiText
-              size="s"
-              css={css`
-                font-weight: ${euiTheme.font.weight.semiBold};
-              `}
-            >
-              {tool.id}
-            </EuiText>
-            <EuiText size="s" color="subdued">
-              {truncateAtNewline(tool.description)}
-            </EuiText>
-          </EuiFlexGroup>
-        ),
-      },
-      {
-        field: 'type',
-        name: labels.tools.typeLabel,
-        width: '80px',
-        render: (type: string) => <EuiText size="s">{toolTypeDisplays[type].label}</EuiText>,
-      },
-      {
-        field: 'tags',
-        name: labels.tools.tagsLabel,
-        render: (tags: string[]) => <OnechatToolTags tags={tags} />,
-      },
-    ];
-
-    return (
-      <div>
-        <ActiveToolsStatus activeToolsCount={11} warningThreshold={24} />
-
-        <EuiSpacer size="l" />
-
-        <EuiFlexGroup alignItems="center" gutterSize="m">
-          {(enableSearch || enableFiltering) && (
-            <EuiFlexItem>
-              <EuiSearchBar {...searchConfig} />
-            </EuiFlexItem>
-          )}
-          {onShowGroupedViewChange && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label="Group by type"
-                    checked={showGroupedView}
-                    onChange={(e) => onShowGroupedViewChange(e.target.checked)}
-                    disabled={disabled}
-                    compressed
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-          {onShowActiveOnlyChange && (
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    label="Show active only"
-                    checked={showActiveOnly}
-                    onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
-                    disabled={disabled}
-                    compressed
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-
-        <EuiSpacer size="m" />
-
-        <EuiInMemoryTable
-          columns={columns}
-          items={filteredTools}
-          itemId="id"
-          pagination={{
-            pageSize: 10,
-            showPerPageOptions: false,
-          }}
-          sorting={{
-            sort: {
-              field: 'id',
-              direction: 'asc',
-            },
-          }}
-          noItemsMessage={
-            <EuiText component="p" size="s" textAlign="center" color="subdued">
-              {i18n.translate('xpack.onechat.tools.noToolsAvailable', {
-                defaultMessage: 'No tools available',
-              })}
-            </EuiText>
-          }
-        />
-      </div>
-    );
-  }
+  const noItemsMessage = (
+    <EuiText component="p" size="s" textAlign="center" color="subdued">
+      {i18n.translate('xpack.onechat.tools.noToolsAvailable', {
+        defaultMessage: 'No tools available',
+      })}
+    </EuiText>
+  );
 
   return (
     <div>
-      <ActiveToolsStatus activeToolsCount={11} warningThreshold={24} />
+      <ActiveToolsStatus
+        activeToolsCount={activeToolsCount}
+        warningThreshold={activeToolsCountWarningThreshold}
+      />
 
       <EuiSpacer size="l" />
 
-      <EuiFlexGroup alignItems="center" gutterSize="m">
-        {(enableSearch || enableFiltering) && (
-          <EuiFlexItem>
-            <EuiSearchBar {...searchConfig} />
-          </EuiFlexItem>
-        )}
-        {onShowGroupedViewChange && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate('xpack.onechat.tools.groupByType', {
-                    defaultMessage: 'Group by type',
-                  })}
-                  checked={showGroupedView}
-                  onChange={(e) => onShowGroupedViewChange(e.target.checked)}
-                  disabled={disabled}
-                  compressed
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-        {onShowActiveOnlyChange && (
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={i18n.translate('xpack.onechat.tools.showActiveOnly', {
-                    defaultMessage: 'Show active only',
-                  })}
-                  checked={showActiveOnly}
-                  onChange={(e) => onShowActiveOnlyChange(e.target.checked)}
-                  disabled={disabled}
-                  compressed
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+      <ControlsSection
+        searchConfig={searchConfig}
+        showGroupedView={showGroupedView}
+        onShowGroupedViewChange={onShowGroupedViewChange}
+        showActiveOnly={showActiveOnly}
+        onShowActiveOnlyChange={onShowActiveOnlyChange}
+        disabled={disabled}
+      />
 
       <EuiSpacer size="m" />
 
-      {Object.entries(toolsByType).map(([type, typeTools]) => {
-        const toolType = type as ToolType;
-        const columns = [
-          {
-            width: '40px',
-            render: (tool: ToolDefinition) => (
-              <EuiCheckbox
-                id={`tool-${tool.id}`}
-                checked={isToolSelected(tool, selectedTools)}
-                onChange={() => handleToggleTool(tool.id, toolType)}
-                disabled={disabled}
+      {!showGroupedView ? (
+        <>
+          <PaginationHeader
+            pageIndex={pageIndex}
+            pageSize={pageSize}
+            totalItems={tools.length}
+            filteredItems={filteredTools.length}
+          />
+          <EuiInMemoryTable
+            columns={flatTableColumns}
+            items={filteredTools}
+            itemId="id"
+            pagination={{
+              pageIndex,
+              pageSize,
+              showPerPageOptions: false,
+            }}
+            onTableChange={handleTableChange}
+            sorting={{
+              sort: {
+                field: 'id',
+                direction: 'asc',
+              },
+            }}
+            noItemsMessage={noItemsMessage}
+          />
+        </>
+      ) : (
+        Object.entries(toolsByType).map(([type, typeTools]) => {
+          const toolType = type as ToolType;
+          const columnsWithToolType = groupedTableColumns.map((col, index) =>
+            index === 0 // First column is always the checkbox column
+              ? createCheckboxColumn(selectedTools, handleToggleTool, disabled, toolType)
+              : col
+          );
+
+          return (
+            <div key={type}>
+              <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" color="subdued">
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup gutterSize="s" alignItems="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiTitle size="xs">
+                          <h4>{toolTypeDisplays[type].label}</h4>
+                        </EuiTitle>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiIcon type={toolTypeDisplays[type].icon} size="l" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiFlexGroup alignItems="center" gutterSize="s">
+                      <EuiFlexItem grow={false}>
+                        <EuiSwitch
+                          id={`type-${type}`}
+                          label={i18n.translate('xpack.onechat.tools.selectAllTypeTools', {
+                            defaultMessage: 'Select all',
+                          })}
+                          checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
+                          onChange={() => handleToggleTypeTools(toolType)}
+                          disabled={disabled}
+                        />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
+
+              <EuiSpacer size="s" />
+
+              <EuiInMemoryTable
+                columns={columnsWithToolType}
+                items={typeTools}
+                itemId="id"
+                noItemsMessage={noItemsMessage}
               />
-            ),
-          },
-          {
-            field: 'id',
-            name: labels.tools.toolIdLabel,
-            render: (_, tool: ToolDefinition) => (
-              <EuiFlexGroup direction="column" gutterSize="xs">
-                <EuiText
-                  size="s"
-                  css={css`
-                    font-weight: ${euiTheme.font.weight.semiBold};
-                  `}
-                >
-                  {tool.id}
-                </EuiText>
-                <EuiText size="s" color="subdued">
-                  {truncateAtNewline(tool.description)}
-                </EuiText>
-              </EuiFlexGroup>
-            ),
-          },
-          {
-            field: 'tags',
-            name: labels.tools.tagsLabel,
-            render: (tags: string[]) => <OnechatToolTags tags={tags} />,
-          },
-        ];
 
-        return (
-          <div key={type}>
-            <EuiPanel hasShadow={false} hasBorder={false} paddingSize="m" color="subdued">
-              <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" gutterSize="s">
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h4>{toolTypeDisplays[type].label}</h4>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type={toolTypeDisplays[type].icon} size="l" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="s">
-                    <EuiFlexItem grow={false}>
-                      <EuiSwitch
-                        id={`type-${type}`}
-                        label={i18n.translate('xpack.onechat.tools.selectAllTypeTools', {
-                          defaultMessage: 'Select all',
-                        })}
-                        checked={isAllToolsSelectedForType(type, typeTools, selectedTools)}
-                        onChange={() => handleToggleTypeTools(toolType)}
-                        disabled={disabled}
-                      />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-
-            <EuiSpacer size="s" />
-
-            <EuiInMemoryTable
-              css={css`
-                table {
-                  background-color: transparent;
-                }
-              `}
-              columns={columns}
-              items={typeTools}
-              itemId="id"
-              noItemsMessage={i18n.translate('xpack.onechat.tools.noToolsAvailable', {
-                defaultMessage: 'No tools available',
-              })}
-            />
-
-            <EuiSpacer size="m" />
-          </div>
-        );
-      })}
+              <EuiSpacer size="m" />
+            </div>
+          );
+        })
+      )}
     </div>
   );
 };

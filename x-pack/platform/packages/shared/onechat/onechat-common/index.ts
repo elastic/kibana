@@ -30,6 +30,7 @@ export {
   type EsqlToolDefinitionWithSchema,
   EsqlToolFieldType,
   idRegexp,
+  activeToolsCountWarningThreshold,
 } from './tools';
 export {
   OnechatErrorCode,
