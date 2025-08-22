@@ -54,6 +54,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             },
           },
           {
+            link: 'workflows',
+          },
+          {
             link: 'observability-overview:alerts',
           },
           {
