@@ -10,6 +10,7 @@ import {
   mockContext,
   lookupIndexFields,
   getMockCallbacks,
+  type MockedICommandCallbacks,
 } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
@@ -36,7 +37,7 @@ const joinExpectSuggestions = (
 };
 
 describe('JOIN Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
+  let mockCallbacks: MockedICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -117,6 +118,14 @@ describe('JOIN Autocomplete', () => {
 
     test('does not suggest create index command for other apps than Discover', async () => {
       const suggestions = await suggest('FROM index | LEFT JOIN ', { appId: 'dashboard' });
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).not.toContain('Create lookup index');
+    });
+
+    test('does not suggest the create index command when a user does not have required privileges', async () => {
+      (mockCallbacks.canCreateLookupIndex as jest.Mock).mockResolvedValueOnce(false);
+      const suggestions = await suggest('FROM index | LEFT JOIN ', { appId: 'discover' });
       const labels = suggestions.map((s) => s.label);
 
       expect(labels).not.toContain('Create lookup index');

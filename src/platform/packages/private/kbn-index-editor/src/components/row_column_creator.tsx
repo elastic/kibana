@@ -53,6 +53,7 @@ export const RowColumnCreator = ({
           onClick={toggleAddRow}
           iconType="plusInCircle"
           size="s"
+          disabled={indexUpdateService.canEditIndex === false}
         >
           <EuiText size="xs">
             <FormattedMessage defaultMessage="Add document" id="indexEditor.addRow" />
@@ -65,6 +66,7 @@ export const RowColumnCreator = ({
           onClick={toggleAddColumn}
           iconType="plusInCircle"
           size="s"
+          disabled={indexUpdateService.canEditIndex === false}
         >
           <EuiText size="xs">
             <FormattedMessage defaultMessage="Add field" id="indexEditor.addColumn" />

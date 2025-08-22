@@ -94,6 +94,7 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getLicense: [],
   getActiveProduct: [],
   getCurrentAppId: [],
+  canCreateLookupIndex: [],
 };
 
 /**

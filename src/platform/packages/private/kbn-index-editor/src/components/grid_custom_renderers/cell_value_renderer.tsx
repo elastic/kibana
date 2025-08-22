@@ -18,7 +18,8 @@ export const getCellValueRenderer =
   (
     rows: DataTableRecord[],
     dataTableRef: RefObject<EuiDataGridRefProps>,
-    isIndexCreated: boolean
+    isIndexCreated: boolean,
+    canEditIndex: boolean
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
@@ -38,18 +39,22 @@ export const getCellValueRenderer =
           <div
             data-test-subj={`indexEditorCellValue-${rowIndex}-${colIndex}`}
             css={{
-              cursor: 'pointer',
+              cursor: canEditIndex ? 'pointer' : 'inherit',
               height: '100%',
               width: '100%',
             }}
-            onClick={onEditStartHandler}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') onEditStartHandler();
-            }}
+            onClick={canEditIndex ? onEditStartHandler : undefined}
+            onKeyDown={
+              canEditIndex
+                ? (e) => {
+                    if (e.key === 'Enter') onEditStartHandler();
+                  }
+                : undefined
+            }
           >
             {
               // Only check for undefined, other falsy values might be user inputs
-              cellValue === undefined ? (
+              cellValue === undefined && canEditIndex ? (
                 <EuiText size="xs" color="subdued">
                   <FormattedMessage
                     id="indexEditor.flyout.grid.cell.default"

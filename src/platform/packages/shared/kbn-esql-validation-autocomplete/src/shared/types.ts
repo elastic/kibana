@@ -65,6 +65,7 @@ export interface ESQLCallbacks {
   getActiveProduct?: () => PricingProduct | undefined;
   /** Returns the current Kibana app ID, e.g. discover, dashboard etc. */
   getCurrentAppId?: () => Promise<string | undefined>;
+  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
 }
 
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';

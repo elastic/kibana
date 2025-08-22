@@ -43,7 +43,7 @@ interface ESQLDataGridProps {
 }
 
 const DEFAULT_INITIAL_ROW_HEIGHT = 2;
-const DEFAULT_ROWS_PER_PAGE = 10;
+const DEFAULT_ROWS_PER_PAGE = 25;
 const ROWS_PER_PAGE_OPTIONS = [10, 25];
 
 const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
@@ -168,8 +168,13 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
     [rows, props.columns, onValueChange, dataTableRef]
   );
   const CellValueRenderer = useMemo(() => {
-    return getCellValueRenderer(rows, dataTableRef, isIndexCreated);
-  }, [rows, isIndexCreated]);
+    return getCellValueRenderer(
+      rows,
+      dataTableRef,
+      isIndexCreated,
+      indexUpdateService.canEditIndex
+    );
+  }, [rows, isIndexCreated, indexUpdateService.canEditIndex]);
 
   const externalCustomRenderers: CustomCellRenderer = useMemo(() => {
     return renderedColumns.reduce((acc, columnId) => {
@@ -224,7 +229,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
           services={services}
           enableInTableSearch
           externalCustomRenderers={externalCustomRenderers}
-          renderCellPopover={renderCellPopover}
+          renderCellPopover={indexUpdateService.canEditIndex ? renderCellPopover : undefined}
           isPlainRecord
           isSortEnabled
           showMultiFields={false}
