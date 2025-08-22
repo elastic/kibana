@@ -62,7 +62,7 @@ function generateTypeScriptFile(result: any, outputPath: string, log: ToolingLog
 // Metric groups: ${stats.metricGroups}
 // Total fields: ${stats.totalFields}
 
-import type { TSemconvFields } from '../types/semconv_types';
+import type { TSemconvFields } from '../types';
 
 export const semconvFlat: TSemconvFields = ${fieldsString};
 `;

@@ -14,7 +14,7 @@
 // Metric groups: 347
 // Total fields: 963
 
-import type { TSemconvFields } from '../types/semconv_types';
+import type { TSemconvFields } from '../types';
 
 export const semconvFlat: TSemconvFields = {
   'webengine.name': {

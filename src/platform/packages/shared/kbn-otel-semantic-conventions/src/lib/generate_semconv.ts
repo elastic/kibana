@@ -16,7 +16,7 @@ import type {
   SemconvFieldMetadata,
   ProcessingResult,
   ProcessingOptions,
-} from '../types/semconv_types';
+} from '../types';
 
 /**
  * OpenTelemetry to Elasticsearch field type mapping
