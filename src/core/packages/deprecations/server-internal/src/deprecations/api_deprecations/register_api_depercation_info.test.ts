@@ -56,7 +56,7 @@ describe('#registerApiDeprecationsInfo', () => {
     registerApiDeprecationsInfo({ deprecationsFactory, coreUsageData, http, docLinks });
 
     expect(deprecationsFactory.getRegistry).toBeCalledWith('core.api_deprecations');
-    expect(deprecationsRegistry.registerDeprecations).toBeCalledTimes(1);
+    expect(deprecationsRegistry.registerDeprecations)..toHaveBeenCalledTimes(1);
     expect(deprecationsRegistry.registerDeprecations).toBeCalledWith({
       getDeprecations: expect.any(Function),
     });

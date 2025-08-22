@@ -130,7 +130,7 @@ describe('KibanaMigrator', () => {
       const doc = {} as any;
 
       expect(() => kibanaMigrator.migrateDocument(doc)).not.toThrowError();
-      expect(DocumentMigrator.prototype.migrate).toBeCalledTimes(1);
+      expect(DocumentMigrator.prototype.migrate)..toHaveBeenCalledTimes(1);
     });
   });
 

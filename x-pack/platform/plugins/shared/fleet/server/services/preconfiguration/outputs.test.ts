@@ -1160,7 +1160,7 @@ describe('Outputs preconfiguration', () => {
         ]);
 
         expect(mockedOutputService.delete).toHaveBeenCalled();
-        expect(mockedOutputService.delete).toBeCalledTimes(1);
+        expect(mockedOutputService.delete)..toHaveBeenCalledTimes(1);
         expect(mockedOutputService.delete.mock.calls[0][1]).toEqual('output2');
       });
 
@@ -1179,7 +1179,7 @@ describe('Outputs preconfiguration', () => {
         await cleanPreconfiguredOutputs(soClient, esClient, []);
 
         expect(mockedOutputService.delete).not.toHaveBeenCalled();
-        expect(mockedOutputService.update).toBeCalledTimes(2);
+        expect(mockedOutputService.update)..toHaveBeenCalledTimes(2);
         expect(mockedOutputService.update).toBeCalledWith(
           expect.anything(),
           expect.anything(),

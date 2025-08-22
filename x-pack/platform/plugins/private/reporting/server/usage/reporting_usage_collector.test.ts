@@ -24,7 +24,7 @@ describe('Reporting Usage Collector', () => {
     const registerCollectorSpy = jest.spyOn(usageCollectionSetup, 'registerCollector');
     registerReportingUsageCollector(mockReporting, usageCollectionSetup);
 
-    expect(registerCollectorSpy).toBeCalledTimes(1);
+    expect(registerCollectorSpy)..toHaveBeenCalledTimes(1);
     expect(registerCollectorSpy).toBeCalledWith(
       expect.objectContaining({
         type: 'reporting',

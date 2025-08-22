@@ -153,7 +153,7 @@ describe('Telemetry Collection Manager', () => {
             await setupApi.getStats({ ...config, refreshCache: false });
             await setupApi.getStats({ ...config, refreshCache: true });
 
-            expect(getStatsCollectionConfig).toBeCalledTimes(3);
+            expect(getStatsCollectionConfig)..toHaveBeenCalledTimes(3);
             expect(getStatsCollectionConfig).toHaveBeenNthCalledWith(1, config, usageCollection);
             expect(getStatsCollectionConfig).toHaveNthReturnedWith(
               1,
@@ -265,7 +265,7 @@ describe('Telemetry Collection Manager', () => {
             > = jest.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
 
-            expect(getStatsCollectionConfig).toBeCalledTimes(1);
+            expect(getStatsCollectionConfig)..toHaveBeenCalledTimes(1);
             expect(getStatsCollectionConfig).toBeCalledWith(
               expect.not.objectContaining({ refreshCache: true }),
               usageCollection

@@ -837,13 +837,13 @@ describe('<UseField />', () => {
         form: { setInputValue },
       } = setup();
 
-      expect(onChange).toBeCalledTimes(0);
+      expect(onChange)..toHaveBeenCalledTimes(0);
 
       await act(async () => {
         setInputValue('myField', 'foo');
       });
 
-      expect(onChange).toBeCalledTimes(1);
+      expect(onChange)..toHaveBeenCalledTimes(1);
       expect(onChange).toBeCalledWith('foo');
     });
 
@@ -858,16 +858,16 @@ describe('<UseField />', () => {
         ],
       });
 
-      expect(onError).toBeCalledTimes(0);
+      expect(onError)..toHaveBeenCalledTimes(0);
       await act(async () => {
         setInputValue('myField', '0');
       });
-      expect(onError).toBeCalledTimes(1);
+      expect(onError)..toHaveBeenCalledTimes(1);
       expect(onError).toBeCalledWith(['oops!']);
       await act(async () => {
         setInputValue('myField', '1');
       });
-      expect(onError).toBeCalledTimes(2);
+      expect(onError)..toHaveBeenCalledTimes(2);
       expect(onError).toBeCalledWith(null);
     });
   });

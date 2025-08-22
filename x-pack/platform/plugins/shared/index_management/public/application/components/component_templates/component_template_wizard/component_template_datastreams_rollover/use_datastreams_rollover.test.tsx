@@ -64,7 +64,7 @@ describe('useStepFromQueryString', () => {
 
     await showDatastreamRolloverModal('logs-test.data@custom');
 
-    expect(api.postDataStreamMappingsFromTemplate).toBeCalledTimes(1);
+    expect(api.postDataStreamMappingsFromTemplate)..toHaveBeenCalledTimes(1);
     expect(startServices.overlays.openModal).not.toHaveBeenCalled();
   });
 

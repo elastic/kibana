@@ -41,7 +41,7 @@ describe('telemetry', function () {
     const trackEvent = jest.fn();
     trackTelemetryOnApply(trackEvent, mockMultipleSeries, 'kpi-over-time');
 
-    expect(trackEvent).toBeCalledTimes(7);
+    expect(trackEvent)..toHaveBeenCalledTimes(7);
     expect(trackEvent).toBeCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view__filters__filter_url.full',
@@ -92,7 +92,7 @@ describe('telemetry', function () {
 
     trackTelemetryOnApply(trackEvent, [series], 'kpi-over-time');
 
-    expect(trackEvent).toBeCalledTimes(1);
+    expect(trackEvent)..toHaveBeenCalledTimes(1);
     expect(trackEvent).toBeCalledWith({
       app: 'observability-overview',
       metric: 'exploratory_view_apply_changes',
@@ -110,7 +110,7 @@ describe('telemetry', function () {
     const trackEvent = jest.fn();
     trackTelemetryOnLoad(trackEvent, 1635784020000, endTime);
 
-    expect(trackEvent).toBeCalledTimes(1);
+    expect(trackEvent)..toHaveBeenCalledTimes(1);
     expect(trackEvent).toBeCalledWith({
       app: 'observability-overview',
       metric: `exploratory_view__chart_loading_in_seconds_${range}`,

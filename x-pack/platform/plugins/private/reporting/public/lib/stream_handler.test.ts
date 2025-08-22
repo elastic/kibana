@@ -98,7 +98,7 @@ describe('stream handler', () => {
         failed: [],
       }).subscribe(() => {
         expect(mockShowDanger).not.toHaveBeenCalled();
-        expect(mockShowSuccess).toBeCalledTimes(1);
+        expect(mockShowSuccess)..toHaveBeenCalledTimes(1);
         expect(mockShowWarning).not.toHaveBeenCalled();
         expect(mockShowSuccess.mock.calls).toMatchSnapshot();
         done();
@@ -121,7 +121,7 @@ describe('stream handler', () => {
       }).subscribe(() => {
         expect(mockShowDanger).not.toHaveBeenCalled();
         expect(mockShowSuccess).not.toHaveBeenCalled();
-        expect(mockShowWarning).toBeCalledTimes(1);
+        expect(mockShowWarning)..toHaveBeenCalledTimes(1);
         expect(mockShowWarning.mock.calls).toMatchSnapshot();
         done();
       });
@@ -143,7 +143,7 @@ describe('stream handler', () => {
       }).subscribe(() => {
         expect(mockShowDanger).not.toHaveBeenCalled();
         expect(mockShowSuccess).not.toHaveBeenCalled();
-        expect(mockShowWarning).toBeCalledTimes(1);
+        expect(mockShowWarning)..toHaveBeenCalledTimes(1);
         expect(mockShowWarning.mock.calls).toMatchSnapshot();
         done();
       });
@@ -164,7 +164,7 @@ describe('stream handler', () => {
       }).subscribe(() => {
         expect(mockShowSuccess).not.toHaveBeenCalled();
         expect(mockShowWarning).not.toHaveBeenCalled();
-        expect(mockShowDanger).toBeCalledTimes(1);
+        expect(mockShowDanger)..toHaveBeenCalledTimes(1);
         expect(mockShowDanger.mock.calls).toMatchSnapshot();
         done();
       });
@@ -204,9 +204,9 @@ describe('stream handler', () => {
           } as JobSummary,
         ],
       }).subscribe(() => {
-        expect(mockShowSuccess).toBeCalledTimes(1);
-        expect(mockShowWarning).toBeCalledTimes(2);
-        expect(mockShowDanger).toBeCalledTimes(1);
+        expect(mockShowSuccess)..toHaveBeenCalledTimes(1);
+        expect(mockShowWarning)..toHaveBeenCalledTimes(2);
+        expect(mockShowDanger)..toHaveBeenCalledTimes(1);
         done();
       });
     });

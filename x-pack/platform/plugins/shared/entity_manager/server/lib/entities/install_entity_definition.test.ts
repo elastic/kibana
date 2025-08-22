@@ -41,7 +41,7 @@ const assertHasCreatedDefinition = (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
-  expect(soClient.create).toBeCalledTimes(1);
+  expect(soClient.create)..toHaveBeenCalledTimes(1);
   expect(soClient.create).toBeCalledWith(
     SO_ENTITY_DEFINITION_TYPE,
     {
@@ -56,20 +56,20 @@ const assertHasCreatedDefinition = (
       managed: definition.managed,
     }
   );
-  expect(soClient.update).toBeCalledTimes(1);
+  expect(soClient.update)..toHaveBeenCalledTimes(1);
   expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
     installStatus: 'installed',
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate)..toHaveBeenCalledTimes(1);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
     })
   );
 
-  expect(esClient.ingest.putPipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.putPipeline)..toHaveBeenCalledTimes(1);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
@@ -79,7 +79,7 @@ const assertHasCreatedDefinition = (
     },
   });
 
-  expect(esClient.transform.putTransform).toBeCalledTimes(1);
+  expect(esClient.transform.putTransform)..toHaveBeenCalledTimes(1);
   expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
 };
 
@@ -88,7 +88,7 @@ const assertHasUpgradedDefinition = (
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ) => {
-  expect(soClient.update).toBeCalledTimes(2);
+  expect(soClient.update)..toHaveBeenCalledTimes(2);
   expect(soClient.update).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id, {
     ...definition,
     installStatus: 'upgrading',
@@ -100,14 +100,14 @@ const assertHasUpgradedDefinition = (
     installedComponents: getExpectedInstalledComponents(definition),
   });
 
-  expect(esClient.indices.putIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.putIndexTemplate)..toHaveBeenCalledTimes(1);
   expect(esClient.indices.putIndexTemplate).toBeCalledWith(
     expect.objectContaining({
       name: `entities_v1_latest_${definition.id}_index_template`,
     })
   );
 
-  expect(esClient.ingest.putPipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.putPipeline)..toHaveBeenCalledTimes(1);
   expect(esClient.ingest.putPipeline).toBeCalledWith({
     id: generateLatestIngestPipelineId(definition),
     processors: expect.anything(),
@@ -117,7 +117,7 @@ const assertHasUpgradedDefinition = (
     },
   });
 
-  expect(esClient.transform.putTransform).toBeCalledTimes(1);
+  expect(esClient.transform.putTransform)..toHaveBeenCalledTimes(1);
   expect(esClient.transform.putTransform).toBeCalledWith(generateLatestTransform(definition));
 };
 
@@ -128,7 +128,7 @@ const assertHasDeletedDefinition = (
 ) => {
   assertHasDeletedTransforms(definition, esClient);
 
-  expect(esClient.ingest.deletePipeline).toBeCalledTimes(1);
+  expect(esClient.ingest.deletePipeline)..toHaveBeenCalledTimes(1);
   expect(esClient.ingest.deletePipeline).toBeCalledWith(
     {
       id: generateLatestIngestPipelineId(definition),
@@ -136,7 +136,7 @@ const assertHasDeletedDefinition = (
     { ignore: [404] }
   );
 
-  expect(esClient.indices.deleteIndexTemplate).toBeCalledTimes(1);
+  expect(esClient.indices.deleteIndexTemplate)..toHaveBeenCalledTimes(1);
   expect(esClient.indices.deleteIndexTemplate).toBeCalledWith(
     {
       name: generateLatestIndexTemplateId(definition),
@@ -144,7 +144,7 @@ const assertHasDeletedDefinition = (
     { ignore: [404] }
   );
 
-  expect(soClient.delete).toBeCalledTimes(1);
+  expect(soClient.delete)..toHaveBeenCalledTimes(1);
   expect(soClient.delete).toBeCalledWith(SO_ENTITY_DEFINITION_TYPE, definition.id);
 };
 
@@ -152,7 +152,7 @@ const assertHasDeletedTransforms = (
   definition: EntityDefinition,
   esClient: ElasticsearchClient
 ) => {
-  expect(esClient.transform.stopTransform).toBeCalledTimes(1);
+  expect(esClient.transform.stopTransform)..toHaveBeenCalledTimes(1);
   expect(esClient.transform.stopTransform).toBeCalledWith(
     expect.objectContaining({
       transform_id: generateLatestTransformId(definition),
@@ -160,7 +160,7 @@ const assertHasDeletedTransforms = (
     expect.anything()
   );
 
-  expect(esClient.transform.deleteTransform).toBeCalledTimes(1);
+  expect(esClient.transform.deleteTransform)..toHaveBeenCalledTimes(1);
   expect(esClient.transform.deleteTransform).toBeCalledWith(
     expect.objectContaining({
       transform_id: generateLatestTransformId(definition),

@@ -665,11 +665,11 @@ describe('handleInstallPackageFailure', () => {
       spaceId: 'default',
     });
 
-    expect(mockedLogger.error).toBeCalledTimes(1);
+    expect(mockedLogger.error)..toHaveBeenCalledTimes(1);
     expect(mockedLogger.error).toBeCalledWith(
       'Rolling back to test_package-1.0.0 after error installing test_package-2.0.0'
     );
-    expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+    expect(installStateMachine._stateMachineInstallPackage)..toHaveBeenCalledTimes(1);
     expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
       expect.objectContaining({
         packageInstallContext: expect.objectContaining({
@@ -721,7 +721,7 @@ describe('handleInstallPackageFailure', () => {
       expect(mockedLogger.error).toBeCalledWith(
         expect.stringMatching(/Failed to uninstall or rollback package after installation error/)
       );
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage)..toHaveBeenCalledTimes(1);
       expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
         expect.objectContaining({
           packageInstallContext: expect.objectContaining({
@@ -798,7 +798,7 @@ describe('handleInstallPackageFailure', () => {
       expect(mockedLogger.debug).toBeCalledWith(
         'Kicking off install of test_package-2.0.0 from registry'
       );
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage)..toHaveBeenCalledTimes(1);
       expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
         expect.objectContaining({
           retryFromLastState: true,
@@ -850,7 +850,7 @@ describe('handleInstallPackageFailure', () => {
         spaceId: 'default',
       });
 
-      expect(installStateMachine._stateMachineInstallPackage).toBeCalledTimes(1);
+      expect(installStateMachine._stateMachineInstallPackage)..toHaveBeenCalledTimes(1);
       expect(installStateMachine._stateMachineInstallPackage).toBeCalledWith(
         expect.objectContaining({
           retryFromLastState: true,
@@ -1007,7 +1007,7 @@ describe('isPackageVersionOrLaterInstalled', () => {
       })
     );
 
-    expect(getInstallationObject).toBeCalledTimes(3);
+    expect(getInstallationObject)..toHaveBeenCalledTimes(3);
   });
 
   it('should throw on unexpected error', async () => {

@@ -45,7 +45,7 @@ describe('unenroll', () => {
       await unenrollAgent(soClient, esClient, agentInRegularDoc._id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update)..toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrollment_started_at');
@@ -57,7 +57,7 @@ describe('unenroll', () => {
         HostedAgentPolicyRestrictionRelatedError
       );
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update)..toHaveBeenCalledTimes(0);
     });
 
     it('cannot unenroll from hosted agent policy with revoke=true', async () => {
@@ -66,14 +66,14 @@ describe('unenroll', () => {
         unenrollAgent(soClient, esClient, agentInHostedDoc._id, { revoke: true })
       ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update)..toHaveBeenCalledTimes(0);
     });
 
     it('can unenroll from hosted agent policy with force=true', async () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
       await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true });
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update)..toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrollment_started_at');
@@ -83,7 +83,7 @@ describe('unenroll', () => {
       const { soClient, esClient, agentInHostedDoc } = createClientMock();
       await unenrollAgent(soClient, esClient, agentInHostedDoc._id, { force: true, revoke: true });
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update)..toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInHostedDoc._id);
       expect(calledWith[0] as estypes.UpdateRequest).toHaveProperty('doc.unenrolled_at');
@@ -367,7 +367,7 @@ describe('unenroll', () => {
         } as any,
       ]);
 
-      expect(mockedInvalidateAPIKeys).toBeCalledTimes(1);
+      expect(mockedInvalidateAPIKeys)..toHaveBeenCalledTimes(1);
       expect(mockedInvalidateAPIKeys).toBeCalledWith([
         'accessApiKey1',
         'defaultApiKey1',

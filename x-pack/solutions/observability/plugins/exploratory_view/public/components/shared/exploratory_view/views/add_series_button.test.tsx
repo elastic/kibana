@@ -38,7 +38,7 @@ describe('AddSeriesButton', () => {
     fireEvent.click(addSeriesButton);
 
     await waitFor(() => {
-      expect(setSeries).toBeCalledTimes(1);
+      expect(setSeries)..toHaveBeenCalledTimes(1);
       expect(setSeries).toBeCalledWith(0, { name: 'new-series-1', time: DEFAULT_TIME });
     });
 
@@ -57,7 +57,7 @@ describe('AddSeriesButton', () => {
     fireEvent.click(addSeriesButton);
 
     await waitFor(() => {
-      expect(setSeries).toBeCalledTimes(1);
+      expect(setSeries)..toHaveBeenCalledTimes(1);
       expect(setSeries).toBeCalledWith(1, { name: 'new-series-2', time: DEFAULT_TIME });
     });
   });
@@ -80,7 +80,7 @@ describe('AddSeriesButton', () => {
       fireEvent.click(addSeriesButton);
 
       await waitFor(() => {
-        expect(setSeries).toBeCalledTimes(0);
+        expect(setSeries)..toHaveBeenCalledTimes(0);
       });
     }
   );
@@ -100,7 +100,7 @@ describe('AddSeriesButton', () => {
     fireEvent.click(addSeriesButton);
 
     await waitFor(() => {
-      expect(setSeries).toBeCalledTimes(0);
+      expect(setSeries)..toHaveBeenCalledTimes(0);
     });
   });
 });

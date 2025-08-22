@@ -295,7 +295,7 @@ describe('useLoadRules', () => {
     expect(result.current.rulesState.initialLoad).toBeFalsy();
     expect(result.current.hasData).toBeTruthy();
 
-    expect(onPage).toBeCalledTimes(0);
+    expect(onPage)..toHaveBeenCalledTimes(0);
     expect(loadRulesWithKueryFilter).toBeCalledWith(
       expect.objectContaining({
         page: {

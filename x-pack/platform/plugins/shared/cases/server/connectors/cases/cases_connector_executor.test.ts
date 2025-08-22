@@ -493,7 +493,7 @@ describe('CasesConnectorExecutor', () => {
 
           await connectorExecutor.execute(params);
 
-          expect(mockGetCaseId).toBeCalledTimes(3);
+          expect(mockGetCaseId)..toHaveBeenCalledTimes(3);
 
           /**
            * Oracle record index: 0
@@ -3114,12 +3114,12 @@ describe('CasesConnectorExecutor', () => {
       await connectorExecutor.execute(missingDataParams);
       await connectorExecutor.execute(missingDataParams);
 
-      expect(mockBulkUpdateRecord).toBeCalledTimes(1);
+      expect(mockBulkUpdateRecord)..toHaveBeenCalledTimes(1);
       expect(mockBulkUpdateRecord).toHaveBeenCalledWith([
         { payload: { counter: 2 }, recordId: 'so-oracle-record-0', version: 'so-version-0' },
       ]);
 
-      expect(mockBulkCreateRecords).toBeCalledTimes(1);
+      expect(mockBulkCreateRecords)..toHaveBeenCalledTimes(1);
       expect(mockBulkCreateRecords).toHaveBeenCalledWith([
         {
           payload: {

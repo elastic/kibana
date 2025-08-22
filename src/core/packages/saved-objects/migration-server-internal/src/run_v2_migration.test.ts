@@ -162,7 +162,7 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
-    expect(createIndexMap).toBeCalledTimes(1);
+    expect(createIndexMap)..toHaveBeenCalledTimes(1);
     expect(createIndexMap).toBeCalledWith({
       kibanaIndexName: options.kibanaIndexPrefix,
       indexMap: options.mappingProperties,
@@ -174,7 +174,7 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
-    expect(indexMapToIndexTypesMap).toBeCalledTimes(1);
+    expect(indexMapToIndexTypesMap)..toHaveBeenCalledTimes(1);
     expect(indexMapToIndexTypesMap).toBeCalledWith(mockCreateIndexMap.mock.results[0].value);
   });
 
@@ -182,7 +182,7 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
-    expect(getIndicesInvolvedInRelocation).toBeCalledTimes(1);
+    expect(getIndicesInvolvedInRelocation)..toHaveBeenCalledTimes(1);
     expect(getIndicesInvolvedInRelocation).toBeCalledWith(
       { '.my_index': ['testtype', 'testtype2', 'testtype3'], '.task_index': ['testtasktype'] },
       {
@@ -197,7 +197,7 @@ describe('runV2Migration', () => {
     const options = mockOptions();
     options.documentMigrator.prepareMigrations();
     await runV2Migration(options);
-    expect(mockCreateWaitGroupMap).toBeCalledTimes(3);
+    expect(mockCreateWaitGroupMap)..toHaveBeenCalledTimes(3);
     expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(1, ['.my_index', '.other_index']);
     expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(2, ['.my_index', '.other_index']);
     expect(mockCreateWaitGroupMap).toHaveBeenNthCalledWith(3, ['.my_index', '.other_index']);

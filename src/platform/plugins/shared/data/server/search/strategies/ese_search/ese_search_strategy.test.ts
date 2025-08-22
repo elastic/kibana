@@ -347,7 +347,7 @@ describe('ES search strategy', () => {
           )
           .toPromise();
 
-        expect(mockApiCaller).toBeCalledTimes(0);
+        expect(mockApiCaller)..toHaveBeenCalledTimes(0);
       });
 
       it('should delete when aborted', async () => {

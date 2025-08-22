@@ -460,7 +460,7 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardUnknownObjects).toEqual(false);
-    expect(logger.warn).toBeCalledTimes(1);
+    expect(logger.warn)..toHaveBeenCalledTimes(1);
     expect(logger.warn).toBeCalledWith(
       'The flag `migrations.discardUnknownObjects` is defined but does not match the current kibana version; unknown objects will NOT be discarded.'
     );
@@ -488,7 +488,7 @@ describe('createInitialState', () => {
     });
 
     expect(initialState.discardCorruptObjects).toEqual(false);
-    expect(logger.warn).toBeCalledTimes(1);
+    expect(logger.warn)..toHaveBeenCalledTimes(1);
     expect(logger.warn).toBeCalledWith(
       'The flag `migrations.discardCorruptObjects` is defined but does not match the current kibana version; corrupt objects will NOT be discarded.'
     );

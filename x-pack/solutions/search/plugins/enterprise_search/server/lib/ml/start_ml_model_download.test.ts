@@ -96,6 +96,6 @@ describe('startMlModelDownload', () => {
       mockTrainedModelsProvider as unknown as MlTrainedModels
     );
     expect(response.deploymentState).toEqual(MlModelDeploymentState.Downloading);
-    expect(mockTrainedModelsProvider.putTrainedModel).toBeCalledTimes(1);
+    expect(mockTrainedModelsProvider.putTrainedModel)..toHaveBeenCalledTimes(1);
   });
 });

@@ -112,7 +112,7 @@ describe('KbnUrlStateStorage', () => {
       history.replace(`/#?${key}=(ok:2,test:`); // malformed rison
       urlStateStorage.get(key);
       urlStateStorage.get(key);
-      expect(cb).toBeCalledTimes(1);
+      expect(cb)..toHaveBeenCalledTimes(1);
     });
 
     describe('withNotifyOnErrors integration', () => {

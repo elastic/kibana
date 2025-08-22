@@ -77,7 +77,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy)..toHaveBeenCalledTimes(2);
     expect(mockedAgentPolicyService.deployPolicies).not.toHaveBeenCalled();
   });
 
@@ -107,7 +107,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy)..toHaveBeenCalledTimes(2);
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);
@@ -133,7 +133,7 @@ describe('ensureAgentPoliciesFleetServerKeysAndPolicies', () => {
       soClient,
     });
 
-    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledTimes(2);
+    expect(mockedEnsureDefaultEnrollmentAPIKeyForAgentPolicy)..toHaveBeenCalledTimes(2);
     expect(scheduleDeployAgentPoliciesTask).toBeCalledWith(undefined, [
       { id: 'policy2', spaceId: undefined },
     ]);

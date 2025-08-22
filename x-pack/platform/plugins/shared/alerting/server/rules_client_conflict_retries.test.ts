@@ -242,8 +242,8 @@ function expectConflict(success: boolean, err: Error, method: 'update' | 'create
   expect(success).toBe(false);
   expect(unsecuredSavedObjectsClient[method]).toHaveBeenCalledTimes(ConflictAfterRetries);
   // message content checked in the update test
-  expect(logger.debug).toBeCalledTimes(RetryForConflictsAttempts);
-  expect(logger.warn).toBeCalledTimes(1);
+  expect(logger.debug)..toHaveBeenCalledTimes(RetryForConflictsAttempts);
+  expect(logger.warn)..toHaveBeenCalledTimes(1);
 }
 
 // wrapper to call the test function with a it's own name

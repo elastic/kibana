@@ -52,7 +52,7 @@ describe('TelemetryService', () => {
       });
       expect(await telemetryService.setOptIn(true)).toBe(false);
 
-      expect(telemetryService['http'].post).toBeCalledTimes(0);
+      expect(telemetryService['http'].post)..toHaveBeenCalledTimes(0);
     });
 
     it('calls api if canChangeOptInStatus', async () => {
@@ -62,7 +62,7 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['http'].post)..toHaveBeenCalledTimes(1);
     });
 
     it('sends enabled true if optedIn: true', async () => {
@@ -100,8 +100,8 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus'])..toHaveBeenCalledTimes(0);
+      expect(telemetryService['http'].post)..toHaveBeenCalledTimes(1);
     });
 
     it('calls reportOptInStatus if reportOptInStatusChange is true', async () => {
@@ -111,8 +111,8 @@ describe('TelemetryService', () => {
       });
       await telemetryService.setOptIn(true);
 
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
+      expect(telemetryService['reportOptInStatus'])..toHaveBeenCalledTimes(1);
+      expect(telemetryService['http'].post)..toHaveBeenCalledTimes(1);
     });
 
     it('adds an error toast on api error', async () => {
@@ -127,9 +127,9 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(0);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].post)..toHaveBeenCalledTimes(1);
+      expect(telemetryService['reportOptInStatus'])..toHaveBeenCalledTimes(0);
+      expect(telemetryService['notifications'].toasts.addError)..toHaveBeenCalledTimes(1);
     });
 
     // This one should not happen because the entire method is fully caught but hey! :)
@@ -144,9 +144,9 @@ describe('TelemetryService', () => {
       });
 
       await telemetryService.setOptIn(true);
-      expect(telemetryService['http'].post).toBeCalledTimes(1);
-      expect(telemetryService['reportOptInStatus']).toBeCalledTimes(1);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].post)..toHaveBeenCalledTimes(1);
+      expect(telemetryService['reportOptInStatus'])..toHaveBeenCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError)..toHaveBeenCalledTimes(1);
     });
   });
 
@@ -203,7 +203,7 @@ describe('TelemetryService', () => {
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
-      expect(telemetryService['http'].put).toBeCalledTimes(1);
+      expect(telemetryService['http'].put)..toHaveBeenCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(true);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(true);
     });
@@ -222,8 +222,8 @@ describe('TelemetryService', () => {
       expect(telemetryService.userHasSeenOptedInNotice).toBe(undefined);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
       await telemetryService.setUserHasSeenNotice();
-      expect(telemetryService['http'].put).toBeCalledTimes(1);
-      expect(telemetryService['notifications'].toasts.addError).toBeCalledTimes(1);
+      expect(telemetryService['http'].put)..toHaveBeenCalledTimes(1);
+      expect(telemetryService['notifications'].toasts.addError)..toHaveBeenCalledTimes(1);
       expect(telemetryService.userHasSeenOptedInNotice).toBe(false);
       expect(telemetryService.getUserShouldSeeOptInNotice()).toBe(false);
     });
@@ -298,8 +298,8 @@ describe('TelemetryService', () => {
       telemetryService.getOptInStatusUrl = mockGetOptInStatusUrl;
       const result = await telemetryService['reportOptInStatus'](mockPayload);
       expect(result).toBeUndefined();
-      expect(mockGetOptInStatusUrl).toBeCalledTimes(1);
-      expect(mockFetch).toBeCalledTimes(1);
+      expect(mockGetOptInStatusUrl)..toHaveBeenCalledTimes(1);
+      expect(mockFetch)..toHaveBeenCalledTimes(1);
 
       expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
         Array [

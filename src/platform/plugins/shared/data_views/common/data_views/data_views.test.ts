@@ -150,7 +150,7 @@ describe('IndexPatterns', () => {
     indexPatterns.get(id);
 
     indexPatternPromise.then((indexPattern) => {
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
       expect(indexPattern).toBeDefined();
     });
 
@@ -174,7 +174,7 @@ describe('IndexPatterns', () => {
     indexPatterns.getDataViewLazy(id);
 
     dataViewLazyPromise.then((dataViewLazy) => {
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
       expect(dataViewLazy).toBeDefined();
     });
 
@@ -197,10 +197,10 @@ describe('IndexPatterns', () => {
     };
 
     await indexPatterns.get(id);
-    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(1);
+    expect(apiClient.getFieldsForWildcard)..toHaveBeenCalledTimes(1);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
     await indexPatterns.get(id, undefined, true);
-    expect(apiClient.getFieldsForWildcard).toBeCalledTimes(2);
+    expect(apiClient.getFieldsForWildcard)..toHaveBeenCalledTimes(2);
     expect(apiClient.getFieldsForWildcard).toBeCalledWith(args);
   });
 
@@ -732,8 +732,8 @@ describe('IndexPatterns', () => {
 
       expect(await indexPatterns.defaultDataViewExists()).toBe(true);
       // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(0);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(0);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
     });
 
     test('return false if no default data view found', async () => {
@@ -743,8 +743,8 @@ describe('IndexPatterns', () => {
 
       expect(await indexPatterns.defaultDataViewExists()).toBe(false);
       // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(0);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(0);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
     });
   });
 
@@ -763,8 +763,8 @@ describe('IndexPatterns', () => {
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
       expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
       // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
     });
 
     test('gets default data view lazy', async () => {
@@ -774,8 +774,8 @@ describe('IndexPatterns', () => {
 
       expect(await indexPatterns.getDefaultDataViewLazy()).toBeInstanceOf(DataViewLazy);
       // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
     });
 
     test('gets default data view and passes down defined arguments (refreshFields and displayErrors)', async () => {
@@ -792,8 +792,8 @@ describe('IndexPatterns', () => {
       expect(
         await indexPatterns.getDefaultDataView({ refreshFields, displayErrors })
       ).toBeInstanceOf(DataView);
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
 
       expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, displayErrors, refreshFields);
       expect(indexPatterns.refreshFields).toBeCalledWith(dataView, displayErrors);
@@ -809,8 +809,8 @@ describe('IndexPatterns', () => {
       await indexPatterns.get(indexPatternObj.id); // to cache the result
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
 
       expect(indexPatterns.get).toBeCalledWith(indexPatternObj.id, true, undefined);
       expect(indexPatterns.refreshFields).not.toHaveBeenCalled();
@@ -844,10 +844,10 @@ describe('IndexPatterns', () => {
 
       expect(await indexPatterns.getDefaultDataView()).toBeInstanceOf(DataView);
       // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
-      expect(uiSettings.remove).toBeCalledTimes(1);
-      expect(uiSettings.set).toBeCalledTimes(1);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
+      expect(uiSettings.remove)..toHaveBeenCalledTimes(1);
+      expect(uiSettings.set)..toHaveBeenCalledTimes(1);
     });
 
     test("when default exists, it isn't overridden with first data view", async () => {
@@ -869,10 +869,10 @@ describe('IndexPatterns', () => {
       expect(defaultDataViewResult?.id).toBe('id2');
 
       // make sure we're not pulling from cache
-      expect(savedObjectsClient.get).toBeCalledTimes(1);
-      expect(savedObjectsClient.find).toBeCalledTimes(1);
-      expect(uiSettings.remove).toBeCalledTimes(0);
-      expect(uiSettings.set).toBeCalledTimes(0);
+      expect(savedObjectsClient.get)..toHaveBeenCalledTimes(1);
+      expect(savedObjectsClient.find)..toHaveBeenCalledTimes(1);
+      expect(uiSettings.remove)..toHaveBeenCalledTimes(0);
+      expect(uiSettings.set)..toHaveBeenCalledTimes(0);
     });
 
     test('dont set defaultIndex without capability allowing advancedSettings save', async () => {
@@ -899,7 +899,7 @@ describe('IndexPatterns', () => {
       const defaultDataViewResult = await indexPatternsNoAccess.getDefaultDataView();
       expect(defaultDataViewResult).toBeInstanceOf(DataView);
       expect(defaultDataViewResult?.id).toBe('id1');
-      expect(uiSettings.set).toBeCalledTimes(0);
+      expect(uiSettings.set)..toHaveBeenCalledTimes(0);
     });
   });
 

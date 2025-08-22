@@ -40,6 +40,6 @@ describe('CaseContainerComponent', () => {
       ),
     });
 
-    expect(mockedSetBadge).toBeCalledTimes(1);
+    expect(mockedSetBadge)..toHaveBeenCalledTimes(1);
   });
 });

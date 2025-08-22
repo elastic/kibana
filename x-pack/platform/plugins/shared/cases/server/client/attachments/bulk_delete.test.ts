@@ -56,7 +56,7 @@ describe('bulk_delete', () => {
       const fileNotFound = await pReflect(Promise.reject(new FileNotFoundError('not found')));
 
       expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc'], mockLogger)).toEqual([]);
-      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
       expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to find file id: abc: Error: not found",
@@ -68,7 +68,7 @@ describe('bulk_delete', () => {
       const fileNotFound = await pReflect(Promise.reject(new FileNotFoundError('not found')));
 
       expect(retrieveFilesIgnoringNotFound([fileNotFound], ['abc', '123'], mockLogger)).toEqual([]);
-      expect(mockLogger.warn).toBeCalledTimes(1);
+      expect(mockLogger.warn)..toHaveBeenCalledTimes(1);
       expect(mockLogger.warn.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "Failed to find file: Error: not found",

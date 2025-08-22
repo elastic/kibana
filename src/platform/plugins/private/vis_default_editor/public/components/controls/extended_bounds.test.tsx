@@ -85,7 +85,7 @@ describe('ExtendedBoundsParamEditor', () => {
       comp.unmount();
 
       expect(defaultProps.setValidity).lastCalledWith(true);
-      expect(defaultProps.setValidity).toBeCalledTimes(2);
+      expect(defaultProps.setValidity)..toHaveBeenCalledTimes(2);
     });
   });
 

@@ -177,7 +177,7 @@ describe('Session service', () => {
 
       await sessionService.cancel();
 
-      expect(abort).toBeCalledTimes(3);
+      expect(abort)..toHaveBeenCalledTimes(3);
     });
 
     describe('Keeping searches alive', () => {

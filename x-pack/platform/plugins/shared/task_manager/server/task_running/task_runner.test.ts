@@ -2753,7 +2753,7 @@ describe('TaskManagerRunner', () => {
         }),
         expect.anything()
       );
-      expect(logger.warn).toBeCalledTimes(1);
+      expect(logger.warn)..toHaveBeenCalledTimes(1);
       expect(logger.warn).toBeCalledWith(
         'Disabling task bar:foo as it indicated it should disable itself',
         { tags: ['bar'] }

@@ -121,7 +121,7 @@ describe('stepStepSelectAgentPolicy', () => {
       render();
       await act(async () => {}); // Needed as updateAgentPolicies is called after multiple useEffect
       await act(async () => {
-        expect(updateAgentPoliciesMock).toBeCalledTimes(1);
+        expect(updateAgentPoliciesMock)..toHaveBeenCalledTimes(1);
         expect(updateAgentPoliciesMock).toBeCalledWith([{ id: 'policy-1', package_policies: [] }]);
       });
     });

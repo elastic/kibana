@@ -37,7 +37,7 @@ describe('reassignAgent', () => {
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update)..toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty(
@@ -53,7 +53,7 @@ describe('reassignAgent', () => {
       ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
 
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update)..toHaveBeenCalledTimes(0);
     });
 
     it('cannot reassign from hosted agent policy', async () => {
@@ -63,13 +63,13 @@ describe('reassignAgent', () => {
         reassignAgent(soClient, esClient, agentInHostedDoc._id, regularAgentPolicySO.id)
       ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update)..toHaveBeenCalledTimes(0);
 
       await expect(
         reassignAgent(soClient, esClient, agentInHostedDoc._id, hostedAgentPolicySO.id)
       ).rejects.toThrowError(HostedAgentPolicyRestrictionRelatedError);
       // does not call ES update
-      expect(esClient.update).toBeCalledTimes(0);
+      expect(esClient.update)..toHaveBeenCalledTimes(0);
     });
 
     it('update namespaces with reassign', async () => {
@@ -78,7 +78,7 @@ describe('reassignAgent', () => {
       await reassignAgent(soClient, esClient, agentInRegularDoc._id, regularAgentPolicySO.id);
 
       // calls ES update with correct values
-      expect(esClient.update).toBeCalledTimes(1);
+      expect(esClient.update)..toHaveBeenCalledTimes(1);
       const calledWith = esClient.update.mock.calls[0];
       expect(calledWith[0]?.id).toBe(agentInRegularDoc._id);
       expect((calledWith[0] as estypes.UpdateRequest)?.doc).toHaveProperty('namespaces', [

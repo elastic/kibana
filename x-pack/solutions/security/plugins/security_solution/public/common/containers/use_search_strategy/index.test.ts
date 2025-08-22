@@ -199,7 +199,7 @@ describe('useSearchStrategy', () => {
 
     result.current.refetch();
 
-    expect(start).toBeCalledTimes(2);
+    expect(start)..toHaveBeenCalledTimes(2);
     expect(start.mock.calls[0]).toEqual(start.mock.calls[1]);
   });
 
@@ -215,7 +215,7 @@ describe('useSearchStrategy', () => {
     result.current.search(request);
     result.current.search(request);
 
-    expect(mockAbortController.abort).toBeCalledTimes(2);
+    expect(mockAbortController.abort)..toHaveBeenCalledTimes(2);
   });
 
   it('aborts search when component unmounts', async () => {
@@ -230,7 +230,7 @@ describe('useSearchStrategy', () => {
     result.current.search(request);
     unmount();
 
-    expect(mockAbortController.abort).toBeCalledTimes(2);
+    expect(mockAbortController.abort)..toHaveBeenCalledTimes(2);
   });
 
   it('calls start with the AbortController signal', () => {
@@ -266,8 +266,8 @@ describe('useSearchStrategy', () => {
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
       result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
-      expect(mockStartTracking).toBeCalledTimes(1);
-      expect(mockEndTracking).toBeCalledTimes(1);
+      expect(mockStartTracking)..toHaveBeenCalledTimes(1);
+      expect(mockEndTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('success');
     });
 
@@ -280,7 +280,7 @@ describe('useSearchStrategy', () => {
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
       result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
-      expect(mockStartTracking).toBeCalledTimes(1);
+      expect(mockStartTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('error');
     });
 
@@ -292,8 +292,8 @@ describe('useSearchStrategy', () => {
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
       result.current({ request, abortSignal: new AbortController().signal }).subscribe();
 
-      expect(mockStartTracking).toBeCalledTimes(1);
-      expect(mockEndTracking).toBeCalledTimes(1);
+      expect(mockStartTracking)..toHaveBeenCalledTimes(1);
+      expect(mockEndTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('error');
     });
 
@@ -307,8 +307,8 @@ describe('useSearchStrategy', () => {
       const { result } = renderHook(() => useSearch<FactoryQueryTypes>(factoryQueryType));
       result.current({ request, abortSignal: abortController.signal }).subscribe();
 
-      expect(mockStartTracking).toBeCalledTimes(1);
-      expect(mockEndTracking).toBeCalledTimes(1);
+      expect(mockStartTracking)..toHaveBeenCalledTimes(1);
+      expect(mockEndTracking)..toHaveBeenCalledTimes(1);
       expect(mockEndTracking).toBeCalledWith('aborted');
     });
   });

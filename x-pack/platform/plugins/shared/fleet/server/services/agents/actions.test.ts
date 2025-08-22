@@ -347,7 +347,7 @@ describe('Agent actions', () => {
       const soClient = savedObjectsClientMock.create();
       await cancelAgentAction(esClient, soClient, 'action1');
 
-      expect(esClient.create).toBeCalledTimes(2);
+      expect(esClient.create)..toHaveBeenCalledTimes(2);
       expect(esClient.create).toBeCalledWith(
         expect.objectContaining({
           document: expect.objectContaining({

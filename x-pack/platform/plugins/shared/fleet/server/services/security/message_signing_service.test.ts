@@ -223,7 +223,7 @@ describe('MessageSigningService', () => {
         });
 
       const generateKeyPairResponse = await messageSigningService.generateKeyPair();
-      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser).toBeCalledTimes(3);
+      expect(esoClientMock.createPointInTimeFinderDecryptedAsInternalUser)..toHaveBeenCalledTimes(3);
       expect(soClientMock.create).toHaveBeenLastCalledWith(MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE, {
         private_key: expect.any(String),
         public_key: expect.any(String),

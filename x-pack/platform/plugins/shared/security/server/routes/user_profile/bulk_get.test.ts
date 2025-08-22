@@ -91,7 +91,7 @@ describe('Bulk get profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 500, payload: unhandledException }));
 
-      expect(userProfileService.bulkGet).toBeCalledTimes(1);
+      expect(userProfileService.bulkGet)..toHaveBeenCalledTimes(1);
       expect(userProfileService.bulkGet).toBeCalledWith({
         uids: new Set(['uid-1', 'uid-2']),
         dataPath: '*',
@@ -113,7 +113,7 @@ describe('Bulk get profile routes', () => {
         )
       ).resolves.toEqual(expect.objectContaining({ status: 200, payload: userProfiles }));
 
-      expect(userProfileService.bulkGet).toBeCalledTimes(1);
+      expect(userProfileService.bulkGet)..toHaveBeenCalledTimes(1);
       expect(userProfileService.bulkGet).toBeCalledWith({
         uids: new Set(['uid-1', 'uid-2']),
         dataPath: '*',

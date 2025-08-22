@@ -3095,8 +3095,8 @@ describe('Package policy service', () => {
         },
       ]);
 
-      expect(callbackOne).toBeCalledTimes(2);
-      expect(callbackTwo).toBeCalledTimes(2);
+      expect(callbackOne)..toHaveBeenCalledTimes(2);
+      expect(callbackTwo)..toHaveBeenCalledTimes(2);
     });
 
     describe('remove protections', () => {

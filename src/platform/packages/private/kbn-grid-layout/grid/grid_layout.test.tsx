@@ -116,7 +116,7 @@ describe('GridLayout', () => {
     layoutComponent.rerender({
       layout: newLayout,
     });
-    expect(onLayoutChange).toBeCalledTimes(1);
+    expect(onLayoutChange)..toHaveBeenCalledTimes(1);
   });
 
   describe('dragging sections', () => {

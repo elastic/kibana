@@ -40,7 +40,7 @@ describe('TelemetrySender', () => {
       const telemetryService = mockTelemetryService();
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       expect(telemetrySender['lastReported']).toBeUndefined();
-      expect(mockLocalStorage.getItem).toBeCalledTimes(1);
+      expect(mockLocalStorage.getItem)..toHaveBeenCalledTimes(1);
       expect(mockLocalStorage.getItem).toHaveBeenCalledWith(LOCALSTORAGE_KEY);
     });
 
@@ -88,9 +88,9 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(false);
-      expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
-      expect(telemetryService.fetchLastReported).toBeCalledTimes(0);
-      expect(refreshConfigMock).toBeCalledTimes(0);
+      expect(telemetryService.getIsOptedIn)..toHaveBeenCalledTimes(0);
+      expect(telemetryService.fetchLastReported)..toHaveBeenCalledTimes(0);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(0);
     });
 
     it('returns false whenever optIn is false (no need to refresh the config)', async () => {
@@ -99,8 +99,8 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
 
-      expect(refreshConfigMock).toBeCalledTimes(0);
-      expect(telemetryService.getIsOptedIn).toBeCalledTimes(1);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(0);
+      expect(telemetryService.getIsOptedIn)..toHaveBeenCalledTimes(1);
       expect(shouldSendReport).toBe(false);
     });
 
@@ -114,7 +114,7 @@ describe('TelemetrySender', () => {
       expect(telemetrySender['lastReported']).toBeUndefined();
       expect(shouldSendReport).toBe(true);
       expect(telemetryService.fetchLastReported).toHaveBeenCalledTimes(1);
-      expect(refreshConfigMock).toBeCalledTimes(1);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(1);
     });
 
     it('returns true if lastReported passed REPORT_INTERVAL_MS', async () => {
@@ -126,7 +126,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = lastReported;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(true);
-      expect(refreshConfigMock).toBeCalledTimes(1);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(1);
     });
 
     it('returns false if local lastReported is within REPORT_INTERVAL_MS', async () => {
@@ -138,7 +138,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = lastReported;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(false);
-      expect(refreshConfigMock).toBeCalledTimes(0);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(0);
     });
 
     it('returns false if local lastReported is expired but the remote is within REPORT_INTERVAL_MS', async () => {
@@ -149,7 +149,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = Date.now() - (REPORT_INTERVAL_MS + 1000);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(false);
-      expect(refreshConfigMock).toBeCalledTimes(0);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(0);
     });
 
     it('returns true if lastReported is malformed', async () => {
@@ -159,7 +159,7 @@ describe('TelemetrySender', () => {
       telemetrySender['lastReported'] = `random_malformed_string` as unknown as number;
       const shouldSendReport = await telemetrySender['shouldSendReport']();
       expect(shouldSendReport).toBe(true);
-      expect(refreshConfigMock).toBeCalledTimes(1);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(1);
     });
 
     it('returns false if we are in screenshot mode', async () => {
@@ -168,9 +168,9 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       const shouldSendReport = await telemetrySender['shouldSendReport']();
 
-      expect(telemetryService.getIsOptedIn).toBeCalledTimes(0);
+      expect(telemetryService.getIsOptedIn)..toHaveBeenCalledTimes(0);
       expect(shouldSendReport).toBe(false);
-      expect(refreshConfigMock).toBeCalledTimes(0);
+      expect(refreshConfigMock)..toHaveBeenCalledTimes(0);
     });
   });
   describe('sendIfDue', () => {
@@ -191,8 +191,8 @@ describe('TelemetrySender', () => {
       telemetrySender['retryCount'] = 0;
       await telemetrySender['sendIfDue']();
 
-      expect(telemetrySender['shouldSendReport']).toBeCalledTimes(1);
-      expect(mockFetch).toBeCalledTimes(0);
+      expect(telemetrySender['shouldSendReport'])..toHaveBeenCalledTimes(1);
+      expect(mockFetch)..toHaveBeenCalledTimes(0);
     });
 
     it('does not send if we are in screenshot mode', async () => {
@@ -200,7 +200,7 @@ describe('TelemetrySender', () => {
       const telemetrySender = new TelemetrySender(telemetryService, refreshConfigMock);
       await telemetrySender['sendIfDue']();
 
-      expect(mockFetch).toBeCalledTimes(0);
+      expect(mockFetch)..toHaveBeenCalledTimes(0);
     });
 
     it('updates last lastReported and calls saveToBrowser', async () => {
@@ -217,7 +217,7 @@ describe('TelemetrySender', () => {
 
       await telemetrySender['sendIfDue']();
 
-      expect(telemetrySender['updateLastReported']).toBeCalledTimes(1);
+      expect(telemetrySender['updateLastReported'])..toHaveBeenCalledTimes(1);
       expect(telemetrySender['retryCount']).toEqual(0);
       expect(telemetrySender['sendUsageData']).toHaveBeenCalledTimes(1);
     });
@@ -275,8 +275,8 @@ describe('TelemetrySender', () => {
 
       await telemetrySender['sendUsageData']();
 
-      expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
-      expect(mockFetch).toBeCalledTimes(1);
+      expect(telemetryService.fetchTelemetry)..toHaveBeenCalledTimes(1);
+      expect(mockFetch)..toHaveBeenCalledTimes(1);
       expect(mockFetch.mock.calls[0]).toMatchInlineSnapshot(`
           Array [
             "telemetry_cluster_url",
@@ -305,8 +305,8 @@ describe('TelemetrySender', () => {
       telemetrySender['shouldSendReport'] = jest.fn().mockReturnValue(true);
       await telemetrySender['sendIfDue']();
 
-      expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
-      expect(mockFetch).toBeCalledTimes(2);
+      expect(telemetryService.fetchTelemetry)..toHaveBeenCalledTimes(1);
+      expect(mockFetch)..toHaveBeenCalledTimes(2);
     });
 
     it('does not increase the retry counter on successful send', async () => {
@@ -322,7 +322,7 @@ describe('TelemetrySender', () => {
 
       await telemetrySender['sendUsageData']();
 
-      expect(mockFetch).toBeCalledTimes(1);
+      expect(mockFetch)..toHaveBeenCalledTimes(1);
       expect(telemetrySender['retryCount']).toBe(0);
     });
 
@@ -334,9 +334,9 @@ describe('TelemetrySender', () => {
         throw Error('Error fetching usage');
       });
       await telemetrySender['sendUsageData']();
-      expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
+      expect(telemetryService.fetchTelemetry)..toHaveBeenCalledTimes(1);
       expect(telemetrySender['retryCount']).toBe(1);
-      expect(setTimeout).toBeCalledTimes(1);
+      expect(setTimeout)..toHaveBeenCalledTimes(1);
       expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 120000);
       expect(consoleWarnMock).not.toHaveBeenCalled(); // console.warn is only triggered when the retryCount exceeds the allowed number
     });
@@ -353,8 +353,8 @@ describe('TelemetrySender', () => {
       telemetrySender['retryCount'] = 3;
       await telemetrySender['sendUsageData']();
 
-      expect(telemetryService.fetchTelemetry).toBeCalledTimes(1);
-      expect(mockFetch).toBeCalledTimes(2);
+      expect(telemetryService.fetchTelemetry)..toHaveBeenCalledTimes(1);
+      expect(mockFetch)..toHaveBeenCalledTimes(2);
       expect(telemetrySender['retryCount']).toBe(4);
       expect(setTimeout).toBeCalledWith(telemetrySender['sendUsageData'], 960000);
 

@@ -71,7 +71,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery)..toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -106,7 +106,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(1);
+      expect(esClient.updateByQuery)..toHaveBeenCalledTimes(1);
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -143,7 +143,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery)..toHaveBeenCalledTimes(2);
       // id1 should be closed
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
@@ -209,7 +209,7 @@ describe('updateAlertsStatus', () => {
 
       await alertService.updateAlertsStatus(args);
 
-      expect(esClient.updateByQuery).toBeCalledTimes(2);
+      expect(esClient.updateByQuery)..toHaveBeenCalledTimes(2);
       // id1 should be closed in index 1
       expect(esClient.updateByQuery.mock.calls[0]).toMatchInlineSnapshot(`
         Array [

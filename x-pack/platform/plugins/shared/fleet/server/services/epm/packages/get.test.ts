@@ -409,7 +409,7 @@ test: invalid manifest
         { id: 'nginx', name: 'nginx', title: 'Nginx', version: '1.0.0' },
       ]);
 
-      expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledTimes(1);
+      expect(jest.mocked(appContextService.getLogger().warn))..toHaveBeenCalledTimes(1);
       expect(jest.mocked(appContextService.getLogger().warn)).toBeCalledWith(
         'Installed package invalidpackage 0.0.1 is not a valid package anymore'
       );

@@ -395,7 +395,7 @@ describe('Task Runner', () => {
           ...generateRuleUpdateParams({})
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(taskRunnerFactoryInitializerParams.executionContext.withContext)..toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -529,7 +529,7 @@ describe('Task Runner', () => {
         expect(elasticsearchService.client.asInternalUser.update).toHaveBeenCalledWith(
           ...generateRuleUpdateParams({})
         );
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(taskRunnerFactoryInitializerParams.executionContext.withContext)..toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -730,7 +730,7 @@ describe('Task Runner', () => {
           ...generateRuleUpdateParams({})
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(taskRunnerFactoryInitializerParams.executionContext.withContext)..toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
@@ -821,7 +821,7 @@ describe('Task Runner', () => {
           ...generateRuleUpdateParams({})
         );
 
-        expect(taskRunnerFactoryInitializerParams.executionContext.withContext).toBeCalledTimes(1);
+        expect(taskRunnerFactoryInitializerParams.executionContext.withContext)..toHaveBeenCalledTimes(1);
         expect(
           taskRunnerFactoryInitializerParams.executionContext.withContext
         ).toHaveBeenCalledWith(
