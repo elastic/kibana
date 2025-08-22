@@ -8,6 +8,21 @@
  */
 
 import type { Meta, StoryObj } from '@storybook/react';
+import {
+  AT_TIMESTAMP,
+  EVENT_OUTCOME,
+  HOST_NAME,
+  HTTP_RESPONSE_STATUS_CODE,
+  PARENT_ID,
+  SERVICE_NAME,
+  SERVICE_NODE_NAME,
+  SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_DURATION,
+  SPAN_SUBTYPE,
+  SPAN_TYPE,
+  TRACE_ID,
+  TRANSACTION_ID,
+} from '@kbn/apm-types';
 import type { UnifiedDocViewerStorybookArgs } from '../../../.storybook/preview';
 import type { DocViewerTableProps } from './table';
 import { DocViewerTable } from './table';
@@ -51,5 +66,21 @@ export const Custom: Story = {
       hideNullValuesToggle: false,
       selectedOnlyToggle: false,
     },
+    fieldNames: [
+      AT_TIMESTAMP,
+      SERVICE_NAME,
+      SPAN_DESTINATION_SERVICE_RESOURCE,
+      HTTP_RESPONSE_STATUS_CODE,
+      SPAN_TYPE,
+      SPAN_SUBTYPE,
+      EVENT_OUTCOME,
+      TRANSACTION_ID,
+      SPAN_DURATION,
+      HOST_NAME,
+      SERVICE_NODE_NAME,
+      TRACE_ID,
+      PARENT_ID,
+      TRANSACTION_ID,
+    ],
   },
 };

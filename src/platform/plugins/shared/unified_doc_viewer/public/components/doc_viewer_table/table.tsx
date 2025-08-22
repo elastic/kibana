@@ -136,7 +136,7 @@ export interface DocViewerTableProps extends DocViewRenderProps {
   };
   customRenderCellValue?: RenderCellValue;
   customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
-  filterNames?: string[]; // todo implement this pre-filter to choose the fields we want to show
+  filterNames?: string[];
 }
 
 export const DocViewerTable = ({
@@ -158,6 +158,7 @@ export const DocViewerTable = ({
   },
   customRenderCellValue,
   customRenderCellPopover,
+  fieldNames = [],
 }: DocViewerTableProps) => {
   const styles = useMemoCss(
     componentStyles({ hideDataGridHeader: !availableFeatures.dataGridHeader })
@@ -244,6 +245,10 @@ export const DocViewerTable = ({
   );
 
   const displayedFieldNames = useMemo(() => {
+    if (fieldNames.length) {
+      return fieldNames;
+    }
+
     if (shouldShowOnlySelectedFields) {
       return getVisibleColumns(
         fieldsFromColumns,
@@ -274,6 +279,7 @@ export const DocViewerTable = ({
     columnsMeta,
     isEsqlMode,
     uiSettings,
+    fieldNames,
   ]);
 
   const { pinnedRows, restRows, allFields } = useMemo(
@@ -294,6 +300,7 @@ export const DocViewerTable = ({
           const isPinned = availableFeatures.pinColumn
             ? pinnedFields.includes(curFieldName)
             : false;
+
           const row = fieldToItem(curFieldName, isPinned);
 
           if (isPinned) {
