@@ -13,7 +13,7 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { SECURITY_EXTENSION_ID, type Logger } from '@kbn/core/server';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { PluginStart, Setup } from '@kbn/core-di';
 import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
@@ -86,6 +86,9 @@ export class ModuleStart implements PluginStartContract {
     private eventLog: ActionsPluginStartDeps['plugins']['eventLog'],
     @inject(PluginStart('spaces'))
     private spaces: ActionsPluginStartDeps['plugins']['spaces'],
+    @optional()
+    @inject(PluginStart('serverless'))
+    private serverless: ActionsPluginStartDeps['plugins']['serverless'],
     @inject(Setup) private setup: ModuleSetup
   ) {
     this.logger = this.loggerFactory.get();
@@ -97,6 +100,7 @@ export class ModuleStart implements PluginStartContract {
       taskManager: this.taskManager,
       eventLog: this.eventLog,
       spaces: this.spaces,
+      serverless: this.serverless,
     };
 
     const core = {

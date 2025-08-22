@@ -13,7 +13,7 @@ import {
   SECURITY_EXTENSION_ID,
 } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { inject, injectable } from 'inversify';
+import { inject, injectable, optional } from 'inversify';
 import { PluginSetup } from '@kbn/core-di';
 import { CoreSetup, PluginInitializer } from '@kbn/core-di-server';
 import type { ActionType, PluginSetupContract } from '.';
@@ -116,7 +116,10 @@ export class ModuleSetup implements PluginSetupContract {
     @inject(PluginSetup('monitoringCollection'))
     private monitoringCollection: ActionsPluginSetupDeps['plugins']['monitoringCollection'],
     @inject(PluginSetup('cloud'))
-    private cloud: ActionsPluginSetupDeps['plugins']['cloud']
+    private cloud: ActionsPluginSetupDeps['plugins']['cloud'],
+    @optional()
+    @inject(PluginSetup('serverless'))
+    private serverless: ActionsPluginSetupDeps['plugins']['serverless']
   ) {
     this.logger = this.loggerFactory.get();
     this.telemetryLogger = this.loggerFactory.get('usage');
@@ -390,7 +393,7 @@ export class ModuleSetup implements PluginSetupContract {
 
   public setEnabledConnectorTypes = (connectorTypes: EnabledConnectorTypes) => {
     if (
-      // !!plugins.serverless &&
+      this.serverless &&
       this.actionsConfig.enabledActionTypes.length === 1 &&
       this.actionsConfig.enabledActionTypes[0] === AllowedHosts.Any
     ) {
