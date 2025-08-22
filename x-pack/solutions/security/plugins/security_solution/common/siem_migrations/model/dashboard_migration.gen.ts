@@ -17,12 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
-import {
-  MigrationLastExecution,
-  MigrationStatus,
-  MigrationTaskStatus,
-  SiemMigrationResourceBase,
-} from './common.gen';
+import { MigrationLastExecution, MigrationStatus, MigrationTaskStatus } from './common.gen';
 import { SplunkOriginalDashboardProperties } from './vendor/dashboards/splunk.gen';
 
 /**
@@ -207,36 +202,3 @@ export const DashboardMigrationTaskStats = z.object({
    */
   last_updated_at: z.string(),
 });
-
-/**
- * The dashboard migration resource document object.
- */
-export type DashboardMigrationResource = z.infer<typeof DashboardMigrationResource>;
-export const DashboardMigrationResource = SiemMigrationResourceBase.merge(
-  z.object({
-    /**
-     * The resource content value. Can be an empty string.
-     */
-    content: z.string().optional(),
-    /**
-     * The resource arbitrary metadata.
-     */
-    metadata: z.object({}).optional(),
-    /**
-     * The dashboard resource migration id
-     */
-    id: NonEmptyString.optional(),
-    /**
-     * The migration id
-     */
-    migration_id: NonEmptyString.optional(),
-    /**
-     * The moment of the last update
-     */
-    updated_at: z.string().optional(),
-    /**
-     * The user who last updated the resource
-     */
-    updated_by: z.string().optional(),
-  })
-);

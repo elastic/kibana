@@ -6,10 +6,10 @@
  */
 
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/index-adapter';
+import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
   DashboardMigration,
   DashboardMigrationDashboardData,
-  DashboardMigrationResource,
 } from '../../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 export const dashboardMigrationsFieldMap: FieldMap<
@@ -48,7 +48,7 @@ export const dashboardMigrationsDashboardsFieldMap: FieldMap<
 };
 
 export const dashboardMigrationResourcesFieldMap: FieldMap<
-  SchemaFieldMapKeys<Omit<DashboardMigrationResource, 'id'>>
+  SchemaFieldMapKeys<Omit<SiemMigrationResource, 'id'>>
 > = {
   migration_id: { type: 'keyword', required: true },
   type: { type: 'keyword', required: true },

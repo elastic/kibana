@@ -15,11 +15,17 @@
  */
 
 import { z } from '@kbn/zod';
+import { ArrayFromString } from '@kbn/zod-helpers';
 
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import { DashboardMigration, DashboardMigrationTaskStats } from '../../dashboard_migration.gen';
 import { SplunkOriginalDashboardExport } from '../../vendor/dashboards/splunk.gen';
-import { SiemMigrationResourceBase } from '../../common.gen';
+import {
+  SiemMigrationResourceData,
+  SiemMigrationResourceType,
+  SiemMigrationResource,
+  SiemMigrationResourceBase,
+} from '../../common.gen';
 
 export type CreateDashboardMigrationRequestBody = z.infer<
   typeof CreateDashboardMigrationRequestBody
@@ -70,6 +76,33 @@ export type GetDashboardMigrationRequestParamsInput = z.input<
 
 export type GetDashboardMigrationResponse = z.infer<typeof GetDashboardMigrationResponse>;
 export const GetDashboardMigrationResponse = DashboardMigration;
+export type GetDashboardMigrationResourcesRequestQuery = z.infer<
+  typeof GetDashboardMigrationResourcesRequestQuery
+>;
+export const GetDashboardMigrationResourcesRequestQuery = z.object({
+  type: SiemMigrationResourceType.optional(),
+  names: ArrayFromString(z.string()).optional(),
+  from: z.coerce.number().optional(),
+  size: z.coerce.number().optional(),
+});
+export type GetDashboardMigrationResourcesRequestQueryInput = z.input<
+  typeof GetDashboardMigrationResourcesRequestQuery
+>;
+
+export type GetDashboardMigrationResourcesRequestParams = z.infer<
+  typeof GetDashboardMigrationResourcesRequestParams
+>;
+export const GetDashboardMigrationResourcesRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type GetDashboardMigrationResourcesRequestParamsInput = z.input<
+  typeof GetDashboardMigrationResourcesRequestParams
+>;
+
+export type GetDashboardMigrationResourcesResponse = z.infer<
+  typeof GetDashboardMigrationResourcesResponse
+>;
+export const GetDashboardMigrationResourcesResponse = z.array(SiemMigrationResource);
 
 export type GetDashboardMigrationResourcesMissingRequestParams = z.infer<
   typeof GetDashboardMigrationResourcesMissingRequestParams
@@ -101,3 +134,31 @@ export type GetDashboardMigrationStatsRequestParamsInput = z.input<
 
 export type GetDashboardMigrationStatsResponse = z.infer<typeof GetDashboardMigrationStatsResponse>;
 export const GetDashboardMigrationStatsResponse = DashboardMigrationTaskStats;
+
+export type UpsertDashboardMigrationResourcesRequestParams = z.infer<
+  typeof UpsertDashboardMigrationResourcesRequestParams
+>;
+export const UpsertDashboardMigrationResourcesRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type UpsertDashboardMigrationResourcesRequestParamsInput = z.input<
+  typeof UpsertDashboardMigrationResourcesRequestParams
+>;
+
+export type UpsertDashboardMigrationResourcesRequestBody = z.infer<
+  typeof UpsertDashboardMigrationResourcesRequestBody
+>;
+export const UpsertDashboardMigrationResourcesRequestBody = z.array(SiemMigrationResourceData);
+export type UpsertDashboardMigrationResourcesRequestBodyInput = z.input<
+  typeof UpsertDashboardMigrationResourcesRequestBody
+>;
+
+export type UpsertDashboardMigrationResourcesResponse = z.infer<
+  typeof UpsertDashboardMigrationResourcesResponse
+>;
+export const UpsertDashboardMigrationResourcesResponse = z.object({
+  /**
+   * The request has been processed correctly.
+   */
+  acknowledged: z.boolean(),
+});

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { SiemMigrationResourceBase } from '../../model/common.gen';
-import type { RuleMigrationResourceData } from '../../model/rule_migration.gen';
+import type { SiemMigrationResourceBase, SiemMigrationResourceData } from '../../model/common.gen';
 import { splResourceIdentifier } from '../../rules/resources/splunk/splunk_identifier';
 import type { VendorResourceIdentifier } from '../../rules/resources/types';
 import type { SiemMigrationVendor } from '../../types';
@@ -46,14 +45,14 @@ export abstract class ResourceIdentifier<I> {
     ];
   }
 
-  public fromResource(resource: RuleMigrationResourceData): SiemMigrationResourceBase[] {
+  public fromResource(resource: SiemMigrationResourceData): SiemMigrationResourceBase[] {
     if (resource.type === 'macro' && resource.content) {
       return this.identifier(resource.content);
     }
     return [];
   }
 
-  public fromResources(resources: RuleMigrationResourceData[]): SiemMigrationResourceBase[] {
+  public fromResources(resources: SiemMigrationResourceData[]): SiemMigrationResourceBase[] {
     const lookups = new Set<string>();
     const macros = new Set<string>();
     resources.forEach((resource) => {

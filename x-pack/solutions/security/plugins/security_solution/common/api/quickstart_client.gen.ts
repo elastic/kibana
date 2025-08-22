@@ -398,10 +398,16 @@ import type {
   CreateDashboardMigrationDashboardsRequestBodyInput,
   GetDashboardMigrationRequestParamsInput,
   GetDashboardMigrationResponse,
+  GetDashboardMigrationResourcesRequestQueryInput,
+  GetDashboardMigrationResourcesRequestParamsInput,
+  GetDashboardMigrationResourcesResponse,
   GetDashboardMigrationResourcesMissingRequestParamsInput,
   GetDashboardMigrationResourcesMissingResponse,
   GetDashboardMigrationStatsRequestParamsInput,
   GetDashboardMigrationStatsResponse,
+  UpsertDashboardMigrationResourcesRequestParamsInput,
+  UpsertDashboardMigrationResourcesRequestBodyInput,
+  UpsertDashboardMigrationResourcesResponse,
 } from '../siem_migrations/model/api/dashboards/dashboard_migration.gen';
 import type {
   CreateRuleMigrationRequestBodyInput,
@@ -1486,6 +1492,26 @@ finalize it.
           [ELASTIC_HTTP_VERSION_HEADER]: '1',
         },
         method: 'GET',
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
+   * Retrieves resources for an existing SIEM dashboards migration
+   */
+  async getDashboardMigrationResources(props: GetDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API GetDashboardMigrationResources`);
+    return this.kbnClient
+      .request<GetDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'GET',
+
+        query: props.query,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2842,6 +2868,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
+   * Creates or updates resources for an existing SIEM dashboards migration
+   */
+  async upsertDashboardMigrationResources(props: UpsertDashboardMigrationResourcesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API UpsertDashboardMigrationResources`);
+    return this.kbnClient
+      .request<UpsertDashboardMigrationResourcesResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/dashboards/{migration_id}/resources',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  /**
    * Creates or updates resources for an existing SIEM rules migration
    */
   async upsertRuleMigrationResources(props: UpsertRuleMigrationResourcesProps) {
@@ -3011,6 +3056,10 @@ export interface GetAssetCriticalityRecordProps {
 }
 export interface GetDashboardMigrationProps {
   params: GetDashboardMigrationRequestParamsInput;
+}
+export interface GetDashboardMigrationResourcesProps {
+  query: GetDashboardMigrationResourcesRequestQueryInput;
+  params: GetDashboardMigrationResourcesRequestParamsInput;
 }
 export interface GetDashboardMigrationResourcesMissingProps {
   params: GetDashboardMigrationResourcesMissingRequestParamsInput;
@@ -3223,6 +3272,10 @@ export interface UpdateWorkflowInsightProps {
 }
 export interface UploadAssetCriticalityRecordsProps {
   attachment: FormData;
+}
+export interface UpsertDashboardMigrationResourcesProps {
+  params: UpsertDashboardMigrationResourcesRequestParamsInput;
+  body: UpsertDashboardMigrationResourcesRequestBodyInput;
 }
 export interface UpsertRuleMigrationResourcesProps {
   params: UpsertRuleMigrationResourcesRequestParamsInput;

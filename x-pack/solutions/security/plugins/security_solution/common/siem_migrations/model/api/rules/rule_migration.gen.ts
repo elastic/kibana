@@ -28,14 +28,14 @@ import {
   RuleMigrationRetryFilter,
   RuleMigrationTranslationStats,
   PrebuiltRuleVersion,
-  RuleMigrationResourceData,
-  RuleMigrationResource,
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
 import {
   LangSmithOptions,
+  SiemMigrationResourceData,
   SiemMigrationResourceType,
+  SiemMigrationResource,
   SiemMigrationResourceBase,
 } from '../../common.gen';
 
@@ -165,7 +165,7 @@ export type GetRuleMigrationResourcesRequestParamsInput = z.input<
 >;
 
 export type GetRuleMigrationResourcesResponse = z.infer<typeof GetRuleMigrationResourcesResponse>;
-export const GetRuleMigrationResourcesResponse = z.array(RuleMigrationResource);
+export const GetRuleMigrationResourcesResponse = z.array(SiemMigrationResource);
 
 export type GetRuleMigrationResourcesMissingRequestParams = z.infer<
   typeof GetRuleMigrationResourcesMissingRequestParams
@@ -410,7 +410,7 @@ export type UpsertRuleMigrationResourcesRequestParamsInput = z.input<
 export type UpsertRuleMigrationResourcesRequestBody = z.infer<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;
-export const UpsertRuleMigrationResourcesRequestBody = z.array(RuleMigrationResourceData);
+export const UpsertRuleMigrationResourcesRequestBody = z.array(SiemMigrationResourceData);
 export type UpsertRuleMigrationResourcesRequestBodyInput = z.input<
   typeof UpsertRuleMigrationResourcesRequestBody
 >;

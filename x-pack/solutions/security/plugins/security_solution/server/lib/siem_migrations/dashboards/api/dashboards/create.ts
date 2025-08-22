@@ -66,7 +66,6 @@ export const registerSiemDashboardMigrationsCreateDashboardsRoute = (
           // Convert the original splunk dashboards format to the migration dashboard item document format
           const dashboardsInput = originalDashboardsExport.map<CreateDashboardsInput>(
             ({ result: { ...originalDashboard } }) => {
-              logger.warn(JSON.stringify({ originalDashboard }, null, 2));
               return {
                 migration_id: migrationId,
                 original_dashboard: {

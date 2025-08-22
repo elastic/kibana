@@ -18,12 +18,7 @@ import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../api/model/primitives.gen';
 import { RuleResponse } from '../../api/detection_engine/model/rule_schema/rule_schemas.gen';
-import {
-  MigrationStatus,
-  MigrationTaskStatus,
-  SiemMigrationResourceBase,
-  MigrationLastExecution,
-} from './common.gen';
+import { MigrationStatus, MigrationTaskStatus, MigrationLastExecution } from './common.gen';
 
 /**
  * The original rule vendor identifier.
@@ -454,53 +449,6 @@ export const RuleMigrationIntegrationStats = z.object({
  */
 export type RuleMigrationAllIntegrationsStats = z.infer<typeof RuleMigrationAllIntegrationsStats>;
 export const RuleMigrationAllIntegrationsStats = z.array(RuleMigrationIntegrationStats);
-
-export type RuleMigrationResourceContent = z.infer<typeof RuleMigrationResourceContent>;
-export const RuleMigrationResourceContent = z.object({
-  /**
-   * The resource content value. Can be an empty string.
-   */
-  content: z.string(),
-  /**
-   * The resource arbitrary metadata.
-   */
-  metadata: z.object({}).optional(),
-});
-
-/**
- * The rule migration resource data.
- */
-export type RuleMigrationResourceData = z.infer<typeof RuleMigrationResourceData>;
-export const RuleMigrationResourceData = SiemMigrationResourceBase.merge(
-  RuleMigrationResourceContent
-);
-
-/**
- * The rule migration resource document object.
- */
-export type RuleMigrationResource = z.infer<typeof RuleMigrationResource>;
-export const RuleMigrationResource = SiemMigrationResourceBase.merge(
-  RuleMigrationResourceContent.partial()
-).merge(
-  z.object({
-    /**
-     * The rule resource migration id
-     */
-    id: NonEmptyString,
-    /**
-     * The migration id
-     */
-    migration_id: NonEmptyString,
-    /**
-     * The moment of the last update
-     */
-    updated_at: z.string().optional(),
-    /**
-     * The user who last updated the resource
-     */
-    updated_by: z.string().optional(),
-  })
-);
 
 /**
  * The rule migration task execution settings.

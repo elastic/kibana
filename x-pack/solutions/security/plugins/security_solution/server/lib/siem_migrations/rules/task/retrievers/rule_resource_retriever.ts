@@ -6,14 +6,14 @@
  */
 
 import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
-import type { SiemMigrationResourceType } from '../../../../../../common/siem_migrations/model/common.gen';
 import type {
-  RuleMigrationResource,
-  RuleMigrationRule,
-} from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+  SiemMigrationResource,
+  SiemMigrationResourceType,
+} from '../../../../../../common/siem_migrations/model/common.gen';
+import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationsDataClient } from '../../data/rule_migrations_data_client';
 
-export interface RuleMigrationDefinedResource extends RuleMigrationResource {
+export interface RuleMigrationDefinedResource extends SiemMigrationResource {
   content: string; // ensures content exists
 }
 export type RuleMigrationResourcesData = Pick<

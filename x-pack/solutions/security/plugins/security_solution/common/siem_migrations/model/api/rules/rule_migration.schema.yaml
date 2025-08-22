@@ -618,7 +618,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResourceData'
+                $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResourceData'
       responses:
         200:
           description: Indicates migration resources have been created or updated correctly.
@@ -681,7 +681,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '../../rule_migration.schema.yaml#/components/schemas/RuleMigrationResource'
+                  $ref: '../../common.schema.yaml#/components/schemas/SiemMigrationResource'
 
   /internal/siem_migrations/rules/{migration_id}/resources/missing:
     get:
