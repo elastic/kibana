@@ -30,7 +30,7 @@ export const addSubFeatureReplacements = (
     privilegeGroup.privileges.forEach((privilege) => {
       privilege.replacedBy ??= [];
       for (const replacement of replacements) {
-        const privileges = !replacement.skipPrivilegeCopy ? [privilege.id] : [];
+        const privileges = !replacement.removeOriginalPrivileges ? [privilege.id] : [];
         privileges.push(...(replacement.additionalPrivileges?.[privilege.id] ?? []));
         privilege.replacedBy.push({ feature: replacement.feature, privileges });
       }

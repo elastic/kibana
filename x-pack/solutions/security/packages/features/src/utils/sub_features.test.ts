@@ -51,7 +51,7 @@ describe('sub_features', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'replacementFeature',
-          skipPrivilegeCopy: false,
+          removeOriginalPrivileges: false,
         },
       ];
 
@@ -69,11 +69,11 @@ describe('sub_features', () => {
       ]);
     });
 
-    it('does not copy privilege IDs when skipPrivilegeCopy is true', () => {
+    it('does not copy privilege IDs when removeOriginalPrivileges is true', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'replacementFeature',
-          skipPrivilegeCopy: true,
+          removeOriginalPrivileges: true,
         },
       ];
 
@@ -89,7 +89,7 @@ describe('sub_features', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'replacementFeature',
-          skipPrivilegeCopy: false,
+          removeOriginalPrivileges: false,
           additionalPrivileges: {
             privilege1: ['extraPriv1', 'extraPriv2'],
             privilege2: ['extraPriv3'],
@@ -128,7 +128,7 @@ describe('sub_features', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'newFeature',
-          skipPrivilegeCopy: false,
+          removeOriginalPrivileges: false,
         },
       ];
 
@@ -145,11 +145,11 @@ describe('sub_features', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'feature1',
-          skipPrivilegeCopy: false,
+          removeOriginalPrivileges: false,
         },
         {
           feature: 'feature2',
-          skipPrivilegeCopy: true,
+          removeOriginalPrivileges: true,
           additionalPrivileges: {
             privilege1: ['extra1'],
           },
@@ -229,7 +229,7 @@ describe('sub_features', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'replacementFeature',
-          skipPrivilegeCopy: false,
+          removeOriginalPrivileges: false,
         },
       ];
 
@@ -261,7 +261,7 @@ describe('sub_features', () => {
       const replacements: SubFeatureReplacement[] = [
         {
           feature: 'replacementFeature',
-          skipPrivilegeCopy: false,
+          removeOriginalPrivileges: false,
         },
       ];
 
