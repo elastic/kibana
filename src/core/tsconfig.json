@@ -81,7 +81,6 @@
     "@kbn/core-plugins-server-internal",
     "@kbn/core-root-server-internal",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-elasticsearch-server-utils",
     "@kbn/core-http-router-server-internal",
     "@kbn/logging",
     "@kbn/core-saved-objects-utils-server",
