@@ -14,6 +14,7 @@ import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 
 import type { DimensionsVisParam, MetricVisParam } from '../../common';
 import type { FormatOverrides } from './helpers';
+import { getMetricFormatter } from './helpers';
 
 const TREND_UPWARD = '\u{2191}'; // ↑
 const TREND_DOWNWARD = '\u{2193}'; // ↓

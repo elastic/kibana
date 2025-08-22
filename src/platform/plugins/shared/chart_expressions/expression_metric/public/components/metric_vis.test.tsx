@@ -8,9 +8,8 @@
  */
 
 import React from 'react';
-<<<<<<< HEAD
-import { renderHook, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { screen } from '@testing-library/react';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { MetricVisComponentProps } from './metric_vis';
 import { MetricVis } from './metric_vis';
@@ -21,19 +20,6 @@ import type { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/p
 import type { MetricVisParam } from '../../common';
 import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
 import type { PaletteOutput } from '@kbn/coloring';
-=======
-import userEvent from '@testing-library/user-event';
-import { screen } from '@testing-library/react';
-import { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { MetricVis, MetricVisComponentProps } from './metric_vis';
-import { MetricWTrend } from '@elastic/charts';
-import { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
-import { SerializableRecord } from '@kbn/utility-types';
-import { CustomPaletteState } from '@kbn/charts-plugin/common/expressions/palette/types';
-import { MetricVisParam } from '../../common';
-import { DEFAULT_TRENDLINE_NAME } from '../../common/constants';
-import { PaletteOutput } from '@kbn/coloring';
->>>>>>> 9c625fdd540 (Update metric vis test)
 import { faker } from '@faker-js/faker';
 import {
   setupResizeObserverMock,
@@ -41,10 +27,7 @@ import {
   renderChart,
   waitForRenderComplete,
 } from '@kbn/chart-test-jest-helpers';
-<<<<<<< HEAD
-=======
 import { euiThemeVars } from '@kbn/ui-theme';
->>>>>>> 9c625fdd540 (Update metric vis test)
 
 import * as secondaryMetricInfoModule from './secondary_metric_info';
 
@@ -783,11 +766,11 @@ describe('MetricVisComponent', function () {
         maxDimensions: {
           x: {
             unit: 'pixels',
-            value: 300,
+            value: 310,
           },
           y: {
             unit: 'pixels',
-            value: 300,
+            value: 310,
           },
         },
       },

@@ -29,18 +29,17 @@ import {
 } from '@kbn/coloring';
 import { getDataBoundsForPalette } from '@kbn/expression-metric-vis-plugin/public';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
+import { css } from '@emotion/react';
 import { DebouncedInput, IconSelect } from '@kbn/visualization-ui-components';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { KbnPalette, useKbnPalettes } from '@kbn/palettes';
-
-import { css } from '@emotion/react';
 import { PalettePanelContainer, getAccessorType } from '../../shared_components';
-import { CollapseSetting } from '../../shared_components/collapse_setting';
-import { metricIconsSet } from '../../shared_components/icon_set';
 import type { VisualizationDimensionEditorProps } from '../../types';
-import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
 import { defaultNumberPaletteParams, defaultPercentagePaletteParams } from './palette_config';
 import { DEFAULT_MAX_COLUMNS, getDefaultColor, showingBar } from './visualization';
+import { CollapseSetting } from '../../shared_components/collapse_setting';
+import type { MetricVisualizationState, SecondaryTrend, SecondaryTrendType } from './types';
+import { metricIconsSet } from '../../shared_components/icon_set';
 import { getColorMode, getDefaultConfigForMode, getSecondaryLabelSelected } from './helpers';
 import { SECONDARY_DEFAULT_STATIC_COLOR, GROUP_ID, metricStateDefaults } from './constants';
 

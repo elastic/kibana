@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { metricVisFunction } from './metric_vis_function';
+import type { MetricArguments } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { EXPRESSION_METRIC_NAME } from '../constants';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-
-import type { MetricArguments } from '..';
-import { metricVisFunction } from './metric_vis_function';
 
 describe('interpreter/functions#metricVis', () => {
   const fn = functionWrapper(metricVisFunction());
