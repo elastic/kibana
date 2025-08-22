@@ -67,8 +67,9 @@ export function messageFromAnonymizationRecords(
 
   for (const [pointer, anonymizedValue] of Object.entries(anonymizedRecord)) {
     // in practice, should always be a string
-    if (typeof anonymizedValue !== 'string') continue;
-    setByPointer(cloned, pointer, anonymizedValue);
+    if (typeof anonymizedValue === 'string') {
+      setByPointer(cloned, pointer, anonymizedValue);
+    }
   }
 
   return cloned;
