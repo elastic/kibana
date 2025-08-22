@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { parseEsInterval } from './parse_es_interval';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 
 export interface ReindexIndexDocumentsParams {
@@ -14,12 +15,13 @@ export interface ReindexIndexDocumentsParams {
   indexName: string;
   batchSize?: number;
   timeout?: string;
+  reindexTimeout?: string;
 }
 
 export interface ReindexTaskStatus {
   taskId: string;
   completed: boolean;
-  error?: any;
+  error?: unknown;
   total?: number;
   created?: number;
   updated?: number;
@@ -36,10 +38,19 @@ export async function reindexIndexDocuments({
   indexName,
   batchSize = 1000,
   timeout = '10m',
+  reindexTimeout = '10m',
 }: ReindexIndexDocumentsParams): Promise<void> {
   logger.info(`Starting reindex of documents in index: ${indexName}`);
 
   try {
+    // Check for existing reindex tasks to prevent concurrent operations
+    const activeTasks = await getActiveReindexTasks({ esClient, logger, indexName });
+    if (activeTasks.length > 0) {
+      throw new Error(
+        `A reindex operation is already in progress for index ${indexName}. Please wait for it to complete.`
+      );
+    }
+
     // Check if index exists
     const indexExists = await retryTransientEsErrors(
       () => esClient.indices.exists({ index: indexName }),
@@ -80,6 +91,7 @@ export async function reindexIndexDocuments({
       targetIndex: tempIndexName,
       batchSize,
       timeout,
+      reindexTimeout,
     });
 
     // Swap indices atomically using aliases
@@ -129,11 +141,12 @@ async function createIndexWithUpdatedMappings({
 
     // Create the new index
     await retryTransientEsErrors(
-      () => esClient.indices.create({
-        index: tempIndexName,
-        mappings,
-        settings,
-      }),
+      () =>
+        esClient.indices.create({
+          index: tempIndexName,
+          mappings,
+          settings,
+        }),
       { logger }
     );
 
@@ -154,6 +167,7 @@ async function performReindex({
   targetIndex,
   batchSize,
   timeout,
+  reindexTimeout,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -161,23 +175,26 @@ async function performReindex({
   targetIndex: string;
   batchSize: number;
   timeout: string;
+  reindexTimeout: string;
 }): Promise<void> {
   logger.debug(`Reindexing from ${sourceIndex} to ${targetIndex}`);
 
   try {
     const reindexResponse = await retryTransientEsErrors(
-      () => esClient.reindex({
-        source: { 
-          index: sourceIndex,
-          size: batchSize,
-        },
-        dest: { 
-          index: targetIndex,
-        },
-        timeout,
-        wait_for_completion: false,
-        refresh: true,
-      }),
+      () =>
+        esClient.reindex({
+          source: {
+            index: sourceIndex,
+            size: batchSize,
+          },
+          dest: {
+            index: targetIndex,
+            op_type: 'create',
+          },
+          timeout,
+          wait_for_completion: false,
+          refresh: true,
+        }),
       { logger }
     );
 
@@ -187,19 +204,26 @@ async function performReindex({
     }
 
     // Wait for reindex to complete
-    await waitForReindexCompletion({ esClient, logger, taskId, sourceIndex, targetIndex });
+    await waitForReindexCompletion({
+      esClient,
+      logger,
+      taskId,
+      sourceIndex,
+      targetIndex,
+      timeout: reindexTimeout,
+    });
 
     logger.debug(`Successfully reindexed ${sourceIndex} to ${targetIndex}`);
   } catch (error) {
     logger.error(`Failed to reindex ${sourceIndex} to ${targetIndex}: ${error.message}`);
-    
+
     // Clean up temporary index on failure
     try {
       await esClient.indices.delete({ index: targetIndex, ignore_unavailable: true });
     } catch (cleanupError) {
       logger.warn(`Failed to clean up temporary index ${targetIndex}: ${cleanupError.message}`);
     }
-    
+
     throw error;
   }
 }
@@ -228,39 +252,27 @@ async function swapIndices({
     );
 
     const existingAliases = Object.keys(aliasResponse[oldIndexName]?.aliases || {});
-    const tempOldIndexName = `${oldIndexName}-old-${Date.now()}`;
 
-    // Atomic swap using aliases
-    const actions = [
-      // Rename old index
-      { add: { index: oldIndexName, alias: tempOldIndexName } },
-      { remove_index: { index: oldIndexName } },
-      
-      // Rename new index to old name
-      { add: { index: newIndexName, alias: oldIndexName } },
-      { remove_index: { index: newIndexName } },
-    ];
+    // Atomically move all aliases from the old index to the new one
+    const actions = existingAliases.flatMap((alias) => [
+      { remove: { index: oldIndexName, alias } },
+      { add: { index: newIndexName, alias } },
+    ]);
 
-    // Re-add existing aliases to the new index
-    existingAliases.forEach(alias => {
-      if (alias !== tempOldIndexName) {
-        actions.push({ add: { index: oldIndexName, alias } });
-      }
-    });
+    // Add the index name itself as an alias to the new index, and remove from the old
+    actions.push({ remove: { index: oldIndexName, alias: oldIndexName } });
+    actions.push({ add: { index: newIndexName, alias: oldIndexName } });
 
-    await retryTransientEsErrors(
-      () => esClient.indices.updateAliases({ actions }),
-      { logger }
-    );
+    await retryTransientEsErrors(() => esClient.indices.updateAliases({ actions }), { logger });
 
     // Clean up the old index
     try {
       await retryTransientEsErrors(
-        () => esClient.indices.delete({ index: tempOldIndexName, ignore_unavailable: true }),
+        () => esClient.indices.delete({ index: oldIndexName, ignore_unavailable: true }),
         { logger }
       );
     } catch (cleanupError) {
-      logger.warn(`Failed to clean up old index ${tempOldIndexName}: ${cleanupError.message}`);
+      logger.warn(`Failed to clean up old index ${oldIndexName}: ${cleanupError.message}`);
     }
 
     logger.debug(`Successfully swapped indices`);
@@ -279,15 +291,18 @@ async function waitForReindexCompletion({
   taskId,
   sourceIndex,
   targetIndex,
+  timeout,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   taskId: string;
   sourceIndex: string;
   targetIndex: string;
+  timeout: string;
 }): Promise<void> {
-  const maxRetries = 120; // 10 minutes with 5-second intervals
+  const timeoutMs = parseEsInterval(timeout);
   const retryInterval = 5000;
+  const maxRetries = Math.floor(timeoutMs / retryInterval);
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
@@ -298,11 +313,13 @@ async function waitForReindexCompletion({
 
       if (taskResponse.completed) {
         const task = taskResponse.task;
-        
+
         if (task?.status?.failures && task.status.failures.length > 0) {
           const failures = task.status.failures;
           logger.error(`Reindex task ${taskId} completed with failures:`, failures);
-          throw new Error(`Reindex from ${sourceIndex} to ${targetIndex} failed with ${failures.length} failures`);
+          throw new Error(
+            `Reindex from ${sourceIndex} to ${targetIndex} failed with ${failures.length} failures`
+          );
         }
 
         const created = task?.status?.created || 0;
@@ -312,14 +329,15 @@ async function waitForReindexCompletion({
       }
 
       // Log progress periodically
-      if (attempt % 12 === 0) { // Every minute
+      if (attempt % 12 === 0) {
+        // Every minute
         const status = taskResponse.task?.status;
         const total = status?.total || 0;
         const processed = (status?.created || 0) + (status?.updated || 0);
         logger.debug(`Reindex task ${taskId} progress: ${processed}/${total} documents`);
       }
 
-      await new Promise(resolve => setTimeout(resolve, retryInterval));
+      await new Promise((resolve) => setTimeout(resolve, retryInterval));
     } catch (error) {
       if (error.meta?.statusCode === 404) {
         // Task might have completed and been cleaned up

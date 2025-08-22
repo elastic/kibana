@@ -70,7 +70,7 @@ describe('updateDataStreams', () => {
       index: dataStreamName,
       ...simulateIndexTemplateResponse.template.mappings,
     });
-    
+
     // Should not call rollover or reindex by default
     expect(rolloverDataStream).not.toHaveBeenCalled();
     expect(reindexDataStreamDocuments).not.toHaveBeenCalled();

@@ -6,6 +6,13 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  IndicesSimulateIndexTemplateResponse,
+  TasksGetResponse,
+  ReindexResponse,
+  IndicesGetResponse,
+  TasksListResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { reindexIndexDocuments, getActiveReindexTasks } from './reindex_index';
 
 const logger = loggingSystemMock.createLogger();
@@ -18,33 +25,38 @@ describe('reindexIndexDocuments', () => {
 
   it('should successfully reindex documents in an index', async () => {
     const indexName = 'test-index';
-    const tempIndexName = `${indexName}-reindex-${Date.now()}`;
     const taskId = 'task123';
 
     // Mock index exists
     esClient.indices.exists.mockResolvedValueOnce(true);
-    
+
     // Mock get index info
     esClient.indices.get.mockResolvedValueOnce({
       [indexName]: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
-    });
+    } as IndicesGetResponse);
 
     // Mock simulate index template
     esClient.indices.simulateIndexTemplate.mockResolvedValueOnce({
       template: {
         mappings: { properties: { field1: { type: 'text' }, field2: { type: 'keyword' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
-    });
+    } as IndicesSimulateIndexTemplateResponse);
 
     // Mock create index
-    esClient.indices.create.mockResolvedValueOnce({ acknowledged: true });
+    esClient.indices.create.mockResolvedValueOnce({
+      acknowledged: true,
+      index: 'new-index',
+      shards_acknowledged: true,
+    });
 
     // Mock reindex
-    esClient.reindex.mockResolvedValueOnce({ task: taskId });
+    esClient.reindex.mockResolvedValueOnce({ task: taskId } as ReindexResponse);
 
     // Mock task completion
     esClient.tasks.get.mockResolvedValueOnce({
@@ -56,13 +68,13 @@ describe('reindexIndexDocuments', () => {
           failures: [],
         },
       },
-    });
+    } as TasksGetResponse);
 
     // Mock get alias
     esClient.indices.getAlias.mockResolvedValueOnce({
       [indexName]: {
         aliases: {
-          'alias1': {},
+          alias1: {},
         },
       },
     });
@@ -108,15 +120,21 @@ describe('reindexIndexDocuments', () => {
       [indexName]: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
-    });
+    } as IndicesGetResponse);
     esClient.indices.simulateIndexTemplate.mockResolvedValueOnce({
       template: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
+    } as IndicesSimulateIndexTemplateResponse);
+    esClient.indices.create.mockResolvedValueOnce({
+      acknowledged: true,
+      index: 'new-index',
+      shards_acknowledged: true,
     });
-    esClient.indices.create.mockResolvedValueOnce({ acknowledged: true });
     esClient.reindex.mockRejectedValueOnce(error);
     esClient.indices.delete.mockResolvedValueOnce({ acknowledged: true });
 
@@ -143,16 +161,22 @@ describe('reindexIndexDocuments', () => {
       [indexName]: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
-    });
+    } as IndicesGetResponse);
     esClient.indices.simulateIndexTemplate.mockResolvedValueOnce({
       template: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
+    } as IndicesSimulateIndexTemplateResponse);
+    esClient.indices.create.mockResolvedValueOnce({
+      acknowledged: true,
+      index: 'new-index',
+      shards_acknowledged: true,
     });
-    esClient.indices.create.mockResolvedValueOnce({ acknowledged: true });
-    esClient.reindex.mockResolvedValueOnce({ task: taskId });
+    esClient.reindex.mockResolvedValueOnce({ task: taskId } as ReindexResponse);
     esClient.tasks.get.mockResolvedValueOnce({
       completed: true,
       task: {
@@ -160,7 +184,7 @@ describe('reindexIndexDocuments', () => {
           failures: [{ error: 'some failure' }],
         },
       },
-    });
+    } as TasksGetResponse);
     esClient.indices.delete.mockResolvedValueOnce({ acknowledged: true });
 
     await expect(
@@ -180,16 +204,22 @@ describe('reindexIndexDocuments', () => {
       [indexName]: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
-    });
+    } as IndicesGetResponse);
     esClient.indices.simulateIndexTemplate.mockResolvedValueOnce({
       template: {
         mappings: { properties: { field1: { type: 'text' } } },
         settings: { index: { number_of_shards: 1 } },
+        aliases: {},
       },
+    } as IndicesSimulateIndexTemplateResponse);
+    esClient.indices.create.mockResolvedValueOnce({
+      acknowledged: true,
+      index: 'new-index',
+      shards_acknowledged: true,
     });
-    esClient.indices.create.mockResolvedValueOnce({ acknowledged: true });
-    esClient.reindex.mockResolvedValueOnce({ task: null });
+    esClient.reindex.mockResolvedValueOnce({ task: undefined } as ReindexResponse);
     esClient.indices.delete.mockResolvedValueOnce({ acknowledged: true });
 
     await expect(
@@ -200,6 +230,40 @@ describe('reindexIndexDocuments', () => {
       })
     ).rejects.toThrow('Failed to get task ID for reindex operation');
   });
+
+  it('should throw an error if a reindex operation is already in progress', async () => {
+    const indexName = 'test-index';
+    esClient.tasks.list.mockResolvedValueOnce({
+      nodes: {
+        node1: {
+          tasks: {
+            task1: {
+              action: 'indices:data/write/reindex',
+              cancellable: true,
+              description: `reindex from [${indexName}] to [some-other-index]`,
+              headers: {},
+              id: 1,
+              node: 'node1',
+              running_time_in_nanos: 1,
+              start_time_in_millis: 1,
+              status: {},
+              type: 'task',
+            },
+          },
+        },
+      },
+    } as TasksListResponse);
+
+    await expect(
+      reindexIndexDocuments({
+        esClient,
+        logger,
+        indexName,
+      })
+    ).rejects.toThrow(
+      `A reindex operation is already in progress for index ${indexName}. Please wait for it to complete.`
+    );
+  });
 });
 
 describe('getActiveReindexTasks', () => {
@@ -209,24 +273,32 @@ describe('getActiveReindexTasks', () => {
 
   it('should return active reindex tasks for index', async () => {
     const indexName = 'test-index';
-    
+
     esClient.tasks.list.mockResolvedValueOnce({
       nodes: {
         node1: {
           tasks: {
-            'task1': {
+            task1: {
+              action: 'indices:data/write/reindex',
+              cancellable: true,
               description: `reindex from [${indexName}] to [${indexName}-reindex-123]`,
+              headers: {},
+              id: 1,
+              node: 'node1',
+              running_time_in_nanos: 1,
+              start_time_in_millis: 1,
               status: {
                 total: 1000,
                 created: 500,
                 updated: 0,
                 batches: 5,
               },
+              type: 'task',
             },
           },
         },
       },
-    });
+    } as TasksListResponse);
 
     const tasks = await getActiveReindexTasks({
       esClient,
@@ -247,10 +319,10 @@ describe('getActiveReindexTasks', () => {
 
   it('should return empty array when no tasks found', async () => {
     const indexName = 'test-index';
-    
+
     esClient.tasks.list.mockResolvedValueOnce({
       nodes: {},
-    });
+    } as TasksListResponse);
 
     const tasks = await getActiveReindexTasks({
       esClient,
@@ -264,7 +336,7 @@ describe('getActiveReindexTasks', () => {
   it('should handle errors gracefully', async () => {
     const indexName = 'test-index';
     const error = new Error('Tasks list failed');
-    
+
     esClient.tasks.list.mockRejectedValueOnce(error);
 
     const tasks = await getActiveReindexTasks({
@@ -274,6 +346,8 @@ describe('getActiveReindexTasks', () => {
     });
 
     expect(tasks).toHaveLength(0);
-    expect(logger.error).toHaveBeenCalledWith(`Failed to get reindex tasks for ${indexName}: ${error.message}`);
+    expect(logger.error).toHaveBeenCalledWith(
+      `Failed to get reindex tasks for ${indexName}: ${error.message}`
+    );
   });
 });

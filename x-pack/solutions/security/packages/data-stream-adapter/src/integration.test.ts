@@ -10,9 +10,14 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  IndicesGetDataStreamResponse,
+  IndicesRolloverResponse,
+  IndicesSimulateIndexTemplateResponse,
+  ReindexResponse,
+  TasksGetResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { updateDataStreams } from './create_or_update_data_stream';
-import { rolloverDataStream } from './rollover_data_stream';
-import { reindexDataStreamDocuments } from './reindex_data_stream';
 
 describe('Integration: Rollover and Reindexing', () => {
   const logger = loggingSystemMock.createLogger();
@@ -24,42 +29,61 @@ describe('Integration: Rollover and Reindexing', () => {
 
   it('should handle complete workflow: mapping update -> rollover -> reindex', async () => {
     const dataStreamName = 'logs-security-default';
-    
+
     // Mock successful responses
     esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{ name: dataStreamName }],
-    });
-    
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [],
+          generation: 1,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
     esClient.indices.putSettings.mockResolvedValueOnce({ acknowledged: true });
     esClient.indices.simulateIndexTemplate.mockResolvedValueOnce({
-      template: { 
-        mappings: { 
-          properties: { 
-            message: { 
+      template: {
+        mappings: {
+          properties: {
+            message: {
               type: 'semantic_text',
-              inference_id: 'new-inference-id'
-            }
-          }
-        }
+              inference_id: 'new-inference-id',
+            },
+          },
+        },
+        aliases: {},
+        settings: {},
       },
-    });
-    
+    } as IndicesSimulateIndexTemplateResponse);
+
     esClient.indices.putMapping.mockResolvedValueOnce({ acknowledged: true });
-    esClient.indices.rollover.mockResolvedValueOnce({ acknowledged: true });
-    
+    esClient.indices.rollover.mockResolvedValueOnce({
+      acknowledged: true,
+    } as IndicesRolloverResponse);
+
     // Mock reindex workflow
     esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{
-        name: dataStreamName,
-        indices: [
-          { index_name: 'logs-security-default-000001' },
-          { index_name: 'logs-security-default-000002' },
-          { index_name: 'logs-security-default-000003' }, // current write index
-        ],
-      }],
-    });
-    
-    esClient.reindex.mockResolvedValue({ task: 'task123' });
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [
+            { index_name: 'logs-security-default-000001', index_uuid: 'uuid1' },
+            { index_name: 'logs-security-default-000002', index_uuid: 'uuid2' },
+            { index_name: 'logs-security-default-000003', index_uuid: 'uuid3' }, // current write index
+          ],
+          generation: 3,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
+    esClient.reindex.mockResolvedValue({ task: 'task123' } as ReindexResponse);
     esClient.tasks.get.mockResolvedValue({
       completed: true,
       task: {
@@ -69,7 +93,7 @@ describe('Integration: Rollover and Reindexing', () => {
           failures: [],
         },
       },
-    });
+    } as TasksGetResponse);
 
     // Execute the complete workflow
     await updateDataStreams({
@@ -90,15 +114,19 @@ describe('Integration: Rollover and Reindexing', () => {
       lazy: true,
     });
     expect(esClient.reindex).toHaveBeenCalledTimes(2); // For older indices only
-    
+
     expect(logger.info).toHaveBeenCalledWith(`Updating data streams - ${dataStreamName}`);
-    expect(logger.info).toHaveBeenCalledWith(`Triggering rollover for ${dataStreamName} after mapping update`);
-    expect(logger.info).toHaveBeenCalledWith(`Starting reindex of older documents for ${dataStreamName}`);
+    expect(logger.info).toHaveBeenCalledWith(
+      `Triggering rollover for ${dataStreamName} after mapping update`
+    );
+    expect(logger.info).toHaveBeenCalledWith(
+      `Starting reindex of older documents for ${dataStreamName}`
+    );
   });
 
   it('should handle semantic text inference_id update scenario', async () => {
     const dataStreamName = 'logs-security-default';
-    
+
     // Simulate semantic text mapping with updated inference_id
     const newMappings = {
       properties: {
@@ -113,29 +141,46 @@ describe('Integration: Rollover and Reindexing', () => {
     };
 
     esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{ name: dataStreamName }],
-    });
-    
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [],
+          generation: 1,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
     esClient.indices.putSettings.mockResolvedValueOnce({ acknowledged: true });
     esClient.indices.simulateIndexTemplate.mockResolvedValueOnce({
-      template: { mappings: newMappings },
-    });
-    
+      template: { mappings: newMappings, aliases: {}, settings: {} },
+    } as IndicesSimulateIndexTemplateResponse);
+
     esClient.indices.putMapping.mockResolvedValueOnce({ acknowledged: true });
-    esClient.indices.rollover.mockResolvedValueOnce({ acknowledged: true });
-    
+    esClient.indices.rollover.mockResolvedValueOnce({
+      acknowledged: true,
+    } as IndicesRolloverResponse);
+
     // Mock reindex for semantic text update
     esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{
-        name: dataStreamName,
-        indices: [
-          { index_name: 'logs-security-default-000001' },
-          { index_name: 'logs-security-default-000002' },
-        ],
-      }],
-    });
-    
-    esClient.reindex.mockResolvedValue({ task: 'semantic-reindex-task' });
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [
+            { index_name: 'logs-security-default-000001', index_uuid: 'uuid1' },
+            { index_name: 'logs-security-default-000002', index_uuid: 'uuid2' },
+          ],
+          generation: 2,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
+    esClient.reindex.mockResolvedValue({ task: 'semantic-reindex-task' } as ReindexResponse);
     esClient.tasks.get.mockResolvedValue({
       completed: true,
       task: {
@@ -145,7 +190,7 @@ describe('Integration: Rollover and Reindexing', () => {
           failures: [],
         },
       },
-    });
+    } as TasksGetResponse);
 
     await updateDataStreams({
       esClient,
@@ -163,13 +208,13 @@ describe('Integration: Rollover and Reindexing', () => {
       ...newMappings,
       write_index_only: true,
     });
-    
+
     expect(esClient.reindex).toHaveBeenCalledWith({
-      source: { 
+      source: {
         index: 'logs-security-default-000001',
         size: 1000,
       },
-      dest: { 
+      dest: {
         index: dataStreamName,
         op_type: 'create',
       },

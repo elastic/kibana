@@ -14,6 +14,46 @@ import { get } from 'lodash';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
 import { reindexIndexDocuments } from './reindex_index';
 
+const shouldReindexForError = (error: unknown): boolean => {
+  if (
+    !error ||
+    typeof error !== 'object' ||
+    !('body' in error) ||
+    !error.body ||
+    typeof error.body !== 'object'
+  ) {
+    return false;
+  }
+  const { body } = error as { body: { error?: { type?: string; reason?: string } } };
+
+  if (!body.error) {
+    return false;
+  }
+
+  const errorType = body.error.type;
+  const errorReason = body.error.reason;
+
+  if (errorType === 'illegal_argument_exception') {
+    return true;
+  }
+
+  if (errorType === 'mapper_exception') {
+    const reindexReasons = [
+      'mapper',
+      "can't merge",
+      'different type',
+      'cannot change',
+      'conflicting type',
+    ];
+
+    return reindexReasons.some((reason) =>
+      errorReason?.toLowerCase().includes(reason.toLowerCase())
+    );
+  }
+
+  return false;
+};
+
 interface UpdateIndexMappingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
@@ -58,11 +98,11 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateMapping = async ({ 
-  logger, 
-  esClient, 
-  indexName, 
-  writeIndexOnly, 
+const updateMapping = async ({
+  logger,
+  esClient,
+  indexName,
+  writeIndexOnly,
   enableReindexing = false,
 }: UpdateIndexOpts) => {
   logger.debug(`Updating mappings for ${indexName} data stream.`);
@@ -97,19 +137,18 @@ const updateMapping = async ({
         }),
       { logger }
     );
-
-    // If reindexing is enabled, trigger reindex after successful mapping update
-    if (enableReindexing) {
-      logger.info(`Starting reindex of documents for ${indexName} after mapping update`);
+  } catch (err) {
+    logger.error(`Failed to PUT mapping for ${indexName}: ${err.message}`);
+    if (enableReindexing && shouldReindexForError(err)) {
+      logger.info(`Mapping update failed for ${indexName}, triggering reindex due to conflict.`);
       await reindexIndexDocuments({
         esClient,
         logger,
         indexName,
       });
+    } else {
+      throw err;
     }
-  } catch (err) {
-    logger.error(`Failed to PUT mapping for ${indexName}: ${err.message}`);
-    throw err;
   }
 };
 /**
@@ -133,12 +172,12 @@ const updateIndexMappings = async ({
   // Update mappings of the found indices.
   await Promise.all(
     indexNames.map((indexName) =>
-      updateMapping({ 
-        logger, 
-        esClient, 
-        totalFieldsLimit, 
-        indexName, 
-        writeIndexOnly, 
+      updateMapping({
+        logger,
+        esClient,
+        totalFieldsLimit,
+        indexName,
+        writeIndexOnly,
         enableReindexing,
       })
     )

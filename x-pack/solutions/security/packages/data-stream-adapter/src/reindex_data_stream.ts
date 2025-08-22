@@ -6,7 +6,15 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type {
+  IndicesGetDataStreamResponse,
+  ReindexResponse,
+  TasksGetResponse,
+  TasksListResponse,
+  IndicesDataStreamIndex,
+} from '@elastic/elasticsearch/lib/api/types';
 import { retryTransientEsErrors } from '@kbn/index-adapter';
+import { parseEsInterval } from './parse_es_interval';
 
 export interface ReindexDataStreamDocumentsParams {
   esClient: ElasticsearchClient;
@@ -14,12 +22,13 @@ export interface ReindexDataStreamDocumentsParams {
   dataStreamName: string;
   batchSize?: number;
   timeout?: string;
+  reindexTimeout?: string;
 }
 
 export interface ReindexTaskStatus {
   taskId: string;
   completed: boolean;
-  error?: any;
+  error?: unknown;
   total?: number;
   created?: number;
   updated?: number;
@@ -36,15 +45,23 @@ export async function reindexDataStreamDocuments({
   dataStreamName,
   batchSize = 1000,
   timeout = '10m',
+  reindexTimeout = '10m',
 }: ReindexDataStreamDocumentsParams): Promise<void> {
   logger.info(`Starting reindex of older documents in data stream: ${dataStreamName}`);
 
   try {
-    // Get all backing indices for the data stream
-    const dataStreamInfo = await retryTransientEsErrors(
+    // Check for existing reindex tasks to prevent concurrent operations
+    const activeTasks = await getActiveReindexTasks({ esClient, logger, dataStreamName });
+    if (activeTasks.length > 0) {
+      throw new Error(
+        `A reindex operation is already in progress for data stream ${dataStreamName}. Please wait for it to complete.`
+      );
+    }
+
+    const dataStreamInfo = (await retryTransientEsErrors(
       () => esClient.indices.getDataStream({ name: dataStreamName }),
       { logger }
-    );
+    )) as IndicesGetDataStreamResponse;
 
     const dataStream = dataStreamInfo.data_streams[0];
     if (!dataStream) {
@@ -53,27 +70,34 @@ export async function reindexDataStreamDocuments({
 
     const backingIndices = dataStream.indices;
     if (backingIndices.length <= 1) {
-      logger.info(`Data stream ${dataStreamName} has ${backingIndices.length} backing indices, skipping reindex`);
+      logger.info(
+        `Data stream ${dataStreamName} has ${backingIndices.length} backing indices, skipping reindex`
+      );
       return;
     }
 
     // Skip the write index (last one) and reindex older indices
     const indicesToReindex = backingIndices.slice(0, -1);
-    
-    logger.info(`Reindexing ${indicesToReindex.length} older indices in data stream ${dataStreamName}`);
 
-    // Process each backing index
-    for (const indexInfo of indicesToReindex) {
-      const sourceIndex = indexInfo.index_name;
-      await reindexSingleIndex({
-        esClient,
-        logger,
-        sourceIndex,
-        targetDataStream: dataStreamName,
-        batchSize,
-        timeout,
-      });
-    }
+    logger.info(
+      `Reindexing ${indicesToReindex.length} older indices in data stream ${dataStreamName}`
+    );
+
+    // Reindex older indices in parallel
+    await Promise.all(
+      indicesToReindex.map((indexInfo: IndicesDataStreamIndex) => {
+        const sourceIndex = indexInfo.index_name;
+        return reindexSingleIndex({
+          esClient,
+          logger,
+          sourceIndex,
+          targetDataStream: dataStreamName,
+          batchSize,
+          timeout,
+          reindexTimeout,
+        });
+      })
+    );
 
     logger.info(`Completed reindex of older documents in data stream: ${dataStreamName}`);
   } catch (error) {
@@ -92,6 +116,7 @@ async function reindexSingleIndex({
   targetDataStream,
   batchSize,
   timeout,
+  reindexTimeout,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
@@ -99,27 +124,29 @@ async function reindexSingleIndex({
   targetDataStream: string;
   batchSize: number;
   timeout: string;
+  reindexTimeout: string;
 }): Promise<void> {
   logger.debug(`Reindexing from ${sourceIndex} to ${targetDataStream}`);
 
   try {
     // Start reindex operation
-    const reindexResponse = await retryTransientEsErrors(
-      () => esClient.reindex({
-        source: { 
-          index: sourceIndex,
-          size: batchSize,
-        },
-        dest: { 
-          index: targetDataStream,
-          op_type: 'create', // Avoid duplicates
-        },
-        timeout,
-        wait_for_completion: false,
-        refresh: true,
-      }),
+    const reindexResponse = (await retryTransientEsErrors(
+      () =>
+        esClient.reindex({
+          source: {
+            index: sourceIndex,
+            size: batchSize,
+          },
+          dest: {
+            index: targetDataStream,
+            op_type: 'create', // Avoid duplicates
+          },
+          timeout,
+          wait_for_completion: false,
+          refresh: true,
+        }),
       { logger }
-    );
+    )) as ReindexResponse;
 
     const taskId = reindexResponse.task?.toString();
     if (!taskId) {
@@ -127,7 +154,13 @@ async function reindexSingleIndex({
     }
 
     // Wait for reindex to complete
-    await waitForReindexCompletion({ esClient, logger, taskId, sourceIndex });
+    await waitForReindexCompletion({
+      esClient,
+      logger,
+      taskId,
+      sourceIndex,
+      timeout: reindexTimeout,
+    });
 
     logger.debug(`Successfully reindexed ${sourceIndex} to ${targetDataStream}`);
   } catch (error) {
@@ -144,25 +177,28 @@ async function waitForReindexCompletion({
   logger,
   taskId,
   sourceIndex,
+  timeout,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   taskId: string;
   sourceIndex: string;
+  timeout: string;
 }): Promise<void> {
-  const maxRetries = 120; // 10 minutes with 5-second intervals
+  const timeoutMs = parseEsInterval(timeout);
   const retryInterval = 5000;
+  const maxRetries = Math.floor(timeoutMs / retryInterval);
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      const taskResponse = await esClient.tasks.get({
+      const taskResponse = (await esClient.tasks.get({
         task_id: taskId,
         wait_for_completion: false,
-      });
+      })) as TasksGetResponse;
 
       if (taskResponse.completed) {
         const task = taskResponse.task;
-        
+
         if (task?.status?.failures && task.status.failures.length > 0) {
           const failures = task.status.failures;
           logger.error(`Reindex task ${taskId} completed with failures:`, failures);
@@ -176,16 +212,22 @@ async function waitForReindexCompletion({
       }
 
       // Log progress periodically
-      if (attempt % 12 === 0) { // Every minute
+      if (attempt % 12 === 0) {
+        // Every minute
         const status = taskResponse.task?.status;
         const total = status?.total || 0;
         const processed = (status?.created || 0) + (status?.updated || 0);
         logger.debug(`Reindex task ${taskId} progress: ${processed}/${total} documents`);
       }
 
-      await new Promise(resolve => setTimeout(resolve, retryInterval));
-    } catch (error) {
-      if (error.meta?.statusCode === 404) {
+      await new Promise((resolve) => setTimeout(resolve, retryInterval));
+    } catch (error: unknown) {
+      if (
+        error &&
+        typeof error === 'object' &&
+        'meta' in error &&
+        (error as { meta: { statusCode?: number } }).meta.statusCode === 404
+      ) {
         // Task might have completed and been cleaned up
         logger.warn(`Reindex task ${taskId} not found, assuming completed`);
         return;
@@ -210,10 +252,10 @@ export async function getActiveReindexTasks({
   dataStreamName: string;
 }): Promise<ReindexTaskStatus[]> {
   try {
-    const tasksResponse = await esClient.tasks.list({
+    const tasksResponse = (await esClient.tasks.list({
       detailed: true,
       actions: ['indices:data/write/reindex'],
-    });
+    })) as TasksListResponse;
 
     const reindexTasks: ReindexTaskStatus[] = [];
 

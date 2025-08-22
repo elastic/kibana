@@ -6,6 +6,12 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type {
+  IndicesGetDataStreamResponse,
+  ReindexResponse,
+  TasksGetResponse,
+  TasksListResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import { reindexDataStreamDocuments, getActiveReindexTasks } from './reindex_data_stream';
 
 const logger = loggingSystemMock.createLogger();
@@ -19,11 +25,17 @@ describe('reindexDataStreamDocuments', () => {
   it('should skip reindex when data stream has only one backing index', async () => {
     const dataStreamName = 'test-data-stream';
     esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{
-        name: dataStreamName,
-        indices: [{ index_name: 'test-data-stream-000001' }],
-      }],
-    });
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [{ index_name: 'test-data-stream-000001', index_uuid: 'uuid1' }],
+          generation: 1,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
 
     await reindexDataStreamDocuments({
       esClient,
@@ -31,28 +43,36 @@ describe('reindexDataStreamDocuments', () => {
       dataStreamName,
     });
 
-    expect(logger.info).toHaveBeenCalledWith(`Data stream ${dataStreamName} has 1 backing indices, skipping reindex`);
+    expect(logger.info).toHaveBeenCalledWith(
+      `Data stream ${dataStreamName} has 1 backing indices, skipping reindex`
+    );
     expect(esClient.reindex).not.toHaveBeenCalled();
   });
 
   it('should reindex older indices in data stream', async () => {
     const dataStreamName = 'test-data-stream';
     const taskId = 'task123';
-    
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{
-        name: dataStreamName,
-        indices: [
-          { index_name: 'test-data-stream-000001' },
-          { index_name: 'test-data-stream-000002' },
-          { index_name: 'test-data-stream-000003' }, // current write index
-        ],
-      }],
-    });
 
-    esClient.reindex.mockResolvedValueOnce({ task: taskId });
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [
+            { index_name: 'test-data-stream-000001', index_uuid: 'uuid1' },
+            { index_name: 'test-data-stream-000002', index_uuid: 'uuid2' },
+            { index_name: 'test-data-stream-000003', index_uuid: 'uuid3' }, // current write index
+          ],
+          generation: 3,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
+    esClient.reindex.mockResolvedValue({ task: taskId } as ReindexResponse);
     esClient.tasks.get
-      .mockResolvedValueOnce({ completed: false })
+      .mockResolvedValueOnce({ completed: false } as TasksGetResponse)
       .mockResolvedValueOnce({
         completed: true,
         task: {
@@ -62,7 +82,7 @@ describe('reindexDataStreamDocuments', () => {
             failures: [],
           },
         },
-      });
+      } as TasksGetResponse);
 
     await reindexDataStreamDocuments({
       esClient,
@@ -72,11 +92,11 @@ describe('reindexDataStreamDocuments', () => {
 
     expect(esClient.reindex).toHaveBeenCalledTimes(2); // For the two older indices
     expect(esClient.reindex).toHaveBeenCalledWith({
-      source: { 
+      source: {
         index: 'test-data-stream-000001',
         size: 1000,
       },
-      dest: { 
+      dest: {
         index: dataStreamName,
         op_type: 'create',
       },
@@ -85,11 +105,11 @@ describe('reindexDataStreamDocuments', () => {
       refresh: true,
     });
     expect(esClient.reindex).toHaveBeenCalledWith({
-      source: { 
+      source: {
         index: 'test-data-stream-000002',
         size: 1000,
       },
-      dest: { 
+      dest: {
         index: dataStreamName,
         op_type: 'create',
       },
@@ -103,7 +123,7 @@ describe('reindexDataStreamDocuments', () => {
     const dataStreamName = 'test-data-stream';
     esClient.indices.getDataStream.mockResolvedValueOnce({
       data_streams: [],
-    });
+    } as IndicesGetDataStreamResponse);
 
     await expect(
       reindexDataStreamDocuments({
@@ -117,18 +137,24 @@ describe('reindexDataStreamDocuments', () => {
   it('should handle reindex task completion with failures', async () => {
     const dataStreamName = 'test-data-stream';
     const taskId = 'task123';
-    
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{
-        name: dataStreamName,
-        indices: [
-          { index_name: 'test-data-stream-000001' },
-          { index_name: 'test-data-stream-000002' },
-        ],
-      }],
-    });
 
-    esClient.reindex.mockResolvedValueOnce({ task: taskId });
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [
+            { index_name: 'test-data-stream-000001', index_uuid: 'uuid1' },
+            { index_name: 'test-data-stream-000002', index_uuid: 'uuid2' },
+          ],
+          generation: 2,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
+    esClient.reindex.mockResolvedValue({ task: taskId } as ReindexResponse);
     esClient.tasks.get.mockResolvedValueOnce({
       completed: true,
       task: {
@@ -136,7 +162,7 @@ describe('reindexDataStreamDocuments', () => {
           failures: [{ error: 'some failure' }],
         },
       },
-    });
+    } as TasksGetResponse);
 
     await expect(
       reindexDataStreamDocuments({
@@ -149,18 +175,24 @@ describe('reindexDataStreamDocuments', () => {
 
   it('should handle missing task ID', async () => {
     const dataStreamName = 'test-data-stream';
-    
-    esClient.indices.getDataStream.mockResolvedValueOnce({
-      data_streams: [{
-        name: dataStreamName,
-        indices: [
-          { index_name: 'test-data-stream-000001' },
-          { index_name: 'test-data-stream-000002' },
-        ],
-      }],
-    });
 
-    esClient.reindex.mockResolvedValueOnce({ task: null });
+    esClient.indices.getDataStream.mockResolvedValueOnce({
+      data_streams: [
+        {
+          name: dataStreamName,
+          timestamp_field: '@timestamp',
+          indices: [
+            { index_name: 'test-data-stream-000001', index_uuid: 'uuid1' },
+            { index_name: 'test-data-stream-000002', index_uuid: 'uuid2' },
+          ],
+          generation: 2,
+          status: 'GREEN',
+          template: 'test-template',
+        },
+      ],
+    } as unknown as IndicesGetDataStreamResponse);
+
+    esClient.reindex.mockResolvedValueOnce({ task: undefined } as ReindexResponse);
 
     await expect(
       reindexDataStreamDocuments({
@@ -169,6 +201,40 @@ describe('reindexDataStreamDocuments', () => {
         dataStreamName,
       })
     ).rejects.toThrow('Failed to get task ID for reindex operation from test-data-stream-000001');
+  });
+
+  it('should throw an error if a reindex operation is already in progress', async () => {
+    const dataStreamName = 'test-data-stream';
+    esClient.tasks.list.mockResolvedValueOnce({
+      nodes: {
+        node1: {
+          tasks: {
+            task1: {
+              action: 'indices:data/write/reindex',
+              cancellable: true,
+              description: `reindex from [some-index] to [${dataStreamName}]`,
+              headers: {},
+              id: 1,
+              node: 'node1',
+              running_time_in_nanos: 1,
+              start_time_in_millis: 1,
+              status: {},
+              type: 'task',
+            },
+          },
+        },
+      },
+    } as TasksListResponse);
+
+    await expect(
+      reindexDataStreamDocuments({
+        esClient,
+        logger,
+        dataStreamName,
+      })
+    ).rejects.toThrow(
+      `A reindex operation is already in progress for data stream ${dataStreamName}. Please wait for it to complete.`
+    );
   });
 });
 
@@ -179,24 +245,32 @@ describe('getActiveReindexTasks', () => {
 
   it('should return active reindex tasks for data stream', async () => {
     const dataStreamName = 'test-data-stream';
-    
+
     esClient.tasks.list.mockResolvedValueOnce({
       nodes: {
         node1: {
           tasks: {
-            'task1': {
+            task1: {
+              action: 'indices:data/write/reindex',
+              cancellable: true,
               description: `reindex from [test-data-stream-000001] to [${dataStreamName}]`,
+              headers: {},
+              id: 1,
+              node: 'node1',
+              running_time_in_nanos: 1,
+              start_time_in_millis: 1,
               status: {
                 total: 1000,
                 created: 500,
                 updated: 0,
                 batches: 5,
               },
+              type: 'task',
             },
           },
         },
       },
-    });
+    } as TasksListResponse);
 
     const tasks = await getActiveReindexTasks({
       esClient,
@@ -217,10 +291,10 @@ describe('getActiveReindexTasks', () => {
 
   it('should return empty array when no tasks found', async () => {
     const dataStreamName = 'test-data-stream';
-    
+
     esClient.tasks.list.mockResolvedValueOnce({
       nodes: {},
-    });
+    } as TasksListResponse);
 
     const tasks = await getActiveReindexTasks({
       esClient,
@@ -234,7 +308,7 @@ describe('getActiveReindexTasks', () => {
   it('should handle errors gracefully', async () => {
     const dataStreamName = 'test-data-stream';
     const error = new Error('Tasks list failed');
-    
+
     esClient.tasks.list.mockRejectedValueOnce(error);
 
     const tasks = await getActiveReindexTasks({
@@ -244,6 +318,8 @@ describe('getActiveReindexTasks', () => {
     });
 
     expect(tasks).toHaveLength(0);
-    expect(logger.error).toHaveBeenCalledWith(`Failed to get reindex tasks for ${dataStreamName}: ${error.message}`);
+    expect(logger.error).toHaveBeenCalledWith(
+      `Failed to get reindex tasks for ${dataStreamName}: ${error.message}`
+    );
   });
 });

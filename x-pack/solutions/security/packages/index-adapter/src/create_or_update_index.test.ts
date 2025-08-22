@@ -59,7 +59,7 @@ describe('updateIndices', () => {
       index: indexName,
       ...simulateIndexTemplateResponse.template.mappings,
     });
-    
+
     // Should not call reindex by default
     expect(reindexIndexDocuments).not.toHaveBeenCalled();
   });

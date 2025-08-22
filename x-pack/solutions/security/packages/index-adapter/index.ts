@@ -21,8 +21,8 @@ export type {
 export type * from './src/field_maps/types';
 
 // Export new reindexing functionality
-export { 
-  reindexIndexDocuments, 
+export {
+  reindexIndexDocuments,
   getActiveReindexTasks,
   type ReindexIndexDocumentsParams,
   type ReindexTaskStatus,

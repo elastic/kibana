@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import type { IndicesRolloverResponse } from '@elastic/elasticsearch/lib/api/types';
 import { rolloverDataStream, shouldRolloverDataStream } from './rollover_data_stream';
 
 const logger = loggingSystemMock.createLogger();
@@ -18,7 +19,9 @@ describe('rolloverDataStream', () => {
 
   it('should successfully rollover a data stream', async () => {
     const dataStreamName = 'test-data-stream';
-    esClient.indices.rollover.mockResolvedValueOnce({ acknowledged: true });
+    esClient.indices.rollover.mockResolvedValueOnce({
+      acknowledged: true,
+    } as IndicesRolloverResponse);
 
     await rolloverDataStream({
       esClient,
@@ -31,12 +34,16 @@ describe('rolloverDataStream', () => {
       lazy: true,
     });
     expect(logger.info).toHaveBeenCalledWith(`Rolling over data stream: ${dataStreamName}`);
-    expect(logger.info).toHaveBeenCalledWith(`Successfully rolled over data stream: ${dataStreamName}`);
+    expect(logger.info).toHaveBeenCalledWith(
+      `Successfully rolled over data stream: ${dataStreamName}`
+    );
   });
 
   it('should log warning when rollover is not acknowledged', async () => {
     const dataStreamName = 'test-data-stream';
-    esClient.indices.rollover.mockResolvedValueOnce({ acknowledged: false });
+    esClient.indices.rollover.mockResolvedValueOnce({
+      acknowledged: false,
+    } as IndicesRolloverResponse);
 
     await rolloverDataStream({
       esClient,
@@ -44,7 +51,9 @@ describe('rolloverDataStream', () => {
       dataStreamName,
     });
 
-    expect(logger.warn).toHaveBeenCalledWith(`Rollover for data stream ${dataStreamName} was not acknowledged`);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Rollover for data stream ${dataStreamName} was not acknowledged`
+    );
   });
 
   it('should throw error when rollover fails', async () => {
@@ -60,7 +69,9 @@ describe('rolloverDataStream', () => {
       })
     ).rejects.toThrow(error);
 
-    expect(logger.error).toHaveBeenCalledWith(`Failed to rollover data stream ${dataStreamName}: ${error.message}`);
+    expect(logger.error).toHaveBeenCalledWith(
+      `Failed to rollover data stream ${dataStreamName}: ${error.message}`
+    );
   });
 });
 
@@ -86,7 +97,7 @@ describe('shouldRolloverDataStream', () => {
       'conflicting type',
     ];
 
-    rolloverReasons.forEach(reason => {
+    rolloverReasons.forEach((reason) => {
       const error = {
         body: {
           error: {
@@ -127,15 +138,9 @@ describe('shouldRolloverDataStream', () => {
   });
 
   it('should return false for errors without body.error', () => {
-    const errors = [
-      {},
-      { body: {} },
-      { body: { error: null } },
-      null,
-      undefined,
-    ];
+    const errors = [{}, { body: {} }, { body: { error: null } }, null, undefined];
 
-    errors.forEach(error => {
+    errors.forEach((error) => {
       expect(shouldRolloverDataStream(error)).toBe(false);
     });
   });

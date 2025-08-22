@@ -61,11 +61,11 @@ const updateTotalFieldLimitSetting = async ({
 // is due to the fact settings can be classed as dynamic and static, and static
 // updates will fail on an index that isn't closed. New settings *will* be applied as part
 // of the ILM policy rollovers. More info: https://github.com/elastic/kibana/pull/113389#issuecomment-940152654
-const updateMapping = async ({ 
-  logger, 
-  esClient, 
-  indexName, 
-  writeIndexOnly, 
+const updateMapping = async ({
+  logger,
+  esClient,
+  indexName,
+  writeIndexOnly,
   enableRollover = false,
   enableReindexing = false,
 }: UpdateIndexOpts) => {
@@ -123,7 +123,7 @@ const updateMapping = async ({
     }
   } catch (err) {
     logger.error(`Failed to PUT mapping for ${indexName}: ${err.message}`);
-    
+
     // Check if we should rollover due to mapping conflicts
     if (enableRollover && shouldRolloverDataStream(err)) {
       logger.info(`Mapping update failed for ${indexName}, triggering rollover due to conflict`);
@@ -155,7 +155,9 @@ const updateMapping = async ({
           });
         }
       } catch (rolloverErr) {
-        logger.error(`Failed to rollover ${indexName} after mapping failure: ${rolloverErr.message}`);
+        logger.error(
+          `Failed to rollover ${indexName} after mapping failure: ${rolloverErr.message}`
+        );
         throw rolloverErr;
       }
     } else {
@@ -175,27 +177,20 @@ const updateDataStreamMappings = async ({
   enableRollover = false,
   enableReindexing = false,
 }: UpdateIndexMappingsOpts) => {
-  // Update total field limit setting of found indices
-  // Other index setting changes are not updated at this time
-  await Promise.all(
-    indexNames.map((indexName) =>
-      updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, indexName })
-    )
-  );
-  // Update mappings of the found indices.
-  await Promise.all(
-    indexNames.map((indexName) =>
-      updateMapping({ 
-        logger, 
-        esClient, 
-        totalFieldsLimit, 
-        indexName, 
-        writeIndexOnly, 
-        enableRollover,
-        enableReindexing,
-      })
-    )
-  );
+  for (const indexName of indexNames) {
+    // Update settings first
+    await updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, indexName });
+    // Then update mappings
+    await updateMapping({
+      logger,
+      esClient,
+      totalFieldsLimit,
+      indexName,
+      writeIndexOnly,
+      enableRollover,
+      enableReindexing,
+    });
+  }
 };
 
 export interface CreateOrUpdateDataStreamParams {

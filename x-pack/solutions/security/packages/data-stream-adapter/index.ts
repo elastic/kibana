@@ -19,14 +19,14 @@ export type {
 export type * from '@kbn/index-adapter/src/field_maps/types';
 
 // Export new rollover and reindexing functionality
-export { 
-  rolloverDataStream, 
+export {
+  rolloverDataStream,
   shouldRolloverDataStream,
   type RolloverDataStreamParams,
 } from './src/rollover_data_stream';
 
-export { 
-  reindexDataStreamDocuments, 
+export {
+  reindexDataStreamDocuments,
   getActiveReindexTasks,
   type ReindexDataStreamDocumentsParams,
   type ReindexTaskStatus,

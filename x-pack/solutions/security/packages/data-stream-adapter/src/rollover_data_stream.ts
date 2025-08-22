@@ -6,7 +6,6 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { retryTransientEsErrors } from '@kbn/index-adapter';
 
 export interface RolloverDataStreamParams {
   esClient: ElasticsearchClient;
@@ -44,13 +43,24 @@ export async function rolloverDataStream({
 /**
  * Checks if a data stream needs rollover based on error conditions
  */
-export function shouldRolloverDataStream(error: any): boolean {
-  if (!error?.body?.error) {
+export function shouldRolloverDataStream(error: unknown): boolean {
+  if (
+    !error ||
+    typeof error !== 'object' ||
+    !('body' in error) ||
+    !error.body ||
+    typeof error.body !== 'object'
+  ) {
+    return false;
+  }
+  const { body } = error as { body: { error?: { type?: string; reason?: string } } };
+
+  if (!body.error) {
     return false;
   }
 
-  const errorType = error.body.error.type;
-  const errorReason = error.body.error.reason;
+  const errorType = body.error.type;
+  const errorReason = body.error.reason;
 
   // Rollover if mapping conflict or illegal argument exceptions
   if (errorType === 'illegal_argument_exception') {
@@ -60,13 +70,13 @@ export function shouldRolloverDataStream(error: any): boolean {
   if (errorType === 'mapper_exception') {
     const rolloverReasons = [
       'mapper',
-      'can\'t merge',
+      "can't merge",
       'different type',
       'cannot change',
       'conflicting type',
     ];
-    
-    return rolloverReasons.some(reason => 
+
+    return rolloverReasons.some((reason) =>
       errorReason?.toLowerCase().includes(reason.toLowerCase())
     );
   }
