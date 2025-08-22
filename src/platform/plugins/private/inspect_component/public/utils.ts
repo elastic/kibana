@@ -22,6 +22,10 @@ import EUI_DOCS_MAP from './eui_docs_links.json';
 
 const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
 
+export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
+  .toLowerCase()
+  .includes('mac');
+
 const extractEuiComponentsFromPath = (value: string): string[] => {
   if (!value) return [];
 
@@ -33,51 +37,24 @@ const extractEuiComponentsFromPath = (value: string): string[] => {
     .filter((t) => t.startsWith('Eui'));
 };
 
-export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
-  if (!componentPath) return null;
+const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
+  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
 
-  const toUrl = (name: string): string | null => {
-    const docsLink = EUI_DOCS_MAP[name];
+  while (current) {
+    const fiber = getFiberFromDomNode(current);
+    if (fiber) {
+      let fiberCursor: ReactFiberNode | null | undefined = fiber;
+      while (fiberCursor) {
+        if (fiberCursor._debugSource) {
+          return fiberCursor._debugSource;
+        }
 
-    if (!docsLink) return null;
-
-    return `${EUI_DOCS_BASE}${docsLink}`;
-  };
-
-  const candidates = extractEuiComponentsFromPath(componentPath);
-
-  if (candidates.length === 0 && componentPath.startsWith('Eui')) {
-    candidates.push(componentPath);
+        fiberCursor = fiberCursor._debugOwner;
+      }
+    }
+    current = current.parentElement;
   }
-
-  for (const candidate of candidates) {
-    const exactUrl = toUrl(candidate);
-
-    if (exactUrl) return { componentName: candidate, docsLink: exactUrl };
-  }
-
-  return null;
-};
-
-const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
-
-const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | undefined => {
-  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
-  return fiberKey ? (node as any)[fiberKey] : undefined;
-};
-
-const getFiberType = (fiber: ReactFiberNode): string | null => {
-  if (typeof fiber.type === 'string') {
-    return fiber.type;
-  } else if (typeof fiber.type?.name === 'string') {
-    return fiber.type?.name;
-  } else if (typeof fiber.type?.displayName === 'string') {
-    return fiber.type?.displayName;
-  } else if (typeof fiber.elementType === 'string') {
-    return fiber.elementType;
-  }
-
-  return null;
+  return;
 };
 
 // TODO - this logic probably needs some work.
@@ -142,24 +119,23 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
   };
 };
 
-const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
-  let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
+const getFiberFromDomNode = (node: HTMLElement | SVGElement): ReactFiberNode | undefined => {
+  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
+  return fiberKey ? (node as any)[fiberKey] : undefined;
+};
 
-  while (current) {
-    const fiber = getFiberFromDomNode(current);
-    if (fiber) {
-      let fiberCursor: ReactFiberNode | null | undefined = fiber;
-      while (fiberCursor) {
-        if (fiberCursor._debugSource) {
-          return fiberCursor._debugSource;
-        }
-
-        fiberCursor = fiberCursor._debugOwner;
-      }
-    }
-    current = current.parentElement;
+const getFiberType = (fiber: ReactFiberNode): string | null => {
+  if (typeof fiber.type === 'string') {
+    return fiber.type;
+  } else if (typeof fiber.type?.name === 'string') {
+    return fiber.type?.name;
+  } else if (typeof fiber.type?.displayName === 'string') {
+    return fiber.type?.displayName;
+  } else if (typeof fiber.elementType === 'string') {
+    return fiber.elementType;
   }
-  return;
+
+  return null;
 };
 
 export const getElementFromPoint = ({
@@ -182,54 +158,30 @@ export const getElementFromPoint = ({
   return undefined;
 };
 
-export const isKeyboardShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && isSingleQuote(event);
+export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
+  if (!componentPath) return null;
 
-export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
-  .toLowerCase()
-  .includes('mac');
+  const toUrl = (name: string): string | null => {
+    const docsLink = EUI_DOCS_MAP[name];
 
-export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
-  const rectangle = target.getBoundingClientRect();
-  const isInsidePortal = Boolean(target.closest('[data-euiportal="true"]'));
+    if (!docsLink) return null;
 
-  const overlay = document.createElement('div');
-  Object.assign(overlay.style, {
-    position: 'absolute',
-    top: `${rectangle.top + window.scrollY}px`,
-    left: `${rectangle.left + window.scrollX}px`,
-    width: `${rectangle.width}px`,
-    height: `${rectangle.height}px`,
-    background: transparentize(euiTheme.colors.primary, 0.3),
-    border: `2px solid ${euiTheme.colors.primary}`,
-    pointerEvents: 'none',
-    boxSizing: 'border-box',
-    borderRadius: getComputedStyle(target).borderRadius,
-    zIndex: isInsidePortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout) - 1,
-  });
-
-  document.body.appendChild(overlay);
-
-  // Removes the overlay when the element is no longer visible, which can happen when using components like accordions or tabs
-  // This won't add the overlay back if the element becomes visible again
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const isVisible = entries.some((entry) => entry.isIntersecting);
-      if (overlay.parentNode && !isVisible) {
-        overlay.parentNode.removeChild(overlay);
-      }
-    },
-    { threshold: 0 }
-  );
-
-  observer.observe(target);
-
-  return () => {
-    if (overlay.parentNode) {
-      overlay.parentNode.removeChild(overlay);
-    }
-    observer.disconnect();
+    return `${EUI_DOCS_BASE}${docsLink}`;
   };
+
+  const candidates = extractEuiComponentsFromPath(componentPath);
+
+  if (candidates.length === 0 && componentPath.startsWith('Eui')) {
+    candidates.push(componentPath);
+  }
+
+  for (const candidate of candidates) {
+    const exactUrl = toUrl(candidate);
+
+    if (exactUrl) return { componentName: candidate, docsLink: exactUrl };
+  }
+
+  return null;
 };
 
 export const getInspectedElementData = async ({
@@ -280,4 +232,52 @@ export const getInspectedElementData = async ({
     sourceComponent,
     target,
   });
+};
+
+export const isKeyboardShortcut = (event: KeyboardEvent) =>
+  (event.metaKey || event.ctrlKey) && isSingleQuote(event);
+
+const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
+
+export const setElementHighlight = ({ target, euiTheme }: SetElementHighlightOptions) => {
+  const rectangle = target.getBoundingClientRect();
+  const isInsidePortal = Boolean(target.closest('[data-euiportal="true"]'));
+
+  const overlay = document.createElement('div');
+  Object.assign(overlay.style, {
+    position: 'absolute',
+    top: `${rectangle.top + window.scrollY}px`,
+    left: `${rectangle.left + window.scrollX}px`,
+    width: `${rectangle.width}px`,
+    height: `${rectangle.height}px`,
+    background: transparentize(euiTheme.colors.primary, 0.3),
+    border: `2px solid ${euiTheme.colors.primary}`,
+    pointerEvents: 'none',
+    boxSizing: 'border-box',
+    borderRadius: getComputedStyle(target).borderRadius,
+    zIndex: isInsidePortal ? Number(euiTheme.levels.modal) + 1 : Number(euiTheme.levels.flyout) - 1,
+  });
+
+  document.body.appendChild(overlay);
+
+  // Removes the overlay when the element is no longer visible, which can happen when using components like accordions or tabs
+  // This won't add the overlay back if the element becomes visible again
+  const observer = new IntersectionObserver(
+    (entries) => {
+      const isVisible = entries.some((entry) => entry.isIntersecting);
+      if (overlay.parentNode && !isVisible) {
+        overlay.parentNode.removeChild(overlay);
+      }
+    },
+    { threshold: 0 }
+  );
+
+  observer.observe(target);
+
+  return () => {
+    if (overlay.parentNode) {
+      overlay.parentNode.removeChild(overlay);
+    }
+    observer.disconnect();
+  };
 };
