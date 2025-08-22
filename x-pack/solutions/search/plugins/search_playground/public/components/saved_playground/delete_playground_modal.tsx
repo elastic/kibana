@@ -35,7 +35,7 @@ export const DeletePlaygroundModal = ({
       const errorMessage = getErrorMessage(error);
       notifications.toasts.addError(error instanceof Error ? error : new Error(errorMessage), {
         title: i18n.translate('xpack.searchPlayground.savedPlayground.deleteError.title', {
-          defaultMessage: 'Error deleting playground',
+          defaultMessage: 'Error deleting RAG playground',
         }),
         toastMessage: errorMessage,
       });
@@ -62,7 +62,7 @@ export const DeletePlaygroundModal = ({
       title={i18n.translate(
         'xpack.searchPlayground.savedPlayground.deletePlayground.confirmModal.modalTitle',
         {
-          defaultMessage: 'Delete playground',
+          defaultMessage: 'Delete RAG playground',
         }
       )}
       titleProps={{ id: modalTitleId }}
@@ -79,7 +79,7 @@ export const DeletePlaygroundModal = ({
       confirmButtonText={i18n.translate(
         'xpack.searchPlayground.savedPlayground.deletePlayground.confirmModal.confirmButtonText',
         {
-          defaultMessage: 'Delete playground',
+          defaultMessage: 'Delete RAG playground',
         }
       )}
     >
@@ -88,7 +88,7 @@ export const DeletePlaygroundModal = ({
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.deletePlayground.deleteDescription"
-              defaultMessage="You are about to delete the {playgroundName} playground"
+              defaultMessage="You are about to delete the {playgroundName} RAG playground"
               values={{
                 playgroundName: <strong>{playgroundName}</strong>,
               }}
@@ -97,7 +97,7 @@ export const DeletePlaygroundModal = ({
           <p>
             <FormattedMessage
               id="xpack.searchPlayground.savedPlayground.deletePlayground.deleteWarningDescription"
-              defaultMessage="You can't recover a deleted playground. Make sure you have appropriate backups."
+              defaultMessage="You can't recover a deleted RAG playground. Make sure you have appropriate backups."
             />
           </p>
         </EuiText>
