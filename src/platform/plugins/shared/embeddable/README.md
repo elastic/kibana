@@ -23,7 +23,7 @@ An embeddable API shares state via a publishing subject, a read only RxJS Observ
 ### Embeddable overview
 Embeddables are React components that manage their own state, can be serialized and deserialized, and return an API that can be used to interact with them imperatively.
 
-Plugins register new embeddable types.
+Plugins register new embeddable types with the embeddable plugin.
 ```
 embeddableSetup.registerReactEmbeddableFactory('myEmbeddableType', async () => {
   const { myEmbeddableFactory } = await import('./embeddable_module');
@@ -36,7 +36,7 @@ Embeddables are rendered with `EmbeddableRenderer` React component.
 ### Publishing packages
 An embeddable API is a plain old typescript object that implements any number of shared interfaces. A shared interface is defined by a publishing package. A publishing package also provides a type guard that is used to check if a given object fulfills the interface.
 
-Interface implemenations provided by `EmbeddableRenderer` React component. An embeddable does not need to implement these interfaces as they are already provided.
+The table below lists interface implemenations provided by `EmbeddableRenderer` React component. An embeddable does not need to implement these interfaces as they are already provided.
 
 | Interface | Description |
 | ----------| ----------- |
@@ -45,13 +45,13 @@ Interface implemenations provided by `EmbeddableRenderer` React component. An em
 | HasUniqueId | Interface for accessing embeddable uuid |
 | CanLockHoverActions | Interface for locking hover actions for an embeddable |
 
-Required publishing package interfaces. An embeddable must implement these interfaces.
+The table below lists required publishing package interfaces. An embeddable must implement these interfaces.
 
 | Interface | Description |
 | ----------| ----------- |
 | HasSerializableState | Interface for serializing embeddable state |
 
-Optional publishing package interfaces. Embeddables may implement these interfaces. Embeddables without interface implemenations will not show UiActions that require an interface.
+The table below lists optional publishing package interfaces. Embeddables may implement these interfaces. Embeddables without interface implemenations will not show UiActions that require an interface.
 
 | Interface | Description | Used by |
 | --------- | ----------- | --------- |
