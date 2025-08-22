@@ -15,7 +15,6 @@ import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { ALL_VALUE, sloDefinitionSchema, storedSloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/Either';
 import { merge } from 'lodash';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '@kbn/deeplinks-analytics/constants';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
 import { SLONotFound } from '../errors';
@@ -228,7 +227,7 @@ export function toStoredSLO(slo: SLODefinition): {
   if (slo.artifacts?.dashboards?.length) {
     slo.artifacts.dashboards.forEach(({ id }, index) => {
       const refId = `dashboard-${index}`;
-      references.push({ id, type: DASHBOARD_SAVED_OBJECT_TYPE, name: refId });
+      references.push({ id, type: 'dashboard', name: refId });
       dashboardsRef.push({ refId });
     });
   }
