@@ -20,7 +20,7 @@ const CLOUD_SECURITY_POSTURE_SETTINGS = 'cloud-security-posture-settings';
 // Benchmark Rule Templates installed by the Cloud Security Posture package stored as Saved Objects:
 const CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE = 'csp-rule-template';
 
-export const securityDefaultSavedObjects = [
+export const securityV1SavedObjects = [
   'exception-list',
   EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
   DATA_VIEW_SAVED_OBJECT_TYPE,
@@ -28,10 +28,25 @@ export const securityDefaultSavedObjects = [
   CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
   CLOUD_SECURITY_POSTURE_SETTINGS,
   CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
+  ...savedObjectTypes,
 ];
 
-export const securityV1SavedObjects = [...securityDefaultSavedObjects, ...savedObjectTypes];
+export const securityV2SavedObjects = [...securityV1SavedObjects];
+
+export const securityV3SavedObjects = [...securityV2SavedObjects];
+
+export const securityV4SavedObjects = [
+  // Removed exception lists
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  ...savedObjectTypesWithoutTimelineAndWithoutNotes,
+  CLOUD_POSTURE_SAVED_OBJECT_RULE_TYPE,
+  CLOUD_SECURITY_POSTURE_SETTINGS,
+  CLOUD_SECURITY_POSTURE_BENCHMARK_RULE_TEMPLATE,
+  ...savedObjectTypes,
+];
 
 export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 
 export const securityNotesSavedObjects = notesSavedObjectTypes;
+
+export const securityExceptionsSavedObjects = ['exception-list', EXCEPTION_LIST_NAMESPACE_AGNOSTIC];

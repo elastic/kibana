@@ -32,10 +32,13 @@ import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
 import { ProductFeatures } from './product_features';
 import {
-  securityDefaultSavedObjects,
+  securityExceptionsSavedObjects,
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
   securityV1SavedObjects,
+  securityV2SavedObjects,
+  securityV3SavedObjects,
+  securityV4SavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
@@ -71,7 +74,7 @@ export class ProductFeaturesService {
       securityFeature.baseKibanaSubFeatureIds
     );
     const securityV2Feature = getSecurityV2Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV2SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV2ProductFeatures = new ProductFeatures(
@@ -82,7 +85,7 @@ export class ProductFeaturesService {
     );
 
     const securityV3Feature = getSecurityV3Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV3SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV3ProductFeatures = new ProductFeatures(
@@ -93,7 +96,7 @@ export class ProductFeaturesService {
     );
 
     const securityV4Feature = getSecurityV4Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV4SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV4ProductFeatures = new ProductFeatures(
@@ -189,8 +192,7 @@ export class ProductFeaturesService {
     );
 
     const rulesFeature = getRulesFeature({
-      // TODO do I need these?
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityExceptionsSavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.rulesProductFeatures = new ProductFeatures(

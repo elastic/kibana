@@ -9,7 +9,13 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
-import { APP_ID, RULES_FEATURE_ID } from '../constants';
+import {
+  APP_ID,
+  BOOTSTRAP_API_ALL,
+  RULES_API_ALL,
+  RULES_API_READ,
+  RULES_FEATURE_ID,
+} from '../constants';
 import { type BaseKibanaFeatureConfig } from '../types';
 import type { SecurityFeatureParams } from '../security/types';
 
@@ -37,7 +43,7 @@ export const getRulesBaseKibanaFeature = (
         read: params.savedObjects,
       },
       ui: [],
-      api: [],
+      api: [RULES_API_ALL, RULES_API_READ, BOOTSTRAP_API_ALL],
     },
     read: {
       app: [RULES_FEATURE_ID, 'kibana'],
@@ -47,7 +53,7 @@ export const getRulesBaseKibanaFeature = (
         read: params.savedObjects,
       },
       ui: [],
-      api: [],
+      api: [RULES_API_READ, BOOTSTRAP_API_ALL],
     },
   },
 });

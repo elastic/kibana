@@ -34,6 +34,9 @@ export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SIEM_MIGRATIONS_FEATURE_ID = 'securitySolutionSiemMigrations' as const;
 
 export const RULES_FEATURE_ID = 'securitySolutionRulesV1' as const;
+export const RULES_API_READ = 'rules-read' as const;
+export const RULES_API_ALL = 'rules-all' as const;
+export const BOOTSTRAP_API_ALL = 'bootstrap-all' as const;
 
 // Same as the plugin id defined by Cloud Security Posture
 export const CLOUD_POSTURE_APP_ID = 'csp' as const;

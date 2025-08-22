@@ -9,7 +9,12 @@ import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-import { APP_ID, CLOUD_POSTURE_APP_ID, SECURITY_FEATURE_ID_V4 } from '../../constants';
+import {
+  APP_ID,
+  BOOTSTRAP_API_ALL,
+  CLOUD_POSTURE_APP_ID,
+  SECURITY_FEATURE_ID_V4,
+} from '../../constants';
 import type { BaseKibanaFeatureConfig } from '../../types';
 import type { SecurityFeatureParams } from '../types';
 
@@ -42,7 +47,7 @@ export const getSecurityV4BaseKibanaFeature = ({
     all: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
+      api: [APP_ID, BOOTSTRAP_API_ALL, 'rac', 'lists-all', 'lists-read', 'lists-summary'],
       savedObject: {
         all: ['alert', ...savedObjects],
         read: [],
@@ -55,7 +60,7 @@ export const getSecurityV4BaseKibanaFeature = ({
     read: {
       app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
       catalogue: [APP_ID],
-      api: [APP_ID, 'rac', 'lists-read'],
+      api: [APP_ID, BOOTSTRAP_API_ALL, 'rac', 'lists-read'],
       savedObject: {
         all: [],
         read: [...savedObjects],
