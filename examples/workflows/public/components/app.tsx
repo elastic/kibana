@@ -61,7 +61,7 @@ export const WorkflowsApp = ({ basename, notifications, http, navigation }: Work
   // Use React hooks to manage state.
   const [workflowYaml, setWorkflowYaml] = useState<string>(
     `
-name: Foreach tests
+name: For
 enabled: false
 triggers:
   - type: manual

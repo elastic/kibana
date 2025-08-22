@@ -2,100 +2,41 @@
 import React, { useMemo } from 'react';
 import dagre from '@dagrejs/dagre';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
-import type { ConnectorContract } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors, EnterForeachNode } from '@kbn/workflows';
-import type { NodeTypes } from '@xyflow/react';
-import { Background, Controls, Position, ReactFlow, Node } from '@xyflow/react';
-import { z } from '@kbn/zod';
-import { parseWorkflowYamlToJSON } from './yaml_utils';
+import type { NodeTypes, Node } from '@xyflow/react';
+import { Background, Controls, Position, ReactFlow } from '@xyflow/react';
+// import { parseWorkflowYamlToJSON } from './yaml_utils';
+import {
+  WORKFLOW_ZOD_SCHEMA_LOOSE,
+  parseWorkflowYamlToJSON,
+} from '@kbn/workflows-management-plugin/common';
 import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
-import '@xyflow/react/dist/style.css';
+import {
+  mainScopeNodes,
+  secondaryScopeNodes,
+  atomicNodes,
+  openScopeNodes,
+  closeScopeNodes,
+} from './nodes/types';
 
-const connectors: ConnectorContract[] = [
-  {
-    type: 'console',
-    paramsSchema: z
-      .object({
-        message: z.string(),
-      })
-      .required(),
-    outputSchema: z.string(),
-  },
-  {
-    type: 'slack',
-    connectorIdRequired: true,
-    paramsSchema: z
-      .object({
-        message: z.string(),
-      })
-      .required(),
-    outputSchema: z.object({
-      message: z.string(),
-    }),
-  },
-  {
-    type: 'inference.unified_completion',
-    connectorIdRequired: true,
-    paramsSchema: z
-      .object({
-        body: z.object({
-          messages: z.array(
-            z.object({
-              role: z.string(),
-              content: z.string(),
-            })
-          ),
-        }),
-      })
-      .required(),
-    // TODO: use UnifiedChatCompleteResponseSchema from stack_connectors/common/inference/schema.ts
-    outputSchema: z.object({
-      id: z.string(),
-      choices: z.array(
-        z.object({
-          message: z.object({
-            content: z.string(),
-            role: z.string(),
-          }),
-        })
-      ),
-    }),
-  },
-  {
-    type: 'inference.completion',
-    connectorIdRequired: true,
-    paramsSchema: z.object({
-      input: z.string(),
-    }),
-    outputSchema: z.array(
-      z.object({
-        result: z.string(),
-      })
-    ),
-  },
-];
+import '@xyflow/react/dist/style.css';
 
 export interface WorkflowExecutionProps {
   workflowYaml: string;
 }
 
-const nodeTypes = {
-  trigger: WorkflowGraphNode,
-  if: WorkflowGraphNode,
-  merge: WorkflowGraphNode,
-  parallel: WorkflowGraphNode,
-  action: WorkflowGraphNode,
-  foreach: WorkflowGraphNode,
-  'enter-foreach': WorkflowGraphNode,
-  'exit-foreach': WorkflowGraphNode,
-  atomic: WorkflowGraphNode,
-};
+const nodeTypes = [...mainScopeNodes, ...secondaryScopeNodes, ...atomicNodes].reduce(
+  (acc, nodeType) => {
+    acc[nodeType] = WorkflowGraphNode;
+    return acc;
+  },
+  {} as Record<string, React.FC<any>>
+);
 const edgeTypes = {
   workflowEdge: WorkflowGraphEdge,
 };
 
 function applyLayout(graph: dagre.graphlib.Graph) {
-  const nnnids = graph.nodes().map((id) => graph.node(id));
+  const topologySort = dagre.graphlib.alg.topsort(graph);
   const dagreGraph = new dagre.graphlib.Graph();
   dagreGraph.setGraph({});
   dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -108,19 +49,30 @@ function applyLayout(graph: dagre.graphlib.Graph) {
     edgesep: 40,
   });
 
-  graph.nodes().forEach((node) =>
-    dagreGraph.setNode(node, {
-      node: graph.node(node),
-      type: (graph.node(node) as any).type,
-      width: 200,
-      height: 50,
-    })
-  );
+  const stack = [] as string[];
+  topologySort
+    .map((nodeId) => graph.node(nodeId))
+    .forEach((node: any) => {
+      if (closeScopeNodes.includes(node.type)) {
+        stack.pop();
+      }
+      const baseWidth = 400;
+
+      dagreGraph.setNode(node.id, {
+        node,
+        type: (node as any).type,
+        width: baseWidth - stack.length * 70,
+        height: 50,
+      });
+      if (openScopeNodes.includes(node.type)) {
+        stack.push(node.type);
+      }
+    });
+
   graph.edges().forEach((edge) => dagreGraph.setEdge(edge.v, edge.w));
 
   dagre.layout(dagreGraph);
-  const dagrenodestopsort = dagre.graphlib.alg.topsort(dagreGraph);
-  const dagreNodes = dagrenodestopsort.map((id) => dagreGraph.node(id));
+
   const nodes = graph.nodes().map((id) => {
     const dagreNode = dagreGraph.node(id);
     const graphNode = graph.node(id) as any;
@@ -149,10 +101,7 @@ function applyLayout(graph: dagre.graphlib.Graph) {
     target: e.w,
     label: graph.edge(e)?.label,
   }));
-//   console.log(
-//     'Node types in graph:',
-//     nodes.map((node) => ({ id: node.id, type: node.type }))
-//   );
+
   console.log('Edges in graph:', edges);
   return { nodes, edges };
 }
@@ -162,17 +111,16 @@ export const DebugGraph: React.FC<WorkflowExecutionProps> = ({ workflowYaml }) =
     if (!workflowYaml) {
       return null;
     }
-    const result = parseWorkflowYamlToJSON(
-      workflowYaml,
-      generateYamlSchemaFromConnectors(connectors, true)
-    );
-    console.log('DebugGraph result', result);
+    const result = parseWorkflowYamlToJSON(workflowYaml, WORKFLOW_ZOD_SCHEMA_LOOSE);
     if (result.error) {
       return null;
     }
-    const sch = convertToWorkflowGraph(result.data as any);
-    console.log('DebugGraph', sch);
-    return sch;
+
+    try {
+      return convertToWorkflowGraph(result.data as any);
+    } catch (error) {
+      console.error('Error converting workflow YAML to graph:', error);
+    }
   }, [workflowYaml]);
 
   const layout = useMemo(() => {
