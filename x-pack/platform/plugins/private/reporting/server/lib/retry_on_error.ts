@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import { SavedReport } from './store';
+import type { SavedReport } from './store';
 
 interface RetryOpts {
   attempt?: number;
