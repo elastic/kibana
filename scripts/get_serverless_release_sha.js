@@ -8,16 +8,4 @@
  */
 
 require('../src/setup_node_env');
-var getServerlessReleaseSha =
-  require('../src/dev/github/get_serverless_release_sha').getServerlessReleaseSha;
-
-getServerlessReleaseSha().then(
-  function (sha) {
-    console.log(sha);
-    process.exit(0);
-  },
-  function (reason) {
-    console.error(reason);
-    process.exit(1);
-  }
-);
+require('../src/dev/github/get_serverless_release_sha');

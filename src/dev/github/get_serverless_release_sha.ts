@@ -6,9 +6,10 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { run } from '@kbn/dev-cli-runner';
 import { Octokit } from '@octokit/rest';
 
-export async function getServerlessReleaseSha(): Promise<string> {
+async function getServerlessReleaseSha(): Promise<string> {
   if (!process.env.GITHUB_TOKEN) {
     throw new Error('Missing environment variable: GITHUB_TOKEN');
   }
@@ -30,3 +31,5 @@ export async function getServerlessReleaseSha(): Promise<string> {
     throw new Error('Cannot find QA field (qa-ds-1) in versions.yaml');
   }
 }
+
+run(async ({ log }) => log.write(await getServerlessReleaseSha()));

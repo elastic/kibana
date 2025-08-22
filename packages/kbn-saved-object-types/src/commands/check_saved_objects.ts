@@ -9,7 +9,7 @@
 
 import { run } from '@kbn/dev-cli-runner';
 import { exit } from 'process';
-import { fetchSnapshot, takeSnapshot, assertValidUpdates } from '../src/snapshots';
+import { fetchSnapshot, takeSnapshot, assertValidUpdates } from '../snapshots';
 
 /**
  * Perform a series of sanity checks on the definitions of the saved object types for the current code level.
