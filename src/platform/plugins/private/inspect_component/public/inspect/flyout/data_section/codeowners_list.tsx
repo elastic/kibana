@@ -33,6 +33,7 @@ export const CodeownersList = ({ codeowners }: Props) => {
   const boldTextCss = css`
     font-weight: ${euiTheme.font.weight.bold};
   `;
+
   return (
     <>
       <EuiText size="s" css={boldTextCss}>

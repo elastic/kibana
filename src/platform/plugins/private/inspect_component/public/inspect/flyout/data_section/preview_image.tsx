@@ -9,12 +9,14 @@
 
 import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/css';
+import { useGeneratedHtmlId } from '@elastic/eui';
 
 interface Props {
   element: HTMLElement | SVGElement;
 }
 
 export const PreviewImage = ({ element }: Props) => {
+  const generatedId = useGeneratedHtmlId();
   const containerRef = useRef<HTMLDivElement>(null);
   const scale = 0.5;
 
@@ -44,8 +46,9 @@ export const PreviewImage = ({ element }: Props) => {
       clone = element.cloneNode(true) as HTMLElement;
     }
 
+    clone.id = generatedId;
     containerRef.current.appendChild(clone);
-  }, [element]);
+  }, [element, generatedId]);
 
   const containerCss = css({
     transform: `scale(${scale})`,

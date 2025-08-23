@@ -88,7 +88,9 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     const stopEventsOnInspectedElement = (e: MouseEvent) => {
       e.stopPropagation();
       e.preventDefault();
-      handleClickAtPositionOfInspectedElement(e);
+      if (e.type === 'click') {
+        handleClickAtPositionOfInspectedElement(e);
+      }
     };
 
     /**
@@ -103,10 +105,12 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       `;
     document.head.appendChild(forceCrossHairCursor);
 
+    document.addEventListener('pointerdown', stopEventsOnInspectedElement, true);
     document.addEventListener('click', stopEventsOnInspectedElement, true);
 
     return () => {
       document.head.removeChild(forceCrossHairCursor);
+      document.removeEventListener('pointerdown', stopEventsOnInspectedElement, true);
       document.removeEventListener('click', stopEventsOnInspectedElement, true);
     };
   }, [handleClickAtPositionOfInspectedElement]);
