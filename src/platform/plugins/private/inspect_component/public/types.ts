@@ -112,24 +112,20 @@ export interface GetComponentDataOptions {
  * Parameters for the `getElementFromPoint` function.
  */
 export interface GetElementFromPointOptions {
-  /** Pointer event from clicking on an component. */
-  event: PointerEvent;
-  /** HTML id for inspect overlay. */
-  overlayId: string;
+  /** Mouse event from clicking on an component. */
+  event: MouseEvent;
 }
 
 /**
  * Parameters for the `getInspectedElementData` function.
  */
 export interface GetInspectedElementOptions {
-  /** Pointer event from clicking on an component. */
-  event: PointerEvent;
+  /** Mouse event from clicking on an component. */
+  event: MouseEvent;
   /** Kibana Core Start services. */
   core: CoreStart;
   /** The component path from the React Fiber node. */
   componentPath: string | undefined;
-  /** HTML id for inspect overlay. */
-  overlayId: string;
   /** The name of the top level React component. */
   sourceComponent?: string;
   /** React state setter for the current Flyout overlay reference. */

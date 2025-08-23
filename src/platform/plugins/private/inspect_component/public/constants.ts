@@ -8,6 +8,7 @@
  */
 
 export const EUI_DATA_ICON_TYPE = 'data-icon-type';
+export const INSPECT_OVERLAY_ID = 'inspectOverlay';
 export const INSPECT_FLYOUT_ID = 'inspectComponentFlyout';
 export const INSPECT_FLYOUT_MAX_WIDTH = 480;
 export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';

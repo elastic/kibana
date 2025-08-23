@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import {
-  EuiPortal,
-  EuiWindowEvent,
-  transparentize,
-  useEuiTheme,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
+import { INSPECT_OVERLAY_ID } from '../../constants';
 import { findReactComponentPath, getElementFromPoint, getInspectedElementData } from '../../utils';
 import { InspectHighlight } from './inspect_highlight';
 
@@ -33,39 +28,20 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
   const [componentPath, setComponentPath] = useState<string | undefined>();
   const [sourceComponent, setSourceComponent] = useState<string | undefined>();
 
-  const overlayId = useGeneratedHtmlId({
-    prefix: 'inspectOverlay',
-  });
-
   const overlayCss = useMemo(
     () => css`
       background-color: ${transparentize(euiTheme.colors.backgroundFilledText, 0.2)};
       inset: 0;
       position: fixed;
       z-index: ${Number(euiTheme.levels.modal) + 1};
-      cursor: crosshair;
+      pointer-events: none;
     `,
     [euiTheme.colors.backgroundFilledText, euiTheme.levels.modal]
   );
 
-  const handleClickAtPositionOfInspectedElement = useCallback(
-    async (event: PointerEvent) => {
-      await getInspectedElementData({
-        event,
-        core,
-        componentPath,
-        overlayId,
-        sourceComponent,
-        setFlyoutOverlayRef,
-        setIsInspecting,
-      });
-    },
-    [core, componentPath, overlayId, sourceComponent, setFlyoutOverlayRef, setIsInspecting]
-  );
-
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      const target = getElementFromPoint({ event, overlayId });
+      const target = getElementFromPoint({ event });
 
       if (!target) {
         return;
@@ -87,25 +63,62 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
         transform: `translate(${left}px, ${top}px)`,
       });
     },
-    [overlayId, componentPath]
+    [componentPath]
   );
+
+  const handleClickAtPositionOfInspectedElement = useCallback(
+    async (event: MouseEvent) => {
+      await getInspectedElementData({
+        event,
+        core,
+        componentPath,
+        sourceComponent,
+        setFlyoutOverlayRef,
+        setIsInspecting,
+      });
+    },
+    [core, componentPath, sourceComponent, setFlyoutOverlayRef, setIsInspecting]
+  );
+
+  /**
+   * Capture all click events on the document and stop them from propagating.
+   * EuiWindowEvent can't be used here as it doesn't allow for setting 'capture: true'.
+   */
+  useEffect(() => {
+    const stopEventsOnInspectedElement = (e: MouseEvent) => {
+      e.stopPropagation();
+      e.preventDefault();
+      handleClickAtPositionOfInspectedElement(e);
+    };
+
+    /**
+     * pointer-events: none on overlay has a drawback of rendering the appropriate cursor for each component.
+     * This is a workaround which forces the crosshair cursor when inspecting.
+     */
+    const forceCrossHairCursor = document.createElement('style');
+    forceCrossHairCursor.textContent = `
+      body * {
+        cursor: crosshair !important;
+      }
+      `;
+    document.head.appendChild(forceCrossHairCursor);
+
+    document.addEventListener('click', stopEventsOnInspectedElement, true);
+
+    return () => {
+      document.head.removeChild(forceCrossHairCursor);
+      document.removeEventListener('click', stopEventsOnInspectedElement, true);
+    };
+  }, [handleClickAtPositionOfInspectedElement]);
 
   const overlayContent = useMemo(
     () => (
-      <div className={overlayCss} id={overlayId} data-test-subj="inspectOverlayContainer">
+      <div className={overlayCss} id={INSPECT_OVERLAY_ID} data-test-subj="inspectOverlayContainer">
         <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
-        <EuiWindowEvent event="pointerdown" handler={handleClickAtPositionOfInspectedElement} />
         <InspectHighlight currentPosition={highlightPosition} path={componentPath} />
       </div>
     ),
-    [
-      overlayCss,
-      overlayId,
-      highlightPosition,
-      componentPath,
-      handlePointerMove,
-      handleClickAtPositionOfInspectedElement,
-    ]
+    [overlayCss, highlightPosition, componentPath, handlePointerMove]
   );
 
   return <EuiPortal>{overlayContent}</EuiPortal>;

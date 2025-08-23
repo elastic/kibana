@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EUI_COMPONENTS_DOCS_MAP, EUI_DATA_ICON_TYPE, EUI_DOCS_BASE } from './constants';
+import {
+  EUI_COMPONENTS_DOCS_MAP,
+  EUI_DATA_ICON_TYPE,
+  EUI_DOCS_BASE,
+  INSPECT_OVERLAY_ID,
+} from './constants';
 import { getComponentData } from './get_component_data';
 import type {
   EuiInfo,
@@ -140,13 +145,12 @@ const getFiberType = (fiber: ReactFiberNode): string | null => {
 
 export const getElementFromPoint = ({
   event,
-  overlayId,
 }: GetElementFromPointOptions): HTMLElement | SVGElement | undefined => {
   const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
   for (const el of elements) {
     const isSvg = el instanceof SVGElement;
-    const isOverlay = el.id === overlayId;
+    const isOverlay = el.id === INSPECT_OVERLAY_ID;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
     /** There is some edge case with SVG elements that are not inspectable. */
     const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
@@ -189,7 +193,6 @@ export const getInspectedElementData = async ({
   componentPath,
   core,
   event,
-  overlayId,
   sourceComponent,
   setFlyoutOverlayRef,
   setIsInspecting,
@@ -197,7 +200,7 @@ export const getInspectedElementData = async ({
   event.preventDefault();
   event.stopPropagation();
 
-  const target = getElementFromPoint({ event, overlayId });
+  const target = getElementFromPoint({ event });
 
   if (!target) {
     setIsInspecting(false);

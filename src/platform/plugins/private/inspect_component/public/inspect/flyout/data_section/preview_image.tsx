@@ -56,10 +56,7 @@ export const PreviewImage = ({ element }: Props) => {
     userSelect: 'none',
     overflow: 'hidden',
     '& *': {
-      pointerEvents: 'none', // force children to also ignore pointer events
-      '& *': {
-        pointerEvents: 'none',
-      },
+      pointerEvents: 'none',
     },
   });
 
