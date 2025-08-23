@@ -31,6 +31,7 @@ import { useDeepEqualSelector } from '../../../common/hooks/use_selector';
 import * as i18n from '../translations';
 import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/telemetry';
 import type { StartServices } from '../../../types';
+import { useAlertCloseInfoModal } from '../use_alert_close_info_modal';
 
 const getTelemetryEvent = {
   groupedAlertsTakeAction: ({
@@ -71,6 +72,8 @@ export const useGroupTakeActionsItems = ({
   const {
     services: { telemetry },
   } = useKibana<StartServices>();
+
+  const { promptAlertCloseConfirmation } = useAlertCloseInfoModal();
 
   const refetchQuery = useCallback(() => {
     globalQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
@@ -148,6 +151,9 @@ export const useGroupTakeActionsItems = ({
       tableId: string;
       selectedGroup: string;
     }) => {
+      if (status === 'closed' && !(await promptAlertCloseConfirmation())) {
+        return;
+      }
       if (query) {
         startTransaction({ name: APM_USER_INTERACTIONS.BULK_QUERY_STATUS_UPDATE });
       } else {
@@ -181,6 +187,7 @@ export const useGroupTakeActionsItems = ({
       reportAlertsGroupingTakeActionClick,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
+      promptAlertCloseConfirmation,
     ]
   );
 
