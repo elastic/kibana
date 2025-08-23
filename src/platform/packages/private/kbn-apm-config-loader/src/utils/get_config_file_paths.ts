@@ -19,9 +19,7 @@ import { getArgValues } from './read_argv';
  * `-c` and `--config` options from process.argv, and fallbacks to `@kbn/utils`'s `getConfigPath()`
  */
 export const getConfigurationFilePaths = (argv: string[]): string[] => {
-  const rawPaths = getArgValues(argv, ['-c', '--config']).filter((path) => {
-    return path.endsWith('.yml');
-  });
+  const rawPaths = getArgValues(argv, ['-c', '--config']);
 
   if (rawPaths.length) {
     return rawPaths.map((path) => resolve(process.cwd(), path));
