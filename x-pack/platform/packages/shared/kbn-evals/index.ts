@@ -9,3 +9,4 @@ export type { DefaultEvaluators } from './src/types';
 export type { EvaluationCriterion } from './src/evaluators/criteria';
 export { createPlaywrightEvalsConfig } from './src/config/create_playwright_eval_config';
 export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
+export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
