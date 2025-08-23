@@ -74,7 +74,7 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
           }
         }
 
-        // Emotion injects a lot of wrapper components, so we need to filter them out.
+        /** Emotion injects a lot of wrapper components, so we need to filter them out. */
         if (type && !type.startsWith('Emotion')) {
           path.push(type);
         }
@@ -101,9 +101,10 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
 
   let restItems = rest;
 
-  // React will always include the literal DOM node rendered, even if it's a
-  // component, (e.g. EuiPanel > div).  Trim off the DOM node if we have a literal
-  // component.
+  /**
+   * React will always include the literal DOM node rendered, even if it's a component, (e.g. EuiPanel > div).
+   * Trim off the DOM node if we have a literal component.
+   */
   if (rest.length > 1 && /^[a-z]/.test(rest[rest.length - 1])) {
     restItems = rest.slice(0, -1);
   }
@@ -143,7 +144,8 @@ export const getElementFromPoint = ({
     const isSvg = el instanceof SVGElement;
     const isOverlay = el.id === overlayId;
     const isPath = isSvg && el.tagName.toLowerCase() === 'path';
-    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg; // There is some edge case with SVG elements that are not inspectable
+    /** There is some edge case with SVG elements that are not inspectable. */
+    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
 
     if (isNotInspectable || isOverlay || isPath) continue;
 

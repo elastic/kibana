@@ -40,6 +40,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
     ...rest,
   });
 
+  /** This useLayoutEffect handles repositoning of the hihglight badge so it's always fully visible. */
   useLayoutEffect(() => {
     if (!badgeRef.current || !containerRef.current) return;
 
@@ -51,17 +52,23 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
     const highlightHeight =
       typeof rest.height === 'number' ? rest.height : parseInt((rest.height as string) || '0', 10);
 
-    // Horizontal adjustment
+    /**
+     * Horizontal adjustment.
+     * If the badge would overflow the viewport on the right, we shift it to the left so it's fully visible.
+     */
     const availableRight = viewportWidth - containerRect.left;
     setBadgeOffsetX(badgeRect.width > availableRight ? availableRight - badgeRect.width : 0);
 
-    // Vertical adjustment
+    /**
+     * Vertical adjustment.
+     * If the badge would overflow the viewport on the bottom, we flip it above the highlight.
+     */
     const availableBottom = viewportHeight - (containerRect.top + highlightHeight);
     if (badgeRect.height > availableBottom) {
-      // Flip above highlight
+      /** Flip above highlight if the badge would be below the viewport. */
       setBadgeOffsetY(-badgeRect.height);
     } else {
-      // Place below highlight
+      /** Default, place badge below highlight. */
       setBadgeOffsetY(highlightHeight);
     }
   }, [path, rest.left, rest.top, rest.width, rest.height]);
@@ -74,7 +81,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
   });
 
   return (
-    <div ref={containerRef} className={containerCss}>
+    <div ref={containerRef} className={containerCss} data-test-subj="inspectHighlightContainer">
       <div className={highlightCss} />
       {path && (
         <div ref={badgeRef} className={badgeCss}>

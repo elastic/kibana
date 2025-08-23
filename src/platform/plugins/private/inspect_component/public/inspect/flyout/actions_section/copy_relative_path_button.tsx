@@ -15,6 +15,16 @@ interface Props {
   relativePath: string;
 }
 
+const COPIED_RELATIVE_PATH = i18n.translate(
+  'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathCopiedTooltip',
+  { defaultMessage: 'Relative file path copied' }
+);
+
+const COPY_RELATIVE_PATH = i18n.translate(
+  'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathActionTooltip',
+  { defaultMessage: 'Copy relative file path' }
+);
+
 export const CopyRelativePathButton = ({ relativePath }: Props) => {
   const [isTextCopied, setTextCopied] = useState(false);
 
@@ -28,30 +38,14 @@ export const CopyRelativePathButton = ({ relativePath }: Props) => {
   };
 
   return (
-    <EuiToolTip
-      content={
-        isTextCopied
-          ? i18n.translate(
-              'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathCopiedTooltip',
-              { defaultMessage: 'Relative file path copied' }
-            )
-          : i18n.translate(
-              'kbnInspectComponent.inspectFlyout.linksSection.copyRelativeFilePathActionTooltip',
-              { defaultMessage: 'Copy relative file path' }
-            )
-      }
-    >
+    <EuiToolTip content={isTextCopied ? COPIED_RELATIVE_PATH : COPY_RELATIVE_PATH}>
       <EuiButtonIcon
-        aria-label={i18n.translate(
-          'kbnInspectComponent.inspectFlyout.linksSection.copyFileNameAriaLabel',
-          {
-            defaultMessage: 'Copy file name',
-          }
-        )}
+        aria-label={COPY_RELATIVE_PATH}
         color="text"
         iconType="copy"
         onClick={onClick}
         onBlur={onBlur}
+        data-test-subj="inspectCopyRelativePathButton"
       />
     </EuiToolTip>
   );

@@ -31,7 +31,7 @@ export const getComponentData = async ({
 
     const { width: maxWidth, height: maxHeight } = target.getBoundingClientRect();
 
-    // TODO: Screenshot component not target for better looking results
+    // TODO: Screenshot component, not  the target for better looking results.
     const image = await capturePreviewScreenshot({
       target,
       maxWidth,

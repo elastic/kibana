@@ -14,7 +14,7 @@ import type { Dispatch, SetStateAction } from 'react';
  * Response type for POST "/internal/inspect_component/inspect" route.
  */
 export interface InspectComponentResponse {
-  /** List of all teams who are codeowners for specified file. */
+  /** List of all teams who are codeowners for the specified file. */
   codeowners: string[];
   /** File path relative to the repository root. */
   relativePath: string;

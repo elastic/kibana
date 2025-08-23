@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
@@ -28,6 +28,7 @@ interface Props {
 }
 
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
+  const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
   const [componentPath, setComponentPath] = useState<string | undefined>();
   const [sourceComponent, setSourceComponent] = useState<string | undefined>();
@@ -36,20 +37,59 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     prefix: 'inspectOverlay',
   });
 
-  const { euiTheme } = useEuiTheme();
+  /**
+   * This functions prevents the inspected element from triggering onClick events
+   * and also prevents it from losing focus which would prevent onHover events
+   * from being triggered on the inspected element, which wouldnt allow for inspecting elements which only
+   * show up on hover.
+   * EuiWindowEvent does not work here because it does not support the 'capture' option
+   * and we need to capture the event before it reaches the inspected element.
+   */
+  const preventInspectedElementOnClickFromTriggering = (e: MouseEvent) => {
+    e.stopImmediatePropagation();
+    e.preventDefault();
+  };
 
+  /** pointer-events: none is required for triggering onHover events.
+   * See: {@link preventInspectedElementOnClickFromTriggering}
+   */
   const overlayCss = useMemo(
     () => css`
       background-color: ${transparentize(euiTheme.colors.backgroundFilledText, 0.2)};
-      cursor: crosshair;
       inset: 0;
       position: fixed;
       z-index: ${Number(euiTheme.levels.modal) + 1};
+      pointer-events: none;
     `,
     [euiTheme.colors.backgroundFilledText, euiTheme.levels.modal]
   );
 
-  const handleClick = useCallback(
+  useEffect(() => {
+    window.addEventListener('click', preventInspectedElementOnClickFromTriggering, true);
+    return () => {
+      window.removeEventListener('click', preventInspectedElementOnClickFromTriggering, true);
+    };
+  }, []);
+
+  useEffect(() => {
+    /** pointer-events: none on overlay has a drawback of rendering the appropriate cursor for each component.
+     * This is a workaround which forces the crosshair cursor when inspecting.
+     * {@link overlayCss}
+     * {@link preventInspectedElementOnClickFromTriggering}
+     */
+    const forceCrossHairCursor = document.createElement('style');
+    forceCrossHairCursor.textContent = `
+    body * {
+      cursor: crosshair !important;
+    }
+  `;
+    document.head.appendChild(forceCrossHairCursor);
+    return () => {
+      document.head.removeChild(forceCrossHairCursor);
+    };
+  }, []);
+
+  const handleClickAtPositionOfInspectedElement = useCallback(
     async (event: PointerEvent) => {
       await getInspectedElementData({
         event,
@@ -93,13 +133,20 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
   const overlayContent = useMemo(
     () => (
-      <div className={overlayCss} id={overlayId}>
+      <div className={overlayCss} id={overlayId} data-test-subj="inspectOverlayContainer">
         <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
-        <EuiWindowEvent event="pointerdown" handler={handleClick} />
+        <EuiWindowEvent event="pointerdown" handler={handleClickAtPositionOfInspectedElement} />
         <InspectHighlight currentPosition={highlightPosition} path={componentPath} />
       </div>
     ),
-    [overlayCss, overlayId, highlightPosition, componentPath, handlePointerMove, handleClick]
+    [
+      overlayCss,
+      overlayId,
+      highlightPosition,
+      componentPath,
+      handlePointerMove,
+      handleClickAtPositionOfInspectedElement,
+    ]
   );
 
   return <EuiPortal>{overlayContent}</EuiPortal>;

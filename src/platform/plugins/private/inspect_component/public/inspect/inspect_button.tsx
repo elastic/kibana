@@ -47,7 +47,7 @@ export const InspectButton = ({ core }: Props) => {
     }
   };
 
-  const handleInspectClick = () => {
+  const handleTogglingInspectModeClick = () => {
     if (flyoutOverlayRef) {
       flyoutOverlayRef.close();
       setFlyoutOverlayRef(undefined);
@@ -55,6 +55,10 @@ export const InspectButton = ({ core }: Props) => {
     setIsInspecting((prev) => !prev);
   };
 
+  /**
+   * This is needed to prevent components like EmbeddableConsole from closing
+   * when toggling on inspect mode.
+   */
   const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();
   };
@@ -64,7 +68,7 @@ export const InspectButton = ({ core }: Props) => {
       <EuiWindowEvent event="keydown" handler={handleKeydown} />
       <EuiToolTip content={isInspecting ? '' : TOOLTIP_CONTENT} position="bottom">
         <EuiHeaderSectionItemButton
-          onClick={handleInspectClick}
+          onClick={handleTogglingInspectModeClick}
           onMouseDown={preventTargetFromLosingFocus}
           iconType="inspect"
           isSelected={isInspecting}

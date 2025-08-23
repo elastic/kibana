@@ -14,7 +14,7 @@ import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section/data_section';
 import { InspectFlyoutHeader } from './inspect_flyout_header';
 import { ActionsSection } from './actions_section/actions_section';
-import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID } from '../../constants';
+import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID, INSPECT_FLYOUT_MAX_WIDTH } from '../../constants';
 import { InspectHighlight } from '../overlay/inspect_highlight';
 import type { ComponentData } from '../../types';
 
@@ -27,7 +27,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
   size: 's',
   'data-test-subj': INSPECT_FLYOUT_ID,
   id: INSPECT_FLYOUT_ID,
-  maxWidth: 480,
+  maxWidth: INSPECT_FLYOUT_MAX_WIDTH,
 };
 
 export const InspectFlyout = ({ componentData, target }: Props) => {

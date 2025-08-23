@@ -21,7 +21,15 @@ interface InspectComponentRoutesOptions {
 export const registerInspectComponentRoutes = ({ http, logger }: InspectComponentRoutesOptions) => {
   const router = http.createRouter();
 
-  /** @internal */
+  /**
+   * @internal
+   * Route to inspect a component at a given path.
+   * @returns {Object} Result object
+   * @returns {string[]} result.codeowners - List of codeowners for the component
+   * @returns {string} result.relativePath - Path relative to the repo root
+   * @returns {string} result.baseFileName - Base file name of the component
+   */
+
   router.post(
     {
       path: '/internal/inspect_component/inspect',
