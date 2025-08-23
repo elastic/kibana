@@ -35,13 +35,9 @@ export const createInternalStateAsyncThunk: CreateInternalStateAsyncThunk = ((
   return createAsyncThunk(typePrefix, payloadCreator, {
     ...options,
     serializeError: (error) => {
-      if (options?.serializeError) {
-        return options.serializeError(error);
-      }
-      if (error instanceof SavedObjectNotFound) {
-        return error;
-      }
-      return miniSerializeError(error);
+      return error instanceof SavedObjectNotFound
+        ? error
+        : options?.serializeError?.(error) ?? miniSerializeError(error);
     },
   });
 }) as CreateInternalStateAsyncThunk;
