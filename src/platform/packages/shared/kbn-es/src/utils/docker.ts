@@ -204,8 +204,6 @@ const DEFAULT_SERVERLESS_ESARGS: Array<[string, string]> = [
 
   ['xpack.security.enabled', 'true'],
 
-  [`data_streams.failure_store.refresh_interval`, `5s`],
-
   // JWT realm settings are to closer emulate a real ES serverless env
   ['xpack.security.authc.realms.jwt.jwt1.allowed_audiences', 'elasticsearch'],
 

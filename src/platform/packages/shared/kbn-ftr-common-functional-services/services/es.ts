@@ -53,16 +53,18 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     },
   });
 
-  await client.indices.putSettings({
-    index: idxPatterns,
-    allow_no_indices: true,
-    expand_wildcards: ['all'],
-    settings: {
-      index: {
-        refresh_interval: '1ms',
+  async function putFastRefreshSettings() {
+    await client.indices.putSettings({
+      index: idxPatterns,
+      allow_no_indices: true,
+      expand_wildcards: ['all'],
+      settings: {
+        index: {
+          refresh_interval: '1ms',
+        },
       },
-    },
-  });
+    });
+  }
 
   const { index_templates: idxTemplates } = await client.indices.getIndexTemplate({
     name: '*',
@@ -95,16 +97,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
   });
 
   lifecycle.beforeTests.add(async () => {
-    await client.indices.putSettings({
-      index: idxPatterns,
-      allow_no_indices: true,
-      expand_wildcards: ['all'],
-      settings: {
-        index: {
-          refresh_interval: '1ms',
-        },
-      },
-    });
+    await putFastRefreshSettings();
   });
 
   return client;

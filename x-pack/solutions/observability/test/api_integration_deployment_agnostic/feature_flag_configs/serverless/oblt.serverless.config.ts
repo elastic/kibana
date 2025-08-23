@@ -14,7 +14,7 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   kbnServerArgs: [
     '--xpack.actions.preconfigured',
     '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
-    '--xpack.alerting.invalidateApiKeysTask.removalDelay="150ms"',
+    '--xpack.alerting.invalidateApiKeysTask.removalDelay="1s"',
     '--xpack.alerting.healthCheck.interval="1s"',
   ],
   testFiles: [require.resolve('./oblt.index.ts')],
