@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useCallback } from 'react';
 import type {
   EuiBasicTableColumn,
   EuiTableActionsColumnType,
@@ -20,13 +20,14 @@ import {
   EuiLink,
   EuiText,
   EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
-import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
+import { AgentDeleteModal } from './agent_delete_modal';
 import { searchParamNames } from '../../../search_param_names';
 
 const columnNames = {
@@ -55,14 +56,21 @@ const actionLabels = {
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
-  const { deleteAgent } = useAgentDelete();
   const { createOnechatUrl } = useNavigation();
+
+  const [deletingAgent, setDeletingAgent] = useState<AgentDefinition | null>(null);
+  const openDeleteModal = useCallback((agent: AgentDefinition) => {
+    setDeletingAgent(agent);
+  }, []);
+  const closeDeleteModal = useCallback(() => {
+    setDeletingAgent(null);
+  }, []);
 
   const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
     const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
       width: '48px',
       align: 'center',
-      render: (agent: AgentDefinition) =>
+      render: (agent) =>
         // TODO: Add avatar for custom agents
         agent.id === oneChatDefaultAgentId ? <EuiIcon type="logoElastic" size="xl" /> : null,
     };
@@ -106,7 +114,7 @@ export const AgentsList: React.FC = () => {
           name: actionLabels.chat,
           description: actionLabels.chatDescription,
           isPrimary: true,
-          href: (agent: AgentDefinition) =>
+          href: (agent) =>
             createOnechatUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
         },
         {
@@ -116,37 +124,47 @@ export const AgentsList: React.FC = () => {
           description: actionLabels.editDescription,
           isPrimary: true,
           showOnHover: true,
-          href: (agent: AgentDefinition) =>
-            createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
+          href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
         },
         {
           type: 'icon',
           icon: 'copy',
           name: actionLabels.clone,
           description: actionLabels.cloneDescription,
-          href: (agent: AgentDefinition) =>
+          href: (agent) =>
             createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
         },
         {
-          type: 'icon',
-          icon: 'trash',
-          name: actionLabels.delete,
-          description: actionLabels.deleteDescription,
-          color: 'danger',
-          enabled: (agent: AgentDefinition) => agent.id !== oneChatDefaultAgentId,
-          onClick: (agent: AgentDefinition) => {
-            if (agent.id === oneChatDefaultAgentId) {
-              return;
-            }
-            // TODO: Add confirmation modal
-            deleteAgent(agent.id);
+          // Have to use a custom action to display the danger color
+          // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
+          render: (agent) => {
+            return (
+              <EuiToolTip position="right" content={actionLabels.deleteDescription} delay="long">
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                  <EuiIcon type="trash" color="danger" />
+                  <EuiLink
+                    onClick={() => {
+                      if (agent.id === oneChatDefaultAgentId) {
+                        return;
+                      }
+                      openDeleteModal(agent);
+                    }}
+                    color="danger"
+                  >
+                    {actionLabels.delete}
+                  </EuiLink>
+                </EuiFlexGroup>
+              </EuiToolTip>
+            );
           },
+          // Don't display delete action for default agent
+          available: (agent) => agent.id !== oneChatDefaultAgentId,
         },
       ],
     };
 
     return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
-  }, [createOnechatUrl, deleteAgent]);
+  }, [createOnechatUrl, openDeleteModal]);
 
   const errorMessage = useMemo(
     () =>
@@ -164,26 +182,29 @@ export const AgentsList: React.FC = () => {
   }, [agents]);
 
   return (
-    <EuiInMemoryTable
-      items={agents}
-      itemId={(agent) => agent.id}
-      columns={columns}
-      sorting={true}
-      selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
-      search={{
-        box: { incremental: true },
-        filters: [
-          {
-            type: 'field_value_selection',
-            name: 'Labels',
-            multiSelect: 'and',
-            options: labelOptions,
-          },
-        ],
-      }}
-      loading={isLoading}
-      error={errorMessage}
-      responsiveBreakpoint={false}
-    />
+    <>
+      <EuiInMemoryTable
+        items={agents}
+        itemId={(agent) => agent.id}
+        columns={columns}
+        sorting={true}
+        selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
+        search={{
+          box: { incremental: true },
+          filters: [
+            {
+              type: 'field_value_selection',
+              name: 'Labels',
+              multiSelect: 'and',
+              options: labelOptions,
+            },
+          ],
+        }}
+        loading={isLoading}
+        error={errorMessage}
+        responsiveBreakpoint={false}
+      />
+      <AgentDeleteModal agent={deletingAgent} onClose={closeDeleteModal} />
+    </>
   );
 };
