@@ -105,7 +105,6 @@ describe('reindex API', () => {
   });
 
   describe('POST /api/upgrade_assistant/reindex/batch', () => {
-
     it('creates a collection of index operations', async () => {
       mockReindexService.createReindexOperation
         .mockResolvedValueOnce({
