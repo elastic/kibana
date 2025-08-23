@@ -11,6 +11,8 @@ import type { Client } from '@elastic/elasticsearch';
 import { omit } from 'lodash';
 import { systemIndicesSuperuser, createEsClientForFtrConfig } from '@kbn/test';
 import { castArray } from 'lodash';
+import pLimit from 'p-limit';
+import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { FtrProviderContext } from './ftr_provider_context';
 
 export async function EsProvider({ getService }: FtrProviderContext): Promise<Client> {
@@ -39,6 +41,8 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     'metricbeat*',
   ];
 
+  const REFRESH_INTERVAL = '1ms';
+
   function wrap<T, U extends keyof T>(obj: T, prop: U, cb: (m: T[U]) => T[U]) {
     const original = obj[prop];
     obj[prop] = cb(original);
@@ -48,7 +52,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     name: 'fast_refresh',
     template: {
       settings: {
-        refresh_interval: '1ms',
+        refresh_interval: REFRESH_INTERVAL,
       },
     },
   });
@@ -60,7 +64,7 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
       expand_wildcards: ['all'],
       settings: {
         index: {
-          refresh_interval: '1ms',
+          refresh_interval: REFRESH_INTERVAL,
         },
       },
     });
@@ -70,15 +74,24 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
     name: '*',
   });
 
+  const limiter = pLimit(10);
+
   await Promise.all(
     idxTemplates.map(async (tpl) => {
-      await client.indices.putIndexTemplate({
+      const next = {
         name: tpl.name,
         ...omit(tpl.index_template, 'created_date_millis', 'modified_date_millis', 'version'),
         ignore_missing_component_templates: castArray(
           tpl.index_template.ignore_missing_component_templates ?? []
         ),
-      });
+      };
+
+      // there are some templates where the priority is higher than ES' parser supports
+      if (next.priority && next.priority >= Number.MAX_SAFE_INTEGER) {
+        return;
+      }
+
+      await limiter(() => client.indices.putIndexTemplate(next));
     })
   );
 
@@ -86,9 +99,15 @@ export async function EsProvider({ getService }: FtrProviderContext): Promise<Cl
   // @ts-expect-error
   wrap(client.indices, 'putIndexTemplate', function putIndexTemplate(originalPutIndexTemplate) {
     return function (indexTemplateRequest, options) {
-      const nextRequest = {
+      const nextRequest: IndicesPutIndexTemplateRequest = {
         ...indexTemplateRequest,
-        composed_of: [...(indexTemplateRequest.composed_of ?? []), 'fast_refresh'],
+        template: {
+          ...indexTemplateRequest.template,
+          settings: {
+            ...indexTemplateRequest.template?.settings,
+            refresh_interval: REFRESH_INTERVAL,
+          },
+        },
       };
 
       // Call original with both arguments to preserve signature
