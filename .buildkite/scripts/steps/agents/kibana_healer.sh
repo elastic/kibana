@@ -14,29 +14,22 @@ source .buildkite/scripts/common/util.sh
 # 6. upload logs
 # 7. exit based on fix status
 
-# Configure subset of steps we can fix (expandable)
+# Step keys that the AI agent will attempt to fix
 FIXABLE_STEPS=("quick_checks")
 
-echo "--- Configuring Agent"
-GEMINI_API_KEY="$(vault_get kibana-healer gemini)"
-export GEMINI_API_KEY
-
-echo "--- Check for failures in fixable steps"
+echo "--- Checking for fixable failures"
 failed_steps=()
 logs_dir="/tmp/failed_step_logs"
 mkdir -p "$logs_dir"
 
 for step in "${FIXABLE_STEPS[@]}"; do
     outcome=$(buildkite-agent step get "outcome" --step "$step" 2>/dev/null || echo "unknown")
-    if [[ "$outcome" == "failed" ]]; then
-        echo "Found failed step: $step"
+    if [[ "$outcome" == "hard_failed" ]]; then
         failed_steps+=("$step")
 
         # Get logs for this failed step
         echo "Collecting logs for $step..."
-        buildkite-agent artifact download "buildkite-agent-log-$step.txt" "$logs_dir/" 2>/dev/null || \
-        buildkite-agent step get "log" --step "$step" > "$logs_dir/$step.log" 2>/dev/null || \
-        echo "Could not retrieve logs for $step" > "$logs_dir/$step.log"
+        download_artifact "buildkite-agent-log-$step.txt" "$logs_dir/"
     fi
 done
 
@@ -50,6 +43,9 @@ fi
 echo "Found ${#failed_steps[@]} failed steps to fix: ${failed_steps[*]}"
 
 echo "--- Setup Gemini CLI"
+GEMINI_API_KEY="$(vault_get kibana-healer gemini)"
+export GEMINI_API_KEY
+
 npm install -g @google/gemini-cli
 
 # Start Gemini logs tail in background
