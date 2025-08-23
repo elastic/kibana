@@ -60,7 +60,7 @@ export const AgentDeleteModal: React.FC<AgentDeleteModalProps> = ({ agent, onClo
   }
 
   return (
-    <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
+    <EuiModal onClose={onClose} aria-labelledby={modalTitleId} role="alertdialog">
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>
           <FormattedMessage
