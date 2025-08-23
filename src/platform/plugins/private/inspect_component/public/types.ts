@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
-import type { Dispatch, SetStateAction } from 'react';
+import type { ComponentType, Dispatch, SetStateAction } from 'react';
 
 /**
  * Response type for POST "/internal/inspect_component/inspect" route.
@@ -35,16 +35,6 @@ export interface FileData {
 }
 
 /**
- * Represents the name information associated with a React Fiber node.
- */
-export interface ReactFiberName {
-  /** The display name of the component. */
-  displayName?: string;
-  /** The actual name of the function or class component. */
-  name?: string;
-}
-
-/**
  * The subset of React Fiber node properties we care about.
  */
 export interface ReactFiberNode {
@@ -59,7 +49,9 @@ export interface ReactFiberNode {
   /** The resolved type of the component.
    * @see {@link ReactFiberName}
    */
-  type: string | ReactFiberName;
+  type: ComponentType;
+  /** The component props */
+  memoizedProps: Record<string, any>;
 }
 
 /**
@@ -85,8 +77,10 @@ export interface ComponentData extends FileData, InspectComponentResponse {
   euiInfo: EuiInfo;
   /** The EUI name of the icon inside this component. */
   iconType?: string;
-  /** A base64 encoded image string representing a screenshot of the component. */
-  image?: string | null;
+  /**
+   * {@link ReactFiberNode} for the inspected element.
+   */
+  preview?: ReactFiberNode | null;
   /** The name of the top level React component. */
   sourceComponent?: string;
 }

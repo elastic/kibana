@@ -22,11 +22,11 @@ interface Props {
 export const DataSection = ({ componentData }: Props) => {
   if (!componentData) return null;
 
-  const { codeowners, euiInfo, iconType, sourceComponent, image } = componentData;
+  const { codeowners, euiInfo, iconType, sourceComponent, preview } = componentData;
 
   return (
     <>
-      <PreviewImage image={image} />
+      <PreviewImage preview={preview} />
       <ComponentTitle sourceComponent={sourceComponent} />
       <CodeownersList codeowners={codeowners} />
       <IconData iconType={iconType} />

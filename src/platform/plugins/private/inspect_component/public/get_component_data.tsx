@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { capturePreviewScreenshot } from './screenshot/capture_screenshot';
+import { getFiberFromDomNode } from './utils';
 import { InspectFlyout, flyoutOptions } from './inspect/flyout/inspect_flyout';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 
@@ -29,15 +29,8 @@ export const getComponentData = async ({
         body: JSON.stringify({ path: fileData.fileName }),
       });
 
-    const { width: maxWidth, height: maxHeight } = target.getBoundingClientRect();
-
-    // TODO: Screenshot component, not  the target for better looking results.
-    const image = await capturePreviewScreenshot({
-      target,
-      maxWidth,
-      maxHeight,
-      aspectRatio: maxHeight / maxWidth,
-    });
+    // TODO: Improve this
+    const preview = getFiberFromDomNode(target);
 
     const componentData = {
       ...fileData,
@@ -45,7 +38,7 @@ export const getComponentData = async ({
       codeowners,
       euiInfo,
       iconType,
-      image,
+      preview,
       relativePath,
       sourceComponent,
     };

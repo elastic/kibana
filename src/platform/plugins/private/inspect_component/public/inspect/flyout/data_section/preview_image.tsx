@@ -8,20 +8,38 @@
  */
 
 import React from 'react';
-import { EuiImage, EuiSpacer } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
+import { css } from '@emotion/css';
+import type { ReactFiberNode } from '../../../types';
 
 interface Props {
-  image?: string | null;
+  preview?: ReactFiberNode | null;
 }
 
-export const PreviewImage = ({ image }: Props) => {
-  if (!image) {
+export const PreviewImage = ({ preview }: Props) => {
+  if (!preview) {
     return null;
   }
 
+  const scale = 0.5; // TODO: Improve this
+  const Component = preview.type;
+  const props = preview.memoizedProps;
+
+  const imageCss = css({
+    pointerEvents: 'none',
+    transform: `scale(${scale})`,
+    transformOrigin: 'top left',
+    width: `${100 / scale}%`,
+    height: `${100 / scale}%`,
+    overflow: 'hidden',
+    userSelect: 'none',
+  });
+
   return (
     <>
-      <EuiImage src={image} alt="Preview" size="fullWidth" hasShadow />
+      <div className={imageCss}>
+        <Component {...props} />
+      </div>
       <EuiSpacer size="l" />
     </>
   );
