@@ -18,13 +18,31 @@ export const PreviewImage = ({ element }: Props) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const scale = 0.5;
 
-  // TODO: Try to handle canvas and image elements
   useEffect(() => {
     if (!containerRef.current) return;
 
     containerRef.current.innerHTML = '';
 
-    const clone = element.cloneNode(true) as HTMLElement;
+    let clone: HTMLElement;
+
+    if (element instanceof HTMLCanvasElement) {
+      const canvasClone = document.createElement('canvas');
+      canvasClone.width = element.width;
+      canvasClone.height = element.height;
+      const ctx = canvasClone.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(element, 0, 0);
+      }
+      clone = canvasClone;
+    } else if (element instanceof HTMLImageElement) {
+      const imgClone = document.createElement('img');
+      imgClone.src = element.src;
+      imgClone.width = element.width;
+      imgClone.height = element.height;
+      clone = imgClone;
+    } else {
+      clone = element.cloneNode(true) as HTMLElement;
+    }
 
     containerRef.current.appendChild(clone);
   }, [element]);
@@ -37,6 +55,12 @@ export const PreviewImage = ({ element }: Props) => {
     pointerEvents: 'none',
     userSelect: 'none',
     overflow: 'hidden',
+    '& *': {
+      pointerEvents: 'none', // force children to also ignore pointer events
+      '& *': {
+        pointerEvents: 'none',
+      },
+    },
   });
 
   return <div ref={containerRef} className={containerCss} />;
