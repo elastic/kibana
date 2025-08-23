@@ -43,6 +43,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       inset: 0;
       position: fixed;
       z-index: ${Number(euiTheme.levels.modal) + 1};
+      cursor: crosshair;
     `,
     [euiTheme.colors.backgroundFilledText, euiTheme.levels.modal]
   );
