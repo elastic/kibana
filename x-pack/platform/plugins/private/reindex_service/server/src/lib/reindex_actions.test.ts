@@ -100,7 +100,7 @@ describe('ReindexActions', () => {
 
     it(`replaces reindexed-v${prevMajor} with reindexed-v${currentMajor}`, async () => {
       await actions.createReindexOp({
-        indexName: `{reindexed-v${prevMajor}-myIndex`,
+        indexName: `reindexed-v${prevMajor}-myIndex`,
         newIndexName: `reindexed-v${currentMajor}-myIndex`,
       });
       expect(client.create).toHaveBeenCalledWith(REINDEX_OP_TYPE, {
@@ -114,6 +114,8 @@ describe('ReindexActions', () => {
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
+        rollupJob: undefined,
+        settings: undefined,
       });
     });
   });
