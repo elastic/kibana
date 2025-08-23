@@ -70,7 +70,7 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
       <EuiWindowEvent event="resize" handler={updateHighlightPosition} />
       <InspectFlyoutHeader />
       <EuiFlyoutBody>
-        <DataSection componentData={componentData} />
+        <DataSection componentData={componentData} target={target} />
         <EuiSpacer size="xxl" />
         <ActionsSection componentData={componentData} />
       </EuiFlyoutBody>

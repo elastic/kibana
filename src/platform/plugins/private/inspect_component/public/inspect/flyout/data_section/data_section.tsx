@@ -17,16 +17,17 @@ import type { ComponentData } from '../../../types';
 
 interface Props {
   componentData: ComponentData;
+  target: HTMLElement | SVGElement;
 }
 
-export const DataSection = ({ componentData }: Props) => {
+export const DataSection = ({ componentData, target }: Props) => {
   if (!componentData) return null;
 
-  const { codeowners, euiInfo, iconType, sourceComponent, preview } = componentData;
+  const { codeowners, euiInfo, iconType, sourceComponent } = componentData;
 
   return (
     <>
-      <PreviewImage preview={preview} />
+      <PreviewImage element={target} />
       <ComponentTitle sourceComponent={sourceComponent} />
       <CodeownersList codeowners={codeowners} />
       <IconData iconType={iconType} />

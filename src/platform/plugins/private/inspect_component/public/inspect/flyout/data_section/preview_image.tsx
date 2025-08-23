@@ -7,40 +7,37 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef } from 'react';
 import { css } from '@emotion/css';
-import type { ReactFiberNode } from '../../../types';
 
 interface Props {
-  preview?: ReactFiberNode | null;
+  element: HTMLElement | SVGElement;
 }
 
-export const PreviewImage = ({ preview }: Props) => {
-  if (!preview) {
-    return null;
-  }
+export const PreviewImage = ({ element }: Props) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scale = 0.5;
 
-  const scale = 0.5; // TODO: Improve this
-  const Component = preview.type;
-  const props = preview.memoizedProps;
+  // TODO: Try to handle canvas and image elements
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-  const imageCss = css({
-    pointerEvents: 'none',
+    containerRef.current.innerHTML = '';
+
+    const clone = element.cloneNode(true) as HTMLElement;
+
+    containerRef.current.appendChild(clone);
+  }, [element]);
+
+  const containerCss = css({
     transform: `scale(${scale})`,
     transformOrigin: 'top left',
     width: `${100 / scale}%`,
     height: `${100 / scale}%`,
-    overflow: 'hidden',
+    pointerEvents: 'none',
     userSelect: 'none',
+    overflow: 'hidden',
   });
 
-  return (
-    <>
-      <div className={imageCss}>
-        <Component {...props} />
-      </div>
-      <EuiSpacer size="l" />
-    </>
-  );
+  return <div ref={containerRef} className={containerCss} />;
 };

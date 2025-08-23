@@ -118,9 +118,7 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
   };
 };
 
-export const getFiberFromDomNode = (
-  node: HTMLElement | SVGElement | null
-): ReactFiberNode | undefined => {
+const getFiberFromDomNode = (node: HTMLElement | SVGElement | null): ReactFiberNode | undefined => {
   if (!node) return;
   const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
   return fiberKey ? (node as any)[fiberKey] : undefined;

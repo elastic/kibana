@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { getFiberFromDomNode } from './utils';
 import { InspectFlyout, flyoutOptions } from './inspect/flyout/inspect_flyout';
 import type { GetComponentDataOptions, InspectComponentResponse } from './types';
 
@@ -29,16 +28,12 @@ export const getComponentData = async ({
         body: JSON.stringify({ path: fileData.fileName }),
       });
 
-    // TODO: Improve this
-    const preview = getFiberFromDomNode(target);
-
     const componentData = {
       ...fileData,
       baseFileName,
       codeowners,
       euiInfo,
       iconType,
-      preview,
       relativePath,
       sourceComponent,
     };
