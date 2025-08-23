@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useLayoutEffect, useState } from 'react';
 import type { CSSProperties } from 'react';
-import { EuiFlyoutBody, EuiPortal, EuiSpacer, useEuiTheme } from '@elastic/eui';
+import { EuiFlyoutBody, EuiPortal, EuiSpacer, EuiWindowEvent, useEuiTheme } from '@elastic/eui';
 import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section/data_section';
 import { InspectFlyoutHeader } from './inspect_flyout_header';
@@ -32,42 +32,51 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
 
 export const InspectFlyout = ({ componentData, target }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [currentPosition, setCurrentPosition] = useState<CSSProperties | null>(null);
+  const [highlightPosition, setHighlightPosition] = useState<CSSProperties | null>(null);
   const modalZIndex = Number(euiTheme.levels.modal);
 
-  requestAnimationFrame(() => {
-    const flyoutElement = document.getElementById(INSPECT_FLYOUT_ID);
-    const portalParent = flyoutElement?.closest(EUI_PORTAL_ATTRIBUTE);
-    if (portalParent instanceof HTMLElement) {
-      portalParent.style.zIndex = (modalZIndex + 2).toString();
-    }
-  });
-
-  useEffect(() => {
-    if (!target) return;
-    const rectangle = target.getBoundingClientRect();
-    // TODO: Handle resizing
-    setCurrentPosition({
+  const updateHighlightPosition = useCallback(() => {
+    const rect = target.getBoundingClientRect();
+    setHighlightPosition({
       position: 'fixed',
-      top: `${rectangle.top}px`,
-      left: `${rectangle.left}px`,
-      width: `${rectangle.width}px`,
-      height: `${rectangle.height}px`,
+      top: `${rect.top}px`,
+      left: `${rect.left}px`,
+      width: `${rect.width}px`,
+      height: `${rect.height}px`,
       zIndex: modalZIndex + 1,
     });
   }, [target, modalZIndex]);
 
+  /** Set initial highlight position. */
+  useLayoutEffect(() => {
+    if (!target) return;
+    updateHighlightPosition();
+  }, [updateHighlightPosition, target]);
+
+  /** Update z-index of the portal parent to be above portal elements. */
+  useLayoutEffect(() => {
+    const flyoutElement = document.getElementById(INSPECT_FLYOUT_ID);
+    const portalParent = flyoutElement?.closest(EUI_PORTAL_ATTRIBUTE);
+
+    if (portalParent instanceof HTMLElement) {
+      requestAnimationFrame(() => {
+        portalParent.style.zIndex = (modalZIndex + 2).toString();
+      });
+    }
+  }, [modalZIndex]);
+
   return (
     <>
+      <EuiWindowEvent event="resize" handler={updateHighlightPosition} />
       <InspectFlyoutHeader />
       <EuiFlyoutBody>
         <DataSection componentData={componentData} />
         <EuiSpacer size="xxl" />
         <ActionsSection componentData={componentData} />
       </EuiFlyoutBody>
-      {currentPosition && (
+      {highlightPosition && (
         <EuiPortal>
-          <InspectHighlight currentPosition={currentPosition} />
+          <InspectHighlight currentPosition={highlightPosition} />
         </EuiPortal>
       )}
     </>

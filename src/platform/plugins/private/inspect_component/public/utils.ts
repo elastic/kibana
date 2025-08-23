@@ -52,7 +52,10 @@ const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined =
   return;
 };
 
-// TODO - this logic probably needs some work.
+/**
+ * Find React component path from DOM node.
+ * This logic is not perfect and may not work in all cases.
+ */
 export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
   const path: string[] = [];
   let source: FileData | null | undefined;
