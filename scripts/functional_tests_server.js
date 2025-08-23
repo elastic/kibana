@@ -8,5 +8,5 @@
  */
 
 require('../src/setup_node_env');
-require('../src/cli/apm')('functional-tests-server', process.argv);
+require('../src/cli/apm')('functional-tests-server', []);
 require('@kbn/test').startServersCli();
