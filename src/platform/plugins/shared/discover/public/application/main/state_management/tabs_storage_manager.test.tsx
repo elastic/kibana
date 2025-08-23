@@ -17,7 +17,11 @@ import {
 } from './tabs_storage_manager';
 import type { RecentlyClosedTabState, TabState } from './redux/types';
 import { TABS_STATE_URL_KEY } from '../../../../common/constants';
-import { DEFAULT_TAB_STATE } from './redux/constants';
+import { DEFAULT_TAB_STATE } from './redux';
+import {
+  getRecentlyClosedTabStateMock,
+  getTabStateMock,
+} from './redux/__mocks__/internal_state.mocks';
 
 const mockUserId = 'testUserId';
 const mockSpaceId = 'testSpaceId';
@@ -44,8 +48,7 @@ const mockGetAppState = (tabId: string) => {
 
 const mockGetInternalState = () => ({});
 
-const mockTab1: TabState = {
-  ...DEFAULT_TAB_STATE,
+const mockTab1 = getTabStateMock({
   id: 'tab1',
   label: 'Tab 1',
   globalState: {
@@ -53,10 +56,9 @@ const mockTab1: TabState = {
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
   },
-};
+});
 
-const mockTab2: TabState = {
-  ...DEFAULT_TAB_STATE,
+const mockTab2 = getTabStateMock({
   id: 'tab2',
   label: 'Tab 2',
   globalState: {
@@ -64,10 +66,9 @@ const mockTab2: TabState = {
     filters: [],
     refreshInterval: { pause: true, value: 1000 },
   },
-};
+});
 
-const mockRecentlyClosedTab: RecentlyClosedTabState = {
-  ...DEFAULT_TAB_STATE,
+const mockRecentlyClosedTab = getRecentlyClosedTabStateMock({
   id: 'closedTab1',
   label: 'Closed tab 1',
   globalState: {
@@ -76,7 +77,7 @@ const mockRecentlyClosedTab: RecentlyClosedTabState = {
     refreshInterval: { pause: true, value: 1000 },
   },
   closedAt: Date.now(),
-};
+});
 
 const mockRecentlyClosedTab2: RecentlyClosedTabState = {
   ...mockRecentlyClosedTab,

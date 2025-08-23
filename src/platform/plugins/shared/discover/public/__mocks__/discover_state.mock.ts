@@ -28,12 +28,13 @@ import type { DiscoverCustomizationContext } from '../customizations';
 import { createCustomizationService } from '../customizations/customization_service';
 import { createTabsStorageManager } from '../application/main/state_management/tabs_storage_manager';
 import { internalStateActions } from '../application/main/state_management/redux';
-import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux/constants';
-import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
+import { DEFAULT_TAB_STATE } from '../application/main/state_management/redux';
+import type { DiscoverSession, DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 
 export function getDiscoverStateMock({
   isTimeBased = true,
   savedSearch,
+  additionalPersistedTabs = [],
   stateStorageContainer,
   runtimeStateManager,
   history,
@@ -42,6 +43,7 @@ export function getDiscoverStateMock({
 }: {
   isTimeBased?: boolean;
   savedSearch?: SavedSearch | false;
+  additionalPersistedTabs?: DiscoverSessionTab[];
   runtimeStateManager?: RuntimeStateManager;
   stateStorageContainer?: IKbnUrlStateStorage;
   history?: History<HistoryLocationState>;
@@ -80,9 +82,9 @@ export function getDiscoverStateMock({
   const persistedDiscoverSession: DiscoverSession | undefined = finalSavedSearch
     ? {
         ...finalSavedSearch,
-        id: finalSavedSearch.id ?? '',
-        title: finalSavedSearch.title ?? '',
-        description: finalSavedSearch.description ?? '',
+        id: finalSavedSearch.id ?? 'test-id',
+        title: finalSavedSearch.title ?? 'title',
+        description: finalSavedSearch.description ?? 'description',
         tabs: [
           fromSavedSearchToSavedObjectTab({
             tab: {
@@ -92,6 +94,7 @@ export function getDiscoverStateMock({
             savedSearch: finalSavedSearch,
             services,
           }),
+          ...additionalPersistedTabs,
         ],
       }
     : undefined;
