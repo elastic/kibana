@@ -105,9 +105,7 @@ describe('reindex API', () => {
   });
 
   describe('POST /api/upgrade_assistant/reindex/batch', () => {
-    const queueSettingsArg = {
-      enqueue: true,
-    };
+
     it('creates a collection of index operations', async () => {
       mockReindexService.createReindexOperation
         .mockResolvedValueOnce({
