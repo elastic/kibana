@@ -23,7 +23,6 @@ import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
-import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
 
 import type { ReindexService } from './reindex_service';
@@ -38,8 +37,6 @@ const asApiResponse = <T>(body: T): TransportResult<T> =>
   ({
     body,
   } as TransportResult<T>);
-
-const { currentMajor, prevMajor } = getMockVersionInfo();
 
 describe('reindexService', () => {
   let actions: jest.Mocked<any>;
@@ -110,35 +107,7 @@ describe('reindexService', () => {
         cluster: ['manage'],
         index: [
           {
-            names: ['anIndex', `reindexed-v${currentMajor}-anIndex`],
-            allow_restricted_indices: true,
-            privileges: ['all'],
-          },
-          {
-            names: ['.tasks'],
-            privileges: ['read'],
-          },
-        ],
-      });
-    });
-
-    it('includes checking for permissions on the baseName which could be an alias', async () => {
-      clusterClient.asCurrentUser.security.hasPrivileges.mockResponse(
-        // @ts-expect-error not full interface
-        { has_all_requested: true }
-      );
-
-      const hasRequired = await service.hasRequiredPrivileges([`reindexed-v${prevMajor}-anIndex`]);
-      expect(hasRequired).toBe(true);
-      expect(clusterClient.asCurrentUser.security.hasPrivileges).toHaveBeenCalledWith({
-        cluster: ['manage'],
-        index: [
-          {
-            names: [
-              `reindexed-v${prevMajor}-anIndex`,
-              `reindexed-v${currentMajor}-anIndex`,
-              'anIndex',
-            ],
+            names: ['anIndex'],
             allow_restricted_indices: true,
             privileges: ['all'],
           },
@@ -194,7 +163,12 @@ describe('reindexService', () => {
         newIndexName: 'reindexed-myIndex',
       });
 
-      expect(actions.createReindexOp).toHaveBeenCalledWith('myIndex', undefined);
+      expect(actions.createReindexOp).toHaveBeenCalledWith({
+        indexName: 'myIndex',
+        newIndexName: 'reindexed-myIndex',
+        reindexOptions: undefined,
+        settings: undefined,
+      });
     });
 
     it('fails if index does not exist', async () => {
