@@ -7,10 +7,7 @@
 
 import React, { useState, useEffect, useMemo } from 'react';
 import type { FC } from 'react';
-import type {
-  FindFileStructureResponse,
-  IngestPipeline,
-} from '@kbn/file-upload-plugin/common/types';
+import type { IngestPipeline } from '@kbn/file-upload-plugin/common/types';
 import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiButton,
@@ -28,16 +25,17 @@ import type {
   InferenceInferenceEndpointInfo,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { createSemanticTextCombinedField, getFieldNames, getNameCollisionMsg } from './utils';
+import { getFieldsFromMappings } from '@kbn/file-upload/file_upload_manager';
+import { createSemanticTextCombinedField, getNameCollisionMsg } from './utils';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import type { AddCombinedField } from './combined_fields_form';
 
 interface Props {
   addCombinedField: AddCombinedField;
   hasNameCollision: (name: string) => boolean;
-  results: FindFileStructureResponse;
+  mappings: MappingTypeMapping;
 }
-export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision, results }) => {
+export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision, mappings }) => {
   const {
     services: { http },
   } = useDataVisualizerKibana();
@@ -49,10 +47,10 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
 
   const fieldOptions = useMemo(
     () =>
-      getFieldNames(results).map((columnName: string) => {
-        return { value: columnName, text: columnName };
+      getFieldsFromMappings(mappings).map(({ name }) => {
+        return { value: name, text: name };
       }),
-    [results]
+    [mappings]
   );
 
   useEffect(() => {
@@ -94,12 +92,12 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
     }
     addCombinedField(
       createSemanticTextCombinedField(renameToFieldOption, selectedFieldOption),
-      (mappings: MappingTypeMapping) => {
+      (mappings2: MappingTypeMapping) => {
         if (renameToFieldOption === undefined || selectedFieldOption === undefined) {
-          return mappings;
+          return mappings2;
         }
 
-        const newMappings = cloneDeep(mappings);
+        const newMappings = cloneDeep(mappings2);
         newMappings.properties![renameToFieldOption ?? selectedFieldOption] = {
           // @ts-ignore types are missing semantic_text
           type: 'semantic_text',
@@ -107,17 +105,18 @@ export const SemanticTextForm: FC<Props> = ({ addCombinedField, hasNameCollision
         };
         return newMappings;
       },
-      (pipeline: IngestPipeline) => {
-        const newPipeline = cloneDeep(pipeline);
-        if (renameToFieldOption !== null) {
-          newPipeline.processors.push({
-            set: {
-              field: renameToFieldOption,
-              copy_from: selectedFieldOption,
-            },
-          });
-        }
-        return newPipeline;
+      (pipelines: IngestPipeline[]) => {
+        return cloneDeep(pipelines).map((p) => {
+          if (renameToFieldOption !== null) {
+            p.processors.push({
+              set: {
+                field: renameToFieldOption,
+                copy_from: selectedFieldOption,
+              },
+            });
+          }
+          return p;
+        });
       }
     );
   };
