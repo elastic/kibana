@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export interface AttachmentTypeRegistryBaseItem {
+export interface RegistryBaseItem {
   id: string;
 }
 
-export class AttachmentTypeRegistry<T extends AttachmentTypeRegistryBaseItem> {
+export class Registry<T extends RegistryBaseItem> {
   private readonly collection: Map<string, T> = new Map();
 
   constructor(private readonly name: string) {}

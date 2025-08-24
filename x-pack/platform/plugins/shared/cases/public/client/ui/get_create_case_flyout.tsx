@@ -16,6 +16,7 @@ export type GetCreateCaseFlyoutProps = Omit<
   GetCreateCaseFlyoutPropsInternal,
   | 'externalReferenceAttachmentTypeRegistry'
   | 'persistableStateAttachmentTypeRegistry'
+  | 'attachmentSuggestionRegistry'
   | 'getFilesClient'
 >;
 
@@ -25,6 +26,7 @@ export const CreateCaseFlyoutLazy: React.FC<CreateCaseFlyoutProps> = lazy(
 export const getCreateCaseFlyoutLazy = ({
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  attachmentSuggestionRegistry,
   getFilesClient,
   owner,
   permissions,
@@ -38,6 +40,7 @@ export const getCreateCaseFlyoutLazy = ({
     value={{
       externalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry,
+      attachmentSuggestionRegistry,
       getFilesClient,
       owner,
       permissions,

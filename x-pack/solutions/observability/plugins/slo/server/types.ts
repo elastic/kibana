@@ -7,6 +7,7 @@
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CasesServerSetup, CasesServerStart } from '@kbn/cases-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
@@ -46,6 +47,7 @@ export interface SLOPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
+  cases?: CasesServerSetup;
 }
 
 export interface SLOPluginStartDependencies {
@@ -55,4 +57,5 @@ export interface SLOPluginStartDependencies {
   ruleRegistry: RuleRegistryPluginStartContract;
   dataViews: DataViewsServerPluginStart;
   licensing: LicensingPluginStart;
+  cases?: CasesServerStart;
 }

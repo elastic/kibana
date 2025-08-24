@@ -35,12 +35,14 @@ import type { ConfigureSubClient, InternalConfigureSubClient } from './configure
 import type { CasesClientFactory } from './factory';
 import type { MetricsSubClient } from './metrics/client';
 import type { UserActionsSubClient } from './user_actions/client';
+import type { AttachmentSuggestionsSubClient } from './suggestions/client';
 
 import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { SortFieldCase } from '../../public/containers/types';
 import {
   createExternalReferenceAttachmentTypeRegistryMock,
   createPersistableStateAttachmentTypeRegistryMock,
+  createAttachmentSuggestionRegistryMock,
 } from '../attachment_framework/mocks';
 import { createAuthorizationMock } from '../authorization/mock';
 import {
@@ -76,6 +78,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     addObservable: jest.fn(),
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
+    getMetadata: jest.fn(),
   };
 };
 
@@ -151,6 +154,7 @@ export const createCasesClientMock = (): CasesClientMock => {
   const client: PublicContract<CasesClient> = {
     cases: createCasesSubClientMock(),
     attachments: createAttachmentsSubClientMock(),
+    suggestions: createAttachmentSuggestionsSubClientMock(),
     userActions: createUserActionsSubClientMock(),
     configure: createConfigureSubClientMock(),
     metrics: createMetricsSubClientMock(),
@@ -193,6 +197,14 @@ export const createSavedObjectsSerializerMock = (): SavedObjectsSerializerMock =
   return serializer;
 };
 
+type AttachmentSuggestionsSubClientMock = jest.Mocked<AttachmentSuggestionsSubClient>;
+
+export const createAttachmentSuggestionsSubClientMock = (): AttachmentSuggestionsSubClientMock => {
+  return {
+    getAllForOwners: jest.fn(),
+  };
+};
+
 export const createCasesClientMockArgs = () => {
   return {
     services: {
@@ -218,6 +230,7 @@ export const createCasesClientMockArgs = () => {
     spaceId: 'default',
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    attachmentSuggestionRegistry: createAttachmentSuggestionRegistryMock(),
     securityStartPlugin: securityMock.createStart(),
     lensEmbeddableFactory: jest.fn().mockReturnValue(
       makeLensEmbeddableFactory(
@@ -253,6 +266,7 @@ export const createCasesClientFactoryMockArgs = () => {
     ),
     externalReferenceAttachmentTypeRegistry: createExternalReferenceAttachmentTypeRegistryMock(),
     persistableStateAttachmentTypeRegistry: createPersistableStateAttachmentTypeRegistryMock(),
+    attachmentSuggestionRegistry: createAttachmentSuggestionRegistryMock(),
   };
 };
 

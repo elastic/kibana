@@ -4252,6 +4252,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/case-suggestion-example-plugin@link:x-pack/examples/case_suggestion_example":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cases-api-integration-test-plugin@link:x-pack/platform/test/cases_api_integration/common/plugins/cases":
   version "0.0.0"
   uid ""

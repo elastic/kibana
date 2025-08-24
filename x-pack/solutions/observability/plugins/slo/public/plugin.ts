@@ -41,6 +41,7 @@ import type {
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
+import { registerSloSuggestion } from './cases/suggestion_definition';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -190,6 +191,10 @@ export class SLOPlugin
       }
     };
     registerEmbeddables();
+
+    if (plugins.cases?.attachmentFramework) {
+      registerSloSuggestion(plugins.cases.attachmentFramework);
+    }
 
     return {
       sloDetailsLocator,

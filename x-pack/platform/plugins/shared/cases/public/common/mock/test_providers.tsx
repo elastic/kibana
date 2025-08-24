@@ -33,6 +33,7 @@ import { ExternalReferenceAttachmentTypeRegistry } from '../../client/attachment
 import { PersistableStateAttachmentTypeRegistry } from '../../client/attachment_framework/persistable_state_registry';
 import { allCasesPermissions } from './permissions';
 import type { CasesPublicStartDependencies } from '../../types';
+import { AttachmentSuggestionRegistry } from '../../client/attachment_framework/suggestion_registry';
 
 interface TestProviderProps {
   children: React.ReactNode;
@@ -42,6 +43,7 @@ interface TestProviderProps {
   releasePhase?: ReleasePhase;
   externalReferenceAttachmentTypeRegistry?: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry?: PersistableStateAttachmentTypeRegistry;
+  attachmentSuggestionRegistry?: AttachmentSuggestionRegistry;
   license?: ILicense;
   services?: CasesPublicStartDependencies;
   queryClient?: QueryClient;
@@ -87,6 +89,7 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
   releasePhase,
   externalReferenceAttachmentTypeRegistry,
   persistableStateAttachmentTypeRegistry,
+  attachmentSuggestionRegistry,
   license,
   coreStart,
   services,
@@ -127,12 +130,16 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
     []
   );
 
+  const defaultAttachmentSuggestionRegistry = useMemo(() => new AttachmentSuggestionRegistry(), []);
+
   const casesProviderValue: CasesContextProps = useMemo(
     () => ({
       externalReferenceAttachmentTypeRegistry:
         externalReferenceAttachmentTypeRegistry ?? defaultExternalReferenceAttachmentTypeRegistry,
       persistableStateAttachmentTypeRegistry:
         persistableStateAttachmentTypeRegistry ?? defaultPersistableStateAttachmentTypeRegistry,
+      attachmentSuggestionRegistry:
+        attachmentSuggestionRegistry ?? defaultAttachmentSuggestionRegistry,
       features,
       owner: owner ?? mockedTestProvidersOwner,
       permissions: permissions ?? defaultPermissions,
@@ -150,6 +157,8 @@ const TestProvidersComponent: React.FC<TestProviderProps> = ({
       permissions,
       persistableStateAttachmentTypeRegistry,
       releasePhase,
+      attachmentSuggestionRegistry,
+      defaultAttachmentSuggestionRegistry,
     ]
   );
 

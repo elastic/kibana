@@ -22,7 +22,6 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DistributiveOmit } from '@elastic/eui';
 import type { ApmBase } from '@elastic/apm-rum';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/public';
@@ -55,12 +54,14 @@ import type {
   CasesBulkGetResponse,
   CasesMetricsRequest,
 } from '../common/types/api';
-import type {
-  AlertAttachmentPayload,
-  UserCommentAttachmentPayload,
-  PersistableStateAttachmentPayload,
-  ExternalReferenceNoSOAttachmentPayload,
-  ExternalReferenceSOAttachmentPayload,
+
+import type { SupportedCaseAttachment } from '../common/types/domain';
+import type { AttachmentSuggestionRegistry } from './client/attachment_framework/suggestion_registry';
+
+export type {
+  SupportedCaseAttachment,
+  CaseAttachmentWithoutOwner,
+  CaseAttachmentsWithoutOwner,
 } from '../common/types/domain';
 
 export interface CasesPublicSetupDependencies {
@@ -112,6 +113,7 @@ export interface RenderAppProps {
   kibanaVersion: string;
   externalReferenceAttachmentTypeRegistry: ExternalReferenceAttachmentTypeRegistry;
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry;
+  attachmentSuggestionRegistry: AttachmentSuggestionRegistry;
 }
 
 export interface CasesPublicSetup {
@@ -175,16 +177,7 @@ export interface CasesPublicStart {
   };
 }
 
-export type SupportedCaseAttachment =
-  | AlertAttachmentPayload
-  | UserCommentAttachmentPayload
-  | PersistableStateAttachmentPayload
-  | ExternalReferenceNoSOAttachmentPayload
-  | ExternalReferenceSOAttachmentPayload;
-
 export type CaseAttachments = SupportedCaseAttachment[];
-export type CaseAttachmentWithoutOwner = DistributiveOmit<SupportedCaseAttachment, 'owner'>;
-export type CaseAttachmentsWithoutOwner = CaseAttachmentWithoutOwner[];
 export type { LensProps } from './components/visualizations/types';
 
 export type ServerError = IHttpFetchError<ResponseErrorBody>;
