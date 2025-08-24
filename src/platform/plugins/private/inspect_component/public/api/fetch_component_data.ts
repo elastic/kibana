@@ -10,7 +10,7 @@
 import type { CoreStart } from '@kbn/core/public';
 
 /**
- * Options for the `fetchComponentData` function.
+ * Parameters for {@link fetchComponentData}.
  */
 interface FetchComponentDataOptions {
   /** Kibana HTTP service. */

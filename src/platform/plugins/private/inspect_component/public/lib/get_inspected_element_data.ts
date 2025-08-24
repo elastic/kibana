@@ -32,7 +32,7 @@ export interface ComponentData extends DebugSource, InspectComponentResponse {
 }
 
 /**
- * Parameters for the `getInspectedElementData` function.
+ * Parameters for {@link getInspectedElementData}.
  */
 export interface GetInspectedElementDataOptions {
   /** Target element */
