@@ -29,7 +29,7 @@ import { useFetchFullPolicy } from '../../../../../../../../../components/agent_
 import type { InstallAgentPageProps } from './types';
 
 export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPageProps> = (props) => {
-  const { setIsManaged, agentPolicy, cancelUrl, onNext, cancelClickHandler } = props;
+  const { setIsManaged, agentPolicy, cancelUrl, onNext, cancelClickHandler, packageInfo } = props;
 
   const kibanaVersion = useKibanaVersion();
   const [commandCopied, setCommandCopied] = useState(false);
@@ -76,7 +76,7 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
 
   return (
     <>
-      <StandaloneModeWarningCallout setIsManaged={setIsManaged} />
+      <StandaloneModeWarningCallout setIsManaged={setIsManaged} packageInfo={packageInfo} />
       <EuiSpacer size="xl" />
       <EuiSteps steps={steps} />
       {commandCopied && (

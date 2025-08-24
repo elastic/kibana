@@ -25,6 +25,8 @@ import { css } from '@emotion/react';
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import {
   usePlatform,
@@ -131,6 +133,22 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const cloudbeatUnsupportedPlatformCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.cloudbeatUnsupportedPlatform', {
+        defaultMessage:
+          'Platform not supported',
+      })}
+      color="danger"
+      iconType="warning"
+    >
+      <FormattedMessage
+        id="xpack.fleet.enrollmentInstructions.cloudbeatUnsupportedPlatformMessage"
+        defaultMessage="This Cloud Security integration (Cloudbeat) only supports Linux and Kubernetes platforms. The selected platform will not function correctly with this integration."
+      />
+    </EuiCallOut>
+  );
+
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
   };
@@ -221,6 +239,21 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
               FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
             <>
               {macCallout}
+              <EuiSpacer size="m" />
+            </>
+          )}
+        {['mac_aarch64', 'mac_x86_64', 'windows', 'windows_msi', 'deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) &&
+          (cloudSecurityIntegration?.integrationType ===
+            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE ||
+            cloudSecurityIntegration?.integrationType ===
+              FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE) &&
+          !isManaged && (
+            <>
+              {cloudbeatUnsupportedPlatformCallout}
               <EuiSpacer size="m" />
             </>
           )}

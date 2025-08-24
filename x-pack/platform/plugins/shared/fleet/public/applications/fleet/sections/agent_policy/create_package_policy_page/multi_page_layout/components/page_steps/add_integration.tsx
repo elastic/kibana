@@ -302,7 +302,7 @@ export const AddIntegrationPageStep: React.FC<MultiPageStepLayoutProps> = (props
 
   return (
     <>
-      {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} />}
+      {isManaged ? null : <StandaloneModeWarningCallout setIsManaged={setIsManaged} packageInfo={packageInfo} />}
       {content}
       {addIntegrationExtensionView}
       <NotObscuredByBottomBar />
