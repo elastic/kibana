@@ -11,6 +11,13 @@ module.exports = (_, options = {}) => {
   return {
     presets: [
       [
+        require('./common_preset'),
+        {
+          ...options,
+          inlineImportsAndExports: true,
+        },
+      ],
+      [
         require.resolve('@babel/preset-env'),
         {
           targets: {
@@ -38,7 +45,6 @@ module.exports = (_, options = {}) => {
           ...(options['@babel/preset-env'] || {}),
         },
       ],
-      [require('./common_preset'), options],
     ],
   };
 };
