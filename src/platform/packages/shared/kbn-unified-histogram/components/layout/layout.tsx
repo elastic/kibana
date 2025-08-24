@@ -11,6 +11,7 @@ import { euiFullHeight, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui
 import type { PropsWithChildren, ReactNode } from 'react';
 import React, { useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
+import type { ResizableLayoutProps } from '@kbn/resizable-layout';
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -39,7 +40,7 @@ export type UnifiedHistogramLayoutProps = PropsWithChildren<{
   /**
    * Current top panel height -- leave undefined to use the default
    */
-  topPanelHeight?: number;
+  topPanelHeight?: ResizableLayoutProps['fixedPanelSize'];
   /**
    * Callback to update the topPanelHeight prop when a resize is triggered
    */
