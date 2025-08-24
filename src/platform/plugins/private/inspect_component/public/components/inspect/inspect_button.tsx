@@ -21,7 +21,7 @@ const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel',
 });
 
 const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.tooltip', {
-  values: { keyboardShortcut: isMac ? "⌘ '" : "Ctrl '" },
+  values: { keyboardShortcut: isMac() ? "⌘ '" : "Ctrl '" },
   defaultMessage: 'Keyboard shortcut {keyboardShortcut}',
 });
 

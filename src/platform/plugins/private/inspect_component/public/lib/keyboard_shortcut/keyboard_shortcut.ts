@@ -27,6 +27,7 @@ export const isKeyboardShortcut = (event: KeyboardEvent) =>
  * Check if the current platform is macOS.
  * @return {boolean} True if the platform is macOS, false otherwise.
  */
-export const isMac: boolean = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
-  .toLowerCase()
-  .includes('mac');
+export const isMac = (): boolean =>
+  ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
+    .toLowerCase()
+    .includes('mac');
