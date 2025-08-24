@@ -18,6 +18,7 @@ export const parseConfig = (() => {
     renovateRules: RenovatePackageRule[];
     packageDependencies: string[];
     packageDevDependencies: string[];
+    packageResolutions: string[];
   } | null = null;
 
   return () => {
@@ -38,8 +39,9 @@ export const parseConfig = (() => {
     const packageDevDependencies = Object.keys(packageConfig?.devDependencies || {}).filter(
       packageFilter
     );
+    const packageResolutions = Object.keys(packageConfig?.resolutions || {});
 
-    cache = { renovateRules, packageDependencies, packageDevDependencies };
+    cache = { renovateRules, packageDependencies, packageDevDependencies, packageResolutions };
     return cache;
   };
 })();
