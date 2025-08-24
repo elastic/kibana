@@ -31,6 +31,12 @@ export const getMockArtifacts = async () => {
     >(async (os) => {
       return getInternalArtifactMock(os, 'v1', ArtifactConstants.GLOBAL_TRUSTED_APPS_NAME);
     }),
+    // Trusted Devices items
+    ...ArtifactConstants.SUPPORTED_TRUSTED_DEVICES_OPERATING_SYSTEMS.map<
+      Promise<InternalArtifactCompleteSchema>
+    >(async (os) => {
+      return getInternalArtifactMock(os, 'v1', ArtifactConstants.GLOBAL_TRUSTED_DEVICES_NAME);
+    }),
   ]);
 };
 

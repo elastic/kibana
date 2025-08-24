@@ -1290,9 +1290,9 @@
     "definition",
     "deleted_at",
     "description",
+    "enabled",
     "lastUpdatedBy",
     "name",
-    "status",
     "tags",
     "yaml"
   ],
