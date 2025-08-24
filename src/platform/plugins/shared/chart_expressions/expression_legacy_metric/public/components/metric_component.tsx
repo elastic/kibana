@@ -13,6 +13,7 @@ import {
   getColumnByAccessor,
   getAccessor,
   getFormatByAccessor,
+  isVisDimension,
 } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
@@ -51,6 +52,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
 
     let bucketColumnId: string;
     let bucketFormatter: IFieldFormat;
+    let description: string = '';
 
     if (dimensions.bucket) {
       const bucketColumn = getColumnByAccessor(dimensions.bucket!, table.columns);
@@ -67,6 +69,45 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
         const formatter = getFormatService().deserialize(
           getFormatByAccessor(metric, table.columns)
         );
+
+        if (isVisDimension(metric)) {
+          if (typeof metric.accessor === 'object' && metric.accessor !== null) {
+            if ('meta' in metric.accessor && metric.accessor.meta) {
+              const { sourceParams } = metric.accessor.meta;
+
+              if (sourceParams?.type === 'cardinality') {
+                const params = sourceParams.params;
+                if (params && typeof params === 'object' && 'field' in params) {
+                  description = params.field?.toString() || '';
+                }
+              }
+              if (sourceParams?.type === 'filtered_metric') {
+                const params = sourceParams.params;
+                if (params && typeof params === 'object' && 'customBucket' in params) {
+                  const customBucket = params.customBucket;
+                  if (
+                    customBucket &&
+                    typeof customBucket === 'object' &&
+                    'params' in customBucket
+                  ) {
+                    const bucketParams = customBucket.params;
+                    if (
+                      bucketParams &&
+                      typeof bucketParams === 'object' &&
+                      'filter' in bucketParams
+                    ) {
+                      const filter = bucketParams.filter;
+                      if (filter && typeof filter === 'object' && 'query' in filter) {
+                        description = filter.query?.toString() || '';
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+
         const metrics = table.rows.map((row, rowIndex) => {
           let title = column!.name;
           let value: number = row[column!.id];
@@ -91,6 +132,7 @@ class MetricVisComponent extends Component<MetricVisComponentProps> {
             lightText: shouldBrush && (style.bgColor ?? false) && needsLightText(color),
             rowIndex,
             colIndex,
+            description,
           };
         });
 
