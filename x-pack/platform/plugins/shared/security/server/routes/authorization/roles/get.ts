@@ -54,6 +54,14 @@ export function defineGetRolesRoutes({
                     },
                   })
                 ),
+                exportable: schema.maybe(
+                  schema.boolean({
+                    meta: {
+                      description:
+                        'If `true`, the resulting output from the API can be used to re-import the role.',
+                    },
+                  })
+                ),
               })
             ),
           },
@@ -78,18 +86,22 @@ export function defineGetRolesRoutes({
           const elasticsearchRole = elasticsearchRoles[request.params.name];
 
           if (elasticsearchRole) {
+            const exportable = request.query?.exportable ?? false;
             return response.ok({
-              body: transformElasticsearchRoleToRole({
-                features,
-                subFeaturePrivilegeIterator,
-                // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
-                elasticsearchRole,
-                name: request.params.name,
-                application: authz.applicationName,
-                logger,
-                replaceDeprecatedKibanaPrivileges:
-                  request.query?.replaceDeprecatedPrivileges ?? false,
-              }),
+              body: transformElasticsearchRoleToRole(
+                {
+                  features,
+                  subFeaturePrivilegeIterator,
+                  // @ts-expect-error `SecurityIndicesPrivileges.names` expected to be `string[]`
+                  elasticsearchRole,
+                  name: request.params.name,
+                  application: authz.applicationName,
+                  logger,
+                  replaceDeprecatedKibanaPrivileges:
+                    request.query?.replaceDeprecatedPrivileges ?? false,
+                },
+                exportable
+              ),
             });
           }
 
