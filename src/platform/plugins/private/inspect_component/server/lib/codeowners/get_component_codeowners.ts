@@ -17,31 +17,45 @@ import { REPO_ROOT } from '@kbn/repo-info';
  * @param {string} path The file path to look up codeowners for, relative to the repository root.
  * @returns {string[]} An array of codeowners responsible for the specified path.
  */
-export const getComponentCodeowners = (path: string): string[] => {
+export function getComponentCodeowners(componentPath: string): string[] {
   const codeownersPath = join(REPO_ROOT, '.github', 'CODEOWNERS');
   if (!existsSync(codeownersPath)) {
     return [];
   }
 
-  const codeownersContent = readFileSync(codeownersPath, { encoding: 'utf8' });
-  const codeownersLines = codeownersContent.split(/\r?\n/);
-  const codeowners = codeownersLines
-    .map((line) => line.trim())
-    .filter((line) => line && line[0] !== '#');
+  const normalizedComponentPath = componentPath.split(sep).join('/');
 
-  let folderPath = path;
+  const codeowners = readFileSync(codeownersPath, 'utf8');
+  const lines = codeowners.split('\n');
 
-  /** Find tthe most specific path. */
-  while (folderPath) {
-    const found = codeowners.find((c) => c.startsWith(folderPath));
-    if (found) {
-      const parts = found.trim().split(/\s+/);
-      return parts.slice(1);
+  const matchingPaths: Array<{ path: string; owners: string[] }> = [];
+
+  // Extract path patterns and owners from CODEOWNERS file
+  for (const line of lines) {
+    const trimmedLine = line.trim();
+    if (trimmedLine === '' || trimmedLine.startsWith('#')) {
+      continue;
     }
-    const nextIndex = folderPath.lastIndexOf(sep);
-    if (nextIndex === -1) break;
-    folderPath = folderPath.substring(0, nextIndex);
+
+    const [pathPattern, ...owners] = trimmedLine.split(/\s+/);
+
+    if (
+      normalizedComponentPath === pathPattern ||
+      normalizedComponentPath.startsWith(`${pathPattern}/`)
+    ) {
+      matchingPaths.push({
+        path: pathPattern,
+        owners,
+      });
+    }
   }
 
-  return [];
-};
+  // Find the most specific path match (longest path)
+  if (matchingPaths.length === 0) {
+    return [];
+  }
+
+  const mostSpecificMatch = matchingPaths.sort((a, b) => b.path.length - a.path.length)[0];
+
+  return mostSpecificMatch.owners;
+}
