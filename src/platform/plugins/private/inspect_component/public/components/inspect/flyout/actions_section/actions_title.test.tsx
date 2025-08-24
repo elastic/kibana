@@ -8,19 +8,16 @@
  */
 
 import React from 'react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { ActionsTitle } from './actions_title';
 
-export const ActionsTitle = () => (
-  <>
-    <EuiTitle size="s" data-test-subj="inspectComponentActionsTitle">
-      <h3>
-        <FormattedMessage
-          id="kbnInspectComponent.inspectFlyout.linksSection.title"
-          defaultMessage="Actions"
-        />
-      </h3>
-    </EuiTitle>
-    <EuiSpacer size="s" />
-  </>
-);
+describe('ActionsTitle', () => {
+  it('should render correctly', () => {
+    renderWithI18n(<ActionsTitle />);
+
+    const title = screen.getByTestId('inspectComponentActionsTitle');
+
+    expect(title).toBeInTheDocument();
+  });
+});

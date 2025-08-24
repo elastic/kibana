@@ -18,7 +18,7 @@ interface Props {
   baseFileName: string;
 }
 
-export const ActionsSubtitle = ({ relativePath, baseFileName }: Props) => {
+export const ActionsSubTitle = ({ relativePath, baseFileName }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const boldTextCss = css`
@@ -28,7 +28,7 @@ export const ActionsSubtitle = ({ relativePath, baseFileName }: Props) => {
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="s">
-        <EuiText component="div" size="s">
+        <EuiText component="div" size="s" data-test-subj="inspectComponentActionsSubtitle">
           <FormattedMessage
             id="kbnInspectComponent.inspectFlyout.linksSection.subtitle"
             defaultMessage="Open {baseFileName}"

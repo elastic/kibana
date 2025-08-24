@@ -89,7 +89,7 @@ export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath
   `;
 
   return (
-    <EuiFlexGroup gutterSize="m" wrap={true}>
+    <EuiFlexGroup gutterSize="m" wrap={true} data-test-subj="inspectComponentActionButtons">
       {ACTIONS.map(({ href, icon, id, i18nId, label }, index) => {
         const isLastOdd = index === ACTIONS.length - 1 && ACTIONS.length % 2 !== 0;
 
@@ -114,6 +114,7 @@ export const ActionButtons = ({ fileName, lineNumber, columnNumber, relativePath
 
         return (
           <EuiCard
+            data-test-subj={`inspectComponentActionButton-${id}`}
             key={id}
             aria-label={ariaLabel}
             href={href}

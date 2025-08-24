@@ -10,7 +10,7 @@
 import React from 'react';
 import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { ActionButtons } from './action_buttons';
-import { ActionsSubtitle } from './actions_subtitle';
+import { ActionsSubTitle } from './actions_sub_title';
 import { ActionsTitle } from './actions_title';
 
 interface Props {
@@ -18,14 +18,12 @@ interface Props {
 }
 
 export const ActionsSection = ({ componentData }: Props) => {
-  if (!componentData) return null;
-
   const { columnNumber, fileName, lineNumber, relativePath, baseFileName } = componentData;
 
   return (
     <>
       <ActionsTitle />
-      <ActionsSubtitle relativePath={relativePath} baseFileName={baseFileName} />
+      <ActionsSubTitle relativePath={relativePath} baseFileName={baseFileName} />
       <ActionButtons
         fileName={fileName}
         lineNumber={lineNumber}

@@ -6,6 +6,8 @@
       "jest",
       "node",
       "react",
+      "@testing-library/jest-dom",
+      "@testing-library/react"
     ]
   },
   "include": [
@@ -23,5 +25,6 @@
     "@kbn/config-schema",
     "@kbn/repo-info",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/test-jest-helpers"
   ]
 }
