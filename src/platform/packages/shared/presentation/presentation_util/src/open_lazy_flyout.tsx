@@ -24,11 +24,14 @@ interface LoadContentArgs {
   ariaLabelledBy: string;
 }
 
-interface OpenLazyFlyoutParams {
+export interface OpenLazyFlyoutParams {
   core: CoreStart;
   parentApi?: unknown;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
+  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & {
+    determineFocusTargetAfterClose?: () => Element | null;
+    focusedPanelId?: string;
+  };
 }
 
 /**
@@ -53,7 +56,7 @@ interface OpenLazyFlyoutParams {
  */
 export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const { core, parentApi, loadContent, flyoutProps: allFlyoutProps } = params;
-  const { focusedPanelId, triggerId, ...flyoutProps } = allFlyoutProps ?? {};
+  const { focusedPanelId, determineFocusTargetAfterClose, ...flyoutProps } = allFlyoutProps ?? {};
 
   const ariaLabelledBy = flyoutProps?.['aria-labelledby'] ?? htmlId();
   const overlayTracker = tracksOverlays(parentApi) ? parentApi : undefined;
@@ -61,9 +64,14 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
   const onClose = () => {
     overlayTracker?.clearOverlays();
     flyoutRef?.close();
-    if (triggerId) {
-      focusFirstFocusable(document.getElementById(triggerId));
-    }
+    requestAnimationFrame(() => {
+      const focusTarget = determineFocusTargetAfterClose?.();
+      if (focusTarget) {
+        focusFirstFocusable(focusTarget);
+      } else if (focusedPanelId) {
+        focusFirstFocusable(document.getElementById(`panel-${focusedPanelId}`));
+      }
+    });
   };
 
   /**

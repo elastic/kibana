@@ -43,8 +43,8 @@ export interface EmbeddableSetup {
    *
    * @example
    *  registerAddFromLibraryType({
-   *    onAdd: (container, savedObject) => {
-   *     container.addNewPanel(
+   *    onAdd: async (container, savedObject) => {
+   *     return container.addNewPanel(
    *         {
    *           panelType: MY_EMBEDDABLE_TYPE,
    *           serializedState: {

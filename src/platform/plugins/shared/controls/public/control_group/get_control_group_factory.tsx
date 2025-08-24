@@ -11,6 +11,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import type { ESQLControlVariable, PublishesESQLVariable } from '@kbn/esql-types';
 import { apiPublishesESQLVariable } from '@kbn/esql-types';
+import { v4 as generateId } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type { PublishesDataViews } from '@kbn/presentation-publishing';
@@ -107,6 +108,7 @@ export const getControlGroupEmbeddableFactory = () => {
             ? parentApi.dataViews$.value?.[0]?.id
             : undefined;
           const newControlState = controlsManager.getNewControlState();
+          const panelUuid = generateId();
 
           openDataControlEditor({
             initialState: {
@@ -114,8 +116,11 @@ export const getControlGroupEmbeddableFactory = () => {
               dataViewId:
                 newControlState.dataViewId ?? parentDataViewId ?? defaultDataViewId ?? undefined,
             },
+            isNew: true,
+            controlId: panelUuid,
             onSave: ({ type: controlType, state: onSaveState }) => {
               controlsManager.api.addNewPanel({
+                maybePanelId: panelUuid,
                 panelType: controlType,
                 serializedState: {
                   rawState: settings?.controlStateTransform

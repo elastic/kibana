@@ -28,7 +28,7 @@ export function openSettingsFlyout(dashboardApi: DashboardApi) {
     },
     flyoutProps: {
       'data-test-subj': 'dashboardSettingsFlyout',
-      triggerId: 'dashboardSettingsButton',
+      determineFocusTargetAfterClose: () => document.getElementById('dashboardSettingsButton'),
     },
   });
 }

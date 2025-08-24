@@ -63,6 +63,7 @@ export interface ControlEditorProps<
   initialState: Partial<State>;
   controlType?: string;
   controlId?: string;
+  isNew?: boolean;
   initialDefaultPanelTitle?: string;
   controlGroupApi: ControlGroupApi; // controls must always have a parent API
   onCancel: (newState: Partial<State>) => void;
@@ -179,6 +180,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
   onCancel,
   controlGroupApi,
   ariaLabelledBy,
+  isNew,
 }: ControlEditorProps<State>) => {
   const [editorState, setEditorState] = useState<Partial<State>>(initialState);
   const [defaultPanelTitle, setDefaultPanelTitle] = useState<string>(
@@ -267,7 +269,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="s">
           <h2 id={ariaLabelledBy}>
-            {!controlId // if no ID, then we are creating a new control
+            {isNew // if no ID, then we are creating a new control
               ? DataControlEditorStrings.manageControl.getFlyoutCreateTitle()
               : DataControlEditorStrings.manageControl.getFlyoutEditTitle()}
           </h2>
@@ -431,7 +433,7 @@ export const DataControlEditor = <State extends DefaultDataControlState = Defaul
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup responsive={false} justifyContent="flexEnd" gutterSize="s">
-              {controlId && (
+              {!isNew && (
                 <EuiButton
                   aria-label={`delete-${editorState.title ?? editorState.fieldName}`}
                   iconType="trash"

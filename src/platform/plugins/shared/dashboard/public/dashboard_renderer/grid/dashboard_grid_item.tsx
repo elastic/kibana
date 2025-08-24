@@ -154,6 +154,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
         css={[focusStyles, styles.item]}
         className={[classes, className].join(' ')}
         data-test-subj="dashboardPanel"
+        tabIndex={-1}
         id={`panel-${id}`}
         ref={ref}
         {...rest}
@@ -229,6 +230,10 @@ const dashboardGridItemStyles = {
         },
         '.kbnAppWrapper--hiddenChrome & .dshDashboardGrid__item--expanded': {
           padding: 0,
+        },
+        // This style is applied when the panel is focused after closing any associated flyout (inspect, edit, settings, drilldowns etc.)
+        '&:focus': {
+          '--hoverActionsBorderStyle': `${context.euiTheme.border.width.thick} solid ${context.euiTheme.colors.vis.euiColorVis0}`,
         },
       },
       getHighlightStyles(context),

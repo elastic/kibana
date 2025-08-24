@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -28,7 +29,7 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
   isCompatible: async ({ embeddable: parentApi }) => apiCanAddNewPanel(parentApi),
   execute: async ({ embeddable: parentApi }) => {
     if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
-
+    let newlyCreatedPanel: unknown;
     openLazyFlyout({
       core: coreServices,
       parentApi,
@@ -37,13 +38,20 @@ export const createImageAction: ActionDefinition<EmbeddableApiContext> = {
         return await getImageEditor({
           closeFlyout,
           ariaLabelledBy,
-          onSave: (imageConfig: ImageConfig) => {
-            parentApi.addNewPanel<ImageEmbeddableSerializedState>({
+          onSave: async (imageConfig: ImageConfig) => {
+            newlyCreatedPanel = await parentApi.addNewPanel<ImageEmbeddableSerializedState>({
               panelType: IMAGE_EMBEDDABLE_TYPE,
               serializedState: { rawState: { imageConfig } },
             });
           },
         });
+      },
+      flyoutProps: {
+        determineFocusTargetAfterClose: () => {
+          return apiHasUniqueId(newlyCreatedPanel)
+            ? document.getElementById(`panel-${newlyCreatedPanel.uuid}`)
+            : document.getElementById(`dashboardEditorMenuButton`);
+        },
       },
     });
   },
