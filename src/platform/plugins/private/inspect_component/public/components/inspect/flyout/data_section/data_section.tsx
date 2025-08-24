@@ -21,8 +21,6 @@ interface Props {
 }
 
 export const DataSection = ({ componentData, target }: Props) => {
-  if (!componentData) return null;
-
   const { codeowners, euiData, iconType, sourceComponent } = componentData;
 
   return (

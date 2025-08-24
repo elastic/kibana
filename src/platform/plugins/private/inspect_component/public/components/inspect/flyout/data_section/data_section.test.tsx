@@ -10,10 +10,10 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { ActionsSection } from './actions_section';
+import { DataSection } from './data_section';
 import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 
-describe('ActionsSection', () => {
+describe('DataSection', () => {
   const mockComponentData: ComponentData = {
     columnNumber: 10,
     fileName: '/path/to/component.tsx',
@@ -29,13 +29,12 @@ describe('ActionsSection', () => {
     sourceComponent: 'MyComponent',
   };
 
+  const mockTargetDomElement = document.createElement('div');
+
   it('should render correctly', () => {
-    renderWithI18n(<ActionsSection componentData={mockComponentData} />);
+    renderWithI18n(<DataSection componentData={mockComponentData} target={mockTargetDomElement} />);
 
-    const title = screen.getByTestId('inspectComponentActionsTitle');
-    const subTitle = screen.getByTestId('inspectComponentActionsSubtitle');
-
+    const title = screen.getByText('MyComponent');
     expect(title).toBeInTheDocument();
-    expect(subTitle).toBeInTheDocument();
   });
 });

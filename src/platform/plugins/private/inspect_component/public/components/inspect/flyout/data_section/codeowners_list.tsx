@@ -20,6 +20,10 @@ interface Props {
 export const CodeownersList = ({ codeowners }: Props) => {
   const { euiTheme } = useEuiTheme();
 
+  if (codeowners.length === 0) {
+    return null;
+  }
+
   const listItems: EuiListGroupItemProps[] = codeowners.map((codeowner) => ({
     label: codeowner,
     size: 's',

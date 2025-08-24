@@ -29,6 +29,7 @@ export const PreviewImage = ({ element }: Props) => {
 
     containerRef.current.innerHTML = '';
 
+    // TODO: Extract this logic into a function and improve it.
     let clone: HTMLElement;
 
     if (element instanceof HTMLCanvasElement) {
@@ -67,5 +68,7 @@ export const PreviewImage = ({ element }: Props) => {
     },
   });
 
-  return <div ref={containerRef} className={containerCss} />;
+  return (
+    <div ref={containerRef} className={containerCss} data-test-subj="inspectFlyoutPreviewImage" />
+  );
 };
