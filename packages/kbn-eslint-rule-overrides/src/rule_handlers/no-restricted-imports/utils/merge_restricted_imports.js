@@ -72,11 +72,20 @@
  * Merge/Mutate restricted imports into existing ESLint config overrides
  * @param {import('eslint').Linter.Config} config - ESLint config object to modify
  * @param {Array} restrictedImports - Additional restricted imports to add
+ * @param {number|null} severity - Optional severity override (0=off, 1=warn, 2=error)
  */
-function mergeRestrictedImports(config, restrictedImports) {
+function mergeRestrictedImports(config, restrictedImports, severity = null) {
   if (!config || !config.overrides || config.overrides.length === 0) {
     return;
   }
+
+  if (!restrictedImports || (Array.isArray(restrictedImports) && restrictedImports.length === 0)) {
+    return;
+  }
+
+  const normalizedImports = Array.isArray(restrictedImports)
+    ? restrictedImports
+    : [restrictedImports];
 
   const overridesWithNoRestrictedImportRule = config.overrides.filter((override) =>
     Boolean(override.rules && 'no-restricted-imports' in override.rules)
@@ -84,13 +93,12 @@ function mergeRestrictedImports(config, restrictedImports) {
 
   // Process and merge restricted imports into existing rules
   for (const override of overridesWithNoRestrictedImportRule) {
-    /** @type {NoRestrictedImportsRuleConfig} */
     const noRestrictedImportsRule = override.rules['no-restricted-imports'];
 
     if (Array.isArray(noRestrictedImportsRule) && noRestrictedImportsRule.length >= 2) {
-      const [severity, ...rawOptions] = noRestrictedImportsRule;
+      const [currentSeverity, ...rawOptions] = noRestrictedImportsRule;
+      const finalSeverity = severity !== null ? severity : currentSeverity;
 
-      /** @type {Required<RestrictedImportOptions>} */
       const modernConfig = { paths: [], patterns: [] };
 
       // Normalize all inputs into modern config format
@@ -107,7 +115,7 @@ function mergeRestrictedImports(config, restrictedImports) {
       // Remove duplicates and add new restricted imports
       const existingPaths = modernConfig.paths.filter(
         (existing) =>
-          !restrictedImports.some((restriction) => {
+          !normalizedImports.some((restriction) => {
             if (typeof existing === 'string') {
               return typeof restriction === 'string'
                 ? existing === restriction
@@ -121,11 +129,10 @@ function mergeRestrictedImports(config, restrictedImports) {
           })
       );
 
-      /** @type {NoRestrictedImportsRuleConfig} */
       const newRuleConfig = [
-        severity,
+        finalSeverity,
         {
-          paths: [...existingPaths, ...restrictedImports],
+          paths: [...existingPaths, ...normalizedImports],
           patterns: modernConfig.patterns,
         },
       ];

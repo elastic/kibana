@@ -37,6 +37,79 @@ describe('mergeRestrictedImports', () => {
       expect(rule[1].paths).toEqual(['lodash', 'react-router']);
     });
 
+    it('should merge with severity override', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'error',
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, ['react-router'], 1); // Change to warn
+
+      const rule = config.overrides[0].rules['no-restricted-imports'];
+      expect(rule[0]).toBe(1);
+      expect(rule[1].paths).toEqual(['lodash', 'react-router']);
+    });
+
+    it('should preserve existing severity when not provided', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'warn',
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, ['react-router']);
+
+      const rule = config.overrides[0].rules['no-restricted-imports'];
+      expect(rule[0]).toBe('warn');
+    });
+
+    it('should handle numeric severity values', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                2,
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, ['react-router'], 0); // Change to off
+
+      const rule = config.overrides[0].rules['no-restricted-imports'];
+      expect(rule[0]).toBe(0);
+    });
+
     it('should merge object restrictions with existing restrictions', () => {
       const config = {
         overrides: [
@@ -314,6 +387,30 @@ describe('mergeRestrictedImports', () => {
         },
       ]);
     });
+
+    it('should handle single non-array import', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'error',
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, 'react-router');
+
+      const rule = config.overrides[0].rules['no-restricted-imports'];
+      expect(rule[1].paths).toEqual(['lodash', 'react-router']);
+    });
   });
 
   describe('when handling legacy rule formats', () => {
@@ -423,6 +520,32 @@ describe('mergeRestrictedImports', () => {
         patterns: ['@internal/*'],
       });
     });
+
+    it('should handle legacy format with severity override', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'error',
+                'lodash',
+                {
+                  paths: ['moment'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, ['react-router'], 1); // Change to warn
+
+      const rule = config.overrides[0].rules['no-restricted-imports'];
+      expect(rule[0]).toBe(1);
+      expect(rule[1].paths).toEqual(['lodash', 'moment', 'react-router']);
+    });
   });
 
   describe('when handling edge cases', () => {
@@ -511,6 +634,71 @@ describe('mergeRestrictedImports', () => {
       expect(rule[1].paths).toEqual(['lodash']);
     });
 
+    it('should handle null or undefined imports', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'error',
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, null);
+      mergeRestrictedImports(config, undefined);
+
+      const rule = config.overrides[0].rules['no-restricted-imports'];
+      expect(rule[1].paths).toEqual(['lodash']);
+    });
+
+    it('should handle rules with only severity', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': ['error'],
+            },
+          },
+        ],
+      };
+
+      const restrictedImports = ['react-router'];
+
+      mergeRestrictedImports(config, restrictedImports);
+
+      // Should not modify malformed rule
+      expect(config.overrides[0].rules['no-restricted-imports']).toEqual(['error']);
+    });
+
+    it('should handle rules that are not arrays', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': 'error',
+            },
+          },
+        ],
+      };
+
+      const restrictedImports = ['react-router'];
+
+      mergeRestrictedImports(config, restrictedImports);
+
+      // Should not modify non-array rules
+      expect(config.overrides[0].rules['no-restricted-imports']).toBe('error');
+    });
+
     it('should handle multiple overrides with no-restricted-imports rules', () => {
       const config = {
         overrides: [
@@ -550,6 +738,89 @@ describe('mergeRestrictedImports', () => {
 
       expect(firstRule[1].paths).toEqual(['lodash', 'react-router']);
       expect(secondRule[1].paths).toEqual(['moment', 'react-router']);
+    });
+
+    it('should handle multiple overrides with severity changes', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'error',
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+          {
+            files: ['src/**/*.ts'],
+            rules: {
+              'no-restricted-imports': [
+                'warn',
+                {
+                  paths: ['moment'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, ['react-router'], 2);
+
+      const firstRule = config.overrides[0].rules['no-restricted-imports'];
+      const secondRule = config.overrides[1].rules['no-restricted-imports'];
+
+      expect(firstRule[0]).toBe(2);
+      expect(firstRule[1].paths).toEqual(['lodash', 'react-router']);
+
+      expect(secondRule[0]).toBe(2);
+      expect(secondRule[1].paths).toEqual(['moment', 'react-router']);
+    });
+
+    it('should handle overrides with mixed rule formats', () => {
+      const config = {
+        overrides: [
+          {
+            files: ['src/**/*.js'],
+            rules: {
+              'no-restricted-imports': [
+                'error',
+                {
+                  paths: ['lodash'],
+                  patterns: [],
+                },
+              ],
+            },
+          },
+          {
+            files: ['test/**/*.js'],
+            rules: {
+              'no-restricted-imports': ['error'], // Malformed
+            },
+          },
+          {
+            files: ['scripts/**/*.js'],
+            rules: {
+              'no-restricted-imports': 'off', // Not an array
+            },
+          },
+        ],
+      };
+
+      mergeRestrictedImports(config, ['react-router']);
+
+      // Only first override should be modified
+      expect(config.overrides[0].rules['no-restricted-imports'][1].paths).toEqual([
+        'lodash',
+        'react-router',
+      ]);
+      expect(config.overrides[1].rules['no-restricted-imports']).toEqual(['error']);
+      expect(config.overrides[2].rules['no-restricted-imports']).toBe('off');
     });
   });
 });

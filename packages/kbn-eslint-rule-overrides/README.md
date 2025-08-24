@@ -1,25 +1,26 @@
 # @kbn/eslint-rule-overrides
 
-A utility package for inheriting and extending ESLint `no-restricted-imports` rules from Kibana's root configuration into nested directory contexts.
+A utility package for inheriting and customizing ESLint rules from Kibana's root configuration into nested directory contexts.
 
 ## Purpose
 
 This package enables teams to:
 
-- Inherit all applicable `no-restricted-imports` rules from the root `.eslintrc.js`
-- Add additional import restrictions specific to their directory
+- Inherit all applicable ESLint rules from the root `.eslintrc.js`
+- Customize rules with different strategies (merge, replace, remove, append, prepend)
+- Add additional restrictions or modify severity levels
 - Automatically transform file patterns to work correctly in nested contexts
-- Maintain consistency with root configuration while allowing local extensions
+- Maintain consistency with root configuration while allowing local customization
 
 ## How It Works
 
 The package performs several key transformations:
 
-1. **Clones and merges**: Deep clones the root ESLint configuration and merges your additional restricted imports
-2. **Filters overrides**: Identifies all overrides containing `no-restricted-imports` rules
-3. **Transforms patterns**: Adjusts file glob patterns from root-relative to local-relative paths
-4. **Handles negations**: Correctly processes negated patterns, excluding overrides when appropriate
-5. **Returns applicable overrides**: Only returns overrides that apply to your nested directory context
+1. **Clones and processes**: Deep clones the root ESLint configuration and applies your rule customizations
+2. **Applies strategies**: Each rule can use different strategies for how it modifies the root config
+3. **Filters overrides**: Returns only overrides containing the rules you're customizing
+4. **Transforms patterns**: Adjusts file glob patterns from root-relative to local-relative paths
+5. **Handles negations**: Correctly processes negated patterns, excluding overrides when appropriate
 
 ### Pattern Transformation Examples
 
@@ -45,148 +46,237 @@ yarn kbn bootstrap
 
 ```javascript
 // src/plugins/my-plugin/.eslintrc.js
-const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
 
 module.exports = {
-  overrides: createNoRestrictedImportsOverride({
+  overrides: createRuleOverrides({
     childConfigDir: __dirname, // Required: tells the package where this config lives
-    restrictedImports: ['lodash', 'moment'],
+    rules: {
+      // Simple merge strategy (default)
+      'no-restricted-imports': ['lodash', 'moment'],
+    },
   }),
 };
 ```
 
-### Advanced Usage
+### Advanced Usage with Strategies
 
 ```javascript
 // x-pack/plugins/security/.eslintrc.js
-const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
 
 module.exports = {
-  overrides: createNoRestrictedImportsOverride({
+  overrides: createRuleOverrides({
     childConfigDir: __dirname,
-    restrictedImports: [
-      // Simple string restriction
-      'lodash',
-
-      // Restriction with custom message
-      {
-        name: 'moment',
-        message: 'Use @kbn/datemath or @elastic/eui/lib/services/format instead',
+    rules: {
+      // Merge additional restricted imports with optional severity change
+      'no-restricted-imports': {
+        strategy: 'merge',
+        severity: 'error', // Optional: change from warn to error
+        value: [
+          'lodash',
+          {
+            name: 'moment',
+            message: 'Use @kbn/datemath instead',
+          },
+        ],
       },
 
-      // Restrict specific named imports
-      {
-        name: 'react-router-dom',
-        importNames: ['Route', 'Switch'],
-        message: 'Use @kbn/shared-ux-router instead',
+      // Completely replace a rule
+      'no-console': {
+        strategy: 'replace',
+        value: ['error', { allow: ['warn', 'error'] }],
       },
 
-      // Allow only specific imports (restrict all others)
-      {
-        name: '@elastic/charts',
-        allowImportNames: ['Chart', 'Settings', 'Axis'],
-        message: 'Only Chart, Settings, and Axis are approved for use',
+      // Remove a rule entirely
+      'no-debugger': {
+        strategy: 'remove',
       },
-    ],
+
+      // Prepend items (for rules that support arrays like no-restricted-imports)
+      'no-restricted-imports': {
+        strategy: 'prepend',
+        value: ['react-router'], // Will be added at the beginning
+      },
+    },
+  }),
+};
+```
+
+### Custom Handler for Special Cases
+
+```javascript
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
+
+module.exports = {
+  overrides: createRuleOverrides({
+    childConfigDir: __dirname,
+    rules: {
+      'my-custom-rule': {
+        strategy: 'merge',
+        value: ['error', { customOption: true }],
+        customHandler: {
+          process(config, ruleConfig, context) {
+            // Custom processing logic for rules not yet supported
+            // config: cloned ESLint config to modify
+            // ruleConfig: { strategy, value, severity }
+            // context: { rootDir, childConfigDir, ruleName }
+          },
+        },
+      },
+    },
+  }),
+};
+```
+
+### no-restricted-imports Specific Examples
+
+The package has built-in intelligent handling for `no-restricted-imports`:
+
+```javascript
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
+
+module.exports = {
+  overrides: createRuleOverrides({
+    childConfigDir: __dirname,
+    rules: {
+      'no-restricted-imports': {
+        strategy: 'merge', // Intelligently merges with deduplication
+        severity: 'error', // Upgrade from warn to error
+        value: [
+          // Simple string restriction
+          'lodash',
+
+          // Restriction with custom message
+          {
+            name: 'moment',
+            message: 'Use @kbn/datemath or @elastic/eui/lib/services/format instead',
+          },
+
+          // Restrict specific named imports
+          {
+            name: 'react-router-dom',
+            importNames: ['Route', 'Switch'],
+            message: 'Use @kbn/shared-ux-router instead',
+          },
+
+          // Allow only specific imports (restrict all others)
+          {
+            name: '@elastic/charts',
+            allowImportNames: ['Chart', 'Settings', 'Axis'],
+            message: 'Only Chart, Settings, and Axis are approved for use',
+          },
+        ],
+      },
+    },
   }),
 };
 ```
 
 ## API Reference
 
-### `createNoRestrictedImportsOverride(options)`
+### `createRuleOverrides(options)`
 
-Creates ESLint override configurations that inherit and extend root `no-restricted-imports` rules.
+Creates ESLint override configurations that inherit and customize root rules.
 
 #### Parameters
 
 - **`options`** _(Object)_ - Configuration object with the following properties:
   - **`childConfigDir`** _(string, required)_ - Directory path where your `.eslintrc.js` is located. Pass `__dirname`.
-  - **`restrictedImports`** _(Array, required)_ - Additional imports to restrict. Each item can be:
-    - **String**: Module name to restrict entirely
-    - **Object**: Advanced restriction with properties:
-      - `name` _(string)_ - Module name to restrict
-      - `message` _(string, optional)_ - Custom error message
-      - `importNames` _(string[], optional)_ - Specific named imports to restrict
-      - `allowImportNames` _(string[], optional)_ - Named imports to allow (restricts all others)
+  - **`rules`** _(Object, required)_ - Rules to customize. Each key is a rule name, each value can be:
+    - **Simple value**: Uses default 'merge' strategy
+    - **Configuration object**:
+      - `strategy` _(string)_ - One of: 'merge', 'replace', 'remove', 'append', 'prepend'
+      - `value` _(any)_ - The rule value/options (not needed for 'remove' strategy)
+      - `severity` _(string|number, optional)_ - 'error', 'warn', 'off' or 0, 1, 2
+      - `customHandler` _(Object, optional)_ - Custom handler with `process` function
 
 #### Returns
 
 An array of ESLint override configurations with:
 
-- Merged `no-restricted-imports` rules (root + your additions)
+- Customized rules based on your specifications
 - Transformed file patterns relative to your directory
-- All other rule settings preserved from root configuration
+- All applicable overrides from root configuration
 
 #### Throws
 
 - Error if `childConfigDir` is not provided
-- Error if `restrictedImports` is empty or not provided
+- Error if `rules` is empty or not provided
 
-## Pattern Transformation Behavior
+## Strategies Explained
 
-### Files Patterns
+### `merge` (default)
 
-The package intelligently transforms `files` patterns based on your directory context:
+- **For arrays**: Combines arrays, removing duplicates
+- **For objects**: Merges properties
+- **For no-restricted-imports**: Intelligently merges paths and patterns with deduplication
 
-1. **Applicable patterns**: Transformed to be relative to your directory
-2. **Non-applicable patterns**: Override is excluded entirely
-3. **Negated patterns**:
-   - If excluding your entire directory → override excluded
-   - If excluding specific files/subdirs → pattern transformed
+### `replace`
 
-### ExcludedFiles Patterns
+- Completely replaces the rule value
+- Useful when you want to override the root configuration entirely
 
-`excludedFiles` patterns are transformed without special negation handling, preserving their exclusion semantics.
+### `remove`
 
-### Examples
+- Removes the rule from all applicable overrides
+- For `no-restricted-imports`: Can remove specific imports if value is provided
 
-For a config in `/project/src/components/`:
+### `append`
 
-| Root Pattern                   | Transformed     | Notes                    |
-| ------------------------------ | --------------- | ------------------------ |
-| `src/components/**/*.js`       | `**/*.js`       | Applies to all JS files  |
-| `src/components/Button.js`     | `Button.js`     | Specific file            |
-| `!src/components/**`           | `null`          | Excludes entire override |
-| `!src/components/**/*.test.js` | `!**/*.test.js` | Excludes test files only |
-| `packages/**/*.js`             | `null`          | Different directory tree |
+- Adds items to the end (similar to merge for most rules)
+- For `no-restricted-imports`: Same as merge
 
-## Deduplication Behavior
+### `prepend`
 
-When the same module is restricted in both root config and your local config:
+- Adds items to the beginning
+- For `no-restricted-imports`: Adds restrictions before existing ones
 
-- **String + String**: Your restriction takes precedence
-- **Object + String**: Your restriction replaces the root's
-- **String + Object**: Your object configuration takes precedence
-- **Object + Object**: Your configuration completely replaces the root's
+## Built-in Rule Handlers
+
+Currently, the package has specialized handling for:
+
+- **`no-restricted-imports`**: Intelligent merging with deduplication, supports all strategies
+
+Other rules use the default handler which supports basic operations. More specialized handlers can be added as needed.
 
 ## Real-World Example
 
 ```javascript
-// x-pack/plugins/security/public/.eslintrc.js
-const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
+// x-pack/solutions/<solution>/<package|plugin>/.eslintrc.js
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
 
 module.exports = {
-  overrides: createNoRestrictedImportsOverride({
+  overrides: createRuleOverrides({
     childConfigDir: __dirname,
-    restrictedImports: [
-      // Prevent usage of legacy router
-      {
-        name: 'react-router-dom',
-        message: 'Please use @kbn/shared-ux-router for routing',
+    rules: {
+      // Merge additional import restrictions with severity upgrade
+      'no-restricted-imports': {
+        strategy: 'merge',
+        severity: 'error', // Upgrade from warn to error
+        value: [
+          {
+            name: 'react-router-dom',
+            message: 'Please use @kbn/shared-ux-router for routing',
+          },
+          {
+            name: 'lodash',
+            message: 'Use native ES or @kbn/std instead',
+          },
+        ],
       },
-      // Prevent direct lodash usage
-      {
-        name: 'lodash',
-        message: 'Use native ES or @kbn/std instead',
+
+      // Replace console settings for this directory
+      'no-console': {
+        strategy: 'replace',
+        value: ['error', { allow: ['error'] }], // Only allow console.error
       },
-      // Allow only specific EUI exports
-      {
-        name: '@elastic/eui',
-        allowImportNames: ['EuiButton', 'EuiModal', 'EuiText'],
-        message: 'Only approved EUI components can be used in Security',
+
+      // Remove a rule that doesn't make sense here
+      'no-underscore-dangle': {
+        strategy: 'remove',
       },
-    ],
+    },
   }),
 };
 ```
@@ -199,9 +289,9 @@ module.exports = {
 
    - Solution: Pass `__dirname` as the `childConfigDir` parameter
 
-2. **"No restricted imports provided"**
+2. **"No rules provided"**
 
-   - Solution: Ensure `restrictedImports` array has at least one item
+   - Solution: Ensure `rules` object has at least one rule
 
 3. **Override not applying**
 
@@ -217,9 +307,11 @@ module.exports = {
 To see what overrides are being generated:
 
 ```javascript
-const overrides = createNoRestrictedImportsOverride({
+const overrides = createRuleOverrides({
   childConfigDir: __dirname,
-  restrictedImports: ['lodash'],
+  rules: {
+    'no-restricted-imports': ['lodash'],
+  },
 });
 
 console.log(JSON.stringify(overrides, null, 2));
@@ -230,9 +322,10 @@ console.log(JSON.stringify(overrides, null, 2));
 When modifying this package:
 
 1. Run tests: `yarn test:jest packages/kbn-eslint-rule-overrides`
-2. Ensure pattern transformation works correctly for nested contexts
-3. Test with real `.eslintrc.js` files in various directory depths
-4. Verify negation patterns behave correctly
+2. Add specialized handlers for rules that need intelligent merging
+3. Ensure pattern transformation works correctly for nested contexts
+4. Test with real `.eslintrc.js` files in various directory depths
+5. Verify negation patterns behave correctly
 
 ## License
 
