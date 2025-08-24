@@ -9,8 +9,8 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import type { unitOfTime } from 'moment';
-import moment from 'moment';
+import type { unitOfTime } from 'moment-timezone';
+import moment from 'moment-timezone';
 
 import type {
   TooltipValue,

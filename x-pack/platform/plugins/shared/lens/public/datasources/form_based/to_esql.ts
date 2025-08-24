@@ -9,7 +9,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { getCalculateAutoTimeExpression, getUserTimeZone } from '@kbn/data-plugin/common';
 import { convertIntervalToEsInterval } from '@kbn/data-plugin/public';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { partition } from 'lodash';
 import { isColumnOfType } from './operations/definitions/helpers';
 import type { ValueFormatConfig } from './operations/definitions/column_types';
