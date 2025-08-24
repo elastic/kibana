@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -22,14 +22,21 @@ export interface ConnectorStep extends BaseStep {
 }
 
 export class ConnectorStepImpl extends StepBase<ConnectorStep> {
+  private core?: CoreStart;
+  private request?: KibanaRequest;
+
   constructor(
     step: ConnectorStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor,
     workflowState: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger
+    private workflowLogger: IWorkflowEventLogger,
+    core?: CoreStart,
+    request?: KibanaRequest
   ) {
     super(step, contextManager, connectorExecutor, workflowState);
+    this.core = core;
+    this.request = request;
   }
 
   public async _run(): Promise<RunStepResult> {
@@ -166,33 +173,58 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   }
 
   private async executeElasticsearchRequest(request: any): Promise<any> {
-    const esClient = this.contextManager.getEsClient();
-    if (!esClient) {
-      throw new Error('Elasticsearch client not available');
+    if (!this.core) {
+      throw new Error('Core services not available for internal connector execution');
     }
 
     const startTime = Date.now();
     
     try {
-      // Get the user context from the full context if available
-      const fullContext = this.contextManager.getFullContext();
-      const userContext = fullContext?.userContext;
-
-      // Use scoped client if we have user context, otherwise use internal user
-      let client = esClient.asInternalUser;
+      const { method, path, headers, body, query } = request;
       
-      if (userContext) {
-        // Create a mock request with user information that can be used with asScoped
-        const mockRequest = this.createMockRequestWithUser(userContext);
-        client = esClient.asScoped(mockRequest).asCurrentUser;
+      // Use scoped client with proper permissions if request is available
+      let esClient;
+      if (this.request) {
+        // Use scoped client with user permissions
+        esClient = this.core.elasticsearch.client.asScoped(this.request).asCurrentUser;
+      } else {
+        // Fallback to internal user for system operations
+        esClient = this.core.elasticsearch.client.asInternalUser;
+      }
+      
+      // Build the request options following Kibana's established patterns
+      const requestOptions: any = {
+        method: method.toLowerCase(),
+        path,
+        headers: headers || {},
+      };
+
+      if (body) {
+        requestOptions.body = body;
       }
 
-      const response = await client.transport.request({
-        method: request.method,
-        path: request.path,
-        body: request.body,
-        querystring: request.query,
-      }) as any;
+      if (query) {
+        // Handle query parameters properly for ES like Kibana does
+        if (typeof query === 'string') {
+          requestOptions.querystring = query;
+        } else if (typeof query === 'object') {
+          // Convert object to proper ES query string format
+          const queryParams = new URLSearchParams();
+          Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              queryParams.append(key, String(value));
+            }
+          });
+          requestOptions.querystring = queryParams.toString();
+        }
+      }
+
+      // Execute with proper transport options like Kibana does
+      const response = await esClient.transport.request(requestOptions, {
+        meta: true,
+        maxRetries: 0,
+      });
+      
       const executionTime = Date.now() - startTime;
 
       return {
@@ -201,28 +233,10 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         headers: response.headers,
         executionTime,
       };
-    } catch (error: any) {
-      // Re-throw the error as is
-      throw error;
+    } catch (error) {
+      const executionTime = Date.now() - startTime;
+      throw new Error(`Elasticsearch request failed: ${error instanceof Error ? error.message : String(error)}`);
     }
-  }
-
-  private createMockRequestWithUser(userContext: any): any {
-    // Create a mock request object that includes the user information
-    // This mimics the structure expected by asScoped
-    return {
-      auth: {
-        isAuthenticated: true,
-        credentials: {
-          username: userContext.username,
-          profile_uid: userContext.profile_uid,
-        },
-        scope: userContext.roles || [],
-      },
-      headers: {
-        'kbn-xsrf': 'true',
-      },
-    };
   }
 
   private async executeKibanaRequest(request: any): Promise<any> {

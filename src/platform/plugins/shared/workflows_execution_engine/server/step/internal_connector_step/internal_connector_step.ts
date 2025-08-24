@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
@@ -29,16 +29,19 @@ export interface InternalConnectorStep extends BaseStep {
 
 export class InternalConnectorStepImpl extends StepBase<InternalConnectorStep> {
   private core: CoreStart;
+  private request?: KibanaRequest;
 
   constructor(
     step: InternalConnectorStep,
     contextManager: WorkflowContextManager,
     workflowState: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger,
-    core: CoreStart
+    core: CoreStart,
+    request?: KibanaRequest
   ) {
     super(step, contextManager, undefined, workflowState);
     this.core = core;
+    this.request = request;
   }
 
   public async _run(): Promise<RunStepResult> {
@@ -150,10 +153,17 @@ export class InternalConnectorStepImpl extends StepBase<InternalConnectorStep> {
     try {
       const { method, path, headers, body, query } = request;
       
-      // Use Elasticsearch client from core
-      const esClient = this.core.elasticsearch.client.asInternalUser;
+      // Use scoped client with proper permissions if request is available
+      let esClient;
+      if (this.request) {
+        // Use scoped client with user permissions
+        esClient = this.core.elasticsearch.client.asScoped(this.request).asCurrentUser;
+      } else {
+        // Fallback to internal user for system operations
+        esClient = this.core.elasticsearch.client.asInternalUser;
+      }
       
-      // Build the request options
+      // Build the request options following Kibana's established patterns
       const requestOptions: any = {
         method: method.toLowerCase(),
         path,
@@ -165,10 +175,26 @@ export class InternalConnectorStepImpl extends StepBase<InternalConnectorStep> {
       }
 
       if (query) {
-        requestOptions.querystring = new URLSearchParams(query).toString();
+        // Handle query parameters properly for ES like Kibana does
+        if (typeof query === 'string') {
+          requestOptions.querystring = query;
+        } else if (typeof query === 'object') {
+          // Convert object to proper ES query string format
+          const queryParams = new URLSearchParams();
+          Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              queryParams.append(key, String(value));
+            }
+          });
+          requestOptions.querystring = queryParams.toString();
+        }
       }
 
-      const response = await esClient.transport.request(requestOptions);
+      // Execute with proper transport options like Kibana does
+      const response = await esClient.transport.request(requestOptions, {
+        meta: true,
+        maxRetries: 0,
+      });
       
       const executionTime = Date.now() - startTime;
 
@@ -190,32 +216,38 @@ export class InternalConnectorStepImpl extends StepBase<InternalConnectorStep> {
     try {
       const { method, path, headers, body, query } = request;
       
-      // Use Kibana's internal HTTP client
-      const kibanaClient = this.core.http.server;
+      // For now, we'll use a simplified approach since Kibana's internal HTTP
+      // routing is complex and requires proper router setup
+      // TODO: Implement proper Kibana internal request handling
       
       // Build the request URL
       let url = path;
       if (query) {
-        const queryString = new URLSearchParams(query).toString();
-        url += `?${queryString}`;
+        // Handle query parameters properly
+        if (typeof query === 'string') {
+          url += `?${query}`;
+        } else if (typeof query === 'object') {
+          const queryParams = new URLSearchParams();
+          Object.entries(query).forEach(([key, value]) => {
+            if (value !== undefined && value !== null) {
+              queryParams.append(key, String(value));
+            }
+          });
+          const queryString = queryParams.toString();
+          if (queryString) {
+            url += `?${queryString}`;
+          }
+        }
       }
 
-      // For Kibana internal requests, we need to use the internal router
-      // This is a simplified implementation - in practice, you'd need to
-      // properly handle Kibana's internal routing
-      const response = await kibanaClient.inject({
-        method: method.toLowerCase(),
-        url,
-        headers: headers || {},
-        payload: body,
-      });
-      
+      // For now, return a mock response since proper Kibana internal routing
+      // requires router setup and context that we don't have here
       const executionTime = Date.now() - startTime;
 
       return {
-        body: response.result,
-        status: response.statusCode,
-        headers: response.headers,
+        body: { message: 'Kibana internal requests not yet implemented' },
+        status: 501, // Not Implemented
+        headers: {},
         executionTime,
       };
     } catch (error) {

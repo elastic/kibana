@@ -13,6 +13,7 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -77,18 +78,21 @@ export class WorkflowsExecutionEnginePlugin
           const workflowExecutionRepository = this.workflowExecutionRepository;
           return {
             async run() {
-              const { workflowRunId } = taskInstance.params as ResumeWorkflowExecutionParams;
+              const { workflowRunId, spaceId } =
+                taskInstance.params as ResumeWorkflowExecutionParams;
               const [, pluginsStart] = await core.getStartServices();
 
               const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
                 workflowRunId,
+                spaceId,
                 (pluginsStart as any).actions,
                 (pluginsStart as any).taskManager,
                 esClient,
                 logger,
                 config,
                 workflowExecutionRepository,
-                (pluginsStart as any).core || core
+                (pluginsStart as any).core || core,
+                undefined // No request context in task runner
               );
               await workflowRuntime.resume();
 
@@ -116,6 +120,7 @@ export class WorkflowsExecutionEnginePlugin
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: workflowRunId,
+        spaceId: context.spaceId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
         context,
@@ -131,13 +136,15 @@ export class WorkflowsExecutionEnginePlugin
 
       const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
         workflowRunId,
+        context.spaceId,
         plugins.actions,
         plugins.taskManager,
         this.esClient,
         this.logger,
         this.config,
         this.workflowExecutionRepository,
-        core
+        core,
+        context.request
       );
 
       // Log workflow execution start
@@ -156,16 +163,19 @@ export class WorkflowsExecutionEnginePlugin
 
 async function createContainer(
   workflowRunId: string,
+  spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
   esClient: Client,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   workflowExecutionRepository: WorkflowExecutionRepository,
-  core: CoreStart
+  core: CoreStart,
+  request?: KibanaRequest
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
-    workflowRunId
+    workflowRunId,
+    spaceId
   );
 
   if (!workflowExecution) {
@@ -226,7 +236,9 @@ async function createContainer(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager
+    workflowTaskManager,
+    core,
+    request
   );
 
   return {

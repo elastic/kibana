@@ -26,6 +26,7 @@ import { WaitStepImpl } from './wait_step/wait_step';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 import { InternalConnectorStepImpl } from './internal_connector_step';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created
@@ -39,7 +40,9 @@ export class StepFactory {
     private connectorExecutor: ConnectorExecutor, // this is temporary, we will remove it when we have a proper connector executor
     private workflowRuntime: WorkflowExecutionRuntimeManager,
     private workflowLogger: IWorkflowEventLogger, // Assuming you have a logger interface
-    private workflowTaskManager: WorkflowTaskManager
+    private workflowTaskManager: WorkflowTaskManager,
+    private core: CoreStart,
+    private request?: KibanaRequest
   ) {}
 
   public create<TStep extends BaseStep>(
@@ -87,7 +90,9 @@ export class StepFactory {
           this.contextManager,
           this.connectorExecutor,
           this.workflowRuntime,
-          this.workflowLogger
+          this.workflowLogger,
+          this.core,
+          this.request
         );
 
       case 'parallel':
