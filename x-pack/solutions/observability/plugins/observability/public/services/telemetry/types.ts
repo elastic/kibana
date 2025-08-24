@@ -12,13 +12,17 @@ export type TelemetryServiceStart = ITelemetryClient;
 export interface ITelemetryClient {
   reportRelatedAlertsLoaded(count: number): void;
   reportAlertDetailsPageView(ruleType: string): void;
+  reportCaseSelectedFromObservability(addedFromPage: string): void;
   reportRelatedAlertAddedToCase(newCaseCreated: boolean): void;
+  reportLinkedDashboardViewed(dashboardId: string): void;
 }
 
 export enum TelemetryEventTypes {
   RELATED_ALERTS_LOADED = 'Related Alerts Loaded',
   ALERT_DETAILS_PAGE_VIEW = 'Alert Details Page View',
   RELATED_ALERT_ADDED_TO_CASE = 'Related Alert Added to Case',
+  LINKED_DASHBOARD_VIEW = 'Linked Dashboard View',
+  CASE_SELECTED_FROM_OBSERVABILITY = 'Case Selected From Observability',
 }
 
 interface RelatedAlertsLoadedParams {
@@ -46,13 +50,37 @@ interface RelatedAlertAddedToCaseEvent {
   eventType: TelemetryEventTypes.RELATED_ALERT_ADDED_TO_CASE;
   schema: RootSchema<RelatedAlertAddedToCaseParams>;
 }
+interface LinkedDashboardViewParams {
+  dashboard_id: string;
+}
+
+interface LinkedDashboardViewEvent {
+  eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW;
+  schema: RootSchema<LinkedDashboardViewParams>;
+}
+
+interface CaseSelectedFromObservabilityParams {
+  caseContext: string;
+}
+
+interface CaseSelectedFromObservabilityEvent {
+  eventType: TelemetryEventTypes.CASE_SELECTED_FROM_OBSERVABILITY;
+  schema: RootSchema<CaseSelectedFromObservabilityParams>;
+}
 
 export type TelemetryEvent =
   | AlertDetailsPageViewEvent
   | RelatedAlertsLoadedEvent
-  | RelatedAlertAddedToCaseEvent;
+  | RelatedAlertAddedToCaseEvent
+  | RelatedAlertAddedToCaseEvent
+  | LinkedDashboardViewEvent
+  | CaseSelectedFromObservabilityEvent;
 
 export type TelemetryEventParams =
   | RelatedAlertsLoadedParams
   | AlertDetailsPageViewParams
-  | RelatedAlertAddedToCaseParams;
+  | RelatedAlertAddedToCaseParams
+  | LinkedDashboardViewParams
+  | RelatedAlertAddedToCaseParams
+  | LinkedDashboardViewParams
+  | CaseSelectedFromObservabilityParams;

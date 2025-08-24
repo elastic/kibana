@@ -41,6 +41,30 @@ const relatedAlertAddedToCase: TelemetryEvent = {
       type: 'boolean' as const,
       _meta: {
         description: 'Whether a case was created when adding an alert to a case',
+      },
+    },
+  },
+};
+const linkedDashboardView: TelemetryEvent = {
+  eventType: TelemetryEventTypes.LINKED_DASHBOARD_VIEW,
+  schema: {
+    dashboard_id: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'ID of the dashboard linked to the alert',
+        optional: false,
+      },
+    },
+  },
+};
+
+const caseSelectedFromObservability: TelemetryEvent = {
+  eventType: TelemetryEventTypes.CASE_SELECTED_FROM_OBSERVABILITY,
+  schema: {
+    caseContext: {
+      type: 'keyword' as const,
+      _meta: {
+        description: 'The UI context where the case was selected from',
         optional: false,
       },
     },
@@ -51,4 +75,6 @@ export const events: TelemetryEvent[] = [
   relatedAlertsLoaded,
   alertDetailsPageView,
   relatedAlertAddedToCase,
+  linkedDashboardView,
+  caseSelectedFromObservability,
 ];
