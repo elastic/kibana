@@ -63,6 +63,7 @@ export function maybeAddCloudLinks({
         const helpMenuLinks = createHelpMenuLinks({
           docLinks: core.docLinks,
           helpSupportUrl,
+          isServerless,
         });
 
         core.chrome.setHelpMenuLinks(helpMenuLinks);
