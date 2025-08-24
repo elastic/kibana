@@ -5,8 +5,29 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiSpacer, EuiInMemoryTable, EuiTitle, EuiCallOut } from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiRangeProps, EuiSelectableOption } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiInMemoryTable,
+  EuiTitle,
+  EuiCallOut,
+  EuiBadge,
+  EuiCard,
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiModalHeader,
+  EuiModal,
+  EuiModalHeaderTitle,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiSelectable,
+  EuiCheckableCard,
+  EuiText,
+  EuiRange,
+  EuiFieldNumber,
+} from '@elastic/eui';
 import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -79,6 +100,40 @@ export const RiskInputsTab = <T extends EntityType>({
     refetch,
     setQuery,
   });
+
+  const [isAdjustRiskScoreModalVisible, setIsAdjustRiskScoreModalVisible] = useState(false);
+
+  const closeAdjustRiskScoreModal = () => setIsAdjustRiskScoreModalVisible(false);
+  const showAdjustRiskScoreModal = () => setIsAdjustRiskScoreModalVisible(true);
+
+  const [isAddToWatchlistModalVisible, setIsAddToWatchlistModalVisible] = useState(false);
+
+  const closeAddToWatchlistModal = () => setIsAddToWatchlistModalVisible(false);
+  const showAddToWatchlistModal = () => setIsAddToWatchlistModalVisible(true);
+
+  const [scaleValue, setScaleValue] = useState('1');
+
+  const onChangeScaleValue: EuiRangeProps['onChange'] = (e) => {
+    setScaleValue(e.currentTarget.value);
+  };
+
+  const [overrideValue, setOverrideValue] = useState('');
+
+  const onChangeOverrideValue = (e) => {
+    setOverrideValue(e.target.value);
+  };
+
+  const [radio, setRadio] = useState('radio1');
+
+  const [watchlistOptions, setWatchlistOptions] = useState<EuiSelectableOption[]>([
+    {
+      label: 'Privileged Users',
+      checked: 'on',
+    },
+    {
+      label: 'Notice given',
+    },
+  ]);
 
   const riskScore = riskScoreData && riskScoreData.length > 0 ? riskScoreData[0] : undefined;
 
@@ -157,7 +212,9 @@ export const RiskInputsTab = <T extends EntityType>({
         mobileOptions: { show: true },
         sortable: true,
         align: 'right',
-        render: formatContribution,
+        render: (value: number) => {
+          return <EuiBadge color={'default'}>{formatContribution(value)}</EuiBadge>;
+        },
       },
     ],
     [scopeId]
@@ -185,20 +242,20 @@ export const RiskInputsTab = <T extends EntityType>({
     );
   }
 
-  const riskInputsAlertSection = (
+  const riskInputsAlertSection = (title: string) => (
     <>
       <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
         <h3>
           <FormattedMessage
             id="xpack.securitySolution.flyout.entityDetails.riskInputs.alertsTitle"
-            defaultMessage="Alerts"
+            defaultMessage={title}
           />
         </h3>
       </EuiTitle>
       <EuiSpacer size="xs" />
       <RiskInputsUtilityBar riskInputs={selectedItems} />
       <EuiInMemoryTable
-        compressed
+        compressed={false}
         loading={loadingRiskScore || alerts.loading}
         items={alerts.data || []}
         columns={inputColumns}
@@ -213,13 +270,180 @@ export const RiskInputsTab = <T extends EntityType>({
 
   return (
     <>
+      <EuiCard
+        textAlign="left"
+        title={
+          <p>
+            <EuiIcon type="logoSecurity" size="xl" css={{ marginRight: '16px' }} />
+            Risk summary
+          </p>
+        }
+        description={
+          <p>
+            The combination of <b>numerous malware detection alerts</b>, a{' '}
+            <b>very high-risk score</b>, and
+            <b> continuous suspicious activity</b> makes this host a major security risk within the
+            system.
+            <br />
+            <br />
+            Additionally, a <b>significant amount of anamolous activity</b> has been detected,
+            coming from this user.
+            <br />
+            <br />
+            <b>
+              This host represents a major threat within your environment. Would you like to launch
+              a case?
+            </b>
+          </p>
+        }
+        footer={
+          <EuiFlexGroup justifyContent="flexStart">
+            <EuiFlexItem grow={false}>
+              <EuiButton fill iconType="plusInCircle">
+                Create case
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={showAdjustRiskScoreModal} iconType="documentEdit">
+                Adjust risk score
+              </EuiButton>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton onClick={showAddToWatchlistModal} iconType="bell">
+                Add to watchlist
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      />
+      <EuiSpacer size="l" />
       <ContextsSection<T>
         loading={loadingRiskScore}
         riskScore={riskScore}
         entityType={entityType}
       />
-      <EuiSpacer size="m" />
-      {riskInputsAlertSection}
+      <EuiSpacer size="l" />
+      <WatchlistsSection<T>
+        loading={loadingRiskScore}
+        riskScore={riskScore}
+        entityType={entityType}
+      />
+      <EuiSpacer size="l" />
+      {riskInputsAlertSection('Alerts')}
+      <EuiSpacer size="l" />
+      {riskInputsAlertSection('Anomalies')}
+      <EuiSpacer size="l" />
+      {isAddToWatchlistModalVisible && (
+        <EuiModal onClose={closeAddToWatchlistModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Add to watchlist</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            Choose watchlists to add the user to:
+            <EuiSpacer />
+            <EuiSelectable
+              options={watchlistOptions}
+              listProps={{ bordered: true }}
+              onChange={(newOptions) => setWatchlistOptions(newOptions)}
+            >
+              {(list) => list}
+            </EuiSelectable>
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={closeAddToWatchlistModal} fill>
+              Apply
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+      {isAdjustRiskScoreModalVisible && (
+        <EuiModal onClose={closeAdjustRiskScoreModal}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Manually adjust the risk score for this user</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            <EuiCheckableCard
+              name={'something'}
+              label={
+                <div>
+                  <EuiTitle size="m">
+                    <h2>Override risk score</h2>
+                  </EuiTitle>
+                  <EuiText>
+                    This option will override this entity's risk score to a static value. Risk
+                    inputs will not be visible.
+                  </EuiText>
+
+                  <EuiFieldNumber
+                    placeholder="A number between 0 and 100"
+                    value={overrideValue}
+                    onChange={(e) => onChangeOverrideValue(e)}
+                  />
+                </div>
+              }
+              value="radio1"
+              checked={radio === 'radio1'}
+              onChange={() => setRadio('radio1')}
+            />
+
+            <EuiSpacer size="m" />
+
+            <EuiCheckableCard
+              label={
+                <div>
+                  <EuiTitle size="m">
+                    <h2>Calibrate risk score</h2>
+                  </EuiTitle>
+                  <EuiText>
+                    Adjust the risk score higher or lower according to any known, external
+                    information about this user. Uses a simple multiplier against the computed risk
+                    score. Note that a risk score will never be below 0 or above 100.
+                  </EuiText>
+                  <EuiRange
+                    min={0}
+                    max={10}
+                    step={0.1}
+                    value={scaleValue}
+                    onChange={onChangeScaleValue}
+                    showLabels
+                    showValue
+                    aria-label="An example of EuiRange with showLabels prop"
+                  />
+                </div>
+              }
+              name={'something'}
+              value="radio2"
+              checked={radio === 'radio2'}
+              onChange={() => setRadio('radio2')}
+            />
+
+            <EuiSpacer size="m" />
+
+            <EuiCheckableCard
+              label={
+                <div>
+                  <EuiTitle size="m">
+                    <h2>Remove all adjustments</h2>
+                  </EuiTitle>
+                </div>
+              }
+              name={'something'}
+              value="radio3"
+              checked={radio === 'radio3'}
+              onChange={() => setRadio('radio3')}
+            />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={closeAdjustRiskScoreModal} fill>
+              Apply
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
     </>
   );
 };
@@ -264,7 +488,7 @@ const ContextsSection = <T extends EntityType>({
       </EuiTitle>
       <EuiSpacer size="xs" />
       <EuiInMemoryTable
-        compressed={true}
+        compressed={false}
         loading={loading}
         data-test-subj="risk-input-contexts-table"
         columns={contextColumns}
@@ -280,6 +504,58 @@ const ContextsSection = <T extends EntityType>({
               <AssetCriticalityBadge
                 criticalityLevel={criticality.level}
                 dataTestSubj="risk-inputs-asset-criticality-badge"
+              />
+            ),
+            contribution: formatContribution(criticality.contribution || 0),
+          },
+        ]}
+      />
+    </>
+  );
+};
+
+const WatchlistsSection = <T extends EntityType>({
+  riskScore,
+  loading,
+  entityType,
+}: ContextsSectionProps<T>) => {
+  const criticality = useMemo(() => {
+    if (!riskScore) {
+      return undefined;
+    }
+
+    return {
+      level: riskScore[entityType].risk.criticality_level,
+      contribution: riskScore[entityType].risk.category_2_score,
+    };
+  }, [entityType, riskScore]);
+
+  if (loading || criticality === undefined) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiTitle size="xs" data-test-subj="risk-input-contexts-title">
+        <h3>
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.contextsTitle"
+            defaultMessage="Watchlists"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="xs" />
+      <EuiInMemoryTable
+        compressed={false}
+        loading={loading}
+        data-test-subj="risk-input-contexts-table"
+        columns={watchlistColumns}
+        items={[
+          {
+            watchlist: (
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityField"
+                defaultMessage="Privileged Users"
               />
             ),
             contribution: formatContribution(criticality.contribution || 0),
@@ -329,7 +605,38 @@ const contextColumns: Array<EuiBasicTableColumn<ContextRow>> = [
         defaultMessage="Contribution"
       />
     ),
-    render: (score: ContextRow['contribution']) => score,
+    render: (score: ContextRow['contribution']) => <EuiBadge color={'default'}>{score}</EuiBadge>,
+  },
+];
+
+interface WatchlistRow {
+  watchlist: ReactNode;
+  contribution: string;
+}
+
+const watchlistColumns: Array<EuiBasicTableColumn<WatchlistRow>> = [
+  {
+    field: 'watchlist',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.fieldColumn"
+        defaultMessage="Watchlist name"
+      />
+    ),
+    width: '30%',
+    render: (watchlist: WatchlistRow['watchlist']) => watchlist,
+  },
+  {
+    field: 'contribution',
+    width: '30%',
+    align: 'right',
+    name: (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.riskInputs.contributionColumn"
+        defaultMessage="Contribution"
+      />
+    ),
+    render: (score: WatchlistRow['contribution']) => <EuiBadge color={'default'}>{score}</EuiBadge>,
   },
 ];
 

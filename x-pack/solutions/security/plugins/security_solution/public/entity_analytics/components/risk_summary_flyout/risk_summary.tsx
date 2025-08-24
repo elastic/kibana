@@ -175,7 +175,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
           title: (
             <FormattedMessage
               id="xpack.securitySolution.flyout.entityDetails.riskInputs"
-              defaultMessage="View risk contributions"
+              defaultMessage="View risk analysis"
             />
           ),
           link: riskScoreData.loading
