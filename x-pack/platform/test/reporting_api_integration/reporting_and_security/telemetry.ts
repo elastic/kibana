@@ -145,12 +145,12 @@ export default function ({ getService }: FtrProviderContext) {
         expect(parsedState.number_of_scheduled_reports).to.equal(7);
         expect(parsedState.number_of_enabled_scheduled_reports).to.equal(5);
         expect(parsedState.number_of_scheduled_reports_by_type).to.eql({
-          csv_searchsource: 3,
+          csv_v2: 3,
           PNGV2: 2,
           printable_pdf_v2: 2,
         });
         expect(parsedState.number_of_enabled_scheduled_reports_by_type).to.eql({
-          csv_searchsource: 2,
+          csv_v2: 2,
           printable_pdf_v2: 2,
           PNGV2: 1,
         });
