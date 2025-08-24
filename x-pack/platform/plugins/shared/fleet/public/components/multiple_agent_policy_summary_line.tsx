@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiIconTip,
   EuiText,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CSSProperties } from 'react';
@@ -73,6 +74,8 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
       };
     });
   }, [getHref, policies]);
+
+  const popoverTitleId = useGeneratedHtmlId();
 
   return (
     <>
@@ -146,8 +149,9 @@ export const MultipleAgentPoliciesSummaryLine = memo<{
                       isOpen={isPopoverOpen}
                       closePopover={closePopover}
                       anchorPosition="downCenter"
+                      aria-labelledby={popoverTitleId}
                     >
-                      <EuiPopoverTitle>
+                      <EuiPopoverTitle id={popoverTitleId}>
                         {i18n.translate('xpack.fleet.agentPolicySummaryLine.popover.title', {
                           defaultMessage: 'This integration is shared by',
                         })}
