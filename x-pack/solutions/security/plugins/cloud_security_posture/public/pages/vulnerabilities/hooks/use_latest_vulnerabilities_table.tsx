@@ -28,7 +28,7 @@ export const useLatestVulnerabilitiesTable = ({
     nonPersistedFilters,
   });
 
-  const { query, sort, queryError, getRowsFromPages, pageSize } = cloudPostureDataTable;
+  const { query, sort, queryError, getRowsFromPages, pageSize, urlQuery } = cloudPostureDataTable;
 
   const {
     data,
@@ -40,6 +40,7 @@ export const useLatestVulnerabilitiesTable = ({
     sort,
     enabled: !queryError,
     pageSize,
+    refreshCounter: urlQuery?.refresherCounter,
   });
 
   const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);
