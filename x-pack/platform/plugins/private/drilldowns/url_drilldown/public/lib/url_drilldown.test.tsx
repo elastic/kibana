@@ -133,7 +133,7 @@ describe('UrlDrilldown', () => {
         },
       };
 
-      await expect(urlDrilldown.isCompatible(config, context)).rejects.toThrowError();
+      await expect(urlDrilldown.isCompatible(config, context)).rejects.toThrow();
     });
 
     test('compatible in edit mode if url is valid', async () => {
@@ -294,7 +294,7 @@ describe('UrlDrilldown', () => {
       expect(url).toMatchInlineSnapshot(`"https://elasti.co/?test&(language:kuery,query:test)"`);
 
       await urlDrilldown.execute(config, context);
-      expect(mockNavigateToUrl).toBeCalledWith(url);
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(url);
 
       const { getError } = await renderActionMenuItem(urlDrilldown, config, context);
       expect(() => getError()).toThrow();
@@ -318,7 +318,7 @@ describe('UrlDrilldown', () => {
 
       await expect(urlDrilldown.getHref(config, context)).resolves.toBeUndefined();
       await expect(urlDrilldown.execute(config, context)).resolves.toBeUndefined();
-      expect(mockNavigateToUrl).not.toBeCalled();
+      expect(mockNavigateToUrl).not.toHaveBeenCalled();
 
       const { getError } = await renderActionMenuItem(urlDrilldown, config, context);
       expect(getError()).toHaveTextContent(
@@ -348,7 +348,7 @@ describe('UrlDrilldown', () => {
       await drilldown1.execute(config, context);
 
       expect(url).toMatchInlineSnapshot(`"https://elasti.co/?test&(language:kuery,query:test)"`);
-      expect(mockNavigateToUrl).toBeCalledWith(url);
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(url);
 
       await expect(drilldown2.getHref(config, context)).resolves.toBeUndefined();
       await expect(drilldown2.execute(config, context)).resolves.toBeUndefined();

@@ -375,7 +375,7 @@ describe('handles errors during migrations', () => {
       const actionTaskParam = getMockData();
       expect(() => {
         migration716(actionTaskParam, context);
-      }).toThrowError(`Can't migrate!`);
+      }).toThrow(`Can't migrate!`);
       expect(context.log.error).toHaveBeenCalledWith(
         `encryptedSavedObject 7.16.0 migration failed for action task param ${actionTaskParam.id} with error: Can't migrate!`,
         {

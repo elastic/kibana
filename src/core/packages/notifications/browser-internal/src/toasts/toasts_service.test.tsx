@@ -108,7 +108,7 @@ describe('#stop()', () => {
     const toasts = new ToastsService();
     expect(() => {
       toasts.stop();
-    }).not.toThrowError();
+    }).not.toThrow();
   });
 
   it('empties the content of the targetDomElement', () => {

@@ -92,8 +92,8 @@ describe('EditTagsSelectable', () => {
       await userEvent.click(screen.getByText(tag));
     }
 
-    expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
-    expect(props.onChangeTags).nthCalledWith(props.tags.length, {
+    expect(props.onChangeTags).toHaveBeenCalledTimes(props.tags.length);
+    expect(props.onChangeTags).toHaveBeenNthCalledWith(props.tags.length, {
       selectedItems: ['one', 'two'],
       unSelectedItems: ['coke', 'pepsi'],
     });
@@ -106,8 +106,8 @@ describe('EditTagsSelectable', () => {
       await userEvent.click(screen.getByText(tag));
     }
 
-    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
-    expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
+    expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(propsMultipleCases.tags.length);
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(propsMultipleCases.tags.length, {
       selectedItems: ['two', 'three', 'coke', 'pepsi'],
       unSelectedItems: ['one'],
     });
@@ -131,8 +131,8 @@ describe('EditTagsSelectable', () => {
       expect(screen.getByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
 
-    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
-    expect(propsMultipleCases.onChangeTags).nthCalledWith(propsMultipleCases.tags.length, {
+    expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(propsMultipleCases.tags.length);
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(propsMultipleCases.tags.length, {
       selectedItems: ['two', 'three', 'coke', 'pepsi'],
       unSelectedItems: ['one'],
     });
@@ -153,8 +153,8 @@ describe('EditTagsSelectable', () => {
 
     await userEvent.click(addNewTagButton);
 
-    expect(props.onChangeTags).toBeCalledTimes(1);
-    expect(props.onChangeTags).nthCalledWith(1, {
+    expect(props.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(props.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: ['not-exist', 'coke', 'pepsi'],
       unSelectedItems: [],
     });
@@ -166,8 +166,8 @@ describe('EditTagsSelectable', () => {
     expect(screen.getByText('Select all')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Select all'));
 
-    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
-    expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
+    expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: propsMultipleCases.tags,
       unSelectedItems: [],
     });
@@ -179,8 +179,8 @@ describe('EditTagsSelectable', () => {
     expect(screen.getByText('Select all')).toBeInTheDocument();
     await userEvent.click(screen.getByText('Select none'));
 
-    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
-    expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
+    expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: [],
       unSelectedItems: ['one', 'three', 'coke', 'pepsi'],
     });
@@ -206,8 +206,8 @@ describe('EditTagsSelectable', () => {
 
     await userEvent.click(screen.getByTestId(iconDataTestSubj));
 
-    expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
-    expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
+    expect(propsMultipleCases.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(propsMultipleCases.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: [],
       unSelectedItems: ['one'],
     });
@@ -236,8 +236,8 @@ describe('EditTagsSelectable', () => {
 
     await userEvent.click(addNewTagButton);
 
-    expect(props.onChangeTags).toBeCalledTimes(1);
-    expect(props.onChangeTags).nthCalledWith(1, {
+    expect(props.onChangeTags).toHaveBeenCalledTimes(1);
+    expect(props.onChangeTags).toHaveBeenNthCalledWith(1, {
       selectedItems: ['on', 'coke', 'pepsi'],
       unSelectedItems: [],
     });

@@ -402,7 +402,7 @@ describe('convertMetricToColumns invalid cases', () => {
     expect(convertMetricToColumns(...input)).toBeNull();
 
     if (mock) {
-      expect(mock).toBeCalledTimes(1);
+      expect(mock).toHaveBeenCalledTimes(1);
     }
   });
 });
@@ -768,7 +768,7 @@ describe('convertMetricToColumns valid cases', () => {
   ])('should return %s', (_, input, expected, mock) => {
     expect(convertMetricToColumns(...input)).toEqual(expected.map(expect.objectContaining));
     if (mock) {
-      expect(mock).toBeCalledTimes(1);
+      expect(mock).toHaveBeenCalledTimes(1);
     }
   });
 });

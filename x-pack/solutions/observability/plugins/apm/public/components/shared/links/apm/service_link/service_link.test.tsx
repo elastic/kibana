@@ -16,7 +16,7 @@ const params =
   'comparisonEnabled=false&environment=ENVIRONMENT_ALL&kuery=&latencyAggregationType=avg&rangeFrom=now-15m&rangeTo=now&serviceGroup=';
 describe('ServiceLink', () => {
   it('links to service details', async () => {
-    expect(() => render(<Example />)).not.toThrowError();
+    expect(() => render(<Example />)).not.toThrow();
 
     expect(await screen.findByTestId('serviceLink_java')).toHaveAttribute(
       'href',
@@ -25,8 +25,8 @@ describe('ServiceLink', () => {
   });
 
   it('links to mobile service details', async () => {
-    expect(() => render(<AndroidAgent />)).not.toThrowError();
-    expect(() => render(<IOSAgent />)).not.toThrowError();
+    expect(() => render(<AndroidAgent />)).not.toThrow();
+    expect(() => render(<IOSAgent />)).not.toThrow();
 
     expect(await screen.findByTestId('serviceLink_android/java')).toHaveAttribute(
       'href',

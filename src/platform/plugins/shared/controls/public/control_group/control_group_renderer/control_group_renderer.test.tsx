@@ -59,15 +59,15 @@ describe('control group renderer', () => {
 
   test('calls build method from the control group embeddable factory', async () => {
     await mountControlGroupRenderer();
-    expect(buildControlGroupSpy).toBeCalledTimes(1);
+    expect(buildControlGroupSpy).toHaveBeenCalledTimes(1);
   });
 
   test('calling `updateInput` forces control group to be rebuilt', async () => {
     const { api } = await mountControlGroupRenderer();
-    expect(buildControlGroupSpy).toBeCalledTimes(1);
+    expect(buildControlGroupSpy).toHaveBeenCalledTimes(1);
     act(() => api.updateInput({ autoApplySelections: false }));
     await waitFor(() => {
-      expect(buildControlGroupSpy).toBeCalledTimes(1);
+      expect(buildControlGroupSpy).toHaveBeenCalledTimes(1);
     });
   });
 

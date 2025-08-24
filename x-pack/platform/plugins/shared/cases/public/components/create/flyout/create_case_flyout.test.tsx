@@ -63,7 +63,7 @@ describe('CreateCaseFlyout', () => {
     await userEvent.click(await screen.findByTestId('euiFlyoutCloseButton'));
 
     await waitFor(() => {
-      expect(onClose).toBeCalled();
+      expect(onClose).toHaveBeenCalled();
     });
   });
 

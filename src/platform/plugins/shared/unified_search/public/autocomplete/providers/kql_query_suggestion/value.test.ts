@@ -148,7 +148,7 @@ describe('Kuery value suggestions', () => {
       );
 
       expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledTimes(1);
-      expect(autocompleteServiceMock.getValueSuggestions).toBeCalledWith(
+      expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           field: expect.any(Object),
           query: prefix + suffix,

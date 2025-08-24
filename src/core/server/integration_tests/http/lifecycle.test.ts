@@ -758,7 +758,7 @@ describe('Auth', () => {
     const doRegister = () => registerAuth(() => null as any);
     doRegister();
 
-    expect(doRegister).toThrowError('Auth interceptor was already registered');
+    expect(doRegister).toThrow('Auth interceptor was already registered');
   });
 
   it('may grant access to a resource', async () => {

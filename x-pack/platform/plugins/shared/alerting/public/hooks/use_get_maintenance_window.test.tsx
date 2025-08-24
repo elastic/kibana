@@ -53,7 +53,7 @@ describe('useGetMaintenanceWindow', () => {
       wrapper: appMockRenderer.AppWrapper,
     });
 
-    await waitFor(() => expect(mockAddDanger).toBeCalledWith('Unable to get maintenance window.'));
+    await waitFor(() => expect(mockAddDanger).toHaveBeenCalledWith('Unable to get maintenance window.'));
   });
 
   it('should return an object where showMultipleSolutionsWarning is false when disabled scoped query filter', async () => {

@@ -226,7 +226,7 @@ describe('enrollment api keys', () => {
 
       await expect(
         getEnrollmentAPIKey(esClient, 'test-enrollment-api-key-id', 'test')
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'Enrollment api key test-enrollment-api-key-id not found in namespace'
       );
     });

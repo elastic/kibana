@@ -190,7 +190,7 @@ describe('PackageInstaller', () => {
             service_settings: {},
           },
         })
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       expect(productDocClient.setInstallationSuccessful).not.toHaveBeenCalled();
 

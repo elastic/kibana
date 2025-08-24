@@ -74,7 +74,7 @@ describe('object transform', () => {
           // @ts-expect-error
           abc: { up: () => undefined },
         });
-      }).toThrowError('Invalid version number [abc].');
+      }).toThrow('Invalid version number [abc].');
     });
   });
 
@@ -242,7 +242,7 @@ describe('object transform', () => {
       transformsFactory = initTransform(7);
       expect(() => {
         transformsFactory(def).validate(123);
-      }).toThrowError('Invalid version number [7].');
+      }).toThrow('Invalid version number [7].');
     });
   });
 });

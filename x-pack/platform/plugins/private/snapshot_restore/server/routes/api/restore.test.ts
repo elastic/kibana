@@ -55,7 +55,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should throw if ES error', async () => {
       restoreSnapshotFn.mockRejectedValue(new Error());
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 
@@ -117,7 +117,7 @@ describe('[Snapshot and Restore API Routes] Restore', () => {
 
     it('should throw if ES error', async () => {
       indicesRecoveryFn.mockRejectedValue(new Error());
-      await expect(router.runRequest(mockRequest)).rejects.toThrowError();
+      await expect(router.runRequest(mockRequest)).rejects.toThrow();
     });
   });
 });

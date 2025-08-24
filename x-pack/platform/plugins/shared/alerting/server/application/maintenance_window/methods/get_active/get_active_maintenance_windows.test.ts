@@ -239,7 +239,7 @@ describe('MaintenanceWindowClient - getActiveMaintenanceWindows', () => {
 
     await expect(async () => {
       await getActiveMaintenanceWindows(mockContext);
-    }).rejects.toThrowError();
+    }).rejects.toThrow();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to find active maintenance window by interval, Error: something went wrong'

@@ -30,6 +30,6 @@ describe('draggableKeyDownHandler', () => {
       keyboardEvent,
       setDragActions: jest.fn(),
     });
-    expect(cancelDragActions).toBeCalled();
+    expect(cancelDragActions).toHaveBeenCalled();
   });
 });

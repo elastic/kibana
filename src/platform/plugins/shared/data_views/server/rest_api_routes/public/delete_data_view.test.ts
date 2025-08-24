@@ -20,6 +20,6 @@ describe('delete data view', () => {
       usageCollection,
       id: '1',
     });
-    expect(usageCollection.incrementCounter).toBeCalledTimes(1);
+    expect(usageCollection.incrementCounter).toHaveBeenCalledTimes(1);
   });
 });

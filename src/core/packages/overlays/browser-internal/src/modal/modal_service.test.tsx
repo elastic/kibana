@@ -81,7 +81,7 @@ describe('ModalService', () => {
         const modalContent = mount(mockReactDomRender.mock.calls[1][0]);
         expect((modalContent.find('MountWrapper').props() as any).mount).toEqual(mountPoint);
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
@@ -90,7 +90,7 @@ describe('ModalService', () => {
         ref1.onClose.then(onCloseComplete);
         modals.open(mountReactNode(<span>Flyout content 2</span>));
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -175,7 +175,7 @@ describe('ModalService', () => {
         );
 
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
-        expect(() => ref1.close()).not.toThrowError();
+        expect(() => ref1.close()).not.toThrow();
         expect(mockReactDomUnmount).toHaveBeenCalledTimes(1);
       });
 
@@ -184,7 +184,7 @@ describe('ModalService', () => {
         ref1.onClose.then(onCloseComplete);
         modals.openConfirm(SOME_CONFIRM);
         await ref1.onClose;
-        expect(onCloseComplete).toBeCalledTimes(1);
+        expect(onCloseComplete).toHaveBeenCalledTimes(1);
       });
     });
 
@@ -252,8 +252,8 @@ describe('ModalService', () => {
       ref2.onClose.then(onCloseComplete);
       mockReactDomUnmount.mockClear();
       await ref1.close();
-      expect(mockReactDomUnmount).toBeCalledTimes(0);
-      expect(onCloseComplete).toBeCalledTimes(0);
+      expect(mockReactDomUnmount).toHaveBeenCalledTimes(0);
+      expect(onCloseComplete).toHaveBeenCalledTimes(0);
     });
   });
 });

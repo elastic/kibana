@@ -72,24 +72,24 @@ describe('convertToStdDeviationFormulaColumns', () => {
   test('should return null if field is not present', () => {
     mockGetFieldNameFromField.mockReturnValue(null);
     expect(convertToStdDeviationFormulaColumns({ agg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(0);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(0);
   });
 
   test("should return null if field doesn't exist in dataView", () => {
     mockGetFieldByName.mockReturnValue(null);
     dataView.getFieldByName = mockGetFieldByName;
     expect(convertToStdDeviationFormulaColumns({ agg, dataView, visType })).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return null if agg id is invalid', () => {
     expect(
       convertToStdDeviationFormulaColumns({ agg: { ...agg, aggId: 'some-id' }, dataView, visType })
     ).toBeNull();
-    expect(mockGetFieldNameFromField).toBeCalledTimes(1);
-    expect(dataView.getFieldByName).toBeCalledTimes(1);
+    expect(mockGetFieldNameFromField).toHaveBeenCalledTimes(1);
+    expect(dataView.getFieldByName).toHaveBeenCalledTimes(1);
   });
 
   test('should return formula column for lower std deviation', () => {

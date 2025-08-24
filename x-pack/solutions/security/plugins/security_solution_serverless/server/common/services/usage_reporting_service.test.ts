@@ -86,7 +86,7 @@ describe('UsageReportingService', () => {
     it('should throw if url not provided', async () => {
       const usageRecord = generateUsageRecord();
       const records: UsageRecord[] = [usageRecord];
-      await expect(service.reportUsage(records)).rejects.toThrowError('usage-api url not provided');
+      await expect(service.reportUsage(records)).rejects.toThrow('usage-api url not provided');
     });
 
     it('should throw if TLS configs not provided', async () => {
@@ -94,7 +94,7 @@ describe('UsageReportingService', () => {
       setupService(generateUsageApiConfig({ url }));
       const usageRecord = generateUsageRecord();
       const records: UsageRecord[] = [usageRecord];
-      await expect(service.reportUsage(records)).rejects.toThrowError(
+      await expect(service.reportUsage(records)).rejects.toThrow(
         'usage-api TLS configs not provided'
       );
     });

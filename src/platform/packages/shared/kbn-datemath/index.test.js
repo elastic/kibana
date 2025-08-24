@@ -70,15 +70,15 @@ describe('dateMath', function () {
     describe('forceNow', function () {
       it('should throw an Error if passed a string', function () {
         const fn = () => dateMath.parse('now', { forceNow: '2000-01-01T00:00:00.000Z' });
-        expect(fn).toThrowError();
+        expect(fn).toThrow();
       });
 
       it('should throw an Error if passed a moment', function () {
-        expect(() => dateMath.parse('now', { forceNow: moment() })).toThrowError();
+        expect(() => dateMath.parse('now', { forceNow: moment() })).toThrow();
       });
 
       it('should throw an Error if passed an invalid date', function () {
-        expect(() => dateMath.parse('now', { forceNow: new Date('foobar') })).toThrowError();
+        expect(() => dateMath.parse('now', { forceNow: new Date('foobar') })).toThrow();
       });
     });
   });

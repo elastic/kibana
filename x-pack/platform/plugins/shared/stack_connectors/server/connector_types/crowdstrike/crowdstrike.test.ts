@@ -330,7 +330,7 @@ describe('CrowdstrikeConnector', () => {
 
       await expect(() =>
         connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
-      ).rejects.toThrowError('something goes wrong');
+      ).rejects.toThrow('something goes wrong');
       expect(mockedRequest).toHaveBeenCalledTimes(2);
     });
     it('should repeat the call one time if theres 401 error ', async () => {
@@ -341,7 +341,7 @@ describe('CrowdstrikeConnector', () => {
 
       await expect(() =>
         connector.getAgentDetails({ ids: ['id1', 'id2'] }, connectorUsageCollector)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
       expect(mockedRequest).toHaveBeenCalledTimes(3);
     });
   });

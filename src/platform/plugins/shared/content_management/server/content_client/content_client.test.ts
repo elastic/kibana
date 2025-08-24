@@ -35,7 +35,7 @@ describe('ContentClient', () => {
       const expectToThrow = () => {
         new ContentClient(Symbol('foo'), 'foo', {} as any);
       };
-      expect(expectToThrow).toThrowError('Use ContentClient.create() instead');
+      expect(expectToThrow).toThrow('Use ContentClient.create() instead');
     });
 
     test('should have contentTypeId', () => {
@@ -52,7 +52,7 @@ describe('ContentClient', () => {
       };
       // With this test and runtime check we can rely on all the existing tests of the Content Crud.
       // e.g. the tests about events being dispatched, etc.
-      expect(expectToThrow).toThrowError('Crud instance missing or not an instance of ContentCrud');
+      expect(expectToThrow).toThrow('Crud instance missing or not an instance of ContentCrud');
     });
   });
 

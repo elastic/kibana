@@ -43,7 +43,7 @@ describe('saveSpaceSettings', () => {
           managed_by: 'kibana_config',
         },
       });
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'fleet-space-settings',
         'test-default-settings',
         { allowed_namespace_prefixes: ['test'], managed_by: 'kibana_config' },
@@ -63,7 +63,7 @@ describe('saveSpaceSettings', () => {
           managed_by: 'kibana_config',
         },
       });
-      expect(soClient.update).toBeCalledWith(
+      expect(soClient.update).toHaveBeenCalledWith(
         'fleet-space-settings',
         'test-default-settings',
         { allowed_namespace_prefixes: ['test'], managed_by: 'kibana_config' },
@@ -81,7 +81,7 @@ describe('saveSpaceSettings', () => {
           managed_by: 'kibana_config',
         },
       });
-      expect(so.update).toBeCalledWith(
+      expect(so.update).toHaveBeenCalledWith(
         'fleet-space-settings',
         'test-default-settings',
         { allowed_namespace_prefixes: ['test'], managed_by: 'kibana_config' },
@@ -98,7 +98,7 @@ describe('saveSpaceSettings', () => {
             allowed_namespace_prefixes: ['test'],
           },
         })
-      ).rejects.toThrowError(/Settings are managed by: kibana_config and should be edited there/);
+      ).rejects.toThrow(/Settings are managed by: kibana_config and should be edited there/);
     });
   });
 });

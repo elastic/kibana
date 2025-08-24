@@ -125,7 +125,7 @@ describe('WaitStepImpl', () => {
 
       const runPromise = underTest.handleShortDuration();
       await jest.advanceTimersByTimeAsync(0);
-      expect(workflowLogger.logInfo).toBeCalledWith(`Waiting for 3s in step wait-step`);
+      expect(workflowLogger.logInfo).toHaveBeenCalledWith(`Waiting for 3s in step wait-step`);
 
       await jest.advanceTimersByTimeAsync(3000);
       await runPromise;

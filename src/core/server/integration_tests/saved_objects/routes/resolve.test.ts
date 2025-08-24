@@ -132,7 +132,7 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
       .expect(200);
 
     expect(savedObjectsClient.resolve).toHaveBeenCalled();
-    expect(savedObjectsClient.resolve).nthCalledWith(1, 'index-pattern', 'logstash-*', {
+    expect(savedObjectsClient.resolve).toHaveBeenNthCalledWith(1, 'index-pattern', 'logstash-*', {
       migrationVersionCompatibility: 'compatible',
     });
   });

@@ -67,7 +67,7 @@ describe('files service', () => {
 
       const result = await getFilesByStatus(esClientMock, abortController, status);
 
-      expect(esClientMock.search).toBeCalledWith(
+      expect(esClientMock.search).toHaveBeenCalledWith(
         {
           index: [FILE_STORAGE_METADATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_METADATA_INDEX_PATTERN],
           size: ES_SEARCH_LIMIT,
@@ -128,7 +128,7 @@ describe('files service', () => {
       const { fileIdsByIndex: deletedFileIdsByIndex, allFileIds: allDeletedFileIds } =
         await fileIdsWithoutChunksByIndex(esClientMock, abortController, files);
 
-      expect(esClientMock.search).toBeCalledWith(
+      expect(esClientMock.search).toHaveBeenCalledWith(
         {
           ignore_unavailable: true,
           index: [FILE_STORAGE_DATA_INDEX_PATTERN, FILE_STORAGE_TO_HOST_DATA_INDEX_PATTERN],

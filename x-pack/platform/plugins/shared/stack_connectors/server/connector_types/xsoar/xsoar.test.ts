@@ -213,7 +213,7 @@ describe('XSOARConnector', () => {
 
     it('XSOAR API call is successful with correct parameters', async () => {
       const response = await connector.getPlaybooks(undefined, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           method: 'post',
@@ -232,7 +232,7 @@ describe('XSOARConnector', () => {
 
     it('Auth headers are correctly set for cloud instance', async () => {
       const response = await cloudConnector.getPlaybooks(undefined, connectorUsageCollector);
-      expect(mockCloudRequest).toBeCalledTimes(1);
+      expect(mockCloudRequest).toHaveBeenCalledTimes(1);
       expect(mockCloudRequest).toHaveBeenCalledWith(
         {
           method: 'post',
@@ -494,7 +494,7 @@ describe('XSOARConnector', () => {
 
     it('XSOAR API call is successful with correct parameters', async () => {
       await connector.run(incident, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/incident',
@@ -519,7 +519,7 @@ describe('XSOARConnector', () => {
     });
 
     it('error when malformed incident is passed', async () => {
-      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrowError(
+      await expect(connector.run(malformedIncident, connectorUsageCollector)).rejects.toThrow(
         `Error parsing Body: SyntaxError: Expected property name or '}' in JSON at position 1`
       );
     });

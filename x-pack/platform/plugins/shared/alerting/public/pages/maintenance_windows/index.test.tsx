@@ -66,7 +66,7 @@ describe('Maintenance windows page', () => {
   test('show empty prompt', () => {
     const result = appMockRenderer.render(<MaintenanceWindowsPage />);
     expect(result.queryByTestId('mw-empty-prompt')).toBeInTheDocument();
-    expect(appMockRenderer.mocked.setBadge).not.toBeCalled();
+    expect(appMockRenderer.mocked.setBadge).not.toHaveBeenCalled();
   });
 
   test('show table in read only', () => {
@@ -80,6 +80,6 @@ describe('Maintenance windows page', () => {
     appMockRenderer = createAppMockRenderer({ capabilities, license });
     const result = appMockRenderer.render(<MaintenanceWindowsPage />);
     expect(result.queryByTestId('maintenance-windows-table')).toBeInTheDocument();
-    expect(appMockRenderer.mocked.setBadge).toBeCalledTimes(1);
+    expect(appMockRenderer.mocked.setBadge).toHaveBeenCalledTimes(1);
   });
 });

@@ -215,6 +215,6 @@ describe('ScriptedFieldsTable', () => {
     await component.instance().deleteField();
     await component.update();
 
-    expect(removeScriptedField).toBeCalled();
+    expect(removeScriptedField).toHaveBeenCalled();
   });
 });

@@ -69,7 +69,7 @@ describe('TinesConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: actionConnector,
         isValid: true,
       });
@@ -95,7 +95,7 @@ describe('TinesConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });
@@ -121,7 +121,7 @@ describe('TinesConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });
@@ -147,7 +147,7 @@ describe('TinesConnectorFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });

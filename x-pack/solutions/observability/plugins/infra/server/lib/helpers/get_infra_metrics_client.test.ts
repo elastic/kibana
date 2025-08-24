@@ -44,7 +44,7 @@ const infraMetricsTestHarness =
       track_total_hits: false,
     });
 
-    expect(callWithRequest).toBeCalledWith(
+    expect(callWithRequest).toHaveBeenCalledWith(
       context,
       'search',
       {

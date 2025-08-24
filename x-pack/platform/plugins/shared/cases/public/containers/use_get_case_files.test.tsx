@@ -44,7 +44,7 @@ describe('useGetCaseFiles', () => {
       wrapper: (props) => <TestProviders {...props} filesClient={filesClient} />,
     });
 
-    await waitFor(() => expect(filesClient.list).toBeCalledWith(expectedCallParams));
+    await waitFor(() => expect(filesClient.list).toHaveBeenCalledWith(expectedCallParams));
   });
 
   it('shows an error toast when filesClient.list throws', async () => {

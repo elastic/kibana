@@ -125,7 +125,7 @@ describe('TinesConnector', () => {
 
     it('should request Tines stories', async () => {
       await connector.getStories(undefined, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(storiesGetRequestExpected);
     });
 
@@ -181,7 +181,7 @@ describe('TinesConnector', () => {
     it('should request Tines webhook actions', async () => {
       await connector.getWebhooks({ storyId: story.id }, connectorUsageCollector);
 
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(agentsGetRequestExpected);
     });
 
@@ -224,7 +224,7 @@ describe('TinesConnector', () => {
         connectorUsageCollector
       );
 
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'post',
@@ -246,7 +246,7 @@ describe('TinesConnector', () => {
         connectorUsageCollector
       );
 
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith({
         ...ignoredRequestFields,
         method: 'post',

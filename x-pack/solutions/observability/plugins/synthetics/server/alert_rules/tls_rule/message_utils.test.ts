@@ -73,7 +73,7 @@ describe('setTLSRecoveredAlertsContext', () => {
         } as TLSLatestPing,
       ],
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         commonName: 'cert-1',
@@ -136,7 +136,7 @@ describe('setTLSRecoveredAlertsContext', () => {
         } as TLSLatestPing,
       ],
     });
-    expect(alertsClientMock.setAlertData).toBeCalledWith({
+    expect(alertsClientMock.setAlertData).toHaveBeenCalledWith({
       context: {
         alertDetailsUrl: 'https://localhost:5601/app/observability/alerts/alert-id',
         commonName: 'cert-1',

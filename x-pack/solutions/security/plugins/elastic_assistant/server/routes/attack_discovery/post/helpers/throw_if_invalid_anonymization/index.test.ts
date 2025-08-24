@@ -43,7 +43,7 @@ describe('throwIfInvalidAnonymization', () => {
 
     expect(() => {
       throwIfInvalidAnonymization(emptyAnonymizationFields);
-    }).toThrowError(i18n.NO_FIELDS_ALLOWED);
+    }).toThrow(i18n.NO_FIELDS_ALLOWED);
   });
 
   it('throws when all fields are NOT allowed', () => {
@@ -54,7 +54,7 @@ describe('throwIfInvalidAnonymization', () => {
 
     expect(() => {
       throwIfInvalidAnonymization(anonymizationFields);
-    }).toThrowError(i18n.NO_FIELDS_ALLOWED);
+    }).toThrow(i18n.NO_FIELDS_ALLOWED);
   });
 
   it('throws when the _id field is NOT included', () => {
@@ -64,7 +64,7 @@ describe('throwIfInvalidAnonymization', () => {
 
     expect(() => {
       throwIfInvalidAnonymization(idFieldNotIncluded);
-    }).toThrowError(i18n.ID_FIELD_REQUIRED);
+    }).toThrow(i18n.ID_FIELD_REQUIRED);
   });
 
   it('throws when the _id field is NOT allowed', () => {
@@ -75,7 +75,7 @@ describe('throwIfInvalidAnonymization', () => {
 
     expect(() => {
       throwIfInvalidAnonymization(anonymizationFields);
-    }).toThrowError(i18n.ID_FIELD_REQUIRED);
+    }).toThrow(i18n.ID_FIELD_REQUIRED);
   });
 
   it('does NOT throw when the _id field is allowed', () => {

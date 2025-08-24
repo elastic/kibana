@@ -224,7 +224,7 @@ describe('<FieldEditorFlyoutContent />', () => {
         jest.advanceTimersByTime(0); // advance timers to allow the form to validate
       });
 
-      expect(onSave).toBeCalled();
+      expect(onSave).toHaveBeenCalled();
       const fieldReturned = onSave.mock.calls[onSave.mock.calls.length - 1][0];
 
       expect(fieldReturned).toEqual({

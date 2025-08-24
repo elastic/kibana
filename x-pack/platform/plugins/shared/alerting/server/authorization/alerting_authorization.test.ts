@@ -504,7 +504,7 @@ describe('AlertingAuthorization', () => {
         entity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -689,7 +689,7 @@ describe('AlertingAuthorization', () => {
         additionalPrivileges: ['test/create'],
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -768,7 +768,7 @@ describe('AlertingAuthorization', () => {
         })
       ).filter;
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1208,7 +1208,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -1360,7 +1360,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2213,7 +2213,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2259,7 +2259,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {
@@ -2288,7 +2288,7 @@ describe('AlertingAuthorization', () => {
         authorizationEntity: AlertingAuthorizationEntity.Rule,
       });
 
-      expect(checkPrivileges).toBeCalledTimes(1);
+      expect(checkPrivileges).toHaveBeenCalledTimes(1);
       expect(checkPrivileges.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           Object {

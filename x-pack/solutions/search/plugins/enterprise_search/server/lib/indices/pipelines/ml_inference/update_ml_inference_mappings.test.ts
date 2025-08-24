@@ -133,6 +133,6 @@ describe('updateMlInferenceMappings', () => {
     );
     await expect(
       updateMlInferenceMappings(indexName, modelId, fieldMappings, mockClient.asCurrentUser)
-    ).rejects.toThrowError(ErrorCode.MAPPING_UPDATE_FAILED);
+    ).rejects.toThrow(ErrorCode.MAPPING_UPDATE_FAILED);
   });
 });

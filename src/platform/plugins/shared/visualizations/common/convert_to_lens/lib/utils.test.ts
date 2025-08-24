@@ -473,19 +473,19 @@ describe('getMetricFromParentPipelineAgg', () => {
 
   test('should return null if aggParams are undefined', () => {
     expect(getMetricFromParentPipelineAgg({ ...agg, aggParams: undefined }, [])).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if is sibling pipeline agg and custom metric is not defined', () => {
     expect(
       getMetricFromParentPipelineAgg({ ...agg, aggParams: { customMetric: undefined } }, [])
     ).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return null if is parent pipeline agg, metricAgg is custom and custom metric is not defined', () => {
     expect(getMetricFromParentPipelineAgg(parentPipelineAgg, [])).toBeNull();
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return metric if is parent pipeline agg, metricAgg is equal to aggId and custom metric is not defined', () => {
@@ -501,12 +501,12 @@ describe('getMetricFromParentPipelineAgg', () => {
         plainAgg,
       ])
     ).toEqual(plainAgg);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(0);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(0);
   });
 
   test('should return metric if sibling pipeline agg with custom metric', () => {
     expect(getMetricFromParentPipelineAgg(agg, [agg])).toEqual(metric);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(1);
   });
 
   test('should return metric if parent pipeline agg with custom metric', () => {
@@ -519,6 +519,6 @@ describe('getMetricFromParentPipelineAgg', () => {
         [agg]
       )
     ).toEqual(metric);
-    expect(mockConvertToSchemaConfig).toBeCalledTimes(1);
+    expect(mockConvertToSchemaConfig).toHaveBeenCalledTimes(1);
   });
 });

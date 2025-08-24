@@ -69,7 +69,7 @@ describe('Cloud plugin config', () => {
                 project_type: solution,
               },
             })
-          ).toThrowError("[serverless.product_tier]: a value wasn't expected to be present");
+          ).toThrow("[serverless.product_tier]: a value wasn't expected to be present");
         });
       }
 

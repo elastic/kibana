@@ -61,6 +61,6 @@ describe('delete_list_item_by_value', () => {
       },
       refresh: false,
     };
-    expect(options.esClient.deleteByQuery).toBeCalledWith(deleteByQuery);
+    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(deleteByQuery);
   });
 });

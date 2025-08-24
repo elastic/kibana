@@ -130,7 +130,7 @@ describe('unflattenKnownApmEventFields', () => {
     const requiredFields: ['service.name'] = ['service.name'];
 
     // @ts-expect-error
-    expect(() => unflattenKnownApmEventFields(input, requiredFields)).toThrowError(
+    expect(() => unflattenKnownApmEventFields(input, requiredFields)).toThrow(
       'Missing required fields service.name in event'
     );
   });

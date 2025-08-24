@@ -159,7 +159,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError('You should register at least one subAction for your connector type');
+    ).rejects.toThrow('You should register at least one subAction for your connector type');
   });
 
   it('throws if the sub action is not registered', async () => {
@@ -176,7 +176,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Sub action "not-exist" is not registered. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -217,7 +217,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Method "not-exist" does not exists in service. Sub action: "testUrl". Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -236,7 +236,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Method "notAFunction" must be a function. Connector id: test-action-id. Connector name: Test. Connector type: .test'
     );
   });
@@ -255,7 +255,7 @@ describe('Executor', () => {
         logger,
         connectorUsageCollector,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Request validation failed (Error: [id]: expected value of type [string] but got [undefined])'
     );
   });

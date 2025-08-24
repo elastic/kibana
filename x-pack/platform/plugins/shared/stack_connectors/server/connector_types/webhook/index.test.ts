@@ -632,7 +632,7 @@ describe('execute()', () => {
       logger: mockedLogger,
       connectorUsageCollector,
     });
-    expect(mockedLogger.error).toBeCalledWith(
+    expect(mockedLogger.error).toHaveBeenCalledWith(
       'error on some-id webhook event: maxContentLength size of 1000000 exceeded'
     );
   });

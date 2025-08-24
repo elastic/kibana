@@ -32,21 +32,21 @@ describe('parseSourceFields', () => {
 
   it('should throw an error if source fields index value is empty', () => {
     const sourceFields = '{"foobar": []}';
-    expect(() => parseSourceFields(sourceFields)).toThrowError(
+    expect(() => parseSourceFields(sourceFields)).toThrow(
       'source_fields index value cannot be empty'
     );
   });
 
   it('should throw an error if source fields index value is not an array or string', () => {
     const sourceFields = '{"foobar": 123}';
-    expect(() => parseSourceFields(sourceFields)).toThrowError(
+    expect(() => parseSourceFields(sourceFields)).toThrow(
       'source_fields index value must be an array or string'
     );
   });
 
   it('should throw an error if source fields parameter is not a valid JSON string', () => {
     const sourceFields = 'invalid';
-    expect(() => parseSourceFields(sourceFields)).toThrowError(
+    expect(() => parseSourceFields(sourceFields)).toThrow(
       `Unexpected token 'i', "invalid" is not valid JSON`
     );
   });
@@ -61,7 +61,7 @@ describe('parseSourceFields', () => {
       expect(() => {
         const result = parseSourceFields(sourceFields);
         expect(result).toBeUndefined();
-      }).toThrowError(errorMessage);
+      }).toThrow(errorMessage);
     }
   });
 });

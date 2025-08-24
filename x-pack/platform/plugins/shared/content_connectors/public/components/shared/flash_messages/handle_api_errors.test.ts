@@ -138,7 +138,7 @@ describe('toastAPIErrors', () => {
 
     expect(() => {
       toastAPIErrors(error as any);
-    }).toThrowError(error);
+    }).toThrow(error);
 
     expect(flashErrorToast).toHaveBeenCalledWith(expect.any(String), {
       'aria-live': 'assertive',

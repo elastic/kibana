@@ -94,8 +94,8 @@ describe('Get current user profile routes', () => {
         expect.objectContaining({ status: 404 })
       );
 
-      expect(coreContextMock.userProfile.getCurrent).toBeCalledTimes(1);
-      expect(coreContextMock.userProfile.getCurrent).toBeCalledWith({});
+      expect(coreContextMock.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+      expect(coreContextMock.userProfile.getCurrent).toHaveBeenCalledWith({});
     });
 
     it('fails if `getCurrent` call fails.', async () => {
@@ -110,8 +110,8 @@ describe('Get current user profile routes', () => {
         expect.objectContaining({ status: 500, payload: unhandledException })
       );
 
-      expect(coreContextMock.userProfile.getCurrent).toBeCalledTimes(1);
-      expect(coreContextMock.userProfile.getCurrent).toBeCalledWith({});
+      expect(coreContextMock.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+      expect(coreContextMock.userProfile.getCurrent).toHaveBeenCalledWith({});
     });
 
     it('returns user profile for the current user.', async () => {
@@ -138,8 +138,8 @@ describe('Get current user profile routes', () => {
         })
       );
 
-      expect(coreContextMock.userProfile.getCurrent).toBeCalledTimes(1);
-      expect(coreContextMock.userProfile.getCurrent).toBeCalledWith({ dataPath: '*' });
+      expect(coreContextMock.userProfile.getCurrent).toHaveBeenCalledTimes(1);
+      expect(coreContextMock.userProfile.getCurrent).toHaveBeenCalledWith({ dataPath: '*' });
     });
   });
 });

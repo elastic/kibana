@@ -149,7 +149,7 @@ describe('Legend Settings', () => {
     });
     fireEvent.click(screen.getByRole('combobox', { name: 'Statistics' }));
     fireEvent.click(screen.getByRole('option', { name: 'Current and last value' }));
-    expect(onLegendStatsChange).toBeCalledWith(
+    expect(onLegendStatsChange).toHaveBeenCalledWith(
       [LegendValue.Average, LegendValue.CurrentAndLastValue],
       false
     );

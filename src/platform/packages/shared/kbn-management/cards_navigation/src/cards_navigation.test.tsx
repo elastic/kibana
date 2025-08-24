@@ -23,7 +23,7 @@ describe('Cards Navigation', () => {
     test('is rendered', () => {
       expect(() =>
         render(<CardsNavigation appBasePath={APP_BASE_PATH} sections={sectionsMock} />)
-      ).not.toThrowError();
+      ).not.toThrow();
     });
   });
 

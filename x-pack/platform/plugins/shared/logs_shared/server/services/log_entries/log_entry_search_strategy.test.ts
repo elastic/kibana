@@ -260,7 +260,7 @@ describe('LogEntry search strategy', () => {
       mockDependencies
     );
 
-    await expect(lastValueFrom(response)).rejects.toThrowError(KbnSearchError);
+    await expect(lastValueFrom(response)).rejects.toThrow(KbnSearchError);
   });
 
   it('forwards cancellation to the underlying search strategy', async () => {

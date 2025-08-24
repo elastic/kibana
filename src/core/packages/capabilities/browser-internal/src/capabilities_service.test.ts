@@ -48,7 +48,7 @@ describe('#start', () => {
     });
 
     // @ts-expect-error TypeScript knows this shouldn't be possible
-    expect(() => (capabilities.foo = 'foo')).toThrowError();
+    expect(() => (capabilities.foo = 'foo')).toThrow();
   });
 
   it('only returns capabilities for given appIds', async () => {
@@ -64,7 +64,7 @@ describe('#start', () => {
     });
 
     // @ts-expect-error TypeScript knows this shouldn't be possible
-    expect(() => (capabilities.foo = 'foo')).toThrowError();
+    expect(() => (capabilities.foo = 'foo')).toThrow();
   });
 
   it('does not allow Capabilities to be modified', async () => {
@@ -75,6 +75,6 @@ describe('#start', () => {
     });
 
     // @ts-expect-error TypeScript knows this shouldn't be possible
-    expect(() => (capabilities.foo = 'foo')).toThrowError();
+    expect(() => (capabilities.foo = 'foo')).toThrow();
   });
 });

@@ -84,7 +84,7 @@ describe('useFormData() hook', () => {
     });
 
     test('should return the form data', () => {
-      expect(onChangeSpy).toBeCalledTimes(1);
+      expect(onChangeSpy).toHaveBeenCalledTimes(1);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleInitialValue' });
     });
@@ -98,7 +98,7 @@ describe('useFormData() hook', () => {
         setInputValue('titleField', 'titleChanged');
       });
 
-      expect(onChangeSpy).toBeCalledTimes(2);
+      expect(onChangeSpy).toHaveBeenCalledTimes(2);
       const [data] = getLastMockValue();
       expect(data).toEqual({ title: 'titleChanged' });
     });

@@ -167,6 +167,6 @@ describe('createKnowledgeBaseEntry', () => {
         logger,
         telemetry,
       })
-    ).rejects.toThrowError('Test error');
+    ).rejects.toThrow('Test error');
   });
 });

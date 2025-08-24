@@ -87,10 +87,10 @@ describe('waitUntilNextSessionCompletes$', () => {
       const next = jest.fn();
       const complete = jest.fn();
       waitUntilNextSessionCompletes$(sessionService).subscribe({ next, complete });
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
 
       sessionService.start();
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
 
       completeSearch = sessionService.trackSearch({
         abort: () => {},
@@ -99,12 +99,12 @@ describe('waitUntilNextSessionCompletes$', () => {
 
       completeSearch();
 
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
       advance(500);
-      expect(next).not.toBeCalled();
+      expect(next).not.toHaveBeenCalled();
       advance(1000);
-      expect(next).toBeCalledTimes(1);
-      expect(complete).toBeCalled();
+      expect(next).toHaveBeenCalledTimes(1);
+      expect(complete).toHaveBeenCalled();
     })
   );
 });

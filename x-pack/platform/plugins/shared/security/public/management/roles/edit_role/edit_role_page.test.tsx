@@ -891,7 +891,7 @@ describe('<EditRolePage />', () => {
         isInvalid: true,
       });
       // A usual toast notification is not expected with this specific error
-      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expect(props.notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
       expectSaveFormButtons(wrapper);
       expect(wrapper.find('EuiButton[data-test-subj="roleFormSaveButton"]').props().disabled);
     });
@@ -975,7 +975,7 @@ describe('<EditRolePage />', () => {
       expect(wrapper.find('EuiFormRow[data-test-subj="roleNameFormRow"]').props()).toMatchObject({
         isInvalid: false,
       });
-      expect(props.notifications.toasts.addDanger).toBeCalledTimes(0);
+      expect(props.notifications.toasts.addDanger).toHaveBeenCalledTimes(0);
       expectSaveFormButtons(wrapper);
     });
   });

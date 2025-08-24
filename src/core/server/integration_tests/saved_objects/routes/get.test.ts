@@ -134,7 +134,7 @@ describe('GET /api/saved_objects/{type}/{id}', () => {
       .expect(200);
 
     expect(savedObjectsClient.get).toHaveBeenCalled();
-    expect(savedObjectsClient.get).nthCalledWith(1, 'index-pattern', 'logstash-*', {
+    expect(savedObjectsClient.get).toHaveBeenNthCalledWith(1, 'index-pattern', 'logstash-*', {
       migrationVersionCompatibility: 'compatible',
     });
   });

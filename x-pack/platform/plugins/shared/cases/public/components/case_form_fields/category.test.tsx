@@ -101,7 +101,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ category }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ category }, true);
     });
   });
 });

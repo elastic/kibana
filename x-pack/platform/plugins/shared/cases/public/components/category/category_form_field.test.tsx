@@ -40,7 +40,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ category: null }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ category: null }, true);
     });
   });
 
@@ -56,7 +56,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ category: categories[0] }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ category: categories[0] }, true);
     });
   });
 
@@ -72,7 +72,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ category: null }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ category: null }, true);
     });
   });
 
@@ -89,7 +89,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
 
     expect(await screen.findByText('Empty category is not allowed'));
@@ -110,7 +110,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
 
     expect(
@@ -132,7 +132,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ category: categories[1] }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ category: categories[1] }, true);
     });
   });
 
@@ -148,7 +148,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({ category: 'my new category' }, true);
+      expect(onSubmit).toHaveBeenCalledWith({ category: 'my new category' }, true);
     });
   });
 
@@ -164,7 +164,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
     expect(await screen.findByText('Empty category is not allowed'));
   });
@@ -181,7 +181,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, false);
+      expect(onSubmit).toHaveBeenCalledWith({}, false);
     });
 
     await userEvent.click(await screen.findByTestId('comboBoxClearButton'));
@@ -189,7 +189,7 @@ describe('Category', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, true);
+      expect(onSubmit).toHaveBeenCalledWith({}, true);
     });
   });
 

@@ -115,7 +115,7 @@ describe('enableSpaceAwarenessMigration', () => {
       }
     `);
 
-    expect(soClient.bulkCreate).toBeCalledWith(
+    expect(soClient.bulkCreate).toHaveBeenCalledWith(
       [
         expect.objectContaining({
           id: 'agent-policy-1',
@@ -128,7 +128,7 @@ describe('enableSpaceAwarenessMigration', () => {
       ],
       { overwrite: true, refresh: 'wait_for' }
     );
-    expect(soClient.bulkCreate).toBeCalledWith(
+    expect(soClient.bulkCreate).toHaveBeenCalledWith(
       [
         expect.objectContaining({
           id: 'package-policy-1',
@@ -142,7 +142,7 @@ describe('enableSpaceAwarenessMigration', () => {
       { overwrite: true, refresh: 'wait_for' }
     );
 
-    expect(saveSettings).toBeCalledWith(
+    expect(saveSettings).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         use_space_awareness_migration_status: 'success',
@@ -193,7 +193,7 @@ describe('enableSpaceAwarenessMigration', () => {
       }
     `);
 
-    expect(saveSettings).toBeCalledWith(
+    expect(saveSettings).toHaveBeenCalledWith(
       expect.anything(),
       expect.objectContaining({
         use_space_awareness_migration_status: 'error',

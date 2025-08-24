@@ -52,31 +52,31 @@ describe('When invoking Trusted Devices Schema', () => {
       it('should throw if `page` param is not a number', () => {
         expect(() => {
           query.validate(getListQueryParams('one'));
-        }).toThrowError();
+        }).toThrow();
       });
 
       it('should throw if `page` param is less than 1', () => {
         expect(() => {
           query.validate(getListQueryParams(0));
-        }).toThrowError();
+        }).toThrow();
         expect(() => {
           query.validate(getListQueryParams(-1));
-        }).toThrowError();
+        }).toThrow();
       });
 
       it('should throw if `per_page` param is not a number', () => {
         expect(() => {
           query.validate(getListQueryParams(1, 'twenty'));
-        }).toThrowError();
+        }).toThrow();
       });
 
       it('should throw if `per_page` param is less than 1', () => {
         expect(() => {
           query.validate(getListQueryParams(1, 0));
-        }).toThrowError();
+        }).toThrow();
         expect(() => {
           query.validate(getListQueryParams(1, -1));
-        }).toThrowError();
+        }).toThrow();
       });
     });
   });

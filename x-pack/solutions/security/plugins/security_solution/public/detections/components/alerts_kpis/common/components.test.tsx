@@ -128,7 +128,7 @@ describe('components', () => {
       const option = await screen.findByText(optionToSelect);
       fireEvent.click(option);
 
-      expect(onSelect).toBeCalledWith(optionToSelect);
+      expect(onSelect).toHaveBeenCalledWith(optionToSelect);
     });
 
     test('it does NOT disable the combo box by default', () => {

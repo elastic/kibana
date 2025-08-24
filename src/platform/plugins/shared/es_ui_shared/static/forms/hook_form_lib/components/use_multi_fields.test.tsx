@@ -88,14 +88,14 @@ describe('<UseMultiFields />', () => {
 
     const { find } = setup();
 
-    expect(onFields).toBeCalledTimes(1);
+    expect(onFields).toHaveBeenCalledTimes(1);
     let fieldsReturned = onFields.mock.calls[0][0] as { [key: string]: FieldHook };
     let paths = Object.values(fieldsReturned).map(({ path }) => path);
     expect(paths).toEqual(['bar', 'foo']);
 
     // We change the fields passed down to <UseMultiFields />
     find('changeFields').simulate('click');
-    expect(onFields).toBeCalledTimes(2);
+    expect(onFields).toHaveBeenCalledTimes(2);
     fieldsReturned = onFields.mock.calls[1][0] as { [key: string]: FieldHook };
     paths = Object.values(fieldsReturned).map(({ path }) => path);
 

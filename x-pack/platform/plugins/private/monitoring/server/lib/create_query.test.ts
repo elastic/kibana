@@ -85,7 +85,7 @@ describe('Create Query', () => {
       const options = { clusterUuid: 'cuid123' }; // missing metric object
       return createQuery(options);
     }
-    expect(callCreateQuery).toThrowError(MissingRequiredError);
+    expect(callCreateQuery).toThrow(MissingRequiredError);
   });
 
   it('Throws if given uuid but missing metric.uuidField', () => {
@@ -94,7 +94,7 @@ describe('Create Query', () => {
       delete options.metric.uuidField;
       return createQuery(options);
     }
-    expect(callCreateQuery).toThrowError(MissingRequiredError);
+    expect(callCreateQuery).toThrow(MissingRequiredError);
   });
 
   it('Uses `type` option to add type filter with minimal fields', () => {

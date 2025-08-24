@@ -41,7 +41,7 @@ describe('UnifiedFieldList <FieldNameSearch />', () => {
     await user.type(input, 'hey');
     jest.advanceTimersByTime(256);
     expect(props.onChange).toHaveBeenCalledWith('hey');
-    expect(props.onChange).toBeCalledTimes(1);
+    expect(props.onChange).toHaveBeenCalledTimes(1);
   });
 
   it('should accept the updates from the top', async () => {

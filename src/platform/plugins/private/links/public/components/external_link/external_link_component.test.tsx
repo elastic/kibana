@@ -80,8 +80,8 @@ describe('external link component', () => {
 
     const link = await screen.findByTestId('externalLink--foo');
     await userEvent.click(link);
-    expect(coreServices.application.navigateToUrl).toBeCalledTimes(1);
-    expect(coreServices.application.navigateToUrl).toBeCalledWith('https://example.com');
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledTimes(1);
+    expect(coreServices.application.navigateToUrl).toHaveBeenCalledWith('https://example.com');
   });
 
   test('disables link when url validation fails', async () => {

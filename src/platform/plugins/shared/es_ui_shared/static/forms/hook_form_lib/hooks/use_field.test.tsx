@@ -147,7 +147,7 @@ describe('useField() hook', () => {
         });
       });
 
-      expect(validatorFn).toBeCalledTimes(0);
+      expect(validatorFn).toHaveBeenCalledTimes(0);
     });
   });
 
@@ -183,12 +183,12 @@ describe('useField() hook', () => {
       const wrapper = registerTestBed(TestForm, {
         memoryRouter: { wrapComponent: false },
       })({ showField1: true, showField2: true });
-      expect(field2ValidatorFn).toBeCalledTimes(0);
+      expect(field2ValidatorFn).toHaveBeenCalledTimes(0);
 
       await act(async () => {
         wrapper.setProps({ showField1: false });
       });
-      expect(field2ValidatorFn).toBeCalledTimes(1);
+      expect(field2ValidatorFn).toHaveBeenCalledTimes(1);
     });
   });
 });

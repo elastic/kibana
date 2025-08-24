@@ -62,8 +62,8 @@ describe('HeatmapToolbar', () => {
 
     const orientationGroup = screen.getByRole('group', { name: /orientation/i });
     await clickButtonByName(/vertical/i, orientationGroup);
-    expect(defaultProps.setState).toBeCalledTimes(1);
-    expect(defaultProps.setState).toBeCalledWith({
+    expect(defaultProps.setState).toHaveBeenCalledTimes(1);
+    expect(defaultProps.setState).toHaveBeenCalledWith({
       ...defaultProps.state,
       gridConfig: { ...defaultProps.state.gridConfig, xAxisLabelRotation: -90 },
     });

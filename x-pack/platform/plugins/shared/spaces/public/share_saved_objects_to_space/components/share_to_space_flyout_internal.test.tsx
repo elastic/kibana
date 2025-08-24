@@ -422,7 +422,7 @@ describe('ShareToSpaceFlyout', () => {
         type,
         id,
       }));
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
         expectedObjects,
         ['space-2'],
@@ -447,7 +447,7 @@ describe('ShareToSpaceFlyout', () => {
       changeSpaceSelection(wrapper, []);
       await clickButton(wrapper, 'save');
 
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(1);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledTimes(1);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledWith(
         [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],
         [],
@@ -472,7 +472,7 @@ describe('ShareToSpaceFlyout', () => {
       changeSpaceSelection(wrapper, ['space-2', 'space-3']);
       await clickButton(wrapper, 'save');
 
-      expect(mockSpacesManager.updateSavedObjectsSpaces).toBeCalledTimes(2);
+      expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenCalledTimes(2);
       expect(mockSpacesManager.updateSavedObjectsSpaces).toHaveBeenNthCalledWith(
         1,
         [{ type: savedObjectToShare.type, id: savedObjectToShare.id }],

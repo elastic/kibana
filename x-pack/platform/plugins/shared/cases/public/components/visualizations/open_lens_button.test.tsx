@@ -54,7 +54,7 @@ describe('OpenLensButton', () => {
 
     await userEvent.click(screen.getByTestId('cases-open-in-visualization-btn'));
 
-    expect(navigateToPrefilledEditor).toBeCalledWith(
+    expect(navigateToPrefilledEditor).toHaveBeenCalledWith(
       {
         id: props.attachmentId,
         ...lensVisualization,

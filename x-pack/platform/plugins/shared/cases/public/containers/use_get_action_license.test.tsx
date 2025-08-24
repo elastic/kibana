@@ -27,7 +27,7 @@ describe('useGetActionLicense', () => {
       wrapper: TestProviders,
     });
 
-    await waitFor(() => expect(spyOnGetActionLicense).toBeCalledWith(abortCtrl.signal));
+    await waitFor(() => expect(spyOnGetActionLicense).toHaveBeenCalledWith(abortCtrl.signal));
   });
 
   it('unhappy path', async () => {

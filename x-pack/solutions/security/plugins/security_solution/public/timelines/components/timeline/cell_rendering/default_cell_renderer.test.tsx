@@ -75,7 +75,7 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(getColumnRenderer).toBeCalledWith(header.id, columnRenderers, data, undefined);
+    expect(getColumnRenderer).toHaveBeenCalledWith(header.id, columnRenderers, data, undefined);
   });
 
   test('if in tgrid expanded value, it invokes `renderColumn` with the expected arguments', () => {
@@ -110,7 +110,7 @@ describe('DefaultCellRenderer', () => {
       </TestProviders>
     );
 
-    expect(mockImplementation.renderColumn).toBeCalledWith({
+    expect(mockImplementation.renderColumn).toHaveBeenCalledWith({
       asPlainText: false,
       columnName: header.id,
       ecsData,

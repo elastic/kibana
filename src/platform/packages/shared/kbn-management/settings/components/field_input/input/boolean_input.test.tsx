@@ -70,7 +70,7 @@ describe('BooleanInput', () => {
       fireEvent.click(input);
     });
 
-    expect(defaultProps.onInputChange).toBeCalledWith({ type: 'boolean', unsavedValue: true });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'boolean', unsavedValue: true });
 
     act(() => {
       fireEvent.click(input);

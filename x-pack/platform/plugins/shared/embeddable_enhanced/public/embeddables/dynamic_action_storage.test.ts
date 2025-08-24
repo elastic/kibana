@@ -49,7 +49,7 @@ describe('EmbeddableActionStorage', () => {
 
       const spy = jest.spyOn(api, 'setDynamicActions');
       await storage.create(event);
-      expect(spy).toBeCalledWith({
+      expect(spy).toHaveBeenCalledWith({
         dynamicActions: {
           events: [
             {

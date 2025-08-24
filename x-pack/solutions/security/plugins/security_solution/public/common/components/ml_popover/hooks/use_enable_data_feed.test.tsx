@@ -101,7 +101,7 @@ describe('useSecurityJobsHelpers', () => {
         await result.current.enableDatafeed({ ...JOB, isInstalled: true }, TIMESTAMP);
       });
 
-      expect(mockSetupMlJob).not.toBeCalled();
+      expect(mockSetupMlJob).not.toHaveBeenCalled();
     });
 
     it('calls setupMlJob if job is uninstalled', async () => {
@@ -111,7 +111,7 @@ describe('useSecurityJobsHelpers', () => {
       await act(async () => {
         await result.current.enableDatafeed({ ...JOB, isInstalled: false }, TIMESTAMP);
       });
-      expect(mockSetupMlJob).toBeCalled();
+      expect(mockSetupMlJob).toHaveBeenCalled();
     });
 
     it('calls startDatafeeds when enableDatafeed is called', async () => {
@@ -121,8 +121,8 @@ describe('useSecurityJobsHelpers', () => {
       await act(async () => {
         await result.current.enableDatafeed(JOB, TIMESTAMP);
       });
-      expect(mockStartDatafeeds).toBeCalled();
-      expect(mockStopDatafeeds).not.toBeCalled();
+      expect(mockStartDatafeeds).toHaveBeenCalled();
+      expect(mockStopDatafeeds).not.toHaveBeenCalled();
     });
 
     it('calls startDatafeeds with 2 weeks old start date', async () => {
@@ -134,7 +134,7 @@ describe('useSecurityJobsHelpers', () => {
       await act(async () => {
         await result.current.enableDatafeed(JOB, TIMESTAMP);
       });
-      expect(mockStartDatafeeds).toBeCalledWith({
+      expect(mockStartDatafeeds).toHaveBeenCalledWith({
         datafeedIds: [`datafeed-test_job_id`],
         start: new Date('1989-02-21').getTime(),
       });
@@ -279,8 +279,8 @@ describe('useSecurityJobsHelpers', () => {
       await act(async () => {
         await result.current.disableDatafeed(JOB);
       });
-      expect(mockStartDatafeeds).not.toBeCalled();
-      expect(mockStopDatafeeds).toBeCalled();
+      expect(mockStartDatafeeds).not.toHaveBeenCalled();
+      expect(mockStopDatafeeds).toHaveBeenCalled();
     });
 
     describe('telemetry', () => {

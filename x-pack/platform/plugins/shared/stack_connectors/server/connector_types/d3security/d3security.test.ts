@@ -53,7 +53,7 @@ describe('D3SecurityConnector', () => {
     });
     it('the D3 Security API call is successful with correct parameters', async () => {
       const response = await connector.runApi({ body: sampleBody }, connectorUsageCollector);
-      expect(mockRequest).toBeCalledTimes(1);
+      expect(mockRequest).toHaveBeenCalledTimes(1);
       expect(mockRequest).toHaveBeenCalledWith(
         {
           url: 'https://example.com/api',

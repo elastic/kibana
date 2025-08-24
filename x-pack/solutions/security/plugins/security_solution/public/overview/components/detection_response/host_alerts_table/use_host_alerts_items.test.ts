@@ -80,7 +80,7 @@ describe('useVulnerableHostsCounters', () => {
       }),
     });
 
-    expect(mockUseQueryAlerts).toBeCalledWith(mockQuery());
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith(mockQuery());
   });
 
   it('should return parsed items', () => {
@@ -128,7 +128,7 @@ describe('useVulnerableHostsCounters', () => {
   it('should skip the query', () => {
     const { result } = renderUseHostAlertsItems({ skip: true });
 
-    expect(mockUseQueryAlerts).toBeCalledWith({ ...mockQuery(), skip: true });
+    expect(mockUseQueryAlerts).toHaveBeenCalledWith({ ...mockQuery(), skip: true });
 
     expect(result.current).toEqual({
       items: [],

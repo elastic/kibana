@@ -484,7 +484,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         },
       ],
     });
-    expect(mockedInstallIndexTemplatesAndPipelines).not.toBeCalled();
+    expect(mockedInstallIndexTemplatesAndPipelines).not.toHaveBeenCalled();
   });
 
   it('Should not call installIndexTemplatesAndPipelines if packageInfo type is input and installedPkg does not exist', async () => {
@@ -562,7 +562,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         },
       ],
     });
-    expect(mockedInstallIndexTemplatesAndPipelines).not.toBeCalled();
+    expect(mockedInstallIndexTemplatesAndPipelines).not.toHaveBeenCalled();
   });
 
   it('Should not call installIndexTemplatesAndPipelines if packageInfo type is undefined', async () => {
@@ -611,7 +611,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
       spaceId: DEFAULT_SPACE_ID,
       esReferences: [],
     });
-    expect(mockedInstallIndexTemplatesAndPipelines).not.toBeCalled();
+    expect(mockedInstallIndexTemplatesAndPipelines).not.toHaveBeenCalled();
   });
 });
 
@@ -731,7 +731,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       initialState: 'install_index_template_pipelines' as any,
     });
 
-    expect(mockDeletePrerequisiteAssets).toBeCalledWith(
+    expect(mockDeletePrerequisiteAssets).toHaveBeenCalledWith(
       {
         indexAssets: [
           {
@@ -763,7 +763,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       },
       esClient
     );
-    expect(mockCleanupComponentTemplate).toBeCalledWith(installedEs, esClient);
+    expect(mockCleanupComponentTemplate).toHaveBeenCalledWith(installedEs, esClient);
   });
 
   it('should not clean up assets if force is passed', async () => {
@@ -790,8 +790,8 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       initialState: 'install_index_template_pipelines' as any,
     });
 
-    expect(mockCleanupComponentTemplate).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockCleanupComponentTemplate).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if retryFromLastState is not passed', async () => {
@@ -816,8 +816,8 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       initialState: 'install_ilm_policies' as any,
     });
 
-    expect(mockCleanupComponentTemplate).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockCleanupComponentTemplate).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if initialState != install_index_template_pipelines', async () => {
@@ -843,8 +843,8 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       initialState: 'create_restart_install' as any,
     });
 
-    expect(mockCleanupComponentTemplate).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockCleanupComponentTemplate).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 
   it('should not clean up assets if attributes are not present', async () => {
@@ -866,7 +866,7 @@ describe('cleanupIndexTemplatePipelinesStep', () => {
       initialState: 'install_index_template_pipelines' as any,
     });
 
-    expect(mockCleanupComponentTemplate).not.toBeCalled();
-    expect(mockDeletePrerequisiteAssets).not.toBeCalled();
+    expect(mockCleanupComponentTemplate).not.toHaveBeenCalled();
+    expect(mockDeletePrerequisiteAssets).not.toHaveBeenCalled();
   });
 });

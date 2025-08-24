@@ -119,7 +119,7 @@ describe('TelemetryEventsSender', () => {
 
       await sender['sendIfDue']();
 
-      expect(sender['sendEvents']).toBeCalledTimes(0);
+      expect(sender['sendEvents']).toHaveBeenCalledTimes(0);
     });
 
     it('should send events to separate channels', async () => {
@@ -149,8 +149,8 @@ describe('TelemetryEventsSender', () => {
 
       await sender['sendIfDue']();
 
-      expect(sender['queuesPerChannel']['my-channel']['getEvents']).toBeCalledTimes(1);
-      expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toBeCalledTimes(1);
+      expect(sender['queuesPerChannel']['my-channel']['getEvents']).toHaveBeenCalledTimes(1);
+      expect(sender['queuesPerChannel']['my-channel2']['getEvents']).toHaveBeenCalledTimes(1);
       const requestConfig = {
         headers: {
           'Content-Type': 'application/x-ndjson',

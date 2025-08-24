@@ -108,7 +108,7 @@ describe('buildStateSubscribe', () => {
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
 
-    expect(stateContainer.dataState.reset).toBeCalledTimes(1);
+    expect(stateContainer.dataState.reset).toHaveBeenCalledTimes(1);
 
     stateContainer.appState.getPrevious = jest.fn(() => ({
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
@@ -117,6 +117,6 @@ describe('buildStateSubscribe', () => {
     await getSubscribeFn()({
       dataSource: createDataViewDataSource({ dataViewId: dataViewComplexMock.id! }),
     });
-    expect(stateContainer.dataState.reset).toBeCalledTimes(1);
+    expect(stateContainer.dataState.reset).toHaveBeenCalledTimes(1);
   });
 });

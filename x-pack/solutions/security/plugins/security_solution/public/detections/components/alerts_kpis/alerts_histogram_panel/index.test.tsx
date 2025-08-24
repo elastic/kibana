@@ -181,7 +181,7 @@ describe('AlertsHistogramPanel', () => {
     const option = await screen.findByText(optionToSelect);
     fireEvent.click(option);
 
-    expect(onFieldSelected).toBeCalledWith(optionToSelect);
+    expect(onFieldSelected).toHaveBeenCalledWith(optionToSelect);
   });
 
   describe('stackByLabel', () => {
@@ -333,7 +333,7 @@ describe('AlertsHistogramPanel', () => {
           preventDefault: jest.fn(),
         });
 
-      expect(mockNavigateToApp).toBeCalledWith('securitySolutionUI', {
+      expect(mockNavigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         deepLinkId: SecurityPageName.alerts,
         path: '',
       });
@@ -411,8 +411,8 @@ describe('AlertsHistogramPanel', () => {
         );
 
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetIsExpanded).toBeCalledWith(false);
-        expect(mockSetToggle).not.toBeCalled();
+        expect(mockSetIsExpanded).toHaveBeenCalledWith(false);
+        expect(mockSetToggle).not.toHaveBeenCalled();
         wrapper.unmount();
       });
 
@@ -453,7 +453,7 @@ describe('AlertsHistogramPanel', () => {
           </TestProviders>
         );
         wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
-        expect(mockSetToggle).toBeCalledWith(false);
+        expect(mockSetToggle).toHaveBeenCalledWith(false);
         wrapper.unmount();
       });
 

@@ -164,7 +164,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         telemetry: mockTelemetry,
       });
 
-      expect(handleGraphError).not.toBeCalled();
+      expect(handleGraphError).not.toHaveBeenCalled();
     });
 
     it('should return valid results', async () => {
@@ -236,7 +236,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
         telemetry: mockTelemetry,
       });
 
-      expect(updateAttackDiscoveries).not.toBeCalled();
+      expect(updateAttackDiscoveries).not.toHaveBeenCalled();
     });
 
     it('should return an error', async () => {

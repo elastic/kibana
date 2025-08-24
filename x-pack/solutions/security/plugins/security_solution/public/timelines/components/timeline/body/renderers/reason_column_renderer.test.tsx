@@ -70,7 +70,7 @@ describe('reasonColumnRenderer', () => {
     it('calls `plainColumnRenderer.renderColumn` when ecsData, or rowRenderers is empty', () => {
       reasonColumnRenderer.renderColumn(defaultProps);
 
-      expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
+      expect(plainColumnRenderer.renderColumn).toHaveBeenCalledTimes(1);
     });
 
     it("doesn't call `plainColumnRenderer.renderColumn` in expanded value when ecsData, or rowRenderers fields are not empty", () => {
@@ -81,7 +81,7 @@ describe('reasonColumnRenderer', () => {
         rowRenderers,
       });
 
-      expect(plainColumnRenderer.renderColumn).toBeCalledTimes(0);
+      expect(plainColumnRenderer.renderColumn).toHaveBeenCalledTimes(0);
     });
 
     it('call `plainColumnRenderer.renderColumn` in cell value', () => {
@@ -92,7 +92,7 @@ describe('reasonColumnRenderer', () => {
         rowRenderers,
       });
 
-      expect(plainColumnRenderer.renderColumn).toBeCalledTimes(1);
+      expect(plainColumnRenderer.renderColumn).toHaveBeenCalledTimes(1);
     });
 
     it("doesn't render reason renderers button when getRowRenderer doesn't find a rowRenderer", () => {

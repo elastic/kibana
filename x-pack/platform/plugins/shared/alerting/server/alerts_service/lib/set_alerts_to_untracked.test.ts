@@ -446,7 +446,7 @@ describe('setAlertsToUntracked()', () => {
       esClient: clusterClient,
     });
 
-    expect(getAlertIndicesAliasMock).lastCalledWith(['test-rule-type'], 'default');
+    expect(getAlertIndicesAliasMock).toHaveBeenLastCalledWith(['test-rule-type'], 'default');
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -581,7 +581,7 @@ describe('setAlertsToUntracked()', () => {
       esClient: clusterClient,
     });
 
-    expect(getAlertIndicesAliasMock).lastCalledWith(['test-rule-type'], 'default');
+    expect(getAlertIndicesAliasMock).toHaveBeenLastCalledWith(['test-rule-type'], 'default');
 
     expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
       expect.objectContaining({

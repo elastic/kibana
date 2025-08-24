@@ -40,9 +40,9 @@ describe('TelemetryConfigProvider', () => {
     } as unknown as Observable<boolean>;
 
     telemetryConfigProvider.start(observableMock);
-    expect(unsubscribeMock).not.toBeCalled();
+    expect(unsubscribeMock).not.toHaveBeenCalled();
 
     telemetryConfigProvider.stop();
-    expect(unsubscribeMock).toBeCalled();
+    expect(unsubscribeMock).toHaveBeenCalled();
   });
 });

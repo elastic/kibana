@@ -95,7 +95,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         'event_category_override: Expected string, received number, tiebreaker_field: Expected string, received number, timestamp_field: Expected string, received number'
       );
     });
@@ -120,7 +120,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError('alert_suppression.group_by: Expected array, received string');
+      ).rejects.toThrow('alert_suppression.group_by: Expected array, received string');
     });
   });
 
@@ -155,7 +155,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'threat_query: Expected string, received number, threat_indicator_path: Expected string, received number'
     );
   });
@@ -191,7 +191,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
     );
   });
@@ -227,7 +227,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       "index.0: Expected string, received number, language: Invalid enum value. Expected 'kuery' | 'lucene', received 'non-language'"
     );
   });
@@ -269,7 +269,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('threshold.value: Expected number, received string');
+    ).rejects.toThrow('threshold.value: Expected number, received string');
   });
 
   test('should accept ES|QL alerts suppression params', async () => {
@@ -395,7 +395,7 @@ describe('applyRulePatch', () => {
           existingRule,
           prebuiltRuleAssetClient,
         })
-      ).rejects.toThrowError('anomaly_threshold: Expected number, received string');
+      ).rejects.toThrow('anomaly_threshold: Expected number, received string');
     });
 
     it('accepts suppression params', async () => {
@@ -451,7 +451,7 @@ describe('applyRulePatch', () => {
         existingRule,
         prebuiltRuleAssetClient,
       })
-    ).rejects.toThrowError('new_terms_fields: Expected array, received string');
+    ).rejects.toThrow('new_terms_fields: Expected array, received string');
   });
 
   test('should retain existing required_fields when not present in rule patch body', async () => {

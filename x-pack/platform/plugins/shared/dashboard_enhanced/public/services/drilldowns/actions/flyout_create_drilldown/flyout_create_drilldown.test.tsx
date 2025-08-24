@@ -176,6 +176,6 @@ describe('execute', () => {
     await flyoutCreateDrilldownAction.execute({
       embeddable: compatibleEmbeddableApi,
     });
-    expect(coreServices.overlays.openFlyout).toBeCalled();
+    expect(coreServices.overlays.openFlyout).toHaveBeenCalled();
   });
 });

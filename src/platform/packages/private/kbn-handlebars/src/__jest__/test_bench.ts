@@ -119,18 +119,18 @@ class HandlebarsTestBench {
     if (process.env.EVAL) {
       expect(() => {
         this.compileAndExecuteEval();
-      }).toThrowError(error);
+      }).toThrow(error);
     } else if (process.env.AST) {
       expect(() => {
         this.compileAndExecuteAST();
-      }).toThrowError(error);
+      }).toThrow(error);
     } else {
       expect(() => {
         this.compileAndExecuteEval();
-      }).toThrowError(error);
+      }).toThrow(error);
       expect(() => {
         this.compileAndExecuteAST();
-      }).toThrowError(error);
+      }).toThrow(error);
     }
   }
 

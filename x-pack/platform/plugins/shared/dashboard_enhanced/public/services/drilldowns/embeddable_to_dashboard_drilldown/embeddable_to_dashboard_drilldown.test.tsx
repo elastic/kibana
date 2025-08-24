@@ -134,7 +134,7 @@ describe('.execute() & getHref', () => {
 
     await drilldown.execute(completeConfig, context);
 
-    expect(navigateToApp).toBeCalledTimes(1);
+    expect(navigateToApp).toHaveBeenCalledTimes(1);
     expect(navigateToApp.mock.calls[0][0]).toBe('dashboards');
 
     const executeNavigatedPath = navigateToApp.mock.calls[0][1]?.path;

@@ -146,7 +146,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -238,7 +238,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: 123412345,
       });
@@ -278,7 +278,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: customFieldConfiguration.defaultValue,
       });
@@ -314,7 +314,7 @@ describe('Edit ', () => {
     );
 
     await waitFor(() => {
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         ...customField,
         value: null,
       });

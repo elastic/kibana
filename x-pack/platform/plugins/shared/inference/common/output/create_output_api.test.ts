@@ -192,7 +192,7 @@ describe('createOutputApi', () => {
             onValidationError: 1,
           },
         })
-      ).toThrowError('Retry options are not supported in streaming mode');
+      ).toThrow('Retry options are not supported in streaming mode');
     });
   });
 

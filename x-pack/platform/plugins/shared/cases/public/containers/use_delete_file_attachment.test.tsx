@@ -61,7 +61,7 @@ describe('useDeleteFileAttachment', () => {
       })
     );
 
-    await waitFor(() => expect(useRefreshCaseViewPage()).toBeCalled());
+    await waitFor(() => expect(useRefreshCaseViewPage()).toHaveBeenCalled());
   });
 
   it('shows a success toaster correctly', async () => {
@@ -101,7 +101,7 @@ describe('useDeleteFileAttachment', () => {
 
     await waitFor(() => expect(result.current.isError).toBe(true));
 
-    expect(spyOnDeleteFileAttachments).toBeCalledWith({
+    expect(spyOnDeleteFileAttachments).toHaveBeenCalledWith({
       caseId: basicCaseId,
       fileIds: [basicFileMock.id],
     });

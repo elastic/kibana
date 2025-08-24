@@ -81,8 +81,8 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     resetMenuItem.click();
 
-    expect(setStackBy).toBeCalledWith('kibana.alert.rule.name');
-    expect(setStackByField1).toBeCalledWith('host.name');
+    expect(setStackBy).toHaveBeenCalledWith('kibana.alert.rule.name');
+    expect(setStackByField1).toHaveBeenCalledWith('host.name');
   });
 
   test('it invokes `onReset` when the `Reset group by fields` menu item clicked', async () => {
@@ -108,6 +108,6 @@ describe('ChartContextMenu', () => {
     const resetMenuItem = screen.getByRole('button', { name: RESET_GROUP_BY_FIELDS });
     fireEvent.click(resetMenuItem);
 
-    expect(onReset).toBeCalled();
+    expect(onReset).toHaveBeenCalled();
   });
 });

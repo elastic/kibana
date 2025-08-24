@@ -308,7 +308,7 @@ describe('CsvESQLGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { filter: undefined, locale: 'en', query: '' } },
         {
           strategy: 'esql',
@@ -386,7 +386,7 @@ describe('CsvESQLGenerator', () => {
         })
       );
 
-      expect(mockDataClientSearchFn).toBeCalledWith(
+      expect(mockDataClientSearchFn).toHaveBeenCalledWith(
         { params: { filter: undefined, locale: 'en', query: '' } },
         {
           strategy: 'esql',

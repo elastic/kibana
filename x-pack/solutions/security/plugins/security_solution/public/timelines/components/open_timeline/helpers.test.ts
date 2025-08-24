@@ -656,7 +656,7 @@ describe('helpers', () => {
           args.duplicate,
           args.timelineType
         );
-        expect(onOpenTimeline).toBeCalledWith({
+        expect(onOpenTimeline).toHaveBeenCalledWith({
           ...timeline,
         });
       });
@@ -833,7 +833,7 @@ describe('helpers', () => {
           args.duplicate,
           args.timelineType
         );
-        expect(onOpenTimeline).toBeCalledWith({
+        expect(onOpenTimeline).toHaveBeenCalledWith({
           ...timeline,
           dateRange: {
             end: '2020-10-28T11:37:31.655Z',

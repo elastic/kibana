@@ -150,7 +150,7 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toBeCalledWith({
+      expect(getAttachmentRemovalObject).toHaveBeenCalledWith({
         caseData: {
           id: 'basic-case-id',
           title: 'Another horrible breach!!',
@@ -218,7 +218,7 @@ describe('createCommentUserActionBuilder', () => {
       renderWithTestingProviders(<EuiCommentList comments={createdUserAction} />);
 
       expect(screen.getByText('removed my own attachment')).toBeInTheDocument();
-      expect(getAttachmentRemovalObject).toBeCalledWith({
+      expect(getAttachmentRemovalObject).toHaveBeenCalledWith({
         caseData: {
           id: 'basic-case-id',
           title: 'Another horrible breach!!',

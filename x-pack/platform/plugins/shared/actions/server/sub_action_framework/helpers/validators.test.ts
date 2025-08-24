@@ -14,11 +14,11 @@ describe('Validators', () => {
     });
 
     it('invalid URL throws an error with a relevant message', () => {
-      expect(() => assertURL('invalidurl')).toThrowError('Invalid URL');
+      expect(() => assertURL('invalidurl')).toThrow('Invalid URL');
     });
 
     it('URL with an invalid protocol throws an error with a relevant message', () => {
-      expect(() => assertURL('ftp://www.example.com')).toThrowError('Invalid protocol');
+      expect(() => assertURL('ftp://www.example.com')).toThrow('Invalid protocol');
     });
 
     it('function handles case sensitivity of protocols correctly', () => {

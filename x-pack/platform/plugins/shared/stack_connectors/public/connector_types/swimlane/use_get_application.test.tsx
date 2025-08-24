@@ -73,7 +73,7 @@ describe('useGetApplication', () => {
     });
 
     await waitFor(() =>
-      expect(getApplicationMock).toBeCalledWith({
+      expect(getApplicationMock).toHaveBeenCalledWith({
         signal: abortCtrl.signal,
         appId: action.config.appId,
         apiToken: action.secrets.apiToken,

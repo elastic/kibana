@@ -83,7 +83,7 @@ describe('AddPanelFlyout', () => {
 
       await waitFor(async () => {
         await userEvent.click(screen.getByTestId('myItem'));
-        expect(onClickMock).toBeCalled();
+        expect(onClickMock).toHaveBeenCalled();
       });
     });
 

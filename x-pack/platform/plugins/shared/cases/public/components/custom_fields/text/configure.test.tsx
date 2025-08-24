@@ -41,7 +41,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith({}, true);
+      expect(onSubmit).toHaveBeenCalledWith({}, true);
     });
   });
 
@@ -58,7 +58,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           defaultValue: 'Default value',
         },
@@ -81,7 +81,7 @@ describe('Configure ', () => {
 
     await waitFor(() => {
       // data, isValid
-      expect(onSubmit).toBeCalledWith(
+      expect(onSubmit).toHaveBeenCalledWith(
         {
           required: true,
           defaultValue: 'Default value',

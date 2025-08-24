@@ -55,7 +55,7 @@ describe('Category ', () => {
 
     await userEvent.type(screen.getByRole('combobox'), 'new{enter}');
     await waitFor(() => {
-      expect(onChange).toBeCalledWith('new');
+      expect(onChange).toHaveBeenCalledWith('new');
     });
   });
 

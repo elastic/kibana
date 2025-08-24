@@ -536,7 +536,7 @@ describe('JiraParamsFields renders', () => {
 
       const results = render(<JiraParamsFields {...defaultProps} />);
 
-      expect(editAction).not.toBeCalled();
+      expect(editAction).not.toHaveBeenCalled();
 
       results.rerender(<JiraParamsFields {...defaultProps} />);
 

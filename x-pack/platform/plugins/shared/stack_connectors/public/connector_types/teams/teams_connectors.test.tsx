@@ -76,7 +76,7 @@ describe('TeamsActionFields renders', () => {
         await userEvent.click(getByTestId('form-test-provide-submit'));
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           secrets: {
             webhookUrl: 'https://test.com',

@@ -37,7 +37,7 @@ describe('useRedirectPath', () => {
 
     redirectToPathOrRedirectPath('/test');
 
-    expect(mockedNavigateToUrl).toBeCalledWith('/test-redirect-path');
+    expect(mockedNavigateToUrl).toHaveBeenCalledWith('/test-redirect-path');
   });
 
   it('should redirect to the provided path if no redirect path is specified in the url', () => {
@@ -50,7 +50,7 @@ describe('useRedirectPath', () => {
 
     redirectToPathOrRedirectPath('/test');
 
-    expect(mockedNavigateToUrl).not.toBeCalled();
+    expect(mockedNavigateToUrl).not.toHaveBeenCalled();
     expect(history.location.pathname).toBe('/test');
   });
 });

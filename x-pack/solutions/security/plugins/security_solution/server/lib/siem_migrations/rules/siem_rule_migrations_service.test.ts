@@ -83,7 +83,7 @@ describe('SiemRuleMigrationsService', () => {
       it('should throw an error', () => {
         expect(() => {
           ruleMigrationsService.createClient(createClientParams);
-        }).toThrowError('ES client not available, please call setup first');
+        }).toThrow('ES client not available, please call setup first');
       });
     });
 

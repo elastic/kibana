@@ -169,7 +169,7 @@ describe('CaseUserActionService', () => {
             },
           });
 
-          expect(mockAuditLogger.log).toBeCalledTimes(1);
+          expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
           expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
             Array [
               Object {
@@ -232,7 +232,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -296,7 +296,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -379,7 +379,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchInlineSnapshot(`
               Array [
                 Object {
@@ -466,7 +466,7 @@ describe('CaseUserActionService', () => {
               },
             });
 
-            expect(mockAuditLogger.log).toBeCalledTimes(1);
+            expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
             expect(mockAuditLogger.log.mock.calls[0]).toMatchSnapshot();
           });
         });
@@ -779,7 +779,7 @@ describe('CaseUserActionService', () => {
           builtUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(9);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(9);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1031,7 +1031,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesAddedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1115,7 +1115,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(1);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(1);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1229,7 +1229,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: assigneesAddedRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1361,7 +1361,7 @@ describe('CaseUserActionService', () => {
           builtUserActions: tagsAddedRemovedUserActions,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [
@@ -1478,7 +1478,7 @@ describe('CaseUserActionService', () => {
           attachments,
         });
 
-        expect(mockAuditLogger.log).toBeCalledTimes(2);
+        expect(mockAuditLogger.log).toHaveBeenCalledTimes(2);
         expect(mockAuditLogger.log.mock.calls).toMatchInlineSnapshot(`
           Array [
             Array [

@@ -504,14 +504,14 @@ describe('TelemetryEventsSender', () => {
       expect(sender['queue'].length).toBe(2);
       await sender['sendIfDue']();
       expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(1);
+      expect(sender['sendEvents']).toHaveBeenCalledTimes(1);
       sender.queueTelemetryEvents([{ 'event.kind': '3' }, { 'event.kind': '4' }]);
       sender.queueTelemetryEvents([{ 'event.kind': '5' }, { 'event.kind': '6' }]);
       expect(sender['queue'].length).toBe(4);
       await sender['sendIfDue']();
       expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(2);
-      expect(sender['telemetryUsageCounter'].incrementCounter).toBeCalledTimes(2);
+      expect(sender['sendEvents']).toHaveBeenCalledTimes(2);
+      expect(sender['telemetryUsageCounter'].incrementCounter).toHaveBeenCalledTimes(2);
     });
 
     it("shouldn't send when telemetry is disabled", async () => {
@@ -528,7 +528,7 @@ describe('TelemetryEventsSender', () => {
       await sender['sendIfDue']();
 
       expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(0);
+      expect(sender['sendEvents']).toHaveBeenCalledTimes(0);
     });
 
     it("shouldn't send when telemetry when opted in but cannot connect to elastic telemetry services", async () => {
@@ -546,7 +546,7 @@ describe('TelemetryEventsSender', () => {
       await sender['sendIfDue']();
 
       expect(sender['queue'].length).toBe(0);
-      expect(sender['sendEvents']).toBeCalledTimes(0);
+      expect(sender['sendEvents']).toHaveBeenCalledTimes(0);
     });
   });
 });

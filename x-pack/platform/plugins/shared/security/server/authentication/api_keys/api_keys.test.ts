@@ -99,7 +99,7 @@ describe('API Keys', () => {
       };
 
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockRejectedValue(error);
-      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrow(error);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
     });
 
@@ -109,7 +109,7 @@ describe('API Keys', () => {
       (error as any).body = {};
 
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockRejectedValue(error);
-      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrow(error);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
     });
 
@@ -118,7 +118,7 @@ describe('API Keys', () => {
       const error = new Error();
 
       mockClusterClient.asInternalUser.security.invalidateApiKey.mockRejectedValue(error);
-      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrowError(error);
+      await expect(apiKeys.areAPIKeysEnabled()).rejects.toThrow(error);
       expect(mockClusterClient.asInternalUser.security.invalidateApiKey).toHaveBeenCalledTimes(1);
     });
 

@@ -72,8 +72,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addErrorSpy).not.toBeCalled();
-      expect(addSuccessSpy).toBeCalled();
+      expect(addErrorSpy).not.toHaveBeenCalled();
+      expect(addSuccessSpy).toHaveBeenCalled();
 
       expect(res).toBeTruthy();
     });
@@ -90,8 +90,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addErrorSpy).not.toBeCalled();
-      expect(addSuccessSpy).toBeCalled();
+      expect(addErrorSpy).not.toHaveBeenCalled();
+      expect(addSuccessSpy).toHaveBeenCalled();
 
       expect(res).toBeTruthy();
     });
@@ -108,8 +108,8 @@ describe('usePackageInstall', () => {
         });
       });
 
-      expect(addSuccessSpy).not.toBeCalled();
-      expect(addErrorSpy).toBeCalled();
+      expect(addSuccessSpy).not.toHaveBeenCalled();
+      expect(addErrorSpy).toHaveBeenCalled();
 
       expect(res).toBeFalsy();
     });

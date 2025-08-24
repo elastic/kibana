@@ -332,7 +332,7 @@ describe('ConnectorFields renders', () => {
         expect(onSubmit).toHaveBeenCalled();
       });
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: openAiConnector,
         isValid: true,
       });

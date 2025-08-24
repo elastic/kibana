@@ -204,7 +204,7 @@ describe('action_type_form', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledWith(
+    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toHaveBeenCalledWith(
       'dedupKey',
       'test',
       1
@@ -359,7 +359,7 @@ describe('action_type_form', () => {
       wrapper.update();
     });
 
-    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toBeCalledTimes(
+    expect(wrapper.find('ActionTypeForm').first().prop('setActionParamsProperty')).toHaveBeenCalledTimes(
       0
     );
   });

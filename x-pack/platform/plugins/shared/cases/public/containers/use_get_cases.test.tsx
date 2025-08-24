@@ -35,10 +35,10 @@ describe('useGetCases', () => {
     });
 
     await waitFor(() => {
-      expect(spyOnGetCases).toBeCalled();
+      expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['securitySolution'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -82,7 +82,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: [...OWNERS] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -107,7 +107,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['cases'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -125,7 +125,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['observability'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,
@@ -143,7 +143,7 @@ describe('useGetCases', () => {
       expect(spyOnGetCases).toHaveBeenCalled();
     });
 
-    expect(spyOnGetCases).toBeCalledWith({
+    expect(spyOnGetCases).toHaveBeenCalledWith({
       filterOptions: { ...DEFAULT_FILTER_OPTIONS, owner: ['my-owner'] },
       queryParams: DEFAULT_QUERY_PARAMS,
       signal: abortCtrl.signal,

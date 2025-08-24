@@ -36,9 +36,9 @@ describe('Load dashboard state', () => {
     const result = await loadDashboardState({
       id,
     });
-    expect(dashboardContentManagementCache.fetchDashboard).toBeCalled();
-    expect(dashboardContentManagementCache.addDashboard).not.toBeCalled();
-    expect(contentManagementService.client.get).not.toBeCalled();
+    expect(dashboardContentManagementCache.fetchDashboard).toHaveBeenCalled();
+    expect(dashboardContentManagementCache.addDashboard).not.toHaveBeenCalled();
+    expect(contentManagementService.client.get).not.toHaveBeenCalled();
     expect(result).toMatchObject({
       dashboardId: id,
       dashboardFound: true,
@@ -62,7 +62,7 @@ describe('Load dashboard state', () => {
     await loadDashboardState({
       id: '123',
     });
-    expect(dashboardContentManagementCache.fetchDashboard).toBeCalled();
-    expect(dashboardContentManagementCache.addDashboard).not.toBeCalled();
+    expect(dashboardContentManagementCache.fetchDashboard).toHaveBeenCalled();
+    expect(dashboardContentManagementCache.addDashboard).not.toHaveBeenCalled();
   });
 });

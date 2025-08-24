@@ -151,7 +151,7 @@ describe('RuleAlertsTable', () => {
       </TestProviders>
     );
 
-    expect(mockGetAppUrl).toBeCalledWith({
+    expect(mockGetAppUrl).toHaveBeenCalledWith({
       deepLinkId: SecurityPageName.rules,
       path: `id/${items[0].id}`,
     });

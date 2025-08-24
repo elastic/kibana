@@ -86,7 +86,7 @@ describe('EnabledFeatures', () => {
     // Ask to show all features
     findTestSubject(wrapper, `featureCategoryButton_kibana`).simulate('click');
 
-    expect(changeHandler).toBeCalledTimes(1);
+    expect(changeHandler).toHaveBeenCalledTimes(1);
 
     const updatedSpace = changeHandler.mock.calls[0][0];
 
@@ -122,7 +122,7 @@ describe('EnabledFeatures', () => {
     await nextTick();
     wrapper.update();
 
-    expect(changeHandler).toBeCalledTimes(1);
+    expect(changeHandler).toHaveBeenCalledTimes(1);
 
     const updatedSpace = changeHandler.mock.calls[0][0];
 
@@ -151,7 +151,7 @@ describe('EnabledFeatures', () => {
     await nextTick();
     wrapper.update();
 
-    expect(changeHandler).toBeCalledTimes(1);
+    expect(changeHandler).toHaveBeenCalledTimes(1);
 
     const updatedSpace = changeHandler.mock.calls[0][0];
 
@@ -180,7 +180,7 @@ describe('EnabledFeatures', () => {
     await nextTick();
     wrapper.update();
 
-    expect(changeHandler).toBeCalledTimes(1);
+    expect(changeHandler).toHaveBeenCalledTimes(1);
 
     const updatedSpace = changeHandler.mock.calls[0][0];
 
@@ -246,7 +246,7 @@ describe('EnabledFeatures', () => {
       );
 
       findTestSubject(wrapper, `featureCategoryButton_management`).simulate('click');
-      expect(changeHandler).toBeCalledTimes(1);
+      expect(changeHandler).toHaveBeenCalledTimes(1);
 
       const updatedSpace = changeHandler.mock.calls[0][0];
 

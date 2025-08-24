@@ -82,7 +82,7 @@ describe('updateAgentPolicySpaces', () => {
     });
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).not.toBeCalled();
+    ).not.toHaveBeenCalled();
   });
 
   it('does nothing if feature flag is not enabled', async () => {
@@ -96,7 +96,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).not.toBeCalled();
+    ).not.toHaveBeenCalled();
   });
 
   it('allow to change spaces', async () => {
@@ -109,7 +109,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       appContextService.getInternalUserSOClientWithoutSpaceExtension().updateObjectsSpaces
-    ).toBeCalledWith(
+    ).toHaveBeenCalledWith(
       [
         { id: 'policy1', type: 'fleet-agent-policies' },
         { id: 'package-policy-1', type: 'fleet-package-policies' },
@@ -122,7 +122,7 @@ describe('updateAgentPolicySpaces', () => {
 
     expect(
       jest.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension()).bulkUpdate
-    ).toBeCalledWith([
+    ).toHaveBeenCalledWith([
       {
         id: 'token1',
         type: 'fleet-uninstall-tokens',
@@ -151,7 +151,7 @@ describe('updateAgentPolicySpaces', () => {
         newSpaceIds: ['test'],
         authorizedSpaces: ['test', 'default'],
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       /Agent policies using reusable integration policies cannot be moved to a different space./
     );
   });
@@ -170,7 +170,7 @@ describe('updateAgentPolicySpaces', () => {
         newSpaceIds: ['test'],
         authorizedSpaces: ['test', 'default'],
       })
-    ).rejects.toThrowError(/Cannot update hosted agent policy policy1 space/);
+    ).rejects.toThrow(/Cannot update hosted agent policy policy1 space/);
   });
 
   it('throw when trying to add a space with missing permissions', async () => {
@@ -181,7 +181,7 @@ describe('updateAgentPolicySpaces', () => {
         newSpaceIds: ['default', 'test'],
         authorizedSpaces: ['default'],
       })
-    ).rejects.toThrowError(/Not enough permissions to create policies in space test/);
+    ).rejects.toThrow(/Not enough permissions to create policies in space test/);
   });
 
   it('throw when trying to remove a space with missing permissions', async () => {
@@ -192,7 +192,7 @@ describe('updateAgentPolicySpaces', () => {
         newSpaceIds: ['test'],
         authorizedSpaces: ['test'],
       })
-    ).rejects.toThrowError(/Not enough permissions to remove policies from space default/);
+    ).rejects.toThrow(/Not enough permissions to remove policies from space default/);
   });
 
   it('throw when validateUniqueName is true and policy name already exists on another space', async () => {
@@ -207,7 +207,7 @@ describe('updateAgentPolicySpaces', () => {
         authorizedSpaces: ['test'],
         options: { validateUniqueName: true },
       })
-    ).rejects.toThrowError(/Name already exists/);
+    ).rejects.toThrow(/Name already exists/);
   });
 
   it('do not call validatePackagePoliciesUniqueNameAcrossSpaces when validateUniqueName is false', async () => {

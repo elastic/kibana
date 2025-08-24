@@ -86,37 +86,37 @@ describe('convertToLens', () => {
     mockIsValidMetrics.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockIsValidMetrics).toBeCalledTimes(1);
+    expect(mockIsValidMetrics).toHaveBeenCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported metrics', async () => {
     mockGetMetricsColumns.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockGetMetricsColumns).toBeCalledTimes(1);
+    expect(mockGetMetricsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return null for invalid or unsupported buckets', async () => {
     mockGetBucketsColumns.mockReturnValue(null);
     const result = await convertToLens(vis);
     expect(result).toBeNull();
-    expect(mockGetBucketsColumns).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(1);
   });
 
   test('should return state for valid model', async () => {
     const result = await convertToLens(vis);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsXY');
-    expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
-    expect(mockGetConfigurationForTopN).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(model.series.length);
+    expect(mockGetConfigurationForTopN).toHaveBeenCalledTimes(1);
   });
 
   test('should drop adhoc dataviews if action is required', async () => {
     const result = await convertToLens(vis, undefined, true);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsXY');
-    expect(mockGetBucketsColumns).toBeCalledTimes(model.series.length);
-    expect(mockGetConfigurationForTopN).toBeCalledTimes(1);
+    expect(mockGetBucketsColumns).toHaveBeenCalledTimes(model.series.length);
+    expect(mockGetConfigurationForTopN).toHaveBeenCalledTimes(1);
   });
 
   test('should skip hidden series', async () => {
@@ -132,7 +132,7 @@ describe('convertToLens', () => {
     } as Vis<Panel>);
     expect(result).toBeDefined();
     expect(result?.type).toBe('lnsXY');
-    expect(mockIsValidMetrics).toBeCalledTimes(0);
+    expect(mockIsValidMetrics).toHaveBeenCalledTimes(0);
   });
 
   test('should set the ignoreGlobalFilters if set on the panel', async () => {

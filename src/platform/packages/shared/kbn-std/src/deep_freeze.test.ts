@@ -26,7 +26,7 @@ it('prevents adding properties to argument', () => {
     // ts knows this shouldn't be possible, but just making sure
     // @ts-expect-error
     frozen.foo = true;
-  }).toThrowError(`object is not extensible`);
+  }).toThrow(`object is not extensible`);
 });
 
 it('prevents changing properties on argument', () => {
@@ -35,7 +35,7 @@ it('prevents changing properties on argument', () => {
     // ts knows this shouldn't be possible, but just making sure
     // @ts-expect-error
     frozen.foo = true;
-  }).toThrowError(`read only property 'foo'`);
+  }).toThrow(`read only property 'foo'`);
 });
 
 it('prevents changing properties on nested children of argument', () => {
@@ -44,7 +44,7 @@ it('prevents changing properties on nested children of argument', () => {
     // ts knows this shouldn't be possible, but just making sure
     // @ts-expect-error
     frozen.foo.bar.baz.box = 2;
-  }).toThrowError(`read only property 'box'`);
+  }).toThrow(`read only property 'box'`);
 });
 
 it('prevents adding items to a frozen array', () => {
@@ -53,7 +53,7 @@ it('prevents adding items to a frozen array', () => {
     // ts knows this shouldn't be possible, but just making sure
     // @ts-expect-error
     frozen.foo.push(2);
-  }).toThrowError(`object is not extensible`);
+  }).toThrow(`object is not extensible`);
 });
 
 it('prevents reassigning items in a frozen array', () => {
@@ -62,5 +62,5 @@ it('prevents reassigning items in a frozen array', () => {
     // ts knows this shouldn't be possible, but just making sure
     // @ts-expect-error
     frozen.foo[0] = 2;
-  }).toThrowError(`read only property '0'`);
+  }).toThrow(`read only property '0'`);
 });

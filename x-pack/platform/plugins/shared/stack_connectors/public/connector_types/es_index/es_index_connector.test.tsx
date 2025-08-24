@@ -354,7 +354,7 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.index',
           config: {
@@ -397,7 +397,7 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {
           actionTypeId: '.index',
           config: {
@@ -435,7 +435,7 @@ describe('IndexActionConnectorFields', () => {
 
       await userEvent.click(getByTestId('form-test-provide-submit'));
 
-      expect(onSubmit).toBeCalledWith({
+      expect(onSubmit).toHaveBeenCalledWith({
         data: {},
         isValid: false,
       });

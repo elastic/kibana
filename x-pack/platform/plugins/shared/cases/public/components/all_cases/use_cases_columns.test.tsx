@@ -695,7 +695,7 @@ describe('useCasesColumns ', () => {
             />
           </TestProviders>
         )
-      ).not.toThrowError();
+      ).not.toThrow();
     });
 
     it('shows the connectors icon if the user has read access to actions', async () => {

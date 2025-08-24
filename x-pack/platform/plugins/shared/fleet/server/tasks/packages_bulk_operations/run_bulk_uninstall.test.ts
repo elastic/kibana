@@ -50,7 +50,7 @@ describe('Bulk uninstall task', () => {
         },
       });
 
-      expect(removeInstallation).toBeCalledTimes(2);
+      expect(removeInstallation).toHaveBeenCalledTimes(2);
 
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
@@ -73,7 +73,7 @@ describe('Bulk uninstall task', () => {
         },
       });
 
-      expect(removeInstallation).toBeCalledTimes(4);
+      expect(removeInstallation).toHaveBeenCalledTimes(4);
       expect(res).toEqual([
         { name: 'test_valid_1', success: true },
         {
@@ -109,7 +109,7 @@ describe('Bulk uninstall task', () => {
         })
       ).rejects.toThrow(/Task was aborted/);
 
-      expect(removeInstallation).toBeCalledTimes(0);
+      expect(removeInstallation).toHaveBeenCalledTimes(0);
     });
   });
 });

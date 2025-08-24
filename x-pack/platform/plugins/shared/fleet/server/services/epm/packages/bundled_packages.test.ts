@@ -73,7 +73,7 @@ describe('bundledPackages', () => {
       expect(packagesRes1.map((p) => omit(p, 'getBuffer'))).toEqual(
         packagesRes2.map((p) => omit(p, 'getBuffer'))
       );
-      expect(fs.readdir).toBeCalledTimes(1);
+      expect(fs.readdir).toHaveBeenCalledTimes(1);
     });
 
     it('should cache getBuffer if called multiple time in the scope of getBundledPackages', async () => {
@@ -81,7 +81,7 @@ describe('bundledPackages', () => {
 
       await packagesRes1[0].getBuffer();
       await packagesRes1[0].getBuffer();
-      expect(fs.readFile).toBeCalledTimes(1);
+      expect(fs.readFile).toHaveBeenCalledTimes(1);
     });
 
     it('should not use cache if called multiple time and cache is disabled', async () => {
@@ -93,7 +93,7 @@ describe('bundledPackages', () => {
       } as any);
       await getBundledPackages();
       await getBundledPackages();
-      expect(fs.readdir).toBeCalledTimes(2);
+      expect(fs.readdir).toHaveBeenCalledTimes(2);
     });
   });
   describe('getBundledPackageByPkgKey', () => {

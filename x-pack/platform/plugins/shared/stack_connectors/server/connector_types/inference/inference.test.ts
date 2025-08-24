@@ -72,7 +72,7 @@ describe('InferenceConnector', () => {
         body: { messages: [{ content: 'What is Elastic?', role: 'user' }] },
         telemetryMetadata: { pluginId: 'security_ai_assistant' },
       });
-      expect(mockEsClient.transport.request).toBeCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           body: {
@@ -284,7 +284,7 @@ describe('InferenceConnector', () => {
       await connector.performApiUnifiedCompletionStream({
         body: { messages: [{ content: 'Hello world', role: 'user' }] },
       });
-      expect(mockEsClient.transport.request).toBeCalledTimes(1);
+      expect(mockEsClient.transport.request).toHaveBeenCalledTimes(1);
       expect(mockEsClient.transport.request).toHaveBeenCalledWith(
         {
           body: {

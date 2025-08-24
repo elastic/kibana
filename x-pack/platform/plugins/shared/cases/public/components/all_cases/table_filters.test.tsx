@@ -119,7 +119,7 @@ describe('CasesTableFilters ', () => {
     await waitForEuiPopoverOpen();
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-high'));
 
-    expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, severity: ['high'] });
+    expect(onFilterChanged).toHaveBeenCalledWith({ ...DEFAULT_FILTER_OPTIONS, severity: ['high'] });
   });
 
   it('should call onFilterChange when selected tags change', async () => {
@@ -129,7 +129,7 @@ describe('CasesTableFilters ', () => {
     await waitForEuiPopoverOpen();
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-coke'));
 
-    expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, tags: ['coke'] });
+    expect(onFilterChanged).toHaveBeenCalledWith({ ...DEFAULT_FILTER_OPTIONS, tags: ['coke'] });
   });
 
   it('should call onFilterChange when selected category changes', async () => {
@@ -139,7 +139,7 @@ describe('CasesTableFilters ', () => {
     await waitForEuiPopoverOpen();
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-twix'));
 
-    expect(onFilterChanged).toBeCalledWith({ ...DEFAULT_FILTER_OPTIONS, category: ['twix'] });
+    expect(onFilterChanged).toHaveBeenCalledWith({ ...DEFAULT_FILTER_OPTIONS, category: ['twix'] });
   });
 
   it('should call onFilterChange when selected assignees change', async () => {
@@ -211,7 +211,7 @@ describe('CasesTableFilters ', () => {
     await waitForEuiPopoverOpen();
     await userEvent.click(await screen.findByTestId('options-filter-popover-item-closed'));
 
-    expect(onFilterChanged).toBeCalledWith({
+    expect(onFilterChanged).toHaveBeenCalledWith({
       ...DEFAULT_FILTER_OPTIONS,
       status: [CaseStatuses.closed],
     });
@@ -499,7 +499,7 @@ describe('CasesTableFilters ', () => {
 
       await userEvent.click(await screen.findByTestId('options-filter-popover-item-on'));
 
-      expect(onFilterChanged).toBeCalledWith({
+      expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
         customFields: {
           [customFieldKey]: {
@@ -518,7 +518,7 @@ describe('CasesTableFilters ', () => {
 
       await userEvent.click(await screen.findByTestId('options-filter-popover-item-off'));
 
-      expect(onFilterChanged).toBeCalledWith({
+      expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
         customFields: {
           [customFieldKey]: {

@@ -72,9 +72,9 @@ describe('JsonEditorField', () => {
     await userEvent.paste('JSON');
 
     await waitFor(() => {
-      expect(setValue).toBeCalledWith('foobarJSON');
+      expect(setValue).toHaveBeenCalledWith('foobarJSON');
     });
 
-    expect(setXJson).toBeCalledWith('foobarJSON');
+    expect(setXJson).toHaveBeenCalledWith('foobarJSON');
   });
 });

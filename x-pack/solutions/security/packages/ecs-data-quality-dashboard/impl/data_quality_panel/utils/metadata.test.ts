@@ -85,7 +85,7 @@ describe('getFieldTypes', () => {
     // @ts-expect-error
     const invalidType: Record<string, unknown> = []; // <-- this is an array, NOT a valid Record<string, unknown>
 
-    expect(() => getFieldTypes(invalidType)).toThrowError('Root value is not flatten-able');
+    expect(() => getFieldTypes(invalidType)).toThrow('Root value is not flatten-able');
   });
 });
 

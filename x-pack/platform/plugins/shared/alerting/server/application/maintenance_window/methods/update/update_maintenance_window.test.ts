@@ -419,7 +419,7 @@ describe('MaintenanceWindowClient - update', () => {
           },
         },
       });
-    }).rejects.toThrowError();
+    }).rejects.toThrow();
 
     expect(mockContext.logger.error).toHaveBeenLastCalledWith(
       'Failed to update maintenance window by id: test-id, Error: Error: Cannot edit archived maintenance windows'

@@ -53,7 +53,7 @@ describe('JourneyScreenshotDialog', () => {
   });
 
   it('renders without errors', () => {
-    expect(() => render(<JourneyScreenshotDialog {...testProps} />)).not.toThrowError();
+    expect(() => render(<JourneyScreenshotDialog {...testProps} />)).not.toThrow();
   });
 
   it('shows loading indicator when image is loading', async () => {

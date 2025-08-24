@@ -45,7 +45,7 @@ describe('Watch', () => {
 
     it('MonitoringWatch to be used when type is WATCH_TYPES.MONITORING', () => {
       const config = { type: WATCH_TYPES.MONITORING };
-      expect(() => Watch.fromDownstreamJson(config)).toThrowError();
+      expect(() => Watch.fromDownstreamJson(config)).toThrow();
     });
   });
 

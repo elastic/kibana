@@ -186,7 +186,7 @@ describe('CM services getTransforms()', () => {
         if (expected === false) {
           expect(() => {
             getTransforms(definitions, 1);
-          }).toThrowError(error);
+          }).toThrow(error);
         } else {
           expect(() => {
             getTransforms(definitions, 1);

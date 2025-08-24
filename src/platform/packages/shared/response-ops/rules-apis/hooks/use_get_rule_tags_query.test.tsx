@@ -180,8 +180,8 @@ describe('useGetRuleTagsQuery', () => {
       { wrapper: Wrapper }
     );
 
-    expect(mockGetRuleTags).toBeCalled();
+    expect(mockGetRuleTags).toHaveBeenCalled();
     expect(result.current.tags).toEqual([]);
-    await waitFor(() => expect(notifications.toasts.addDanger).toBeCalled());
+    await waitFor(() => expect(notifications.toasts.addDanger).toHaveBeenCalled());
   });
 });

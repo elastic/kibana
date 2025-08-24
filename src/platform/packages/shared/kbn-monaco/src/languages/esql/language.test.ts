@@ -111,7 +111,7 @@ describe('ESQLLang', () => {
           notFieldItem,
           {} as any
         );
-        expect(mockFind).toBeCalledTimes(1);
+        expect(mockFind).toHaveBeenCalledTimes(1);
         expect(notFieldResolvedItem).toEqual(notFieldItem);
 
         mockFind.mockClear();
@@ -125,7 +125,7 @@ describe('ESQLLang', () => {
           notECSFieldItem,
           {} as any
         );
-        expect(mockFind).toBeCalledTimes(1);
+        expect(mockFind).toHaveBeenCalledTimes(1);
         expect(notECSFieldResolvedItem).toEqual(notECSFieldItem);
       });
     });

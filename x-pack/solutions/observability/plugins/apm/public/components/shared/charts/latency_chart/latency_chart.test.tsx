@@ -15,7 +15,7 @@ const { Example } = composeStories(stories);
 describe('LatencyChart', () => {
   it('renders', async () => {
     await waitFor(() => {
-      expect(() => render(<Example />)).not.toThrowError();
+      expect(() => render(<Example />)).not.toThrow();
     });
   });
 });

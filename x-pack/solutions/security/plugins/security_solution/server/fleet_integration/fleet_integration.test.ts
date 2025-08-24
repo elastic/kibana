@@ -1432,7 +1432,7 @@ describe('Fleet integrations', () => {
 
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
-      ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+      ).toHaveBeenCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
     });
 
     describe('and with space awareness feature enabled', () => {

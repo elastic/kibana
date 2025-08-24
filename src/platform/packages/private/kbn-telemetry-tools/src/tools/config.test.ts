@@ -13,7 +13,7 @@ import { parseTelemetryRC } from './config';
 describe('parseTelemetryRC', () => {
   it('throw if config path is not absolute', async () => {
     const fixtureDir = './__fixture__/';
-    await expect(parseTelemetryRC(fixtureDir)).rejects.toThrowError();
+    await expect(parseTelemetryRC(fixtureDir)).rejects.toThrow();
   });
 
   it('returns parsed rc file', async () => {

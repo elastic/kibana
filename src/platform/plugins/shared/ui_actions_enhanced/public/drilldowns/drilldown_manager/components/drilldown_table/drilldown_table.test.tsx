@@ -30,14 +30,14 @@ test('Emit onEdit() when clicking on edit drilldown', () => {
   const editButtons = screen.getAllByText('Edit');
   expect(editButtons).toHaveLength(drilldowns.length);
   fireEvent.click(editButtons[1]);
-  expect(fn).toBeCalledWith(drilldowns[1].id);
+  expect(fn).toHaveBeenCalledWith(drilldowns[1].id);
 });
 
 test('Emit onCreate() when clicking on create drilldown', () => {
   const fn = jest.fn();
   const screen = render(<DrilldownTable items={drilldowns} onCreate={fn} />);
   fireEvent.click(screen.getByText('Create new'));
-  expect(fn).toBeCalled();
+  expect(fn).toHaveBeenCalled();
 });
 
 test('Delete button is not visible when non is selected', () => {
@@ -61,7 +61,7 @@ test('Can delete drilldowns', () => {
 
   fireEvent.click(screen.getByText(/Delete \(2\)/i));
 
-  expect(fn).toBeCalledWith([drilldowns[1].id, drilldowns[2].id]);
+  expect(fn).toHaveBeenCalledWith([drilldowns[1].id, drilldowns[2].id]);
 });
 
 test('Error is displayed', () => {

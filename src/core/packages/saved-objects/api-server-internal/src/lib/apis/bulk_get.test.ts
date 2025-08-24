@@ -239,7 +239,7 @@ describe('#bulkGet', () => {
         const obj = { type: 'dashboard', id: 'three' };
         await expect(
           repository.bulkGet([obj], { namespace: ALL_NAMESPACES_STRING })
-        ).rejects.toThrowError(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
+        ).rejects.toThrow(createBadRequestErrorPayload('"options.namespace" cannot be "*"'));
       });
 
       it(`returns error when namespaces is used with a space-agnostic object`, async () => {

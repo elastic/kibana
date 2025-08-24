@@ -93,7 +93,7 @@ describe('GenerationModal', () => {
         />,
         { wrapper }
       );
-      await waitFor(() => expect(mockOnComplete).toBeCalled());
+      await waitFor(() => expect(mockOnComplete).toHaveBeenCalled());
     });
 
     it('should render generation modal', () => {
@@ -174,7 +174,7 @@ describe('GenerationModal', () => {
         />,
         { wrapper }
       );
-      await waitFor(() => expect(mockOnComplete).toBeCalled());
+      await waitFor(() => expect(mockOnComplete).toHaveBeenCalled());
     });
 
     it('should render generation modal', () => {
@@ -278,7 +278,7 @@ describe('GenerationModal', () => {
         await act(async () => {
           result.getByTestId('retryButton').click();
         });
-        await waitFor(() => expect(mockOnComplete).toBeCalled());
+        await waitFor(() => expect(mockOnComplete).toHaveBeenCalled());
       });
 
       it('should not render the error callout', () => {
@@ -347,7 +347,7 @@ describe('GenerationModal', () => {
         await act(async () => {
           result.getByTestId('retryButton').click();
         });
-        await waitFor(() => expect(mockOnComplete).toBeCalled());
+        await waitFor(() => expect(mockOnComplete).toHaveBeenCalled());
       });
 
       it('should not render the error callout', () => {

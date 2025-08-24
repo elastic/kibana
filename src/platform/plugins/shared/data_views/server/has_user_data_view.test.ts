@@ -60,6 +60,6 @@ describe('hasUserDataView', () => {
       ],
     };
     expect(await hasUserDataView({ esClient, soClient }, dataViewsFindResponse)).toEqual(true);
-    expect(soClient.find).not.toBeCalled();
+    expect(soClient.find).not.toHaveBeenCalled();
   });
 });

@@ -54,7 +54,7 @@ test('should call onCancel when "Cancel" clicked', async () => {
   const { getByText } = render(<ImageEditor onCancel={onCancel} />);
   expect(getByText('Cancel')).toBeVisible();
   await userEvent.click(getByText('Cancel'));
-  expect(onCancel).toBeCalled();
+  expect(onCancel).toHaveBeenCalled();
 });
 
 test('should call onSave when "Save" clicked (url)', async () => {
@@ -67,7 +67,7 @@ test('should call onSave when "Save" clicked (url)', async () => {
 
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
   await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
-  expect(onSave).toBeCalledWith({
+  expect(onSave).toHaveBeenCalledWith({
     altText: 'alt text',
     backgroundColor: '',
     sizing: {
@@ -104,7 +104,7 @@ test('should be able to edit', async () => {
 
   expect(getByTestId(`imageEmbeddableEditorSave`)).toBeVisible();
   await userEvent.click(getByTestId(`imageEmbeddableEditorSave`));
-  expect(onSave).toBeCalledWith({
+  expect(onSave).toHaveBeenCalledWith({
     altText: 'alt text changed',
     backgroundColor: '',
     sizing: {

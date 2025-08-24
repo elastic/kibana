@@ -871,7 +871,7 @@ describe('Agentless Agent service', () => {
         data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     // Assert that tls configuration is missing
     expect(mockedLogger.debug).toHaveBeenCalledWith(expect.stringContaining('cert: undefined'));
@@ -933,7 +933,7 @@ describe('Agentless Agent service', () => {
         data_output_id: 'mock-fleet-default-output',
         supports_agentless: true,
       } as AgentPolicy)
-    ).rejects.toThrowError();
+    ).rejects.toThrow();
 
     // Assert that sensitive information is redacted
     expect(mockedLogger.error).toHaveBeenCalledWith(
@@ -1038,7 +1038,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: false,
         } as AgentPolicy)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentlessAgentConfigError(
           'Agentless agent policy does not have supports_agentless enabled'
         )
@@ -1077,7 +1077,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentlessAgentConfigError(
           'Agentless agents are only supported in cloud deployment and serverless projects'
         )
@@ -1100,7 +1100,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(
+      ).rejects.toThrow(
         new AgentlessAgentConfigError('missing Agentless API configuration in Kibana')
       );
     });
@@ -1146,7 +1146,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentConfigError('missing default Fleet server host'));
+      ).rejects.toThrow(new AgentlessAgentConfigError('missing default Fleet server host'));
     });
 
     it('should throw AgentlessAgentConfigError if enrollment tokens are not found', async () => {
@@ -1189,7 +1189,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentConfigError('missing Fleet enrollment token'));
+      ).rejects.toThrow(new AgentlessAgentConfigError('missing Fleet enrollment token'));
     });
 
     it('should throw AgentlessAgentConfigError if agent policy is missing fleet_server_host_id', async () => {
@@ -1231,7 +1231,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError(new AgentlessAgentConfigError('missing fleet_server_host_id'));
+      ).rejects.toThrow(new AgentlessAgentConfigError('missing fleet_server_host_id'));
     });
 
     it('should throw an error and log and error when the Agentless API returns a status not handled and not in the 2xx series', async () => {
@@ -1290,7 +1290,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
@@ -1352,7 +1352,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
@@ -1414,7 +1414,7 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
       expect(mockedLogger.error).toHaveBeenCalledTimes(1);
@@ -1476,10 +1476,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 404', async () => {
@@ -1538,10 +1538,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 403', async () => {
@@ -1600,10 +1600,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 401', async () => {
@@ -1662,10 +1662,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
 
     it('should throw an error and log and error when the Agentless API returns status 400', async () => {
@@ -1724,10 +1724,10 @@ describe('Agentless Agent service', () => {
           data_output_id: 'mock-fleet-default-output',
           supports_agentless: true,
         } as AgentPolicy)
-      ).rejects.toThrowError();
+      ).rejects.toThrow();
 
       // Assert that the error is logged
-      expect(mockedLogger.error).toBeCalledTimes(1);
+      expect(mockedLogger.error).toHaveBeenCalledTimes(1);
     });
   });
 });

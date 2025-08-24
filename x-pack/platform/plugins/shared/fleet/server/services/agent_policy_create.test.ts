@@ -288,7 +288,7 @@ describe('createAgentPolicyWithPackages', () => {
 
     expect(response.id).toEqual('policy-1');
 
-    expect(mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toBeCalledWith(
+    expect(mockEnsureDefaultEnrollmentAPIKeyForAgentPolicy).toHaveBeenCalledWith(
       expect.anything(),
       expect.anything(),
       'policy-1'

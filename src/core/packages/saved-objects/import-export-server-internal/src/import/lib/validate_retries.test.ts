@@ -82,7 +82,7 @@ describe('#validateRetries', () => {
 
     test('does not throw error if retry objects and retry destinations are unique', () => {
       // no need to mock return value, the mock `getNonUniqueEntries` function returns an empty array by default
-      expect(() => validateRetries([])).not.toThrowError();
+      expect(() => validateRetries([])).not.toThrow();
     });
   });
 });

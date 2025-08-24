@@ -70,7 +70,7 @@ describe('validateTypeMigrations', () => {
         },
       });
 
-      expect(() => validate({ type })).toThrowError(
+      expect(() => validate({ type })).toThrow(
         `Invalid migration for type foo. Property '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
       );
     });
@@ -470,7 +470,7 @@ describe('validateTypeMigrations', () => {
       });
       expect(() =>
         validate({ type, convertVersion: '3.2.3', kibanaVersion: '3.2.3' })
-      ).toThrowError(
+      ).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be any other than '3.2.3'.`
       );
     });
@@ -483,7 +483,7 @@ describe('validateTypeMigrations', () => {
       });
       expect(() =>
         validateTypeMigrations({ type, kibanaVersion: defaultKibanaVersion })
-      ).toThrowError(
+      ).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.2.4' cannot be greater than the current Kibana version '3.2.3'.`
       );
     });
@@ -496,7 +496,7 @@ describe('validateTypeMigrations', () => {
       });
       expect(() =>
         validateTypeMigrations({ type, kibanaVersion: defaultKibanaVersion })
-      ).toThrowError(
+      ).toThrow(
         `Invalid convertToMultiNamespaceTypeVersion for type foo. Value '3.1.1' cannot be used on a patch version (must be like 'x.y.0').`
       );
     });

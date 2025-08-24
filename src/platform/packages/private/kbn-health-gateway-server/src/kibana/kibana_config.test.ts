@@ -40,7 +40,7 @@ describe('kibana config', () => {
     test('throws if invalid hosts', () => {
       const invalidHosts = ['https://localhost:3000', 'abcxyz'];
       const configSchema = config.schema;
-      expect(() => configSchema.validate({ hosts: invalidHosts })).toThrowError(
+      expect(() => configSchema.validate({ hosts: invalidHosts })).toThrow(
         '[hosts.1]: expected URI with scheme [http|https].'
       );
     });

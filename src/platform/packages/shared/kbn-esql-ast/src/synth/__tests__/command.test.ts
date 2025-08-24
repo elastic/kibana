@@ -72,7 +72,7 @@ test('can create a FROM source command', () => {
 });
 
 test('throws if specified source is not a command', () => {
-  expect(() => cmd`123`).toThrowError();
+  expect(() => cmd`123`).toThrow();
 });
 
 test('can compose expressions into commands', () => {

@@ -165,8 +165,8 @@ test('spins up `preboot` server until started if configured with `autoListen:tru
   await service.setup(setupDeps);
   await service.start();
 
-  expect(httpServer.start).toBeCalledTimes(1);
-  expect(prebootHapiServer.stop).toBeCalledTimes(1);
+  expect(httpServer.start).toHaveBeenCalledTimes(1);
+  expect(prebootHapiServer.stop).toHaveBeenCalledTimes(1);
   await service.stop();
 });
 

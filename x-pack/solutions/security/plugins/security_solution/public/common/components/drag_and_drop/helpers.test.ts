@@ -995,7 +995,7 @@ describe('helpers', () => {
         onAddedToTimeline,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'timeline-1',
           providers: [
@@ -1027,7 +1027,7 @@ describe('helpers', () => {
         onAddedToTimeline,
       });
 
-      expect(dispatch).toBeCalledWith({
+      expect(dispatch).toHaveBeenCalledWith({
         payload: {
           id: 'hosts-table-hostName-ENDPOINT-W-0-01',
         },

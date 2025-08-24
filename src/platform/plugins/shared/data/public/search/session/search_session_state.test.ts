@@ -44,7 +44,7 @@ describe('Session state container', () => {
     });
 
     test('trackSearch', () => {
-      expect(() => state.transitions.trackSearch({})).toThrowError();
+      expect(() => state.transitions.trackSearch({})).toThrow();
 
       state.transitions.start({ appName });
       state.transitions.trackSearch({});
@@ -71,7 +71,7 @@ describe('Session state container', () => {
     });
 
     test('cancel', () => {
-      expect(() => state.transitions.cancel()).toThrowError();
+      expect(() => state.transitions.cancel()).toThrow();
 
       state.transitions.start({ appName });
       const search = {};
@@ -84,7 +84,7 @@ describe('Session state container', () => {
     });
 
     test('store -> completed', () => {
-      expect(() => state.transitions.store(mockSavedObject)).toThrowError();
+      expect(() => state.transitions.store(mockSavedObject)).toThrow();
 
       state.transitions.start({ appName });
       const search = {};
@@ -124,9 +124,9 @@ describe('Session state container', () => {
       state.transitions.removeSearch(search);
 
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
-      expect(() => state.transitions.store(mockSavedObject)).toThrowError();
+      expect(() => state.transitions.store(mockSavedObject)).toThrow();
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
-      expect(() => state.transitions.cancel()).toThrowError();
+      expect(() => state.transitions.cancel()).toThrow();
       expect(state.selectors.getState()).toBe(SearchSessionState.Restored);
 
       state.transitions.start({ appName });

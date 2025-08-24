@@ -29,7 +29,7 @@ describe('Filters Schema Test', () => {
       endpointFilters.validate({
         host_status: ['foobar'],
       })
-    ).toThrowError();
+    ).toThrow();
   });
 
   it('accepts a KQL string', () => {

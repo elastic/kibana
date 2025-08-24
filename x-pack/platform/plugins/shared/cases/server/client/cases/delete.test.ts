@@ -100,13 +100,13 @@ describe('delete', () => {
       it(`throws 400 when trying to delete more than ${MAX_DELETE_IDS_LENGTH} cases at a time`, async () => {
         const caseIds = new Array(MAX_DELETE_IDS_LENGTH + 1).fill('id');
 
-        await expect(deleteCases(caseIds, clientArgs)).rejects.toThrowError(
+        await expect(deleteCases(caseIds, clientArgs)).rejects.toThrow(
           'Error: The length of the field ids is too long. Array must be of length <= 100.'
         );
       });
 
       it('throws 400 when no id is passed to delete', async () => {
-        await expect(deleteCases([], clientArgs)).rejects.toThrowError(
+        await expect(deleteCases([], clientArgs)).rejects.toThrow(
           'Error: The length of the field ids is too short. Array must be of length >= 1.'
         );
       });

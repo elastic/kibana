@@ -112,7 +112,7 @@ describe('<AnalyzeGraph />', () => {
 
     expect(wrapper.getByTestId('resolver:graph-controls:show-panel-button')).toBeInTheDocument();
     wrapper.getByTestId('resolver:graph-controls:show-panel-button').click();
-    expect(mockFlyoutApi.openPreviewPanel).toBeCalledWith({
+    expect(mockFlyoutApi.openPreviewPanel).toHaveBeenCalledWith({
       id: DocumentDetailsAnalyzerPanelKey,
       params: {
         resolverComponentInstanceID: `${FLYOUT_KEY}-${TableId.test}`,

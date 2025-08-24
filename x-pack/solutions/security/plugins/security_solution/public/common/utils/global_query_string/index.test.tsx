@@ -97,7 +97,7 @@ describe('global query string', () => {
       });
       unmount();
 
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         globalUrlParamActions.deregisterUrlParam({
           key: urlParamKey,
         })
@@ -113,7 +113,7 @@ describe('global query string', () => {
         wrapper: makeWrapper(),
       });
 
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         globalUrlParamActions.registerUrlParam({
           key: urlParamKey,
           initialValue,
@@ -131,7 +131,7 @@ describe('global query string', () => {
         wrapper: makeWrapper(),
       });
 
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         globalUrlParamActions.registerUrlParam({
           key: newUrlParamKey,
           initialValue,
@@ -156,7 +156,7 @@ describe('global query string', () => {
       });
       updateUrlParam(value);
 
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         globalUrlParamActions.updateUrlParam({
           key: urlParamKey,
           value,
@@ -174,7 +174,7 @@ describe('global query string', () => {
       });
       updateUrlParam(null);
 
-      expect(mockDispatch).toBeCalledWith(
+      expect(mockDispatch).toHaveBeenCalledWith(
         globalUrlParamActions.updateUrlParam({
           key: urlParamKey,
           value: null,

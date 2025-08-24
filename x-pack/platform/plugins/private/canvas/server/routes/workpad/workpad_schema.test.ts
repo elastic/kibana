@@ -67,7 +67,7 @@ it('validates there are no duplicate page ids', () => {
     pages: [{ ...baseWorkpad.pages[0] }, { ...baseWorkpad.pages[1], id: pageOneId }],
   };
 
-  expect(() => WorkpadSchema.validate(dupePage)).toThrowError('Page Ids are not unique');
+  expect(() => WorkpadSchema.validate(dupePage)).toThrow('Page Ids are not unique');
 });
 
 it('validates there are no duplicate element ids on the same page', () => {
@@ -85,7 +85,7 @@ it('validates there are no duplicate element ids on the same page', () => {
     ],
   };
 
-  expect(() => WorkpadSchema.validate(dupeElement)).toThrowError('Element Ids are not unique');
+  expect(() => WorkpadSchema.validate(dupeElement)).toThrow('Element Ids are not unique');
 });
 
 it('validates there are no duplicate element ids in the workpad', () => {
@@ -106,5 +106,5 @@ it('validates there are no duplicate element ids in the workpad', () => {
     ],
   };
 
-  expect(() => WorkpadSchema.validate(dupeElement)).toThrowError('Element Ids are not unique');
+  expect(() => WorkpadSchema.validate(dupeElement)).toThrow('Element Ids are not unique');
 });

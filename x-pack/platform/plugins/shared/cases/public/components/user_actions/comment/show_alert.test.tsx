@@ -48,13 +48,13 @@ describe('UserActionShowAlert ', () => {
   it('it calls onShowAlertDetails onClick when is defined', async () => {
     wrapper.find('button[data-test-subj="comment-action-show-alert-action-id"]').simulate('click');
     expect(onShowAlertDetails).toHaveBeenCalledWith('alert-id', 'alert-index');
-    expect(navigateToCaseView).toBeCalledTimes(0);
+    expect(navigateToCaseView).toHaveBeenCalledTimes(0);
   });
 
   it('it calls navigateToCaseView onClick when onShowAlertDetails is undefined', async () => {
     wrapper = mount(<UserActionShowAlert {...{ ...props, onShowAlertDetails: undefined }} />);
     wrapper.find('button[data-test-subj="comment-action-show-alert-action-id"]').simulate('click');
     expect(navigateToCaseView).toHaveBeenCalledWith({ detailName: 'case-id', tabId: 'alerts' });
-    expect(onShowAlertDetails).toBeCalledTimes(0);
+    expect(onShowAlertDetails).toHaveBeenCalledTimes(0);
   });
 });

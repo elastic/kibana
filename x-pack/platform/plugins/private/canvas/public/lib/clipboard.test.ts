@@ -27,12 +27,12 @@ describe('clipboard', () => {
   test('stores data to local storage', () => {
     setClipboardData(elements);
 
-    expect(set).toBeCalledWith(LOCALSTORAGE_CLIPBOARD, JSON.stringify(elements));
+    expect(set).toHaveBeenCalledWith(LOCALSTORAGE_CLIPBOARD, JSON.stringify(elements));
   });
 
   test('gets data from local storage', () => {
     getClipboardData();
 
-    expect(get).toBeCalledWith(LOCALSTORAGE_CLIPBOARD);
+    expect(get).toHaveBeenCalledWith(LOCALSTORAGE_CLIPBOARD);
   });
 });

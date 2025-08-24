@@ -66,7 +66,7 @@ describe('CreateSourceEditor', () => {
     const onSourceConfigChange = jest.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
-      expect(onSourceConfigChange).toBeCalledWith({
+      expect(onSourceConfigChange).toHaveBeenCalledWith({
         columns: [
           {
             name: 'location',
@@ -93,7 +93,7 @@ describe('CreateSourceEditor', () => {
       />
     );
     await waitFor(() =>
-      expect(onSourceConfigChange).toBeCalledWith({
+      expect(onSourceConfigChange).toHaveBeenCalledWith({
         columns: [
           {
             name: 'geometry',

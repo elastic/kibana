@@ -401,7 +401,7 @@ describe('buildEnrichments', () => {
         threats,
         indicatorPath,
       })
-    ).toThrowError('Expected indicator field to be an object, but found: not an object');
+    ).toThrow('Expected indicator field to be an object, but found: not an object');
   });
 
   it('throws an error if indicator field is not an array of objects', () => {
@@ -422,7 +422,7 @@ describe('buildEnrichments', () => {
         threats,
         indicatorPath,
       })
-    ).toThrowError('Expected indicator field to be an object, but found: not an object');
+    ).toThrow('Expected indicator field to be an object, but found: not an object');
   });
 
   it('returns the feed data if it specified', () => {
@@ -662,7 +662,7 @@ describe('enrichSignalThreatMatchesFromSignalsMap', () => {
     const signals: SignalSourceHit[] = [signalHit];
     await expect(() =>
       enrichSignalThreatMatchesFromSignalsMap(signals, matchedThreats, indicatorPath, signalsMap)
-    ).rejects.toThrowError('Expected threat field to be an object, but found: whoops');
+    ).rejects.toThrow('Expected threat field to be an object, but found: whoops');
   });
 
   it('enriches from a configured indicator path, if specified', async () => {

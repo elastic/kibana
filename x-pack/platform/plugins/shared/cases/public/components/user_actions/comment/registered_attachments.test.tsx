@@ -95,7 +95,7 @@ describe('createRegisteredAttachmentUserActionBuilder', () => {
     createRegisteredAttachmentUserActionBuilder(userActionBuilderArgs).build();
 
     expect(getAttachmentViewProps).toHaveBeenCalled();
-    expect(getAttachmentViewObject).toBeCalledWith({
+    expect(getAttachmentViewObject).toHaveBeenCalledWith({
       ...viewProps,
       attachmentId: attachment.id,
       caseData: { id: builderArgs.caseData.id, title: builderArgs.caseData.title },

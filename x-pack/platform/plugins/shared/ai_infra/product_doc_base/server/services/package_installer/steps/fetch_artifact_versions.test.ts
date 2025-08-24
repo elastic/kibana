@@ -180,7 +180,7 @@ describe('fetchArtifactVersions', () => {
   it('throws an error if the response is truncated', async () => {
     mockResponse(createResponse({ artifactNames: [], truncated: true }));
 
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError(
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrow(
       /bucket content is truncated/
     );
   });
@@ -188,6 +188,6 @@ describe('fetchArtifactVersions', () => {
   it('throws an error if the response is not valid xml', async () => {
     mockResponse('some plain text');
 
-    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrowError();
+    await expect(fetchArtifactVersions({ artifactRepositoryUrl })).rejects.toThrow();
   });
 });

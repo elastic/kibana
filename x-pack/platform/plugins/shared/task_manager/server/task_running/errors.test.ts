@@ -17,7 +17,7 @@ import {
 describe('Error Types', () => {
   describe('Unrecoverable error', () => {
     it('wraps and throws normal errors', () => {
-      expect(() => throwUnrecoverableError(new Error('OMG'))).toThrowError('OMG');
+      expect(() => throwUnrecoverableError(new Error('OMG'))).toThrow('OMG');
     });
 
     it('idnentifies wrapped normal errors', async () => {

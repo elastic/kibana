@@ -212,7 +212,7 @@ describe('registerRoutes', () => {
     const [_, wrappedHandler] = post.mock.calls[0];
     await wrappedHandler(mockContext, mockRequest, kibanaResponseFactory);
 
-    expect(handler).toBeCalledTimes(1);
+    expect(handler).toHaveBeenCalledTimes(1);
     const [args] = handler.mock.calls[0];
     expect(Object.keys(args).sort()).toEqual(
       ['aService', 'request', 'response', 'context', 'params', 'logger'].sort()
@@ -351,7 +351,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({
@@ -423,7 +423,7 @@ describe('registerRoutes', () => {
         kibanaResponseFactory
       );
 
-      expect(handler).toBeCalledTimes(1);
+      expect(handler).toHaveBeenCalledTimes(1);
       const [args] = handler.mock.calls[0];
       const { params } = args;
       expect(params).toEqual({

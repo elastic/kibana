@@ -143,7 +143,7 @@ describe('externalUrl config', () => {
               },
             ],
           })
-        ).toThrowError();
+        ).toThrow();
       });
     });
   });

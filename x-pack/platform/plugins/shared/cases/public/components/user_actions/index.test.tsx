@@ -193,7 +193,7 @@ describe(`UserActions`, () => {
       ).queryByTestId('editable-markdown-form')
     ).not.toBeInTheDocument();
 
-    expect(patchComment).toBeCalledWith(
+    expect(patchComment).toHaveBeenCalledWith(
       {
         commentUpdate: sampleData.content,
         caseId: 'case-id',

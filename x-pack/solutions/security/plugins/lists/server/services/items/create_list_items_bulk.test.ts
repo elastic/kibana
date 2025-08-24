@@ -27,7 +27,7 @@ describe('crete_list_item_bulk', () => {
     const firstRecord = getIndexESListItemMock();
     const secondRecord = getIndexESListItemMock(VALUE_2);
     [firstRecord.tie_breaker_id, secondRecord.tie_breaker_id] = TIE_BREAKERS;
-    expect(options.esClient.bulk).toBeCalledWith({
+    expect(options.esClient.bulk).toHaveBeenCalledWith({
       body: [
         { create: { _index: LIST_ITEM_INDEX } },
         firstRecord,
@@ -42,7 +42,7 @@ describe('crete_list_item_bulk', () => {
   test('It should not call the dataClient when the values are empty', async () => {
     const options = getCreateListItemBulkOptionsMock();
     options.value = [];
-    expect(options.esClient.bulk).not.toBeCalled();
+    expect(options.esClient.bulk).not.toHaveBeenCalled();
   });
 
   test('It should skip over a value if it is not able to add that item because it is not parsable such as an ip_range with a serializer that only matches one ip', async () => {
@@ -53,7 +53,7 @@ describe('crete_list_item_bulk', () => {
       value: ['127.0.0.1', '127.0.0.2'],
     };
     await createListItemsBulk(options);
-    expect(options.esClient.bulk).toBeCalledWith({
+    expect(options.esClient.bulk).toHaveBeenCalledWith({
       body: [
         { create: { _index: LIST_ITEM_INDEX } },
         {

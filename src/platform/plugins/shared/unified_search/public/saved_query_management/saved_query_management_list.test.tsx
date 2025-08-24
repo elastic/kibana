@@ -218,8 +218,8 @@ describe('Saved query management list component', () => {
     expect(screen.getByLabelText('Load query')).toBeEnabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeEnabled();
     await userEvent.click(screen.getByLabelText('Load query'));
-    expect(onLoadSpy).toBeCalled();
-    expect(onCloseSpy).toBeCalled();
+    expect(onLoadSpy).toHaveBeenCalled();
+    expect(onCloseSpy).toHaveBeenCalled();
   });
 
   it('should render the button with the correct text', async () => {
@@ -298,7 +298,7 @@ describe('Saved query management list component', () => {
     expect(screen.getByLabelText('Load query')).toBeDisabled();
     expect(screen.getByRole('button', { name: 'Delete query' })).toBeDisabled();
     expect(deleteSavedQuerySpy).toHaveBeenLastCalledWith('8a0b7cd0-b0c4-11ec-92b2-73d62e0d28a9');
-    expect(onClearSavedQuerySpy).toBeCalled();
+    expect(onClearSavedQuerySpy).toHaveBeenCalled();
   });
 
   it('should not render pagination if there are less than 5 saved queries', async () => {

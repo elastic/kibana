@@ -79,7 +79,7 @@ describe('server config', () => {
     test('throws if invalid hostname', () => {
       for (const host of invalidHostnames) {
         const configSchema = config.schema;
-        expect(() => configSchema.validate({ host })).toThrowError(
+        expect(() => configSchema.validate({ host })).toThrow(
           '[host]: value must be a valid hostname (see RFC 1123).'
         );
       }
@@ -97,10 +97,10 @@ describe('server config', () => {
 
     test('throws if invalid ports', () => {
       const configSchema = config.schema;
-      expect(() => configSchema.validate({ port: false })).toThrowError(
+      expect(() => configSchema.validate({ port: false })).toThrow(
         'port]: expected value of type [number] but got [boolean]'
       );
-      expect(() => configSchema.validate({ port: 'oops' })).toThrowError(
+      expect(() => configSchema.validate({ port: 'oops' })).toThrow(
         'port]: expected value of type [number] but got [string]'
       );
     });
@@ -212,10 +212,10 @@ describe('server config', () => {
 
     test('throws if not boolean', () => {
       const configSchema = config.schema;
-      expect(() => configSchema.validate({ restrictInternalApis: 100 })).toThrowError(
+      expect(() => configSchema.validate({ restrictInternalApis: 100 })).toThrow(
         'restrictInternalApis]: expected value of type [boolean] but got [number]'
       );
-      expect(() => configSchema.validate({ restrictInternalApis: 'something' })).toThrowError(
+      expect(() => configSchema.validate({ restrictInternalApis: 'something' })).toThrow(
         'restrictInternalApis]: expected value of type [boolean] but got [string]'
       );
     });

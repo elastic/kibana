@@ -240,7 +240,7 @@ describe('ConnectorsForm ', () => {
     });
 
     await userEvent.click(screen.getByTestId('edit-connectors-cancel'));
-    expect(onCancel).toBeCalled();
+    expect(onCancel).toHaveBeenCalled();
   });
 
   it('disables the submit button correctly if the initial connector is the none', async () => {
