@@ -8,10 +8,10 @@
  */
 
 import React from 'react';
+import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { ActionButtons } from './action_buttons';
 import { ActionsSubtitle } from './actions_subtitle';
 import { ActionsTitle } from './actions_title';
-import type { ComponentData } from '../../../../lib/types';
 
 interface Props {
   componentData: ComponentData;
