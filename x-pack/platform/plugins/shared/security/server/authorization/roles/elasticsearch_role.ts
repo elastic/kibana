@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { omit } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
 import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/common';
@@ -51,33 +50,15 @@ export interface TransformRoleOptions {
   replaceDeprecatedKibanaPrivileges?: boolean;
 }
 
-type ExportableRole = Omit<
-  Role,
-  '_transform_error' | '_unrecognized_applications' | 'name' | 'transient_metadata'
->;
-
-export function transformElasticsearchRoleToRole(
-  opts: TransformRoleOptions,
-  exportable: true
-): ExportableRole;
-
-export function transformElasticsearchRoleToRole(
-  opts: TransformRoleOptions,
-  exportable?: false
-): Role;
-
-export function transformElasticsearchRoleToRole(
-  {
-    features,
-    elasticsearchRole,
-    name,
-    application,
-    logger,
-    subFeaturePrivilegeIterator,
-    replaceDeprecatedKibanaPrivileges,
-  }: TransformRoleOptions,
-  exportable?: boolean
-): Role | ExportableRole {
+export function transformElasticsearchRoleToRole({
+  features,
+  elasticsearchRole,
+  name,
+  application,
+  logger,
+  subFeaturePrivilegeIterator,
+  replaceDeprecatedKibanaPrivileges,
+}: TransformRoleOptions): Role {
   const kibanaTransformResult = transformRoleApplicationsToKibanaPrivileges({
     features,
     roleApplications: elasticsearchRole.applications,
@@ -86,7 +67,7 @@ export function transformElasticsearchRoleToRole(
     subFeaturePrivilegeIterator,
     replaceDeprecatedKibanaPrivileges,
   });
-  const role = {
+  return {
     name,
     ...(elasticsearchRole.description && { description: elasticsearchRole.description }),
     metadata: elasticsearchRole.metadata,
@@ -105,18 +86,6 @@ export function transformElasticsearchRoleToRole(
       application
     ),
   };
-
-  if (exportable === true) {
-    const exportableRole = omit(role, [
-      '_transform_error',
-      '_unrecognized_applications',
-      'name',
-      'transient_metadata',
-    ]);
-    return exportableRole;
-  }
-
-  return role;
 }
 
 interface TransformRoleApplicationsOptions {
