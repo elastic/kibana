@@ -128,6 +128,7 @@ function createRuleOverrides(options = {}) {
  */
 function normalizeRuleConfig(ruleConfig) {
   // If it's not an object, assume it's the value with default merge strategy
+  // This will throw in applyDefaultHandler since merge requires custom handler
   if (!ruleConfig || typeof ruleConfig !== 'object') {
     return {
       strategy: 'merge',
@@ -136,9 +137,7 @@ function normalizeRuleConfig(ruleConfig) {
     };
   }
 
-  // If it's an object, check if it has our config properties
-  // If it has 'value' or 'strategy' or 'severity' or 'customHandler', treat it as config
-  // Otherwise treat the whole object as the value
+  // Check if it's our config object format
   const isConfigObject =
     'strategy' in ruleConfig ||
     'value' in ruleConfig ||
@@ -147,6 +146,7 @@ function normalizeRuleConfig(ruleConfig) {
 
   if (!isConfigObject) {
     // It's an object but not our config format, treat it as the value
+    // This will throw in applyDefaultHandler since merge requires custom handler
     return {
       strategy: 'merge',
       value: ruleConfig,
@@ -155,6 +155,16 @@ function normalizeRuleConfig(ruleConfig) {
   }
 
   // It's our config object format
+  // Special case: if only severity is provided, no strategy needed
+  if ('severity' in ruleConfig && !('strategy' in ruleConfig) && !('value' in ruleConfig)) {
+    return {
+      strategy: undefined,
+      value: undefined,
+      severity: ruleConfig.severity,
+      customHandler: ruleConfig.customHandler,
+    };
+  }
+
   return {
     strategy: ruleConfig.strategy || 'merge',
     value: ruleConfig.value,
@@ -186,6 +196,30 @@ function applyDefaultHandler(config, ruleName, ruleConfig) {
 
   if (!config.overrides) return;
 
+  // If only severity is provided (no strategy), just update severity
+  if (!strategy && severity !== undefined && value === undefined) {
+    for (const override of config.overrides) {
+      if (!override.rules || !(ruleName in override.rules)) continue;
+
+      const existingRule = override.rules[ruleName];
+      const normalizedSeverity = normalizeSeverity(severity);
+
+      if (normalizedSeverity === null) {
+        throw new Error(
+          `Invalid severity '${severity}' for rule '${ruleName}'. ` +
+            `Valid values are: 'off', 'warn', 'error', 0, 1, 2`
+        );
+      }
+
+      if (Array.isArray(existingRule) && existingRule.length > 0) {
+        override.rules[ruleName][0] = normalizedSeverity;
+      } else if (typeof existingRule === 'string' || typeof existingRule === 'number') {
+        override.rules[ruleName] = normalizedSeverity;
+      }
+    }
+    return;
+  }
+
   for (const override of config.overrides) {
     if (!override.rules) continue;
 
@@ -203,26 +237,27 @@ function applyDefaultHandler(config, ruleName, ruleConfig) {
       case 'merge':
       case 'append':
       case 'prepend':
-        if (ruleName in override.rules) {
-          // For default handler, update severity if provided and keep/replace value
-          const existingRule = override.rules[ruleName];
-          const normalizedSeverity = normalizeSeverity(severity);
-
-          if (Array.isArray(existingRule) && existingRule.length > 0) {
-            // Normalize the existing severity too
-            const currentSeverity = normalizeSeverity(existingRule[0]);
-            override.rules[ruleName] = [
-              normalizedSeverity !== null ? normalizedSeverity : currentSeverity,
-              value,
-            ];
-          } else {
-            override.rules[ruleName] = value;
-          }
-        }
-        break;
+        throw new Error(
+          `Strategy '${strategy}' requires a custom handler for rule '${ruleName}'.\n` +
+            `Only 'severity' (change severity only), 'replace', and 'remove' are supported by default.\n` +
+            `To use '${strategy}', provide a customHandler that implements the ${strategy} logic for this specific rule.\n` +
+            `Example:\n` +
+            `  '${ruleName}': {\n` +
+            `    strategy: '${strategy}',\n` +
+            `    value: ...,\n` +
+            `    customHandler: {\n` +
+            `      process(config, ruleConfig, context) {\n` +
+            `        // Your custom ${strategy} logic here\n` +
+            `      }\n` +
+            `    }\n` +
+            `  }`
+        );
 
       default:
-        console.warn(`Unknown strategy '${strategy}' for rule '${ruleName}'`);
+        throw new Error(
+          `Unknown strategy '${strategy}' for rule '${ruleName}'.\n` +
+            `Supported strategies: 'replace', 'remove', or provide only 'severity' to change severity.`
+        );
     }
   }
 }
