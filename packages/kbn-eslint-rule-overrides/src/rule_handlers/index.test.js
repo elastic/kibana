@@ -17,111 +17,143 @@ describe('Rule Handlers', () => {
     registerRuleHandler('no-restricted-imports', noRestrictedImportsHandler);
   });
 
-  describe('registerRuleHandler', () => {
-    it('should register a valid handler', () => {
-      const handler = {
-        ruleName: 'test-rule',
-        process: jest.fn(),
-      };
+  describe('WHEN registering a rule handler', () => {
+    describe('AND WHEN providing valid parameters', () => {
+      it('SHOULD register the handler successfully', () => {
+        const handler = {
+          ruleName: 'test-rule',
+          process: jest.fn(),
+        };
 
-      registerRuleHandler('test-rule', handler);
-      expect(getRuleHandler('test-rule')).toBe(handler);
+        registerRuleHandler('test-rule', handler);
+        expect(getRuleHandler('test-rule')).toBe(handler);
+      });
+
+      it('SHOULD overwrite existing handler when registering same rule name', () => {
+        const handler1 = { process: jest.fn() };
+        const handler2 = { process: jest.fn() };
+
+        registerRuleHandler('test-rule', handler1);
+        expect(getRuleHandler('test-rule')).toBe(handler1);
+
+        registerRuleHandler('test-rule', handler2);
+        expect(getRuleHandler('test-rule')).toBe(handler2);
+      });
     });
 
-    it('should throw error for invalid rule name', () => {
-      const handler = { process: jest.fn() };
+    describe('AND WHEN providing invalid rule name', () => {
+      it('SHOULD throw error for empty string', () => {
+        const handler = { process: jest.fn() };
 
-      expect(() => registerRuleHandler('', handler)).toThrow(
-        'Rule name must be a non-empty string'
-      );
-      expect(() => registerRuleHandler(null, handler)).toThrow(
-        'Rule name must be a non-empty string'
-      );
-      expect(() => registerRuleHandler(123, handler)).toThrow(
-        'Rule name must be a non-empty string'
-      );
+        expect(() => registerRuleHandler('', handler)).toThrow(
+          'Rule name must be a non-empty string'
+        );
+      });
+
+      it('SHOULD throw error for null value', () => {
+        const handler = { process: jest.fn() };
+
+        expect(() => registerRuleHandler(null, handler)).toThrow(
+          'Rule name must be a non-empty string'
+        );
+      });
+
+      it('SHOULD throw error for non-string value', () => {
+        const handler = { process: jest.fn() };
+
+        expect(() => registerRuleHandler(123, handler)).toThrow(
+          'Rule name must be a non-empty string'
+        );
+      });
     });
 
-    it('should throw error for invalid handler', () => {
-      expect(() => registerRuleHandler('test-rule', null)).toThrow(
-        'Handler must have a process function'
-      );
-      expect(() => registerRuleHandler('test-rule', {})).toThrow(
-        'Handler must have a process function'
-      );
-      expect(() => registerRuleHandler('test-rule', { process: 'not-a-function' })).toThrow(
-        'Handler must have a process function'
-      );
-    });
+    describe('AND WHEN providing invalid handler', () => {
+      it('SHOULD throw error for null handler', () => {
+        expect(() => registerRuleHandler('test-rule', null)).toThrow(
+          'Handler must have a process function'
+        );
+      });
 
-    it('should overwrite existing handler', () => {
-      const handler1 = { process: jest.fn() };
-      const handler2 = { process: jest.fn() };
+      it('SHOULD throw error for empty object handler', () => {
+        expect(() => registerRuleHandler('test-rule', {})).toThrow(
+          'Handler must have a process function'
+        );
+      });
 
-      registerRuleHandler('test-rule', handler1);
-      expect(getRuleHandler('test-rule')).toBe(handler1);
-
-      registerRuleHandler('test-rule', handler2);
-      expect(getRuleHandler('test-rule')).toBe(handler2);
-    });
-  });
-
-  describe('getRuleHandler', () => {
-    it('should return registered handler', () => {
-      const handler = { process: jest.fn() };
-      registerRuleHandler('test-rule', handler);
-
-      expect(getRuleHandler('test-rule')).toBe(handler);
-    });
-
-    it('should return null for unregistered rule', () => {
-      expect(getRuleHandler('non-existent-rule')).toBe(null);
-    });
-
-    it('should return built-in no-restricted-imports handler', () => {
-      const handler = getRuleHandler('no-restricted-imports');
-      expect(handler).toBeTruthy();
-      expect(handler.ruleName).toBe('no-restricted-imports');
-      expect(typeof handler.process).toBe('function');
-    });
-  });
-
-  describe('clearHandlers', () => {
-    it('should remove all handlers', () => {
-      const handler1 = { process: jest.fn() };
-      const handler2 = { process: jest.fn() };
-
-      registerRuleHandler('rule1', handler1);
-      registerRuleHandler('rule2', handler2);
-
-      clearHandlers();
-
-      expect(getRuleHandler('rule1')).toBe(null);
-      expect(getRuleHandler('rule2')).toBe(null);
-      expect(getRuleHandler('no-restricted-imports')).toBe(null);
+      it('SHOULD throw error for handler with non-function process property', () => {
+        expect(() => registerRuleHandler('test-rule', { process: 'not-a-function' })).toThrow(
+          'Handler must have a process function'
+        );
+      });
     });
   });
 
-  describe('getRegisteredHandlers', () => {
-    it('should return list of registered handler names', () => {
-      expect(getRegisteredHandlers()).toEqual(['no-restricted-imports']);
+  describe('WHEN getting a rule handler', () => {
+    describe('AND WHEN handler is registered', () => {
+      it('SHOULD return the registered handler', () => {
+        const handler = { process: jest.fn() };
+        registerRuleHandler('test-rule', handler);
 
-      const handler1 = { process: jest.fn() };
-      const handler2 = { process: jest.fn() };
+        expect(getRuleHandler('test-rule')).toBe(handler);
+      });
 
-      registerRuleHandler('rule1', handler1);
-      registerRuleHandler('rule2', handler2);
-
-      const handlers = getRegisteredHandlers();
-      expect(handlers).toContain('no-restricted-imports');
-      expect(handlers).toContain('rule1');
-      expect(handlers).toContain('rule2');
-      expect(handlers).toHaveLength(3);
+      it('SHOULD return built-in no-restricted-imports handler', () => {
+        const handler = getRuleHandler('no-restricted-imports');
+        expect(handler).toBeTruthy();
+        expect(handler.ruleName).toBe('no-restricted-imports');
+        expect(typeof handler.process).toBe('function');
+      });
     });
 
-    it('should return empty array after clearing', () => {
-      clearHandlers();
-      expect(getRegisteredHandlers()).toEqual([]);
+    describe('AND WHEN handler is not registered', () => {
+      it('SHOULD return null for unregistered rule', () => {
+        expect(getRuleHandler('non-existent-rule')).toBe(null);
+      });
+    });
+  });
+
+  describe('WHEN clearing all handlers', () => {
+    describe('AND WHEN handlers are registered', () => {
+      it('SHOULD remove all registered handlers', () => {
+        const handler1 = { process: jest.fn() };
+        const handler2 = { process: jest.fn() };
+
+        registerRuleHandler('rule1', handler1);
+        registerRuleHandler('rule2', handler2);
+
+        clearHandlers();
+
+        expect(getRuleHandler('rule1')).toBe(null);
+        expect(getRuleHandler('rule2')).toBe(null);
+        expect(getRuleHandler('no-restricted-imports')).toBe(null);
+      });
+    });
+  });
+
+  describe('WHEN getting registered handlers list', () => {
+    describe('AND WHEN handlers are registered', () => {
+      it('SHOULD return list of all registered handler names', () => {
+        expect(getRegisteredHandlers()).toEqual(['no-restricted-imports']);
+
+        const handler1 = { process: jest.fn() };
+        const handler2 = { process: jest.fn() };
+
+        registerRuleHandler('rule1', handler1);
+        registerRuleHandler('rule2', handler2);
+
+        const handlers = getRegisteredHandlers();
+        expect(handlers).toContain('no-restricted-imports');
+        expect(handlers).toContain('rule1');
+        expect(handlers).toContain('rule2');
+        expect(handlers).toHaveLength(3);
+      });
+    });
+
+    describe('AND WHEN no handlers are registered', () => {
+      it('SHOULD return empty array after clearing', () => {
+        clearHandlers();
+        expect(getRegisteredHandlers()).toEqual([]);
+      });
     });
   });
 });

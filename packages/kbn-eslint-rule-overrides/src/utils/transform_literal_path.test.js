@@ -15,73 +15,95 @@ describe('transformLiteralPath', () => {
   const rootDir = '/project';
   const targetDir = '/project/src/components';
 
-  describe('when transforming literal paths within target directory', () => {
-    it('should transform file in target directory', () => {
+  describe('WHEN transforming literal paths within target directory', () => {
+    it('SHOULD transform file in target directory to relative path', () => {
       const result = transformLiteralPath('src/components/Button.js', rootDir, targetDir);
       expect(result).toBe('Button.js');
     });
 
-    it('should transform file in subdirectory of target', () => {
-      const result = transformLiteralPath('src/components/forms/Input.js', rootDir, targetDir);
-      expect(result).toBe('forms/Input.js');
+    describe('AND WHEN the path is in a subdirectory of target', () => {
+      it('SHOULD transform to relative path from target directory', () => {
+        const result = transformLiteralPath('src/components/forms/Input.js', rootDir, targetDir);
+        expect(result).toBe('forms/Input.js');
+      });
+
+      it('SHOULD handle deeply nested subdirectories', () => {
+        const result = transformLiteralPath(
+          'src/components/ui/buttons/Button.js',
+          rootDir,
+          targetDir
+        );
+        expect(result).toBe('ui/buttons/Button.js');
+      });
     });
 
-    it('should return dot for exact target directory match', () => {
-      const result = transformLiteralPath('src/components', rootDir, targetDir);
-      expect(result).toBe('.');
-    });
-
-    it('should handle nested subdirectories', () => {
-      const result = transformLiteralPath(
-        'src/components/ui/buttons/Button.js',
-        rootDir,
-        targetDir
-      );
-      expect(result).toBe('ui/buttons/Button.js');
-    });
-  });
-
-  describe('when transforming literal paths outside target directory', () => {
-    it('should return null for sibling directory', () => {
-      const result = transformLiteralPath('src/utils/helpers.js', rootDir, targetDir);
-      expect(result).toBe(null);
-    });
-
-    it('should return null for parent directory file', () => {
-      const result = transformLiteralPath('src/index.js', rootDir, targetDir);
-      expect(result).toBe(null);
-    });
-
-    it('should return null for completely different path', () => {
-      const result = transformLiteralPath('packages/core/index.js', rootDir, targetDir);
-      expect(result).toBe(null);
-    });
-
-    it('should return null for root level file', () => {
-      const result = transformLiteralPath('package.json', rootDir, targetDir);
-      expect(result).toBe(null);
+    describe('AND WHEN the path exactly matches the target directory', () => {
+      it('SHOULD return dot for current directory', () => {
+        const result = transformLiteralPath('src/components', rootDir, targetDir);
+        expect(result).toBe('.');
+      });
     });
   });
 
-  describe('when handling edge cases', () => {
-    it('should handle absolute paths in literal pattern', () => {
-      const absolutePattern = path.resolve(rootDir, 'src/components/Button.js');
-      const result = transformLiteralPath(absolutePattern, rootDir, targetDir);
-      expect(result).toBe('Button.js');
+  describe('WHEN transforming literal paths outside target directory', () => {
+    describe('AND WHEN the path is in a sibling directory', () => {
+      it('SHOULD return null', () => {
+        const result = transformLiteralPath('src/utils/helpers.js', rootDir, targetDir);
+        expect(result).toBe(null);
+      });
     });
 
-    it('should handle target directory with trailing slash', () => {
-      const result = transformLiteralPath('src/components/Button.js', rootDir, targetDir + '/');
-      expect(result).toBe('Button.js');
+    describe('AND WHEN the path is in a parent directory', () => {
+      it('SHOULD return null', () => {
+        const result = transformLiteralPath('src/index.js', rootDir, targetDir);
+        expect(result).toBe(null);
+      });
     });
 
-    it('should handle Windows-style paths', () => {
-      if (process.platform === 'win32') {
-        const winRootDir = 'C:\\project';
-        const winTargetDir = 'C:\\project\\src\\components';
-        const result = transformLiteralPath('src\\components\\Button.js', winRootDir, winTargetDir);
+    describe('AND WHEN the path is in a completely different location', () => {
+      it('SHOULD return null', () => {
+        const result = transformLiteralPath('packages/core/index.js', rootDir, targetDir);
+        expect(result).toBe(null);
+      });
+    });
+
+    describe('AND WHEN the path is at root level', () => {
+      it('SHOULD return null', () => {
+        const result = transformLiteralPath('package.json', rootDir, targetDir);
+        expect(result).toBe(null);
+      });
+    });
+  });
+
+  describe('WHEN handling edge cases', () => {
+    describe('AND WHEN the literal pattern is an absolute path', () => {
+      it('SHOULD transform absolute path to relative path', () => {
+        const absolutePattern = path.resolve(rootDir, 'src/components/Button.js');
+        const result = transformLiteralPath(absolutePattern, rootDir, targetDir);
         expect(result).toBe('Button.js');
-      }
+      });
+    });
+
+    describe('AND WHEN the target directory has a trailing slash', () => {
+      it('SHOULD handle the transformation correctly', () => {
+        const result = transformLiteralPath('src/components/Button.js', rootDir, targetDir + '/');
+        expect(result).toBe('Button.js');
+      });
+    });
+
+    describe('AND WHEN dealing with Windows-style paths', () => {
+      it('SHOULD handle Windows path separators correctly', () => {
+        if (process.platform === 'win32') {
+          const winRootDir = 'C:\\project';
+          const winTargetDir = 'C:\\project\\src\\components';
+          const result = transformLiteralPath(
+            'src\\components\\Button.js',
+            winRootDir,
+            winTargetDir
+          );
+          expect(result).toBe('Button.js');
+        }
+      });
     });
   });
 });

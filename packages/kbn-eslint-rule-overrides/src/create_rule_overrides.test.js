@@ -69,8 +69,8 @@ describe('createRuleOverrides', () => {
     ]);
   });
 
-  describe('when childConfigDir is not provided', () => {
-    it('should throw an error', () => {
+  describe('WHEN childConfigDir is not provided', () => {
+    it('SHOULD throw an error', () => {
       expect(() => {
         createRuleOverrides({
           rules: {
@@ -81,236 +81,270 @@ describe('createRuleOverrides', () => {
     });
   });
 
-  describe('when rules are not provided', () => {
-    it('should throw an error for empty rules object', () => {
-      expect(() => {
-        createRuleOverrides({
-          childConfigDir,
-          rules: {},
-        });
-      }).toThrow('No rules provided');
+  describe('WHEN rules are not provided', () => {
+    describe('AND WHEN rules is an empty object', () => {
+      it('SHOULD throw an error', () => {
+        expect(() => {
+          createRuleOverrides({
+            childConfigDir,
+            rules: {},
+          });
+        }).toThrow('No rules provided');
+      });
     });
 
-    it('should throw an error for missing rules', () => {
-      expect(() => {
-        createRuleOverrides({
-          childConfigDir,
-        });
-      }).toThrow('No rules provided');
+    describe('AND WHEN rules is missing', () => {
+      it('SHOULD throw an error', () => {
+        expect(() => {
+          createRuleOverrides({
+            childConfigDir,
+          });
+        }).toThrow('No rules provided');
+      });
     });
   });
 
-  describe('when using rule handlers', () => {
-    it('should use specific handler when available', () => {
-      const mockHandler = {
-        process: jest.fn(),
-      };
-      getRuleHandler.mockReturnValue(mockHandler);
+  describe('WHEN using rule handlers', () => {
+    describe('AND WHEN a specific handler is available', () => {
+      it('SHOULD use the specific handler', () => {
+        const mockHandler = {
+          process: jest.fn(),
+        };
+        getRuleHandler.mockReturnValue(mockHandler);
 
-      createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'no-restricted-imports': ['lodash'],
-        },
-      });
-
-      expect(getRuleHandler).toHaveBeenCalledWith('no-restricted-imports');
-      expect(mockHandler.process).toHaveBeenCalledWith(
-        expect.any(Object),
-        { strategy: 'merge', value: ['lodash'], severity: undefined },
-        expect.objectContaining({
-          rootDir: '/project',
+        createRuleOverrides({
           childConfigDir,
-          ruleName: 'no-restricted-imports',
-        })
-      );
+          rules: {
+            'no-restricted-imports': ['lodash'],
+          },
+        });
+
+        expect(getRuleHandler).toHaveBeenCalledWith('no-restricted-imports');
+        expect(mockHandler.process).toHaveBeenCalledWith(
+          expect.any(Object),
+          { strategy: 'merge', value: ['lodash'], severity: undefined },
+          expect.objectContaining({
+            rootDir: '/project',
+            childConfigDir,
+            ruleName: 'no-restricted-imports',
+          })
+        );
+      });
     });
 
-    it('should use default handler when no specific handler exists', () => {
-      getRuleHandler.mockReturnValue(null);
+    describe('AND WHEN no specific handler exists', () => {
+      it('SHOULD throw an error for merge strategy without handler', () => {
+        getRuleHandler.mockReturnValue(null);
 
-      expect(() => {
+        expect(() => {
+          createRuleOverrides({
+            childConfigDir,
+            rules: {
+              'no-console': {
+                strategy: 'merge',
+                value: ['error', { allow: ['warn'] }],
+              },
+            },
+          });
+        }).toThrow(/Strategy 'merge' requires a custom handler/);
+      });
+    });
+
+    describe('AND WHEN a custom handler is provided', () => {
+      it('SHOULD use the custom handler', () => {
+        const customHandler = {
+          process: jest.fn(),
+        };
+
+        createRuleOverrides({
+          childConfigDir,
+          rules: {
+            'custom-rule': {
+              strategy: 'merge',
+              value: ['error'],
+              customHandler,
+            },
+          },
+        });
+
+        expect(customHandler.process).toHaveBeenCalled();
+        expect(getRuleHandler).not.toHaveBeenCalledWith('custom-rule');
+      });
+    });
+  });
+
+  describe('WHEN filtering overrides', () => {
+    describe('AND WHEN only some overrides have processed rules', () => {
+      it('SHOULD only include overrides with processed rules', () => {
+        getRuleHandler.mockReturnValue(null);
+
         createRuleOverrides({
           childConfigDir,
           rules: {
             'no-console': {
-              strategy: 'merge',
-              value: ['error', { allow: ['warn'] }],
+              strategy: 'replace',
+              value: ['error'],
             },
           },
         });
-      }).toThrow(/Strategy 'merge' requires a custom handler/);
+
+        const ruleFilter = transformOverridesForNestedContext.mock.calls[0][3];
+
+        expect(ruleFilter({ rules: { 'no-console': ['error'] } })).toBe(true);
+        expect(ruleFilter({ rules: { 'other-rule': ['error'] } })).toBe(false);
+        expect(ruleFilter({ rules: {} })).toBe(false);
+        expect(ruleFilter({})).toBe(false);
+      });
     });
 
-    it('should use custom handler when provided', () => {
-      const customHandler = {
-        process: jest.fn(),
-      };
+    describe('AND WHEN multiple rules are configured', () => {
+      it('SHOULD handle filtering for multiple rules', () => {
+        getRuleHandler.mockReturnValue(null);
 
-      createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'custom-rule': {
-            strategy: 'merge',
-            value: ['error'],
-            customHandler,
+        createRuleOverrides({
+          childConfigDir,
+          rules: {
+            'no-console': { strategy: 'replace', value: ['error'] },
+            'no-debugger': { strategy: 'remove' },
           },
-        },
-      });
+        });
 
-      expect(customHandler.process).toHaveBeenCalled();
-      expect(getRuleHandler).not.toHaveBeenCalledWith('custom-rule');
+        const ruleFilter = transformOverridesForNestedContext.mock.calls[0][3];
+
+        expect(ruleFilter({ rules: { 'no-console': ['error'] } })).toBe(true);
+        expect(ruleFilter({ rules: { 'no-debugger': ['error'] } })).toBe(true);
+        expect(ruleFilter({ rules: { 'no-console': ['error'], 'no-debugger': ['error'] } })).toBe(
+          true
+        );
+        expect(ruleFilter({ rules: { 'other-rule': ['error'] } })).toBe(false);
+      });
     });
   });
 
-  describe('when filtering overrides', () => {
-    it('should only include overrides with processed rules', () => {
-      getRuleHandler.mockReturnValue(null);
+  describe('WHEN handling edge cases', () => {
+    describe('AND WHEN root config has no overrides', () => {
+      it('SHOULD return empty array', () => {
+        const eslintConfig = require('../../../.eslintrc');
+        eslintConfig.overrides = [];
 
-      createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'no-console': {
-            strategy: 'replace',
-            value: ['error'],
+        const result = createRuleOverrides({
+          childConfigDir,
+          rules: {
+            'no-console': ['error'],
           },
-        },
+        });
+
+        expect(result).toEqual([]);
       });
-
-      const ruleFilter = transformOverridesForNestedContext.mock.calls[0][3];
-
-      expect(ruleFilter({ rules: { 'no-console': ['error'] } })).toBe(true);
-      expect(ruleFilter({ rules: { 'other-rule': ['error'] } })).toBe(false);
-      expect(ruleFilter({ rules: {} })).toBe(false);
-      expect(ruleFilter({})).toBe(false);
     });
 
-    it('should handle multiple rules', () => {
-      getRuleHandler.mockReturnValue(null);
+    describe('AND WHEN root config has undefined overrides', () => {
+      it('SHOULD return empty array', () => {
+        const eslintConfig = require('../../../.eslintrc');
+        delete eslintConfig.overrides;
 
-      createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'no-console': { strategy: 'replace', value: ['error'] },
-          'no-debugger': { strategy: 'remove' },
-        },
+        const result = createRuleOverrides({
+          childConfigDir,
+          rules: {
+            'no-console': ['error'],
+          },
+        });
+
+        expect(result).toEqual([]);
       });
-
-      const ruleFilter = transformOverridesForNestedContext.mock.calls[0][3];
-
-      expect(ruleFilter({ rules: { 'no-console': ['error'] } })).toBe(true);
-      expect(ruleFilter({ rules: { 'no-debugger': ['error'] } })).toBe(true);
-      expect(ruleFilter({ rules: { 'no-console': ['error'], 'no-debugger': ['error'] } })).toBe(
-        true
-      );
-      expect(ruleFilter({ rules: { 'other-rule': ['error'] } })).toBe(false);
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should handle root config with no overrides', () => {
-      const eslintConfig = require('../../../.eslintrc');
-      eslintConfig.overrides = [];
-
-      const result = createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'no-console': ['error'],
-        },
-      });
-
-      expect(result).toEqual([]);
-    });
-
-    it('should handle root config with undefined overrides', () => {
-      const eslintConfig = require('../../../.eslintrc');
-      delete eslintConfig.overrides;
-
-      const result = createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'no-console': ['error'],
-        },
-      });
-
-      expect(result).toEqual([]);
     });
   });
 });
 
 describe('normalizeRuleConfig', () => {
-  it('should handle severity-only config', () => {
-    const result = normalizeRuleConfig({ severity: 'error' });
-    expect(result).toEqual({
-      strategy: undefined,
-      value: undefined,
-      severity: 'error',
-      customHandler: undefined,
+  describe('WHEN given severity-only config', () => {
+    it('SHOULD normalize to config object with severity', () => {
+      const result = normalizeRuleConfig({ severity: 'error' });
+      expect(result).toEqual({
+        strategy: undefined,
+        value: undefined,
+        severity: 'error',
+        customHandler: undefined,
+      });
     });
   });
 
-  it('should normalize simple value to merge strategy', () => {
-    const result = normalizeRuleConfig(['lodash', 'moment']);
-    expect(result).toEqual({
-      strategy: 'merge',
-      value: ['lodash', 'moment'],
-      severity: undefined,
+  describe('WHEN given simple value', () => {
+    it('SHOULD normalize to merge strategy', () => {
+      const result = normalizeRuleConfig(['lodash', 'moment']);
+      expect(result).toEqual({
+        strategy: 'merge',
+        value: ['lodash', 'moment'],
+        severity: undefined,
+      });
     });
   });
 
-  it('should preserve explicit config', () => {
-    const config = {
-      strategy: 'replace',
-      value: ['error'],
-      severity: 'warn',
-    };
-    const result = normalizeRuleConfig(config);
-    expect(result).toEqual({
-      strategy: 'replace',
-      value: ['error'],
-      severity: 'warn',
-      customHandler: undefined,
+  describe('WHEN given explicit config', () => {
+    it('SHOULD preserve the explicit configuration', () => {
+      const config = {
+        strategy: 'replace',
+        value: ['error'],
+        severity: 'warn',
+      };
+      const result = normalizeRuleConfig(config);
+      expect(result).toEqual({
+        strategy: 'replace',
+        value: ['error'],
+        severity: 'warn',
+        customHandler: undefined,
+      });
     });
   });
 
-  it('should use defaults for missing fields', () => {
-    const result = normalizeRuleConfig({ value: ['error'] });
-    expect(result).toEqual({
-      strategy: 'merge',
-      value: ['error'],
-      severity: undefined,
-      customHandler: undefined,
+  describe('WHEN given config with missing fields', () => {
+    it('SHOULD use defaults for missing fields', () => {
+      const result = normalizeRuleConfig({ value: ['error'] });
+      expect(result).toEqual({
+        strategy: 'merge',
+        value: ['error'],
+        severity: undefined,
+        customHandler: undefined,
+      });
     });
   });
 
-  it('should preserve custom handler', () => {
-    const handler = { process: jest.fn() };
-    const result = normalizeRuleConfig({
-      value: ['error'],
-      customHandler: handler,
+  describe('WHEN given config with custom handler', () => {
+    it('SHOULD preserve custom handler', () => {
+      const handler = { process: jest.fn() };
+      const result = normalizeRuleConfig({
+        value: ['error'],
+        customHandler: handler,
+      });
+      expect(result.customHandler).toBe(handler);
     });
-    expect(result.customHandler).toBe(handler);
   });
 });
 
 describe('normalizeSeverity', () => {
-  it('should normalize string severities', () => {
-    expect(normalizeSeverity('off')).toBe(0);
-    expect(normalizeSeverity('warn')).toBe(1);
-    expect(normalizeSeverity('error')).toBe(2);
+  describe('WHEN given string severities', () => {
+    it('SHOULD normalize to numeric values', () => {
+      expect(normalizeSeverity('off')).toBe(0);
+      expect(normalizeSeverity('warn')).toBe(1);
+      expect(normalizeSeverity('error')).toBe(2);
+    });
   });
 
-  it('should normalize numeric severities', () => {
-    expect(normalizeSeverity(0)).toBe(0);
-    expect(normalizeSeverity(1)).toBe(1);
-    expect(normalizeSeverity(2)).toBe(2);
+  describe('WHEN given numeric severities', () => {
+    it('SHOULD return the same numeric values', () => {
+      expect(normalizeSeverity(0)).toBe(0);
+      expect(normalizeSeverity(1)).toBe(1);
+      expect(normalizeSeverity(2)).toBe(2);
+    });
   });
 
-  it('should return null for invalid severities', () => {
-    expect(normalizeSeverity('invalid')).toBe(null);
-    expect(normalizeSeverity(3)).toBe(null);
-    expect(normalizeSeverity(undefined)).toBe(null);
-    expect(normalizeSeverity(null)).toBe(null);
+  describe('WHEN given invalid severities', () => {
+    it('SHOULD return null', () => {
+      expect(normalizeSeverity('invalid')).toBe(null);
+      expect(normalizeSeverity(3)).toBe(null);
+      expect(normalizeSeverity(undefined)).toBe(null);
+      expect(normalizeSeverity(null)).toBe(null);
+    });
   });
 });
 
@@ -331,86 +365,102 @@ describe('applyDefaultHandler', () => {
     };
   });
 
-  describe('remove strategy', () => {
-    it('should remove the rule', () => {
+  describe('WHEN using remove strategy', () => {
+    it('SHOULD remove the rule from config', () => {
       applyDefaultHandler(config, 'no-console', { strategy: 'remove' });
       expect(config.overrides[0].rules['no-console']).toBeUndefined();
       expect(config.overrides[0].rules['no-debugger']).toEqual(['error']);
     });
   });
 
-  describe('replace strategy', () => {
-    it('should replace existing rule', () => {
-      applyDefaultHandler(config, 'no-console', {
-        strategy: 'replace',
-        value: ['error', { allow: ['warn', 'error'] }],
+  describe('WHEN using replace strategy', () => {
+    describe('AND WHEN rule exists', () => {
+      it('SHOULD replace existing rule', () => {
+        applyDefaultHandler(config, 'no-console', {
+          strategy: 'replace',
+          value: ['error', { allow: ['warn', 'error'] }],
+        });
+        expect(config.overrides[0].rules['no-console']).toEqual([
+          'error',
+          { allow: ['warn', 'error'] },
+        ]);
       });
-      expect(config.overrides[0].rules['no-console']).toEqual([
-        'error',
-        { allow: ['warn', 'error'] },
-      ]);
     });
 
-    it('should not add rule if it does not exist', () => {
-      applyDefaultHandler(config, 'new-rule', {
-        strategy: 'replace',
-        value: ['error'],
+    describe('AND WHEN rule does not exist', () => {
+      it('SHOULD not add the rule', () => {
+        applyDefaultHandler(config, 'new-rule', {
+          strategy: 'replace',
+          value: ['error'],
+        });
+        expect(config.overrides[0].rules['new-rule']).toBeUndefined();
       });
-      expect(config.overrides[0].rules['new-rule']).toBeUndefined();
     });
   });
 
-  describe('severity-only changes', () => {
-    it('should update severity when only severity is provided', () => {
-      applyDefaultHandler(config, 'no-console', {
-        severity: 'error',
-      });
-      expect(config.overrides[0].rules['no-console'][0]).toBe(2);
-    });
-
-    it('should throw for invalid severity', () => {
-      expect(() => {
+  describe('WHEN applying severity-only changes', () => {
+    describe('AND WHEN severity is valid', () => {
+      it('SHOULD update rule severity', () => {
         applyDefaultHandler(config, 'no-console', {
-          severity: 'invalid',
+          severity: 'error',
         });
-      }).toThrow("Invalid severity 'invalid' for rule 'no-console'");
+        expect(config.overrides[0].rules['no-console'][0]).toBe(2);
+      });
     });
 
-    it('should handle string rule severity update', () => {
-      config.overrides[0].rules['simple-rule'] = 'warn';
-      applyDefaultHandler(config, 'simple-rule', {
-        severity: 'error',
+    describe('AND WHEN severity is invalid', () => {
+      it('SHOULD throw error', () => {
+        expect(() => {
+          applyDefaultHandler(config, 'no-console', {
+            severity: 'invalid',
+          });
+        }).toThrow("Invalid severity 'invalid' for rule 'no-console'");
       });
-      expect(config.overrides[0].rules['simple-rule']).toBe(2);
+    });
+
+    describe('AND WHEN rule has string severity', () => {
+      it('SHOULD update string rule severity', () => {
+        config.overrides[0].rules['simple-rule'] = 'warn';
+        applyDefaultHandler(config, 'simple-rule', {
+          severity: 'error',
+        });
+        expect(config.overrides[0].rules['simple-rule']).toBe(2);
+      });
     });
   });
 
-  describe('merge/append/prepend strategies', () => {
-    it('should throw error for merge strategy without custom handler', () => {
-      expect(() => {
-        applyDefaultHandler(config, 'no-console', {
-          strategy: 'merge',
-          value: { allow: ['log'] },
-        });
-      }).toThrow(/Strategy 'merge' requires a custom handler for rule 'no-console'/);
+  describe('WHEN using strategies requiring custom handlers', () => {
+    describe('AND WHEN using merge strategy without handler', () => {
+      it('SHOULD throw error', () => {
+        expect(() => {
+          applyDefaultHandler(config, 'no-console', {
+            strategy: 'merge',
+            value: { allow: ['log'] },
+          });
+        }).toThrow(/Strategy 'merge' requires a custom handler for rule 'no-console'/);
+      });
     });
 
-    it('should throw error for append strategy without custom handler', () => {
-      expect(() => {
-        applyDefaultHandler(config, 'no-console', {
-          strategy: 'append',
-          value: ['error'],
-        });
-      }).toThrow(/Strategy 'append' requires a custom handler/);
+    describe('AND WHEN using append strategy without handler', () => {
+      it('SHOULD throw error', () => {
+        expect(() => {
+          applyDefaultHandler(config, 'no-console', {
+            strategy: 'append',
+            value: ['error'],
+          });
+        }).toThrow(/Strategy 'append' requires a custom handler/);
+      });
     });
 
-    it('should throw error for prepend strategy without custom handler', () => {
-      expect(() => {
-        applyDefaultHandler(config, 'no-console', {
-          strategy: 'prepend',
-          value: ['error'],
-        });
-      }).toThrow(/Strategy 'prepend' requires a custom handler/);
+    describe('AND WHEN using prepend strategy without handler', () => {
+      it('SHOULD throw error', () => {
+        expect(() => {
+          applyDefaultHandler(config, 'no-console', {
+            strategy: 'prepend',
+            value: ['error'],
+          });
+        }).toThrow(/Strategy 'prepend' requires a custom handler/);
+      });
     });
   });
 });
