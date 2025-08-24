@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ConnectorExecutor } from '../connector_executor';
 import type { WorkflowContextManager } from '../workflow_context_manager/workflow_context_manager';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
@@ -22,21 +21,14 @@ export interface ConnectorStep extends BaseStep {
 }
 
 export class ConnectorStepImpl extends StepBase<ConnectorStep> {
-  private core?: CoreStart;
-  private request?: KibanaRequest;
-
   constructor(
     step: ConnectorStep,
     contextManager: WorkflowContextManager,
     connectorExecutor: ConnectorExecutor,
     workflowState: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger,
-    core?: CoreStart,
-    request?: KibanaRequest
+    private workflowLogger: IWorkflowEventLogger
   ) {
     super(step, contextManager, connectorExecutor, workflowState);
-    this.core = core;
-    this.request = request;
   }
 
   public async _run(): Promise<RunStepResult> {
@@ -120,10 +112,6 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   }
 
   private async executeInternalConnector(step: ConnectorStep, withInputs: Record<string, any>): Promise<RunStepResult> {
-    if (!this.core) {
-      throw new Error('Core services not available for internal connector execution');
-    }
-
     try {
       const request = withInputs.request;
       if (!request) {
@@ -168,33 +156,46 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
         error: undefined,
       };
     } catch (error) {
-      return await this.handleFailure(error);
+      // Enhanced error handling for internal connector steps
+      let errorMessage: string;
+      
+      if (error && typeof error === 'object' && 'meta' in error) {
+        // This is an ES ResponseError - extract meaningful information
+        const esError = error as any;
+        const errorDetails = this.extractElasticsearchErrorDetails(esError);
+        errorMessage = errorDetails.summary;
+      } else {
+        // Generic error handling
+        errorMessage = error instanceof Error ? error.message : String(error);
+      }
+      
+      // Log the error
+      this.workflowLogger.logError(
+        `Internal connector step ${step.name} failed: ${errorMessage}`
+      );
+      
+      return {
+        output: undefined,
+        error: errorMessage,
+      };
     }
   }
 
   private async executeElasticsearchRequest(request: any): Promise<any> {
-    if (!this.core) {
-      throw new Error('Core services not available for internal connector execution');
-    }
-
     const startTime = Date.now();
     
     try {
       const { method, path, headers, body, query } = request;
       
-      // Use scoped client with proper permissions if request is available
-      let esClient;
-      if (this.request) {
-        // Use scoped client with user permissions
-        esClient = this.core.elasticsearch.client.asScoped(this.request).asCurrentUser;
-      } else {
-        // Fallback to internal user for system operations
-        esClient = this.core.elasticsearch.client.asInternalUser;
+      // Get ES client from context manager
+      const esClient = this.contextManager.getEsClient();
+      if (!esClient) {
+        throw new Error('Elasticsearch client not available');
       }
       
       // Build the request options following Kibana's established patterns
       const requestOptions: any = {
-        method: method.toLowerCase(),
+        method: method, // Keep original case - ES expects GET, POST, etc.
         path,
         headers: headers || {},
       };
@@ -235,46 +236,114 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       };
     } catch (error) {
       const executionTime = Date.now() - startTime;
-      throw new Error(`Elasticsearch request failed: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Enhanced error handling for ES errors
+      if (error && typeof error === 'object' && 'meta' in error) {
+        // This is an ES ResponseError - extract meaningful information
+        const esError = error as any;
+        const errorDetails = this.extractElasticsearchErrorDetails(esError);
+        
+        // Log the detailed error for debugging
+        this.workflowLogger.logError(
+          `Elasticsearch request failed: ${errorDetails.summary}`
+        );
+        
+        throw new Error(errorDetails.summary);
+      } else {
+        // Generic error handling
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        throw new Error(`Elasticsearch request failed: ${errorMessage}`);
+      }
+    }
+  }
+
+  private extractElasticsearchErrorDetails(esError: any): {
+    summary: string;
+    details: string;
+    statusCode: number;
+    rootCause: string;
+  } {
+    try {
+      const meta = esError.meta;
+      const body = meta?.body;
+      const statusCode = meta?.statusCode || 500;
+      
+      let summary = 'Elasticsearch request failed';
+      let details = 'Unknown error';
+      let rootCause = 'Unknown';
+      
+      if (body) {
+        if (body.error) {
+          // Extract the main error type
+          summary = body.error.type || body.error.reason || summary;
+          
+          // Extract root cause if available
+          if (body.error.root_cause && Array.isArray(body.error.root_cause) && body.error.root_cause.length > 0) {
+            const firstRootCause = body.error.root_cause[0];
+            rootCause = firstRootCause.reason || firstRootCause.type || 'Unknown';
+          }
+          
+          // Build detailed error message
+          details = body.error.reason || body.error.type || 'No additional details available';
+        }
+      }
+      
+      // Create a user-friendly summary
+      const userFriendlySummary = `${summary}${rootCause !== 'Unknown' ? `: ${rootCause}` : ''}`;
+      
+      return {
+        summary: userFriendlySummary,
+        details,
+        statusCode,
+        rootCause,
+      };
+    } catch (parseError) {
+      // Fallback if error parsing fails
+      return {
+        summary: 'Elasticsearch request failed',
+        details: 'Error parsing failed',
+        statusCode: 500,
+        rootCause: 'Unknown',
+      };
     }
   }
 
   private async executeKibanaRequest(request: any): Promise<any> {
-    if (!this.core) {
-      throw new Error('Core services not available');
-    }
-
     const startTime = Date.now();
     
-    // For now, we'll use a simple approach and make the request directly
-    // TODO: Implement proper internal API call mechanism
-    try {
-      // Create a simple HTTP request to the internal API
-      const response = await this.core.http.fetch(request.path, {
-        method: request.method,
-        headers: request.headers || {},
-        body: request.body ? JSON.stringify(request.body) : undefined,
-        query: request.query || {},
-      });
-      
-      const executionTime = Date.now() - startTime;
-
-      return {
-        body: await response.json(),
-        status: response.status,
-        headers: Object.fromEntries(response.headers.entries()),
-        executionTime,
-      };
-    } catch (error) {
-      // If the request fails, return an error response
-      const executionTime = Date.now() - startTime;
-      
-      return {
-        body: { error: error.message },
-        status: 500,
-        headers: {},
-        executionTime,
-      };
+    // For now, we'll use a simplified approach since Kibana's internal HTTP
+    // routing is complex and requires proper router setup
+    // TODO: Implement proper Kibana internal request handling
+    
+    // Build the request URL
+    let url = request.path;
+    if (request.query) {
+      // Handle query parameters properly
+      if (typeof request.query === 'string') {
+        url += `?${request.query}`;
+      } else if (typeof request.query === 'object') {
+        const queryParams = new URLSearchParams();
+        Object.entries(request.query).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, String(value));
+          }
+        });
+        const queryString = queryParams.toString();
+        if (queryString) {
+          url += `?${queryString}`;
+        }
+      }
     }
+
+    // For now, return a mock response since proper Kibana internal routing
+    // requires router setup and context that we don't have here
+    const executionTime = Date.now() - startTime;
+
+    return {
+      body: { message: 'Kibana internal requests not yet implemented' },
+      status: 501, // Not Implemented
+      headers: {},
+      executionTime,
+    };
   }
 }

@@ -11,6 +11,7 @@ import type { ConnectorContract } from '@kbn/workflows';
 import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
+
 // TODO: replace with dynamically fetching connectors actions and subactions via ActionsClient or other service once we decide on that.
 
 const connectors: ConnectorContract[] = [
@@ -83,7 +84,7 @@ const connectors: ConnectorContract[] = [
         method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']),
         path: z.string(),
         headers: z.record(z.string(), z.string()).optional(),
-        body: z.any().optional(),
+        body: z.any().optional().describe('Elasticsearch request body'),
         query: z.record(z.string(), z.string()).optional(),
       }),
     }),
@@ -101,8 +102,8 @@ const connectors: ConnectorContract[] = [
         method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']),
         path: z.string(),
         headers: z.record(z.string(), z.string()).optional(),
-        body: z.any().optional(),
-        query: z.record(z.string(), z.string()).optional(),
+        body: z.any().optional().describe('Request body for Kibana internal API'),
+        query: z.record(z.string(), z.string()).optional().describe('Query parameters'),
       }),
     }),
     outputSchema: z.object({

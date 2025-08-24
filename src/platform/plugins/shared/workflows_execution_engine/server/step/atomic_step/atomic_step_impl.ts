@@ -14,7 +14,6 @@ import type { WorkflowContextManager } from '../../workflow_context_manager/work
 import type { ConnectorExecutor } from '../../connector_executor';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
-import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 
 /**
  * Implements the execution logic for an atomic workflow step.
@@ -38,9 +37,7 @@ export class AtomicStepImpl implements StepImplementation {
     private contextManager: WorkflowContextManager,
     private connectorExecutor: ConnectorExecutor,
     private workflowState: WorkflowExecutionRuntimeManager,
-    private workflowLogger: IWorkflowEventLogger,
-    private core?: CoreStart,
-    private request?: KibanaRequest
+    private workflowLogger: IWorkflowEventLogger
   ) {}
 
   async run(): Promise<void> {
@@ -52,9 +49,7 @@ export class AtomicStepImpl implements StepImplementation {
       this.contextManager,
       this.connectorExecutor,
       this.workflowState,
-      this.workflowLogger,
-      this.core,
-      this.request
+      this.workflowLogger
     ).run();
   }
 }

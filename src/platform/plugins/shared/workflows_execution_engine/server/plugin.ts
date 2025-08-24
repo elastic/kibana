@@ -8,12 +8,11 @@
  */
 
 import type {
+  Plugin,
+  PluginInitializerContext,
   CoreSetup,
   CoreStart,
   Logger,
-  Plugin,
-  PluginInitializerContext,
-  KibanaRequest,
 } from '@kbn/core/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -91,8 +90,7 @@ export class WorkflowsExecutionEnginePlugin
                 logger,
                 config,
                 workflowExecutionRepository,
-                (pluginsStart as any).core || core,
-                undefined // No request context in task runner
+                (pluginsStart as any).core || core
               );
               await workflowRuntime.resume();
 
@@ -143,8 +141,7 @@ export class WorkflowsExecutionEnginePlugin
         this.logger,
         this.config,
         this.workflowExecutionRepository,
-        core,
-        context.request
+        core
       );
 
       // Log workflow execution start
@@ -170,8 +167,7 @@ async function createContainer(
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   workflowExecutionRepository: WorkflowExecutionRepository,
-  core: CoreStart,
-  request?: KibanaRequest
+  core: CoreStart
 ) {
   const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
     workflowRunId,
@@ -236,9 +232,7 @@ async function createContainer(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager,
-    core,
-    request
+    workflowTaskManager
   );
 
   return {
