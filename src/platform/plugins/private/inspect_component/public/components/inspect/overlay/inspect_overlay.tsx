@@ -13,6 +13,7 @@ import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { handleEventPropagation } from '../../../lib/dom/handle_event_propagation';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { findReactComponentPath } from '../../../lib/fiber/find_react_component_path';
@@ -39,6 +40,9 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
   const [componentPath, setComponentPath] = useState<string | undefined>();
   const [sourceComponent, setSourceComponent] = useState<string | undefined>();
 
+  /**
+   * pointer-events: none is required for {@link stopEventsOnInspectedElement} to work properly.
+   */
   const overlayCss = useMemo(
     () => css`
       background-color: ${transparentize(euiTheme.colors.backgroundFilledText, 0.2)};
@@ -116,17 +120,13 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
     [core, componentPath, sourceComponent, setIsInspecting, setFlyoutOverlayRef]
   );
 
-  /**
-   * Capture all click events on the document and stop them from propagating.
-   * EuiWindowEvent can't be used here as it doesn't allow for setting 'capture: true'.
-   */
   useEffect(() => {
-    const stopEventsOnInspectedElement = (e: MouseEvent) => {
-      e.stopPropagation();
-      e.preventDefault();
-      if (e.type === 'click') {
-        handleClickAtPositionOfInspectedElement(e);
-      }
+    /**
+     * Capture all click events on the document and stop them from propagating.
+     * EuiWindowEvent can't be used here as it doesn't allow for setting 'capture: true'.
+     */
+    const handleMouseEvent = (event: MouseEvent) => {
+      handleEventPropagation({ event, callback: handleClickAtPositionOfInspectedElement });
     };
 
     /**
@@ -141,13 +141,13 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       `;
 
     document.head.appendChild(forceCrossHairCursor);
-    document.addEventListener('pointerdown', stopEventsOnInspectedElement, true);
-    document.addEventListener('click', stopEventsOnInspectedElement, true);
+    document.addEventListener('pointerdown', handleMouseEvent, true);
+    document.addEventListener('click', handleMouseEvent, true);
 
     return () => {
       document.head.removeChild(forceCrossHairCursor);
-      document.removeEventListener('pointerdown', stopEventsOnInspectedElement, true);
-      document.removeEventListener('click', stopEventsOnInspectedElement, true);
+      document.removeEventListener('pointerdown', handleMouseEvent, true);
+      document.removeEventListener('click', handleMouseEvent, true);
     };
   }, [handleClickAtPositionOfInspectedElement]);
 
