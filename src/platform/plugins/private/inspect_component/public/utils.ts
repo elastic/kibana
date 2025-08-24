@@ -33,7 +33,7 @@ export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.u
   .includes('mac');
 
 /**
- * Get the topmost DOM element at the given pointer event's coordinates, ignoring overlays and non-inspectable
+ * Get the topmost DOM element at the given pointer event's coordinates, ignoring inspect overlay and non-inspectable
  * elements.
  */
 export const getElementFromPoint = ({
@@ -171,7 +171,6 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
 
 /**
  * Extract EUI component names from a given component path string.
- * The component path is expected to be in the format "ComponentA > ComponentB > EuiComponentC:subpart".
  * This function extracts and returns an array of EUI component names found in the path.
  */
 const extractEuiComponentsFromPath = (value: string): string[] => {
@@ -185,7 +184,10 @@ const extractEuiComponentsFromPath = (value: string): string[] => {
     .filter((t) => t.startsWith('Eui'));
 };
 
-export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
+/**
+ * Get EUI component documentation link and component name from a given component path.
+ */
+const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
   if (!componentPath) return null;
 
   const toUrl = (name: string): string | null => {
@@ -212,16 +214,13 @@ export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null 
 };
 
 export const getInspectedElementData = async ({
-  componentPath,
   core,
   event,
+  componentPath,
   sourceComponent,
   setFlyoutOverlayRef,
   setIsInspecting,
 }: GetInspectedElementOptions) => {
-  event.preventDefault();
-  event.stopPropagation();
-
   const target = getElementFromPoint({ event });
 
   if (!target) {

@@ -28,7 +28,10 @@ const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.toolti
 interface Props {
   core: CoreStart;
 }
-
+/**
+ * The entry point for the plugin.
+ * Renders the inspect button which toggles the inspect mode.
+ */
 export const InspectButton = ({ core }: Props) => {
   const [isInspecting, setIsInspecting] = useState(false);
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef>();
@@ -57,7 +60,7 @@ export const InspectButton = ({ core }: Props) => {
 
   /**
    * This is needed to prevent components like EmbeddableConsole from closing
-   * when toggling on inspect mode.
+   * when toggling on inspect mode by clicking on the InspectButton.
    */
   const preventTargetFromLosingFocus = (event: MouseEvent) => {
     event.preventDefault();

@@ -10,8 +10,12 @@
 import React from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { InspectFlyout, flyoutOptions } from './inspect/flyout/inspect_flyout';
-import type { GetComponentDataOptions, InspectComponentResponse } from './types';
+import type { ComponentData, GetComponentDataOptions, InspectComponentResponse } from './types';
 
+/**
+ * Fetch component data ({@link InspectComponentResponse}) from the server
+ * and display it in a flyout ({@link InspectFlyout}).
+ */
 export const getComponentData = async ({
   core,
   euiInfo,
@@ -28,7 +32,7 @@ export const getComponentData = async ({
         body: JSON.stringify({ path: fileData.fileName }),
       });
 
-    const componentData = {
+    const componentData: ComponentData = {
       ...fileData,
       baseFileName,
       codeowners,

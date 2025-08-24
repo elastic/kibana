@@ -11,6 +11,10 @@ import { existsSync, readFileSync } from 'fs';
 import { join, sep } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+/**
+ * Get the list of codeowners for a given file path by reading the CODEOWNERS file in the repository.
+ * It matches the most specific path in the CODEOWNERS file to the given file path.
+ */
 export const getComponentCodeowners = (path: string) => {
   const codeownersPath = join(REPO_ROOT, '.github', 'CODEOWNERS');
   if (!existsSync(codeownersPath)) {
@@ -25,7 +29,7 @@ export const getComponentCodeowners = (path: string) => {
 
   let folderPath = path;
 
-  /** Find the first matching folder in the codeowners file. */
+  /** Find tthe most specific path. */
   while (folderPath) {
     const found = codeowners.find((c) => c.startsWith(folderPath));
     if (found) {
