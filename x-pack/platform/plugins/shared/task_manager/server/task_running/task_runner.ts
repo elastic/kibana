@@ -69,6 +69,7 @@ import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
+import { createScriptRunner } from './create_script_runner';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -394,7 +395,18 @@ export class TaskManagerRunner implements TaskRunner {
         modifiedContext.taskInstance.apiKey,
         modifiedContext.taskInstance.userScope?.spaceId
       );
-      this.task = definition.createTaskRunner({ taskInstance: sanitizedTaskInstance, fakeRequest });
+      if (typeof definition.createTaskRunner === 'string') {
+        this.task = createScriptRunner({
+          taskInstance: sanitizedTaskInstance,
+          apiKey: modifiedContext.taskInstance.apiKey,
+          path: definition.createTaskRunner,
+        });
+      } else {
+        this.task = definition.createTaskRunner({
+          taskInstance: sanitizedTaskInstance,
+          fakeRequest,
+        });
+      }
 
       const ctx = {
         type: 'task manager',

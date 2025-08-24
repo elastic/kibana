@@ -75,7 +75,7 @@ export interface TaskRegisterDefinition {
    * Creates an object that has a run function which performs the task's work,
    * and an optional cancel function which cancels the task.
    */
-  createTaskRunner: TaskRunCreatorFunction;
+  createTaskRunner: TaskRunCreatorFunction | string;
 
   /**
    * Up to how many times the task should retry when it fails to run. This will
