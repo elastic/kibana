@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
+import { withAlertingSpan } from './lib';
 
 export enum TaskRunnerTimerSpan {
   StartTaskRun = 'claim_to_start_duration_ms',
@@ -41,13 +42,17 @@ export class TaskRunnerTimer {
     this.timings[name] = new Date().getTime() - start.getTime();
   }
 
-  public async runWithTimer<T>(name: TaskRunnerTimerSpan, cb: () => Promise<T>): Promise<T> {
+  public async runWithTimer<T>(
+    name: TaskRunnerTimerSpan,
+    cb: () => Promise<T>,
+    spanName?: string
+  ): Promise<T> {
     if (this.timings[name]) {
       this.options.logger.warn(`Duration already exists for "${name}" and will be overwritten`);
     }
 
     const start = new Date();
-    const result = await cb();
+    const result = spanName ? await withAlertingSpan(spanName, () => cb()) : await cb();
     const end = new Date();
 
     this.timings[name] = end.getTime() - start.getTime();

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { keys } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { Alert } from '../alert';
 import type { AlertInstanceState, AlertInstanceContext, RawAlertInstance } from '../types';
@@ -19,26 +18,27 @@ export function toRawAlertInstances<
 >(
   logger: Logger,
   maxAlerts: number,
-  activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {},
-  recoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {},
+  activeAlerts: Map<string, Alert<State, Context, ActionGroupIds>> = new Map(),
+  recoveredAlerts: Map<string, Alert<State, Context, ActionGroupIds>> = new Map(),
   shouldOptimizeTaskState: boolean = false
 ): {
-  rawActiveAlerts: Record<string, RawAlertInstance>;
-  rawRecoveredAlerts: Record<string, RawAlertInstance>;
+  rawActiveAlerts: Map<string, RawAlertInstance>;
+  rawRecoveredAlerts: Map<string, RawAlertInstance>;
 } {
-  const rawActiveAlerts: Record<string, RawAlertInstance> = {};
-  const rawRecoveredAlerts: Record<string, RawAlertInstance> = {};
+  const rawActiveAlerts: Map<string, RawAlertInstance> = new Map();
+  const rawRecoveredAlerts: Map<string, RawAlertInstance> = new Map();
 
-  for (const id of keys(activeAlerts)) {
-    rawActiveAlerts[id] = activeAlerts[id].toRaw();
-  }
+  activeAlerts.forEach((alert, id) => {
+    rawActiveAlerts.set(id, alert.toRaw());
+  });
 
   if (shouldOptimizeTaskState) {
-    recoveredAlerts = optimizeTaskStateForFlapping(logger, recoveredAlerts, maxAlerts);
+    optimizeTaskStateForFlapping(logger, recoveredAlerts, maxAlerts);
   }
-  for (const id of keys(recoveredAlerts)) {
-    rawRecoveredAlerts[id] = recoveredAlerts[id].toRaw(true);
-  }
+
+  recoveredAlerts.forEach((alert, id) => {
+    rawRecoveredAlerts.set(id, alert.toRaw(true));
+  });
 
   return { rawActiveAlerts, rawRecoveredAlerts };
 }

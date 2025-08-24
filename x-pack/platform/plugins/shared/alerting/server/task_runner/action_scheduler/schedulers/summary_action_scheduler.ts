@@ -8,6 +8,7 @@
 import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-state-types';
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
+import type { AlertsResult } from '../../../alerts_client/types';
 import type { CombinedSummarizedAlerts } from '../../../types';
 import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
@@ -23,12 +24,7 @@ import {
   logNumberOfFilteredAlerts,
   shouldScheduleAction,
 } from '../lib';
-import type {
-  ActionSchedulerOptions,
-  ActionsToSchedule,
-  GetActionsToScheduleOpts,
-  IActionScheduler,
-} from '../types';
+import type { ActionSchedulerOptions, ActionsToSchedule, IActionScheduler } from '../types';
 import { injectActionParams } from '../../inject_action_params';
 import { transformSummaryActionParams } from '../../transform_action_params';
 
@@ -57,15 +53,12 @@ export class SummaryActionScheduler<
       AlertData
     >
   ) {
-    const canGetSummarizedAlerts =
-      !!context.ruleType.alerts && !!context.alertsClient.getSummarizedAlerts;
-
     // filter for summary actions where the rule type supports summarized alerts
     this.actions = compact(
       (context.rule.actions ?? [])
         .filter((action) => isSummaryAction(action))
         .map((action) => {
-          if (!canGetSummarizedAlerts) {
+          if (!context.canGetSummarizedAlerts) {
             this.context.logger.error(
               `Skipping action "${action.id}" for rule "${this.context.rule.id}" because the rule type "${this.context.ruleType.name}" does not support alert-as-data.`
             );
@@ -81,14 +74,9 @@ export class SummaryActionScheduler<
     return 0;
   }
 
-  public async getActionsToSchedule({
-    activeAlerts,
-    recoveredAlerts,
-    throttledSummaryActions,
-  }: GetActionsToScheduleOpts<State, Context, ActionGroupIds, RecoveryActionGroupId>): Promise<
-    ActionsToSchedule[]
-  > {
-    const alerts = { ...activeAlerts, ...recoveredAlerts };
+  public async getActionsToSchedule(
+    alerts: AlertsResult<State, Context, ActionGroupIds>
+  ): Promise<ActionsToSchedule[]> {
     const executables: Array<{
       action: RuleAction;
       summarizedAlerts: CombinedSummarizedAlerts;
@@ -98,7 +86,11 @@ export class SummaryActionScheduler<
     for (const action of this.actions) {
       if (
         // if summary action is throttled, we won't send any notifications
-        !isSummaryActionThrottled({ action, throttledSummaryActions, logger: this.context.logger })
+        !isSummaryActionThrottled({
+          action,
+          throttledSummaryActions: this.context.throttledSummaryActions,
+          logger: this.context.logger,
+        })
       ) {
         const actionHasThrottleInterval = isActionOnInterval(action);
         const optionsBase = {
@@ -162,8 +154,8 @@ export class SummaryActionScheduler<
         actionTypeId
       );
 
-      if (isActionOnInterval(action) && throttledSummaryActions) {
-        throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
+      if (isActionOnInterval(action) && this.context.throttledSummaryActions) {
+        this.context.throttledSummaryActions[action.uuid!] = { date: new Date().toISOString() };
       }
 
       const { start, end } = getSummaryActionTimeBounds(
