@@ -3,7 +3,7 @@ id: kibTroubleshooting
 slug: /kibana-dev-docs/getting-started/troubleshooting
 title: Troubleshooting
 description: A collection of tips for working around strange issues.
-date: 2021-09-08
+date: 2025-08-21
 tags: ['kibana', 'onboarding', 'dev', 'troubleshooting']
 ---
 
