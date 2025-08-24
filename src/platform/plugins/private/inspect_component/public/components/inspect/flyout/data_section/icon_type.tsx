@@ -16,7 +16,7 @@ interface Props {
   iconType?: string;
 }
 
-export const IconData = ({ iconType }: Props) => {
+export const IconType = ({ iconType }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const boldTextCss = css`

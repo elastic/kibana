@@ -33,7 +33,7 @@ export const handleEventPropagation = ({
   event.stopPropagation();
   event.preventDefault();
   const eventTarget = event.target as HTMLElement;
-  const isTargetDisabled = eventTarget.hasAttribute && eventTarget.hasAttribute('disabled');
+  const isTargetDisabled = eventTarget?.hasAttribute && eventTarget.hasAttribute('disabled');
   const isClickEvent = event.type === 'click';
 
   /**

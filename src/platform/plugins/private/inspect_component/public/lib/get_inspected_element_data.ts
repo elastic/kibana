@@ -12,20 +12,20 @@ import type { DebugSource } from './fiber/types';
 import { EUI_DOCS_BASE } from './constants';
 import type { EuiData } from './eui/get_eui_component_docs_data';
 import { getEuiComponentDocsData } from './eui/get_eui_component_docs_data';
-import { getIconData } from './dom/get_icon_data';
+import { getIconType } from './dom/get_icon_type';
 import { findDebugSource } from './fiber/find_debug_source';
 import type { InspectComponentResponse } from '../api/fetch_component_data';
 import { fetchComponentData } from '../api/fetch_component_data';
 
 /**
- * Represents information about an component.
+ * Represents information about a component.
  */
 export interface ComponentData extends DebugSource, InspectComponentResponse {
   /** List of all teams who are codeowners for specified file. */
   codeowners: string[];
   /** Represents information about an EUI component. */
   euiData: EuiData;
-  /** The EUI name of the icon inside this component. */
+  /** The EUI icon type for the icon inside this component. */
   iconType?: string;
   /** The name of the top level React component. */
   sourceComponent?: string;
@@ -79,7 +79,7 @@ export const getInspectedElementData = async ({
 
   const { baseFileName, codeowners, relativePath } = response;
 
-  const iconType = getIconData(target);
+  const iconType = getIconType(target);
   const euiDocs = getEuiComponentDocsData(componentPath);
   const euiData = {
     componentName: euiDocs?.componentName || 'N/A',
