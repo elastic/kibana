@@ -91,9 +91,7 @@ const GeoFieldValues = React.memo<{
             <EuiFlexItem grow={false}>
               <DefaultDraggable
                 scopeId={scopeId}
-                data-test-subj={fieldName}
                 field={fieldName}
-                id={`geo-field-values-default-draggable-${contextId}-${eventId}-${fieldName}-${value}`}
                 tooltipContent={fieldName}
                 value={value}
               />

@@ -74,12 +74,7 @@ const SourceArrow = React.memo<{
 
       {sourceBytes != null && !isNaN(Number(sourceBytes)) ? (
         <EuiFlexItem grow={false}>
-          <DefaultDraggable
-            scopeId={scopeId}
-            field={SOURCE_BYTES_FIELD_NAME}
-            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_BYTES_FIELD_NAME}-${sourceBytes}`}
-            value={sourceBytes}
-          >
+          <DefaultDraggable scopeId={scopeId} field={SOURCE_BYTES_FIELD_NAME} value={sourceBytes}>
             <Data size="xs">
               {sourceBytesPercent != null ? (
                 <Percent>{`(${numeral(sourceBytesPercent).format('0.00')}%)`}</Percent>
@@ -101,7 +96,6 @@ const SourceArrow = React.memo<{
           <DefaultDraggable
             scopeId={scopeId}
             field={SOURCE_PACKETS_FIELD_NAME}
-            id={`source-arrow-default-draggable-${contextId}-${eventId}-${SOURCE_PACKETS_FIELD_NAME}-${sourcePackets}`}
             value={sourcePackets}
           >
             <Data size="xs">
@@ -164,7 +158,6 @@ const DestinationArrow = React.memo<{
             <DefaultDraggable
               scopeId={scopeId}
               field={DESTINATION_BYTES_FIELD_NAME}
-              id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_BYTES_FIELD_NAME}-${destinationBytes}`}
               value={destinationBytes}
             >
               <Data size="xs">
@@ -188,7 +181,6 @@ const DestinationArrow = React.memo<{
             <DefaultDraggable
               scopeId={scopeId}
               field={DESTINATION_PACKETS_FIELD_NAME}
-              id={`destination-arrow-default-draggable-${contextId}-${eventId}-${DESTINATION_PACKETS_FIELD_NAME}-${destinationPackets}`}
               value={destinationPackets}
             >
               <Data size="xs">

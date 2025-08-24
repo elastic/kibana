@@ -19,7 +19,7 @@ import {
   constructDroppedValue,
   TotalVirusLinkSha,
   Link,
-  DraggableZeekElement,
+  ZeekElement,
   sha1StringRenderer,
   md5StringRenderer,
   droppedStringRenderer,
@@ -58,7 +58,7 @@ describe('ZeekSignature', () => {
 
   describe('rendering', () => {
     test('it renders the default Zeek', () => {
-      const wrapper = shallow(<ZeekSignature data={zeek} timelineId="test" />);
+      const wrapper = shallow(<ZeekSignature data={zeek} scopeId="test" />);
       expect(wrapper).toMatchSnapshot();
     });
   });
@@ -134,21 +134,16 @@ describe('ZeekSignature', () => {
     test('it returns null if value is null', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement scopeId="some_scope" id="id-123" field="zeek.notice" value={null} />
+          <ZeekElement scopeId="some_scope" field="zeek.notice" value={null} />
         </TestProviders>
       );
-      expect(wrapper.find('DraggableZeekElement').children().exists()).toBeFalsy();
+      expect(wrapper.find('ZeekElement').children().exists()).toBeFalsy();
     });
 
     test('it renders the default ZeekSignature', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement
-            scopeId="some_scope"
-            id="id-123"
-            field="zeek.notice"
-            value={'mynote'}
-          />
+          <ZeekElement field="zeek.notice" value={'mynote'} scopeId="test" />
         </TestProviders>
       );
       expect(wrapper.text()).toEqual('mynote');
@@ -157,9 +152,8 @@ describe('ZeekSignature', () => {
     test('it renders with a custom string renderer', () => {
       const wrapper = mount(
         <TestProviders>
-          <DraggableZeekElement
+          <ZeekElement
             scopeId="some_scope"
-            id="id-123"
             field="zeek.notice"
             value={'mynote'}
             stringRenderer={(value) => `->${value}<-`}
@@ -172,13 +166,7 @@ describe('ZeekSignature', () => {
     test('should passing correct scopeId to cell actions', () => {
       mount(
         <TestProviders>
-          <DraggableZeekElement
-            scopeId="some_scope"
-            id="id-123"
-            field="zeek.notice"
-            value={'mynote'}
-            stringRenderer={(value) => `->${value}<-`}
-          />
+          <ZeekElement scopeId="some_scope" field="zeek.notice" value={'mynote'} />
         </TestProviders>
       );
 
@@ -195,12 +183,7 @@ describe('ZeekSignature', () => {
         const field = 'zeek.notice';
         const wrapper = mount(
           <TestProviders>
-            <DraggableZeekElement
-              scopeId="some_scope"
-              id="id-123"
-              field={field}
-              value={'the people you love'}
-            />
+            <ZeekElement scopeId="some_scope" field={field} value={'the people you love'} />
           </TestProviders>
         );
 

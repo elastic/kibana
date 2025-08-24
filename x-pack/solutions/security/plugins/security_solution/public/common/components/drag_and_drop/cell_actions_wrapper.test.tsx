@@ -7,9 +7,12 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import { CellActionsWrapper } from './cell_actions_wrapper';
+import { TableId } from '@kbn/securitysolution-data-table';
+import { CellActionsWrapper, disableHoverActions } from './cell_actions_wrapper';
 import { CellActionsMode, SecurityCellActionType } from '../cell_actions';
-import { TimelineId, type DataProvider } from '../../../../common/types';
+import { TimelineId } from '../../../../common/types';
+import { ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID } from '../../../timelines/components/row_renderers_browser/constants';
+import { TestProviders } from '../../mock';
 
 const MockSecurityCellActions = jest.fn(({ children }: { children: React.ReactNode }) => (
   <div data-test-subj="mockSecurityCellActions">{children}</div>
@@ -24,8 +27,26 @@ jest.mock('../../../helpers', () => ({
   getSourcererScopeId: jest.fn(() => mockSourcererScopeId),
 }));
 
-const dataProvider = { queryMatch: { field: 'host.name', value: '12345' } } as DataProvider;
-const data = { ...dataProvider.queryMatch };
+const field = 'host.name';
+const value = '12345';
+const data = { field, value };
+
+const scopeIdsWithHoverActions = [
+  undefined,
+  TimelineId.active,
+  TableId.alternateTest,
+  TimelineId.casePage,
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnRuleDetailsPage,
+  TableId.hostsPageEvents,
+  TableId.hostsPageSessions,
+  TableId.kubernetesPageSessions,
+  TableId.networkPageEvents,
+  TimelineId.test,
+  TableId.usersPageEvents,
+];
+
+const scopeIdsNoHoverActions = [TableId.rulePreview, ROW_RENDERER_BROWSER_EXAMPLE_TIMELINE_ID];
 
 describe('CellActionsWrapper', () => {
   beforeEach(() => {
@@ -34,14 +55,20 @@ describe('CellActionsWrapper', () => {
 
   it('should render cell actions with the content', () => {
     const result = render(
-      <CellActionsWrapper dataProvider={dataProvider}>{'test children'}</CellActionsWrapper>
+      <CellActionsWrapper field={field} value={value}>
+        {'test children'}
+      </CellActionsWrapper>
     );
     expect(result.queryByTestId('mockSecurityCellActions')).toBeInTheDocument();
     expect(result.queryByText('test children')).toBeInTheDocument();
   });
 
   it('should call cell actions with the default props', () => {
-    render(<CellActionsWrapper dataProvider={dataProvider}>{'test children'}</CellActionsWrapper>);
+    render(
+      <CellActionsWrapper field={field} value={value}>
+        {'test children'}
+      </CellActionsWrapper>
+    );
     expect(MockSecurityCellActions).toHaveBeenCalledWith(
       expect.objectContaining({
         data,
@@ -53,13 +80,10 @@ describe('CellActionsWrapper', () => {
     );
   });
 
-  describe('when dataProvider value is empty', () => {
+  describe('when value is empty', () => {
     it('should set an empty array value to the SecurityCellActions component', () => {
-      const emptyValueDataProvider = {
-        queryMatch: { field: 'host.name', value: '' },
-      } as DataProvider;
       render(
-        <CellActionsWrapper dataProvider={emptyValueDataProvider}>
+        <CellActionsWrapper field={field} value={''}>
           {'test children'}
         </CellActionsWrapper>
       );
@@ -69,10 +93,23 @@ describe('CellActionsWrapper', () => {
     });
   });
 
+  describe('when queryValue is provided', () => {
+    it('should set value to queryValue', () => {
+      render(
+        <CellActionsWrapper field={field} value={value} queryValue="testQueryValue">
+          {'test children'}
+        </CellActionsWrapper>
+      );
+      expect(MockSecurityCellActions).toHaveBeenCalledWith(
+        expect.objectContaining({ data: { ...data, value: 'testQueryValue' } })
+      );
+    });
+  });
+
   describe('when scopeId is defined', () => {
     it('should set the scopeId to the SecurityCellActions component metadata', () => {
       render(
-        <CellActionsWrapper dataProvider={dataProvider} scopeId="testScopeId">
+        <CellActionsWrapper field={field} value={value} scopeId="testScopeId">
           {'test children'}
         </CellActionsWrapper>
       );
@@ -85,13 +122,75 @@ describe('CellActionsWrapper', () => {
   describe('when hideTopN is true', () => {
     it('should set the disabledActionTypes to the SecurityCellActions component', () => {
       render(
-        <CellActionsWrapper dataProvider={dataProvider} hideTopN>
+        <CellActionsWrapper field={field} value={value} hideTopN>
           {'test children'}
         </CellActionsWrapper>
       );
       expect(MockSecurityCellActions).toHaveBeenCalledWith(
         expect.objectContaining({ disabledActionTypes: [SecurityCellActionType.SHOW_TOP_N] })
       );
+    });
+  });
+
+  scopeIdsWithHoverActions.forEach((scopeId) => {
+    test(`it renders hover actions (by default) when scopeId is '${scopeId}'`, async () => {
+      const { getByTestId } = render(
+        <CellActionsWrapper field={field} value={value} scopeId={scopeId}>
+          {'test children'}
+        </CellActionsWrapper>
+      );
+      expect(getByTestId('mockSecurityCellActions')).toBeInTheDocument();
+    });
+  });
+
+  scopeIdsNoHoverActions.forEach((scopeId) => {
+    test(`it does NOT render hover actions when scopeId is '${scopeId}'`, async () => {
+      const { queryByTestId } = render(
+        <CellActionsWrapper field={field} value={value} scopeId={scopeId}>
+          {'test children'}
+        </CellActionsWrapper>
+      );
+      expect(queryByTestId('mockSecurityCellActions')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('disableHoverActions', () => {
+    scopeIdsNoHoverActions.forEach((scopeId) =>
+      test(`it returns true when timelineId is ${scopeId}`, () => {
+        expect(disableHoverActions(scopeId)).toBe(true);
+      })
+    );
+
+    scopeIdsWithHoverActions.forEach((scopeId) =>
+      test(`it returns false when timelineId is ${scopeId}`, () => {
+        expect(disableHoverActions(scopeId)).toBe(false);
+      })
+    );
+  });
+
+  describe('text truncation styling', () => {
+    test('it applies text truncation styling when truncate IS specified (implicit: and the user is not dragging)', () => {
+      const { getByTestId } = render(
+        <TestProviders>
+          <CellActionsWrapper field={field} value={value} truncate>
+            {'test children'}
+          </CellActionsWrapper>
+        </TestProviders>
+      );
+
+      expect(getByTestId('render-truncatable-content')).toBeInTheDocument();
+    });
+
+    test('it does NOT apply text truncation styling when truncate is NOT specified', () => {
+      const { queryByTestId } = render(
+        <TestProviders>
+          <CellActionsWrapper field={field} value={value}>
+            {'test children'}
+          </CellActionsWrapper>
+        </TestProviders>
+      );
+
+      expect(queryByTestId('render-truncatable-content')).not.toBeInTheDocument();
     });
   });
 });

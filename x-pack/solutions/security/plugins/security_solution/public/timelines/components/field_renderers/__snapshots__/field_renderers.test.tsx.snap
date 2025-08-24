@@ -2,15 +2,7 @@
 
 exports[`Field Renderers #autonomousSystemRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c0 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-<div
+  <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
   >
     <div
@@ -25,11 +17,10 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
           >
             <div>
               <div
-                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_organization_name"
                 tabindex="-1"
               >
                 <span
-                  class="c0"
+                  class="css-jlsvsc-ProviderContentWrapper ebmrexd0"
                   data-test-subj="render-content-source.as.organization.name"
                 >
                   <span
@@ -61,11 +52,10 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
           >
             <div>
               <div
-                data-provider-id="draggableId.content.autonomous-system-renderer-default-draggable-ip-overview-source_as_number"
                 tabindex="-1"
               >
                 <span
-                  class="c0"
+                  class="css-jlsvsc-ProviderContentWrapper ebmrexd0"
                   data-test-subj="render-content-source.as.number"
                 >
                   <span
@@ -86,15 +76,7 @@ exports[`Field Renderers #autonomousSystemRenderer it renders correctly against 
 
 exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c0 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-<div
+  <div
     data-test-subj="cellActions-renderContent-host.id"
   >
     <div>
@@ -103,11 +85,10 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
       >
         <div>
           <div
-            data-provider-id="draggableId.content.host-id-renderer-default-draggable-ip-overview-host-id"
             tabindex="-1"
           >
             <span
-              class="c0"
+              class="css-jlsvsc-ProviderContentWrapper ebmrexd0"
               data-test-subj="render-content-host.id"
             >
               <span
@@ -132,15 +113,7 @@ exports[`Field Renderers #hostIdRenderer it renders correctly against snapshot 1
 
 exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c0 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-<div
+  <div
     data-test-subj="cellActions-renderContent-host.name"
   >
     <div>
@@ -149,11 +122,10 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
       >
         <div>
           <div
-            data-provider-id="draggableId.content.host-name-renderer-default-draggable-ip-overview-host-name"
             tabindex="-1"
           >
             <span
-              class="c0"
+              class="css-jlsvsc-ProviderContentWrapper ebmrexd0"
               data-test-subj="render-content-host.name"
             >
               <span
@@ -178,15 +150,7 @@ exports[`Field Renderers #hostNameRenderer it renders correctly against snapshot
 
 exports[`Field Renderers #locationRenderer it renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 > span.euiToolTipAnchor {
-  display: block;
-}
-
-.c0 > span.euiToolTipAnchor.eui-textTruncate {
-  display: inline-block;
-}
-
-<div
+  <div
     class="euiFlexGroup emotion-euiFlexGroup-responsive-none-flexStart-center-row"
   >
     <div
@@ -201,11 +165,10 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
           >
             <div>
               <div
-                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_city_name"
                 tabindex="-1"
               >
                 <span
-                  class="c0"
+                  class="css-jlsvsc-ProviderContentWrapper ebmrexd0"
                   data-test-subj="render-content-source.geo.city_name"
                 >
                   <span
@@ -233,11 +196,10 @@ exports[`Field Renderers #locationRenderer it renders correctly against snapshot
           >
             <div>
               <div
-                data-provider-id="draggableId.content.location-renderer-default-draggable-ip-overview-source_geo_region_name"
                 tabindex="-1"
               >
                 <span
-                  class="c0"
+                  class="css-jlsvsc-ProviderContentWrapper ebmrexd0"
                   data-test-subj="render-content-source.geo.region_name"
                 >
                   <span

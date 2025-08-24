@@ -27,7 +27,7 @@ export const IpOverviewId = 'ip-overview';
 export const locationRenderer = (
   fieldNames: string[],
   data: NetworkDetailsStrategyResponse['networkDetails'],
-  contextID?: string
+  scopeId?: string
 ): React.ReactElement =>
   fieldNames.length > 0 && fieldNames.every((fieldName) => getOr(null, fieldName, data)) ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -37,15 +37,7 @@ export const locationRenderer = (
           <Fragment key={`${IpOverviewId}-${fieldName}`}>
             {index ? ',\u00A0' : ''}
             <EuiFlexItem grow={false}>
-              <DefaultDraggable
-                id={`location-renderer-default-draggable-${IpOverviewId}-${
-                  contextID ? `${contextID}-` : ''
-                }${fieldName}`}
-                field={fieldName}
-                value={locationValue}
-                isAggregatable={true}
-                fieldType={'keyword'}
-              />
+              <DefaultDraggable scopeId={scopeId} field={fieldName} value={locationValue} />
             </EuiFlexItem>
           </Fragment>
         );
@@ -58,15 +50,13 @@ export const locationRenderer = (
 export const autonomousSystemRenderer = (
   as: AutonomousSystem,
   flowTarget: FlowTarget | FlowTargetSourceDest,
-  contextID?: string
+  scopeId?: string
 ): React.ReactElement =>
   as && as.organization && as.organization.name && as.number ? (
     <EuiFlexGroup alignItems="center" gutterSize="none">
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }${flowTarget}.as.organization.name`}
+          scopeId={scopeId}
           field={`${flowTarget}.as.organization.name`}
           value={as.organization.name}
         />
@@ -74,13 +64,9 @@ export const autonomousSystemRenderer = (
       <EuiFlexItem grow={false}>{'/'}</EuiFlexItem>
       <EuiFlexItem grow={false}>
         <DefaultDraggable
-          id={`autonomous-system-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }${flowTarget}.as.number`}
+          scopeId={scopeId}
           field={`${flowTarget}.as.number`}
           value={`${as.number}`}
-          isAggregatable={true}
-          fieldType={'number'}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -108,16 +94,7 @@ export const hostIdRenderer = ({
   host.id && host.ip && (ipFilter == null || host.ip.includes(ipFilter)) ? (
     <>
       {host.name && host.name[0] != null ? (
-        <DefaultDraggable
-          id={`host-id-renderer-default-draggable-${IpOverviewId}-${
-            contextID ? `${contextID}-` : ''
-          }host-id`}
-          field="host.id"
-          value={host.id[0]}
-          isAggregatable={true}
-          fieldType={'keyword'}
-          scopeId={scopeId}
-        >
+        <DefaultDraggable field="host.id" value={host.id[0]} scopeId={scopeId}>
           {noLink ? (
             <>{host.id}</>
           ) : (
@@ -150,20 +127,10 @@ export const hostNameRenderer = ({
   scopeId,
   host,
   ipFilter,
-  contextID,
   isFlyoutOpen,
 }: HostNameRendererTypes): React.ReactElement =>
   host.name && host.name[0] && host.ip && (!(ipFilter != null) || host.ip.includes(ipFilter)) ? (
-    <DefaultDraggable
-      id={`host-name-renderer-default-draggable-${IpOverviewId}-${
-        contextID ? `${contextID}-` : ''
-      }host-name`}
-      field={'host.name'}
-      value={host.name[0]}
-      isAggregatable={true}
-      fieldType={'keyword'}
-      scopeId={scopeId}
-    >
+    <DefaultDraggable field={'host.name'} value={host.name[0]} scopeId={scopeId}>
       <FlyoutLink
         field={'host.name'}
         value={host.name[0]}
