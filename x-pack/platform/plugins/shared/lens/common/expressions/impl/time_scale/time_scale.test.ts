@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type { Datatable, ExecutionContext } from '@kbn/expressions-plugin/common';
 
 import type { TimeRange } from '@kbn/es-query';

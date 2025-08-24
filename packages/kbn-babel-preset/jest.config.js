@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
-import type { IUiSettingsClient } from '@kbn/core/public';
-
-/**
- * Get timeZone from uiSettings
- */
-export function getTimeZone(uiSettings: IUiSettingsClient) {
-  const timeZone = uiSettings.get('dateFormat:tz');
-  return moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
-}
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-babel-preset'],
+};

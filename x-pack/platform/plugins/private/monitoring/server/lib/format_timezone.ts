@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 
 /**
  * This function is designed to offset a UTC timestamp based on the provided timezone

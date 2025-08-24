@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { useGeneratedHtmlId } from '@elastic/eui';
 import type { KibanaReactOverlays } from '@kbn/kibana-react-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

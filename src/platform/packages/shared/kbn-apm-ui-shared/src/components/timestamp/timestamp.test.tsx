@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { Timestamp } from '.';
 import userEvent from '@testing-library/user-event';
 import { mockNow } from '../../utils/test_helpers/mock_now';

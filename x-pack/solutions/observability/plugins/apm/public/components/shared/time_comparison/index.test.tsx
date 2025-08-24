@@ -12,7 +12,7 @@ import { MemoryRouter } from 'react-router-dom';
 import { expectTextsInDocument, expectTextsNotInDocument } from '../../../utils/test_helpers';
 import { TimeComparison } from '.';
 import * as urlHelpers from '../links/url_helpers';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import {
   mockApmPluginContextValue,
   MockApmPluginContextWrapper,
