@@ -129,17 +129,17 @@ describe('createRuleOverrides', () => {
     it('should use default handler when no specific handler exists', () => {
       getRuleHandler.mockReturnValue(null);
 
-      createRuleOverrides({
-        childConfigDir,
-        rules: {
-          'no-console': {
-            strategy: 'replace',
-            value: ['error', { allow: ['warn'] }],
+      expect(() => {
+        createRuleOverrides({
+          childConfigDir,
+          rules: {
+            'no-console': {
+              strategy: 'merge',
+              value: ['error', { allow: ['warn'] }],
+            },
           },
-        },
-      });
-
-      expect(getRuleHandler).toHaveBeenCalledWith('no-console');
+        });
+      }).toThrow(/Strategy 'merge' requires a custom handler/);
     });
 
     it('should use custom handler when provided', () => {
@@ -239,6 +239,16 @@ describe('createRuleOverrides', () => {
 });
 
 describe('normalizeRuleConfig', () => {
+  it('should handle severity-only config', () => {
+    const result = normalizeRuleConfig({ severity: 'error' });
+    expect(result).toEqual({
+      strategy: undefined,
+      value: undefined,
+      severity: 'error',
+      customHandler: undefined,
+    });
+  });
+
   it('should normalize simple value to merge strategy', () => {
     const result = normalizeRuleConfig(['lodash', 'moment']);
     expect(result).toEqual({
@@ -350,32 +360,57 @@ describe('applyDefaultHandler', () => {
     });
   });
 
-  describe('merge strategy with severity', () => {
-    it('should update severity when provided', () => {
+  describe('severity-only changes', () => {
+    it('should update severity when only severity is provided', () => {
       applyDefaultHandler(config, 'no-console', {
-        strategy: 'merge',
-        value: { allow: ['log'] },
         severity: 'error',
       });
-      expect(config.overrides[0].rules['no-console']).toEqual([2, { allow: ['log'] }]);
+      expect(config.overrides[0].rules['no-console'][0]).toBe(2);
     });
 
-    it('should preserve existing severity when not provided', () => {
-      applyDefaultHandler(config, 'no-console', {
-        strategy: 'merge',
-        value: { allow: ['log'] },
-      });
-      expect(config.overrides[0].rules['no-console']).toEqual([1, { allow: ['log'] }]);
+    it('should throw for invalid severity', () => {
+      expect(() => {
+        applyDefaultHandler(config, 'no-console', {
+          severity: 'invalid',
+        });
+      }).toThrow("Invalid severity 'invalid' for rule 'no-console'");
     });
 
-    it('should handle non-array rules', () => {
-      config.overrides[0].rules['simple-rule'] = 'error';
+    it('should handle string rule severity update', () => {
+      config.overrides[0].rules['simple-rule'] = 'warn';
       applyDefaultHandler(config, 'simple-rule', {
-        strategy: 'merge',
-        value: ['warn'],
-        severity: 'warn',
+        severity: 'error',
       });
-      expect(config.overrides[0].rules['simple-rule']).toEqual(['warn']);
+      expect(config.overrides[0].rules['simple-rule']).toBe(2);
+    });
+  });
+
+  describe('merge/append/prepend strategies', () => {
+    it('should throw error for merge strategy without custom handler', () => {
+      expect(() => {
+        applyDefaultHandler(config, 'no-console', {
+          strategy: 'merge',
+          value: { allow: ['log'] },
+        });
+      }).toThrow(/Strategy 'merge' requires a custom handler for rule 'no-console'/);
+    });
+
+    it('should throw error for append strategy without custom handler', () => {
+      expect(() => {
+        applyDefaultHandler(config, 'no-console', {
+          strategy: 'append',
+          value: ['error'],
+        });
+      }).toThrow(/Strategy 'append' requires a custom handler/);
+    });
+
+    it('should throw error for prepend strategy without custom handler', () => {
+      expect(() => {
+        applyDefaultHandler(config, 'no-console', {
+          strategy: 'prepend',
+          value: ['error'],
+        });
+      }).toThrow(/Strategy 'prepend' requires a custom handler/);
     });
   });
 });
