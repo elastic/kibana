@@ -88,9 +88,9 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
 
   return (
     <div ref={containerRef} className={containerCss} data-test-subj="inspectHighlightContainer">
-      <div className={highlightCss} />
+      <div className={highlightCss} data-test-subj="inspectHighlightBox" />
       {path && (
-        <div ref={badgeRef} className={badgeCss}>
+        <div ref={badgeRef} className={badgeCss} data-test-subj="inspectHighlightBadge">
           <EuiBadge color="primary">{path}</EuiBadge>
         </div>
       )}

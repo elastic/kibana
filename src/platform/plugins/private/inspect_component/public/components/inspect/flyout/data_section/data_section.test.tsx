@@ -11,24 +11,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DataSection } from './data_section';
-import type { ComponentData } from '../../../../lib/get_inspected_element_data';
+import { mockComponentData } from '../../../../__mocks__/mocks';
 
 describe('DataSection', () => {
-  const mockComponentData: ComponentData = {
-    columnNumber: 10,
-    fileName: '/path/to/component.tsx',
-    lineNumber: 25,
-    relativePath: 'src/components/my_component',
-    baseFileName: 'component.tsx',
-    codeowners: ['@elastic/kibana-team'],
-    euiData: {
-      componentName: 'EuiButton',
-      docsLink: 'https://elastic.github.io/eui/#/navigation/button',
-    },
-    iconType: 'button',
-    sourceComponent: 'MyComponent',
-  };
-
   const mockTargetDomElement = document.createElement('div');
 
   it('should render correctly', () => {

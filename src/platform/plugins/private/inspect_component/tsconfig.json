@@ -25,6 +25,6 @@
     "@kbn/config-schema",
     "@kbn/repo-info",
     "@kbn/core-http-router-server-mocks",
-    "@kbn/test-jest-helpers"
+    "@kbn/test-jest-helpers",
   ]
 }
