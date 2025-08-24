@@ -42,7 +42,6 @@ describe('getConnectorById', () => {
     expect(actionsClient.get).toHaveBeenCalledTimes(1);
     expect(actionsClient.get).toHaveBeenCalledWith({
       id: connectorId,
-      throwIfSystemAction: true,
     });
   });
 
@@ -53,7 +52,7 @@ describe('getConnectorById', () => {
 
     await expect(() => getConnectorById({ actionsClient, connectorId })).rejects
       .toThrowErrorMatchingInlineSnapshot(`
-      "No connector found for id 'my-connector-id'
+      "An error occur fetching connectors for id 'my-connector-id'
       Something wrong"
     `);
   });

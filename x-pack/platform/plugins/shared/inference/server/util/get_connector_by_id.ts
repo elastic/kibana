@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ActionsClient, ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
 import {
   createInferenceRequestError,
   connectorToInference,
@@ -22,15 +22,15 @@ export const getConnectorById = async ({
   actionsClient: ActionsClient;
   connectorId: string;
 }): Promise<InferenceConnector> => {
-  let connector: ActionConnector;
+  let connector;
   try {
-    connector = await actionsClient.get({
-      id: connectorId,
-      throwIfSystemAction: true,
-    });
+    connector = await actionsClient.get({ id: connectorId });
+    if (!connector) {
+      throw createInferenceRequestError(`No connector found for id '${connectorId}'`, 400);
+    }
   } catch (error) {
     throw createInferenceRequestError(
-      `No connector found for id '${connectorId}'\n${error.message}`,
+      `An error occur fetching connectors for id '${connectorId}'\n${error.message}`,
       400
     );
   }
