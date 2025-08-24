@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 import {
-  EuiButton,
-  EuiDescribedFormGroup,
-  EuiFormRow,
+  EuiCallOut,
+  EuiToolTip,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
-  EuiToolTip,
+  EuiIcon,
+  EuiText,
+  EuiLink,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant/src/hooks';
@@ -21,7 +22,7 @@ import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/publ
 import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {
+const statusToLabelMap: Record<Exclude<InstallationStatus, 'error'> | 'loading', string> = {
   installing: i18n.translate(
     'xpack.observabilityAiAssistantManagement.settingsPage.installingText',
     { defaultMessage: 'Installing...' }
@@ -31,12 +32,12 @@ const statusToButtonTextMap: Record<Exclude<InstallationStatus, 'error'> | 'load
     { defaultMessage: 'Uninstalling...' }
   ),
   installed: i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocButtonLabel',
-    { defaultMessage: 'Uninstall' }
+    'xpack.observabilityAiAssistantManagement.settingsPage.installedLabel',
+    { defaultMessage: 'Installed' }
   ),
   uninstalled: i18n.translate(
-    'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocButtonLabel',
-    { defaultMessage: 'Install' }
+    'xpack.observabilityAiAssistantManagement.settingsPage.notInstalledLabel',
+    { defaultMessage: 'Not installed' }
   ),
   loading: i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.loadingText', {
     defaultMessage: 'Loading...',
@@ -97,113 +98,166 @@ export function ProductDocSetting({
       });
   }, [overlays, uninstallProductDoc, currentlyDeployedInferenceId]);
 
-  const buttonText = useMemo(() => {
-    if (!status || status.value?.productDocStatus === 'error' || !canInstallProductDoc) {
-      return statusToButtonTextMap.uninstalled;
-    }
-    if (
-      (isProductDocInstalling || isProductDocUninstalling) &&
-      status.value?.productDocStatus !== 'installing' &&
-      status.value?.productDocStatus !== 'uninstalling'
-    ) {
-      return statusToButtonTextMap.loading;
-    }
-    return statusToButtonTextMap[status.value?.productDocStatus || 'uninstalled'];
-  }, [status, isProductDocInstalling, isProductDocUninstalling, canInstallProductDoc]);
-
   const isLoading =
     isProductDocInstalling ||
     isProductDocUninstalling ||
     status.value?.productDocStatus === 'installing' ||
     status.value?.productDocStatus === 'uninstalling';
 
-  const content = useMemo(() => {
-    if (!isLoading && canInstallProductDoc && status.value?.productDocStatus === 'installed') {
-      return (
-        <EuiFlexGroup justifyContent="flexStart" alignItems="center">
-          <EuiFlexItem grow={false}>
-            <EuiHealth textSize="s" color="success">
-              {i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocInstalledLabel',
-                { defaultMessage: 'Installed' }
-              )}
-            </EuiHealth>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj="settingsTabUninstallProductDocButton"
-              onClick={onClickUninstall}
-              color="warning"
-            >
-              {buttonText}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      );
-    }
+  const productDocStatus: InstallationStatus | 'loading' =
+    !status || isLoading ? 'loading' : status.value?.productDocStatus ?? 'uninstalled';
 
-    const installButton = (
-      <EuiButton
-        data-test-subj="settingsTabInstallProductDocButton"
-        onClick={onClickInstall}
-        disabled={!canInstallProductDoc}
-        isLoading={isLoading}
+  const badgeColor: 'success' | 'default' | 'warning' | 'hollow' = (() => {
+    if (productDocStatus === 'installed') return 'success';
+    if (
+      productDocStatus === 'installing' ||
+      productDocStatus === 'uninstalling' ||
+      productDocStatus === 'loading'
+    )
+      return 'hollow';
+    if (status?.value?.productDocStatus === 'error') return 'warning';
+    return 'default';
+  })();
+
+  const statusLabel =
+    status?.value?.productDocStatus === 'error'
+      ? i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.notAvailableLabel', {
+          defaultMessage: 'Not available',
+        })
+      : statusToLabelMap[productDocStatus];
+
+  const installLink = (
+    <EuiLink
+      data-test-subj="settingsTabInstallProductDocLink"
+      onClick={onClickInstall}
+      aria-disabled={!canInstallProductDoc || !isLoading}
+    >
+      <EuiIcon type="importAction" size="s" />{' '}
+      {i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocLink',
+        { defaultMessage: 'Install' }
+      )}
+    </EuiLink>
+  );
+
+  const uninstallLink = (
+    <EuiLink
+      data-test-subj="settingsTabUninstallProductDocLink"
+      onClick={onClickUninstall}
+      aria-disabled={isLoading}
+    >
+      <EuiIcon type="cross" size="s" /> {}
+      {i18n.translate(
+        'xpack.observabilityAiAssistantManagement.settingsPage.uninstallProductDocLink',
+        { defaultMessage: 'Uninstall' }
+      )}
+    </EuiLink>
+  );
+
+  return (
+    <>
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        responsive={false}
+        css={{ marginTop: 8, gap: '4px', marginBottom: 16 }}
       >
-        {buttonText}
-      </EuiButton>
-    );
-
-    return (
-      <EuiFlexGroup justifyContent="flexStart" alignItems="center">
         <EuiFlexItem grow={false}>
-          {canInstallProductDoc ? (
-            installButton
+          <EuiText size="s" color="subdued">
+            •{' '}
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.productDocStatusPrefix',
+              { defaultMessage: 'Elastic documentation' }
+            )}{' '}
+            <EuiIcon type="beaker" size="s" />
+            {i18n.translate(
+              'xpack.observabilityAiAssistantManagement.settingsPage.productDocStatus',
+              { defaultMessage: ' status:' }
+            )}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiBadge color={badgeColor} data-test-subj="productDocStatusBadge">
+            {statusLabel}
+          </EuiBadge>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          {status?.value?.productDocStatus === 'error' ? (
+            <EuiLink
+              data-test-subj="settingsTabRetryProductDocLink"
+              onClick={onClickInstall}
+              aria-disabled={isLoading}
+            >
+              {i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.retryLink', {
+                defaultMessage: 'Retry',
+              })}
+              {}
+            </EuiLink>
+          ) : productDocStatus === 'installed' ? (
+            uninstallLink
+          ) : canInstallProductDoc ? (
+            installLink
           ) : (
             <EuiToolTip
               position="top"
               content={i18n.translate(
-                'xpack.observabilityAiAssistantManagement.settingsPage.installDissabledTooltip',
-                {
-                  defaultMessage: 'Knowledge Base has to be installed first.',
-                }
+                'xpack.observabilityAiAssistantManagement.settingsPage.installDisabledTooltip',
+                { defaultMessage: 'Knowledge Base has to be installed first.' }
               )}
             >
-              {installButton}
+              <EuiText color="subdued" size="s">
+                {i18n.translate(
+                  'xpack.observabilityAiAssistantManagement.settingsPage.installProductDocLinkDisabled',
+                  { defaultMessage: 'Install' }
+                )}
+              </EuiText>
             </EuiToolTip>
           )}
         </EuiFlexItem>
       </EuiFlexGroup>
-    );
-  }, [canInstallProductDoc, onClickInstall, onClickUninstall, status, buttonText, isLoading]);
 
-  return (
-    <EuiDescribedFormGroup
-      fullWidth
-      title={
-        <h3>
-          {i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.productDocLabel', {
-            defaultMessage: 'Elastic documentation',
-          })}
-        </h3>
-      }
-      description={
-        <p>
-          <em>
-            {i18n.translate('xpack.observabilityAiAssistantManagement.settingsPage.techPreview', {
-              defaultMessage: '[technical preview] ',
-            })}
-          </em>
-          {i18n.translate(
-            'xpack.observabilityAiAssistantManagement.settingsPage.productDocDescription',
-            {
-              defaultMessage:
-                "Install Elastic documentation to improve the assistant's efficiency.",
-            }
-          )}
-        </p>
-      }
-    >
-      <EuiFormRow fullWidth>{content}</EuiFormRow>
-    </EuiDescribedFormGroup>
+      {status?.value?.productDocStatus === 'error' && (
+        <EuiFlexGroup gutterSize="s" css={{ padding: 8 }}>
+          <EuiFlexItem grow={false}>
+            <EuiCallOut
+              color="warning"
+              iconType="iInCircle"
+              size="s"
+              style={{
+                marginLeft: 0,
+                width: '528px',
+                display: 'flex',
+                padding: '8px',
+                flexDirection: 'column',
+                alignItems: 'flex-start',
+                gap: '8px',
+              }}
+              data-test-subj="productDocNotAvailableCallout"
+              title={
+                <span>
+                  {i18n.translate(
+                    'xpack.observabilityAiAssistantManagement.settingsPage.productDocNotAvailableTitle',
+                    {
+                      defaultMessage:
+                        'The Elastic Documentation is not available. Try doing ABC and DCE to side-load the product docs and make them available to Kibana. Check our',
+                    }
+                  )}{' '}
+                  <EuiLink
+                    href="https://www.elastic.co/docs/explore-analyze/ai-assistant#observability-ai-assistant-requirements"
+                    target="_blank"
+                  >
+                    {i18n.translate(
+                      'xpack.observabilityAiAssistantManagement.settingsPage.documentation',
+                      { defaultMessage: 'documentation' }
+                    )}
+                  </EuiLink>{' '}
+                </span>
+              }
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+    </>
   );
 }
