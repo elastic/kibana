@@ -202,6 +202,8 @@ export async function createRule<Params extends RuleParams = never>(
     extractReferences(context, ruleType, allActions, validatedRuleTypeParams, artifacts)
   );
 
+  console.error('WHAT ARE REFERENCES', JSON.stringify(references, null, 2));
+
   const createTime = Date.now();
   const lastRunTimestamp = new Date();
   const legacyId = Semver.lt(context.kibanaVersion, '8.0.0') ? id : null;

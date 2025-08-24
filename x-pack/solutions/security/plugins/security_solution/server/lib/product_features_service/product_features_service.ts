@@ -16,11 +16,13 @@ import {
   getAssistantFeature,
   getAttackDiscoveryFeature,
   getCasesFeature,
+  getRulesFeature,
   getSecurityFeature,
   getCasesV2Feature,
   getCasesV3Feature,
   getSecurityV2Feature,
   getSecurityV3Feature,
+  getSecurityV4Feature,
   getTimelineFeature,
   getNotesFeature,
   getSiemMigrationsFeature,
@@ -34,6 +36,8 @@ import {
   securityNotesSavedObjects,
   securityTimelineSavedObjects,
   securityV1SavedObjects,
+  securityExceptionsSavedObjects,
+  securityV3SavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
 
@@ -41,6 +45,7 @@ export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
   private securityV2ProductFeatures: ProductFeatures;
   private securityV3ProductFeatures: ProductFeatures;
+  private securityV4ProductFeatures: ProductFeatures;
   private casesProductFeatures: ProductFeatures;
   private casesProductV2Features: ProductFeatures;
   private casesProductFeaturesV3: ProductFeatures;
@@ -49,6 +54,7 @@ export class ProductFeaturesService {
   private timelineProductFeatures: ProductFeatures;
   private notesProductFeatures: ProductFeatures;
   private siemMigrationsProductFeatures: ProductFeatures;
+  private rulesProductFeatures: ProductFeatures;
 
   private productFeatures?: Set<ProductFeatureKeyType>;
 
@@ -67,7 +73,7 @@ export class ProductFeaturesService {
       securityFeature.baseKibanaSubFeatureIds
     );
     const securityV2Feature = getSecurityV2Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV3SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV2ProductFeatures = new ProductFeatures(
@@ -78,7 +84,7 @@ export class ProductFeaturesService {
     );
 
     const securityV3Feature = getSecurityV3Feature({
-      savedObjects: securityDefaultSavedObjects,
+      savedObjects: securityV3SavedObjects,
       experimentalFeatures: this.experimentalFeatures,
     });
     this.securityV3ProductFeatures = new ProductFeatures(
@@ -86,6 +92,17 @@ export class ProductFeaturesService {
       securityV3Feature.subFeaturesMap,
       securityV3Feature.baseKibanaFeature,
       securityV3Feature.baseKibanaSubFeatureIds
+    );
+
+    const securityV4Feature = getSecurityV4Feature({
+      savedObjects: securityDefaultSavedObjects,
+      experimentalFeatures: this.experimentalFeatures,
+    });
+    this.securityV4ProductFeatures = new ProductFeatures(
+      this.logger,
+      securityV4Feature.subFeaturesMap,
+      securityV4Feature.baseKibanaFeature,
+      securityV4Feature.baseKibanaSubFeatureIds
     );
 
     const casesFeature = getCasesFeature({
@@ -165,6 +182,17 @@ export class ProductFeaturesService {
       notesFeature.baseKibanaSubFeatureIds
     );
 
+    const rulesFeature = getRulesFeature({
+      savedObjects: securityExceptionsSavedObjects,
+      experimentalFeatures: {},
+    });
+    this.rulesProductFeatures = new ProductFeatures(
+      this.logger,
+      rulesFeature.subFeaturesMap,
+      rulesFeature.baseKibanaFeature,
+      rulesFeature.baseKibanaSubFeatureIds
+    );
+
     const siemMigrationsFeature = getSiemMigrationsFeature();
     this.siemMigrationsProductFeatures = new ProductFeatures(
       this.logger,
@@ -178,9 +206,13 @@ export class ProductFeaturesService {
     this.securityProductFeatures.init(featuresSetup);
     this.securityV2ProductFeatures.init(featuresSetup);
     this.securityV3ProductFeatures.init(featuresSetup);
+    this.securityV4ProductFeatures.init(featuresSetup);
+
     this.casesProductFeatures.init(featuresSetup);
     this.casesProductV2Features.init(featuresSetup);
     this.casesProductFeaturesV3.init(featuresSetup);
+    // this.exceptionsProductFeatures.init(featuresSetup);
+    this.rulesProductFeatures.init(featuresSetup);
     this.securityAssistantProductFeatures.init(featuresSetup);
     this.attackDiscoveryProductFeatures.init(featuresSetup);
     this.timelineProductFeatures.init(featuresSetup);
@@ -193,6 +225,7 @@ export class ProductFeaturesService {
     this.securityProductFeatures.setConfig(securityProductFeaturesConfig);
     this.securityV2ProductFeatures.setConfig(securityProductFeaturesConfig);
     this.securityV3ProductFeatures.setConfig(securityProductFeaturesConfig);
+    this.securityV4ProductFeatures.setConfig(securityProductFeaturesConfig);
 
     const casesProductFeaturesConfig = configurator.cases();
     this.casesProductFeatures.setConfig(casesProductFeaturesConfig);
@@ -208,8 +241,14 @@ export class ProductFeaturesService {
     const timelineProductFeaturesConfig = configurator.timeline();
     this.timelineProductFeatures.setConfig(timelineProductFeaturesConfig);
 
+    const rulesFeaturesConfig = configurator.rules();
+    this.rulesProductFeatures.setConfig(rulesFeaturesConfig);
+
     const notesProductFeaturesConfig = configurator.notes();
     this.notesProductFeatures.setConfig(notesProductFeaturesConfig);
+
+    // const exceptionsProductFeaturesConfig = configurator.exceptions();
+    // this.exceptionsProductFeatures.setConfig(exceptionsProductFeaturesConfig);
 
     let siemMigrationsProductFeaturesConfig = new Map();
     if (!this.experimentalFeatures.siemMigrationsDisabled) {
@@ -226,6 +265,8 @@ export class ProductFeaturesService {
         ...timelineProductFeaturesConfig.keys(),
         ...notesProductFeaturesConfig.keys(),
         ...siemMigrationsProductFeaturesConfig.keys(),
+        // ...exceptionsProductFeaturesConfig.keys(),
+        ...rulesFeaturesConfig.keys(),
       ]) as readonly ProductFeatureKeyType[]
     );
   }
@@ -242,6 +283,7 @@ export class ProductFeaturesService {
       this.securityProductFeatures.isActionRegistered(action) ||
       this.securityV2ProductFeatures.isActionRegistered(action) ||
       this.securityV3ProductFeatures.isActionRegistered(action) ||
+      this.securityV4ProductFeatures.isActionRegistered(action) ||
       this.casesProductFeatures.isActionRegistered(action) ||
       this.casesProductV2Features.isActionRegistered(action) ||
       this.securityAssistantProductFeatures.isActionRegistered(action) ||

@@ -13,6 +13,8 @@ export const SERVER_APP_ID = 'siem' as const;
 export const SECURITY_FEATURE_ID_V2 = 'siemV2' as const;
 // New version for 9.1.
 export const SECURITY_FEATURE_ID_V3 = 'siemV3' as const;
+// New version for 9.2
+export const SECURITY_FEATURE_ID_V4 = 'siemV4' as const;
 
 /**
  * @deprecated deprecated in 8.17. Use CASE_FEATURE_ID_V2 instead
@@ -24,6 +26,11 @@ export const CASES_FEATURE_ID_V2 = 'securitySolutionCasesV2' as const;
 
 // New version created in 8.18 for case assignees
 export const CASES_FEATURE_ID_V3 = 'securitySolutionCasesV3' as const;
+
+export const EXCEPTIONS_SUBFEATURE_ID = 'securitySolutionExceptions' as const;
+export const EXCEPTIONS_SUBFEATURE_ID_ALL = 'securitySolutionExceptionsAll' as const;
+export const EXCEPTIONS_SUBFEATURE_ID_READ = 'securitySolutionExceptionsRead' as const;
+export const RULES_FEATURE_ID = 'securitySolutionRules' as const;
 
 export const SECURITY_SOLUTION_CASES_APP_ID = 'securitySolutionCases' as const;
 
