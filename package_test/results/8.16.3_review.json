@@ -1,0 +1,9 @@
+{
+  "stats": {
+    "num_rules_to_upgrade_total": 0,
+    "num_rules_with_conflicts": 0,
+    "num_rules_with_non_solvable_conflicts": 0,
+    "tags": []
+  },
+  "rules": []
+}

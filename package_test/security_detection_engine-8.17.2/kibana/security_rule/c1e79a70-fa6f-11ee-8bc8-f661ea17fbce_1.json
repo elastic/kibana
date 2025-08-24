@@ -1,0 +1,81 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "building_block_type": "default",
+    "description": "Identifies discovery request `DescribeInstanceAttribute` with the attribute userData and instanceId in AWS CloudTrail logs. This may indicate an attempt to retrieve user data from an EC2 instance. Adversaries may use this information to gather sensitive data from the instance or to identify potential vulnerabilities. This is a building block rule that does not generate an alert on its own, but serves as a signal for anomalous activity.",
+    "from": "now-119m",
+    "index": [
+      "filebeat-*",
+      "logs.aws.cloudtrail-*"
+    ],
+    "interval": "60m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Attempt to Retrieve User Data from AWS EC2 Instance",
+    "query": "event.dataset:aws.cloudtrail\n    and event.action:DescribeInstanceAttribute\n    and aws.cloudtrail.request_parameters:(*attribute=userData* and *instanceId*)\n",
+    "references": [
+      "https://docs.aws.amazon.com/AWSEC2/latest/APIReference/API_DescribeInstanceAttribute.html",
+      "https://hackingthe.cloud/aws/exploitation/local_ec2_priv_esc_through_user_data"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": false,
+        "name": "aws.cloudtrail.request_parameters",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "c1e79a70-fa6f-11ee-8bc8-f661ea17fbce",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: Amazon EC2",
+      "Use Case: Log Auditing",
+      "Tactic: Discovery",
+      "Rule Type: BBR"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0007",
+          "name": "Discovery",
+          "reference": "https://attack.mitre.org/tactics/TA0007/"
+        },
+        "technique": [
+          {
+            "id": "T1580",
+            "name": "Cloud Infrastructure Discovery",
+            "reference": "https://attack.mitre.org/techniques/T1580/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 1
+  },
+  "id": "c1e79a70-fa6f-11ee-8bc8-f661ea17fbce_1",
+  "type": "security-rule"
+}

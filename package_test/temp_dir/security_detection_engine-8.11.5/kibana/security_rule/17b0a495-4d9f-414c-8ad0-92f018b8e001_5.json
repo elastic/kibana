@@ -1,0 +1,129 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Systemd service files are configuration files in Linux systems used to define and manage system services. Malicious actors can leverage systemd service files to achieve persistence by creating or modifying service files to execute malicious commands or payloads during system startup. This allows them to maintain unauthorized access, execute additional malicious activities, or evade detection.",
+        "from": "now-9m",
+        "history_window_start": "now-10d",
+        "index": [
+            "logs-endpoint.events.*",
+            "endgame-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "New Systemd Service Created by Previously Unknown Process",
+        "new_terms_fields": [
+            "host.id",
+            "file.path",
+            "process.executable"
+        ],
+        "query": "host.os.type:linux and event.category:file and event.action:(\"creation\" or \"file_create_event\") and file.path:(\n  /etc/systemd/system/* or \n  /usr/local/lib/systemd/system/* or \n  /lib/systemd/system/* or \n  /usr/lib/systemd/system/* or \n  /home/*/.config/systemd/user/*\n) and \nnot (\n  process.name:(\n    \"dpkg\" or \"dockerd\" or \"rpm\" or \"snapd\" or \"yum\" or \"exe\" or \"dnf\" or \"dnf-automatic\" or python* or \"puppetd\" or\n    \"elastic-agent\" or \"cinc-client\" or \"chef-client\" or \"pacman\" or \"puppet\" or \"cloudflared\"\n  ) or \n  file.extension:(\"swp\" or \"swpx\")\n)\n",
+        "references": [
+            "https://opensource.com/article/20/7/systemd-timers",
+            "https://pberba.github.io/security/2022/01/30/linux-threat-hunting-for-persistence-systemd-timers-cron/"
+        ],
+        "related_integrations": [
+            {
+                "package": "endpoint",
+                "version": "^8.2.0"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.extension",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "file.path",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "process.name",
+                "type": "keyword"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "17b0a495-4d9f-414c-8ad0-92f018b8e001",
+        "setup": "\nThis rule requires data coming in from Elastic Defend.\n\n### Elastic Defend Integration Setup\nElastic Defend is integrated into the Elastic Agent using Fleet. Upon configuration, the integration allows\nthe Elastic Agent to monitor events on your host and send data to the Elastic Security app.\n\n#### Prerequisite Requirements:\n- Fleet is required for Elastic Defend.\n- To configure Fleet Server refer to the [documentation](https://www.elastic.co/guide/en/fleet/current/fleet-server.html).\n\n#### The following steps should be executed in order to add the Elastic Defend integration on a Linux System:\n- Go to the Kibana home page and click Add integrations.\n- In the query bar, search for Elastic Defend and select the integration to see more details about it.\n- Click Add Elastic Defend.\n- Configure the integration name and optionally add a description.\n- Select the type of environment you want to protect, either Traditional Endpoints or Cloud Workloads.\n- Select a configuration preset. Each preset comes with different default settings for Elastic Agent, you can further customize these later by configuring the Elastic Defend integration policy. [Helper guide](https://www.elastic.co/guide/en/security/current/configure-endpoint-integration-policy.html).\n- We suggest to select \"Complete EDR (Endpoint Detection and Response)\" as a configuration setting, that provides \"All events; all preventions\"\n- Enter a name for the agent policy in New agent policy name. If other agent policies already exist, you can click the Existing hosts tab and select an existing policy instead.\nFor more details on Elastic Agent configuration settings, refer to the [helper guide](https://www.elastic.co/guide/en/fleet/8.10/agent-policy.html).\n- Click Save and Continue.\n- To complete the integration, select Add Elastic Agent to your hosts and continue to the next section to install the Elastic Agent on your hosts.\nFor more details on Elastic Defend refer to the [helper guide](https://www.elastic.co/guide/en/security/current/install-endpoint.html).\n\n",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Linux",
+            "Use Case: Threat Detection",
+            "Tactic: Persistence",
+            "Tactic: Privilege Escalation",
+            "Data Source: Elastic Endgame",
+            "Data Source: Elastic Defend"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0003",
+                    "name": "Persistence",
+                    "reference": "https://attack.mitre.org/tactics/TA0003/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.002",
+                                "name": "Systemd Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0004",
+                    "name": "Privilege Escalation",
+                    "reference": "https://attack.mitre.org/tactics/TA0004/"
+                },
+                "technique": [
+                    {
+                        "id": "T1543",
+                        "name": "Create or Modify System Process",
+                        "reference": "https://attack.mitre.org/techniques/T1543/",
+                        "subtechnique": [
+                            {
+                                "id": "T1543.002",
+                                "name": "Systemd Service",
+                                "reference": "https://attack.mitre.org/techniques/T1543/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 5
+    },
+    "id": "17b0a495-4d9f-414c-8ad0-92f018b8e001_5",
+    "type": "security-rule"
+}

@@ -1,0 +1,30 @@
+{
+  "summary": {
+    "total": 2,
+    "skipped": 0,
+    "succeeded": 0,
+    "failed": 2
+  },
+  "results": {
+    "updated": [],
+    "skipped": []
+  },
+  "errors": [
+    {
+      "message": "Merge conflicts found in rule 'ff9bc8b9-f03b-4283-be58-ee0a16f5a11b' for fields: required_fields. Please resolve the conflict manually or choose another value for 'pick_version'",
+      "rules": [
+        {
+          "rule_id": "ff9bc8b9-f03b-4283-be58-ee0a16f5a11b"
+        }
+      ]
+    },
+    {
+      "message": "Merge conflicts found in rule '28eb3afe-131d-48b0-a8fc-9784f3d54f3c' for fields: required_fields. Please resolve the conflict manually or choose another value for 'pick_version'",
+      "rules": [
+        {
+          "rule_id": "28eb3afe-131d-48b0-a8fc-9784f3d54f3c"
+        }
+      ]
+    }
+  ]
+}

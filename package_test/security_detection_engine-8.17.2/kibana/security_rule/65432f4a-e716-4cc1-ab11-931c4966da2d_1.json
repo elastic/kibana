@@ -1,0 +1,120 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the execution of an MsiExec service child process followed by network or dns lookup activity. Adversaries may abuse Windows Installers for initial access and delivery of malware.",
+    "from": "now-9m",
+    "index": [
+      "logs-endpoint.events.process-*",
+      "logs-endpoint.events.network-*",
+      "logs-windows.sysmon_operational-*",
+      "logs-sentinel_one_cloud_funnel.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "MsiExec Service Child Process With Network Connection",
+    "query": "sequence by process.entity_id with maxspan=1m\n [process where host.os.type == \"windows\" and event.type : \"start\" and\n  process.parent.name : \"msiexec.exe\" and process.parent.args : \"/v\" and\n  not process.executable :\n        (\"?:\\\\Windows\\\\System32\\\\msiexec.exe\",\n         \"?:\\\\Windows\\\\sysWOW64\\\\msiexec.exe\",\n         \"?:\\\\Windows\\\\system32\\\\srtasks.exe\",\n         \"?:\\\\Windows\\\\syswow64\\\\srtasks.exe\",\n         \"?:\\\\Windows\\\\sys*\\\\taskkill.exe\",\n         \"?:\\\\Program Files\\\\*.exe\",\n         \"?:\\\\Program Files (x86)\\\\*.exe\",\n         \"?:\\\\Windows\\\\Installer\\\\MSI*.tmp\",\n         \"?:\\\\Windows\\\\Microsoft.NET\\\\Framework*\\\\RegSvcs.exe\") and\n not (process.name : (\"rundll32.exe\", \"regsvr32.exe\") and process.args : (\"?:\\\\Program Files\\\\*\", \"?:\\\\Program Files (x86)\\\\*\"))]\n[any where host.os.type == \"windows\" and event.category in (\"network\", \"dns\") and process.name != null]\n",
+    "related_integrations": [
+      {
+        "package": "endpoint",
+        "version": "^8.2.0"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      },
+      {
+        "package": "sentinel_one_cloud_funnel",
+        "version": "^0.1.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.entity_id",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.executable",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.name",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.args",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "process.parent.name",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 47,
+    "rule_id": "65432f4a-e716-4cc1-ab11-931c4966da2d",
+    "severity": "medium",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Defense Evasion",
+      "Data Source: Elastic Defend",
+      "Data Source: Sysmon",
+      "Data Source: SentinelOne"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0005",
+          "name": "Defense Evasion",
+          "reference": "https://attack.mitre.org/tactics/TA0005/"
+        },
+        "technique": [
+          {
+            "id": "T1218",
+            "name": "System Binary Proxy Execution",
+            "reference": "https://attack.mitre.org/techniques/T1218/",
+            "subtechnique": [
+              {
+                "id": "T1218.007",
+                "name": "Msiexec",
+                "reference": "https://attack.mitre.org/techniques/T1218/007/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "type": "eql",
+    "version": 1
+  },
+  "id": "65432f4a-e716-4cc1-ab11-931c4966da2d_1",
+  "type": "security-rule"
+}

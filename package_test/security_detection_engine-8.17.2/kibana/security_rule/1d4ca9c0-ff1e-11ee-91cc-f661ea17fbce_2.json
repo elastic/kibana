@@ -1,0 +1,97 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Identifies the creation of an AWS Roles Anywhere profile. AWS Roles Anywhere is a feature that allows you to use AWS Identity and Access Management (IAM) profiles to manage access to your AWS resources from any location via trusted anchors. This rule detects the creation of a profile that can be assumed from any service. Adversaries may create profiles tied to overly permissive roles to maintain access to AWS resources. Ensure that the profile creation is expected and that the trust policy is configured securely.",
+    "false_positives": [
+      "AWS Roles Anywhere profiles are legitimate profiles that can be created by administrators to allow access from any location. Ensure that the profile created is expected and that the trust policy is configured securely."
+    ],
+    "from": "now-30m",
+    "index": [
+      "filebeat-*",
+      "logs-aws.cloudtrail-*"
+    ],
+    "interval": "10m",
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "AWS IAM Roles Anywhere Profile Creation",
+    "note": "## Triage and Analysis\n\n### Investigating AWS IAM Roles Anywhere Profile Creation\n\nThis rule detects the creation of an AWS Roles Anywhere profile. AWS Roles Anywhere allows you to use AWS Identity and Access Management (IAM) profiles to manage access to your AWS resources from any location via trusted anchors. Adversaries may create profiles tied to overly permissive roles to maintain access to AWS resources. It is crucial to ensure that the profile creation is expected and that the trust policy is configured securely.\n\n#### Possible Investigation Steps:\n\n- **Identify the Actor**: Review the `aws.cloudtrail.user_identity.arn` and `aws.cloudtrail.user_identity.access_key_id` fields to identify who created the profile. Verify if this actor typically performs such actions and if they have the necessary permissions.\n- **Review the Request Details**: Examine the `aws.cloudtrail.request_parameters` to understand the specific details of the profile creation. Look for any unusual parameters or overly permissive roles that could suggest unauthorized or malicious activity.\n- **Analyze the Source of the Request**: Investigate the `source.ip` and `source.geo` fields to determine the location and origin of the request. Ensure the request originated from a known and trusted location.\n- **Check the Created Profile’s Permissions**: Review the `roleArns` associated with the created profile. Verify that the roles are appropriate for the user's intended actions and do not grant excessive permissions.\n- **Verify the Profile’s Configuration**: Ensure that the profile's `durationSeconds`, `enabled`, and `tags` are configured according to your organization's security policies. Pay particular attention to any configuration that might allow prolonged access or concealment of activity.\n\n### False Positive Analysis:\n\n- **Legitimate Administrative Actions**: Confirm if the profile creation aligns with scheduled updates, development activities, or legitimate administrative tasks documented in change management systems.\n- **Consistency Check**: Compare the action against historical data of similar actions performed by the user or within the organization. If the action is consistent with past legitimate activities, it might indicate a false alarm.\n- **Verify through Outcomes**: Check the `aws.cloudtrail.response_elements` and the `event.outcome` to confirm if the profile creation was successful and intended according to policy.\n\n### Response and Remediation:\n\n- **Immediate Review and Reversal if Necessary**: If the profile creation was unauthorized, disable or delete the created profile and review the associated roles and permissions for any potential misuse.\n- **Enhance Monitoring and Alerts**: Adjust monitoring systems to alert on similar actions, especially those involving sensitive roles or unexpected locations.\n- **Educate and Train**: Provide additional training to users with administrative rights on the importance of security best practices concerning profile and role management and the risks of unauthorized profile creation.\n- **Audit IAM Policies and Permissions**: Conduct a comprehensive audit of all IAM policies and associated permissions to ensure they adhere to the principle of least privilege.\n- **Incident Response**: If there's an indication of malicious intent or a security breach, initiate the incident response protocol to mitigate any damage and prevent future occurrences.\n\n### Additional Information:\n\nFor further guidance on managing AWS IAM Roles Anywhere profiles and securing AWS environments, refer to the [AWS Roles Anywhere documentation](https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html) and AWS best practices for security. Additionally, consult the following resources for specific details on profile management and potential abuse:\n- [AWS IAM Roles Anywhere Profile Creation API Reference](https://docs.aws.amazon.com/rolesanywhere/latest/APIReference/API_CreateProfile.html)\n- [Ermetic Blog - Managing Third Party Access](https://ermetic.com/blog/aws/keep-your-iam-users-close-keep-your-third-parties-even-closer-part-1/)\n\n",
+    "query": "event.dataset:aws.cloudtrail\n    and event.provider: rolesanywhere.amazonaws.com\n    and event.action: CreateProfile\n    and event.outcome: success\n",
+    "references": [
+      "https://docs.aws.amazon.com/rolesanywhere/latest/userguide/introduction.html",
+      "https://docs.datadoghq.com/security/default_rules/cloudtrail-aws-iam-roles-anywhere-trust-anchor-created/",
+      "https://ermetic.com/blog/aws/keep-your-iam-users-close-keep-your-third-parties-even-closer-part-1/",
+      "https://docs.aws.amazon.com/rolesanywhere/latest/APIReference/API_CreateProfile.html"
+    ],
+    "related_integrations": [
+      {
+        "integration": "cloudtrail",
+        "package": "aws",
+        "version": "^2.0.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.dataset",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.outcome",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.provider",
+        "type": "keyword"
+      }
+    ],
+    "risk_score": 21,
+    "rule_id": "1d4ca9c0-ff1e-11ee-91cc-f661ea17fbce",
+    "severity": "low",
+    "tags": [
+      "Domain: Cloud",
+      "Data Source: AWS",
+      "Data Source: Amazon Web Services",
+      "Data Source: AWS IAM",
+      "Use Case: Identity and Access Audit",
+      "Tactic: Persistence"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0003",
+          "name": "Persistence",
+          "reference": "https://attack.mitre.org/tactics/TA0003/"
+        },
+        "technique": [
+          {
+            "id": "T1098",
+            "name": "Account Manipulation",
+            "reference": "https://attack.mitre.org/techniques/T1098/",
+            "subtechnique": [
+              {
+                "id": "T1098.003",
+                "name": "Additional Cloud Roles",
+                "reference": "https://attack.mitre.org/techniques/T1098/003/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 2
+  },
+  "id": "1d4ca9c0-ff1e-11ee-91cc-f661ea17fbce_2",
+  "type": "security-rule"
+}

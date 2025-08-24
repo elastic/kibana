@@ -1,0 +1,88 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Active Directory Integrated DNS (ADIDNS) is one of the core components of AD DS, leveraging AD's access control and replication to maintain domain consistency. It stores DNS zones as AD objects, a feature that, while robust, introduces some security issues, such as wildcard records, mainly because of the default permission (Any authenticated users) to create DNS-named records. Attackers can create wildcard records to redirect traffic that doesn't explicitly match records contained in the zone, becoming the Man-in-the-Middle and being able to abuse DNS similarly to LLMNR/NBNS spoofing.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-system.*",
+      "logs-windows.*"
+    ],
+    "language": "eql",
+    "license": "Elastic License v2",
+    "name": "Potential ADIDNS Poisoning via Wildcard Record Creation",
+    "query": "any where host.os.type == \"windows\" and event.action in (\"Directory Service Changes\", \"directory-service-object-modified\") and\n    event.code == \"5137\" and startsWith(winlog.event_data.ObjectDN, \"DC=*,\")\n",
+    "references": [
+      "https://www.netspi.com/blog/technical/network-penetration-testing/exploiting-adidns/",
+      "https://www.thehacker.recipes/a-d/movement/mitm-and-coerced-authentications/adidns-spoofing"
+    ],
+    "related_integrations": [
+      {
+        "package": "system",
+        "version": "^1.6.4"
+      },
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.action",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "event.code",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "winlog.event_data.ObjectDN",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "8f242ffb-b191-4803-90ec-0f19942e17fd",
+    "setup": "## Setup\n\nThe 'Audit Directory Service Changes' logging policy must be configured for (Success, Failure).\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nPolicies >\nWindows Settings >\nSecurity Settings >\nAdvanced Audit Policies Configuration >\nAudit Policies >\nDS Access >\nAudit Directory Service Changes (Success,Failure)\n```\n\nThe above policy does not cover the target object by default (we still need it to be configured to generate events), so we need to set up an AuditRule using https://github.com/OTRF/Set-AuditRule.\n\n```\nSet-AuditRule -AdObjectPath 'AD:\\CN=MicrosoftDNS,DC=DomainDNSZones,DC=Domain,DC=com' -WellKnownSidType WorldSid -Rights CreateChild -InheritanceFlags Descendents -AttributeGUID e0fa1e8c-9b45-11d0-afdd-00c04fd930c9 -AuditFlags Success\n```\n",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Credential Access",
+      "Data Source: Active Directory",
+      "Use Case: Active Directory Monitoring"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0006",
+          "name": "Credential Access",
+          "reference": "https://attack.mitre.org/tactics/TA0006/"
+        },
+        "technique": [
+          {
+            "id": "T1557",
+            "name": "Adversary-in-the-Middle",
+            "reference": "https://attack.mitre.org/techniques/T1557/"
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "eql",
+    "version": 2
+  },
+  "id": "8f242ffb-b191-4803-90ec-0f19942e17fd_2",
+  "type": "security-rule"
+}

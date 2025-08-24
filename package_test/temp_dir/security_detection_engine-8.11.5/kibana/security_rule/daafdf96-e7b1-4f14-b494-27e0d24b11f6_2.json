@@ -1,0 +1,110 @@
+{
+    "attributes": {
+        "author": [
+            "Elastic"
+        ],
+        "description": "Adversaries may pass the hash using stolen password hashes to move laterally within an environment, bypassing normal system access controls. Pass the hash (PtH) is a method of authenticating as a user without having access to the user's cleartext password.",
+        "from": "now-9m",
+        "history_window_start": "now-10d",
+        "index": [
+            "winlogbeat-*",
+            "logs-windows.*",
+            "logs-system.*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "name": "Potential Pass-the-Hash (PtH) Attempt",
+        "new_terms_fields": [
+            "user.id"
+        ],
+        "query": "host.os.type:\"windows\" and \nevent.category : \"authentication\" and event.action : \"logged-in\" and \nwinlog.logon.type : \"NewCredentials\" and event.outcome : \"success\" and \nuser.id : (S-1-5-21-* or S-1-12-1-*) and winlog.event_data.LogonProcessName : \"seclogo\"\n",
+        "references": [
+            "https://attack.mitre.org/techniques/T1550/002/"
+        ],
+        "related_integrations": [
+            {
+                "package": "windows",
+                "version": "^1.5.0"
+            },
+            {
+                "package": "system",
+                "version": "^1.6.4"
+            }
+        ],
+        "required_fields": [
+            {
+                "ecs": true,
+                "name": "event.action",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.category",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "event.outcome",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "host.os.type",
+                "type": "keyword"
+            },
+            {
+                "ecs": true,
+                "name": "user.id",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.event_data.LogonProcessName",
+                "type": "keyword"
+            },
+            {
+                "ecs": false,
+                "name": "winlog.logon.type",
+                "type": "unknown"
+            }
+        ],
+        "risk_score": 47,
+        "rule_id": "daafdf96-e7b1-4f14-b494-27e0d24b11f6",
+        "severity": "medium",
+        "tags": [
+            "Domain: Endpoint",
+            "OS: Windows",
+            "Use Case: Threat Detection",
+            "Tactic: Lateral Movement"
+        ],
+        "threat": [
+            {
+                "framework": "MITRE ATT\u0026CK",
+                "tactic": {
+                    "id": "TA0008",
+                    "name": "Lateral Movement",
+                    "reference": "https://attack.mitre.org/tactics/TA0008/"
+                },
+                "technique": [
+                    {
+                        "id": "T1550",
+                        "name": "Use Alternate Authentication Material",
+                        "reference": "https://attack.mitre.org/techniques/T1550/",
+                        "subtechnique": [
+                            {
+                                "id": "T1550.002",
+                                "name": "Pass the Hash",
+                                "reference": "https://attack.mitre.org/techniques/T1550/002/"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "timestamp_override": "event.ingested",
+        "type": "new_terms",
+        "version": 2
+    },
+    "id": "daafdf96-e7b1-4f14-b494-27e0d24b11f6_2",
+    "type": "security-rule"
+}

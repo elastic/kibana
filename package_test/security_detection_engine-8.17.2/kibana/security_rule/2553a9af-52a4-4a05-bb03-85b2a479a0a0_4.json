@@ -1,0 +1,83 @@
+{
+  "attributes": {
+    "author": [
+      "Elastic"
+    ],
+    "description": "Detects known PowerShell offensive tooling author's name in PowerShell scripts. Attackers commonly use out-of-the-box offensive tools without modifying the code, which may still contain the author artifacts. This rule identifies common author handles found in popular PowerShell scripts used for red team exercises.",
+    "from": "now-9m",
+    "index": [
+      "winlogbeat-*",
+      "logs-windows.powershell*"
+    ],
+    "language": "kuery",
+    "license": "Elastic License v2",
+    "name": "Potential PowerShell HackTool Script by Author",
+    "query": "host.os.type:windows and event.category:process and\n  powershell.file.script_block_text : (\n      \"mattifestation\" or \"JosephBialek\" or\n      \"harmj0y\" or \"ukstufus\" or\n      \"SecureThisShit\" or \"Matthew Graeber\" or\n      \"secabstraction\" or \"mgeeky\" or\n      \"oddvarmoe\" or \"am0nsec\" or\n      \"obscuresec\" or \"sixdub\" or\n      \"darkoperator\" or \"funoverip\" or\n      \"rvrsh3ll\" or \"kevin_robertson\" or\n      \"dafthack\" or \"r4wd3r\" or\n      \"danielhbohannon\" or \"OneLogicalMyth\" or\n      \"cobbr_io\" or \"xorrior\" or\n      \"PetrMedonos\" or \"citronneur\" or\n      \"eladshamir\" or \"RastaMouse\" or\n      \"enigma0x3\" or \"FuzzySec\" or\n      \"424f424f\" or \"jaredhaight\" or\n      \"fullmetalcache\" or \"Hubbl3\" or\n      \"curi0usJack\" or \"Cx01N\" or\n      \"itm4n\" or \"nurfed1\" or\n      \"cfalta\" or \"Scott Sutherland\" or\n      \"_nullbind\" or \"_tmenochet\" or\n      \"jaredcatkinson\" or \"ChrisTruncer\" or\n      \"monoxgas\" or \"TheRealWover\" or\n      \"splinter_code\"\n  )\n",
+    "references": [
+      "https://github.com/atc-project/atc-data/blob/master/docs/Logging_Policies/LP_0109_windows_powershell_script_block_log.md"
+    ],
+    "related_integrations": [
+      {
+        "package": "windows",
+        "version": "^1.5.0"
+      }
+    ],
+    "required_fields": [
+      {
+        "ecs": true,
+        "name": "event.category",
+        "type": "keyword"
+      },
+      {
+        "ecs": true,
+        "name": "host.os.type",
+        "type": "keyword"
+      },
+      {
+        "ecs": false,
+        "name": "powershell.file.script_block_text",
+        "type": "unknown"
+      }
+    ],
+    "risk_score": 73,
+    "rule_id": "2553a9af-52a4-4a05-bb03-85b2a479a0a0",
+    "setup": "## Setup\n\nThe 'PowerShell Script Block Logging' logging policy must be enabled.\nSteps to implement the logging policy with Advanced Audit Configuration:\n\n```\nComputer Configuration >\nAdministrative Templates >\nWindows PowerShell >\nTurn on PowerShell Script Block Logging (Enable)\n```\n\nSteps to implement the logging policy via registry:\n\n```\nreg add \"hklm\\SOFTWARE\\Policies\\Microsoft\\Windows\\PowerShell\\ScriptBlockLogging\" /v EnableScriptBlockLogging /t REG_DWORD /d 1\n```\n",
+    "severity": "high",
+    "tags": [
+      "Domain: Endpoint",
+      "OS: Windows",
+      "Use Case: Threat Detection",
+      "Tactic: Execution",
+      "Data Source: PowerShell Logs"
+    ],
+    "threat": [
+      {
+        "framework": "MITRE ATT&CK",
+        "tactic": {
+          "id": "TA0002",
+          "name": "Execution",
+          "reference": "https://attack.mitre.org/tactics/TA0002/"
+        },
+        "technique": [
+          {
+            "id": "T1059",
+            "name": "Command and Scripting Interpreter",
+            "reference": "https://attack.mitre.org/techniques/T1059/",
+            "subtechnique": [
+              {
+                "id": "T1059.001",
+                "name": "PowerShell",
+                "reference": "https://attack.mitre.org/techniques/T1059/001/"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "timestamp_override": "event.ingested",
+    "type": "query",
+    "version": 4
+  },
+  "id": "2553a9af-52a4-4a05-bb03-85b2a479a0a0_4",
+  "type": "security-rule"
+}
