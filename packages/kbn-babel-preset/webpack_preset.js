@@ -18,19 +18,17 @@ module.exports = (
 ) => {
   return {
     presets: [
-      [
-        require.resolve('@babel/preset-env'),
-        {
-          useBuiltIns: 'entry',
-          modules: false,
-          // Please read the explanation for this
-          // in node_preset.js
-          corejs: '3.37.1',
-          bugfixes: true,
-          browserslistEnv: api.env('production') ? 'production' : 'dev',
-        },
-      ],
       [require('./common_preset'), options],
+      require.resolve('@babel/preset-env'),
+      {
+        useBuiltIns: 'entry',
+        modules: false,
+        // Please read the explanation for this
+        // in node_preset.js
+        corejs: '3.37.1',
+        bugfixes: true,
+        browserslistEnv: api.env('production') ? 'production' : 'dev',
+      },
     ],
     plugins: [
       // Conditionally include babel-plugin-transform-require-default

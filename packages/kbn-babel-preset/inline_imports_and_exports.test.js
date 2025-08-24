@@ -378,7 +378,7 @@ describe('inline_imports_and_exports plugin - transform contract', () => {
 
     const out = transform(input);
 
-    expect(out).not.toContain(`_mod_ingest`)
+    expect(out).not.toContain(`_mod_ingest`);
 
     expect(out).toMatchInlineSnapshot(`
       "import { IngestStream } from './ingest';
@@ -390,7 +390,6 @@ describe('inline_imports_and_exports plugin - transform contract', () => {
       Streams.ingest = IngestStream;
       export const r = Streams.all[0];"
     `);
-
   });
 
   it('removes type-only exports (TS) to avoid runtime refs', () => {
@@ -425,8 +424,8 @@ describe('inline_imports_and_exports plugin - transform contract', () => {
     `;
     const out = transform(input, { filename: 'file.ts' });
     // Should create a lazy require for './base' and rewrite runtime usage
-    expect(out).toContain("function _mod_base() {");
-    expect(out).toContain("require(\"./base\")");
+    expect(out).toContain('function _mod_base() {');
+    expect(out).toContain('require("./base")');
     expect(out).toContain('_mod_base().BaseStream.run()');
 
     // Execute to ensure deferral works and no crashes from type-only constructs
@@ -553,5 +552,103 @@ describe('inline_imports_and_exports plugin - transform contract', () => {
     // Should replace the imported references correctly
     expect(out).toContain("_mod_safer_lodash_set().set({}, 'key', 'value')");
     expect(out).toContain('return _interopDefault(_mod_lib())()');
+  });
+
+  it('regression: does not rewrite imported identifiers used as JSX tag names', () => {
+    const input = `
+      import React from 'react';
+      import { Button } from '@elastic/eui';
+      export const C = () => <Button />;
+      export const use = () => Button; // runtime value ref should be rewritten
+    `;
+    const out = transform(input, { filename: 'file.tsx' });
+    // Ensure <Button /> tag is preserved as JSXIdentifier and not rewritten to MemberExpression
+    expect(out).toContain('<Button />');
+    // But the runtime value reference should be rewritten through lazy require
+    expect(out).toContain('require("@elastic/eui")');
+    expect(out).toMatch(/_mod_[A-Za-z0-9_]*elastic_eui\(\)\.Button/);
+
+    // Execute to ensure it runs without syntax errors
+    const { run } = execTransformed(input, { filename: 'file.tsx' });
+    const mod = run({ '@elastic/eui': { Button: function Btn() { } } });
+    expect(typeof mod.exports.C).toBe('function');
+    expect(mod.exports.use()).toBeDefined();
+  });
+
+  it('regression: does not rewrite identifiers inside export specifiers (no MemberExpression in specifier)', () => {
+    const input = `
+      import { FormattedMessage } from 'react-intl';
+      export { FormattedMessage };
+    `;
+    const out = transform(input, { filename: 'file.tsx' });
+    // We may rewrite the export into a getter, but must not inline a MemberExpression inside the specifier itself
+    expect(out).toContain('function _mod_react_intl() {');
+    expect(out).toContain('Object.defineProperty(exports, "FormattedMessage"');
+    expect(out).toContain('return _mod_react_intl().FormattedMessage;');
+  });
+
+  it('regression: handles `import { default as X }` with default interop', () => {
+    const input = `
+      import { default as themeVars } from './theme.json';
+      export const P = new Proxy(themeVars, { get: (t, p) => t[p] });
+      export const get = (k) => themeVars[k];
+    `;
+
+    const out = transform(input, { filename: 'theme.tsx' });
+
+    expect(out).toContain(`new Proxy(_interopDefault(_mod_theme_json())`);
+
+    expect(out).toMatchInlineSnapshot(`
+      "function _interopDefault(m) {
+        return m && m.__esModule ? m.default : m;
+      }
+      function _mod_theme_json() {
+        try {
+          var m = require(\\"./theme.json\\");
+          _mod_theme_json = function () {
+            return m;
+          };
+          return m;
+        } catch (e) {
+          throw e;
+        }
+      }
+      export const P = new Proxy(_interopDefault(_mod_theme_json()), {
+        get: (t, p) => t[p]
+      });
+      export const get = k => _interopDefault(_mod_theme_json())[k];"
+    `);
+  });
+
+  describe('option: ignore specifiers', () => {
+    it('does not rewrite ignored named specifier by module/name', () => {
+      const input = `import { css, keyframes as kf } from '@emotion/react';
+const a = css\`\`;
+const b = kf\`\`;
+`;
+      const out = transform(input, {
+        filename: 'file.tsx',
+        plugin: { ignore: [{ specifier: '@emotion/react', name: 'css' }] },
+      });
+      // Should still create accessor for the module because kf is rewritten
+      expect(out).toContain('function _mod_emotion_react() {');
+      // css should remain imported (we keep the specifier because it's ignored)
+      expect(out).toMatch(/import\s*\{\s*css\s*\}[^\n]*from\s*['"]@emotion\/react['"]/);
+      // keyframes alias should be rewritten
+      expect(out).toContain('const b = _mod_emotion_react().keyframes`');
+    });
+
+    it('does not rewrite ignored default import by module/name', () => {
+      const input = `import React, { useMemo } from 'react';
+export const x = () => useMemo(() => 1, [React]);`;
+      const out = transform(input, {
+        filename: 'file.tsx',
+        plugin: { ignore: [{ specifier: 'react', name: 'React' }] },
+      });
+      // default import React should remain (named specifier removed)
+      expect(out).toMatch(/import\s+React\s+from\s+['"]react['"]/);
+      // named useMemo should be rewritten
+      expect(out).toMatch(/_mod_react\(\)\.useMemo/);
+    });
   });
 });
