@@ -26,7 +26,7 @@ describe('getElementFromPoint', () => {
     document.elementsFromPoint = originalElementsFromPoint;
   });
 
-  it('returns the first valid element', () => {
+  it('should return the first valid element', () => {
     const mockHtmlElement = document.createElement('div');
     document.elementsFromPoint = jest.fn().mockReturnValue([mockHtmlElement]);
 
@@ -36,7 +36,7 @@ describe('getElementFromPoint', () => {
     expect(result).toBe(mockHtmlElement);
   });
 
-  it('skips overlay', () => {
+  it('should skip overlay', () => {
     const mockOverlayElement = document.createElement('div');
     mockOverlayElement.id = INSPECT_OVERLAY_ID;
     const mockValidElement = document.createElement('div');
@@ -59,7 +59,7 @@ describe('getElementFromPoint', () => {
     expect(result).toBe(mockValidElement);
   });
 
-  it('returns SVG elements that are not paths', () => {
+  it('should return SVG elements that are not paths', () => {
     const mockSvgCircle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
 
     document.elementsFromPoint = jest.fn().mockReturnValue([mockSvgCircle]);
@@ -69,7 +69,7 @@ describe('getElementFromPoint', () => {
     expect(result).toBe(mockSvgCircle);
   });
 
-  it('returns undefined when no valid elements are found', () => {
+  it('should return undefined when no valid elements are found', () => {
     const mockOverlayElement = document.createElement('div');
     mockOverlayElement.id = INSPECT_OVERLAY_ID;
     const mockSvgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
@@ -81,7 +81,7 @@ describe('getElementFromPoint', () => {
     expect(result).toBeUndefined();
   });
 
-  it('returns undefined when elements array is empty', () => {
+  it('should return undefined when elements array is empty', () => {
     document.elementsFromPoint = jest.fn().mockReturnValue([]);
 
     const result = getElementFromPoint(mockEvent);

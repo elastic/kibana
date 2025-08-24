@@ -11,20 +11,20 @@ import { getIconType } from './get_icon_type';
 import { EUI_DATA_ICON_TYPE } from '../constants';
 
 describe('getIconType', () => {
-  it('returns icon type from SVG element with EUI_DATA_ICON_TYPE attribute', () => {
+  it('should return icon type from SVG element with EUI_DATA_ICON_TYPE attribute', () => {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElement.setAttribute(EUI_DATA_ICON_TYPE, 'logoElastic');
 
     expect(getIconType(svgElement)).toBe('logoElastic');
   });
 
-  it('returns undefined from SVG element without EUI_DATA_ICON_TYPE attribute', () => {
+  it('should return undefined from SVG element without EUI_DATA_ICON_TYPE attribute', () => {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
     expect(getIconType(svgElement)).toBeUndefined();
   });
 
-  it('returns icon type from HTML element with SVG child that has EUI_DATA_ICON_TYPE attribute', () => {
+  it('should return icon type from HTML element with SVG child that has EUI_DATA_ICON_TYPE attribute', () => {
     const divElement = document.createElement('div');
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElement.setAttribute(EUI_DATA_ICON_TYPE, 'arrowDown');
@@ -33,7 +33,7 @@ describe('getIconType', () => {
     expect(getIconType(divElement)).toBe('arrowDown');
   });
 
-  it('returns undefined from HTML element with SVG child without EUI_DATA_ICON_TYPE attribute', () => {
+  it('should return undefined from HTML element with SVG child without EUI_DATA_ICON_TYPE attribute', () => {
     const divElement = document.createElement('div');
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     divElement.appendChild(svgElement);
@@ -41,7 +41,7 @@ describe('getIconType', () => {
     expect(getIconType(divElement)).toBeUndefined();
   });
 
-  it('returns undefined from HTML element without SVG child', () => {
+  it('should return undefined from HTML element without SVG child', () => {
     const divElement = document.createElement('div');
 
     expect(getIconType(divElement)).toBeUndefined();
