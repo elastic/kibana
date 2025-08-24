@@ -9,6 +9,7 @@
 
 import { loadConfiguration } from './config_loader';
 import { piiFilter } from './filters/pii_filter';
+import { patchMocha } from './patch_mocha';
 
 export const initApm = (
   argv: string[],
@@ -24,6 +25,8 @@ export const initApm = (
   // we want to only load the module when effectively used
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const apm = require('elastic-apm-node') as typeof import('elastic-apm-node');
+
+  patchMocha(apm);
 
   // Filter out all user PII
   if (shouldRedactUsers) {
