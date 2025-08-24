@@ -38,57 +38,19 @@ describe('fetchAgentMetrics', () => {
   });
 
   it('should fetch agent metrics', async () => {
-    esClient.search.mockResolvedValue({
-      took: 5,
-      timed_out: false,
-      _shards: {
-        total: 1,
-        successful: 1,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 0,
-          relation: 'eq',
-        },
-        hits: [],
-      },
-      aggregations: {
-        versions: {
-          buckets: [
-            {
-              key: '8.12.0',
-              doc_count: 1,
-            },
-          ],
-        },
-        upgrade_details: {
-          buckets: [
-            {
-              key: 'UPG_REQUESTED',
-              doc_count: 1,
-            },
-          ],
-        },
-        unhealthy_reason: {
-          buckets: [
-            {
-              key: 'input',
-              doc_count: 2,
-            },
-            {
-              key: 'output',
-              doc_count: 1,
-            },
-            {
-              key: 'other',
-              doc_count: 3,
-            },
-          ],
-        },
-      },
-    });
+    esClient.esql.query.mockResolvedValueOnce({
+      values: [[1, '8.12.0']],
+    } as any);
+    esClient.esql.query.mockResolvedValueOnce({
+      values: [[1, 'UPG_REQUESTED']],
+    } as any);
+    esClient.esql.query.mockResolvedValueOnce({
+      values: [
+        [2, 'input'],
+        [1, 'output'],
+        [3, 'other'],
+      ],
+    } as any);
 
     const result = await fetchAgentMetrics(mockCore, abortController);
 

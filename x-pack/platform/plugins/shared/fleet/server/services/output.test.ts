@@ -378,6 +378,9 @@ describe('Output Service', () => {
       items: [],
     } as any);
     mockedFindAgentlessPolicies.mockResolvedValue([]);
+    esClientMock.esql.query.mockResponse({
+      values: [],
+    } as any);
   });
 
   afterEach(() => {
@@ -2544,12 +2547,6 @@ describe('Output Service', () => {
     });
 
     it('should return unknown state if no hits', async () => {
-      esClientMock.search.mockResolvedValue({
-        hits: {
-          hits: [],
-        },
-      } as any);
-
       const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
 
       expect(response).toEqual({
@@ -2560,18 +2557,8 @@ describe('Output Service', () => {
     });
 
     it('should return state from hits', async () => {
-      esClientMock.search.mockResolvedValue({
-        hits: {
-          hits: [
-            {
-              _source: {
-                state: 'DEGRADED',
-                message: 'connection error',
-                '@timestamp': '2023-11-30T14:25:31Z',
-              },
-            },
-          ],
-        },
+      esClientMock.esql.query.mockResponse({
+        values: [['DEGRADED', 'connection error', '2023-11-30T14:25:31Z']],
       } as any);
 
       const response = await outputService.getLatestOutputHealth(esClientMock, 'id');
@@ -2597,15 +2584,9 @@ describe('Output Service', () => {
 
       await outputService.getLatestOutputHealth(esClientMock, 'id');
 
-      expect((esClientMock.search.mock.lastCall?.[0] as any)?.query.bool.must).toEqual([
-        {
-          range: {
-            '@timestamp': {
-              gte: updatedAt,
-            },
-          },
-        },
-      ]);
+      expect((esClientMock.esql.query.mock.lastCall?.[0] as any)?.query).toContain(
+        `AND @timestamp >= "${updatedAt}"`
+      );
     });
 
     it('should not apply range filter if updated_at is not available', async () => {
@@ -2617,7 +2598,9 @@ describe('Output Service', () => {
 
       await outputService.getLatestOutputHealth(esClientMock, 'id');
 
-      expect((esClientMock.search.mock.lastCall?.[0] as any)?.query.bool.must).toEqual([]);
+      expect((esClientMock.esql.query.mock.lastCall?.[0] as any)?.query).not.toContain(
+        'AND @timestamp'
+      );
     });
 
     it('should not apply range filter if output query returns error', async () => {
@@ -2625,7 +2608,9 @@ describe('Output Service', () => {
 
       await outputService.getLatestOutputHealth(esClientMock, 'id');
 
-      expect((esClientMock.search.mock.lastCall?.[0] as any)?.query.bool.must).toEqual([]);
+      expect((esClientMock.esql.query.mock.lastCall?.[0] as any)?.query).not.toContain(
+        'AND @timestamp'
+      );
     });
   });
 
