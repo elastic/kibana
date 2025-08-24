@@ -13,7 +13,7 @@ import { PreviewImage } from './preview_image';
 import { ComponentTitle } from './component_title';
 import { IconData } from './icon_data';
 import { CodeownersList } from './codeowners_list';
-import type { ComponentData } from '../../../types';
+import type { ComponentData } from '../../../../lib/types';
 
 interface Props {
   componentData: ComponentData;

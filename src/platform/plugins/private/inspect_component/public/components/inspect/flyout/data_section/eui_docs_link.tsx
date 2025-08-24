@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiInfo } from '../../../types';
+import type { EuiInfo } from '../../../../lib/types';
 
 interface Props {
   euiInfo?: EuiInfo;

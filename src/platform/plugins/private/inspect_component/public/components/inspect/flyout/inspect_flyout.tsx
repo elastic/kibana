@@ -14,9 +14,9 @@ import type { OverlayFlyoutOpenOptions } from '@kbn/core/public';
 import { DataSection } from './data_section/data_section';
 import { InspectFlyoutHeader } from './inspect_flyout_header';
 import { ActionsSection } from './actions_section/actions_section';
-import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID, INSPECT_FLYOUT_MAX_WIDTH } from '../../constants';
+import { EUI_PORTAL_ATTRIBUTE, INSPECT_FLYOUT_ID, INSPECT_FLYOUT_MAX_WIDTH } from '../../../lib/constants';
 import { InspectHighlight } from '../overlay/inspect_highlight';
-import type { ComponentData } from '../../types';
+import type { ComponentData } from '../../../lib/types';
 
 interface Props {
   componentData: ComponentData;

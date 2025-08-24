@@ -12,8 +12,12 @@ import type { CSSProperties, Dispatch, SetStateAction } from 'react';
 import { css } from '@emotion/css';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { EuiPortal, EuiWindowEvent, transparentize, useEuiTheme } from '@elastic/eui';
-import { INSPECT_OVERLAY_ID } from '../../constants';
-import { findReactComponentPath, getElementFromPoint, getInspectedElementData } from '../../utils';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
+import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
+import { findReactComponentPath } from '../../../lib/fiber/find_react_component_path';
+import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
+import { INSPECT_OVERLAY_ID } from '../../../lib/constants';
 import { InspectHighlight } from './inspect_highlight';
 
 interface Props {
@@ -48,7 +52,7 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
-      const target = getElementFromPoint({ event });
+      const target = getElementFromPoint(event);
 
       if (!target) {
         return;
@@ -75,16 +79,41 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
 
   const handleClickAtPositionOfInspectedElement = useCallback(
     async (event: MouseEvent) => {
-      await getInspectedElementData({
-        event,
-        core,
+      const target = getElementFromPoint(event);
+
+      if (!target) {
+        setIsInspecting(false);
+        return;
+      }
+
+      const componentData = await getInspectedElementData({
+        target,
+        httpService: core.http,
         componentPath,
         sourceComponent,
-        setFlyoutOverlayRef,
-        setIsInspecting,
       });
+
+      if (!componentData) {
+        setIsInspecting(false);
+        return;
+      }
+
+      const flyout = core.overlays.openFlyout(
+        toMountPoint(
+          <InspectFlyout componentData={componentData} target={target} />,
+          core.rendering
+        ),
+        flyoutOptions
+      );
+
+      flyout.onClose.then(() => {
+        setFlyoutOverlayRef(undefined);
+      });
+
+      setFlyoutOverlayRef(flyout);
+      setIsInspecting(false);
     },
-    [core, componentPath, sourceComponent, setFlyoutOverlayRef, setIsInspecting]
+    [core, componentPath, sourceComponent, setIsInspecting, setFlyoutOverlayRef]
   );
 
   /**

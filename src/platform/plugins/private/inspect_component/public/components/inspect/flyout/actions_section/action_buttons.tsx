@@ -12,7 +12,19 @@ import { EuiCard, EuiFlexGroup, EuiIcon, EuiText, useEuiTheme } from '@elastic/e
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type { ActionLink } from '../../../types';
+
+interface ActionLink {
+  /** The URL for the link. */
+  href: string;
+  /** The internationalization ID for the link label. */
+  i18nId: string;
+  /** EUI icon type for the link component. */
+  icon: string;
+  /** Unique id. */
+  id: string;
+  /** Visible text for the link. */
+  label: string;
+}
 
 interface Props {
   fileName: string;

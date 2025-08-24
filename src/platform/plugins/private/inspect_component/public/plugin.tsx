@@ -10,7 +10,7 @@
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { InspectButton } from './inspect/inspect_button';
+import { InspectButton } from './components/inspect/inspect_button';
 import type { ConfigSchema } from '../server/config';
 
 export class InspectComponentPluginPublic implements Plugin {

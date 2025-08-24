@@ -13,8 +13,8 @@ import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { css } from '@emotion/react';
 import { EuiHeaderSectionItemButton, EuiToolTip, EuiWindowEvent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isKeyboardShortcut, isMac } from '../../lib/keyboard_shortcut/keyboard_shortcut';
 import { InspectOverlay } from './overlay/inspect_overlay';
-import { isKeyboardShortcut, isMac } from '../utils';
 
 const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
   defaultMessage: 'Inspect component',
@@ -28,6 +28,7 @@ const TOOLTIP_CONTENT = i18n.translate('kbnInspectComponent.inspectButton.toolti
 interface Props {
   core: CoreStart;
 }
+
 /**
  * The entry point for the plugin.
  * Renders the inspect button which toggles the inspect mode.
