@@ -48,10 +48,10 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
       background-color: ${transparentize(euiTheme.colors.backgroundFilledText, 0.2)};
       inset: 0;
       position: fixed;
-      z-index: ${Number(euiTheme.levels.modal) + 1};
+      z-index: ${Number(euiTheme.levels.toast) + 1};
       pointer-events: none;
     `,
-    [euiTheme.colors.backgroundFilledText, euiTheme.levels.modal]
+    [euiTheme.colors.backgroundFilledText, euiTheme.levels.toast]
   );
 
   const handlePointerMove = useCallback(

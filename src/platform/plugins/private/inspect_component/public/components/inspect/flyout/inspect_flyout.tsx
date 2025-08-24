@@ -37,7 +37,7 @@ export const flyoutOptions: OverlayFlyoutOpenOptions = {
 export const InspectFlyout = ({ componentData, target }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties | null>(null);
-  const modalZIndex = Number(euiTheme.levels.modal);
+  const toastZIndex = Number(euiTheme.levels.toast);
 
   const updateHighlightPosition = useCallback(() => {
     const rect = target.getBoundingClientRect();
@@ -47,9 +47,9 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
       left: `${rect.left}px`,
       width: `${rect.width}px`,
       height: `${rect.height}px`,
-      zIndex: modalZIndex + 1,
+      zIndex: toastZIndex + 1,
     });
-  }, [target, modalZIndex]);
+  }, [target, toastZIndex]);
 
   /** Set initial highlight position. */
   useLayoutEffect(() => {
@@ -64,10 +64,10 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
 
     if (portalParent instanceof HTMLElement) {
       requestAnimationFrame(() => {
-        portalParent.style.zIndex = (modalZIndex + 2).toString();
+        portalParent.style.zIndex = (toastZIndex + 2).toString();
       });
     }
-  }, [modalZIndex]);
+  }, [toastZIndex]);
 
   return (
     <>
