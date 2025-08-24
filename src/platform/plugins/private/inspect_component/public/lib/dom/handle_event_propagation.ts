@@ -21,8 +21,9 @@ interface HandleEventPropagationOptions {
  * Handle event propagation for inspected elements.
  * It invokes the provided callback only for click events or if the target element is disabled.
  * This allows for inspecting disabled elements and prevents triggering 'onClick' behavior on underlying elements.
- * @param {MouseEvent} event The mouse event to handle.
- * @param {function} callback The callback to invoke if the event should be handled.
+ * @param {HandleEventPropagationOptions} options
+ * @param {MouseEvent} options.event The mouse event to handle.
+ * @param {function} options.callback The callback to invoke if the event should be handled.
  * @return {void}
  */
 export const handleEventPropagation = ({

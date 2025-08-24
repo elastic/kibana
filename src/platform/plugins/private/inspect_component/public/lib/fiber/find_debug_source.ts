@@ -12,8 +12,8 @@ import { getFiberFromDomNode } from './get_fiber_from_dom_node';
 
 /**
  * Find the nearest _debugSource by traversing up the DOM and React Fiber tree.
- * @param {HTMLElement|SVGElement} node The DOM node.
- * @return {DebugSource|undefined} The debug source information, or undefined if not found.
+ * @param {HTMLElement | SVGElement} node The DOM node.
+ * @return {DebugSource | undefined} The debug source information, or undefined if not found.
  */
 export const findDebugSource = (node: HTMLElement | SVGElement): DebugSource | undefined => {
   let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;

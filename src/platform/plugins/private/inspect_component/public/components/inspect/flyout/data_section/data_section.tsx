@@ -8,12 +8,12 @@
  */
 
 import React from 'react';
+import type { ComponentData } from '../../../../lib/get_inspected_element_data';
 import { EuiDocsLink } from './eui_docs_link';
 import { PreviewImage } from './preview_image';
 import { ComponentTitle } from './component_title';
 import { IconData } from './icon_data';
 import { CodeownersList } from './codeowners_list';
-import type { ComponentData } from '../../../../lib/types';
 
 interface Props {
   componentData: ComponentData;
@@ -23,7 +23,7 @@ interface Props {
 export const DataSection = ({ componentData, target }: Props) => {
   if (!componentData) return null;
 
-  const { codeowners, euiInfo, iconType, sourceComponent } = componentData;
+  const { codeowners, euiData, iconType, sourceComponent } = componentData;
 
   return (
     <>
@@ -31,7 +31,7 @@ export const DataSection = ({ componentData, target }: Props) => {
       <ComponentTitle sourceComponent={sourceComponent} />
       <CodeownersList codeowners={codeowners} />
       <IconData iconType={iconType} />
-      <EuiDocsLink euiInfo={euiInfo} />
+      <EuiDocsLink euiData={euiData} />
     </>
   );
 };

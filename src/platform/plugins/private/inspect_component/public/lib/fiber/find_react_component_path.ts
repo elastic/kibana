@@ -21,7 +21,7 @@ interface FindReactComponentPathResult {
  * Find React component path from DOM node.
  * This logic is not perfect and may not work in all cases.
  * @param {HTMLElement | SVGElement} node The DOM node.
- * @return {FindReactComponentPathResult|undefined} The component path and source component name, or undefined if it cannot be determined.
+ * @return {FindReactComponentPathResult | undefined} The component path and source component name, or undefined if it cannot be determined.
  */
 export const findReactComponentPath = (
   node: HTMLElement | SVGElement

@@ -13,7 +13,7 @@ import { EUI_COMPONENTS_DOCS_MAP, EUI_DOCS_BASE } from '../constants';
 /**
  * Represents information about an EUI component.
  */
-export interface EuiInfo {
+export interface EuiData {
   /** The React component name of this EUI component. */
   componentName: string;
   /** Link to the EUI documentation for this EUI component. */
@@ -24,9 +24,9 @@ export interface EuiInfo {
  * Get EUI component documentation link and component name from a given component path.
  * If multiple EUI components are found in the path, the first one with a known documentation link is returned.
  * @param {string | undefined} componentPath The component path string.
- * @return {EuiInfo | null} An object containing the component name and documentation link, or null if no EUI component is found.
+ * @return {EuiData | null} An object containing the component name and documentation link, or null if no EUI component is found.
  */
-export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
+export const getEuiComponentDocsData = (componentPath?: string): EuiData | null => {
   if (!componentPath) return null;
 
   const toUrl = (name: string): string | null => {

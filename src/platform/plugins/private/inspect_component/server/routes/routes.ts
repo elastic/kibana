@@ -7,19 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
-import { sep } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
-import { getComponentCodeowners } from './lib/codeowners/get_component_codeowners';
+import { getComponentData, getComponentDataBodySchema } from './component_data/get_component_data';
 
+/**
+ * Parameters for {@link registerInspectComponentRoutes}.
+ */
 interface InspectComponentRoutesOptions {
-  http: HttpServiceSetup;
+  /** The HTTP service setup contract. */
+  httpService: HttpServiceSetup;
+  /** The logger instance. */
   logger: Logger;
 }
-
-export const registerInspectComponentRoutes = ({ http, logger }: InspectComponentRoutesOptions) => {
-  const router = http.createRouter();
+/**
+ * Register routes for the Inspect Component plugin.
+ * @param {InspectComponentRoutesOptions} options
+ * @param {http} options.httpService The HTTP service setup contract.
+ * @param {Logger} options.logger The logger instance.
+ */
+export const registerInspectComponentRoutes = ({
+  httpService,
+  logger,
+}: InspectComponentRoutesOptions) => {
+  const router = httpService.createRouter();
 
   /**
    * @internal
@@ -42,24 +52,9 @@ export const registerInspectComponentRoutes = ({ http, logger }: InspectComponen
         access: 'internal',
       },
       validate: {
-        body: schema.object({
-          path: schema.string({
-            minLength: 1,
-          }),
-        }),
+        body: getComponentDataBodySchema,
       },
     },
-    async (_ctx, req, res) => {
-      const { path } = req.body;
-
-      logger.debug(`Inspecting component at path: ${path}`);
-
-      const relativePath = path.slice(REPO_ROOT.length + sep.length);
-      const baseFileName = relativePath.split(sep).pop();
-
-      const codeowners = getComponentCodeowners(relativePath);
-
-      return res.ok({ body: { codeowners, relativePath, baseFileName } });
-    }
+    async (_ctx, req, res) => getComponentData({ req, res, logger })
   );
 };

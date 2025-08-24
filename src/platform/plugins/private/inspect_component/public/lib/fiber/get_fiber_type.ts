@@ -12,7 +12,7 @@ import type { ReactFiberNode } from './types';
 /**
  * Get the display name of the fiber node.
  * @param {ReactFiberNode} fiber The React Fiber node.
- * @return {string|null} The display name of the fiber node, or null if it cannot be determined.
+ * @return {string | null} The display name of the fiber node, or null if it cannot be determined.
  */
 export const getFiberType = (fiber: ReactFiberNode): string | null => {
   if (typeof fiber.type === 'string') {

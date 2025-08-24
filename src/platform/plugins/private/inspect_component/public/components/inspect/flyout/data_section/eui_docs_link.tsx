@@ -11,13 +11,13 @@ import React from 'react';
 import { EuiFlexGroup, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiInfo } from '../../../../lib/types';
+import type { EuiData } from '../../../../lib/eui/get_eui_component_docs_data';
 
 interface Props {
-  euiInfo?: EuiInfo;
+  euiData?: EuiData;
 }
 
-export const EuiDocsLink = ({ euiInfo }: Props) => {
+export const EuiDocsLink = ({ euiData }: Props) => {
   const { euiTheme } = useEuiTheme();
 
   const boldTextCss = css`
@@ -32,9 +32,9 @@ export const EuiDocsLink = ({ euiInfo }: Props) => {
           defaultMessage="EUI Docs:"
         />
       </EuiText>
-      {euiInfo ? (
-        <EuiLink href={euiInfo.docsLink} target="_blank" external>
-          {euiInfo.componentName}
+      {euiData ? (
+        <EuiLink href={euiData.docsLink} target="_blank" external>
+          {euiData.componentName}
         </EuiLink>
       ) : (
         <EuiText size="s">

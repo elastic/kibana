@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 
 /**
  * Parameters for {@link fetchComponentData}.
  */
 interface FetchComponentDataOptions {
   /** Kibana HTTP service. */
-  httpService: CoreStart['http'];
+  httpService: HttpStart;
   /** Full component path. */
   fileName: string;
 }
@@ -34,9 +34,10 @@ export interface InspectComponentResponse {
 /**
  * Fetch component data.
  * @async
- * @param {CoreStart['http']} httpService Kibana HTTP service.
- * @param {string} fileName Full component path.
- * @returns {Promise<InspectComponentResponse|undefined>} Resolves with component data or undefined if an error occurs.
+ * @param {FetchComponentDataOptions} options
+ * @param {HttpStart} options.httpService Kibana HTTP service.
+ * @param {string} options.fileName Full component path.
+ * @returns {Promise<InspectComponentResponse | undefined>} Resolves with component data or undefined if an error occurs.
  */
 export const fetchComponentData = async ({
   httpService,

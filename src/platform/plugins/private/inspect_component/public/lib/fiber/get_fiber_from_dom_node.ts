@@ -11,8 +11,8 @@ import type { ReactFiberNode } from './types';
 
 /**
  * Get the React Fiber node from a DOM node.
- * @param {HTMLElement|SVGElement|null} node The DOM node.
- * @return {ReactFiberNode|undefined} The React Fiber node associated with the DOM node
+ * @param {HTMLElement | SVGElement | null} node The DOM node.
+ * @return {ReactFiberNode | undefined} The React Fiber node associated with the DOM node.
  */
 export const getFiberFromDomNode = (
   node: HTMLElement | SVGElement | null

@@ -14,7 +14,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { registerInspectComponentRoutes } from './routes';
+import { registerInspectComponentRoutes } from './routes/routes';
 import type { ConfigSchema } from './config';
 
 export class InspectComponentPluginServer implements Plugin {
@@ -31,7 +31,7 @@ export class InspectComponentPluginServer implements Plugin {
 
   public setup(core: CoreSetup) {
     if (this.isDevMode && this.isEnabled) {
-      registerInspectComponentRoutes({ http: core.http, logger: this.logger });
+      registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
     }
 
     return {};

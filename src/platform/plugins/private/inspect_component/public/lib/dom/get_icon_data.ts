@@ -12,8 +12,8 @@ import { EUI_DATA_ICON_TYPE } from '../constants';
 /**
  * Get the EUI icon name from a DOM node.
  * It checks if the target is an SVG element or looks for an SVG child element.
- * @param {HTMLElement|SVGElement} target The DOM node to check.
- * @return {string|undefined} The EUI icon name, or undefined if not found.
+ * @param {HTMLElement | SVGElement} target The DOM node to check.
+ * @return {string | undefined} The EUI icon name, or undefined if not found.
  */
 export const getIconData = (target: HTMLElement | SVGElement): string | undefined => {
   if (target instanceof SVGElement) {
