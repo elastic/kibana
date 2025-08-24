@@ -10,10 +10,18 @@
   },
   "server": {
     "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.drop",
+        "id": "def-common.drop",
         "type": "Function",
         "tags": [],
         "label": "drop",
@@ -28,7 +36,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.drop.$1",
+            "id": "def-common.drop.$1",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -47,7 +55,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.evaluate",
+        "id": "def-common.evaluate",
         "type": "Function",
         "tags": [],
         "label": "evaluate",
@@ -62,7 +70,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.evaluate.$1",
+            "id": "def-common.evaluate.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -77,7 +85,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.evaluate.$2",
+            "id": "def-common.evaluate.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
@@ -96,7 +104,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.from",
+        "id": "def-common.from",
         "type": "Function",
         "tags": [],
         "label": "from",
@@ -111,7 +119,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.from.$1",
+            "id": "def-common.from.$1",
             "type": "Array",
             "tags": [],
             "label": "patterns",
@@ -130,7 +138,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.keep",
+        "id": "def-common.keep",
         "type": "Function",
         "tags": [],
         "label": "keep",
@@ -145,7 +153,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.keep.$1",
+            "id": "def-common.keep.$1",
             "type": "Array",
             "tags": [],
             "label": "columns",
@@ -164,7 +172,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.limit",
+        "id": "def-common.limit",
         "type": "Function",
         "tags": [],
         "label": "limit",
@@ -179,7 +187,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.limit.$1",
+            "id": "def-common.limit.$1",
             "type": "number",
             "tags": [],
             "label": "value",
@@ -198,7 +206,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.sort",
+        "id": "def-common.sort",
         "type": "Function",
         "tags": [],
         "label": "sort",
@@ -213,7 +221,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$1",
+            "id": "def-common.sort.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -228,7 +236,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$2",
+            "id": "def-common.sort.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
@@ -247,7 +255,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.sort",
+        "id": "def-common.sort",
         "type": "Function",
         "tags": [],
         "label": "sort",
@@ -262,7 +270,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$1",
+            "id": "def-common.sort.$1",
             "type": "Array",
             "tags": [],
             "label": "sorts",
@@ -281,7 +289,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.sort",
+        "id": "def-common.sort",
         "type": "Function",
         "tags": [],
         "label": "sort",
@@ -296,7 +304,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$1",
+            "id": "def-common.sort.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "firstArg",
@@ -311,7 +319,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$2",
+            "id": "def-common.sort.$2",
             "type": "CompoundType",
             "tags": [],
             "label": "secondArg",
@@ -326,7 +334,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.sort.$3",
+            "id": "def-common.sort.$3",
             "type": "Array",
             "tags": [],
             "label": "restSorts",
@@ -345,7 +353,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.stats",
+        "id": "def-common.stats",
         "type": "Function",
         "tags": [],
         "label": "stats",
@@ -360,7 +368,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.stats.$1",
+            "id": "def-common.stats.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -375,7 +383,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.stats.$2",
+            "id": "def-common.stats.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
@@ -394,7 +402,7 @@
       },
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.where",
+        "id": "def-common.where",
         "type": "Function",
         "tags": [],
         "label": "where",
@@ -409,7 +417,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.where.$1",
+            "id": "def-common.where.$1",
             "type": "Uncategorized",
             "tags": [],
             "label": "body",
@@ -424,7 +432,7 @@
           },
           {
             "parentPluginId": "@kbn/esql-composer",
-            "id": "def-server.where.$2",
+            "id": "def-common.where.$2",
             "type": "Uncategorized",
             "tags": [],
             "label": "params",
@@ -446,7 +454,7 @@
     "enums": [
       {
         "parentPluginId": "@kbn/esql-composer",
-        "id": "def-server.SortOrder",
+        "id": "def-common.SortOrder",
         "type": "Enum",
         "tags": [],
         "label": "SortOrder",
@@ -457,14 +465,6 @@
         "initialIsOpen": false
       }
     ],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
     "misc": [],
     "objects": []
   }
