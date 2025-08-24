@@ -7,13 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = () => ({
+module.exports = (t, options = { inlineImportsAndExports: false }) => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
+        ...options.inlineImportsAndExports ? [
+          require.resolve('./inline_imports_and_exports'),
+        ] : [],
         require.resolve('babel-plugin-add-module-exports'),
 
         // The class properties proposal was merged with the private fields proposal
@@ -39,7 +42,6 @@ module.exports = () => ({
         // Proposal is on stage 4, and included in ECMA-262 (https://github.com/tc39/proposal-export-ns-from)
         // Need this since we are using TypeScript 3.9+
         require.resolve('@babel/plugin-proposal-private-methods'),
-
         // It enables the @babel/runtime so we can decrease the bundle sizes of the produced outputs
         [
           require.resolve('@babel/plugin-transform-runtime'),
