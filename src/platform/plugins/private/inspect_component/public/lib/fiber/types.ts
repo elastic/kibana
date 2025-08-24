@@ -28,7 +28,7 @@ export interface ReactFiberNode {
   /** The type of the React element represented by this Fiber node. */
   elementType: string | null;
   /** The resolved type of the component. */
-  type: ComponentType;
+  type: ComponentType | string;
   /** Metadata about the source file where this Fiber was created. */
   _debugSource?: DebugSource;
   /** The Fiber node that created this node. */

@@ -12,8 +12,13 @@ import { COMPONENT_PATH_IGNORED_TYPES } from '../constants';
 import { getFiberType } from './get_fiber_type';
 import { getFiberFromDomNode } from './get_fiber_from_dom_node';
 
+/**
+ * Result of {@link findReactComponentPath}.
+ */
 interface FindReactComponentPathResult {
+  /** The component path in the format "SourceComponent : ParentComponent > ChildComponent". */
   path: string | null;
+  /** The name of the source component where the path starts. */
   sourceComponent: string;
 }
 

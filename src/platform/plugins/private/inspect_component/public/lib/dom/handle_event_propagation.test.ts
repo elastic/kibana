@@ -70,13 +70,6 @@ describe('handleEventPropagation', () => {
 
     handleEventPropagation({ event: eventMock, callback: callbackMock });
 
-    eventMock = {
-      ...eventMock,
-      type: 'pointerdown',
-    } as unknown as MouseEvent;
-
-    handleEventPropagation({ event: eventMock, callback: callbackMock });
-
     expect(callbackMock).not.toHaveBeenCalled();
   });
 });

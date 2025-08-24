@@ -15,13 +15,17 @@ describe('getIconType', () => {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     svgElement.setAttribute(EUI_DATA_ICON_TYPE, 'logoElastic');
 
-    expect(getIconType(svgElement)).toBe('logoElastic');
+    const iconType = getIconType(svgElement);
+
+    expect(iconType).toBe('logoElastic');
   });
 
   it('should return undefined from SVG element without EUI_DATA_ICON_TYPE attribute', () => {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
-    expect(getIconType(svgElement)).toBeUndefined();
+    const iconType = getIconType(svgElement);
+
+    expect(iconType).toBeUndefined();
   });
 
   it('should return icon type from HTML element with SVG child that has EUI_DATA_ICON_TYPE attribute', () => {
@@ -30,7 +34,9 @@ describe('getIconType', () => {
     svgElement.setAttribute(EUI_DATA_ICON_TYPE, 'arrowDown');
     divElement.appendChild(svgElement);
 
-    expect(getIconType(divElement)).toBe('arrowDown');
+    const iconType = getIconType(divElement);
+
+    expect(iconType).toBe('arrowDown');
   });
 
   it('should return undefined from HTML element with SVG child without EUI_DATA_ICON_TYPE attribute', () => {
@@ -38,12 +44,16 @@ describe('getIconType', () => {
     const svgElement = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     divElement.appendChild(svgElement);
 
-    expect(getIconType(divElement)).toBeUndefined();
+    const iconType = getIconType(divElement);
+
+    expect(iconType).toBeUndefined();
   });
 
   it('should return undefined from HTML element without SVG child', () => {
     const divElement = document.createElement('div');
 
-    expect(getIconType(divElement)).toBeUndefined();
+    const iconType = getIconType(divElement);
+
+    expect(iconType).toBeUndefined();
   });
 });

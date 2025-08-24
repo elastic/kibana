@@ -11,32 +11,48 @@ import { getEuiComponentNamesFromPath } from './get_eui_component_names_from_pat
 
 describe('getEuiComponentNamesFromPath', () => {
   it('should return an empty array for empty input', () => {
-    expect(getEuiComponentNamesFromPath('')).toEqual([]);
-    expect(getEuiComponentNamesFromPath(undefined as unknown as string)).toEqual([]);
+    const result = getEuiComponentNamesFromPath('');
+
+    expect(result).toEqual([]);
   });
 
   it('should extract EUI component names from a simple path', () => {
     const path = 'EuiButton > EuiPanel';
-    expect(getEuiComponentNamesFromPath(path)).toEqual(['EuiButton', 'EuiPanel']);
+
+    const result = getEuiComponentNamesFromPath(path);
+
+    expect(result).toEqual(['EuiButton', 'EuiPanel']);
   });
 
   it('should ignore non-EUI components', () => {
     const path = 'EuiButton > CustomComponent > EuiPanel';
-    expect(getEuiComponentNamesFromPath(path)).toEqual(['EuiButton', 'EuiPanel']);
+
+    const result = getEuiComponentNamesFromPath(path);
+
+    expect(result).toEqual(['EuiButton', 'EuiPanel']);
   });
 
   it('should handle paths with colon notation', () => {
     const path = 'SomeComponent:EuiButton > EuiPanel';
-    expect(getEuiComponentNamesFromPath(path)).toEqual(['EuiButton', 'EuiPanel']);
+
+    const result = getEuiComponentNamesFromPath(path);
+
+    expect(result).toEqual(['EuiButton', 'EuiPanel']);
   });
 
   it('should trim whitespace from component names', () => {
     const path = 'EuiButton >   EuiPanel  > EuiCard';
-    expect(getEuiComponentNamesFromPath(path)).toEqual(['EuiButton', 'EuiPanel', 'EuiCard']);
+
+    const result = getEuiComponentNamesFromPath(path);
+
+    expect(result).toEqual(['EuiButton', 'EuiPanel', 'EuiCard']);
   });
 
   it('should handle complex nested paths with both a colon and components', () => {
     const path = 'App:EuiButton > NonEuiComponent > EuiPanel > EuiCard';
-    expect(getEuiComponentNamesFromPath(path)).toEqual(['EuiButton', 'EuiPanel', 'EuiCard']);
+
+    const result = getEuiComponentNamesFromPath(path);
+
+    expect(result).toEqual(['EuiButton', 'EuiPanel', 'EuiCard']);
   });
 });

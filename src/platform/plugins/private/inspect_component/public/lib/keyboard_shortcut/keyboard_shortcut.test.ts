@@ -19,7 +19,9 @@ describe('keyboard_shortcut', () => {
         key: "'",
       } as KeyboardEvent;
 
-      expect(isKeyboardShortcut(event)).toBe(true);
+      const result = isKeyboardShortcut(event);
+
+      expect(result).toBe(true);
     });
 
     it('should return true when ctrl key and single quote are pressed', () => {
@@ -30,7 +32,9 @@ describe('keyboard_shortcut', () => {
         key: "'",
       } as KeyboardEvent;
 
-      expect(isKeyboardShortcut(event)).toBe(true);
+      const result = isKeyboardShortcut(event);
+
+      expect(result).toBe(true);
     });
 
     it('should return true when both meta and ctrl keys are pressed with single quote', () => {
@@ -41,7 +45,9 @@ describe('keyboard_shortcut', () => {
         key: "'",
       } as KeyboardEvent;
 
-      expect(isKeyboardShortcut(event)).toBe(true);
+      const result = isKeyboardShortcut(event);
+
+      expect(result).toBe(true);
     });
 
     it('should return false when only single quote is pressed', () => {
@@ -52,7 +58,9 @@ describe('keyboard_shortcut', () => {
         key: "'",
       } as KeyboardEvent;
 
-      expect(isKeyboardShortcut(event)).toBe(false);
+      const result = isKeyboardShortcut(event);
+
+      expect(result).toBe(false);
     });
 
     it('should return false when meta key is pressed without single quote', () => {
@@ -63,7 +71,9 @@ describe('keyboard_shortcut', () => {
         key: 'a',
       } as KeyboardEvent;
 
-      expect(isKeyboardShortcut(event)).toBe(false);
+      const result = isKeyboardShortcut(event);
+
+      expect(result).toBe(false);
     });
 
     it('should return true when using key property instead of code', () => {
@@ -74,7 +84,9 @@ describe('keyboard_shortcut', () => {
         key: "'",
       } as KeyboardEvent;
 
-      expect(isKeyboardShortcut(event)).toBe(true);
+      const result = isKeyboardShortcut(event);
+
+      expect(result).toBe(true);
     });
   });
 
