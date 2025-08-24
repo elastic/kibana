@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const { createRuleOverrides } = require('./src/create_rule_overrides');
+
 module.exports = {
-  createNoRestrictedImportsOverride: require('./src/create_no_restricted_imports_override')
-    .createNoRestrictedImportsOverride,
+  createRuleOverrides,
 };
