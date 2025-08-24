@@ -306,7 +306,7 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    options?: ApiKeyOptions
+    options?: ApiKeyOptions & { refresh?: boolean }
   ): Promise<ConcreteTaskInstance> {
     try {
       this.validateCanEncryptSavedObjects(options?.request);
@@ -336,7 +336,7 @@ export class TaskStore {
           ...(apiKey ? { apiKey } : {}),
           runAt: getFirstRunAt({ taskInstance: validatedTaskInstance, logger: this.logger }),
         },
-        { id, refresh: false }
+        { id, refresh: options?.refresh || false }
       );
       if (
         get(taskInstance, 'schedule.interval', null) == null &&
@@ -834,6 +834,93 @@ export class TaskStore {
       }
       throw err;
     }
+  }
+
+  async requestPoll(taskId: string) {
+    await this.savedObjectsRepository.create('task_poll_request', { taskId }, { refresh: true });
+  }
+
+  async storeTaskRunResult(taskId: string, success: boolean, result: unknown) {
+    await this.savedObjectsRepository.create(
+      'task_result',
+      { taskId, success, result },
+      { refresh: true }
+    );
+  }
+
+  async deleteTaskRunResult(id: string) {
+    await this.savedObjectsRepository.delete('task_result', id, { refresh: false });
+  }
+
+  async awaitTaskPollRequest() {
+    const index = '.kibana_task_poll_requests';
+    const startCp = (
+      await this.esClient.fleet.globalCheckpoints({
+        index,
+        wait_for_advance: false,
+      })
+    ).global_checkpoints[0];
+
+    while (true) {
+      const resp = await this.esClient.fleet.globalCheckpoints({
+        index,
+        checkpoints: [startCp],
+        wait_for_advance: true,
+        timeout: '25s',
+      });
+
+      if (resp.timed_out === false) {
+        (async () => {
+          try {
+            await this.esClient.deleteByQuery({
+              index,
+              query: { match_all: {} },
+              conflicts: 'proceed',
+            });
+          } catch (e) {
+            this.logger.error(`Failed to cleanup ad hoc run requests: ${e.message}`, {
+              error: { stack_trace: e.stack },
+            });
+          }
+        })();
+        return;
+      }
+    }
+  }
+
+  async awaitTaskRunResult<T>(taskId: string) {
+    const timeout = 25000;
+    const start = Date.now();
+    const index = '.kibana_task_results';
+
+    let startCp = (
+      await this.esClient.fleet.globalCheckpoints({
+        index,
+        wait_for_advance: false,
+      })
+    ).global_checkpoints[0];
+
+    while (Date.now() < start + timeout) {
+      await this.esClient.fleet.globalCheckpoints({
+        index,
+        checkpoints: [startCp++],
+        wait_for_advance: true,
+        timeout: '25s',
+      });
+
+      const searchResp = await this.savedObjectsRepository.find<{ result: T }>({
+        type: 'task_result',
+        filter: `task_result.attributes.taskId: ${taskId}`,
+      });
+      if (searchResp.saved_objects.length > 0) {
+        return {
+          id: searchResp.saved_objects[0].id,
+          result: searchResp.saved_objects[0].attributes?.result,
+        };
+      }
+    }
+
+    throw new Error('Document not found after checkpoint advanced');
   }
 
   // like search(), only runs multiple searches in parallel returning the combined results
