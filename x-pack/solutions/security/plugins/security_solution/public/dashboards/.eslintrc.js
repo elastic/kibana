@@ -6,7 +6,7 @@
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
 
 /**
  * @typedef {Object} RestrictedImportPath
@@ -24,9 +24,14 @@ const RESTRICTED_IMPORTS_PATHS = [
   },
 ];
 
-const overrides = createNoRestrictedImportsOverride({
+const overrides = createRuleOverrides({
   childConfigDir: __dirname,
-  restrictedImports: RESTRICTED_IMPORTS_PATHS,
+  rules: {
+    'no-restricted-imports': {
+      strategy: 'append',
+      value: RESTRICTED_IMPORTS_PATHS,
+    },
+  },
 });
 
 /** @type {import('eslint').Linter.Config} */
