@@ -21,6 +21,7 @@ import {
   type FieldListItem,
   type OverrideFieldGroupDetails,
   ExistenceFetchStatus,
+  AdditionalFieldGroups,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {
@@ -44,6 +45,7 @@ export interface GroupedFieldsParams<T extends FieldListItem> {
   onSupportedFieldFilter?: (field: T) => boolean;
   onSelectedFieldFilter?: (field: T) => boolean;
   getNewFieldsBySpec?: UseNewFieldsParams<T>['getNewFieldsBySpec'];
+  additionalFieldGroups?: AdditionalFieldGroups<T>;
 }
 
 export interface GroupedFieldsResult<T extends FieldListItem> {
@@ -71,6 +73,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
   onSupportedFieldFilter,
   onSelectedFieldFilter,
   getNewFieldsBySpec,
+  additionalFieldGroups,
 }: GroupedFieldsParams<T>): GroupedFieldsResult<T> {
   const fieldsExistenceReader = useExistingFieldsReader();
   const fieldListFilters = useFieldFilters<T>({
@@ -183,7 +186,27 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           .slice(0, popularFieldsLimit)
       : [];
 
+    // Recommended fields are not part of the data view fields list, so we need to check them separately
+    const recommendedFields = additionalFieldGroups?.recommendedFields || [];
+
     let fieldGroupDefinitions: FieldListGroups<T> = {
+      ...(recommendedFields
+        ? {
+            RecommendedFields: {
+              fields: recommendedFields,
+              fieldCount: recommendedFields.length,
+              isAffectedByGlobalFilter: true,
+              isAffectedByTimeFilter: true,
+              isInitiallyOpen: true,
+              showInAccordion: true,
+              hideDetails: false,
+              hideIfEmpty: true,
+              title: i18n.translate('unifiedFieldList.useGroupedFields.recommendedFieldsLabel', {
+                defaultMessage: 'Recommended fields',
+              }),
+            },
+          }
+        : {}),
       SpecialFields: {
         fields: groupedFields.specialFields,
         fieldCount: groupedFields.specialFields.length,
@@ -348,6 +371,7 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
     isAffectedByTimeFilter,
     popularFieldsLimit,
     sortedSelectedFields,
+    additionalFieldGroups,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
