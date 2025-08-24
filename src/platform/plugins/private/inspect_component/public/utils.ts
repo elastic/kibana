@@ -8,6 +8,7 @@
  */
 
 import {
+  COMPONENT_PATH_IGNORED_TYPES,
   EUI_COMPONENTS_DOCS_MAP,
   EUI_DATA_ICON_TYPE,
   EUI_DOCS_BASE,
@@ -82,8 +83,12 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
           }
         }
 
-        /** Emotion injects a lot of wrapper components, so we need to filter them out. */
-        if (type && !type.startsWith('Emotion')) {
+        /** Remove wrappers. */
+        if (
+          type &&
+          !COMPONENT_PATH_IGNORED_TYPES.some((t) => type.startsWith(t)) &&
+          type.length > 1
+        ) {
           path.push(type);
         }
 
