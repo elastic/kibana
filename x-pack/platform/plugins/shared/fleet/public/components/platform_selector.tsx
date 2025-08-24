@@ -131,6 +131,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const cloudbeatPlatformUnsupportedCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.cloudbeatPlatformUnsupportedCallout', {
+        defaultMessage:
+          'Cloudbeat only supports Linux and Kubernetes environments. This platform is not compatible with Cloud Security Posture integrations.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
   };
@@ -214,13 +225,14 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
             <EuiSpacer size="m" />
           </>
         )}
-        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
+        {(['mac_aarch64', 'mac_x86_64', 'windows', 'windows_msi'].includes(platform) ||
+          ['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform)) &&
           (cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
             cloudSecurityIntegration?.integrationType ===
               FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
             <>
-              {macCallout}
+              {cloudbeatPlatformUnsupportedCallout}
               <EuiSpacer size="m" />
             </>
           )}
