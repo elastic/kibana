@@ -23,21 +23,47 @@ import type {
   ReactFiberNode,
 } from './types';
 
+const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
+
+export const isKeyboardShortcut = (event: KeyboardEvent) =>
+  (event.metaKey || event.ctrlKey) && isSingleQuote(event);
+
 export const isMac = ((navigator as any)?.userAgentData?.platform || navigator.userAgent)
   .toLowerCase()
   .includes('mac');
 
-const extractEuiComponentsFromPath = (value: string): string[] => {
-  if (!value) return [];
+/**
+ * Get the topmost DOM element at the given pointer event's coordinates, ignoring overlays and non-inspectable
+ * elements.
+ */
+export const getElementFromPoint = ({
+  event,
+}: GetElementFromPointOptions): HTMLElement | SVGElement | undefined => {
+  const elements = document.elementsFromPoint(event.clientX, event.clientY);
 
-  const euiComponentPart = value.includes(':') ? value.split(':').slice(1).join(':') : value;
+  for (const el of elements) {
+    const isSvg = el instanceof SVGElement;
+    const isOverlay = el.id === INSPECT_OVERLAY_ID;
+    const isPath = isSvg && el.tagName.toLowerCase() === 'path';
+    /** There is some edge case with SVG elements that are not inspectable. */
+    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
 
-  return euiComponentPart
-    .split('>')
-    .map((t) => t.trim())
-    .filter((t) => t.startsWith('Eui'));
+    if (isNotInspectable || isOverlay || isPath) continue;
+
+    return el;
+  }
+
+  return undefined;
 };
 
+/** Get the React Fiber node from a DOM node. */
+const getFiberFromDomNode = (node: HTMLElement | SVGElement | null): ReactFiberNode | undefined => {
+  if (!node) return;
+  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
+  return fiberKey ? (node as any)[fiberKey] : undefined;
+};
+
+/** Find the nearest _debugSource by traversing up the DOM and React Fiber tree. */
 const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined => {
   let current: HTMLElement | null = node instanceof HTMLElement ? node : node.parentElement;
 
@@ -56,6 +82,21 @@ const findDebugSource = (node: HTMLElement | SVGElement): FileData | undefined =
     current = current.parentElement;
   }
   return;
+};
+
+/** Get the display name of the fiber node. */
+const getFiberType = (fiber: ReactFiberNode): string | null => {
+  if (typeof fiber.type === 'string') {
+    return fiber.type;
+  } else if (typeof fiber.type?.name === 'string') {
+    return fiber.type?.name;
+  } else if (typeof fiber.type?.displayName === 'string') {
+    return fiber.type?.displayName;
+  } else if (typeof fiber.elementType === 'string') {
+    return fiber.elementType;
+  }
+
+  return null;
 };
 
 /**
@@ -128,44 +169,20 @@ export const findReactComponentPath = (node: HTMLElement | SVGElement) => {
   };
 };
 
-const getFiberFromDomNode = (node: HTMLElement | SVGElement | null): ReactFiberNode | undefined => {
-  if (!node) return;
-  const fiberKey = Object.keys(node).find((key) => key.startsWith('__reactFiber$'));
-  return fiberKey ? (node as any)[fiberKey] : undefined;
-};
+/**
+ * Extract EUI component names from a given component path string.
+ * The component path is expected to be in the format "ComponentA > ComponentB > EuiComponentC:subpart".
+ * This function extracts and returns an array of EUI component names found in the path.
+ */
+const extractEuiComponentsFromPath = (value: string): string[] => {
+  if (!value) return [];
 
-const getFiberType = (fiber: ReactFiberNode): string | null => {
-  if (typeof fiber.type === 'string') {
-    return fiber.type;
-  } else if (typeof fiber.type?.name === 'string') {
-    return fiber.type?.name;
-  } else if (typeof fiber.type?.displayName === 'string') {
-    return fiber.type?.displayName;
-  } else if (typeof fiber.elementType === 'string') {
-    return fiber.elementType;
-  }
+  const euiComponentPart = value.includes(':') ? value.split(':').slice(1).join(':') : value;
 
-  return null;
-};
-
-export const getElementFromPoint = ({
-  event,
-}: GetElementFromPointOptions): HTMLElement | SVGElement | undefined => {
-  const elements = document.elementsFromPoint(event.clientX, event.clientY);
-
-  for (const el of elements) {
-    const isSvg = el instanceof SVGElement;
-    const isOverlay = el.id === INSPECT_OVERLAY_ID;
-    const isPath = isSvg && el.tagName.toLowerCase() === 'path';
-    /** There is some edge case with SVG elements that are not inspectable. */
-    const isNotInspectable = !(el instanceof HTMLElement) && !isSvg;
-
-    if (isNotInspectable || isOverlay || isPath) continue;
-
-    return el;
-  }
-
-  return undefined;
+  return euiComponentPart
+    .split('>')
+    .map((t) => t.trim())
+    .filter((t) => t.startsWith('Eui'));
 };
 
 export const getEuiComponentDocsInfo = (componentPath?: string): EuiInfo | null => {
@@ -240,8 +257,3 @@ export const getInspectedElementData = async ({
     setIsInspecting,
   });
 };
-
-const isSingleQuote = (event: KeyboardEvent) => event.code === 'Quote' || event.key === "'";
-
-export const isKeyboardShortcut = (event: KeyboardEvent) =>
-  (event.metaKey || event.ctrlKey) && isSingleQuote(event);

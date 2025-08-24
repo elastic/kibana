@@ -53,7 +53,7 @@ export const InspectFlyout = ({ componentData, target }: Props) => {
     updateHighlightPosition();
   }, [updateHighlightPosition, target]);
 
-  /** Update z-index of the portal parent to be above portal elements. */
+  /** Update z-index of the flyout to be above portal elements. */
   useLayoutEffect(() => {
     const flyoutElement = document.getElementById(INSPECT_FLYOUT_ID);
     const portalParent = flyoutElement?.closest(EUI_PORTAL_ATTRIBUTE);

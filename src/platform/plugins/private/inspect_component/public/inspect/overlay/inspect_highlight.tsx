@@ -17,6 +17,12 @@ interface Props {
   path?: string;
 }
 
+/**
+ * The InspectHighlight component is responsible for rendering a highlight box around the currently
+ * inspected element, along with a badge displaying the React component path.
+ * It takes the current position and dimensions of the highlight box as props, and it adjusts the
+ * position of the badge to ensure it remains fully visible within the viewport.
+ */
 export const InspectHighlight = ({ currentPosition, path }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { transform, ...rest } = currentPosition;
@@ -40,7 +46,7 @@ export const InspectHighlight = ({ currentPosition, path }: Props) => {
     ...rest,
   });
 
-  /** This useLayoutEffect handles repositoning of the hihglight badge so it's always fully visible. */
+  /** This handles repositoning of the hihglight badge so it's always fully visible. */
   useLayoutEffect(() => {
     if (!badgeRef.current || !containerRef.current) return;
 

@@ -22,6 +22,12 @@ interface Props {
   setIsInspecting: Dispatch<SetStateAction<boolean>>;
 }
 
+/* The InspectOverlay component is responsible for rendering an overlay on the entire viewport
+ * when the user is in "inspect" mode. It highlights elements as the user hovers over them and
+ * captures click events to inspect the clicked element.
+ * It uses pointer events to track mouse movements and clicks, and it prevents these events
+ * from propagating to underlying elements. With the exception of hovering.
+ */
 export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: Props) => {
   const { euiTheme } = useEuiTheme();
   const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
@@ -103,8 +109,8 @@ export const InspectOverlay = ({ core, setFlyoutOverlayRef, setIsInspecting }: P
         cursor: crosshair !important;
       }
       `;
-    document.head.appendChild(forceCrossHairCursor);
 
+    document.head.appendChild(forceCrossHairCursor);
     document.addEventListener('pointerdown', stopEventsOnInspectedElement, true);
     document.addEventListener('click', stopEventsOnInspectedElement, true);
 

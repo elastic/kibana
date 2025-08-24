@@ -14,7 +14,10 @@ import { useGeneratedHtmlId } from '@elastic/eui';
 interface Props {
   element: HTMLElement | SVGElement;
 }
-
+/**
+ * The PreviewImage component is responsible for rendering a scaled-down preview of a given HTML or SVG element.
+ * It clones the provided element and applies a scaling transformation to fit it within its container.
+ */
 export const PreviewImage = ({ element }: Props) => {
   const generatedId = useGeneratedHtmlId();
   const containerRef = useRef<HTMLDivElement>(null);
