@@ -25,6 +25,7 @@ import { css } from '@emotion/react';
 import {
   FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
+  FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
 } from '../../common/constants/epm';
 import {
   usePlatform,
@@ -66,6 +67,11 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
   const { platform, setPlatform } = usePlatform();
   const [showExtendedPlatforms, setShowExtendedPlatforms] = useState(false);
 
+  const isCloudSecurityIntegration = 
+    cloudSecurityIntegration?.integrationType === FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
+    cloudSecurityIntegration?.integrationType === FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE ||
+    cloudSecurityIntegration?.integrationType === FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE;
+
   useEffect(() => {
     if (
       hasK8sIntegration ||
@@ -98,6 +104,17 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
+  const cloudSecurityUnsupportedCallout = (
+    <EuiCallOut
+      title={i18n.translate('xpack.fleet.enrollmentInstructions.cloudSecurityUnsupportedCallout', {
+        defaultMessage:
+          'This platform is not supported by Cloudbeat, which is required for Cloud Security Posture integrations. Cloudbeat only supports Linux and Kubernetes environments.',
+      })}
+      color="warning"
+      iconType="warning"
+    />
+  );
+
   const k8sCallout = (
     <EuiCallOut
       title={i18n.translate('xpack.fleet.enrollmentInstructions.k8sCallout', {
@@ -120,16 +137,7 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
     />
   );
 
-  const macCallout = (
-    <EuiCallOut
-      title={i18n.translate('xpack.fleet.enrollmentInstructions.macCallout', {
-        defaultMessage:
-          'We recommend against deploying this integration within Mac as it is currently not being supported.',
-      })}
-      color="warning"
-      iconType="warning"
-    />
-  );
+  const macCallout = cloudSecurityUnsupportedCallout;
 
   const onTextAreaClick = () => {
     if (onCopy) onCopy();
@@ -210,20 +218,30 @@ export const PlatformSelector: React.FunctionComponent<Props> = ({
         <EuiSpacer size="m" />
         {['deb_aarch64', 'deb_x86_64', 'rpm_aarch64', 'rpm_x86_64'].includes(platform) && (
           <>
-            {systemPackageCallout}
+            {isCloudSecurityIntegration ? (
+              <>
+                {cloudSecurityUnsupportedCallout}
+                <EuiSpacer size="m" />
+                {systemPackageCallout}
+              </>
+            ) : (
+              systemPackageCallout
+            )}
             <EuiSpacer size="m" />
           </>
         )}
-        {['mac_aarch64', 'mac_x86_64'].includes(platform) &&
-          (cloudSecurityIntegration?.integrationType ===
-            FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE ||
-            cloudSecurityIntegration?.integrationType ===
-              FLEET_CLOUD_SECURITY_POSTURE_KSPM_POLICY_TEMPLATE) && (
-            <>
-              {macCallout}
-              <EuiSpacer size="m" />
-            </>
-          )}
+        {['mac_aarch64', 'mac_x86_64'].includes(platform) && isCloudSecurityIntegration && (
+          <>
+            {macCallout}
+            <EuiSpacer size="m" />
+          </>
+        )}
+        {['windows', 'windows_msi'].includes(platform) && isCloudSecurityIntegration && (
+          <>
+            {cloudSecurityUnsupportedCallout}
+            <EuiSpacer size="m" />
+          </>
+        )}
         {platform === 'kubernetes' &&
           cloudSecurityIntegration?.integrationType ===
             FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE && (
