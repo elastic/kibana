@@ -7,16 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = (t, options = { inlineImportsAndExports: false }) => ({
+module.exports = () => ({
   presets: [
     // plugins always run before presets, but in this case we need the
     // @babel/preset-typescript preset to run first so we have to move
     // our explicit plugin configs to a sub-preset
     {
       plugins: [
-        ...options.inlineImportsAndExports ? [
-          require.resolve('./inline_imports_and_exports'),
-        ] : [],
         require.resolve('babel-plugin-add-module-exports'),
 
         // The class properties proposal was merged with the private fields proposal

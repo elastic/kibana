@@ -285,24 +285,45 @@ module.exports = function inlineRequiresPlugin(babel) {
 
   /** Determine whether a reference path is within a TypeScript type position. */
   function isInTSTypePosition(refPath) {
-    return !!refPath.findParent((p) =>
-      p.isTSTypeAnnotation() ||
-      p.isTSTypeReference() ||
-      p.isTSTypeQuery() ||
-      p.isTSQualifiedName() ||
-      p.isTSTypeAliasDeclaration() ||
-      p.isTSInterfaceDeclaration() ||
-      p.isTSImportType() ||
-      p.isTSExpressionWithTypeArguments() ||
-      p.isTSIndexedAccessType() ||
-      p.isTSArrayType() ||
-      p.isTSTupleType() ||
-      p.isTSUnionType() ||
-      p.isTSIntersectionType() ||
-      p.isTSConditionalType() ||
-      p.isTSMappedType() ||
-      p.isTSLiteralType()
+    return !!refPath.findParent(
+      (p) =>
+        p.isTSTypeAnnotation() ||
+        p.isTSTypeReference() ||
+        p.isTSTypeQuery() ||
+        p.isTSQualifiedName() ||
+        p.isTSTypeAliasDeclaration() ||
+        p.isTSInterfaceDeclaration() ||
+        p.isTSImportType() ||
+        p.isTSExpressionWithTypeArguments() ||
+        p.isTSIndexedAccessType() ||
+        p.isTSArrayType() ||
+        p.isTSTupleType() ||
+        p.isTSUnionType() ||
+        p.isTSIntersectionType() ||
+        p.isTSConditionalType() ||
+        p.isTSMappedType() ||
+        p.isTSLiteralType()
     );
+  }
+
+  /** Determine whether an identifier reference is the JSX tag name (opening/closing). */
+  function isInJSXTagName(refPath) {
+    const parent = refPath.parentPath;
+    if (!parent) return false;
+    // <Tag ...> or </Tag>
+    if (parent.isJSXOpeningElement() || parent.isJSXClosingElement()) {
+      return parent.node.name === refPath.node;
+    }
+    // Part of a JSX member name, e.g., <NS.Tag>
+    if (parent.isJSXMemberExpression()) {
+      return true;
+    }
+    return false;
+  }
+
+  /** Determine whether the identifier is within an export specifier (export { x as y }). */
+  function isInExportSpecifier(refPath) {
+    return !!refPath.findParent((p) => p.isExportSpecifier && p.isExportSpecifier());
   }
 
   /**
@@ -351,6 +372,24 @@ module.exports = function inlineRequiresPlugin(babel) {
     visitor: {
       Program: {
         enter(programPath, state) {
+          // Normalize options
+          const opts = state.opts || {};
+          /** @type {Array<{ specifier?: string, name?: string }>} */
+          const ignore = Array.isArray(opts.ignore) ? opts.ignore : [];
+          // Create a fast matcher for ignore rules
+          state.shouldIgnore = (mod, localName) => {
+            if (!ignore.length) return false;
+            for (const rule of ignore) {
+              const hasMod =
+                rule && typeof rule.specifier === 'string' && rule.specifier.length > 0;
+              const hasName = rule && typeof rule.name === 'string' && rule.name.length > 0;
+              if (!hasMod && !hasName) continue;
+              const modOk = hasMod ? rule.specifier === mod : true;
+              const nameOk = hasName ? rule.name === localName : true;
+              if (modOk && nameOk) return true;
+            }
+            return false;
+          };
           /** @type {Map<string, AccessorInfo>} */
           state.accessors = new Map();
           /** @type {Set<import('@babel/types').ImportDeclaration>} */
@@ -388,7 +427,8 @@ module.exports = function inlineRequiresPlugin(babel) {
                 });
                 // eslint-disable-next-line no-console
                 console.log(
-                  `--- KBN_DEBUG_INLINE_REWRITE [${filename || '<unknown>'}] START ---\n${code}\n--- KBN_DEBUG_INLINE_REWRITE END ---`
+                  `--- KBN_DEBUG_INLINE_REWRITE [${filename || '<unknown>'
+                  }] START ---\n${code}\n--- KBN_DEBUG_INLINE_REWRITE END ---`
                 );
               }
             } catch (e) {
@@ -441,7 +481,8 @@ module.exports = function inlineRequiresPlugin(babel) {
               // Print with clear markers and filename for grep-friendly output.
               // eslint-disable-next-line no-console
               console.log(
-                `--- KBN_DEBUG_INLINE_REWRITE [${filename || '<unknown>'}] START ---\n${code}\n--- KBN_DEBUG_INLINE_REWRITE END ---`
+                `--- KBN_DEBUG_INLINE_REWRITE [${filename || '<unknown>'
+                }] START ---\n${code}\n--- KBN_DEBUG_INLINE_REWRITE END ---`
               );
             }
           } catch (e) {
@@ -480,40 +521,67 @@ module.exports = function inlineRequiresPlugin(babel) {
           const refs = binding.referencePaths || [];
           if (refs.length === 0) return;
 
+          // Respect ignore option for this specifier
+          if (state.shouldIgnore && state.shouldIgnore(source, localId)) {
+            return; // leave this specifier and all its references untouched
+          }
+
           // Prepare accessors
           const modId = ensureModuleAccessor(programPath, accessors, source);
 
           let didReplace = false;
+          let hadUnreplacedRef = false; // e.g., JSX tag names or export specifiers
           if (t.isImportDefaultSpecifier(s)) {
             refs.forEach((refPath) => {
-              if (isInTSTypePosition(refPath)) return;
+              if (
+                isInTSTypePosition(refPath) ||
+                isInJSXTagName(refPath) ||
+                isInExportSpecifier(refPath)
+              ) {
+                hadUnreplacedRef = true;
+                return;
+              }
               const expr = buildDefaultInterop(programPath, state, t.callExpression(modId, []));
               replaceRef(refPath, expr);
               didReplace = true;
             });
-            if (didReplace) fullyInlinedLocals.add(localId);
+            if (didReplace && !hadUnreplacedRef) fullyInlinedLocals.add(localId);
           } else if (t.isImportNamespaceSpecifier(s)) {
             const nsId = ensureNamespaceAccessor(programPath, accessors, source);
             refs.forEach((refPath) => {
-              if (isInTSTypePosition(refPath)) return;
+              if (
+                isInTSTypePosition(refPath) ||
+                isInJSXTagName(refPath) ||
+                isInExportSpecifier(refPath)
+              ) {
+                hadUnreplacedRef = true;
+                return;
+              }
               replaceRef(refPath, t.callExpression(nsId, []));
               didReplace = true;
             });
-            if (didReplace) fullyInlinedLocals.add(localId);
+            if (didReplace && !hadUnreplacedRef) fullyInlinedLocals.add(localId);
           } else if (t.isImportSpecifier(s)) {
             // Named import
             const importedName =
               s.imported && t.isIdentifier(s.imported) ? s.imported.name : s.imported.value;
             refs.forEach((refPath) => {
-              if (isInTSTypePosition(refPath)) return;
-              const expr = t.memberExpression(
-                t.callExpression(modId, []),
-                t.identifier(importedName)
-              );
+              if (
+                isInTSTypePosition(refPath) ||
+                isInJSXTagName(refPath) ||
+                isInExportSpecifier(refPath)
+              ) {
+                hadUnreplacedRef = true;
+                return;
+              }
+              const expr =
+                importedName === 'default'
+                  ? buildDefaultInterop(programPath, state, t.callExpression(modId, []))
+                  : t.memberExpression(t.callExpression(modId, []), t.identifier(importedName));
               replaceRef(refPath, expr);
               didReplace = true;
             });
-            if (didReplace) fullyInlinedLocals.add(localId);
+            if (didReplace && !hadUnreplacedRef) fullyInlinedLocals.add(localId);
           }
         });
 
@@ -556,6 +624,7 @@ module.exports = function inlineRequiresPlugin(babel) {
       ExportNamedDeclaration(path, state) {
         if (state.skipFile) return;
         if (hasOptOut(path)) return;
+        if (path.node.exportKind === 'type') return; // skip type-only exports entirely
 
         const programPath = path.findParent((p) => p.isProgram());
 
@@ -634,6 +703,13 @@ module.exports = function inlineRequiresPlugin(babel) {
             continue;
           }
 
+          // Respect ignore option: if this imported binding is ignored, keep the export as-is
+          const src = importDecl.source && importDecl.source.value;
+          if (state.shouldIgnore && state.shouldIgnore(src, localName)) {
+            remainingSpecs.push(spec);
+            continue;
+          }
+
           const source = importDecl.source.value;
           const modId = ensureModuleAccessor(programPath, state.accessors, source);
 
@@ -645,7 +721,11 @@ module.exports = function inlineRequiresPlugin(babel) {
             valueExpr = t.callExpression(nsId, []);
           } else if (binding.path.isImportSpecifier()) {
             const impName = binding.path.node.imported.name || binding.path.node.imported.value;
-            valueExpr = t.memberExpression(t.callExpression(modId, []), t.identifier(impName));
+            if (impName === 'default') {
+              valueExpr = buildDefaultInterop(programPath, state, t.callExpression(modId, []));
+            } else {
+              valueExpr = t.memberExpression(t.callExpression(modId, []), t.identifier(impName));
+            }
           }
 
           addedGetters.push(buildExportGetter(exportedName, valueExpr));
