@@ -15,19 +15,22 @@ import type { AppDependencies } from '../types';
 import { apiService } from './lib/api';
 import { breadcrumbService } from './lib/breadcrumbs';
 
-export function mountManagementSection(
-  params: ManagementAppMountParams,
-  dependencies: AppDependencies
-) {
+export function mountManagementSection(params: ManagementAppMountParams, deps: AppDependencies) {
   const { element, setBreadcrumbs } = params;
 
-  apiService.setup(
-    dependencies.services.core.http,
-    dependencies.plugins.reindexService.reindexService
-  );
+  const rootComponentDeps = {
+    ...deps,
+    services: {
+      ...deps.services,
+      api: apiService,
+      breadcrumbs: breadcrumbService,
+    },
+  };
+
+  apiService.setup(deps.services.core.http, deps.plugins.reindexService.reindexService);
   breadcrumbService.setup(setBreadcrumbs);
 
-  render(<RootComponent {...dependencies} />, element);
+  render(<RootComponent {...rootComponentDeps} />, element);
 
   return () => {
     unmountComponentAtNode(element);
