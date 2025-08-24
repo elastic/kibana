@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 

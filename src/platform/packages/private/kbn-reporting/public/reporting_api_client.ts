@@ -26,7 +26,7 @@ import type {
   ScheduledReportApiJSON,
 } from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { stringify } from 'query-string';
 import type { ReactElement } from 'react';
 import { Job } from '.';

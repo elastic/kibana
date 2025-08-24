@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type {
