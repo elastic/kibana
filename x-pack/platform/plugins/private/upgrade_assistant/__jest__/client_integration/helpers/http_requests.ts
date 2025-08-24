@@ -117,7 +117,7 @@ const registerHttpRequestMockHelpers = (
     indexName: string,
     response?: object,
     error?: ResponseError
-  ) => mockResponse('POST', `${API_BASE_PATH}/reindex/${indexName}`, response, error);
+  ) => mockResponse('POST', `${API_BASE_PATH}/reindex`, response, error);
 
   const setDeleteMlSnapshotResponse = (
     jobId: string,
