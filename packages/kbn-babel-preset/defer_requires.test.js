@@ -369,7 +369,9 @@ describe('defer_requires plugin integration tests', () => {
   describe('with transformer_config (Jest integration)', () => {
     function transformWithJestConfig(input, opts = {}) {
       const babel = require('@babel/core');
-      const transformerConfig = require('@kbn/test/src/jest/transforms/babel/transformer_config');
+      const src = '@kbn/test/src/jest/transforms/babel/transformer_config';
+      // eslint-disable-next-line import/no-dynamic-require
+      const transformerConfig = require(src);
       return babel.transformSync(input, {
         filename: opts.filename || 'file.js',
         sourceType: 'module',
