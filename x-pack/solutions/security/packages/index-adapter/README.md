@@ -57,3 +57,66 @@ indexPatternAdapter.install({ logger, esClient, pluginStop$ }); // Installs/upda
 // Create a specific index on the fly
 await indexPatternAdapter.installIndex('12345'); // creates 'my-awesome-index-12345' index if it does not exist.
 ```
+
+## Reindexing Support
+
+Enhanced functionality for handling mapping updates that require reindexing documents.
+
+### Updating Indices with Reindexing
+
+```typescript
+import { updateIndices, createOrUpdateIndex } from '@kbn/index-adapter';
+
+// Update indices with automatic reindexing
+await updateIndices({
+  esClient,
+  logger,
+  name: 'security-alerts-*',
+  totalFieldsLimit: 1000,
+  writeIndexOnly: false,
+  enableReindexing: true,    // Reindexes documents with new mappings
+});
+
+// Create or update with reindexing enabled
+await createOrUpdateIndex({
+  esClient,
+  logger,
+  name: 'security-alerts-000001',
+  totalFieldsLimit: 1000,
+  enableReindexing: true,
+});
+```
+
+### Manual Reindexing
+
+```typescript
+import { reindexIndexDocuments } from '@kbn/index-adapter';
+
+// Manual reindexing for standalone indices
+await reindexIndexDocuments({
+  esClient,
+  logger,
+  indexName: 'security-alerts-000001',
+  batchSize: 1000,
+  timeout: '10m',
+});
+```
+
+### Use Cases
+
+This functionality is particularly useful for:
+
+- **Semantic Text Updates**: Updating `inference_id` properties in `semantic_text` fields
+- **Schema Evolution**: Safely applying new mappings to existing documents
+- **Index Migration**: Moving to new index structures with updated mappings
+- **Field Type Changes**: Updating field types that require document reprocessing
+
+### Features
+
+- **Atomic reindexing** with temporary index creation and swapping
+- **Alias preservation** during index transitions
+- **Error handling** with automatic cleanup and rollback
+- **Task monitoring** with progress tracking and failure detection
+- **Zero-downtime** operations using index aliases
+
+For detailed documentation and examples, see the [Data Stream Adapter documentation](../data-stream-adapter/REINDEX_ROLLOVER.md) which covers similar concepts for data streams.
