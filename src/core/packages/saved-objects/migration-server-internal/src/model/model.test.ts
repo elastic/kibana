@@ -2322,8 +2322,10 @@ describe('migrations v2 model', () => {
       };
 
       test('REINDEX_SOURCE_TO_TEMP_INDEX_BULK -> REINDEX_SOURCE_TO_TEMP_READ if action succeeded', () => {
-        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> =
-          Either.right('bulk_index_succeeded');
+        const res: ResponseType<'REINDEX_SOURCE_TO_TEMP_INDEX_BULK'> = Either.right({
+          type: 'bulk_index_succeeded',
+          versionConflictErrors: [],
+        });
         const newState = model(reindexSourceToTempIndexBulkState, res);
         expect(newState.controlState).toEqual('REINDEX_SOURCE_TO_TEMP_READ');
         expect(newState.retryCount).toEqual(0);
@@ -3010,8 +3012,10 @@ describe('migrations v2 model', () => {
       };
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> TRANSFORMED_DOCUMENTS_BULK_INDEX and increments currentBatch if more batches are left', () => {
-        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
-          Either.right('bulk_index_succeeded');
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right({
+          type: 'bulk_index_succeeded',
+          versionConflictErrors: [],
+        });
         const newState = model(
           transformedDocumentsBulkIndexState,
           res
@@ -3021,13 +3025,38 @@ describe('migrations v2 model', () => {
       });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> OUTDATED_DOCUMENTS_SEARCH_READ if all batches were written', () => {
-        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> =
-          Either.right('bulk_index_succeeded');
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right({
+          type: 'bulk_index_succeeded',
+          versionConflictErrors: [],
+        });
         const newState = model(
           { ...transformedDocumentsBulkIndexState, ...{ currentBatch: 1 } },
           res
         );
         expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
+      });
+
+      test('TRANSFORMED_DOCUMENTS_BULK_INDEX -> OUTDATED_DOCUMENTS_SEARCH_READ adds logs if version conflicts were found', () => {
+        const res: ResponseType<'TRANSFORMED_DOCUMENTS_BULK_INDEX'> = Either.right({
+          type: 'bulk_index_succeeded',
+          versionConflictErrors: [
+            { type: 'version_conflict_engine_exception', reason: 'reason 1' },
+            { type: 'version_conflict_engine_exception', reason: 'reason 2' },
+          ],
+        });
+        const newState = model(
+          { ...transformedDocumentsBulkIndexState, ...{ currentBatch: 1 } },
+          res
+        );
+        expect(newState.controlState).toEqual('OUTDATED_DOCUMENTS_SEARCH_READ');
+        expect(newState.logs).toMatchInlineSnapshot(`
+          Array [
+            Object {
+              "level": "warning",
+              "message": "Found 2 errors related to version_conflict_engine_exception, showing 2 reasons: reason 1; reason 2",
+            },
+          ]
+        `);
       });
 
       test('TRANSFORMED_DOCUMENTS_BULK_INDEX throws if action returns left index_not_found_exception', () => {
