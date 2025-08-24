@@ -12,17 +12,19 @@ import {
   SIEM_READINESS_PATH,
   SecurityPageName,
   ENABLE_SIEM_READINESS_SETTING,
+  SECURITY_FEATURE_ID,
 } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
 
 export const siemReadinessLinks: LinkItem = {
-  // capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
+  capabilities: [[`${SECURITY_FEATURE_ID}.show`]],
   globalNavPosition: 13,
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.siem_readiness', {
       defaultMessage: 'SIEM Readiness',
     }),
   ],
+  experimentalKey: 'siemReadinessDashboard',
   uiSettingRequired: ENABLE_SIEM_READINESS_SETTING,
   id: SecurityPageName.siemReadiness,
   path: SIEM_READINESS_PATH,
