@@ -15,10 +15,10 @@ export const mockComponentData: ComponentData = {
   lineNumber: 25,
   relativePath: 'src/components/my_component',
   baseFileName: 'component.tsx',
-  codeowners: ['@elastic/kibana-team'],
+  codeowners: ['@elastic/capybara-team'],
   euiData: {
     componentName: 'EuiButton',
-    docsLink: 'https://elastic.github.io/eui/#/navigation/button',
+    docsLink: 'https://eui.elastic.co/docs/components/button',
   },
   iconType: 'button',
   sourceComponent: 'MyComponent',
