@@ -25,13 +25,13 @@ export const getComponentDataBodySchema = schema.object({
   }),
 });
 
-type RequestBody = TypeOf<typeof getComponentDataBodySchema>;
+export type GetComponentDataRequestBody = TypeOf<typeof getComponentDataBodySchema>;
 
 /**
  * Parameters for {@link getComponentData}.
  */
 interface GetComponentDataOptions {
-  req: KibanaRequest<unknown, unknown, RequestBody>;
+  req: KibanaRequest<unknown, unknown, GetComponentDataRequestBody>;
   res: KibanaResponseFactory;
   logger: Logger;
 }
@@ -51,7 +51,7 @@ export interface GetComponentDataResponse {
  * Get data about a component at a given path.
  * @internal
  * @param {GetComponentDataOptions} options
- * @param {KibanaRequest<unknown, unknown, RequestBody>} options.req
+ * @param {KibanaRequest<unknown, unknown, GetComponentDataRequestBody>} options.req
  * @param {KibanaResponseFactory} options.res
  * @param {Logger} options.logger
  * @returns {Promise<IKibanaResponse<GetComponentDataResponse>>}
