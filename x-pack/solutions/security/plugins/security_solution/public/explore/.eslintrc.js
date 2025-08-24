@@ -1,14 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 // eslint-disable-next-line import/no-extraneous-dependencies
-const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-overrides');
+const { createRuleOverrides } = require('@kbn/eslint-rule-overrides');
 
 /**
  * @typedef {Object} RestrictedImportPath
@@ -18,8 +16,7 @@ const { createNoRestrictedImportsOverride } = require('@kbn/eslint-rule-override
  * @property {string[]} [allowImportNames] - Named imports to allow (restricts all others).
  */
 
-/**
-/** @type {Array.<RestrictedImportPath>} */
+/** @type {RestrictedImportPath[]} */
 const RESTRICTED_IMPORTS_PATHS = [
   {
     name: 'enzyme',
@@ -27,9 +24,14 @@ const RESTRICTED_IMPORTS_PATHS = [
   },
 ];
 
-const overrides = createNoRestrictedImportsOverride({
+const overrides = createRuleOverrides({
   childConfigDir: __dirname,
-  restrictedImports: RESTRICTED_IMPORTS_PATHS,
+  rules: {
+    'no-restricted-imports': {
+      strategy: 'append',
+      value: RESTRICTED_IMPORTS_PATHS,
+    },
+  },
 });
 
 /** @type {import('eslint').Linter.Config} */
