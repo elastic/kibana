@@ -382,6 +382,7 @@ describe('validation logic', () => {
     describe('drop', () => {
       testErrorsAndWarnings('from index | drop ', [
         "SyntaxError: mismatched input '<EOF>' expecting {'?', '??', NAMED_OR_POSITIONAL_PARAM, NAMED_OR_POSITIONAL_DOUBLE_PARAMS, ID_PATTERN}",
+        'Unknown column []',
       ]);
       testErrorsAndWarnings('from index | drop 4.5', [
         "SyntaxError: token recognition error at: '4'",

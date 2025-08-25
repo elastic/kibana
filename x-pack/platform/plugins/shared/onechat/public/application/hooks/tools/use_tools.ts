@@ -6,43 +6,35 @@
  */
 
 import { ToolType } from '@kbn/onechat-common';
-import { EsqlToolDefinitionWithSchema, isEsqlTool } from '@kbn/onechat-common/tools/esql';
+import { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common/tools/esql';
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { queryKeys } from '../../query_keys';
 import { useOnechatServices } from '../use_onechat_service';
 
-export const useOnechatTools = () => {
+export interface UseOnechatToolsProps {
+  includeSystemTools?: boolean;
+}
+
+export const useOnechatTools = ({ includeSystemTools }: UseOnechatToolsProps = {}) => {
   const { toolsService } = useOnechatServices();
 
-  const {
-    data: tools,
-    isLoading,
-    error,
-  } = useQuery({
+  const { data, isLoading, error } = useQuery({
     queryKey: queryKeys.tools.all,
     queryFn: () => toolsService.list(),
   });
 
-  return { tools: tools ?? [], isLoading, error };
-};
+  const tools = useMemo(() => {
+    if (!data) {
+      return [];
+    }
+    if (includeSystemTools) {
+      return data;
+    }
+    return data.filter((tool) => tool.type !== ToolType.builtin);
+  }, [data, includeSystemTools]);
 
-export const useBaseTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const baseTools = useMemo(() => tools.filter((tool) => tool.type === ToolType.builtin), [tools]);
-  return { tools: baseTools, ...rest };
-};
-
-export const useEsqlTools = () => {
-  const { tools, ...rest } = useOnechatTools();
-
-  const esqlTools = useMemo(
-    // inferred type predicates are implemented in Typescript 5.5
-    () => tools.filter(isEsqlTool) as EsqlToolDefinitionWithSchema[],
-    [tools]
-  );
-  return { tools: esqlTools, ...rest };
+  return { tools, isLoading, error };
 };
 
 export const useOnechatTool = (toolId?: string) => {

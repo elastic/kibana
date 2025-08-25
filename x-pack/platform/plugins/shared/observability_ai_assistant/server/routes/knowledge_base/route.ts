@@ -12,12 +12,13 @@ import {
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import {
   Instruction,
   KnowledgeBaseEntry,
   KnowledgeBaseEntryRole,
-  KnowledgeBaseState,
+  InferenceModelState,
 } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
@@ -34,10 +35,11 @@ const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
     enabled: boolean;
     endpoint?: InferenceInferenceEndpointInfo;
     modelStats?: Partial<MlTrainedModelStats>;
-    kbState: KnowledgeBaseState;
+    inferenceModelState: InferenceModelState;
     currentInferenceId?: string | undefined;
     concreteWriteIndex: string | undefined;
     isReIndexing: boolean;
+    productDocStatus: InstallationStatus;
   }> => {
     const client = await resources.service.getClient({ request: resources.request });
     return client.getKnowledgeBaseStatus();
@@ -282,9 +284,9 @@ const importKnowledgeBaseEntries = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<void> => {
     const client = await resources.service.getClient({ request: resources.request });
 
-    const { kbState } = await client.getKnowledgeBaseStatus();
+    const { inferenceModelState } = await client.getKnowledgeBaseStatus();
 
-    if (kbState !== KnowledgeBaseState.READY) {
+    if (inferenceModelState !== InferenceModelState.READY) {
       throw new Error('Knowledge base is not ready');
     }
 

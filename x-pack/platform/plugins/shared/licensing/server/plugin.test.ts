@@ -21,7 +21,7 @@ import {
   ServiceStatusLevel,
   ServiceStatusLevels,
 } from '@kbn/core/server';
-import { LicenseType } from '../common/types';
+import { LicenseType } from '@kbn/licensing-types';
 import { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';
 

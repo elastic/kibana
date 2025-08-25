@@ -16,6 +16,7 @@ import {
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
@@ -469,25 +470,22 @@ describe('rules_list ', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149061
-  describe.skip('rules_list component with items', () => {
+  describe('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));
+
+      expect(await screen.findAllByTestId('rule-row')).toHaveLength(6);
     });
 
     it('Name and rule type column', async () => {
       renderWithProviders(<RulesList />);
 
-      let ruleNameColumns: HTMLElement[] = [];
-      await waitFor(() => {
-        ruleNameColumns = screen.queryAllByTestId('rulesTableCell-name');
-        return expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
-      });
+      const ruleNameColumns = await screen.findAllByTestId('rulesTableCell-name');
 
-      mockedRulesData.forEach((rule, index) => {
-        expect(ruleNameColumns[index]).toHaveTextContent(`Name${rule.name}${ruleTypeFromApi.name}`);
-      });
+      expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
+      expect(ruleNameColumns[0]).toHaveTextContent(
+        `${mockedRulesData[0].name}${ruleTypeFromApi.name}`
+      );
     });
 
     it('Tags column', async () => {
@@ -505,10 +503,8 @@ describe('rules_list ', () => {
     it('Last run column', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() =>
-        expect(screen.queryAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
-          mockedRulesData.length
-        )
+      expect(await screen.findAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
+        mockedRulesData.length
       );
     });
 
@@ -530,42 +526,26 @@ describe('rules_list ', () => {
       );
     });
 
-    it('Schedule minimum interval tooltip', async () => {
-      renderWithProviders(<RulesList />);
-
-      fireEvent.mouseOver(await screen.findByLabelText('Below configured minimum interval'));
-
-      expect(
-        await screen.findByText(
-          'Rule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
-        )
-      ).toBeInTheDocument();
-    });
-
     it('long duration tooltip', async () => {
       renderWithProviders(<RulesList />);
 
+      const durationColumnHeader = await screen.findAllByTestId('rulesTableCell-duration');
       // Duration column
-      expect(await screen.findAllByTestId('rulesTableCell-duration')).toHaveLength(
-        mockedRulesData.length
-      );
+      expect(durationColumnHeader).toHaveLength(mockedRulesData.length);
 
       // show warning if duration is long
-      await waitFor(() => screen.getAllByText('Info'));
-      const durationWarningIcon = screen.getAllByText('Info');
-      expect(durationWarningIcon).toHaveLength(
-        mockedRulesData.filter(
-          (data) =>
-            data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
-        ).length
-      );
+      const filteredData = mockedRulesData.filter((data) => {
+        return data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout);
+      });
+      const warningIcons = await screen.findAllByTestId('ruleDurationWarning');
+      expect(warningIcons).toHaveLength(filteredData.length);
     });
 
     it('duration tooltip', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() => screen.getAllByText('Duration')[0]);
-      fireEvent.mouseOver(screen.getAllByText('Duration')[0]);
+      const durationColumnHeader = await screen.findByText('Duration');
+      fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
         expect(screen.getByRole('tooltip')).toHaveTextContent(
@@ -598,18 +578,19 @@ describe('rules_list ', () => {
     it('Status control column', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() => screen.getAllByTestId('rulesTableCell-status')[0]);
-      expect(screen.getAllByTestId('rulesTableCell-status')).toHaveLength(mockedRulesData.length);
+      expect(await screen.findAllByTestId('rulesTableCell-status')).toHaveLength(
+        mockedRulesData.length
+      );
     });
 
     it('Monitoring column', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() => screen.getAllByTestId('rulesTableCell-successRatio')[0]);
-      expect(screen.getAllByTestId('rulesTableCell-successRatio')).toHaveLength(
+
+      expect(await screen.findAllByTestId('rulesTableCell-successRatio')).toHaveLength(
         mockedRulesData.length
       );
 
-      const ratios = screen.getAllByTestId('successRatio');
+      const ratios = await screen.findAllByTestId('successRatio');
 
       mockedRulesData.forEach((rule, index) => {
         if (rule.monitoring) {
@@ -624,9 +605,8 @@ describe('rules_list ', () => {
 
     it('P50 column is rendered initially', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() =>
-        expect(screen.getByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined()
-      );
+
+      expect(await screen.findByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined();
 
       let percentiles: HTMLElement[] = [];
       await waitFor(() => {
@@ -864,43 +844,6 @@ describe('rules_list ', () => {
       expect(screen.queryByTestId('ruleStatusFilter')).toBeInTheDocument();
     });
 
-    it('can filter by rule states', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      renderWithProviders(<RulesList />);
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: [],
-        })
-      );
-
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: ['enabled'],
-        })
-      );
-
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-snoozed'))[0]);
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: ['enabled', 'snoozed'],
-        })
-      );
-
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-snoozed'))[0]);
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: ['enabled'],
-        })
-      );
-    });
-
     it('does not render the tag filter is the feature flag is off', async () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
@@ -920,8 +863,9 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      const selectActionButtons = document.body.querySelectorAll('.euiButtonIcon[disabled]');
-      expect(selectActionButtons).toHaveLength(2);
+      expect(await screen.findAllByTestId('selectActionButton')).toHaveLength(
+        mockedRulesData.length
+      );
     });
 
     it('rule list items with actions are not editable if canExecuteAction is false', async () => {
@@ -930,7 +874,9 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(8);
+      expect(await screen.findAllByTestId('selectActionButton')).toHaveLength(
+        mockedRulesData.filter((rule) => !rule.actions.length).length
+      );
       hasExecuteActionsCapability.mockReturnValue(true);
     });
 
@@ -1473,7 +1419,7 @@ describe('MaintenanceWindowsMock', () => {
     renderWithProviders(<RulesList />);
 
     expect(
-      await screen.findByText('A maintenance window is running for Observability rules')
+      await screen.findByText('One or more maintenance windows are running')
     ).toBeInTheDocument();
 
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);

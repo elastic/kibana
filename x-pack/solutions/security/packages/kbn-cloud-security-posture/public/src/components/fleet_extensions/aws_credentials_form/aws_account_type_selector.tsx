@@ -128,6 +128,7 @@ export const AwsAccountTypeSelect = ({
           });
         }}
         size="m"
+        name="accountType"
       />
       {getAwsAccountType(input) === AWS_ORGANIZATION_ACCOUNT && (
         <>

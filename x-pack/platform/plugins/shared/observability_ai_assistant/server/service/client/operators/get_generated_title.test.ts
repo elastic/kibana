@@ -87,6 +87,7 @@ describe('getGeneratedTitle', () => {
 
     expect(title).toEqual('My title');
   });
+
   it('calls chat with the user message', async () => {
     const { chatSpy, title$ } = callGenerateTitle(
       ['observability'],
@@ -212,5 +213,22 @@ describe('getGeneratedTitle', () => {
         systemMessage: getTitleSystemMessage(scopes),
       })
     );
+  });
+
+  it('falls back to response.content when toolCalls is empty', async () => {
+    const { title$ } = callGenerateTitle(
+      ['observability'],
+      [
+        createChatCompletionResponse({
+          content: '"My fallback title"',
+        }),
+      ]
+    );
+
+    const title = await lastValueFrom(
+      title$.pipe(filter((event): event is string => typeof event === 'string'))
+    );
+
+    expect(title).toEqual('My fallback title');
   });
 });

@@ -17,6 +17,7 @@ import {
   SecuritySection,
   KibanaSection,
   StackSection,
+  AISection,
 } from './components/management_sections';
 
 import {
@@ -45,6 +46,7 @@ export class ManagementSectionsService {
       machineLearning: this.registerSection(MachineLearningSection),
       security: this.registerSection(SecuritySection),
       kibana: this.registerSection(KibanaSection),
+      ai: this.registerSection(AISection),
       stack: this.registerSection(StackSection),
     };
   }

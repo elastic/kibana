@@ -56,7 +56,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
       type: SOURCE_TYPES.EMS_FILE,
       id: id!,
       tooltipProperties,
-    };
+    } as EMSFileSourceDescriptor;
   }
 
   private readonly _tooltipFields: IField[];
@@ -65,7 +65,7 @@ export class EMSFileSource extends AbstractVectorSource implements IEmsFileSourc
   constructor(descriptor: Partial<EMSFileSourceDescriptor>) {
     super(EMSFileSource.createDescriptor(descriptor));
     this._descriptor = EMSFileSource.createDescriptor(descriptor);
-    this._tooltipFields = this._descriptor.tooltipProperties.map((propertyKey) =>
+    this._tooltipFields = (this._descriptor.tooltipProperties ?? []).map((propertyKey) =>
       this.getFieldByName(propertyKey)
     );
   }

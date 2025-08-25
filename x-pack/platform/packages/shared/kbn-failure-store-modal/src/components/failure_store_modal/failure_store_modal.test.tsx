@@ -61,7 +61,7 @@ describe('FailureStoreModal', () => {
   it('calls onCloseModal when cancel button is clicked', () => {
     const { getByTestId } = renderModal();
 
-    fireEvent.click(getByTestId('cancelButton'));
+    fireEvent.click(getByTestId('failureStoreModalCancelButton'));
     expect(defaultProps.onCloseModal).toHaveBeenCalledTimes(1);
   });
 
@@ -85,8 +85,8 @@ describe('FailureStoreModal', () => {
         customRetentionPeriod: '15d',
       });
 
-      expect(getByTestId('saveButton')).toBeInTheDocument();
-      expect(getByTestId('saveButton')).toBeDisabled();
+      expect(getByTestId('failureStoreModalSaveButton')).toBeInTheDocument();
+      expect(getByTestId('failureStoreModalSaveButton')).toBeDisabled();
       // Expect the toggle to be on initially
       expect(getByTestId('enableFailureStoreToggle')).toBeChecked();
 
@@ -101,11 +101,11 @@ describe('FailureStoreModal', () => {
       expect(queryByTestId('selectFailureStorePeriodType')).not.toBeInTheDocument();
       expect(queryByTestId('selectFailureStorePeriodValue')).not.toBeInTheDocument();
 
-      expect(getByTestId('saveButton')).not.toBeDisabled();
+      expect(getByTestId('failureStoreModalSaveButton')).not.toBeDisabled();
       // Expect the toggle to be off
       expect(getByTestId('enableFailureStoreToggle')).not.toBeChecked();
 
-      fireEvent.click(getByTestId('saveButton'));
+      fireEvent.click(getByTestId('failureStoreModalSaveButton'));
 
       await waitFor(() => {
         expect(defaultProps.onSaveModal).toHaveBeenCalledTimes(1);
@@ -167,7 +167,7 @@ describe('FailureStoreModal', () => {
       expect(unitSelector).toHaveValue('s');
       expect(valueSelector).toHaveValue(15);
 
-      fireEvent.click(getByTestId('saveButton'));
+      fireEvent.click(getByTestId('failureStoreModalSaveButton'));
 
       await waitFor(() => {
         expect(defaultProps.onSaveModal).toHaveBeenCalledWith({

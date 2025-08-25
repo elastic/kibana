@@ -15,7 +15,7 @@ import {
   PublicLicenseJSON,
   PublicLicense,
   PublicFeatures,
-} from './types';
+} from '@kbn/licensing-types';
 
 /**
  * @public

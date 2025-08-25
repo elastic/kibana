@@ -7,7 +7,7 @@
 
 import { Observable } from 'rxjs';
 
-import { ILicense } from '../common/types';
+import { ILicense } from '@kbn/licensing-types';
 import { FeatureUsageServiceSetup, FeatureUsageServiceStart } from './services';
 
 /** @public */

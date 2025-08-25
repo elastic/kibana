@@ -9,6 +9,33 @@ import { PluginInitializerContext } from '@kbn/core/server';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { configSchema, MapsXPackConfig } from './config';
 
+export type {
+  CountAggDescriptor,
+  FieldedAggDescriptor,
+  PercentileAggDescriptor,
+  AggDescriptor,
+  AbstractESAggSourceDescriptor,
+  AbstractESJoinSourceDescriptor,
+  AbstractESSourceDescriptor,
+  EMSFileSourceDescriptor,
+  EMSTMSSourceDescriptor,
+  ESGeoGridSourceDescriptor,
+  ESGeoLineSourceDescriptor,
+  ESPewPewSourceDescriptor,
+  ESSearchSourceDescriptor,
+  ESQLSourceDescriptor,
+  ESDistanceSourceDescriptor,
+  ESTermSourceDescriptor,
+  KibanaTilemapSourceDescriptor,
+  WMSSourceDescriptor,
+  XYZTMSSourceDescriptor,
+  MVTFieldDescriptor,
+  TiledSingleLayerVectorSourceDescriptor,
+  JoinSourceDescriptor,
+  SourceDescriptor,
+} from './content_management';
+export { MapsStorage } from './content_management';
+
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   // exposeToBrowser specifies kibana.yml settings to expose to the browser
   // the value `true` in this context signals configuration is exposed to browser

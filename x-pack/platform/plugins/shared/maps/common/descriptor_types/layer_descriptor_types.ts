@@ -17,7 +17,7 @@ import {
   VectorStyleDescriptor,
 } from './style_property_descriptor_types';
 import { DataRequestDescriptor } from './data_request_descriptor_types';
-import { AbstractSourceDescriptor, JoinSourceDescriptor } from './source_descriptor_types';
+import type { JoinSourceDescriptor, SourceDescriptor } from '.';
 import { LAYER_TYPE } from '../constants';
 
 export type Attribution = {
@@ -72,7 +72,7 @@ export type LayerDescriptor = {
   areLabelsOnTop?: boolean;
   minZoom?: number;
   maxZoom?: number;
-  sourceDescriptor: AbstractSourceDescriptor | null;
+  sourceDescriptor: SourceDescriptor | null;
   type?: string;
   visible?: boolean;
   style?: StyleDescriptor | null;

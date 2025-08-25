@@ -45,9 +45,9 @@ export class StepFactory {
 
     switch (stepType) {
       case 'enter-foreach':
-        return new EnterForeachNodeImpl(step as any, workflowState);
+        return new EnterForeachNodeImpl(step as any, workflowState, contextManager, workflowLogger);
       case 'exit-foreach':
-        return new ExitForeachNodeImpl(step as any, workflowState);
+        return new ExitForeachNodeImpl(step as any, workflowState, workflowLogger);
       case 'enter-if':
         return new EnterIfNodeImpl(step as any, workflowState, contextManager, workflowLogger);
       case 'enter-condition-branch':

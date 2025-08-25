@@ -70,7 +70,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       async function getKnowledgeBaseEntries() {
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
 
@@ -119,7 +119,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('User instruction management', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/230988
+    describe.skip('User instruction management', () => {
       async function openUserInstructionFlyout() {
         await testSubjects.click(ui.pages.kbManagementTab.editUserInstructionButton);
         await testSubjects.exists(ui.pages.kbManagementTab.saveEntryButton);
@@ -148,7 +149,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await clearKnowledgeBase(es);
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
       });
@@ -199,7 +200,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       });
     });
 
-    describe('Bulk import knowledge base entries', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/231420
+    describe.skip('Bulk import knowledge base entries', () => {
       const tempDir = os.tmpdir();
       const tempFilePath = path.join(tempDir, 'bulk_import.ndjson');
 
@@ -216,7 +218,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       async function getKnowledgeBaseEntryCount() {
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
 
@@ -248,7 +250,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await clearKnowledgeBase(es);
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
       });

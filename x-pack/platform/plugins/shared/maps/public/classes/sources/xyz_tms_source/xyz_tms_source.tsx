@@ -32,7 +32,7 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
 
   static createDescriptor({ urlTemplate }: XYZTMSSourceConfig): XYZTMSSourceDescriptor {
     return {
-      type: XYZTMSSource.type,
+      type: SOURCE_TYPES.EMS_XYZ,
       urlTemplate,
     };
   }

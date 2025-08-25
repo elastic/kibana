@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { ILicense } from '@kbn/licensing-plugin/public';
+import { ILicense } from '@kbn/licensing-types';
 import { durationToNumber, REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '@kbn/reporting-common';
 
 import { checkLicense, Job } from '@kbn/reporting-public';

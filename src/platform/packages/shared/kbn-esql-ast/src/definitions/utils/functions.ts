@@ -8,12 +8,8 @@
  */
 import { i18n } from '@kbn/i18n';
 import { memoize } from 'lodash';
-import {
-  ESQLControlVariable,
-  ESQLLicenseType,
-  ESQLVariableType,
-  RecommendedField,
-} from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import { ESQLControlVariable, ESQLVariableType, RecommendedField } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -87,7 +83,7 @@ export function getFunctionDefinition(name: string) {
 
 export const filterFunctionSignatures = (
   signatures: FunctionDefinition['signatures'],
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined
 ): FunctionDefinition['signatures'] => {
   if (!hasMinimumLicenseRequired) {
     return signatures;
@@ -95,14 +91,14 @@ export const filterFunctionSignatures = (
 
   return signatures.filter((signature) => {
     if (!signature.license) return true;
-    return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as ESQLLicenseType);
+    return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
   });
 };
 
 export const filterFunctionDefinitions = (
   functions: FunctionDefinition[],
   predicates: FunctionFilterPredicates | undefined,
-  hasMinimumLicenseRequired: ((minimumLicenseRequired: ESQLLicenseType) => boolean) | undefined,
+  hasMinimumLicenseRequired: ((minimumLicenseRequired: LicenseType) => boolean) | undefined,
   activeProduct?: PricingProduct | undefined
 ): FunctionDefinition[] => {
   if (!predicates) {
@@ -117,7 +113,7 @@ export const filterFunctionDefinitions = (
       }
 
       if (!!hasMinimumLicenseRequired && license) {
-        if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as ESQLLicenseType)) {
+        if (!hasMinimumLicenseRequired(license.toLocaleLowerCase() as LicenseType)) {
           return false;
         }
       }
@@ -290,7 +286,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
  */
 export const getFunctionSuggestions = (
   predicates?: FunctionFilterPredicates,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean,
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
   activeProduct?: PricingProduct | undefined
 ): ISuggestionItem[] => {
   return filterFunctionDefinitions(

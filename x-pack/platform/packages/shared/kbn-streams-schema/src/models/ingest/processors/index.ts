@@ -241,29 +241,49 @@ export const renameProcessorDefinitionSchema = z.strictObject({
  * Set processor
  */
 
-export interface SetProcessorConfig extends ProcessorBase {
+export interface SetProcessorBaseConfig extends ProcessorBase {
   field: string;
-  value: string;
   override?: boolean;
   ignore_empty_value?: boolean;
   media_type?: string;
 }
 
+export interface SetValueProcessorConfig extends SetProcessorBaseConfig {
+  value: string;
+  copy_from?: never;
+}
+
+export interface SetCopyFromProcessorConfig extends SetProcessorBaseConfig {
+  value?: never;
+  copy_from: string;
+}
+
+export type SetProcessorConfig = SetValueProcessorConfig | SetCopyFromProcessorConfig;
+
 export interface SetProcessorDefinition {
   set: SetProcessorConfig;
 }
 
+const setProcessorBaseSchema = z.object({
+  field: NonEmptyString,
+  override: z.optional(z.boolean()),
+  ignore_empty_value: z.optional(z.boolean()),
+  media_type: z.optional(z.string()),
+});
+
+const valueXorCopyFromSchema = z.union([
+  setProcessorBaseSchema.extend({
+    value: NonEmptyString,
+    copy_from: z.undefined(),
+  }) satisfies z.Schema<SetValueProcessorConfig>,
+  setProcessorBaseSchema.extend({
+    value: z.undefined(),
+    copy_from: NonEmptyString,
+  }) satisfies z.Schema<SetCopyFromProcessorConfig>,
+]);
+
 export const setProcessorDefinitionSchema = z.strictObject({
-  set: z.intersection(
-    processorBaseSchema,
-    z.object({
-      field: NonEmptyString,
-      value: NonEmptyString,
-      override: z.optional(z.boolean()),
-      ignore_empty_value: z.optional(z.boolean()),
-      media_type: z.optional(z.string()),
-    })
-  ),
+  set: z.intersection(processorBaseSchema, valueXorCopyFromSchema),
 }) satisfies z.Schema<SetProcessorDefinition>;
 
 /**

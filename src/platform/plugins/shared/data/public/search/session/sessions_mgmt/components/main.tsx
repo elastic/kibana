@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
+import { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SearchSessionsMgmtAPI } from '../lib/api';
 import type { AsyncSearchIntroDocumentation } from '../lib/documentation';
 import { SearchSessionsMgmtTable } from './table';
@@ -27,10 +28,11 @@ interface Props {
   timezone: string;
   config: SearchSessionsConfigSchema;
   kibanaVersion: string;
+  share: SharePluginStart;
   searchUsageCollector: SearchUsageCollector;
 }
 
-export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) {
+export function SearchSessionsMgmtMain({ documentation, share, ...tableProps }: Props) {
   if (BACKGROUND_SEARCH_ENABLED) {
     return (
       <>
@@ -51,7 +53,11 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
         />
 
         <EuiSpacer size="l" />
-        <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+        <SearchSessionsMgmtTable
+          data-test-subj="search-sessions-mgmt-table"
+          locators={share.url.locators}
+          {...tableProps}
+        />
       </>
     );
   }
@@ -90,7 +96,11 @@ export function SearchSessionsMgmtMain({ documentation, ...tableProps }: Props) 
       <SearchSessionsDeprecatedWarning />
 
       <EuiSpacer size="l" />
-      <SearchSessionsMgmtTable data-test-subj="search-sessions-mgmt-table" {...tableProps} />
+      <SearchSessionsMgmtTable
+        data-test-subj="search-sessions-mgmt-table"
+        locators={share.url.locators}
+        {...tableProps}
+      />
     </>
   );
 }

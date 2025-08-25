@@ -196,17 +196,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('can select a range on a defined step interval using arrow keys', async () => {
         const secondId = (await dashboardControls.getAllControlIds())[1];
 
+        // clear out the lower bound selection
+        await dashboardControls.clearControlSelections(secondId);
+
         await testSubjects.click(
           `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
         );
 
         // use arrow key to set lower bound to the next step up
-        await browser.pressKeys(browser.keys.ARROW_UP);
-        await dashboardControls.validateRange('value', secondId, '300', '');
+        await browser.pressKeys(browser.keys.ARROW_UP, browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '200', '');
 
         // use arrow key to set lower bound to the next step up
         await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await dashboardControls.validateRange('value', secondId, '200', '');
+        await dashboardControls.validateRange('value', secondId, '100', '');
 
         await dashboardControls.rangeSliderSetUpperBound(secondId, '800');
 
@@ -216,11 +219,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // use arrow key to set upper bound to the next step up
         await browser.pressKeys(browser.keys.ARROW_UP);
-        await dashboardControls.validateRange('value', secondId, '200', '900');
+        await dashboardControls.validateRange('value', secondId, '100', '900');
 
         // use arrow key to set upper bound to the next step up
         await browser.pressKeys(browser.keys.ARROW_DOWN);
-        await dashboardControls.validateRange('value', secondId, '200', '800');
+        await dashboardControls.validateRange('value', secondId, '100', '800');
 
         await dashboard.clearUnsavedChanges();
       });

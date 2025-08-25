@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { map } from 'rxjs';
 import { Observable, Subscription } from 'rxjs';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { ILicense } from '@kbn/licensing-types';
 import { checkLicense, GraphLicenseInformation } from '../../common/check_license';
 
 export class LicenseState {

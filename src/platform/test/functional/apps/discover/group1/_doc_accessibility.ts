@@ -47,7 +47,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should give focus to the first tab link when Tab is pressed', async () => {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
-      const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
+      const rowActions = await dataGrid.getRowActions();
       await rowActions[0].click();
       await header.waitUntilLoadingHasFinished();
       await browser.pressKeys(browser.keys.TAB);

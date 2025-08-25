@@ -199,9 +199,8 @@ export const getStructuredToolForIndexEntry = ({
           bool: {
             must: [
               {
-                semantic: {
-                  field: indexEntry.field,
-                  query: input.query,
+                match: {
+                  [indexEntry.field]: input.query,
                 },
               },
             ],
@@ -211,7 +210,6 @@ export const getStructuredToolForIndexEntry = ({
         highlight: {
           fields: {
             [indexEntry.field]: {
-              type: 'semantic',
               number_of_fragments: 2,
               order: 'score',
             },

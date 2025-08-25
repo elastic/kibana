@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   EuiButton,
   EuiFieldSearch,
@@ -13,6 +13,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -115,6 +116,35 @@ const TotalIntegrationsCount = ({
   </EuiText>
 );
 
+const SearchAnnouncement = ({
+  resultCount,
+  searchValue,
+}: {
+  resultCount: number;
+  searchValue: string;
+}) => {
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = searchValue
+        ? i18n.translate('xpack.csp.benchmarks.searchResultAnnouncementWithQuery', {
+            defaultMessage: '{resultCount} benchmark table results found for "{searchValue}"',
+            values: { resultCount, searchValue },
+          })
+        : i18n.translate('xpack.csp.benchmarks.searchResultAnnouncementWithoutQuery', {
+            defaultMessage: '{resultCount} total benchmarks',
+            values: { resultCount },
+          });
+    }
+  }, [resultCount, searchValue]);
+
+  return (
+    <EuiScreenReaderOnly>
+      <div aria-live="polite" aria-atomic="true" ref={liveRegionRef} role="status" />
+    </EuiScreenReaderOnly>
+  );
+};
 const BenchmarkSearchField = ({
   onSearch,
   isLoading,
@@ -201,6 +231,7 @@ export const Benchmarks = () => {
             totalCount={totalItemCount}
           />
           <EuiSpacer size="s" />
+          <SearchAnnouncement resultCount={benchmarkResult.length} searchValue={query.name} />
           <BenchmarksTable
             benchmarks={benchmarkResult}
             data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}

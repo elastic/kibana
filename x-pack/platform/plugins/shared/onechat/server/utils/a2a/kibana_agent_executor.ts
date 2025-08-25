@@ -17,6 +17,10 @@ import type { InternalStartServices } from '../../services';
 
 const generateMessageId = () => `msg-${uuidv4()}`;
 
+const A2A_CONVERSATION_ID_PREFIX = 'a2a-';
+
+const generateA2AConversationId = (id: string) => `${A2A_CONVERSATION_ID_PREFIX}${id}`;
+
 /**
  * Agent executor that bridges A2A requests to Kibana's onechat system
  */
@@ -29,25 +33,27 @@ export class KibanaAgentExecutor implements AgentExecutor {
   ) {}
 
   async execute(requestContext: RequestContext, eventBus: ExecutionEventBus): Promise<void> {
-    const { taskId, userMessage } = requestContext;
+    const { taskId, userMessage, contextId } = requestContext;
 
     try {
-      this.logger.debug(`A2A: Starting task ${taskId}`);
+      this.logger.debug(`A2A: Starting task ${taskId} with contextId ${contextId}`);
 
-      // Extract text from message parts
       const userText = userMessage.parts
         .filter((part: Part): part is TextPart => part.kind === 'text')
         .map((part: TextPart) => part.text)
         .join(' ');
 
-      // Execute chat with onechat service
       const { chat } = this.getInternalServices();
+
+      const a2aConversationId = generateA2AConversationId(contextId);
 
       const chatEvents$ = chat.converse({
         agentId: this.agentId,
         mode: AgentMode.normal,
         nextInput: { message: userText },
         request: this.kibanaRequest,
+        conversationId: a2aConversationId,
+        autoCreateConversationWithId: true,
       });
 
       // Process chat response

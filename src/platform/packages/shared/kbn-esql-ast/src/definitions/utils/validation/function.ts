@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLLicenseType, ESQLSignatureLicenseType } from '@kbn/esql-types';
+import { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import { errors, getFunctionDefinition } from '..';
 import { within } from '../../../..';
@@ -189,10 +189,10 @@ class FunctionValidator {
   /**
    * Checks if the current license level is sufficient the given license requirement
    */
-  private licenseOk(license: ESQLSignatureLicenseType | undefined): boolean {
+  private licenseOk(license: LicenseType | undefined): boolean {
     const hasMinimumLicenseRequired = this.callbacks.hasMinimumLicenseRequired;
     if (hasMinimumLicenseRequired && license) {
-      return hasMinimumLicenseRequired(license as ESQLLicenseType);
+      return hasMinimumLicenseRequired(license as LicenseType);
     }
     return true;
   }

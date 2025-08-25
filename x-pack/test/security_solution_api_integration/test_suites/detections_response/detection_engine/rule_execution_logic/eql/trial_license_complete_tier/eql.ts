@@ -82,8 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
   const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
   const packetBeatPath = dataPathBuilder.getPath('packetbeat/default');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/220943
-  describe.skip('@ess @serverless @serverlessQA EQL type rules', () => {
+  describe('@ess @serverless @serverlessQA EQL type rules', () => {
     const { indexListOfDocuments } = dataGeneratorFactory({
       es,
       index: 'ecs_compliant',
@@ -120,7 +119,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const createdRule = await createRule(supertest, log, rule);
       const alerts = await getAlerts(supertest, log, es, createdRule);
-      kbnExpect(alerts.hits.hits.length).eql(1);
+      expect(alerts.hits.hits).toHaveLength(1);
       const fullAlert = alerts.hits.hits[0]._source;
       if (!fullAlert) {
         return kbnExpect(fullAlert).to.be.ok();
@@ -289,7 +288,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId, size: maxAlerts * 2 });
-      kbnExpect(previewAlerts.length).eql(maxAlerts);
+      expect(previewAlerts).toHaveLength(maxAlerts);
     });
 
     it('generates max alerts warning when circuit breaker is hit', async () => {
@@ -308,7 +307,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      kbnExpect(previewAlerts.length).eql(1);
+      expect(previewAlerts).toHaveLength(1);
       const fullAlert = previewAlerts[0]._source;
       if (!fullAlert) {
         return kbnExpect(fullAlert).to.be.ok();
@@ -378,7 +377,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      kbnExpect(previewAlerts.length).eql(3);
+      expect(previewAlerts).toHaveLength(3);
 
       const createdAtHits = previewAlerts.map((hit) => hit._source?.created_at).sort();
       kbnExpect(createdAtHits).to.eql([1622676785, 1622676790, 1622676795]);
@@ -392,7 +391,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      kbnExpect(previewAlerts.length).eql(3);
+      expect(previewAlerts).toHaveLength(3);
 
       const createdAtHits = previewAlerts.map((hit) => hit._source?.locale);
       kbnExpect(createdAtHits).to.eql(['es', 'pt', 'ua']);
@@ -672,7 +671,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['agent.name'] });
 
-      kbnExpect(previewAlerts).to.have.length(3);
+      expect(previewAlerts).toHaveLength(3);
 
       const buildingBlockAlerts = previewAlerts.filter(
         (alert) => alert._source?.['kibana.alert.building_block_type']
@@ -716,11 +715,11 @@ export default ({ getService }: FtrProviderContext) => {
       // For EQL rules, max_alerts is the maximum number of detected sequences: each sequence has a building block
       // alert for each event in the sequence, so max_alerts=200 results in 400 building blocks in addition to
       // 200 regular alerts
-      kbnExpect(previewAlerts.length).eql(maxAlerts * 3);
+      expect(previewAlerts).toHaveLength(maxAlerts * 3);
       const shellAlerts = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 2);
       const buildingBlocks = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 1);
-      kbnExpect(shellAlerts.length).eql(maxAlerts);
-      kbnExpect(buildingBlocks.length).eql(maxAlerts * 2);
+      expect(shellAlerts).toHaveLength(maxAlerts);
+      expect(buildingBlocks).toHaveLength(maxAlerts * 2);
     });
 
     it('generates alerts when an index name contains special characters to encode', async () => {
@@ -730,7 +729,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      kbnExpect(previewAlerts.length).eql(1);
+      expect(previewAlerts).toHaveLength(1);
     });
 
     it('uses the provided filters', async () => {
@@ -776,7 +775,7 @@ export default ({ getService }: FtrProviderContext) => {
       };
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      kbnExpect(previewAlerts.length).eql(2);
+      expect(previewAlerts).toHaveLength(2);
     });
 
     describe('with host risk index', () => {
@@ -795,7 +794,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        kbnExpect(previewAlerts.length).eql(1);
+        expect(previewAlerts).toHaveLength(1);
         const fullAlert = previewAlerts[0]._source;
         if (!fullAlert) {
           return kbnExpect(fullAlert).to.be.ok();
@@ -850,7 +849,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(_log.warnings).to.eql([expectedWarning]);
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        kbnExpect(previewAlerts.length).to.be.greaterThan(0);
+        expect(previewAlerts).not.toHaveLength(0);
       });
 
       it('specifying only timestamp_override results in alert creation with an kbnExpect.expected warning', async () => {
@@ -868,7 +867,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(_log.warnings).to.eql([expectedWarning]);
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        kbnExpect(previewAlerts.length).to.be.greaterThan(0);
+        expect(previewAlerts).not.toHaveLength(0);
       });
 
       it('specifying both timestamp_override and timestamp_field results in alert creation with an kbnExpect.expected warning', async () => {
@@ -887,7 +886,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(_log.warnings).to.eql([expectedWarning]);
 
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        kbnExpect(previewAlerts.length).to.be.greaterThan(0);
+        expect(previewAlerts).not.toHaveLength(0);
       });
     });
 
@@ -959,7 +958,7 @@ export default ({ getService }: FtrProviderContext) => {
         kbnExpect(_log.warnings).to.be.empty();
         const previewAlerts = await getPreviewAlerts({ es, previewId });
 
-        kbnExpect(previewAlerts).to.have.length(3);
+        expect(previewAlerts).toHaveLength(3);
       });
     });
 
@@ -1034,7 +1033,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(alerts.hits.hits.length).equal(3);
+        expect(alerts.hits.hits).toHaveLength(3);
         kbnExpect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
@@ -1044,7 +1043,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(allNewAlerts.hits.hits.length).equal(6);
+        expect(allNewAlerts.hits.hits).toHaveLength(6);
         kbnExpect(allNewAlerts.hits.hits[5]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
@@ -1054,7 +1053,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(allNewAlertsAfter2ManualRuns.hits.hits.length).equal(6);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits).toHaveLength(6);
       });
 
       it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
@@ -1093,7 +1092,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        kbnExpect(alerts.hits.hits.length).equal(3);
+        expect(alerts.hits.hits).toHaveLength(3);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1102,7 +1101,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(allNewAlerts.hits.hits.length).equal(3);
+        expect(allNewAlerts.hits.hits).toHaveLength(3);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {
@@ -1146,7 +1145,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        kbnExpect(alerts.hits.hits.length).equal(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -1155,7 +1154,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
         kbnExpect(allNewAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(2);
       });
@@ -1191,7 +1190,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        kbnExpect(alerts.hits.hits.length).equal(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         // generate alert in the past
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
@@ -1200,7 +1199,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
         // now we will ingest new event, and manual rule run should update original alert
         const secondDocument = {
@@ -1220,9 +1219,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
-        kbnExpect(updatedAlerts.hits.hits.length).equal(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
 
-        kbnExpect(updatedAlerts.hits.hits.length).equal(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
 
         kbnExpect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
       });
@@ -1247,7 +1246,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const requests = logs[0].requests;
 
-        kbnExpect(requests).to.have.length(1);
+        expect(requests).toHaveLength(1);
         kbnExpect(requests![0].description).to.be('EQL request to find all matches');
         kbnExpect(requests![0].request).to.contain(
           'POST /auditbeat-*/_eql/search?allow_no_indices=true'

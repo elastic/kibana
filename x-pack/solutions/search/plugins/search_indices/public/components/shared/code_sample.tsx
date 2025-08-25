@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiThemeProvider,
 } from '@elastic/eui';
+import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 
 export interface CodeSampleProps {
   id?: string;
@@ -35,6 +36,7 @@ export const CodeSample = ({
   onCodeCopyClick,
   description,
 }: CodeSampleProps) => {
+  const isDarkMode = useKibanaIsDarkMode();
   const onCodeClick = React.useCallback(
     (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
       if (onCodeCopyClick === undefined) return;
@@ -61,7 +63,7 @@ export const CodeSample = ({
         </>
       )}
       <EuiSpacer size="m" />
-      <EuiThemeProvider colorMode="dark">
+      <EuiThemeProvider colorMode={isDarkMode ? 'dark' : 'light'}>
         <EuiPanel color="subdued" paddingSize="none" hasShadow={false}>
           <div onClick={onCodeClick}>
             <EuiCodeBlock

@@ -40,7 +40,7 @@ export const mountManagementSection = async ({ core, mountParams, config }: Moun
 
   coreStart.chrome.docTitle.change(
     i18n.translate('xpack.observabilityAiAssistantManagement.app.titleBar', {
-      defaultMessage: 'AI Assistant for Observability and Search Settings',
+      defaultMessage: 'AI Assistant',
     })
   );
 

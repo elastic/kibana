@@ -32,7 +32,6 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
 import {
   AbstractESSourceDescriptor,
-  AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
   VectorSourceRequestMeta,
@@ -65,7 +64,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
-      type: isValidStringConfig(descriptor.type) ? descriptor.type! : '',
       indexPatternId: descriptor.indexPatternId!,
       applyGlobalQuery:
         typeof descriptor.applyGlobalQuery !== 'undefined' ? descriptor.applyGlobalQuery : true,
@@ -73,7 +71,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         typeof descriptor.applyGlobalTime !== 'undefined' ? descriptor.applyGlobalTime : true,
       applyForceRefresh:
         typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
-    };
+    } as AbstractESSourceDescriptor;
   }
 
   constructor(descriptor: AbstractESSourceDescriptor) {
@@ -90,22 +88,22 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getApplyGlobalQuery(): boolean {
-    return this._descriptor.applyGlobalQuery;
+    return this._descriptor.applyGlobalQuery ?? true;
   }
 
   getApplyGlobalTime(): boolean {
-    return this._descriptor.applyGlobalTime;
+    return this._descriptor.applyGlobalTime ?? true;
   }
 
   getApplyForceRefresh(): boolean {
-    return this._descriptor.applyForceRefresh;
+    return this._descriptor.applyForceRefresh ?? true;
   }
 
   isQueryAware(): boolean {
     return true;
   }
 
-  cloneDescriptor(): AbstractSourceDescriptor {
+  cloneDescriptor() {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
     clonedDescriptor.id = uuidv4();
@@ -332,10 +330,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
   }
 
   getGeoFieldName(): string {
-    if (!this._descriptor.geoField) {
-      throw new Error(`Required field 'geoField' not provided in '_descriptor'`);
-    }
-    return this._descriptor.geoField;
+    throw new Error('Must implement IESSource#getGeoFieldName');
   }
 
   async getIndexPattern(): Promise<DataView> {

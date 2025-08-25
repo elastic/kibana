@@ -8,7 +8,7 @@
  */
 
 import { Configurable } from '@kbn/kibana-utils-plugin/public';
-import { LicenseType } from '@kbn/licensing-plugin/public';
+import { LicenseType } from '@kbn/licensing-types';
 import {
   UiActionsActionDefinition as ActionDefinition,
   UiActionsPresentable as Presentable,

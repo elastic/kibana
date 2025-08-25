@@ -31,6 +31,7 @@ export const KspmEksInputSelector = ({ input, disabled, setInput }: KspmEksInput
       options={options}
       onChange={(inputType) => setInput(inputType as PostureInput)}
       size="m"
+      name="kspmEksInput"
     />
   );
 };

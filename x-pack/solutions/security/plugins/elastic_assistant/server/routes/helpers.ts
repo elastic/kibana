@@ -27,7 +27,7 @@ import {
   MessageMetadata,
   ScreenContext,
 } from '@kbn/elastic-assistant-common';
-import { ILicense } from '@kbn/licensing-plugin/server';
+import { ILicense } from '@kbn/licensing-types';
 import { i18n } from '@kbn/i18n';
 import { AwaitedProperties, PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
@@ -302,7 +302,7 @@ export const langChainExecute = async ({
   // get a scoped esClient for assistant memory
   const esClient = context.core.elasticsearch.client.asCurrentUser;
 
-  // convert the assistant messages to LangChain messages:
+  // convert the new messages to LangChain messages:
   const langChainMessages = getLangChainMessages(messages);
 
   const anonymizationFieldsDataClient =

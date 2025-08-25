@@ -20,25 +20,31 @@ import { i18n } from '@kbn/i18n';
 import { BottomBarActions, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
+import { isEDOTAgentName, type AgentName } from '@kbn/elastic-agent-utils';
+import type { SettingDefinition } from '../../../../../../../common/agent_configuration/setting_definitions/types';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
-import type { AgentConfigurationIntake } from '../../../../../../../common/agent_configuration/configuration_types';
+import type {
+  AgentConfiguration,
+  AgentConfigurationIntake,
+} from '../../../../../../../common/agent_configuration/configuration_types';
 import {
   filterByAgent,
   settingDefinitions,
   validateSetting,
 } from '../../../../../../../common/agent_configuration/setting_definitions';
-import type { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
+import type { FetcherResult } from '../../../../../../hooks/use_fetcher';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
+import { AdvancedConfiguration } from './advanced_configuration';
 
 function removeEmpty(obj: { [key: string]: any }) {
   return Object.fromEntries(Object.entries(obj).filter(([_, v]) => v != null && v !== ''));
 }
 
 export function SettingsPage({
-  status,
+  initialConfig,
   unsavedChanges,
   newConfig,
   setNewConfig,
@@ -46,7 +52,7 @@ export function SettingsPage({
   isEditMode,
   onClickEdit,
 }: {
-  status?: FETCH_STATUS;
+  initialConfig?: FetcherResult<AgentConfiguration>;
   unsavedChanges: Record<string, string>;
   newConfig: AgentConfigurationIntake;
   setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
@@ -59,8 +65,33 @@ export function SettingsPage({
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { toasts } = useApmPluginContext().core.notifications;
   const [isSaving, setIsSaving] = useState(false);
+  const [removedConfigCount, setRemovedConfigCount] = useState<number>(0);
+  const [validationErrors, setValidationErrors] = useState<Set<string>>(new Set<string>());
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
+  const status = initialConfig?.status;
   const isLoading = status === FETCH_STATUS.LOADING;
+  const isAdvancedConfigSupported =
+    newConfig.agent_name && isEDOTAgentName(newConfig.agent_name as AgentName);
+  const isAdvancedConfigInvalid = validationErrors.size > 0;
+
+  const addValidationError = (key: string) => {
+    setValidationErrors((prev) => {
+      prev.add(key);
+      return new Set(prev);
+    });
+  };
+
+  const removeValidationError = (key: string) => {
+    setValidationErrors((prev) => {
+      prev.delete(key);
+      return new Set(prev);
+    });
+  };
+
+  const settingsDefinitionsByAgent = useMemo(
+    () => settingDefinitions.filter(filterByAgent(newConfig.agent_name as AgentName)),
+    [newConfig.agent_name]
+  );
 
   const isFormValid = useMemo(() => {
     return (
@@ -91,6 +122,50 @@ export function SettingsPage({
     history.push({
       pathname: '/settings/agent-configuration',
       search: history.location.search,
+    });
+  };
+
+  const handleChange = (key: string, value: string, oldKey?: string) => {
+    setNewConfig((prev) => {
+      let updatedSettings: Record<string, string>;
+
+      if (oldKey !== undefined) {
+        // Handle key change
+
+        // Maintain the order by recreating the config object while preserving key positions
+        updatedSettings = Object.fromEntries(
+          Object.entries(prev.settings).map(([currentKey, currentValue]) =>
+            currentKey === oldKey ? [key, currentValue] : [currentKey, currentValue]
+          )
+        );
+      } else if (key === '' && value === '' && prev.settings[''] === undefined) {
+        // Handle new row at the top of the list
+        updatedSettings = { ['']: '', ...prev.settings };
+      } else {
+        // Handle value change
+        updatedSettings = { ...prev.settings, [key]: value };
+      }
+
+      return {
+        ...prev,
+        settings: updatedSettings,
+      };
+    });
+  };
+
+  const handleDelete = (key: string, id: number) => {
+    // Detect removed config only when the key-value already existed before
+    if (key in (initialConfig?.data?.settings ?? {})) {
+      setRemovedConfigCount((prev) => prev + 1);
+    }
+    removeValidationError(`key${id}`);
+    removeValidationError(`value${id}`);
+    setNewConfig((prev) => {
+      const { [key]: deleted, ...rest } = prev.settings;
+      return {
+        ...prev,
+        settings: rest,
+      };
     });
   };
 
@@ -189,23 +264,47 @@ export function SettingsPage({
               <EuiLoadingSpinner size="m" />
             </div>
           ) : (
-            renderSettings({ unsavedChanges, newConfig, setNewConfig })
+            <>
+              {renderSettings({
+                unsavedChanges,
+                newConfig,
+                settingsDefinitionsByAgent,
+                onChange: handleChange,
+              })}
+              {isAdvancedConfigSupported && (
+                <>
+                  <EuiHorizontalRule />
+                  <AdvancedConfiguration
+                    newConfig={newConfig}
+                    settingsDefinitions={settingsDefinitionsByAgent}
+                    onChange={handleChange}
+                    onDelete={handleDelete}
+                    addValidationError={addValidationError}
+                    removeValidationError={removeValidationError}
+                  />
+                </>
+              )}
+            </>
           )}
         </form>
       </EuiForm>
       <EuiSpacer size="xxl" />
 
       {/* Bottom bar with save button */}
-      {unsavedChangesCount > 0 && (
+      {(unsavedChangesCount > 0 || removedConfigCount > 0) && (
         <BottomBarActions
           isLoading={isSaving}
-          onDiscardChanges={resetSettings}
+          onDiscardChanges={() => {
+            setRemovedConfigCount(0);
+            resetSettings();
+          }}
           onSave={handleSubmitEvent}
           saveLabel={i18n.translate('xpack.apm.agentConfig.settingsPage.saveButton', {
             defaultMessage: 'Save configuration',
           })}
-          unsavedChangesCount={unsavedChangesCount}
+          unsavedChangesCount={unsavedChangesCount + removedConfigCount}
           appTestSubj="apm"
+          areChangesInvalid={isAdvancedConfigInvalid}
         />
       )}
     </>
@@ -215,34 +314,21 @@ export function SettingsPage({
 function renderSettings({
   newConfig,
   unsavedChanges,
-  setNewConfig,
+  settingsDefinitionsByAgent,
+  onChange,
 }: {
   newConfig: AgentConfigurationIntake;
   unsavedChanges: Record<string, string>;
-  setNewConfig: React.Dispatch<React.SetStateAction<AgentConfigurationIntake>>;
+  settingsDefinitionsByAgent: SettingDefinition[];
+  onChange: (key: string, value: string) => void;
 }) {
-  return (
-    settingDefinitions
-
-      // filter out agent specific items that are not applicable
-      // to the selected service
-      .filter(filterByAgent(newConfig.agent_name as AgentName))
-      .map((setting) => (
-        <SettingFormRow
-          isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
-          key={setting.key}
-          setting={setting}
-          value={newConfig.settings[setting.key]}
-          onChange={(key, value) => {
-            setNewConfig((prev) => ({
-              ...prev,
-              settings: {
-                ...prev.settings,
-                [key]: value,
-              },
-            }));
-          }}
-        />
-      ))
-  );
+  return settingsDefinitionsByAgent.map((setting) => (
+    <SettingFormRow
+      isUnsaved={Object.hasOwn(unsavedChanges, setting.key)}
+      key={setting.key}
+      setting={setting}
+      value={newConfig.settings[setting.key]}
+      onChange={onChange}
+    />
+  ));
 }

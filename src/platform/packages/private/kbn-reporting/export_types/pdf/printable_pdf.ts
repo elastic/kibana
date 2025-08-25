@@ -11,7 +11,7 @@ import apm from 'elastic-apm-node';
 import { Observable, fromEventPattern, lastValueFrom, of, throwError } from 'rxjs';
 import { catchError, map, mergeMap, takeUntil, tap } from 'rxjs';
 
-import type { LicenseType } from '@kbn/licensing-plugin/server';
+import type { LicenseType } from '@kbn/licensing-types';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,

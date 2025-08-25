@@ -1640,7 +1640,7 @@ const stExtentAggDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      license: 'PLATINUM',
+      license: 'platinum',
       returnType: 'cartesian_shape',
     },
     {
@@ -1661,7 +1661,7 @@ const stExtentAggDefinition: FunctionDefinition = {
           optional: false,
         },
       ],
-      license: 'PLATINUM',
+      license: 'platinum',
       returnType: 'geo_shape',
     },
   ],

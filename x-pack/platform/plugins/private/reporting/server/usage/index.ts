@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '@kbn/licensing-plugin/server';
+import { LicenseType } from '@kbn/licensing-types';
 
 export interface FeaturesAvailability {
   isAvailable: () => boolean;

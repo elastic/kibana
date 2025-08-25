@@ -15,16 +15,16 @@ describe('getLicensesArray', () => {
     const licenseData: MultipleLicenseInfo = {
       hasMultipleLicenses: true,
       licenses: [
-        { name: 'GOLD' },
-        { name: 'ENTERPRISE', isSignatureSpecific: true, paramsWithLicense: ['param1'] },
+        { name: 'gold' },
+        { name: 'enterprise', isSignatureSpecific: true, paramsWithLicense: ['param1'] },
       ],
     };
 
     const result = getLicensesArray(licenseData);
 
     expect(result).toHaveLength(2);
-    expect(result[0].name).toBe('GOLD');
-    expect(result[1].name).toBe('ENTERPRISE');
+    expect(result[0].name).toBe('gold');
+    expect(result[1].name).toBe('enterprise');
     expect(result[1].isSignatureSpecific).toBe(true);
     expect(result[1].paramsWithLicense).toEqual(['param1']);
   });

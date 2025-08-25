@@ -174,6 +174,7 @@ export const AwsCredentialsForm = ({
         onChange={(idSelected: AwsSetupFormat) =>
           idSelected !== setupFormat && onSetupFormatChange(idSelected)
         }
+        name="setupFormat"
       />
       <EuiSpacer size="l" />
       {setupFormat === AWS_SETUP_FORMAT.CLOUD_FORMATION && (

@@ -49,3 +49,4 @@ export type {
 export type { IField } from './classes/fields/field';
 export type { LayerWizard, RenderWizardArguments } from './classes/layers';
 export type { DataRequest } from './classes/util/data_request';
+export type { TableSourceDescriptor } from './classes/sources/join_sources/table_source';

@@ -6,10 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { get, isEqual, omit } from 'lodash';
+import { get, omit } from 'lodash';
 import moment from 'moment';
-import expect from '@kbn/expect';
-import jestExpect from 'expect';
+import expect from 'expect';
 
 import {
   ALERT_REASON,
@@ -60,18 +59,6 @@ import {
 } from '../../../../../../config/services/detections_response';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
-
-const format = (value: unknown): string => JSON.stringify(value, null, 2);
-
-// Asserts that each expected value is included in the subject, independent of
-// ordering. Uses _.isEqual for value comparison.
-const assertContains = (subject: unknown[], expected: unknown[]) =>
-  expected.forEach((expectedValue) =>
-    expect(subject.some((value) => isEqual(value, expectedValue))).to.eql(
-      true,
-      `expected ${format(subject)} to contain ${format(expectedValue)}`
-    )
-  );
 
 const createThreatMatchRule = ({
   name = 'Query with a rule id',
@@ -166,7 +153,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
   const sort = (alerts: any[]) =>
     alerts.sort((a: any, b: any) => a.message.localeCompare(b.message));
 
-  expect(sort(alertsA.map(mapAlert))).to.eql(sort(alertsB.map(mapAlert)));
+  expect(sort(alertsA.map(mapAlert))).toEqual(sort(alertsB.map(mapAlert)));
 }
 
 const eventDoc = (id: string, timestamp: string) => ({
@@ -236,15 +223,15 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      expect(alerts.hits.hits.length).equal(88);
+      expect(alerts.hits.hits).toHaveLength(88);
       const fullSource = alerts.hits.hits.find(
         (alert) => (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
       );
       const fullAlert = fullSource?._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         '@timestamp': fullAlert['@timestamp'],
         agent: {
@@ -418,15 +405,15 @@ export default ({ getService }: FtrProviderContext) => {
         RuleExecutionStatusEnum.succeeded,
         100
       );
-      expect(alerts.hits.hits.length).equal(88);
+      expect(alerts.hits.hits).toHaveLength(88);
       const fullSource = alerts.hits.hits.find(
         (alert) => (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
       );
       const fullAlert = fullSource?._source;
       if (!fullAlert) {
-        return expect(fullAlert).to.be.ok();
+        return expect(fullAlert).toBeTruthy();
       }
-      expect(fullAlert).eql({
+      expect(fullAlert).toEqual({
         ...fullAlert,
         '@timestamp': fullAlert['@timestamp'],
         agent: {
@@ -571,7 +558,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('generates max alerts warning when circuit breaker is hit', async () => {
       const rule: ThreatMatchRuleCreateProps = { ...createThreatMatchRule(), max_signals: 87 }; // Query generates 88 alerts with current esArchive
       const { logs } = await previewRule({ supertest, rule });
-      expect(logs[0].warnings).contain(getMaxAlertsWarning());
+      expect(logs[0].warnings).toContain(getMaxAlertsWarning());
     });
 
     it('terms and match should have the same alerts with pagination', async () => {
@@ -650,7 +637,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).equal(0);
+      expect(previewAlerts).toHaveLength(0);
     });
 
     it('should return 0 alerts when using an AND and one of the clauses does not have data', async () => {
@@ -675,7 +662,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).equal(0);
+      expect(previewAlerts).toHaveLength(0);
     });
 
     it('should return 0 alerts when using an AND and one of the clauses has a made up value that does not exist', async () => {
@@ -700,7 +687,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       const { previewId } = await previewRule({ supertest, rule });
       const previewAlerts = await getPreviewAlerts({ es, previewId });
-      expect(previewAlerts.length).equal(0);
+      expect(previewAlerts).toHaveLength(0);
     });
 
     describe('timeout behavior', () => {
@@ -715,7 +702,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         const { logs } = await previewRule({ supertest, rule });
-        expect(logs[0].errors[0]).to.contain('execution has exceeded its allotted interval');
+        expect(logs[0].errors[0]).toContain('execution has exceeded its allotted interval');
       });
     });
 
@@ -747,10 +734,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
 
         const threats = previewAlerts.map((hit) => hit._source?.threat);
-        expect(threats).to.eql([
+        expect(threats).toEqual([
           {
             enrichments: [
               {
@@ -821,48 +808,50 @@ export default ({ getService }: FtrProviderContext) => {
         });
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(1);
+        expect(previewAlerts).toHaveLength(1);
 
         const [threat] = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
 
-        assertContains(threat.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threat.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
-            },
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
 
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-        ]);
+          ])
+        );
       });
 
       it('adds a single indicator that matched multiple fields', async () => {
@@ -894,70 +883,72 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(1);
+        expect(previewAlerts).toHaveLength(1);
 
         const [threat] = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
 
-        assertContains(threat.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threat.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          // We do not merge matched indicators during enrichment, so in
-          // certain circumstances a given indicator document could appear
-          // multiple times in an enriched alert (albeit with different
-          // threat.indicator.matched data). That's the case with the
-          // first and third indicators matched, here.
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
+            // We do not merge matched indicators during enrichment, so in
+            // certain circumstances a given indicator document could appear
+            // multiple times in an enriched alert (albeit with different
+            // threat.indicator.matched data). That's the case with the
+            // first and third indicators matched, here.
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
 
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
       });
 
       it('generates multiple alerts with multiple matches', async () => {
@@ -993,91 +984,95 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
 
         const threats = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[0].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[0].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
 
-        assertContains(threats[1].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[1].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
       });
 
       // https://github.com/elastic/kibana/issues/149920
@@ -1103,7 +1098,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
       });
     });
 
@@ -1159,10 +1154,10 @@ export default ({ getService }: FtrProviderContext) => {
         const termPreviewAlerts = await getPreviewAlerts({ es, previewId: termPrevieId });
         const { previewId: matchPreviewId } = await previewRule({ supertest, rule: matchRule });
         const matchPrevieAlerts = await getPreviewAlerts({ es, previewId: matchPreviewId });
-        expect(termPreviewAlerts.length).equal(2);
+        expect(termPreviewAlerts).toHaveLength(2);
 
         const threats = termPreviewAlerts.map((hit) => hit._source?.threat);
-        expect(threats).to.eql([
+        expect(threats).toEqual([
           {
             enrichments: [
               {
@@ -1258,48 +1253,50 @@ export default ({ getService }: FtrProviderContext) => {
         const termPreviewAlerts = await getPreviewAlerts({ es, previewId: termPrevieId });
         const { previewId: matchPreviewId } = await previewRule({ supertest, rule: matchRule });
         const matchPrevieAlerts = await getPreviewAlerts({ es, previewId: matchPreviewId });
-        expect(termPreviewAlerts.length).equal(1);
+        expect(termPreviewAlerts).toHaveLength(1);
 
         const [threat] = termPreviewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
 
-        assertContains(threat.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threat.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
-            },
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
 
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-        ]);
+          ])
+        );
         alertsAreTheSame(termPreviewAlerts, matchPrevieAlerts);
       });
 
@@ -1369,7 +1366,7 @@ export default ({ getService }: FtrProviderContext) => {
         const termPreviewAlerts = await getPreviewAlerts({ es, previewId: termPrevieId });
         const { previewId: matchPreviewId } = await previewRule({ supertest, rule: matchRule });
         const matchPrevieAlerts = await getPreviewAlerts({ es, previewId: matchPreviewId });
-        expect(termPreviewAlerts.length).equal(1);
+        expect(termPreviewAlerts).toHaveLength(1);
 
         const [threatTerm] = termPreviewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
@@ -1378,64 +1375,66 @@ export default ({ getService }: FtrProviderContext) => {
         const [threatMatch] = matchPrevieAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
-        assertContains(threatTerm.enrichments, [
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+        expect(threatTerm.enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          // We do not merge matched indicators during enrichment, so in
-          // certain circumstances a given indicator document could appear
-          // multiple times in an enriched alert (albeit with different
-          // threat.indicator.matched data). That's the case with the
-          // first and third indicators matched, here.
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
+            // We do not merge matched indicators during enrichment, so in
+            // certain circumstances a given indicator document could appear
+            // multiple times in an enriched alert (albeit with different
+            // threat.indicator.matched data). That's the case with the
+            // first and third indicators matched, here.
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
 
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              provider: 'other_provider',
-              type: 'ip',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                provider: 'other_provider',
+                type: 'ip',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978787',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978787',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
         const sortEnrichments = (a: any, b: any) => {
           const atomicA = a.matched.atomic.toString();
           const atomicB = b.matched.atomic.toString();
@@ -1445,7 +1444,7 @@ export default ({ getService }: FtrProviderContext) => {
           return atomicA > atomicB ? 1 : -1;
         };
 
-        expect(threatTerm.enrichments.sort(sortEnrichments)).to.be.eql(
+        expect(threatTerm.enrichments.sort(sortEnrichments)).toEqual(
           threatMatch.enrichments.sort(sortEnrichments)
         );
       });
@@ -1484,91 +1483,95 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
 
         const threats = previewAlerts.map((hit) => hit._source?.threat) as Array<{
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[0].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[0].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: '45.115.45.3',
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
+            {
+              indicator: {
+                description: 'this should match auditbeat/hosts on both port and ip',
+                first_seen: '2021-01-26T11:06:03.000Z',
+                ip: '45.115.45.3',
+                port: 57324,
+                provider: 'geenensp',
+                type: 'url',
+              },
+              matched: {
+                atomic: 57324,
+                id: '978785',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'source.port',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
+              },
             },
-            matched: {
-              atomic: '45.115.45.3',
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-          {
-            indicator: {
-              description: 'this should match auditbeat/hosts on both port and ip',
-              first_seen: '2021-01-26T11:06:03.000Z',
-              ip: '45.115.45.3',
-              port: 57324,
-              provider: 'geenensp',
-              type: 'url',
-            },
-            matched: {
-              atomic: 57324,
-              id: '978785',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'source.port',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
 
-        assertContains(threats[1].enrichments, [
-          {
-            indicator: {
-              description: "domain should match the auditbeat hosts' data's source.ip",
-              domain: '159.89.119.67',
-              first_seen: '2021-01-26T11:09:04.000Z',
-              provider: 'geenensp',
-              type: 'url',
-              url: {
-                full: 'http://159.89.119.67:59600/bin.sh',
-                scheme: 'http',
+        expect(threats[1].enrichments).toEqual(
+          expect.arrayContaining([
+            {
+              indicator: {
+                description: "domain should match the auditbeat hosts' data's source.ip",
+                domain: '159.89.119.67',
+                first_seen: '2021-01-26T11:09:04.000Z',
+                provider: 'geenensp',
+                type: 'url',
+                url: {
+                  full: 'http://159.89.119.67:59600/bin.sh',
+                  scheme: 'http',
+                },
+              },
+              matched: {
+                atomic: '159.89.119.67',
+                id: '978783',
+                index: 'filebeat-8.0.0-2021.01.26-000001',
+                field: 'destination.ip',
+                type: ENRICHMENT_TYPES.IndicatorMatchRule,
               },
             },
-            matched: {
-              atomic: '159.89.119.67',
-              id: '978783',
-              index: 'filebeat-8.0.0-2021.01.26-000001',
-              field: 'destination.ip',
-              type: ENRICHMENT_TYPES.IndicatorMatchRule,
-            },
-          },
-        ]);
+          ])
+        );
       });
 
       // https://github.com/elastic/kibana/issues/149920
@@ -1608,7 +1611,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId });
-        expect(previewAlerts.length).equal(2);
+        expect(previewAlerts).toHaveLength(2);
       });
     });
 
@@ -1702,18 +1705,18 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
 
             // threat enriched only for MATCHED condition
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments', [
+            expect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments', [
               {
                 matched: {
                   atomic: 'user-1',
                   field: 'user.name',
-                  id: jestExpect.any(String),
+                  id: expect.any(String),
                   index: 'ecs_compliant',
                   type: 'indicator_match_rule',
                 },
@@ -1801,7 +1804,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
           });
 
           it('should create alerts for not matching fields in OR condition', async () => {
@@ -1900,13 +1903,13 @@ export default ({ getService }: FtrProviderContext) => {
               sort: ['user.name'],
             });
 
-            jestExpect(previewAlerts).toHaveLength(2);
+            expect(previewAlerts).toHaveLength(2);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'France');
 
-            jestExpect(previewAlerts[1]).toHaveProperty('_source.host.name', 'host-1');
-            jestExpect(previewAlerts[1]).toHaveProperty('_source.client.ip', '127.0.0.100');
+            expect(previewAlerts[1]).toHaveProperty('_source.host.name', 'host-1');
+            expect(previewAlerts[1]).toHaveProperty('_source.client.ip', '127.0.0.100');
           });
 
           it('should not create alerts when does not match condition is not met', async () => {
@@ -1969,7 +1972,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(0);
+            expect(previewAlerts).toHaveLength(0);
           });
 
           it('should create multiple alerts when conditions are met', async () => {
@@ -2044,7 +2047,7 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(3);
+            expect(previewAlerts).toHaveLength(3);
           });
 
           it('should create alert when source event not matching field is undefined', async () => {
@@ -2090,10 +2093,10 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).not.toHaveProperty('_source.geo.country_name');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).not.toHaveProperty('_source.geo.country_name');
           });
 
           it('should create alert when threat not matching field is undefined', async () => {
@@ -2139,10 +2142,10 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(1);
+            expect(previewAlerts).toHaveLength(1);
 
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
-            jestExpect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'UK');
+            expect(previewAlerts[0]).toHaveProperty('_source.user.name', 'user-1');
+            expect(previewAlerts[0]).toHaveProperty('_source.geo.country_name', 'UK');
           });
 
           it('should not create alert not matching field is undefined in both source and threat', async () => {
@@ -2187,7 +2190,138 @@ export default ({ getService }: FtrProviderContext) => {
               previewId,
             });
 
-            jestExpect(previewAlerts).toHaveLength(0);
+            expect(previewAlerts).toHaveLength(0);
+          });
+        });
+      });
+    });
+
+    describe('enrichment from partial matches', () => {
+      // cases to cover 2 execution paths of IM
+      const cases = [
+        {
+          eventsCount: 5,
+          threatsCount: 0,
+          title: `(threats first) events count is greater than threats count`,
+        },
+
+        {
+          eventsCount: 0,
+          threatsCount: 5,
+          title: `(events first) events count is smaller than threats count`,
+        },
+      ];
+
+      cases.forEach(({ eventsCount, threatsCount, title }) => {
+        describe(`Code execution path: ${title}`, () => {
+          const timestamp = new Date().toISOString();
+
+          const basicThreatMatchRuleWithDoesNotMatch = (
+            id: string
+          ): ThreatMatchRuleCreateProps => ({
+            ...threatMatchRuleEcsComplaint(id),
+            query: `id:${id} and NOT agent.type:threat`,
+            threat_query: `id:${id} and agent.type:threat`,
+            threat_mapping: [
+              {
+                entries: [
+                  {
+                    field: 'user.name',
+                    value: 'user.name',
+                    type: 'mapping',
+                  },
+                  {
+                    field: 'host.name',
+                    value: 'host.name',
+                    type: 'mapping',
+                  },
+                ],
+              },
+            ],
+          });
+
+          it('should not add include partially matched threats in enrcihments', async () => {
+            const id = uuidv4();
+
+            // Add filler events to ensure we have more events than threats when threats are first
+            await indexListOfDocuments([
+              ...Array.from({ length: eventsCount }, (_, i) => ({
+                id,
+                '@timestamp': timestamp,
+                user: { name: `filler-user${i + 1}` },
+                host: { name: `filler-host${i + 1}` },
+              })),
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'bob-1' },
+                host: { name: 'host-1' },
+              },
+              {
+                id,
+                '@timestamp': timestamp,
+                user: { name: 'bob-2' },
+                host: { name: 'host-1' },
+              },
+            ]);
+
+            // Add filler threats to ensure we have more threats than events when events are first
+            await indexListOfDocuments([
+              ...Array.from({ length: threatsCount }, (_, i) => ({
+                ...threatDoc(id, timestamp),
+                user: { name: `filler-threat-user${i + 1}` },
+                host: { name: `filler-threat-host${i + 1}` },
+              })),
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'bob-1' },
+                host: { name: 'host-1' },
+              },
+              {
+                ...threatDoc(id, timestamp),
+                user: { name: 'bob-2' },
+                host: { name: 'host-1' },
+              },
+            ]);
+
+            const { previewId } = await previewRule({
+              supertest,
+              rule: basicThreatMatchRuleWithDoesNotMatch(id),
+              invocationCount: 1,
+            });
+
+            const previewAlerts = await getPreviewAlerts({
+              es,
+              previewId,
+              sort: ['user.name'],
+            });
+
+            expect(previewAlerts).toHaveLength(2);
+
+            expect(previewAlerts[0]).toHaveProperty('_source.threat.enrichments.length', 2);
+            expect(previewAlerts[0]).toHaveProperty(
+              '_source.threat.enrichments',
+              expect.arrayContaining([
+                {
+                  matched: {
+                    atomic: 'bob-1',
+                    field: 'user.name',
+                    id: expect.any(String),
+                    index: 'ecs_compliant',
+                    type: 'indicator_match_rule',
+                  },
+                },
+                {
+                  matched: {
+                    atomic: 'host-1',
+                    field: 'host.name',
+                    id: expect.any(String),
+                    index: 'ecs_compliant',
+                    type: 'indicator_match_rule',
+                  },
+                },
+              ])
+            );
           });
         });
       });
@@ -2222,18 +2356,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
-        expect(previewAlerts.length).equal(88);
+        expect(previewAlerts).toHaveLength(88);
         const fullSource = previewAlerts.find(
           (alert) =>
             (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
         const fullAlert = fullSource?._source;
         if (!fullAlert) {
-          return expect(fullAlert).to.be.ok();
+          return expect(fullAlert).toBeTruthy();
         }
 
-        expect(fullAlert?.host?.risk?.calculated_level).to.eql('Critical');
-        expect(fullAlert?.host?.risk?.calculated_score_norm).to.eql(70);
+        expect(fullAlert?.host?.risk?.calculated_level).toEqual('Critical');
+        expect(fullAlert?.host?.risk?.calculated_score_norm).toEqual(70);
       });
     });
 
@@ -2270,18 +2404,18 @@ export default ({ getService }: FtrProviderContext) => {
 
         const { previewId } = await previewRule({ supertest, rule });
         const previewAlerts = await getPreviewAlerts({ es, previewId, size: 100 });
-        expect(previewAlerts.length).equal(88);
+        expect(previewAlerts).toHaveLength(88);
         const fullSource = previewAlerts.find(
           (alert) =>
             (alert._source?.[ALERT_ANCESTORS] as Ancestor[])[0].id === '7yJ-B2kBR346wHgnhlMn'
         );
         const fullAlert = fullSource?._source;
         if (!fullAlert) {
-          return expect(fullAlert).to.be.ok();
+          return expect(fullAlert).toBeTruthy();
         }
 
-        expect(fullAlert?.['host.asset.criticality']).to.eql('low_impact');
-        expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
+        expect(fullAlert?.['host.asset.criticality']).toEqual('low_impact');
+        expect(fullAlert?.['user.asset.criticality']).toEqual('extreme_impact');
       });
     });
 
@@ -2311,8 +2445,8 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
 
-        expect(previewAlerts.length).to.eql(2);
-        expect(logs[0].errors).to.have.length(0);
+        expect(previewAlerts.length).toEqual(2);
+        expect(logs[0].errors).toHaveLength(0);
       });
 
       it('should create alert using a timestamp override and timestamp fallback enabled on events first code path execution', async () => {
@@ -2337,8 +2471,8 @@ export default ({ getService }: FtrProviderContext) => {
           sort: ['host.name', ALERT_ORIGINAL_TIME],
         });
 
-        expect(previewAlerts.length).to.eql(1);
-        expect(logs[0].errors).to.have.length(0);
+        expect(previewAlerts.length).toEqual(1);
+        expect(logs[0].errors).toHaveLength(0);
       });
     });
 
@@ -2374,8 +2508,8 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(1);
-        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('scheduled');
+        expect(alerts.hits.hits).toHaveLength(1);
+        expect(alerts.hits.hits[0]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toBe('scheduled');
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2384,8 +2518,8 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(2);
-        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).equal('manual');
+        expect(allNewAlerts.hits.hits).toHaveLength(2);
+        expect(allNewAlerts.hits.hits[1]?._source?.[ALERT_RULE_EXECUTION_TYPE]).toBe('manual');
 
         const secondBackfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2394,7 +2528,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const allNewAlertsAfter2ManualRuns = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlertsAfter2ManualRuns.hits.hits.length).equal(2);
+        expect(allNewAlertsAfter2ManualRuns.hits.hits).toHaveLength(2);
       });
 
       it('does not alert if the manual run overlaps with a previous scheduled rule execution', async () => {
@@ -2411,7 +2545,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(1);
+        expect(alerts.hits.hits).toHaveLength(1);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2420,7 +2554,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('should not generate alerts if threat query not in manual rule interval', async () => {
@@ -2442,7 +2576,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(1);
+        expect(alerts.hits.hits).toHaveLength(1);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2451,7 +2585,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
       });
 
       it('supression per rule execution should work for manual rule runs', async () => {
@@ -2474,7 +2608,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
           startDate: moment(firstTimestamp).subtract(5, 'm'),
@@ -2483,9 +2617,9 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
-        expect(allNewAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(2);
+        expect(allNewAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toBe(2);
       });
 
       it('supression with time window should work for manual rule runs and update alert', async () => {
@@ -2511,7 +2645,7 @@ export default ({ getService }: FtrProviderContext) => {
         const createdRule = await createRule(supertest, log, rule);
         const alerts = await getAlerts(supertest, log, es, createdRule);
 
-        expect(alerts.hits.hits.length).equal(0);
+        expect(alerts.hits.hits).toHaveLength(0);
 
         // generate alert in the past
         const backfill = await scheduleRuleRun(supertest, [createdRule.id], {
@@ -2521,7 +2655,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(backfill, [createdRule.id], { supertest, log });
         const allNewAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(allNewAlerts.hits.hits.length).equal(1);
+        expect(allNewAlerts.hits.hits).toHaveLength(1);
 
         // now we will ingest new event, and manual rule run should update original alert
 
@@ -2534,10 +2668,10 @@ export default ({ getService }: FtrProviderContext) => {
 
         await waitForBackfillExecuted(secondBackfill, [createdRule.id], { supertest, log });
         const updatedAlerts = await getAlerts(supertest, log, es, createdRule);
-        expect(updatedAlerts.hits.hits.length).equal(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
 
-        expect(updatedAlerts.hits.hits.length).equal(1);
-        expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).equal(1);
+        expect(updatedAlerts.hits.hits).toHaveLength(1);
+        expect(updatedAlerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_DOCS_COUNT]).toBe(1);
       });
     });
 
@@ -2632,13 +2766,13 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // Should only generate 1 alert for the event that matches completely
-        expect(previewAlerts.length).to.eql(1);
-        expect(logs[0].errors).to.have.length(0);
+        expect(previewAlerts.length).toEqual(1);
+        expect(logs[0].errors).toHaveLength(0);
 
         // Verify the alert is for the correct event (user1)
         const alert = previewAlerts[0]._source;
-        expect(alert?.user?.name).to.eql('user1');
-        expect(alert?.host?.name).to.eql('server');
+        expect(alert?.user?.name).toEqual('user1');
+        expect(alert?.host?.name).toEqual('server');
       });
     });
   });

@@ -101,10 +101,12 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esSearchTitle', {
 });
 
 export class ESSearchSource extends AbstractESSource implements IMvtVectorSource {
-  readonly _descriptor: ESSearchSourceDescriptor;
+  readonly _descriptor: Required<ESSearchSourceDescriptor>;
   protected readonly _tooltipFields: ESDocField[];
 
-  static createDescriptor(descriptor: Partial<ESSearchSourceDescriptor>): ESSearchSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<ESSearchSourceDescriptor>
+  ): Required<ESSearchSourceDescriptor> {
     const normalizedDescriptor = AbstractESSource.createDescriptor(
       descriptor
     ) as AbstractESSourceDescriptor & Partial<ESSearchSourceDescriptor>;
@@ -140,7 +142,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         typeof descriptor.topHitsSize === 'number' && descriptor.topHitsSize > 0
           ? descriptor.topHitsSize
           : 1,
-    };
+    } as Required<ESSearchSourceDescriptor>;
   }
 
   constructor(descriptor: Partial<ESSearchSourceDescriptor>) {
@@ -152,6 +154,10 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           return this.getFieldByName(property);
         })
       : [];
+  }
+
+  getGeoFieldName(): string {
+    return this._descriptor.geoField;
   }
 
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs): ReactElement<any> | null {

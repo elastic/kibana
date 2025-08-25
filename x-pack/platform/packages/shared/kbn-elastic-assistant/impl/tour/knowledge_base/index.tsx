@@ -39,7 +39,7 @@ const navigateToKnowledgeBasePage = (
     });
   }
   return navigateToApp('management', {
-    path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+    path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
   });
 };
 

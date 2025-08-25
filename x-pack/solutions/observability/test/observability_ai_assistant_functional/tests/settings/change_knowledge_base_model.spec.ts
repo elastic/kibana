@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/common/types';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { createConnector, deleteConnectors } from '../../common/connectors';
 import {
@@ -39,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ui.auth.login('editor');
       await PageObjects.common.navigateToUrlWithBrowserHistory(
         'management',
-        '/kibana/observabilityAiAssistantManagement'
+        '/ai/observabilityAiAssistantManagement'
       );
     });
 
@@ -59,7 +59,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const statusBadgeText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseStatus'
       );
-      expect(statusBadgeText).to.be(KnowledgeBaseState.NOT_INSTALLED);
+      expect(statusBadgeText).to.be(InferenceModelState.NOT_INSTALLED);
       const buttonText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseUpdateModelButton'
       );
@@ -113,7 +113,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const statusBadgeText = await testSubjects.getVisibleText(
         'observabilityAiAssistantKnowledgeBaseStatus'
       );
-      expect(statusBadgeText).to.be(KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT);
+      expect(statusBadgeText).to.be(InferenceModelState.MODEL_PENDING_DEPLOYMENT);
     });
   });
 }

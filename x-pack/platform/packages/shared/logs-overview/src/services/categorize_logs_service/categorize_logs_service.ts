@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
+import { createActorContext } from '@xstate5/react';
+import { MachineImplementationsFrom, assign, setup } from 'xstate5';
 import { LogCategory } from '../../types';
 import { categorizeDocuments } from './categorize_documents';
 import { countDocuments } from './count_documents';
@@ -237,6 +238,8 @@ export const categorizeLogsService = setup({
     samplingProbability: context.samplingProbability,
   }),
 });
+
+export const CategorizeLogsServiceContext = createActorContext(categorizeLogsService);
 
 export const createCategorizeLogsServiceImplementations = ({
   search,

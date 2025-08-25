@@ -10,6 +10,7 @@ import {
   createConversationMock$,
   executeAgentMock$,
   getConversationMock$,
+  conversationExistsMock$,
   updateConversationMock$,
   generateTitleMock$,
   getChatModelMock$,
@@ -75,6 +76,7 @@ describe('ChatService', () => {
     createConversationMock$.mockReset();
     executeAgentMock$.mockReset();
     getConversationMock$.mockReset();
+    conversationExistsMock$.mockReset();
     updateConversationMock$.mockReset();
     generateTitleMock$.mockReset();
     getChatModelMock$.mockReset();
@@ -101,6 +103,140 @@ describe('ChatService', () => {
       request,
       mode: AgentMode.normal,
       agentService,
+    });
+  });
+
+  describe('autoCreateConversationWithId', () => {
+    it('creates new conversation when autoCreateConversationWithId=true and conversation does not exist', async () => {
+      conversationExistsMock$.mockReturnValue(of(false));
+      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        conversationId: 'non-existing-conversation',
+        autoCreateConversationWithId: true,
+        request,
+        nextInput: {
+          message: 'hello',
+        },
+      });
+
+      await firstValueFrom(obs$.pipe(toArray()));
+
+      expect(conversationExistsMock$).toHaveBeenCalledWith({
+        conversationId: 'non-existing-conversation',
+        conversationClient: expect.anything(),
+      });
+      expect(createConversationMock$).toHaveBeenCalledWith({
+        agentId: 'my-agent',
+        conversationClient: expect.anything(),
+        conversationId: 'non-existing-conversation',
+        title$: expect.anything(),
+        roundCompletedEvents$: expect.anything(),
+      });
+      expect(updateConversationMock$).not.toHaveBeenCalled();
+    });
+
+    it('updates existing conversation when autoCreateConversationWithId=true and conversation exists', async () => {
+      conversationExistsMock$.mockReturnValue(of(true));
+      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        conversationId: 'existing-conversation',
+        autoCreateConversationWithId: true,
+        request,
+        nextInput: {
+          message: 'hello',
+        },
+      });
+
+      await firstValueFrom(obs$.pipe(toArray()));
+
+      expect(conversationExistsMock$).toHaveBeenCalledWith({
+        conversationId: 'existing-conversation',
+        conversationClient: expect.anything(),
+      });
+      expect(updateConversationMock$).toHaveBeenCalledWith({
+        conversationClient: expect.anything(),
+        conversation$: expect.anything(),
+        title$: expect.anything(),
+        roundCompletedEvents$: expect.anything(),
+      });
+      expect(createConversationMock$).not.toHaveBeenCalled();
+    });
+
+    it('follows default behavior when autoCreateConversationWithId=false (default)', async () => {
+      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        conversationId: 'existing-conversation',
+        request,
+        nextInput: {
+          message: 'hello',
+        },
+      });
+
+      await firstValueFrom(obs$.pipe(toArray()));
+
+      expect(conversationExistsMock$).not.toHaveBeenCalled();
+      expect(updateConversationMock$).toHaveBeenCalledWith({
+        conversationClient: expect.anything(),
+        conversation$: expect.anything(),
+        title$: expect.anything(),
+        roundCompletedEvents$: expect.anything(),
+      });
+      expect(createConversationMock$).not.toHaveBeenCalled();
+    });
+
+    it('creates new conversation when no conversationId is provided regardless of autoCreateConversationWithId flag', async () => {
+      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        autoCreateConversationWithId: true,
+        request,
+        nextInput: {
+          message: 'hello',
+        },
+      });
+
+      await firstValueFrom(obs$.pipe(toArray()));
+
+      expect(conversationExistsMock$).not.toHaveBeenCalled();
+      expect(createConversationMock$).toHaveBeenCalledWith({
+        agentId: 'my-agent',
+        conversationClient: expect.anything(),
+        conversationId: undefined,
+        title$: expect.anything(),
+        roundCompletedEvents$: expect.anything(),
+      });
+      expect(updateConversationMock$).not.toHaveBeenCalled();
+    });
+
+    it('passes autoCreateConversationWithId parameter to getConversation$', async () => {
+      conversationExistsMock$.mockReturnValue(of(false));
+      getConversationMock$.mockReturnValue(of(createEmptyConversation()));
+
+      const obs$ = chatService.converse({
+        agentId: 'my-agent',
+        conversationId: 'test-conversation',
+        autoCreateConversationWithId: true,
+        request,
+        nextInput: {
+          message: 'hello',
+        },
+      });
+
+      await firstValueFrom(obs$.pipe(toArray()));
+
+      expect(getConversationMock$).toHaveBeenCalledWith({
+        agentId: 'my-agent',
+        conversationId: 'test-conversation',
+        autoCreateConversationWithId: true,
+        conversationClient: expect.anything(),
+      });
     });
   });
 });

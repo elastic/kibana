@@ -28,6 +28,7 @@
       "observability",
       "observabilityShared",
       "ruleRegistry",
+      "savedSearch",
       "security",
       "share",
       "triggersActionsUi",

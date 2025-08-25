@@ -93,6 +93,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             searchSourceJSON:
               '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
           },
+          tabs: [
+            {
+              id: 'my_tab',
+              label: 'My Tab',
+              attributes: {
+                columns: ['agent', 'bytes', 'clientip'],
+                sort: [['@timestamp', 'desc']],
+                kibanaSavedObjectMeta: {
+                  searchSourceJSON:
+                    '{"highlightAll":true,"version":true,"query":{"language":"lucene","query":""},"filter":[],"indexRefName":"kibanaSavedObjectMeta.searchSourceJSON.index"}',
+                },
+              },
+            },
+          ],
         },
         references: [
           {

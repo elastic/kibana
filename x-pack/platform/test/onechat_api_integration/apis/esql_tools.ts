@@ -35,10 +35,6 @@ export default function ({ getService }: FtrProviderContext) {
           log.warning(`Failed to delete tool ${toolId}: ${error.message}`);
         }
       }
-
-      await kibanaServer.uiSettings.update({
-        'onechat:api:enabled': false,
-      });
     });
 
     describe('POST /api/chat/tools', () => {

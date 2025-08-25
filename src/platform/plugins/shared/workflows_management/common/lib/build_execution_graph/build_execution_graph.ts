@@ -140,18 +140,19 @@ function visitForeachStep(graph: graphlib.Graph, previousStep: any, currentStep:
   const enterForeachNodeId = getNodeId(currentStep);
   const foreachStep = currentStep as ForEachStep;
   const foreachNestedSteps: BaseStep[] = foreachStep.steps || [];
-
+  const exitNodeId = `exitForeach(${enterForeachNodeId})`;
   const enterForeachNode: EnterForeachNode = {
     id: enterForeachNodeId,
     type: 'enter-foreach',
     itemNodeIds: [],
+    exitNodeId,
     configuration: {
       ...omit(foreachStep, ['steps']), // No need to include them as they will be represented in the graph
     },
   };
   const exitForeachNode: ExitForeachNode = {
     type: 'exit-foreach',
-    id: `exitForeach(${enterForeachNodeId})`,
+    id: exitNodeId,
     startNodeId: enterForeachNodeId,
   };
 

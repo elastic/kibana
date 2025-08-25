@@ -77,7 +77,7 @@ type SummaryPanelKPI = Record<
 const texts = {
   noActivityText: 'No activity in the selected timeframe',
   datasetHealthPoor: 'Poor',
-  datasetHealthDegraded: 'Degraded',
+  datasetHealthWarning: 'Warning',
   datasetHealthGood: 'Good',
   activeDatasets: 'Active Data Sets',
   estimatedData: 'Estimated Data',
@@ -279,7 +279,7 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
 
       const kpiTitleAndKeys = [
         { title: texts.datasetHealthPoor, key: 'datasetHealthPoor' },
-        { title: texts.datasetHealthDegraded, key: 'datasetHealthDegraded' },
+        { title: texts.datasetHealthWarning, key: 'datasetHealthWarning' },
         { title: texts.datasetHealthGood, key: 'datasetHealthGood' },
         { title: texts.activeDatasets, key: 'activeDatasets' },
         { title: texts.estimatedData, key: 'estimatedData' },

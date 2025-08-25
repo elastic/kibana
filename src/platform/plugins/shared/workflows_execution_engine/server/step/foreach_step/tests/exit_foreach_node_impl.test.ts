@@ -22,6 +22,7 @@ describe('ExitForeachNodeImpl', () => {
   let goToNextStep: jest.Mock<any, any, any>;
   let goToStep: jest.Mock<any, any, any>;
   let finishStep: jest.Mock<any, any, any>;
+  let logDebug: jest.Mock<any, any, any>;
 
   beforeEach(() => {
     startStep = jest.fn();
@@ -31,6 +32,7 @@ describe('ExitForeachNodeImpl', () => {
     goToNextStep = jest.fn();
     finishStep = jest.fn();
     goToStep = jest.fn();
+    logDebug = jest.fn();
     step = {
       id: 'testStep',
       type: 'exit-foreach',
@@ -45,7 +47,10 @@ describe('ExitForeachNodeImpl', () => {
       finishStep,
       goToStep,
     } as any;
-    underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager);
+    const workflowLogger = {
+      logDebug,
+    } as any;
+    underTest = new ExitForeachNodeImpl(step, wfExecutionRuntimeManager, workflowLogger);
   });
 
   describe('when no foreach step', () => {
@@ -54,13 +59,9 @@ describe('ExitForeachNodeImpl', () => {
     });
 
     it('should throw an error', async () => {
-      await underTest.run();
-
-      expect(wfExecutionRuntimeManager.setStepResult).toHaveBeenCalledWith(step.startNodeId, {
-        output: null,
-        error: expect.any(Error),
-      });
-      expect(wfExecutionRuntimeManager.finishStep).toHaveBeenCalledWith(step.startNodeId);
+      await expect(underTest.run()).rejects.toThrow(
+        new Error(`Foreach state for step ${step.startNodeId} not found`)
+      );
     });
   });
 
@@ -117,6 +118,14 @@ describe('ExitForeachNodeImpl', () => {
       await underTest.run();
 
       expect(wfExecutionRuntimeManager.goToNextStep).toHaveBeenCalled();
+    });
+
+    it('should log debug message', async () => {
+      await underTest.run();
+
+      expect(logDebug).toHaveBeenCalledWith(
+        `Exiting foreach step ${step.startNodeId} after processing all items.`
+      );
     });
   });
 });

@@ -11,7 +11,6 @@ import { services as svlSharedServices } from '../../shared/services';
 
 import { SamlToolsProvider } from './saml_tools';
 import { SvlCasesServiceProvider } from './svl_cases';
-import { SloApiProvider } from './slo_api';
 import { TransformProvider } from './transform';
 
 import { SvlEnrichPoliciesApi } from './index_management/svl_enrich_policies.api';
@@ -25,7 +24,6 @@ import { SvlComponentTemplateHelpers } from './index_management/svl_component_te
 import { SvlTemplatesHelpers } from './index_management/svl_templates.helpers';
 import { SvlTemplatesApi } from './index_management/svl_templates.api';
 import { SvlMappingsApi } from './index_management/svl_mappings.api';
-import { SynthtraceClientProvider } from './synthtrace';
 import { SvlClusterNodesApi } from './index_management/svl_cluster_nodes.api';
 
 export const services = {
@@ -36,9 +34,7 @@ export const services = {
   ...svlSharedServices,
   samlTools: SamlToolsProvider,
   svlCases: SvlCasesServiceProvider,
-  sloApi: SloApiProvider,
   transform: TransformProvider,
-  synthtrace: SynthtraceClientProvider,
   svlEnrichPoliciesApi: SvlEnrichPoliciesApi,
   svlSettingsApi: SvlSettingsApi,
   svlIndicesApi: SvlIndicesApi,

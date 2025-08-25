@@ -9,11 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { GeoJsonProperties } from 'geojson';
 import type { Query } from '@kbn/data-plugin/common';
 import { FIELD_ORIGIN, SOURCE_TYPES, VECTOR_SHAPE_TYPE } from '../../../../../common/constants';
-import {
-  MapExtent,
-  TableSourceDescriptor,
-  VectorSourceRequestMeta,
-} from '../../../../../common/descriptor_types';
+import { MapExtent, VectorSourceRequestMeta } from '../../../../../common/descriptor_types';
 import { ITermJoinSource } from '../types';
 import { BucketProperties, PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { IField } from '../../../fields/field';
@@ -27,6 +23,18 @@ import {
 import { DataRequest } from '../../../util/data_request';
 import { InlineField } from '../../../fields/inline_field';
 import { ITooltipProperty, TooltipProperty } from '../../../tooltips/tooltip_property';
+
+export interface TableSourceDescriptor {
+  id: string;
+  type: SOURCE_TYPES.TABLE_SOURCE;
+  __rows: Array<{ [key: string]: string | number }>;
+  __columns: Array<{
+    name: string;
+    label?: string;
+    type: 'string' | 'number';
+  }>;
+  term: string;
+}
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {
   static type = SOURCE_TYPES.TABLE_SOURCE;

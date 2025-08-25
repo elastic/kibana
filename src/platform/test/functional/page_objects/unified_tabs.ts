@@ -207,4 +207,8 @@ export class UnifiedTabsPageObject extends FtrService {
       );
     });
   }
+
+  public async isTabsBarVisible() {
+    return await this.testSubjects.exists('unifiedTabs_tabsBar');
+  }
 }

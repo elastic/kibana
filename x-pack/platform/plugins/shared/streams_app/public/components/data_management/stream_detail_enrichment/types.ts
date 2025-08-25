@@ -11,6 +11,7 @@ import {
   GrokProcessorConfig,
   ProcessorDefinition,
   ProcessorTypeOf,
+  SetProcessorConfig,
 } from '@kbn/streams-schema';
 import { ManualIngestPipelineProcessorConfig } from '@kbn/streams-schema';
 import { DraftGrokExpression } from '@kbn/grok-ui';
@@ -40,11 +41,14 @@ export type ManualIngestPipelineFormState = ManualIngestPipelineProcessorConfig 
   type: 'manual_ingest_pipeline';
 };
 
+export type SetFormState = SetProcessorConfig & { type: 'set' };
+
 export type SpecialisedFormState =
   | GrokFormState
   | DissectFormState
   | DateFormState
-  | ManualIngestPipelineFormState;
+  | ManualIngestPipelineFormState
+  | SetFormState;
 
 export type ProcessorFormState = SpecialisedFormState | ConfigDrivenProcessorFormState;
 
