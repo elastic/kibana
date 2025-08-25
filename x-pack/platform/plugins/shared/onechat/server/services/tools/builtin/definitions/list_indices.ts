@@ -15,19 +15,40 @@ import { getToolResultId } from '../../utils/tool_result_id';
 const listIndicesSchema = z.object({
   pattern: z
     .string()
-    .optional()
+    .default('*')
     .describe(
-      '(optional) pattern to filter indices by. Defaults to *. Leave empty to list all indices (recommended)'
+      `Index pattern to match Elasticsearch index names.
+      - Correct examples: '.logs-*', '*data*', 'metrics-prod-*', 'my-specific-index', '*'
+      - Should only be used if you are certain of a specific index pattern to filter on. *Do not try to guess*.
+      - Defaults to '*' to match all indices.`
+    ),
+  showDetails: z
+    .boolean()
+    .default(false)
+    .describe(
+      'If true, returns extra details like health, status, and shard counts. Defaults to false.'
     ),
 });
 
 export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchema> => {
   return {
     id: builtinToolIds.listIndices,
-    description: 'List the indices in the Elasticsearch cluster the current user has access to.',
+    description: `List the indices in the Elasticsearch cluster the current user has access to.
+
+    The 'pattern' optional parameter is an index pattern which can be used to filter indices.
+    This parameter should only be used when you already know of a specific pattern to filter on,
+    e.g. if the user provided one. Otherwise, do not try to invent or guess a pattern.`,
     schema: listIndicesSchema,
-    handler: async ({ pattern = '*' }, { esClient }) => {
-      const result = await listIndices({ pattern, esClient: esClient.asCurrentUser });
+    handler: async ({ pattern, showDetails }, { esClient }) => {
+      const result = await listIndices({
+        pattern,
+        showDetails,
+        includeHidden: false,
+        includeKibanaIndices: false,
+        // LLM is stupid with index patterns, this works around it
+        listAllIfNoResults: true,
+        esClient: esClient.asCurrentUser,
+      });
 
       return {
         results: [
@@ -36,7 +57,6 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
             type: ToolResultType.other,
             data: {
               indices: result,
-              pattern,
             },
           },
         ],

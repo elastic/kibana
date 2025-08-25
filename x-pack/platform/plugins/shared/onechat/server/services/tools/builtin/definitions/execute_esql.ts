@@ -20,7 +20,17 @@ const executeEsqlToolSchema = z.object({
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
   return {
     id: builtinToolIds.executeEsql,
-    description: 'Execute an ES|QL query and return the results.',
+    description: `Execute an ES|QL query and return the results in a tabular format.
+
+    **IMPORTANT**: This tool only **runs** queries; it does not write them.
+    Think of this as the final step after a query has been prepared.
+
+    You **must** get the query from one of two sources before calling this tool:
+    1.  The output of the \`${builtinToolIds.generateEsql}\` tool (if the tool is available).
+    2.  A verbatim query provided directly by the user.
+
+    Under no circumstances should you invent, guess, or modify a query yourself for this tool.
+    If you need a query, use the \`${builtinToolIds.generateEsql}\` tool first.`,
     schema: executeEsqlToolSchema,
     handler: async ({ query }, { esClient }) => {
       const result = await executeEsql({ query, esClient: esClient.asCurrentUser });

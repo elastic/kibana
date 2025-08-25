@@ -31,7 +31,7 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
 
                   The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
                   This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
-                  Otherwise, leave it empty to list all indices.
+                  Otherwise, leave it empty to search against all indices.
 
                   *Example:*
                   User: "Show me my latest alerts"
@@ -44,7 +44,7 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
       { esClient, modelProvider }
     ) => {
       const model = await modelProvider.getDefaultModel();
-      const result = await indexExplorer({
+      const response = await indexExplorer({
         nlQuery,
         indexPattern,
         limit,
@@ -58,10 +58,10 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
             toolResultId: getToolResultId(),
             type: ToolResultType.other,
             data: {
-              indices: result,
-              nlQuery,
-              index_pattern: indexPattern,
-              limit,
+              indices: response.indices.map((result) => ({
+                index: result.indexName,
+                reason: result.reason,
+              })),
             },
           },
         ],

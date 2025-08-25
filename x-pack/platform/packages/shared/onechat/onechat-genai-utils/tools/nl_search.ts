@@ -11,6 +11,8 @@ import type { EsqlResponse } from './steps/execute_esql';
 import { executeEsql } from './steps/execute_esql';
 import { generateEsql } from './generate_esql';
 
+export type NaturalLanguageSearchResponse = EsqlResponse;
+
 export const naturalLanguageSearch = async ({
   nlQuery,
   context,
@@ -23,7 +25,7 @@ export const naturalLanguageSearch = async ({
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<{ esqlQuery: string; esqlResult: EsqlResponse }> => {
+}): Promise<{ esqlQuery: string; esqlResult: NaturalLanguageSearchResponse }> => {
   const generateResponse = await generateEsql({
     nlQuery,
     context,

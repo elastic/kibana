@@ -20,7 +20,8 @@ const getDocumentByIdSchema = z.object({
 export const getDocumentByIdTool = (): BuiltinToolDefinition<typeof getDocumentByIdSchema> => {
   return {
     id: builtinToolIds.getDocumentById,
-    description: 'Retrieve the full content (source) of a document based on its ID and index name.',
+    description:
+      'Retrieve the full content (source) of an Elasticsearch document based on its ID and index name.',
     schema: getDocumentByIdSchema,
     handler: async ({ id, index }, { esClient }) => {
       const result = await getDocumentById({ id, index, esClient: esClient.asCurrentUser });

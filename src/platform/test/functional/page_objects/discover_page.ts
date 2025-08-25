@@ -418,8 +418,12 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async findFieldByNameOrValueInDocViewer(name: string) {
-    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
-    await fieldSearch.type(name);
+    await this.retry.waitForWithTimeout('field search input value', 5000, async () => {
+      const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+      await fieldSearch.clearValue();
+      await fieldSearch.type(name);
+      return (await fieldSearch.getAttribute('value')) === name;
+    });
   }
 
   public async openFilterByFieldTypeInDocViewer() {
