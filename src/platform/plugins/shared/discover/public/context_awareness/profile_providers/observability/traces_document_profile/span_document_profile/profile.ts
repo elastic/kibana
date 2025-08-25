@@ -30,7 +30,7 @@ export const createObservabilityTracesSpanDocumentProfileProvider = ({
         errors: apmErrorsContextService.getErrorsIndexPattern(),
         traces: tracesContextService.getAllTracesIndexPattern(),
       },
-      logs: logsContextService.getAllLogsIndexPattern() ?? '',
+      logs: logsContextService.getAllLogsIndexPattern(),
     }),
   },
   resolve: ({ record, rootContext }) => {

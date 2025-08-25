@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AgentName } from '../typings/es_schemas/ui/fields/agent';
-import type { Environment } from './environment_rt';
+import type { AgentName } from '../es_schemas_ui';
 
 export interface SpanLinkDetails {
   traceId: string;
@@ -15,10 +14,15 @@ export interface SpanLinkDetails {
     agentName: AgentName;
     serviceName: string;
     duration: number;
-    environment: Environment;
+    environment: string;
     transactionId?: string;
     spanName?: string;
     spanSubtype?: string;
     spanType?: string;
   };
+}
+
+export interface SpanLinks {
+  outgoingSpanLinks: SpanLinkDetails[];
+  incomingSpanLinks: SpanLinkDetails[];
 }

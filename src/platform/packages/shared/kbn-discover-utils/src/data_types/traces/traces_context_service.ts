@@ -12,7 +12,7 @@ import { createRegExpPatternFrom, testPatternAgainstAllowedList } from '@kbn/dat
 import { containsIndexPattern } from '../../utils';
 
 export interface TracesContextService {
-  getAllTracesIndexPattern(): string;
+  getAllTracesIndexPattern(): string | undefined;
   isTracesIndexPattern(indexPattern: unknown): boolean;
   containsTracesIndexPattern(indexPattern: unknown): boolean;
 }
@@ -46,28 +46,35 @@ export const createTracesContextService = async ({
     const allIndices = getAllIndices(transaction, span);
     const uniqueIndices = Array.from(new Set(allIndices));
 
-    const traces = uniqueIndices.join();
-    const allowedDataSources = [createRegExpPatternFrom(uniqueIndices, 'data')];
+    const tracesIndexPattern = uniqueIndices.join();
+    const allowedDataSources = [
+      createRegExpPatternFrom(uniqueIndices, 'data'),
+      DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP,
+    ];
 
-    return getTracesContextService(traces, allowedDataSources);
+    return getTracesContextService({ tracesIndexPattern, allowedDataSources });
   } catch (error) {
     return defaultTracesContextService;
   }
 };
 
 function getAllIndices(transaction: string, span: string) {
-  return [transaction, span]
-    .flatMap((index) => index.split(','))
-    .concat(DEFAULT_ALLOWED_TRACES_BASE_PATTERNS);
+  return [transaction, span].flatMap((index) => index.split(','));
 }
 
-export const getTracesContextService = (traces: string, allowedDataSources: RegExp[]) => ({
-  getAllTracesIndexPattern: () => traces,
+export const getTracesContextService = ({
+  tracesIndexPattern,
+  allowedDataSources,
+}: {
+  tracesIndexPattern?: string;
+  allowedDataSources: RegExp[];
+}) => ({
+  getAllTracesIndexPattern: () => tracesIndexPattern,
   isTracesIndexPattern: testPatternAgainstAllowedList(allowedDataSources),
   containsTracesIndexPattern: containsIndexPattern(allowedDataSources),
 });
 
-const defaultTracesContextService = getTracesContextService(
-  DEFAULT_ALLOWED_TRACES_BASE_PATTERNS.join(),
-  [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP]
-);
+const defaultTracesContextService = getTracesContextService({
+  tracesIndexPattern: undefined,
+  allowedDataSources: [DEFAULT_ALLOWED_TRACES_BASE_PATTERNS_REGEXP],
+});

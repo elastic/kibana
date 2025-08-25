@@ -9,16 +9,16 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { UnifiedDocViewerObservabilityTracesSpanOverview } from '@kbn/unified-doc-viewer-plugin/public';
+import {
+  UnifiedDocViewerObservabilityTracesSpanOverview,
+  type TraceIndexes,
+} from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type { DocumentProfileProvider } from '../../../../../profiles';
 import type { DocViewerExtensionParams, DocViewerExtension } from '../../../../../types';
 
 export const createGetDocViewer =
-  (indexes: {
-    apm: { errors: string; traces: string };
-    logs: string;
-  }): DocumentProfileProvider['profile']['getDocViewer'] =>
+  (indexes: TraceIndexes): DocumentProfileProvider['profile']['getDocViewer'] =>
   (prev: (params: DocViewerExtensionParams) => DocViewerExtension) =>
   (params: DocViewerExtensionParams) => {
     const prevDocViewer = prev(params);
