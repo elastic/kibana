@@ -10,14 +10,15 @@
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { Query } from '@kbn/es-query';
 import type { Feature } from 'geojson';
+import type { DataRequestDescriptor } from './data_request_descriptor_types';
 import type {
   EMSVectorTileStyleDescriptor,
   HeatmapStyleDescriptor,
+  JoinSourceDescriptor,
+  SourceDescriptor,
   StyleDescriptor,
   VectorStyleDescriptor,
-} from './style_property_descriptor_types';
-import type { DataRequestDescriptor } from './data_request_descriptor_types';
-import type { JoinSourceDescriptor, SourceDescriptor } from '.';
+} from '.';
 import type { LAYER_TYPE } from '../constants';
 
 export type Attribution = {

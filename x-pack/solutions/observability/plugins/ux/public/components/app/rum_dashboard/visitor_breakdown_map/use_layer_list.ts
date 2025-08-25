@@ -12,6 +12,7 @@ import type {
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
   VectorStyleDescriptor,
+  LAYER_STYLE_TYPE,
 } from '@kbn/maps-plugin/common';
 import {
   AGG_TYPE,
@@ -100,7 +101,7 @@ export function useLayerList() {
 
   const getLayerStyle = (fieldName: string): VectorStyleDescriptor => {
     return {
-      type: 'VECTOR',
+      type: 'VECTOR' as LAYER_STYLE_TYPE.VECTOR,
       properties: {
         icon: { type: STYLE_TYPE.STATIC, options: { value: 'marker' } },
         fillColor: {
