@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
+import type { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
 import React from 'react';
 import { useTimer } from '../../../hooks/use_timer';
 import { ChatMessageText } from './chat_message_text';

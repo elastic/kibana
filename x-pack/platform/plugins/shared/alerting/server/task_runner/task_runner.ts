@@ -687,6 +687,7 @@ export class TaskRunner<
 
     let runRuleResult: Result<RunRuleResult, Error>;
     let schedule: Result<IntervalSchedule, Error>;
+    let shouldDisableTask = false;
     try {
       const validatedRuleData = await this.prepareToRun();
 
@@ -705,6 +706,7 @@ export class TaskRunner<
 
       runRuleResult = asErr(err);
       schedule = asErr(err);
+      shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
     }
 
     await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
@@ -736,6 +738,8 @@ export class TaskRunner<
         ruleTypeId: this.ruleType.id,
         ruleId,
       }),
+      // added this way so we don't add shouldDisableTask: false explicitly
+      ...(shouldDisableTask ? { shouldDisableTask } : {}),
     };
   }
 

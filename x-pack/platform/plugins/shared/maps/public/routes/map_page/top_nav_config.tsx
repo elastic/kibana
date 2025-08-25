@@ -7,17 +7,14 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import {
-  SavedObjectSaveModalOrigin,
-  OnSaveProps,
-  showSaveModal,
-} from '@kbn/saved-objects-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,
 } from '@kbn/presentation-util-plugin/public';
-import { ScopedHistory } from '@kbn/core/public';
+import type { ScopedHistory } from '@kbn/core/public';
 import {
   getNavigateToApp,
   getMapsCapabilities,
@@ -26,7 +23,7 @@ import {
   getSavedObjectsTagging,
 } from '../../kibana_services';
 import { MAP_EMBEDDABLE_NAME } from '../../../common/constants';
-import { SavedMap } from './saved_map';
+import type { SavedMap } from './saved_map';
 import { checkForDuplicateTitle } from '../../content_management';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
 
 export const putSynonymsSet = async (
   client: ElasticsearchClient,

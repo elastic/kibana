@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Locator } from '@playwright/test';
-import { HeaderBar } from '../stateful/pom/components/header_bar.component';
-import { SpaceSelector } from '../stateful/pom/components/space_selector.component';
+import type { Locator } from '@playwright/test';
+import type { HeaderBar } from '../stateful/pom/components/header_bar.component';
+import type { SpaceSelector } from '../stateful/pom/components/space_selector.component';
 
 type WaitForRes = [locatorIndex: number, locator: Locator];
 

@@ -14,10 +14,13 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { EsWorkflowExecution, ExecutionStatus, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
+import { ExecutionStatus } from '@kbn/workflows';
 
 import { graphlib } from '@dagrejs/dagre';
 import { Client } from '@elastic/elasticsearch';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { WorkflowsExecutionEngineConfig } from './config';
 
 import type {
@@ -34,6 +37,11 @@ import { WorkflowExecutionRepository } from './repositories/workflow_execution_r
 import { StepFactory } from './step/step_factory';
 import { WorkflowContextManager } from './workflow_context_manager/workflow_context_manager';
 import { WorkflowExecutionRuntimeManager } from './workflow_context_manager/workflow_execution_runtime_manager';
+import { WorkflowEventLogger } from './workflow_event_logger/workflow_event_logger';
+import { WorkflowExecutionState } from './workflow_context_manager/workflow_execution_state';
+import type { ResumeWorkflowExecutionParams } from './workflow_task_manager/types';
+import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { workflowExecutionLoop } from './workflow_execution_loop';
 
 export class WorkflowsExecutionEnginePlugin
   implements Plugin<WorkflowsExecutionEnginePluginSetup, WorkflowsExecutionEnginePluginStart>
@@ -47,14 +55,52 @@ export class WorkflowsExecutionEnginePlugin
       password: 'changeme',
     },
   });
+  private readonly workflowExecutionRepository: WorkflowExecutionRepository;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = initializerContext.config.get<WorkflowsExecutionEngineConfig>();
+    this.workflowExecutionRepository = new WorkflowExecutionRepository(this.esClient);
   }
 
   public setup(core: CoreSetup, plugins: WorkflowsExecutionEnginePluginSetupDeps) {
     this.logger.debug('workflows-execution-engine: Setup');
+    const esClient = this.esClient;
+    const logger = this.logger;
+    const config = this.config;
+    plugins.taskManager.registerTaskDefinitions({
+      'workflow:resume': {
+        title: 'Resume Workflow',
+        description: 'Resumes a paused workflow',
+        timeout: '5m',
+        maxAttempts: 1,
+        createTaskRunner: ({ taskInstance }) => {
+          const workflowExecutionRepository = this.workflowExecutionRepository;
+          return {
+            async run() {
+              const { workflowRunId, spaceId } =
+                taskInstance.params as ResumeWorkflowExecutionParams;
+              const [, pluginsStart] = await core.getStartServices();
+
+              const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
+                workflowRunId,
+                spaceId,
+                (pluginsStart as any).actions,
+                (pluginsStart as any).taskManager,
+                esClient,
+                logger,
+                config,
+                workflowExecutionRepository
+              );
+              await workflowRuntime.resume();
+
+              await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
+            },
+            async cancel() {},
+          };
+        },
+      },
+    });
 
     return {};
   }
@@ -68,14 +114,15 @@ export class WorkflowsExecutionEnginePlugin
     ) => {
       const workflowRunId = context.workflowRunId;
       const workflowCreatedAt = new Date();
-      const workflowExecutionRepository = new WorkflowExecutionRepository(this.esClient);
-      const stepExecutionRepository = new StepExecutionRepository(this.esClient);
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
         id: workflowRunId,
+        spaceId: context.spaceId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
+        context,
+        executionGraph: workflow.executionGraph,
         status: ExecutionStatus.PENDING,
         createdAt: workflowCreatedAt.toISOString(),
         createdBy: context.createdBy || '', // TODO: set if available
@@ -83,61 +130,23 @@ export class WorkflowsExecutionEnginePlugin
         lastUpdatedBy: context.createdBy || '', // TODO: set if available
         triggeredBy, // <-- new field for scheduled workflows
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
-      await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
-      const workflowExecutionGraph = graphlib.json.read(workflow.executionGraph);
+      await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
 
-      const connectorExecutor = new ConnectorExecutor(
-        context.connectorCredentials,
-        await plugins.actions.getUnsecuredActionsClient()
+      const { workflowRuntime, workflowLogger, nodesFactory } = await createContainer(
+        workflowRunId,
+        context.spaceId,
+        plugins.actions,
+        plugins.taskManager,
+        this.esClient,
+        this.logger,
+        this.config,
+        this.workflowExecutionRepository
       );
 
-      // Create workflow runtime first (simpler, fewer dependencies)
-      const workflowRuntime = new WorkflowExecutionRuntimeManager({
-        workflowExecution: workflowExecution as EsWorkflowExecution,
-        workflowExecutionRepository,
-        stepExecutionRepository,
-        workflowExecutionGraph,
-      });
-
-      const contextManager = new WorkflowContextManager({
-        workflowRunId,
-        workflow: workflow as any,
-        event: context.event,
-        logger: this.logger,
-        workflowEventLoggerIndex: WORKFLOWS_EXECUTION_LOGS_INDEX,
-        esClient: this.esClient,
-        enableConsoleLogging: this.config.logging.console,
-        workflowExecutionGraph,
-        workflowExecutionRuntime: workflowRuntime,
-      });
-
-      // Set the logger reference using a clean setter method
-      workflowRuntime.setLogger(contextManager);
-
       // Log workflow execution start
-      await contextManager.logWorkflowStart();
-
       await workflowRuntime.start();
 
-      try {
-        do {
-          const currentNode = workflowRuntime.getCurrentStep();
-
-          const step = new StepFactory().create(
-            currentNode as any,
-            contextManager,
-            connectorExecutor,
-            workflowRuntime
-          );
-
-          await step.run();
-        } while (workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING);
-
-        contextManager.logWorkflowComplete(true);
-      } catch (error) {
-        await workflowRuntime.fail(error);
-        contextManager.logWorkflowComplete(false);
-      }
+      await workflowExecutionLoop(workflowRuntime, workflowLogger, nodesFactory);
     };
 
     return {
@@ -146,4 +155,86 @@ export class WorkflowsExecutionEnginePlugin
   }
 
   public stop() {}
+}
+
+async function createContainer(
+  workflowRunId: string,
+  spaceId: string,
+  actionsPlugin: ActionsPluginStartContract,
+  taskManagerPlugin: TaskManagerStartContract,
+  esClient: Client,
+  logger: Logger,
+  config: WorkflowsExecutionEngineConfig,
+  workflowExecutionRepository: WorkflowExecutionRepository
+) {
+  const workflowExecution = await workflowExecutionRepository.getWorkflowExecutionById(
+    workflowRunId,
+    spaceId
+  );
+
+  if (!workflowExecution) {
+    throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
+  }
+
+  const workflowExecutionGraph = graphlib.json.read(workflowExecution.executionGraph);
+  const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
+  const stepExecutionRepository = new StepExecutionRepository(esClient);
+  const connectorExecutor = new ConnectorExecutor(unsecuredActionsClient);
+
+  const workflowLogger = new WorkflowEventLogger(
+    esClient,
+    logger,
+    WORKFLOWS_EXECUTION_LOGS_INDEX,
+    {
+      workflowId: workflowExecution.workflowId,
+      workflowName: workflowExecution.workflowDefinition.name,
+      executionId: workflowExecution.id,
+    },
+    {
+      enableConsoleLogging: config.logging.console,
+    }
+  );
+
+  const workflowExecutionState = new WorkflowExecutionState(
+    workflowExecution as EsWorkflowExecution,
+    workflowExecutionRepository,
+    stepExecutionRepository
+  );
+
+  // Create workflow runtime first (simpler, fewer dependencies)
+  const workflowRuntime = new WorkflowExecutionRuntimeManager({
+    workflowExecution: workflowExecution as EsWorkflowExecution,
+    workflowExecutionGraph,
+    workflowLogger,
+    workflowExecutionState,
+  });
+
+  const contextManager = new WorkflowContextManager({
+    spaceId: workflowExecution.spaceId,
+    workflow: workflowExecution.workflowDefinition,
+    event: workflowExecution.context.event,
+    workflowExecutionGraph,
+    workflowExecutionRuntime: workflowRuntime,
+  });
+
+  const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
+
+  const nodesFactory = new StepFactory(
+    contextManager,
+    connectorExecutor,
+    workflowRuntime,
+    workflowLogger,
+    workflowTaskManager
+  );
+
+  return {
+    workflowRuntime,
+    contextManager,
+    connectorExecutor,
+    workflowLogger,
+    taskManagerPlugin,
+    workflowExecutionRepository,
+    workflowTaskManager,
+    nodesFactory,
+  };
 }

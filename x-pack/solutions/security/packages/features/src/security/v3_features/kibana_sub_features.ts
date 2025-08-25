@@ -873,7 +873,7 @@ export const getSecurityV3SubFeaturesMap = ({
       SecuritySubFeatureId.trustedApplications,
       enableSpaceAwarenessIfNeeded(trustedApplicationsSubFeature()),
     ],
-    ...((experimentalFeatures.trustedDevicesEnabled
+    ...((experimentalFeatures.trustedDevices
       ? [
           [
             SecuritySubFeatureId.trustedDevices,

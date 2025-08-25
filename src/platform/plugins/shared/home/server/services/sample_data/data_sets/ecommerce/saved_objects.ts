@@ -10,7 +10,7 @@
 /* eslint max-len: 0 */
 
 import { i18n } from '@kbn/i18n';
-import { SavedObject } from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 
 export const getSavedObjects = (): SavedObject[] => [
   {

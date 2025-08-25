@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useRef, useState, RefObject, useLayoutEffect } from 'react';
+import type { RefObject } from 'react';
+import { useCallback, useRef, useState, useLayoutEffect } from 'react';
 
-import { MenuCalculations, MenuItem, NavigationStructure } from '../../types';
+import type { MenuCalculations, MenuItem, NavigationStructure } from '../../types';
 import { getActualItemHeights } from '../utils/get_actual_item_heights';
 import {
   COLLAPSED_MENU_ITEM_HEIGHT,

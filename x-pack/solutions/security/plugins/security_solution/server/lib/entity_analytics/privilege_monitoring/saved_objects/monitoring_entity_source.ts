@@ -32,7 +32,9 @@ export class MonitoringEntitySourceDescriptorClient {
     return { ...created, id };
   }
 
-  async update(monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }) {
+  async update(
+    monitoringEntitySource: Partial<MonitoringEntitySource> & { id: string }
+  ): Promise<MonitoringEntitySource> {
     await this.assertNameUniqueness(monitoringEntitySource);
 
     const { attributes } = await this.dependencies.soClient.update<MonitoringEntitySource>(
@@ -42,14 +44,11 @@ export class MonitoringEntitySourceDescriptorClient {
       { refresh: 'wait_for' }
     );
 
-    return attributes;
+    return { ...attributes, id: monitoringEntitySource.id };
   }
 
   async find(query?: ListEntitySourcesRequestQuery) {
-    const scopedSoClient = this.dependencies.soClient.asScopedToNamespace(
-      this.dependencies.namespace
-    );
-
+    const scopedSoClient = this.dependencies.soClient;
     return scopedSoClient.find<MonitoringEntitySource>({
       type: monitoringEntitySourceTypeName,
       filter: this.getQueryFilters(query),

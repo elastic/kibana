@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import {
   DEFAULT_URL_LIMIT,
   DEFAULT_URL_EXPIRATION_CHECK_INTERVAL,

@@ -10,7 +10,7 @@ import { z } from '@kbn/zod';
 import { loggerMock } from '@kbn/logging-mocks';
 import { buildToolName } from '@kbn/wci-common';
 import { getConnectToInternalServer } from '@kbn/wci-server';
-import { GatewayToolInputSchema } from './types';
+import type { GatewayToolInputSchema } from './types';
 import { McpGatewaySessionImpl } from './session';
 import type { McpClientProvider } from '@kbn/wci-server';
 

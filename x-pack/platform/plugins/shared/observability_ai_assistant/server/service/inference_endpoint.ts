@@ -6,24 +6,26 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/logging';
-import {
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/logging';
+import type {
   InferenceInferenceEndpointInfo,
   MlGetTrainedModelsStatsResponse,
   MlTrainedModelStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import pRetry from 'p-retry';
-import { CoreSetup } from '@kbn/core/server';
-import { EIS_PRECONFIGURED_INFERENCE_IDS, KnowledgeBaseState } from '../../common';
-import { ObservabilityAIAssistantConfig } from '../config';
+import type { CoreSetup } from '@kbn/core/server';
+import type { DocumentationManagerAPI } from '@kbn/product-doc-base-plugin/server/services/doc_manager';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import { EIS_PRECONFIGURED_INFERENCE_IDS, InferenceModelState } from '../../common';
+import type { ObservabilityAIAssistantConfig } from '../config';
 import {
   getConcreteWriteIndex,
   getInferenceIdFromWriteIndex,
 } from './knowledge_base_service/get_inference_id_from_write_index';
 import { isReIndexInProgress } from './knowledge_base_service/reindex_knowledge_base';
-import { ObservabilityAIAssistantPluginStartDependencies } from '../types';
+import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 
 const SUPPORTED_TASK_TYPES = ['sparse_embedding', 'text_embedding'];
 
@@ -120,21 +122,24 @@ export async function getKbModelStatus({
   logger,
   config,
   inferenceId,
+  productDoc,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   inferenceId?: string;
+  productDoc: DocumentationManagerAPI;
 }): Promise<{
   enabled: boolean;
   endpoint?: InferenceInferenceEndpointInfo;
   modelStats?: MlTrainedModelStats;
   errorMessage?: string;
-  kbState: KnowledgeBaseState;
+  inferenceModelState: InferenceModelState;
   currentInferenceId?: string | undefined;
   concreteWriteIndex: string | undefined;
   isReIndexing: boolean;
+  productDocStatus: InstallationStatus;
 }> {
   const enabled = config.enableKnowledgeBase;
   const concreteWriteIndex = await getConcreteWriteIndex(esClient, logger);
@@ -147,19 +152,24 @@ export async function getKbModelStatus({
         enabled,
         errorMessage: 'Inference ID not found in write index',
         currentInferenceId: undefined,
-        kbState: KnowledgeBaseState.NOT_INSTALLED,
+        inferenceModelState: InferenceModelState.NOT_INSTALLED,
         concreteWriteIndex,
         isReIndexing,
+        productDocStatus: 'uninstalled',
       };
     }
 
     inferenceId = currentInferenceId;
   }
 
+  const productDocStatus = await productDoc.getStatus({
+    inferenceId,
+  });
   // check if inference ID is an EIS inference ID
   const isPreConfiguredInferenceIdInEIS = EIS_PRECONFIGURED_INFERENCE_IDS.includes(inferenceId);
 
   let endpoint: InferenceInferenceEndpointInfo;
+
   try {
     endpoint = await getInferenceEndpoint({ esClient, inferenceId });
     logger.debug(
@@ -172,10 +182,11 @@ export async function getKbModelStatus({
       return {
         endpoint,
         enabled,
-        kbState: KnowledgeBaseState.READY,
+        inferenceModelState: InferenceModelState.READY,
         currentInferenceId,
         concreteWriteIndex,
         isReIndexing,
+        productDocStatus: productDocStatus.status,
       };
     }
   } catch (error) {
@@ -187,10 +198,11 @@ export async function getKbModelStatus({
     return {
       enabled,
       errorMessage: error.message,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: InferenceModelState.NOT_INSTALLED,
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
+      productDocStatus: productDocStatus.status,
     };
   }
 
@@ -210,10 +222,11 @@ export async function getKbModelStatus({
       enabled,
       endpoint,
       errorMessage: error.message,
-      kbState: KnowledgeBaseState.NOT_INSTALLED,
+      inferenceModelState: InferenceModelState.NOT_INSTALLED,
       currentInferenceId,
       concreteWriteIndex,
       isReIndexing,
+      productDocStatus: productDocStatus.status,
     };
   }
 
@@ -221,43 +234,44 @@ export async function getKbModelStatus({
     (stats) => stats.deployment_stats?.deployment_id === inferenceId
   );
 
-  let kbState: KnowledgeBaseState;
+  let inferenceModelState: InferenceModelState;
 
   if (trainedModelStatsResponse.trained_model_stats?.length && !modelStats) {
     // model has been deployed at least once, but stopped later
-    kbState = KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT;
+    inferenceModelState = InferenceModelState.MODEL_PENDING_DEPLOYMENT;
   } else if (modelStats?.deployment_stats?.state === 'failed') {
-    kbState = KnowledgeBaseState.ERROR;
+    inferenceModelState = InferenceModelState.ERROR;
   } else if (
     modelStats?.deployment_stats?.state === 'starting' &&
     modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
   ) {
-    kbState = KnowledgeBaseState.DEPLOYING_MODEL;
+    inferenceModelState = InferenceModelState.DEPLOYING_MODEL;
   } else if (
     modelStats?.deployment_stats?.state === 'started' &&
     modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
     modelStats?.deployment_stats?.allocation_status?.allocation_count > 0
   ) {
-    kbState = KnowledgeBaseState.READY;
+    inferenceModelState = InferenceModelState.READY;
   } else if (
     modelStats?.deployment_stats?.state === 'started' &&
     modelStats?.deployment_stats?.allocation_status?.state === 'fully_allocated' &&
     modelStats?.deployment_stats?.allocation_status?.allocation_count === 0
   ) {
     // model has been scaled down due to inactivity
-    kbState = KnowledgeBaseState.MODEL_PENDING_ALLOCATION;
+    inferenceModelState = InferenceModelState.MODEL_PENDING_ALLOCATION;
   } else {
-    kbState = KnowledgeBaseState.ERROR;
+    inferenceModelState = InferenceModelState.ERROR;
   }
 
   return {
     endpoint,
     enabled,
     modelStats,
-    kbState,
+    inferenceModelState,
     concreteWriteIndex,
     currentInferenceId,
     isReIndexing,
+    productDocStatus: productDocStatus.status,
   };
 }
 
@@ -267,12 +281,14 @@ export async function waitForKbModel({
   logger,
   config,
   inferenceId,
+  productDoc,
 }: {
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: { asInternalUser: ElasticsearchClient };
   logger: Logger;
   config: ObservabilityAIAssistantConfig;
   inferenceId: string;
+  productDoc: DocumentationManagerAPI;
 }) {
   logger.debug(`Waiting for knowledge base model to be ready for inference ID "${inferenceId}" !!`);
 
@@ -283,16 +299,17 @@ export async function waitForKbModel({
   return pRetry(
     async () => {
       logger.debug(`Checking knowledge base model status for inference ID "${inferenceId}"`);
-      const { kbState } = await getKbModelStatus({
+      const { inferenceModelState } = await getKbModelStatus({
         core,
         esClient,
         logger,
         config,
         inferenceId,
+        productDoc,
       });
 
-      if (kbState !== KnowledgeBaseState.READY) {
-        const message = `Knowledge base model is not yet ready. kbState = ${kbState}, `;
+      if (inferenceModelState !== InferenceModelState.READY) {
+        const message = `Knowledge base model is not yet ready. inferenceModelState = ${inferenceModelState}, `;
         logger.debug(message);
         throw new Error(message);
       }

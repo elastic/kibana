@@ -15,7 +15,7 @@ import { ConversationServiceImpl } from './conversations';
 import { ChatService } from './chat';
 import { AgentFactory } from './orchestration';
 import { AgentServiceImpl } from './agents';
-import { IntegrationRegistry } from './integrations';
+import type { IntegrationRegistry } from './integrations';
 
 interface CreateServicesParams {
   core: CoreStart;

@@ -50,6 +50,7 @@ import { RedirectWhenSavedObjectNotFound } from './redirect_not_found';
 import { DiscoverMainApp } from './main_app';
 import { useAsyncFunction } from '../../hooks/use_async_function';
 import { ScopedServicesProvider } from '../../../../components/scoped_services_provider';
+import { HideTabsBar } from '../tabs_view/hide_tabs_bar';
 
 export interface DiscoverSessionViewProps {
   customizationContext: DiscoverCustomizationContext;
@@ -194,27 +195,29 @@ export const DiscoverSessionView = ({
 
   if (initializeSessionState.value.showNoDataPage) {
     return (
-      <NoDataPage
-        {...initializationState}
-        onDataViewCreated={async (dataViewUnknown) => {
-          await dispatch(internalStateActions.loadDataViewList());
-          dispatch(
-            internalStateActions.setInitializationState({
-              hasESData: true,
-              hasUserDataView: true,
-            })
-          );
-          const dataView = dataViewUnknown as DataView;
-          initializeSession({
-            defaultUrlState: dataView.id
-              ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
-              : undefined,
-          });
-        }}
-        onESQLNavigationComplete={() => {
-          initializeSession();
-        }}
-      />
+      <HideTabsBar>
+        <NoDataPage
+          {...initializationState}
+          onDataViewCreated={async (dataViewUnknown) => {
+            await dispatch(internalStateActions.loadDataViewList());
+            dispatch(
+              internalStateActions.setInitializationState({
+                hasESData: true,
+                hasUserDataView: true,
+              })
+            );
+            const dataView = dataViewUnknown as DataView;
+            initializeSession({
+              defaultUrlState: dataView.id
+                ? { dataSource: createDataViewDataSource({ dataViewId: dataView.id }) }
+                : undefined,
+            });
+          }}
+          onESQLNavigationComplete={() => {
+            initializeSession();
+          }}
+        />
+      </HideTabsBar>
     );
   }
 

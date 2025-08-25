@@ -2024,21 +2024,6 @@
       }
     }
   },
-  "guided-onboarding-guide-state": {
-    "dynamic": false,
-    "properties": {
-      "guideId": {
-        "type": "keyword"
-      },
-      "isActive": {
-        "type": "boolean"
-      }
-    }
-  },
-  "guided-onboarding-plugin-state": {
-    "dynamic": false,
-    "properties": {}
-  },
   "index-pattern": {
     "dynamic": false,
     "properties": {
@@ -4296,6 +4281,9 @@
         "enabled": false,
         "type": "object"
       },
+      "deleted_at": {
+        "type": "date"
+      },
       "description": {
         "fields": {
           "keyword": {
@@ -4317,8 +4305,8 @@
         },
         "type": "text"
       },
-      "status": {
-        "type": "keyword"
+      "enabled": {
+        "type": "boolean"
       },
       "tags": {
         "type": "keyword"

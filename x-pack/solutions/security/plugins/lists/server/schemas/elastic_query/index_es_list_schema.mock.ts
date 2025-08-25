@@ -17,7 +17,7 @@ import {
   VERSION,
 } from '../../../common/constants.mock';
 
-import { IndexEsListSchema } from './index_es_list_schema';
+import type { IndexEsListSchema } from './index_es_list_schema';
 
 export const getIndexESListMock = (): IndexEsListSchema => ({
   '@timestamp': DATE_NOW,

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { KibanaRequest } from '@kbn/core-http-server';
+import type { KibanaRequest } from '@kbn/core-http-server';
 import { ToolType, createToolNotFoundError } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import {
+import type {
   InternalToolDefinition,
   ToolTypeDefinition,
   ReadonlyToolTypeClient,
 } from '../tool_provider';
-import { BuiltinToolRegistry } from './builtin_registry';
+import type { BuiltinToolRegistry } from './builtin_registry';
 
 export const createBuiltInToolTypeDefinition = ({
   registry,

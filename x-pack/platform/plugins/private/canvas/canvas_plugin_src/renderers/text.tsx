@@ -7,11 +7,11 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { StartInitializer } from '../plugin';
+import type { StartInitializer } from '../plugin';
 import { RendererStrings } from '../../i18n';
-import { RendererFactory } from '../../types';
+import type { RendererFactory } from '../../types';
 
 const { text: strings } = RendererStrings;
 

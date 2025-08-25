@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import React, {
-  Dispatch,
-  SetStateAction,
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -50,11 +43,8 @@ import {
   conversationContainsAnonymizedValues,
   conversationContainsContentReferences,
 } from './conversations/utils';
-import {
-  LastConversation,
-  useAssistantLastConversation,
-  useAssistantSpaceId,
-} from './use_space_aware_context';
+import type { LastConversation } from './use_space_aware_context';
+import { useAssistantLastConversation, useAssistantSpaceId } from './use_space_aware_context';
 import { AssistantConversationBanner } from './assistant_conversation_banner';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;

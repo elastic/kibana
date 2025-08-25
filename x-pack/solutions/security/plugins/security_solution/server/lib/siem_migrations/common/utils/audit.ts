@@ -23,6 +23,8 @@ export enum SiemMigrationsAuditActions {
   SIEM_MIGRATION_UPDATED_RULE = 'siem_migration_updated_rule',
   SIEM_MIGRATION_INSTALLED_RULES = 'siem_migration_installed_rules',
   SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS = 'siem_migration_retrieved_integrations_stats',
+  // Dashboards
+  SIEM_MIGRATION_ADDED_DASHBOARDS = 'siem_migration_added_dashboards',
 }
 
 export enum AUDIT_TYPE {
@@ -63,6 +65,7 @@ export const siemMigrationAuditEventType: Record<
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_RULES]: AUDIT_TYPE.ACCESS,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_DELETED]: AUDIT_TYPE.CHANGE,
   [SiemMigrationsAuditActions.SIEM_MIGRATION_RETRIEVED_INTEGRATIONS_STATS]: AUDIT_TYPE.ACCESS,
+  [SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS]: AUDIT_TYPE.CREATION,
 };
 
 interface SiemMigrationAuditEvent {
@@ -74,7 +77,8 @@ interface SiemMigrationAuditEvent {
 export class SiemMigrationAuditLogger {
   private auditLogger?: AuditLogger | null = null;
   constructor(
-    private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>
+    private readonly securitySolutionContextPromise: Promise<SecuritySolutionApiRequestHandlerContext>,
+    private readonly migrationType: 'rules' | 'dashboards'
   ) {}
 
   private setAuditLogger = async (): Promise<boolean> => {
@@ -86,13 +90,14 @@ export class SiemMigrationAuditLogger {
   };
 
   private logEvent = ({ action, message, error }: SiemMigrationAuditEvent): void => {
-    const type = siemMigrationAuditEventType[action];
+    const auditEventType = siemMigrationAuditEventType[action];
+    const messageWithMigrationType = `[migrationType=${this.migrationType}]${message}`;
     this.auditLogger?.log({
-      message,
+      message: messageWithMigrationType,
       event: {
         action,
         category: [AUDIT_CATEGORY.DATABASE],
-        type: type ? [type] : undefined,
+        type: auditEventType ? [auditEventType] : undefined,
         outcome: error ? AUDIT_OUTCOME.FAILURE : AUDIT_OUTCOME.SUCCESS,
       },
       error: error && {
@@ -172,7 +177,7 @@ export class SiemMigrationAuditLogger {
     count?: number;
   }): Promise<void> {
     const { migrationId, error, count } = params;
-    const message = `User added ${
+    const message = `User adding ${
       count ?? ''
     } rules to the SIEM migration with [id=${migrationId}]`;
     return this.log({
@@ -182,9 +187,25 @@ export class SiemMigrationAuditLogger {
     });
   }
 
+  public async logAddDashboards(params: {
+    migrationId: string;
+    error?: Error;
+    count?: number;
+  }): Promise<void> {
+    const { migrationId, error, count } = params;
+    const message = `User adding ${
+      count ?? '0'
+    } dashboards to the SIEM migration with [id=${migrationId}]`;
+    return this.log({
+      action: SiemMigrationsAuditActions.SIEM_MIGRATION_ADDED_DASHBOARDS,
+      message,
+      error,
+    });
+  }
+
   public async logUploadResources(params: { migrationId: string; error?: Error }): Promise<void> {
     const { migrationId, error } = params;
-    const message = `User uploaded resources to the SIEM migration with [id=${migrationId}]`;
+    const message = `User uploading resources to the SIEM migration with [id=${migrationId}]`;
     return this.log({
       action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPLOADED_RESOURCES,
       message,
@@ -221,7 +242,7 @@ export class SiemMigrationAuditLogger {
   }): Promise<void> {
     const { ids, migrationId, error } = params;
     const events = ids.map<SiemMigrationAuditEvent>((id) => {
-      const message = `User updated a translated rule through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
+      const message = `User updating a translated rule through SIEM migration with [id=${id}, migration_id=${migrationId}]`;
       return { action: SiemMigrationsAuditActions.SIEM_MIGRATION_UPDATED_RULE, message, error };
     });
     return this.log(events);

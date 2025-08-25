@@ -13,7 +13,7 @@ import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import Url from 'url';
-import { Protocol } from 'devtools-protocol';
+import type { Protocol } from 'devtools-protocol';
 
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import sharp from 'sharp';

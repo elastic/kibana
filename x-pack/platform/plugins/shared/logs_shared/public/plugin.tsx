@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { LogsLocatorDefinition } from '../common/locators';
 import { createLogAIAssistant, createLogsAIAssistantRenderer } from './components/log_ai_assistant';
 import { createLogsOverview } from './components/logs_overview';
 import { LogViewsService } from './services/log_views';
-import {
+import type {
   LogsSharedClientCoreSetup,
   LogsSharedClientPluginClass,
   LogsSharedClientSetupDeps,
@@ -45,7 +45,7 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
   }
 
   public start(core: CoreStart, plugins: LogsSharedClientStartDeps) {
-    const { http, settings } = core;
+    const { http, settings, theme } = core;
     const {
       charts,
       data,
@@ -72,6 +72,8 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       share,
       dataViews,
       embeddable: plugins.embeddable,
+      mlApi: plugins.ml?.mlApi,
+      theme,
     });
 
     if (!observabilityAIAssistant) {
