@@ -8,8 +8,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, type EuiThemeShape } from '@elastic/eui';
-import type { CellContext, Row } from '@tanstack/react-table';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart } from '@elastic/eui';
+import type { CascadeRowCellPrimitiveProps } from '../types';
 import {
   getCascadeRowNodePath,
   getCascadeRowNodePathValueRecord,
@@ -21,31 +21,6 @@ import {
   useDataCascadeState,
   useDataCascadeActions,
 } from '../../../store_provider';
-
-interface OnCascadeLeafNodeExpandedArgs<G extends GroupNode> {
-  row: Row<G>;
-  /**
-   * The path of the row that was expanded in the group by hierarchy.
-   */
-  nodePath: string[];
-  /**
-   * KV record of the path values for the row node.
-   */
-  nodePathMap: Record<string, string>;
-}
-
-export interface CascadeRowCellPrimitiveProps<G extends GroupNode, L extends LeafNode>
-  extends CellContext<G, unknown> {
-  /**
-   * Size of the row cell
-   */
-  size: keyof Pick<EuiThemeShape['size'], 's' | 'm' | 'l'>;
-  /**
-   * Callback invoked when a leaf node gets expanded, which can be used to fetch data for leaf nodes.
-   */
-  onCascadeLeafNodeExpanded: (args: OnCascadeLeafNodeExpandedArgs<G>) => Promise<L[]>;
-  children: (args: { data: L[] | null }) => React.ReactNode;
-}
 
 export function CascadeRowCellPrimitive<G extends GroupNode, L extends LeafNode>({
   children,
