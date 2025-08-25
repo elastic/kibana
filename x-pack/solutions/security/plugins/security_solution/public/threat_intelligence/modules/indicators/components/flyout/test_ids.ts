@@ -24,9 +24,6 @@ export const ADD_TO_EXISTING_CASE_TEST_ID = 'tiIndicatorFlyoutAddToExistingCaseC
 export const ADD_TO_NEW_CASE_TEST_ID = 'tiIndicatorFlyoutAddToNewCaseContextMenu';
 export const ADD_TO_BLOCK_LIST_TEST_ID = 'tiIndicatorFlyoutAddToBlockListContextMenu';
 
-/* Json Tab */
-export const CODE_BLOCK_TEST_ID = 'tiFlyoutJsonCodeBlock';
-
 /* Table Tab */
 export const FLYOUT_TABLE_TEST_ID = 'tiFlyoutTable';
 
