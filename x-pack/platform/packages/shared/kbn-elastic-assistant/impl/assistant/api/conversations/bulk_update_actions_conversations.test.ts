@@ -6,6 +6,7 @@
  */
 
 import { bulkUpdateConversations } from './bulk_update_actions_conversations';
+import type { ConversationCategory } from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
@@ -18,7 +19,7 @@ const conversation1 = {
   title: 'Conversation 1',
   apiConfig: { connectorId: '123', actionTypeId: '.gen-ai' },
   replacements: {},
-  category: 'default',
+  category: 'assistant' as ConversationCategory,
   messages: [
     {
       id: 'message1',

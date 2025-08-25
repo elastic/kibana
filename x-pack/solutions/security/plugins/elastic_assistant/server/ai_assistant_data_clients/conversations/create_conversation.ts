@@ -70,6 +70,10 @@ export const transformToCreateScheme = (
   return {
     '@timestamp': createdAt,
     created_at: createdAt,
+    created_by: {
+      id: user.profile_uid,
+      name: user.username,
+    },
     users: [
       {
         id: user.profile_uid,
@@ -94,6 +98,7 @@ export const transformToCreateScheme = (
       is_error: message.isError,
       reader: message.reader,
       role: message.role,
+      user: message.user,
       ...(message.traceData
         ? {
             trace_data: {

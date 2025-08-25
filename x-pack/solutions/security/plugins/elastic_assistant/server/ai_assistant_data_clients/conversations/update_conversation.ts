@@ -142,12 +142,14 @@ export const transformToUpdateScheme = (
     messages,
     replacements,
     id,
+    users,
   }: ConversationUpdateProps
 ): UpdateConversationSchema => {
   return {
     id,
     updated_at: updatedAt,
     ...(title ? { title } : {}),
+    ...(users ? { users } : {}),
     ...(apiConfig
       ? {
           api_config: {

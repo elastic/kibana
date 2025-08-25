@@ -15,7 +15,7 @@
  */
 
 import { z } from '@kbn/zod';
-import { ArrayFromString } from '@kbn/zod-helpers';
+import { ArrayFromString, BooleanFromString } from '@kbn/zod-helpers';
 
 import { SortOrder } from '../common_attributes.gen';
 import { ConversationResponse } from './common_attributes.gen';
@@ -54,6 +54,10 @@ export const FindConversationsRequestQuery = z.object({
    * The number of conversations to return per page. Default is 20.
    */
   per_page: z.coerce.number().int().min(0).optional().default(20),
+  /**
+   * Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+   */
+  is_owner: BooleanFromString.optional().default(false),
 });
 export type FindConversationsRequestQueryInput = z.input<typeof FindConversationsRequestQuery>;
 

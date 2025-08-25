@@ -40,6 +40,10 @@ export interface EsConversationSchema {
       transaction_id?: string;
       trace_id?: string;
     };
+    user?: {
+      id?: string;
+      name?: string;
+    };
   }>;
   api_config?: {
     connector_id: string;
@@ -54,6 +58,10 @@ export interface EsConversationSchema {
     id?: string;
     name?: string;
   }>;
+  created_by: {
+    id?: string;
+    name?: string;
+  };
   updated_at?: string;
   namespace: string;
 }
@@ -84,6 +92,10 @@ export interface CreateMessageSchema {
   };
   exclude_from_last_conversation_storage?: boolean;
   replacements?: EsReplacementSchema[];
+  created_by: {
+    id?: string;
+    name?: string;
+  };
   users: Array<{
     id?: string;
     name?: string;

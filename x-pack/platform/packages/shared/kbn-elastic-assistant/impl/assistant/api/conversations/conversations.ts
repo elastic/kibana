@@ -7,7 +7,7 @@
 
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { ApiConfig, Replacements } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, Replacements, User } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
   API_VERSIONS,
@@ -195,6 +195,7 @@ export interface PutConversationMessageParams {
   toasts?: IToasts;
   conversationId: string;
   title?: string;
+  users?: User[];
   messages?: ClientMessage[];
   apiConfig?: ApiConfig;
   replacements?: Replacements;
@@ -220,6 +221,7 @@ export const updateConversation = async ({
   http,
   toasts,
   title,
+  users,
   conversationId,
   messages,
   apiConfig,
@@ -235,6 +237,7 @@ export const updateConversation = async ({
         body: JSON.stringify({
           id: conversationId,
           title,
+          users,
           messages,
           replacements,
           apiConfig,

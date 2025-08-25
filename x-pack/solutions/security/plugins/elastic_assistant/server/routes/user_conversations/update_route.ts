@@ -10,6 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  getIsConversationOwner,
 } from '@kbn/elastic-assistant-common';
 import type { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import {
@@ -65,6 +66,17 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
               statusCode: 404,
+            });
+          }
+          if (
+            !getIsConversationOwner(existingConversation, {
+              name: authenticatedUser?.username,
+              id: authenticatedUser?.profile_uid,
+            })
+          ) {
+            return assistantResponse.error({
+              body: `conversation id: "${id}". Updating a conversation is only allowed for the owner of the conversation.`,
+              statusCode: 403,
             });
           }
           const conversation = await dataClient?.updateConversation({

@@ -13,8 +13,11 @@ import type {
   RefetchOptions,
   RefetchQueryFilters,
 } from '@tanstack/react-query';
-import type { ApiConfig, PromptResponse } from '@kbn/elastic-assistant-common';
+import type { ApiConfig, PromptResponse, User } from '@kbn/elastic-assistant-common';
+import { getIsConversationOwner } from '@kbn/elastic-assistant-common';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import type { ConversationSharedState } from '../share_conversation/utils';
+import { getConversationSharedState } from '../share_conversation/utils';
 import type { FetchConversationsResponse } from '../api';
 import type { AIConnector } from '../../connectorland/connector_selector';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
@@ -27,6 +30,7 @@ export interface Props {
   allSystemPrompts: PromptResponse[];
   connectors?: AIConnector[];
   currentAppId?: string;
+  currentUser?: User;
   lastConversation: LastConversation;
   conversations: Record<string, Conversation>;
   defaultConnector?: AIConnector;
@@ -39,6 +43,7 @@ export interface Props {
 }
 
 interface UseCurrentConversation {
+  conversationSharedState: ConversationSharedState;
   currentConversation: Conversation | undefined;
   currentSystemPrompt: PromptResponse | undefined;
   handleCreateConversation: () => Promise<void>;
@@ -50,6 +55,7 @@ interface UseCurrentConversation {
     cId: string;
     cTitle?: string;
   }) => Promise<void>;
+  isConversationOwner: boolean;
   refetchCurrentConversation: (options?: {
     cId?: string;
     isStreamRefetch?: boolean;
@@ -69,6 +75,7 @@ export const useCurrentConversation = ({
   currentAppId,
   lastConversation,
   conversations,
+  currentUser,
   spaceId,
   defaultConnector,
   mayUpdateConversations,
@@ -194,13 +201,22 @@ export const useCurrentConversation = ({
             }
           : {}),
         id: '',
+        users: [currentUser ?? {}],
+        createdBy: currentUser ?? {},
+        createdAt: new Date().toISOString(),
         messages: [],
         replacements: {},
         category: 'assistant',
         title: cTitle ?? '',
       });
     },
-    [allSystemPrompts, currentConversation?.apiConfig, defaultConnector, setLastConversation]
+    [
+      allSystemPrompts,
+      currentConversation?.apiConfig,
+      currentUser,
+      defaultConnector,
+      setLastConversation,
+    ]
   );
   useEffect(() => {
     if (defaultConnector && !currentConversation?.apiConfig && currentConversation?.id === '') {
@@ -293,12 +309,25 @@ export const useCurrentConversation = ({
     [handleOnConversationSelected]
   );
 
+  // is current user the owner of the conversation?
+  const isConversationOwner = useMemo(
+    () => getIsConversationOwner(currentConversation, currentUser),
+    [currentConversation, currentUser]
+  );
+
+  const conversationSharedState = useMemo(
+    () => getConversationSharedState(currentConversation),
+    [currentConversation]
+  );
+
   return {
+    conversationSharedState,
     currentConversation,
     currentSystemPrompt,
     handleCreateConversation,
     handleOnConversationDeleted,
     handleOnConversationSelected,
+    isConversationOwner,
     refetchCurrentConversation,
     setCurrentConversation,
     setCurrentSystemPromptId,

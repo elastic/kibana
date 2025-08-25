@@ -174,6 +174,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
   checkPrivileges: () => CheckPrivileges;
+  userProfiles: SecurityPluginStart['userProfiles'];
 }
 /**
  * @internal

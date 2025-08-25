@@ -66,7 +66,14 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
 
           const conversation = await dataClient?.appendConversationMessages({
             existingConversation,
-            messages: request.body.messages,
+            messages: request.body.messages.map((message) =>
+              message.role === 'user'
+                ? {
+                    ...message,
+                    user: { id: authenticatedUser.profile_uid, name: authenticatedUser.username },
+                  }
+                : message
+            ),
           });
           if (conversation == null) {
             return assistantResponse.error({
