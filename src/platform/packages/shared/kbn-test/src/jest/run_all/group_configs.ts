@@ -21,7 +21,7 @@ export function groupConfigs({
   globalConfig: Config.GlobalConfig;
   configs: Array<{ configPath: string | null; config: Config.InitialOptions }>;
   log: ToolingLog;
-}) {
+}): Array<Config.InitialOptions> {
   const normalized = configs.map(({ config, configPath }) => {
     const rootDir = config.rootDir || REPO_ROOT;
     const configDir = Path.dirname(configPath!);
