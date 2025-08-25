@@ -35,7 +35,7 @@ export const useMigrationNameStep = ({
     // localized date and time according to the locale including seconds
     const datetime = moment(Date.now()).format('ddd , ll, LTS');
 
-    const userName = currentUserProfile?.user.full_name ?? currentUserProfile?.user.username;
+    const userName = currentUserProfile?.user.full_name || currentUserProfile?.user.username;
 
     if (userName) {
       return `${userName}'s migration on ${datetime}`;
