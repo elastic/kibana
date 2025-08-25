@@ -29,7 +29,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { RuleSnooze } from '@kbn/alerting-plugin/common';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import React, { useState, useCallback, useMemo } from 'react';
 import { parseInterval } from '../../../../../../../common/parse_interval';
 
