@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC } from 'react';
+import { type FC, useRef } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -18,7 +18,6 @@ import {
   type CellContext,
 } from '@tanstack/react-table';
 export { flexRender } from '@tanstack/react-table';
-import { useRef } from 'react';
 import type { LeafNode } from '../../../store_provider';
 import {
   useDataCascadeActions,
@@ -39,13 +38,14 @@ interface TableProps<G>
     | 'onExpandedChange'
     | 'getRowCanExpand'
   > {
-  allowExpandMultiple: boolean;
+  allowMultipleRowToggle: boolean;
   header: FC<{ table: Table<G> }>;
   rowCell: FC<CellContext<G, unknown>>;
 }
 
 export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
-  allowExpandMultiple,
+  allowMultipleRowToggle,
+  enableRowSelection,
   header: Header,
   rowCell: RowCell,
   ...rest
@@ -56,6 +56,7 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
   const state = useDataCascadeState<G, L>();
 
   tableRef.current = useReactTable<G>({
+    ...rest,
     data: state.groupNodes,
     state: state.table,
     columns: [
@@ -65,6 +66,7 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
         cell: RowCell,
       }),
     ],
+    enableRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
@@ -72,7 +74,7 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
       const newExpandedState =
         typeof updater === 'function' ? updater(state.table.expanded) : updater;
 
-      if (allowExpandMultiple) {
+      if (allowMultipleRowToggle) {
         return actions.setExpandedRows(newExpandedState);
       }
 
@@ -119,8 +121,14 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
     },
     getRowId: (rowData) => rowData.id,
     getSubRows: (row) => row.children as G[],
-    ...rest,
   });
 
-  return tableRef.current;
+  return {
+    get headerColumns() {
+      return tableRef.current!.getHeaderGroups()[0].headers;
+    },
+    get rows() {
+      return tableRef.current!.getRowModel().rows;
+    },
+  };
 };
