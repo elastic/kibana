@@ -14,9 +14,7 @@ const { getSafePath, validateAndSanitizeFileData } = require('./fs_validations')
 
 let hardeningConfig = null;
 
-// TODO: propagate here file specified for file logger (it can change in the runtime)
-// Idea 1: Use EventEmitter to propagate file logger path.
-// Checked it, it works, though we need to find a proper folder/package for that event emitter.
+// IMPORTANT: this is used for POC, however we can consider using preboot plugin to pass the config down
 fsEventBus.on(FS_CONFIG_EVENT, (config) => {
   hardeningConfig = config;
 });
@@ -114,6 +112,14 @@ const patchAsyncDualMethod = (target, thisArg, argumentsList) => {
   return target.apply(thisArg, [srcSafePath, destSafePath, ...args]);
 };
 
+const pathUnsecureMethod = (target, thisArg, argumentsList) => {
+  if (!shouldEnableHardenedFs()) {
+    return target.apply(thisArg, argumentsList);
+  }
+
+  throw new Error('This method is blocked by security hardening model');
+};
+
 const createFsProxy = (fs) => {
   fs.writeFileSync = new Proxy(fs.writeFileSync, { apply: patchSingleMethod });
   fs.writeFile = new Proxy(fs.writeFile, { apply: patchAsyncSingleMethod });
@@ -123,6 +129,12 @@ const createFsProxy = (fs) => {
   fs.appendFileSync = new Proxy(fs.appendFileSync, { apply: patchSingleMethod });
   fs.appendFile = new Proxy(fs.appendFile, { apply: patchAsyncSingleMethod });
   fs.createWriteStream = new Proxy(fs.createWriteStream, { apply: patchWriteStream });
+
+  // Methods that we want to block completely
+  fs.open = new Proxy(fs.open, { apply: pathUnsecureMethod });
+  fs.openSync = new Proxy(fs.openSync, { apply: pathUnsecureMethod });
+  fs.symlink = new Proxy(fs.symlink, { apply: pathUnsecureMethod });
+  fs.symlinkSync = new Proxy(fs.symlinkSync, { apply: pathUnsecureMethod });
 
   return fs;
 };
