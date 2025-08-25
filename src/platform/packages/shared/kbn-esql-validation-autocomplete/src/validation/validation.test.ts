@@ -6,14 +6,8 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import {
-  timeUnitsToSuggest,
-  FieldType,
-  dataTypes,
-  SupportedDataType,
-  FunctionDefinition,
-  getNoValidCallSignatureError,
-} from '@kbn/esql-ast';
+import type { FieldType, SupportedDataType, FunctionDefinition } from '@kbn/esql-ast';
+import { timeUnitsToSuggest, dataTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { getFunctionSignatures } from '@kbn/esql-ast/src/definitions/utils';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';

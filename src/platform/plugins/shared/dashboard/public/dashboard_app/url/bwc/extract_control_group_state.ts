@@ -13,7 +13,7 @@ import {
   DEFAULT_CONTROLS_LABEL_POSITION,
 } from '@kbn/controls-constants';
 import { serializeRuntimeState } from '@kbn/controls-plugin/public';
-import { DashboardState } from '../../../../common';
+import type { DashboardState } from '../../../../common';
 
 export function extractControlGroupState(state: {
   [key: string]: unknown;

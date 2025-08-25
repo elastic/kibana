@@ -26,7 +26,7 @@ import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { filterDataErrors, type MonacoMessage } from '../helpers';
-import { DataErrorsControl } from '../types';
+import type { DataErrorsControl } from '../types';
 
 interface TypeConsts {
   color: 'danger' | 'warning' | 'text';

@@ -19,18 +19,18 @@ import {
   getValidSignaturesAndTypesToSuggestNext,
 } from '@kbn/esql-ast/src/definitions/utils';
 import {
-  ESQLAstQueryExpression,
-  ESQLFunction,
-  ESQLSingleAstItem,
-  ESQLSource,
   isESQLNamedParamLiteral,
+  type ESQLAstQueryExpression,
+  type ESQLFunction,
+  type ESQLSingleAstItem,
+  type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 import { collectUserDefinedColumns, type ESQLCallbacks } from '@kbn/esql-validation-autocomplete';
 import { getFieldsByTypeRetriever } from '@kbn/esql-validation-autocomplete/src/autocomplete/autocomplete';
 import { getQueryForFields } from '@kbn/esql-validation-autocomplete/src/autocomplete/helper';
 import { getPolicyHelper } from '@kbn/esql-validation-autocomplete/src/shared/resources_helpers';
 import { i18n } from '@kbn/i18n';
-import { monaco } from '../../../../monaco_imports';
+import type { monaco } from '../../../../monaco_imports';
 import { monacoPositionToOffset } from '../shared/utils';
 import { getVariablesHoverContent } from './helpers';
 

@@ -8,7 +8,8 @@
  */
 
 import { XY_VIS_RENDERER } from '../constants';
-import { LayeredXyVisFn, type XYRender } from '../types';
+import type { LayeredXyVisFn } from '../types';
+import { type XYRender } from '../types';
 import { logDatatables, logDatatable } from '../utils';
 import {
   validateMarkSizeRatioLimits,

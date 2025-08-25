@@ -10,7 +10,7 @@
 import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
 import { Y_AXIS_CONFIG, AxisModes, YScaleTypes } from '../constants';
-import { YAxisConfigFn } from '../types';
+import type { YAxisConfigFn } from '../types';
 import { commonAxisConfigArgs } from './common_axis_args';
 
 export const yAxisConfigFunction: YAxisConfigFn = {

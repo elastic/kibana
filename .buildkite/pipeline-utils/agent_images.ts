@@ -8,7 +8,8 @@
  */
 
 import { dump } from 'js-yaml';
-import { BuildkiteClient, BuildkiteAgentTargetingRule } from './buildkite';
+import type { BuildkiteAgentTargetingRule } from './buildkite';
+import { BuildkiteClient } from './buildkite';
 
 const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';

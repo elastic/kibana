@@ -6,7 +6,7 @@
  */
 
 import { expect } from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const ADD_TO_CASE_DATA_TEST_SUBJ = 'embeddablePanelAction-embeddable_addToExistingCase';
 

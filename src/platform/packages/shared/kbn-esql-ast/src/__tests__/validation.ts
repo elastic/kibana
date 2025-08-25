@@ -21,8 +21,8 @@
  * validation tests. This allows us to use our own fixtures without relying
  * on the generated definitions provided by Elasticsearch.
  */
-import { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../commands_registry/types';
 import { buildFunctionLookup } from '../definitions/utils/functions';
+import type { ESQLUserDefinedColumn, ESQLFieldWithMetadata } from '../commands_registry/types';
 import { Parser } from '../parser';
 import type { ESQLCommand, ESQLMessage } from '../types';
 import { mockContext } from './context_fixtures';

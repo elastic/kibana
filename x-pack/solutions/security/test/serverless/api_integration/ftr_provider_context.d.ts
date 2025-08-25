@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from './services';
+import type { services } from './services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;
 

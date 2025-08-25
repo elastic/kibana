@@ -12,9 +12,9 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { act } from 'react-dom/test-utils';
 import { BehaviorSubject } from 'rxjs';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { markdownEmbeddableFactory } from './markdown_embeddable';
-import { MarkdownEditorApi } from './types';
+import type { MarkdownEditorApi } from './types';
 
 const renderEmbeddable = async (
   overrideParams?: Partial<Parameters<(typeof markdownEmbeddableFactory)['buildEmbeddable']>[0]>

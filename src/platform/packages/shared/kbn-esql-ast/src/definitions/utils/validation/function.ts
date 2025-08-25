@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import { uniqBy } from 'lodash';
 import { errors, getFunctionDefinition } from '..';
 import { within } from '../../../..';
@@ -19,14 +19,11 @@ import {
   isOptionNode,
   isParamLiteral,
 } from '../../../ast/is';
-import {
-  ICommandCallbacks,
-  ICommandContext,
-  getLocationFromCommandOrOptionName,
-} from '../../../commands_registry/types';
-import { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../../commands_registry/types';
+import { getLocationFromCommandOrOptionName } from '../../../commands_registry/types';
+import type { ESQLAstItem, ESQLCommand, ESQLFunction, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
-import { FunctionDefinition, FunctionParameterType, SupportedDataType } from '../../types';
+import type { FunctionDefinition, FunctionParameterType, SupportedDataType } from '../../types';
 import {
   getExpressionType,
   getParamAtPosition,

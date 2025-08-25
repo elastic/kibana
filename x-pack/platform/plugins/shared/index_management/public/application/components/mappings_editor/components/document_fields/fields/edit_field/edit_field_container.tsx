@@ -10,7 +10,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../../..';
 import { useForm } from '../../../../shared_imports';
 import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
-import { Field } from '../../../../types';
+import type { Field } from '../../../../types';
 import { fieldSerializer, fieldDeserializer } from '../../../../lib';
 import { ModalConfirmationDeleteFields } from '../modal_confirmation_delete_fields';
 import { EditField } from './edit_field';

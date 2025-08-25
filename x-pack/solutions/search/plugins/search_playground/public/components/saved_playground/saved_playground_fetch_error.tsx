@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { PLUGIN_ID } from '../../../common';
 import { useKibana } from '../../hooks/use_kibana';
-import { SavedPlaygroundFormFetchError } from '../../types';
+import type { SavedPlaygroundFormFetchError } from '../../types';
 
 export const SavedPlaygroundFetchError = () => {
   const {
@@ -29,7 +29,7 @@ export const SavedPlaygroundFetchError = () => {
       title={
         <h1>
           {i18n.translate('xpack.searchPlayground.savedPlayground.fetchError.title', {
-            defaultMessage: 'Error loading playground',
+            defaultMessage: 'Error loading RAG playground',
           })}
         </h1>
       }

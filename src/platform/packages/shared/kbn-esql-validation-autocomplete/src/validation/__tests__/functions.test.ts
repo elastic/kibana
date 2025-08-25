@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  FunctionDefinition,
-  FunctionDefinitionTypes,
-  getNoValidCallSignatureError,
-} from '@kbn/esql-ast';
+import type { FunctionDefinition } from '@kbn/esql-ast';
+import { FunctionDefinitionTypes, getNoValidCallSignatureError } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';

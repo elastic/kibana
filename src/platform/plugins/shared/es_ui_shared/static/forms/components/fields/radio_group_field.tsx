@@ -11,7 +11,8 @@ import React from 'react';
 import { EuiFormRow, EuiRadioGroup } from '@elastic/eui';
 import camelCase from 'lodash/camelCase';
 
-import { FieldHook, getFieldValidityAndErrorMessage } from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {
   field: FieldHook;

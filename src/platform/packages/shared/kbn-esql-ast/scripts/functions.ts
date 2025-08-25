@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { RecursivePartial } from '@kbn/utility-types';
-import { FunctionDefinition, FunctionDefinitionTypes } from '../src/definitions/types';
+import type { FunctionDefinition } from '../src/definitions/types';
+import { FunctionDefinitionTypes } from '../src/definitions/types';
 import {
   defaultScalarFunctionLocations,
   dateDiffSuggestions,
