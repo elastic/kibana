@@ -4,11 +4,10 @@ import dagre from '@dagrejs/dagre';
 import { convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { NodeTypes, Node } from '@xyflow/react';
 import { Background, Controls, Position, ReactFlow } from '@xyflow/react';
-import { parseWorkflowYamlToJSON } from './yaml_utils';
-// import {
-//   WORKFLOW_ZOD_SCHEMA_LOOSE,
-//   parseWorkflowYamlToJSON,
-// } from '@kbn/workflows-management-plugin/common';
+import {
+  WORKFLOW_ZOD_SCHEMA_LOOSE,
+  parseWorkflowYamlToJSON,
+} from '@kbn/workflows-management-plugin/public';
 import { WorkflowGraphEdge, WorkflowGraphNode } from './nodes';
 import {
   mainScopeNodes,
@@ -19,7 +18,6 @@ import {
 } from './nodes/types';
 
 import '@xyflow/react/dist/style.css';
-import { WORKFLOW_ZOD_SCHEMA_LOOSE } from './schema';
 
 export interface WorkflowExecutionProps {
   workflowYaml: string;

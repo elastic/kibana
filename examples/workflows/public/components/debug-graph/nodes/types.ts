@@ -1,7 +1,12 @@
 export type NodeType = 'if' | 'merge' | 'parallel' | 'action' | 'foreach' | 'atomic' | 'trigger';
 
-export const openScopeNodes = ['enter-if', 'enter-foreach', 'enter-condition-branch'];
-export const closeScopeNodes = ['exit-if', 'exit-foreach', 'exit-condition-branch'];
+export const openScopeNodes = [
+  'enter-if',
+  'enter-foreach',
+  'enter-condition-branch',
+  'enter-retry',
+];
+export const closeScopeNodes = ['exit-if', 'exit-foreach', 'exit-condition-branch', 'exit-retry'];
 
 export const mainScopeNodes = [
   'enter-if',
