@@ -19,11 +19,12 @@ import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { ID as IndexThreshold } from './rule_types/index_threshold/rule_type';
 import { GEO_CONTAINMENT_ID as GeoContainment } from './rule_types/geo_containment';
+import { ID as Webhook } from './rule_types/webhook/rule_type';
 
 const TransformHealth = TRANSFORM_RULE_TYPE.TRANSFORM_HEALTH;
 const DISCOVER_CONSUMER = 'discover';
 
-const basicAlertingFeatures = [IndexThreshold, GeoContainment, TransformHealth].map(
+const basicAlertingFeatures = [IndexThreshold, GeoContainment, TransformHealth, Webhook].map(
   (ruleTypeId) => ({
     ruleTypeId,
     consumers: [STACK_ALERTS_FEATURE_ID, ALERTING_FEATURE_ID],
