@@ -599,6 +599,7 @@ export const QueryBarTopRow = React.memo(
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
       }
+      // console.log(props.isDirty);
       const iconDirty = Boolean(isQueryLangSelected) ? 'playFilled' : 'kqlFunction';
       const labelDirty = Boolean(isQueryLangSelected)
         ? strings.getRunQueryLabel()
@@ -861,7 +862,7 @@ const inputStringStyles = {
   datePickerWrapper: ({ euiTheme }: UseEuiTheme) =>
     css({
       '.euiDatePopoverButton-isInvalid': {
-        backgroundImage: `linear-gradient(0deg,${euiTheme.colors.danger},${euiTheme.colors.danger} ${euiTheme.size.xxs},#0000 0,#0000)`,
+        backgroundImage: `linear-gradient(0deg,red,red, 1px ,#0000 0,#0000)`,
       },
     }),
 };

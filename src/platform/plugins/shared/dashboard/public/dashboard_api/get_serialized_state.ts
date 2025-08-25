@@ -56,6 +56,7 @@ export const getSerializedState = ({
     description,
 
     // Dashboard options
+    autoApplyFilters,
     useMargins,
     syncColors,
     syncCursor,
@@ -83,6 +84,7 @@ export const getSerializedState = ({
     syncCursor,
     syncTooltips,
     hidePanelTitles,
+    autoApplyFilters,
   };
 
   /**

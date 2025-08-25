@@ -133,6 +133,7 @@ export const combineCompatibleChildrenApis = <ApiType extends unknown, Publishin
         if (isCompatible(child) && isObservable(child[observableKey]))
           compatibleChildren.push(child[observableKey] as BehaviorSubject<PublishingSubjectType>);
       }
+      if (observableKey === 'hasDraftFilters$') console.log({ compatibleChildren });
 
       if (compatibleChildren.length === 0) return of(emptyState);
 

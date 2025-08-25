@@ -77,7 +77,11 @@ export function getDashboardApi({
     () => unsavedChangesManager.internalApi.getLastSavedState(),
     creationOptions
   );
-  const filterManager = initializeFiltersManager(unifiedSearchManager, layoutManager);
+  const filtersManager = initializeFiltersManager(
+    unifiedSearchManager,
+    layoutManager,
+    settingsManager
+  );
   const unsavedChangesManager = initializeUnsavedChangesManager({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
@@ -112,7 +116,7 @@ export function getDashboardApi({
     ...dataViewsManager.api,
     ...layoutManager.api,
     ...settingsManager.api,
-    ...filterManager.api,
+    ...filtersManager.api,
     ...trackPanel,
     ...unifiedSearchManager.api,
     ...unsavedChangesManager.api,

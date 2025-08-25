@@ -112,6 +112,7 @@ export const loadDashboardState = async ({
     references,
     resolveMeta,
     dashboardInput: {
+      ...DEFAULT_DASHBOARD_STATE,
       ...options,
       refreshInterval,
       timeRestore,
