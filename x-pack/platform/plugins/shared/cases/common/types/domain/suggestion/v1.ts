@@ -11,6 +11,7 @@ import { OWNERS } from '../../../constants/owners';
 const suggestionOwnerSchema = z.enum(OWNERS);
 
 export const suggestionContextRt = z.object({
+  spaceId: z.string(),
   'service.name': z.array(z.string()).optional(),
   timeRange: z
     .object({
@@ -49,6 +50,7 @@ export interface SuggestionItem<
   /* Optional plaintext description of the entire suggestion payload.
    * This is used by the LLM to understand the context, but may also be used by the UI
    * to display a summary of all context items. */
+  componentId: string;
   description?: string;
   data: Array<AttachmentItem<TPayload>>; // The main data of the context, containing 1 or more context items
 }

@@ -73,6 +73,7 @@ describe('AttachmentSuggestionRegistry', () => {
         suggestions: [
           {
             id: 'suggestion-1',
+            componentId: 'test-component',
             description: 'Test suggestion 1',
             data: [],
           },
@@ -83,6 +84,7 @@ describe('AttachmentSuggestionRegistry', () => {
         suggestions: [
           {
             id: 'suggestion-2',
+            componentId: 'test-component',
             description: 'Test suggestion 2',
             data: [],
           },
@@ -112,6 +114,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
+        spaceId: 'default',
         'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
@@ -141,6 +144,7 @@ describe('AttachmentSuggestionRegistry', () => {
         suggestions: [
           {
             id: 'suggestion-1',
+            componentId: 'test-component',
             description: 'Test suggestion 1',
             data: [],
           },
@@ -174,6 +178,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
+        spaceId: 'default',
         'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',
@@ -235,6 +240,7 @@ describe('AttachmentSuggestionRegistry', () => {
       registry.register(suggestionType);
 
       const context: SuggestionContext = {
+        spaceId: 'default',
         'service.name': ['test-service'],
         timeRange: {
           from: '2023-01-01T00:00:00Z',

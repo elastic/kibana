@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
-import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -73,6 +73,7 @@ export interface SLOPublicPluginsSetup {
   uiActions: UiActionsSetup;
   usageCollection: UsageCollectionSetup;
   security?: SecurityPluginSetup;
+  cases?: CasesPublicSetup;
 }
 
 export interface SLOPublicPluginsStart {

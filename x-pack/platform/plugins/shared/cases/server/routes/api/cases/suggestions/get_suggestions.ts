@@ -30,7 +30,7 @@ export const getSuggestionsRoute = createCasesRoute({
   },
   handler: async ({ context, request, response }): Promise<IKibanaResponse<SuggestionResponse>> => {
     try {
-      const caseContext = await context.cases;
+      const [caseContext, spaceService] = await Promise.all([context.cases, context.spacesService]);
       const casesClient = await caseContext.getCasesClient();
       const caseData = await casesClient.cases.get({
         id: request.params.case_id,
@@ -63,7 +63,7 @@ export const getSuggestionsRoute = createCasesRoute({
 
       const suggestions = await casesClient.suggestions.getAllForOwners({
         owners,
-        context: metadata,
+        context: { ...metadata, spaceId: spaceService.getSpaceId(request) },
         request,
       });
       return response.ok({

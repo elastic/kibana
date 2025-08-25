@@ -41,6 +41,7 @@ import type {
 import { getLazyWithContextProviders } from './utils/get_lazy_with_context_providers';
 import { registerSloUiActions } from './ui_actions/register_ui_actions';
 import { SloDetailsHistoryLocatorDefinition } from './locators/slo_details_history';
+import { registerSloSuggestion } from './cases/suggestion_definition';
 
 export class SLOPlugin
   implements Plugin<SLOPublicSetup, SLOPublicStart, SLOPublicPluginsSetup, SLOPublicPluginsStart>
@@ -104,7 +105,7 @@ export class SLOPlugin
     // Register an application into the side navigation menu
     core.application.register(app);
 
-    const registerRules = async () => {
+    const registerRulesAndSuggestions = async () => {
       const [coreStart, pluginsStart] = await core.getStartServices();
       const lazyWithContextProviders = getLazyWithContextProviders({
         core: coreStart,
@@ -122,8 +123,12 @@ export class SLOPlugin
         plugins.observability.observabilityRuleTypeRegistry,
         lazyWithContextProviders
       );
+
+      if (plugins.cases?.attachmentFramework) {
+        registerSloSuggestion(plugins.cases.attachmentFramework, lazyWithContextProviders);
+      }
     };
-    registerRules();
+    registerRulesAndSuggestions();
 
     const registerEmbeddables = async () => {
       const licensing = plugins.licensing;

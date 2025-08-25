@@ -18,7 +18,11 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import type {
+  SpacesPluginSetup,
+  SpacesPluginStart,
+  SpacesServiceSetup,
+} from '@kbn/spaces-plugin/server';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LensServerPluginSetup } from '@kbn/lens-plugin/server';
 import type {
@@ -47,7 +51,7 @@ export interface CasesServerSetupDependencies {
   licensing: LicensingPluginSetup;
   taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
-  spaces?: SpacesPluginSetup;
+  spaces: SpacesPluginSetup;
   cloud?: CloudSetup;
 }
 
@@ -58,7 +62,7 @@ export interface CasesServerStartDependencies {
   licensing: LicensingPluginStart;
   taskManager: TaskManagerStartContract;
   security: SecurityPluginStart;
-  spaces?: SpacesPluginStart;
+  spaces: SpacesPluginStart;
   notifications: NotificationsPluginStart;
   ruleRegistry: RuleRegistryPluginStartContract;
 }
@@ -69,6 +73,7 @@ export interface CaseRequestContext {
 
 export type CasesRequestHandlerContext = CustomRequestHandlerContext<{
   cases: CaseRequestContext;
+  spacesService: SpacesServiceSetup;
 }>;
 
 export type CasesRouter = IRouter<CasesRequestHandlerContext>;

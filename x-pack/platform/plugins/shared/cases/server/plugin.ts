@@ -138,6 +138,11 @@ export class CasePlugin
       })
     );
 
+    core.http.registerRouteHandlerContext<CasesRequestHandlerContext, 'spacesService'>(
+      'spacesService',
+      () => plugins.spaces.spacesService
+    );
+
     if (plugins.taskManager && plugins.usageCollection) {
       createCasesTelemetry({
         core,
