@@ -11,6 +11,7 @@ import * as i18n from './translations';
 import { CaseSummaryContents } from './contents';
 import { useGetCaseSummary } from '../../../../containers/use_get_case_summary';
 import { useGetInferenceConnectors } from '../../../../containers/use_get_inference_connectors';
+import { useLicense } from '../../../../common/use_license';
 
 export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
   const [isSummaryOpen, setIsSummaryOpen] = useState(false);
@@ -28,6 +29,12 @@ export const CaseSummary = React.memo(({ caseId }: { caseId: string }) => {
   const handleCaseSummaryClick = useCallback(() => {
     fetchCaseSummary();
   }, [fetchCaseSummary]);
+
+  const { isAtLeastEnterprise } = useLicense();
+
+  if (!isAtLeastEnterprise || !connectorId) {
+    return null;
+  }
 
   return (
     <EuiFlexItem grow={false} data-test-subj="caseSummary">
