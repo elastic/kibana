@@ -20,10 +20,10 @@ import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/publ
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { Filter } from '@kbn/es-query';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DatatableUtilitiesService } from '../common';
 import type { ISearchSetup, ISearchStart } from './search';
 import type { QuerySetup, QueryStart } from './query';
-import type { DataViewsContract } from './data_views';
 import type { NowProviderPublicContract } from './now_provider';
 import type {
   MultiValueClickDataContext,
