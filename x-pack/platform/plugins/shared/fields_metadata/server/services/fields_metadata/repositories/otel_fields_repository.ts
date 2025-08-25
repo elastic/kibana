@@ -40,6 +40,30 @@ interface FindOptions {
   fieldNames?: OtelFieldName[];
 }
 
+/**
+ * Strip common OpenTelemetry prefixes from field names to match the actual field names
+ * in the semantic conventions dictionary.
+ * 
+ * Examples:
+ * - "resource.attributes.cloud.account.id" -> "cloud.account.id"
+ * - "attributes.service.name" -> "service.name"
+ * - "cloud.account.id" -> "cloud.account.id" (no change)
+ */
+function stripOtelPrefixes(fieldName: string): string {
+  // Strip "resource.attributes." prefix
+  if (fieldName.startsWith('resource.attributes.')) {
+    return fieldName.substring('resource.attributes.'.length);
+  }
+  
+  // Strip "attributes." prefix
+  if (fieldName.startsWith('attributes.')) {
+    return fieldName.substring('attributes.'.length);
+  }
+  
+  // Return original field name if no prefixes match
+  return fieldName;
+}
+
 export class OtelFieldsRepository {
   private readonly otelFields: Record<OtelFieldName, FieldMetadata>;
 
@@ -50,7 +74,9 @@ export class OtelFieldsRepository {
   }
 
   getByName(fieldName: OtelFieldName | AnyFieldName): FieldMetadata | undefined {
-    return this.otelFields[fieldName as OtelFieldName];
+    // Strip OTel prefixes before looking up the field
+    const strippedFieldName = stripOtelPrefixes(fieldName as string);
+    return this.otelFields[strippedFieldName as OtelFieldName];
   }
 
   find({ fieldNames }: FindOptions = {}): FieldsMetadataDictionary {
@@ -59,10 +85,13 @@ export class OtelFieldsRepository {
     }
 
     const fields = fieldNames.reduce((fieldsMetadata, fieldName) => {
-      const field = this.getByName(fieldName);
+      // Strip OTel prefixes before looking up the field
+      const strippedFieldName = stripOtelPrefixes(fieldName as string);
+      const field = this.otelFields[strippedFieldName as OtelFieldName];
 
       if (field) {
-        fieldsMetadata[fieldName] = field;
+        // Use the stripped field name as the key in the result
+        fieldsMetadata[strippedFieldName as OtelFieldName] = field;
       }
 
       return fieldsMetadata;

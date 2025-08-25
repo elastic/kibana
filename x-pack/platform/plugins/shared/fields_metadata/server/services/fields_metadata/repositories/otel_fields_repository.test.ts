@@ -35,6 +35,18 @@ const mockOtelFields: TOtelFields = {
       'Difference in system.cpu.time since the last measurement, divided by the elapsed time and number of CPUs available to the process.',
     type: 'double',
   },
+  'cloud.account.id': {
+    name: 'cloud.account.id',
+    description: 'The cloud account id the resource is assigned to.',
+    type: 'keyword',
+    example: '111111111111',
+  },
+  'cloud.provider': {
+    name: 'cloud.provider',
+    description: 'Name of the cloud provider.',
+    type: 'keyword',
+    example: 'aws',
+  },
 } as const;
 
 describe('OtelFieldsRepository', () => {
@@ -136,11 +148,13 @@ describe('OtelFieldsRepository', () => {
       const fieldsDict = otelFieldsRepository.find();
       const fields = fieldsDict.getFields();
 
-      expect(Object.keys(fields)).toHaveLength(4);
+      expect(Object.keys(fields)).toHaveLength(6);
       expect(fields['service.name']).toBeDefined();
       expect(fields['service.version']).toBeDefined();
       expect(fields['http.request.method']).toBeDefined();
       expect(fields['system.cpu.utilization']).toBeDefined();
+      expect(fields['cloud.account.id']).toBeDefined();
+      expect(fields['cloud.provider']).toBeDefined();
 
       // Verify all fields have 'otel' source
       Object.values(fields).forEach((field) => {
@@ -244,6 +258,180 @@ describe('OtelFieldsRepository', () => {
 
       Object.values(fields).forEach((field) => {
         expect(field.source).toBe('otel');
+      });
+    });
+  });
+
+  describe('prefix stripping functionality', () => {
+    describe('getByName method with prefixes', () => {
+      it('should strip "resource.attributes." prefix and find field', () => {
+        const field = otelFieldsRepository.getByName('resource.attributes.cloud.account.id');
+
+        expect(field).toBeDefined();
+        expect(field!.name).toBe('cloud.account.id');
+        expect(field!.description).toBe('The cloud account id the resource is assigned to.');
+        expect(field!.type).toBe('keyword');
+        expect(field!.example).toBe('111111111111');
+        expect(field!.source).toBe('otel');
+      });
+
+      it('should strip "attributes." prefix and find field', () => {
+        const field = otelFieldsRepository.getByName('attributes.service.name');
+
+        expect(field).toBeDefined();
+        expect(field!.name).toBe('service.name');
+        expect(field!.description).toBe('Logical name of the service.');
+        expect(field!.type).toBe('keyword');
+        expect(field!.example).toBe('shoppingcart');
+        expect(field!.source).toBe('otel');
+      });
+
+      it('should return original field when no prefix matches', () => {
+        const field = otelFieldsRepository.getByName('cloud.provider');
+
+        expect(field).toBeDefined();
+        expect(field!.name).toBe('cloud.provider');
+        expect(field!.description).toBe('Name of the cloud provider.');
+        expect(field!.type).toBe('keyword');
+        expect(field!.example).toBe('aws');
+        expect(field!.source).toBe('otel');
+      });
+
+      it('should return undefined for non-existing field even after stripping', () => {
+        const field = otelFieldsRepository.getByName('resource.attributes.non.existing.field');
+
+        expect(field).toBeUndefined();
+      });
+
+      it('should handle multiple prefix types correctly', () => {
+        const resourceField = otelFieldsRepository.getByName('resource.attributes.service.version');
+        const attributesField = otelFieldsRepository.getByName('attributes.service.version');
+        const normalField = otelFieldsRepository.getByName('service.version');
+
+        // All should return the same field metadata
+        expect(resourceField).toBeDefined();
+        expect(attributesField).toBeDefined();
+        expect(normalField).toBeDefined();
+
+        expect(resourceField!.name).toBe('service.version');
+        expect(attributesField!.name).toBe('service.version');
+        expect(normalField!.name).toBe('service.version');
+      });
+
+      it('should handle edge cases with prefix stripping', () => {
+        // Test field names that start with prefix but don't have content after
+        expect(otelFieldsRepository.getByName('resource.attributes.')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('attributes.')).toBeUndefined();
+
+        // Test partial matches that shouldn't be stripped
+        expect(otelFieldsRepository.getByName('resource.attribute.service.name')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('attribute.service.name')).toBeUndefined();
+      });
+    });
+
+    describe('find method with prefixes', () => {
+      it('should strip prefixes and return fields with stripped names as keys', () => {
+        const fieldsDict = otelFieldsRepository.find({
+          fieldNames: [
+            'resource.attributes.cloud.account.id',
+            'attributes.service.name',
+            'cloud.provider', // no prefix
+          ],
+        });
+        const fields = fieldsDict.getFields();
+
+        expect(Object.keys(fields)).toHaveLength(3);
+
+        // Check that keys are the stripped field names
+        expect(fields['cloud.account.id']).toBeDefined();
+        expect(fields['service.name']).toBeDefined();
+        expect(fields['cloud.provider']).toBeDefined();
+
+        // Verify field contents
+        expect(fields['cloud.account.id'].name).toBe('cloud.account.id');
+        expect(fields['service.name'].name).toBe('service.name');
+        expect(fields['cloud.provider'].name).toBe('cloud.provider');
+      });
+
+      it('should handle mixed existing and non-existing fields with prefixes', () => {
+        const fieldsDict = otelFieldsRepository.find({
+          fieldNames: [
+            'resource.attributes.cloud.account.id', // exists
+            'attributes.non.existing.field', // doesn't exist
+            'resource.attributes.service.name', // exists
+          ],
+        });
+        const fields = fieldsDict.getFields();
+
+        expect(Object.keys(fields)).toHaveLength(2);
+        expect(fields['cloud.account.id']).toBeDefined();
+        expect(fields['service.name']).toBeDefined();
+        expect(fields['non.existing.field']).toBeUndefined();
+      });
+
+      it('should deduplicate fields when different prefixes resolve to same field', () => {
+        const fieldsDict = otelFieldsRepository.find({
+          fieldNames: [
+            'resource.attributes.service.name',
+            'attributes.service.name',
+            'service.name', // all resolve to the same field
+          ],
+        });
+        const fields = fieldsDict.getFields();
+
+        // Should only have one entry for service.name
+        expect(Object.keys(fields)).toHaveLength(1);
+        expect(fields['service.name']).toBeDefined();
+        expect(fields['service.name'].name).toBe('service.name');
+      });
+
+      it('should handle complex field names with prefixes', () => {
+        const fieldsDict = otelFieldsRepository.find({
+          fieldNames: [
+            'resource.attributes.http.request.method',
+            'attributes.system.cpu.utilization',
+          ],
+        });
+        const fields = fieldsDict.getFields();
+
+        expect(Object.keys(fields)).toHaveLength(2);
+        expect(fields['http.request.method']).toBeDefined();
+        expect(fields['system.cpu.utilization']).toBeDefined();
+      });
+
+      it('should return empty results when all prefixed fields are non-existing', () => {
+        const fieldsDict = otelFieldsRepository.find({
+          fieldNames: [
+            'resource.attributes.non.existing.field',
+            'attributes.another.missing.field',
+          ],
+        });
+        const fields = fieldsDict.getFields();
+
+        expect(Object.keys(fields)).toHaveLength(0);
+      });
+    });
+
+    describe('prefix stripping edge cases', () => {
+      it('should not strip partial prefix matches', () => {
+        // These should not be stripped because they don't match the full prefix
+        const partialResource = otelFieldsRepository.getByName('resource.attr.service.name');
+        const partialAttributes = otelFieldsRepository.getByName('attr.service.name');
+
+        expect(partialResource).toBeUndefined();
+        expect(partialAttributes).toBeUndefined();
+      });
+
+      it('should handle empty strings and special characters', () => {
+        expect(otelFieldsRepository.getByName('')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('resource.attributes.')).toBeUndefined();
+        expect(otelFieldsRepository.getByName('attributes.')).toBeUndefined();
+      });
+
+      it('should preserve case sensitivity in field names', () => {
+        // OTel field names are case sensitive
+        const field = otelFieldsRepository.getByName('resource.attributes.Service.Name');
+        expect(field).toBeUndefined(); // Should not match 'service.name'
       });
     });
   });
