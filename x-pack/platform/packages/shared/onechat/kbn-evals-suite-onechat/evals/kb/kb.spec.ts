@@ -88,4 +88,51 @@ evaluate.describe('Default Agent Knowledge Base Retrieval', { tag: '@svlSearch' 
       },
     });
   });
+  evaluate('ambiguous queries', async ({ evaluateDataset }) => {
+    await evaluateDataset({
+      dataset: {
+        name: 'onechat: default-agent-ambiguous-queries',
+        description: 'Dataset containing ambiguous queries',
+        examples: [
+          {
+            input: {
+              question: 'List projects which are unhealthy?',
+            },
+            output: {
+              expected: 'Can you clarify how to determine if a project is unhealthy',
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question: 'Can I get a list of our most active users from last week?',
+            },
+            output: {
+              expected: 'What is the definition of an active user?',
+            },
+            metadata: {},
+          },
+          {
+            input: {
+              question: 'Who are our top-performing support agents?',
+            },
+            output: {
+              expected: 'How do you define performance for an agent?',
+            },
+
+            metadata: {},
+          },
+          {
+            input: {
+              question: 'I would like to view my invoices.',
+            },
+            output: {
+              expected: 'Can you clarify which invoices would you like to see?',
+            },
+            metadata: {},
+          },
+        ],
+      },
+    });
+  });
 });
