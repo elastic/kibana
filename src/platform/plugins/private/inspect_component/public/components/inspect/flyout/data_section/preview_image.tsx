@@ -22,19 +22,19 @@ interface Props {
 const PREVIEW_ALT_TEXT = i18n.translate(
   'kbnInspectComponent.inspectFlyout.dataSection.previewImageAltText',
   {
-    defaultMessage: 'Preview of the selected element',
+    defaultMessage: 'Preview of the component associated with the selected element',
   }
 );
 
 const PREVIEW_BADGE_LABEL = i18n.translate(
   'kbnInspectComponent.inspectFlyout.dataSection.previewCardLabel',
   {
-    defaultMessage: 'Preview',
+    defaultMessage: 'Component Preview',
   }
 );
 
 /**
- * The PreviewImage component is responsible for rendering a preview of a given HTML or SVG element.
+ * The PreviewImage component is responsible for rendering a preview of a user-creted component associated with target DOM element.
  */
 export const PreviewImage = ({ targetDomElement }: Props) => {
   const [screenshot, setScreenshot] = useState('');
@@ -52,6 +52,10 @@ export const PreviewImage = ({ targetDomElement }: Props) => {
     width: ${CARD_WIDTH}px;
     height: ${CARD_HEIGHT}px;
     margin: 0 auto;
+  `;
+
+  const badgeCss = css`
+    user-select: none;
   `;
 
   useEffect(() => {
@@ -115,6 +119,7 @@ export const PreviewImage = ({ targetDomElement }: Props) => {
           title=""
           betaBadgeProps={{
             label: PREVIEW_BADGE_LABEL,
+            css: badgeCss,
           }}
           css={cardCss}
           paddingSize="xs"

@@ -15,10 +15,11 @@ export const EUI_PORTAL_ATTRIBUTE = '[data-euiportal="true"]';
 export const EUI_DOCS_BASE = 'https://eui.elastic.co/docs';
 export const COMPONENT_PATH_IGNORED_TYPES = [
   'Emotion',
-  'Router',
   'ConnectFunction',
   '_',
   'EuiI18n',
+  'Route',
+  'Wrapper',
 ];
 
 export const EUI_COMPONENTS_DOCS_MAP = new Map<string, string>([

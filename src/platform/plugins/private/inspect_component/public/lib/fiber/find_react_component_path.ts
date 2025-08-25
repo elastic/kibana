@@ -54,7 +54,7 @@ export const findReactComponentPath = (
         /** Remove wrappers. */
         if (
           type &&
-          !COMPONENT_PATH_IGNORED_TYPES.some((t) => type.startsWith(t)) &&
+          !COMPONENT_PATH_IGNORED_TYPES.some((t) => type.includes(t)) &&
           type.length > 1
         ) {
           path.push(type);
