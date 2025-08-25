@@ -140,6 +140,33 @@ describe('#getAllFields', () => {
     ]);
   });
 
+  it('should map semconv string ip metadata properly', () => {
+    const result: InfraMetadata = {
+      id: 'host1',
+      name: 'host1',
+      hasSystemIntegration: true,
+      features: [
+        {
+          name: 'system.core',
+          source: 'metrics',
+        },
+      ],
+      info: {
+        resource: {
+          attributes: {
+            host: {
+              ip: '10.10.10.10',
+            },
+          },
+        },
+      },
+    };
+
+    expect(getAllFields(result, 'semconv')).toStrictEqual([
+      { name: 'resource.attributes.host.ip', value: '10.10.10.10' },
+    ]);
+  });
+
   it('should map metadata with nested properties', async () => {
     const result: InfraMetadata = {
       id: 'host1',
