@@ -1691,6 +1691,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING",
+        "description": [],
+        "signature": [
+          "\"securitySolution:suppressionBehaviorOnAlertClosure\""
+        ],
+        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_TIME_DEFAULTS_ID",
         "type": "string",
         "tags": [],

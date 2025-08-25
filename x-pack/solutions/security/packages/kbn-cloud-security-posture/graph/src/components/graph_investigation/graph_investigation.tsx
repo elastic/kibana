@@ -369,6 +369,7 @@ export const GraphInvestigation = memo<GraphInvestigationProps>(
               edges={data?.edges ?? []}
               interactive={true}
               isLocked={isPopoverOpen}
+              showMinimap={true}
             >
               <Panel position="top-right">
                 <Actions

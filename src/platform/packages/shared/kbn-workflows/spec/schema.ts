@@ -279,7 +279,10 @@ export const WorkflowContextSchema = z.object({
   ),
   foreach: z
     .object({
+      items: z.array(z.any()),
+      index: z.number().int(),
       item: z.any(),
+      total: z.number().int(),
     })
     .optional(),
   now: z.date().optional(),

@@ -19,19 +19,26 @@ export class WorkflowExecutionRepository {
    * Retrieves a workflow execution by its ID from Elasticsearch.
    *
    * @param workflowExecutionId - The ID of the workflow execution to retrieve.
+   * @param spaceId - The ID of the space associated with the workflow execution.
    * @returns A promise that resolves to the workflow execution document, or null if not found.
    */
   public async getWorkflowExecutionById(
-    workflowExecutionId: string
+    workflowExecutionId: string,
+    spaceId: string
   ): Promise<EsWorkflowExecution | null> {
-    const response = await this.esClient.get<EsWorkflowExecution>({
+    const response = await this.esClient.search<EsWorkflowExecution>({
       index: this.indexName,
-      id: workflowExecutionId,
+      query: {
+        bool: {
+          filter: [{ term: { id: workflowExecutionId } }, { term: { spaceId } }],
+        },
+      },
+      size: 1,
     });
-    if (!response.found) {
+    if (response.hits.hits.length === 0) {
       return null;
     }
-    return response._source as EsWorkflowExecution;
+    return response.hits.hits[0]._source as EsWorkflowExecution;
   }
 
   /**

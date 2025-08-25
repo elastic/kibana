@@ -11,10 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
-import {
-  convertToSerializableGraph,
-  convertToWorkflowGraph,
-} from '../../common/lib/build_execution_graph/build_execution_graph';
+import { convertToSerializableGraph, convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {

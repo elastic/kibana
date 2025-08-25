@@ -894,10 +894,12 @@
             "parentPluginId": "features",
             "id": "def-public.KibanaFeatureConfig.hidden",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "hidden",
             "description": [
-              "\nIndicates whether the feature is available as a standalone feature. The feature can still be\nreferenced by other features, but it will not be displayed in any feature management UIs. By default, all features\nare visible."
+              "\nIndicates whether the feature is available as a standalone feature. The feature can still be\nreferenced by other features, but it will not be displayed in any feature management UIs. By default, all features\nare visible.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -3142,10 +3144,12 @@
             "parentPluginId": "features",
             "id": "def-server.KibanaFeatureConfig.hidden",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "hidden",
             "description": [
-              "\nIndicates whether the feature is available as a standalone feature. The feature can still be\nreferenced by other features, but it will not be displayed in any feature management UIs. By default, all features\nare visible."
+              "\nIndicates whether the feature is available as a standalone feature. The feature can still be\nreferenced by other features, but it will not be displayed in any feature management UIs. By default, all features\nare visible.\n"
             ],
             "signature": [
               "boolean | undefined"
@@ -4743,10 +4747,12 @@
             "parentPluginId": "features",
             "id": "def-common.KibanaFeatureConfig.hidden",
             "type": "CompoundType",
-            "tags": [],
+            "tags": [
+              "note"
+            ],
             "label": "hidden",
             "description": [
-              "\nIndicates whether the feature is available as a standalone feature. The feature can still be\nreferenced by other features, but it will not be displayed in any feature management UIs. By default, all features\nare visible."
+              "\nIndicates whether the feature is available as a standalone feature. The feature can still be\nreferenced by other features, but it will not be displayed in any feature management UIs. By default, all features\nare visible.\n"
             ],
             "signature": [
               "boolean | undefined"

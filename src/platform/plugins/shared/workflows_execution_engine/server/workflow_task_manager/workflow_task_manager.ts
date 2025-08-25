@@ -16,14 +16,17 @@ export class WorkflowTaskManager {
   async scheduleResumeTask({
     runAt,
     workflowRunId,
+    spaceId,
   }: {
     runAt: Date;
     workflowRunId: string;
+    spaceId: string;
   }): Promise<{ taskId: string }> {
     const task = await this.taskManager.schedule({
       taskType: 'workflow:resume',
       params: {
         workflowRunId,
+        spaceId,
       } as ResumeWorkflowExecutionParams,
       state: {},
       runAt,

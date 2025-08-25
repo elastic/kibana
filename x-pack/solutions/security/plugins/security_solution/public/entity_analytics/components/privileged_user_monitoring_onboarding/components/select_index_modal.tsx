@@ -180,7 +180,11 @@ export const IndexSelectorModal = ({
       <EuiModalFooter>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty iconType="plusInCircle" onClick={showCreateIndexModal}>
+            <EuiButtonEmpty
+              iconType="plusInCircle"
+              onClick={showCreateIndexModal}
+              data-test-subj="create-index-button"
+            >
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.createIndexButtonLabel"
                 defaultMessage="Create index"
@@ -195,7 +199,12 @@ export const IndexSelectorModal = ({
                   defaultMessage="Cancel"
                 />
               </EuiButtonEmpty>
-              <EuiButton onClick={addPrivilegedUsers} fill disabled={selectedOptions.length === 0}>
+              <EuiButton
+                onClick={addPrivilegedUsers}
+                fill
+                disabled={selectedOptions.length === 0}
+                data-test-subj="privileged-user-monitoring-update-button"
+              >
                 <FormattedMessage
                   id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.selectIndex.addUserButtonLabel"
                   defaultMessage="Update privileged users"

@@ -305,6 +305,7 @@ export class SearchService implements Plugin<ISearchSetup, ISearchStart> {
               storage: new Storage(window.localStorage),
               usageCollector: this.usageCollector,
               tourDisabled: screenshotMode.isScreenshotMode(),
+              featureFlags: coreStart.featureFlags,
             })
           ),
           startServices

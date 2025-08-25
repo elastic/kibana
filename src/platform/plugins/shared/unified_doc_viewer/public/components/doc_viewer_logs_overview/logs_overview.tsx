@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { forwardRef, useImperativeHandle, useRef } from 'react';
+import React, { forwardRef, useImperativeHandle, useRef, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { getLogDocumentOverview } from '@kbn/discover-utils';
 import { EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
@@ -63,10 +63,10 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
     const qualityIssuesSectionRef = useRef<ScrollableSectionWrapperApi>(null);
     const stackTraceSectionRef = useRef<ScrollableSectionWrapperApi>(null);
-    const containerRef = useRef<HTMLDivElement>(null);
+    const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
 
-    const containerHeight = containerRef.current
-      ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
+    const containerHeight = containerRef
+      ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
       : 0;
 
     useImperativeHandle(
@@ -91,16 +91,14 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
         onRemoveColumn={onRemoveColumn}
       >
         <div
-          ref={containerRef}
+          ref={setContainerRef}
           css={
             containerHeight
               ? css`
                   height: ${containerHeight}px;
                   overflow: auto;
                 `
-              : css`
-                  display: block;
-                `
+              : undefined
           }
         >
           <EuiSpacer size="m" />

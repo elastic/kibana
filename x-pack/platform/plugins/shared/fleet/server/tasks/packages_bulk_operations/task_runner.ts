@@ -28,8 +28,13 @@ export function registerPackagesBulkOperationTask(taskManager: TaskManagerSetupC
     [TASK_TYPE]: {
       title: TASK_TITLE,
       timeout: TASK_TIMEOUT,
-      createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-        const abortController = new AbortController();
+      createTaskRunner: ({
+        taskInstance,
+        abortController,
+      }: {
+        taskInstance: ConcreteTaskInstance;
+        abortController: AbortController;
+      }) => {
         const logger = appContextService.getLogger();
 
         return {

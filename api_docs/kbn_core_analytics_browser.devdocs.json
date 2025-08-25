@@ -952,6 +952,10 @@
                 "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
               },
               {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_client.ts"
+              },
+              {
                 "plugin": "observabilityOnboarding",
                 "path": "x-pack/solutions/observability/plugins/observability_onboarding/server/routes/flow/route.ts"
               },
@@ -1506,6 +1510,14 @@
               {
                 "plugin": "apm",
                 "path": "x-pack/solutions/observability/plugins/apm/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
+              },
+              {
+                "plugin": "infra",
+                "path": "x-pack/solutions/observability/plugins/infra/public/services/telemetry/telemetry_service.test.ts"
               },
               {
                 "plugin": "infra",

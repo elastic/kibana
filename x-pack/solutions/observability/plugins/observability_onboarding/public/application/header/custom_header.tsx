@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageTemplate,
@@ -29,16 +28,9 @@ interface Props {
   euiIconType?: EuiIconType;
   headlineCopy: string;
   captionCopy: string;
-  isTechnicalPreview?: boolean;
 }
 
-export function CustomHeader({
-  euiIconType,
-  logo,
-  headlineCopy,
-  captionCopy,
-  isTechnicalPreview = false,
-}: Props) {
+export function CustomHeader({ euiIconType, logo, headlineCopy, captionCopy }: Props) {
   const theme = useEuiTheme();
   const shadow = useEuiShadow('s');
   return (
@@ -80,31 +72,9 @@ export function CustomHeader({
           </div>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFlexGroup alignItems="baseline" gutterSize="m">
-            <EuiTitle size="l">
-              <h1>{headlineCopy}</h1>
-            </EuiTitle>
-            {isTechnicalPreview && (
-              <EuiBetaBadge
-                label={i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.label',
-                  {
-                    defaultMessage: 'Technical preview',
-                  }
-                )}
-                size="m"
-                color="hollow"
-                tooltipContent={i18n.translate(
-                  'xpack.observability_onboarding.otelLogsPanel.techPreviewBadge.tooltip',
-                  {
-                    defaultMessage:
-                      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
-                  }
-                )}
-                tooltipPosition={'right'}
-              />
-            )}
-          </EuiFlexGroup>
+          <EuiTitle size="l">
+            <h1>{headlineCopy}</h1>
+          </EuiTitle>
           <EuiSpacer size="s" />
           <EuiText size="m">
             <p>{captionCopy}</p>

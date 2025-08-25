@@ -22,6 +22,8 @@ import { fifteenMinutesInMilliseconds } from '../../constants';
 
 const ALERT_RULE_PARAMTERS_INVENTORY_METRIC_ID = `${ALERT_RULE_PARAMETERS}.criteria.metric`;
 export const ALERT_RULE_PARAMETERS_NODE_TYPE = `${ALERT_RULE_PARAMETERS}.nodeType`;
+export const ALERT_RULE_PARAMETERS_SCHEMA = `${ALERT_RULE_PARAMETERS}.schema`;
+
 const CUSTOM_METRIC_TYPE = 'custom';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
@@ -68,6 +70,7 @@ export const getInventoryViewInAppUrl = ({
     : fields;
 
   const nodeType = castArray(inventoryFields[ALERT_RULE_PARAMETERS_NODE_TYPE])[0];
+  const preferredSchema = castArray(inventoryFields[ALERT_RULE_PARAMETERS_SCHEMA])[0];
 
   if (!nodeType) {
     return '';
@@ -95,6 +98,7 @@ export const getInventoryViewInAppUrl = ({
     timestamp: Date.parse(inventoryFields[TIMESTAMP]),
     customMetric: '',
     metric: '',
+    preferredSchema,
   };
 
   // We always pick the first criteria metric for the URL

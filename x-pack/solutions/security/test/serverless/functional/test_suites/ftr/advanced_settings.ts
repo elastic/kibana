@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SECURITY_PROJECT_SETTINGS } from '@kbn/serverless-security-settings';
+import { SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING } from '@kbn/management-settings-ids';
 import { isEditorFieldSetting } from '@kbn/test-suites-xpack-platform/serverless/functional/test_suites/management/advanced_settings';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -15,6 +16,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects(['svlCommonPage', 'common']);
   const browser = getService('browser');
   const retry = getService('retry');
+
+  const featureFlaggedSettings: string[] = [
+    SECURITY_SOLUTION_SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  ];
 
   describe('Security advanced settings', function () {
     before(async () => {
@@ -35,6 +40,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       for (const settingId of SECURITY_PROJECT_SETTINGS) {
         // Code editors don't have their test subjects rendered
         if (isEditorFieldSetting(settingId)) {
+          continue;
+        }
+        // settings behind feature flags are not available in a general setup
+        if (featureFlaggedSettings.includes(settingId)) {
           continue;
         }
         it('renders ' + settingId + ' edit field', async () => {

@@ -20,7 +20,8 @@ export {
   executeEsql,
   type EsqlResponse,
   listIndices,
-  type ListIndexInfo,
+  type ListIndexDetailInfo,
+  type ListIndexBasicInfo,
 } from './tools/steps';
 export {
   indexExplorer,
@@ -30,4 +31,6 @@ export {
   relevanceSearch,
   type RelevanceSearchResponse,
   naturalLanguageSearch,
+  type NaturalLanguageSearchResponse,
+  runSearchTool,
 } from './tools';

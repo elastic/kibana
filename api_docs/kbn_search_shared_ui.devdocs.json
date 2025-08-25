@@ -108,6 +108,21 @@
     "misc": [
       {
         "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.ELASTIC_LLM_COST_TOUR_SKIP_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "ELASTIC_LLM_COST_TOUR_SKIP_KEY",
+        "description": [],
+        "signature": [
+          "\"search_elastic_llm_cost_info_skip\""
+        ],
+        "path": "x-pack/solutions/search/packages/shared-ui/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
         "id": "def-public.GLOBAL_EMPTY_STATE_SKIP_KEY",
         "type": "string",
         "tags": [],

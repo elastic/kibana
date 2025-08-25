@@ -7,7 +7,7 @@
 
 export { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from './definition';
 export { isReservedToolId, isBuiltInToolId, idRegexp } from './tool_ids';
-export { builtinToolIds, builtinTags, builtInToolIdPrefix } from './constants';
+export { builtinToolIds, builtinTags, builtInToolIdPrefix, defaultAgentToolIds } from './constants';
 export {
   type ByIdsToolSelection,
   type ToolSelection,
@@ -27,3 +27,12 @@ export {
   type EsqlToolDefinitionWithSchema,
   isEsqlTool,
 } from './esql';
+export {
+  ToolResultType,
+  type ToolResult,
+  type ErrorResult,
+  type QueryResult,
+  type ResourceResult,
+  type TabularDataResult,
+  type OtherResult,
+} from './tool_result';

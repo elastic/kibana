@@ -227,11 +227,11 @@ export class WorkflowsManagementApi {
     };
   }
 
-  public async getWorkflowStats() {
-    return await this.workflowsService.getWorkflowStats();
+  public async getWorkflowStats(spaceId: string) {
+    return await this.workflowsService.getWorkflowStats(spaceId);
   }
 
-  public async getWorkflowAggs(fields: string[] = []) {
-    return await this.workflowsService.getWorkflowAggs(fields);
+  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
+    return await this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 }

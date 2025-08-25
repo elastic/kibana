@@ -9,4 +9,5 @@
 
 export interface ResumeWorkflowExecutionParams {
   workflowRunId: string;
+  spaceId: string;
 }

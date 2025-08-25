@@ -149,11 +149,12 @@ export class LinksPlugin
       }
     );
 
-    plugins.dashboard.registerDashboardPanelPlacementSetting(
+    plugins.dashboard.registerDashboardPanelSettings(
       LINKS_EMBEDDABLE_TYPE,
       async (serializedState?: SerializedPanelState<LinksEmbeddableState>) => {
         const { getPanelPlacement } = await import('./embeddable/embeddable_module');
-        return await getPanelPlacement(serializedState);
+        const placementSettings = await getPanelPlacement(serializedState);
+        return { placementSettings };
       }
     );
 

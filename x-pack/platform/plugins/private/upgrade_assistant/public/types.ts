@@ -56,6 +56,14 @@ export interface AppDependencies {
   services: {
     core: CoreStart;
     data: DataPublicPluginStart;
+    history: ScopedHistory;
+  };
+}
+
+export interface RootComponentDependencies extends AppDependencies {
+  services: {
+    core: CoreStart;
+    data: DataPublicPluginStart;
     breadcrumbs: BreadcrumbService;
     history: ScopedHistory;
     api: ApiService;

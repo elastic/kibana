@@ -99,7 +99,7 @@ export class Plugin implements InfraClientPluginClass {
       );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(
-      createInventoryMetricRuleType({ assetDetailsLocator, inventoryLocator })
+      createInventoryMetricRuleType({ assetDetailsLocator, inventoryLocator, config: this.config })
     );
 
     pluginsSetup.observability.observabilityRuleTypeRegistry.register(

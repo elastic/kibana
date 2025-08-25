@@ -324,11 +324,21 @@ const degradedFieldsRoute = createDatasetQualityServerRoute({
 
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-    return await getDegradedFields({
-      esClient,
-      dataStream,
-      ...params.query,
-    });
+    try {
+      return await getDegradedFields({
+        esClient,
+        dataStream,
+        ...params.query,
+      });
+    } catch (e) {
+      if (e.body?.error?.type === 'index_closed_exception') {
+        return {
+          degradedFields: [],
+        };
+      }
+
+      throw e;
+    }
   },
 });
 

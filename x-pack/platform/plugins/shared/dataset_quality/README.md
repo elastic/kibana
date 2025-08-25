@@ -26,7 +26,7 @@ The deployment-agnostic API tests are located in [`x-pack/solutions/observabilit
 
 ```sh
 # start server
-node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/ion_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
+node scripts/functional_tests_server --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts
 
 # run tests
 node scripts/functional_test_runner --config x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.stateful.config.ts --include ./x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/dataset_quality/$

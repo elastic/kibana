@@ -163,7 +163,7 @@ management.deeplinks.navLinkStatus: visible
 
 # Onboarding team UI configurations
 xpack.cloud_integrations.data_migration.enabled: false
-guided_onboarding.enabled: false
+
 
 # Other disabled plugins
 xpack.canvas.enabled: false
@@ -274,6 +274,7 @@ xpack.reporting.csv.maxConcurrentShardRequests: 0
 # Disabled Platform plugins
 monitoring.enabled: false
 monitoring.ui.enabled: false
+monitoring_collection.enabled: false
 
 ## Enable uiSettings validations
 data.enableUiSettingsValidations: true

@@ -59,6 +59,7 @@ export async function getAggregatedDatasetPaginatedResults(options: {
       bool,
     },
     aggs: aggs(after),
+    ignore_unavailable: true,
   });
 
   const currResults =

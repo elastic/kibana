@@ -51,7 +51,6 @@ interface UnenrollInactiveAgentsTaskStartContract {
 export class UnenrollInactiveAgentsTask {
   private logger: Logger;
   private wasStarted: boolean = false;
-  private abortController = new AbortController();
   private unenrollBatchSize: number;
 
   constructor(setupContract: UnenrollInactiveAgentsTaskSetupContract) {
@@ -69,9 +68,7 @@ export class UnenrollInactiveAgentsTask {
             run: async () => {
               return this.runTask(taskInstance, core);
             },
-            cancel: async () => {
-              this.abortController.abort('Task timed out');
-            },
+            cancel: async () => {},
           };
         },
       },
