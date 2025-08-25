@@ -10,6 +10,7 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { listIndices } from '@kbn/onechat-genai-utils';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '../../utils/tool_result_id';
 
 const listIndicesSchema = z.object({
   pattern: z
@@ -31,6 +32,7 @@ export const listIndicesTool = (): BuiltinToolDefinition<typeof listIndicesSchem
       return {
         results: [
           {
+            toolResultId: getToolResultId(),
             type: ToolResultType.other,
             data: {
               indices: result,

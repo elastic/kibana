@@ -7,9 +7,7 @@
 
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React, { useMemo } from 'react';
-import type { Node } from 'unist';
 import {
   EuiCodeBlock,
   EuiTable,
@@ -22,9 +20,17 @@ import {
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
 } from '@elastic/eui';
+import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
+import { ChartType } from '@kbn/visualization-utils';
+import { type PluggableList } from 'unified';
+import type { ConversationRoundStep } from '@kbn/onechat-common';
+import { VisualizeESQL } from '../../tools/esql/visualize_esql';
+import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { esqlLanguagePlugin, loadingCursorPlugin, toolResultPlugin } from './markdown_plugins';
 
 interface Props {
   content: string;
+  steps: ConversationRoundStep[];
 }
 
 const cursorCss = css`
@@ -50,81 +56,32 @@ const cursorCss = css`
 
 const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
 
-const CURSOR = ` ᠎  `;
-
-const loadingCursorPlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
-      });
-    }
-
-    if (node.type !== 'text' && node.type !== 'inlineCode' && node.type !== 'code') {
-      return;
-    }
-
-    const textNode = node as Text | InlineCode | Code;
-
-    const indexOfCursor = textNode.value.indexOf(CURSOR);
-    if (indexOfCursor === -1) {
-      return;
-    }
-
-    textNode.value = textNode.value.replace(CURSOR, '');
-
-    const indexOfNode = parent!.children.indexOf(textNode);
-    parent!.children.splice(indexOfNode + 1, 0, {
-      type: 'cursor' as Text['type'],
-      value: CURSOR,
-    });
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
-const esqlLanguagePlugin = () => {
-  const visitor = (node: Node, parent?: Parent) => {
-    if ('children' in node) {
-      const nodeAsParent = node as Parent;
-      nodeAsParent.children.forEach((child) => {
-        visitor(child, nodeAsParent);
-      });
-    }
-
-    if (node.type === 'code' && node.lang === 'esql') {
-      node.type = 'esql';
-    } else if (node.type === 'code') {
-      // switch to type that allows us to control rendering
-      node.type = 'codeBlock';
-    }
-  };
-
-  return (tree: Node) => {
-    visitor(tree);
-  };
-};
-
 /**
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-export function ChatMessageText({ content }: Props) {
+export function ChatMessageText({ content, steps }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
 
+  // const conversationRounds = useConversationRounds();
+  const { pluginsStart } = useOnechatServices();
+
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
-    const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
+    const defaultProcessingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
-    const { components } = processingPlugins[1][1];
+    const [remarkToRehypePlugin, remarkToRehypeOptions] = defaultProcessingPlugins[0];
+    const [rehypeToReactPlugin, rehypeToReactOptions] = defaultProcessingPlugins[1];
 
-    processingPlugins[1][1].components = {
-      ...components,
+    const processingPlugins = [
+      [remarkToRehypePlugin, remarkToRehypeOptions],
+      [rehypeToReactPlugin, rehypeToReactOptions],
+    ] as PluggableList;
+
+    rehypeToReactOptions.components = {
+      ...rehypeToReactOptions.components,
       cursor: Cursor,
       codeBlock: (props) => {
         return (
@@ -168,13 +125,49 @@ export function ChatMessageText({ content }: Props) {
           </EuiTableRowCell>
         );
       },
+      toolresult: (props) => {
+        const { resultId, chartType } = props;
+
+        if (!resultId) {
+          return <p>Visualization requires a tool result ID.</p>;
+        }
+
+        const toolResult = steps
+          .filter((s) => s.type === 'tool_call')
+          .flatMap((s) => (s.type === 'tool_call' && s.results) || [])
+          .find((r) => r.ui?.toolResultId === resultId && r.type === 'tabular_data') as
+          | TabularDataResult
+          | undefined;
+
+        if (!toolResult) {
+          return <p>Unable to find visualization for tool result ID: {resultId}</p>;
+        }
+
+        const { esqlQuery, esqlResult } = toolResult.data;
+
+        return (
+          <VisualizeESQL
+            lens={pluginsStart.lens}
+            dataViews={pluginsStart.dataViews}
+            uiActions={pluginsStart.uiActions}
+            esqlQuery={esqlQuery}
+            esqlResult={esqlResult}
+            preferredChartType={(chartType as ChartType | undefined) || ChartType.Line}
+          />
+        );
+      },
     };
 
     return {
-      parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
+      parsingPluginList: [
+        loadingCursorPlugin,
+        esqlLanguagePlugin,
+        toolResultPlugin,
+        ...parsingPlugins,
+      ],
       processingPluginList: processingPlugins,
     };
-  }, []);
+  }, [pluginsStart.dataViews, pluginsStart.lens, pluginsStart.uiActions, steps]);
 
   return (
     <EuiText size="s" className={containerClassName}>

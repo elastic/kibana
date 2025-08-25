@@ -10,6 +10,7 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { indexExplorer } from '@kbn/onechat-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { getToolResultId } from '../../utils/tool_result_id';
 
 const indexExplorerSchema = z.object({
   query: z.string().describe('A natural language query to infer which indices to use.'),
@@ -54,6 +55,7 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
       return {
         results: [
           {
+            toolResultId: getToolResultId(),
             type: ToolResultType.other,
             data: {
               indices: result,

@@ -70,6 +70,7 @@ export class OnechatPlugin
       chatService,
       conversationsService,
       toolsService,
+      pluginsStart,
     };
 
     return {};

@@ -23,7 +23,7 @@ export const naturalLanguageSearch = async ({
   index?: string;
   model: ScopedModel;
   esClient: ElasticsearchClient;
-}): Promise<EsqlResponse> => {
+}): Promise<{ esqlQuery: string; esqlResult: EsqlResponse }> => {
   const generateResponse = await generateEsql({
     nlQuery,
     context,
@@ -36,8 +36,8 @@ export const naturalLanguageSearch = async ({
     throw new Error(`No esql queries were generated for query=${nlQuery}`);
   }
 
-  return executeEsql({
-    query: generateResponse.queries[0], // TODO: handle multiple queries
-    esClient,
-  });
+  const esqlQuery = generateResponse.queries[0]; // TODO: handle multiple queries
+  const esqlResult = await executeEsql({ query: esqlQuery, esClient });
+
+  return { esqlQuery, esqlResult };
 };

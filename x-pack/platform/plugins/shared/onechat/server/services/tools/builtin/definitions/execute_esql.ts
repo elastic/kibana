@@ -10,6 +10,8 @@ import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
 import { executeEsql } from '@kbn/onechat-genai-utils/tools/steps/execute_esql';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import { ChartType } from '@kbn/visualization-utils';
+import { getToolResultId } from '../../utils/tool_result_id';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -23,11 +25,31 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
     handler: async ({ query }, { esClient }) => {
       const result = await executeEsql({ query, esClient: esClient.asCurrentUser });
 
+      const toolResultId = getToolResultId();
+
       return {
         results: [
           {
             type: ToolResultType.tabularData,
-            data: result,
+            data: {
+              esqlQuery: query,
+              esqlResult: result,
+            },
+            ui: {
+              toolResultId,
+              description:
+                'The result of executing the ESQL query can be visualized. Multiple chart types are available',
+              params: {
+                chartType: {
+                  description: `Select the visualization type most suitable for representing the esql result. Choose based on the data structure and the insights you want to highlight.`,
+                  type: 'string',
+                  default: ChartType.Line,
+                  options: Object.values(ChartType),
+                  required: false,
+                },
+              },
+              example: `<toolresult result-id="${toolResultId}" chart-type="${ChartType.Bar}" />`,
+            },
           },
         ],
       };

@@ -27,6 +27,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
 }) => {
   const { showTimer, elapsedTime, isStopped } = useTimer({ isLoading });
   const showThinking = showTimer || steps.length > 0;
+
   return (
     <EuiFlexGroup
       direction="column"
@@ -47,7 +48,7 @@ export const RoundResponse: React.FC<RoundResponseProps> = ({
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} />
+        <ChatMessageText content={message} steps={steps} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

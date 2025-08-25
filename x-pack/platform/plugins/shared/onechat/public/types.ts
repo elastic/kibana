@@ -5,13 +5,28 @@
  * 2.0.
  */
 
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
 
-export interface OnechatSetupDependencies {}
+export interface OnechatSetupDependencies {
+  lens: LensPublicSetup;
+  dataViews: DataViewsPublicPluginSetup;
+  uiActions: UiActionsSetup;
+}
 
-export interface OnechatStartDependencies {}
+export interface OnechatStartDependencies {
+  lens: LensPublicStart;
+  dataViews: DataViewsPublicPluginStart;
+  uiActions: UiActionsStart;
+}
 
 export interface OnechatPluginSetup {}
 
