@@ -17,7 +17,6 @@ import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
 import { apiPublishesSettings, initializeUnsavedChanges } from '@kbn/presentation-containers';
 import {
   apiHasDisableTriggers,
