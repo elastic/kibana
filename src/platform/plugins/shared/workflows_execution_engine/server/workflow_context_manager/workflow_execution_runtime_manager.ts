@@ -347,11 +347,11 @@ export class WorkflowExecutionRuntimeManager {
         this.workflowExecutionState.upsertStep({
           id: latestStepExecution.id,
           stepId,
-          status: ExecutionStatus.WAITING_FOR_INPUT,
+          status: ExecutionStatus.WAITING,
         });
 
         this.workflowExecutionState.updateWorkflowExecution({
-          status: ExecutionStatus.WAITING_FOR_INPUT,
+          status: ExecutionStatus.WAITING,
         });
       }
     );
