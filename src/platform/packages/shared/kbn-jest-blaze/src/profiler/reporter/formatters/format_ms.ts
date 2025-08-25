@@ -7,8 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const babelJest = require('babel-jest');
-const transformerConfig = require('./transformer_config');
+export function formatMs(ms?: number): string {
+  if (ms === undefined) {
+    return 'N/A';
+  }
 
-/** @type {import('@jest/transform').SyncTransformer} */
-module.exports = babelJest.default.createTransformer(transformerConfig);
+  const seconds = ms / 1000;
+  if (seconds < 0.5) {
+    return `${seconds.toFixed(2)}s`;
+  } else if (seconds < 10) {
+    return `${seconds.toFixed(1)}s`;
+  } else {
+    return `${Math.round(seconds)}s`;
+  }
+}
