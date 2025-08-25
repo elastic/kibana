@@ -7,7 +7,7 @@
 
 import type { InternalFindCaseUserActions, UserActionUI, CaseUI } from './types';
 import { type GetAttachments } from '../components/all_cases/selector_modal/use_cases_add_to_existing_case_modal';
-import { useFindCasesUserActions } from './use_find_case_user_actions';
+import { useFindCasesUserActions, useTestQuery } from './use_find_case_user_actions';
 
 export interface UseCheckAlertAttachmentsProps {
   cases: Pick<CaseUI, 'id'>[];
@@ -33,6 +33,11 @@ export const useCheckAlertAttachments = ({
     .map(({ alertId }) => alertId)
     .flatMap((a) => a);
 
+  const useTestQueryRes = useTestQuery(
+    selectedAlerts,
+    cases.map(({ id }) => id)
+  );
+  console.log('use test query!',cases, useTestQueryRes, typeof useTestQueryRes);
   const findActionsForCasesResult = useFindCasesUserActions(
     cases.map((caseInfo) => ({
       caseId: caseInfo.id,

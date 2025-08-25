@@ -7,7 +7,7 @@
 
 import { useQueries, useQuery, type UseQueryResult } from '@tanstack/react-query';
 import type { CaseUserActionTypeWithAll, InternalFindCaseUserActions } from '../../common/ui/types';
-import { findCaseUserActions } from './api';
+import { findCaseUserActions, findCasesByAttachmentId } from './api';
 import type { ServerError } from '../types';
 import { useCasesToast } from '../common/use_cases_toast';
 import { ERROR_TITLE } from './translations';
@@ -23,6 +23,18 @@ interface UseFindCasesUserActionsParam {
   };
   isEnabled: boolean;
 }
+
+export const useTestQuery = (selectedAlertIds: string[], caseIds: string[]) => {
+  console.log('case ids param', caseIds);
+  const res = useQuery({
+    queryKey: ['test', ...caseIds],
+    queryFn: async () => {
+      const response = await findCasesByAttachmentId(selectedAlertIds, caseIds);
+      return response;
+    },
+  });
+  return res;
+};
 
 /**
  * Iteratively fetches data for a list of caseIds.
