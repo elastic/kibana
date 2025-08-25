@@ -153,7 +153,10 @@ interface DraggablePatternInputProps {
   grokCollection: GrokCollection;
   onChange: (expression: DraftGrokExpression) => void;
   onRemove: ((idx: number) => void) | null;
-  setupResizeChecker: (divElement: HTMLDivElement, editor: monaco.editor.IStandaloneCodeEditor) => void;
+  setupResizeChecker: (
+    divElement: HTMLDivElement,
+    editor: monaco.editor.IStandaloneCodeEditor
+  ) => void;
   destroyResizeChecker: () => void;
 }
 
