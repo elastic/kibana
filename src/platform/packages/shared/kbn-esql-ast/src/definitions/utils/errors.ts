@@ -540,7 +540,6 @@ export const errors = {
           })
           .join(', ');
         return `${definitionArgTypes}`;
-        // return `${definitionArgTypes} => ${sig.returnType}`;
       });
 
     return errors.byId('noMatchingCallSignature', fn.location, {
