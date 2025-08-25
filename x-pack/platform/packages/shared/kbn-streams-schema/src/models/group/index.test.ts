@@ -14,7 +14,13 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
-          members: [],
+          owner: 'test_user',
+          tier: 1,
+          tags: [],
+          documentation_links: [],
+          repository_links: [],
+          runbook_links: [],
+          relationships: [],
         },
       },
     ])('is valid', (val) => {
@@ -27,7 +33,7 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: null,
         group: {
-          members: [],
+          relationships: [],
         },
       },
       {
@@ -39,7 +45,7 @@ describe('GroupStream', () => {
         name: 'group-stream',
         description: '',
         group: {
-          members: 'logs',
+          relationships: 'logs',
         },
       },
     ])('is not valid', (val) => {
@@ -54,7 +60,13 @@ describe('GroupStream', () => {
           name: 'group-stream',
           description: '',
           group: {
-            members: [],
+            owner: 'test_user',
+            tier: 1,
+            tags: [],
+            documentation_links: [],
+            repository_links: [],
+            runbook_links: [],
+            relationships: [],
           },
         },
         dashboards: [],
@@ -70,7 +82,7 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
-            members: [],
+            relationships: [],
           },
         },
         dashboards: [],
@@ -80,7 +92,7 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
-            members: [],
+            relationships: [],
           },
         },
         dashboards: [],
@@ -89,7 +101,7 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
-            members: [],
+            relationships: [],
           },
         },
         queries: [],
@@ -107,7 +119,13 @@ describe('GroupStream', () => {
         stream: {
           description: '',
           group: {
-            members: [],
+            owner: 'test_user',
+            tier: 1,
+            tags: [],
+            documentation_links: [],
+            repository_links: [],
+            runbook_links: [],
+            relationships: [],
           },
         },
       },
@@ -122,7 +140,7 @@ describe('GroupStream', () => {
         queries: [],
         stream: {
           group: {
-            members: [],
+            relationships: [],
           },
         },
       },
@@ -140,7 +158,7 @@ describe('GroupStream', () => {
           name: 'my-name',
           description: '',
           group: {
-            members: [],
+            relationships: [],
           },
         },
       },

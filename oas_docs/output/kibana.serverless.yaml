@@ -51982,12 +51982,71 @@ paths:
                                   additionalProperties: false
                                   type: object
                                   properties:
-                                    members:
+                                    documentation_links:
                                       items:
                                         type: string
                                       type: array
+                                    owner:
+                                      type: string
+                                    relationships:
+                                      items:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          name:
+                                            type: string
+                                          type:
+                                            anyOf:
+                                              - enum:
+                                                  - related
+                                                type: string
+                                              - enum:
+                                                  - child
+                                                type: string
+                                              - enum:
+                                                  - parent
+                                                type: string
+                                              - enum:
+                                                  - dependency
+                                                type: string
+                                        required:
+                                          - name
+                                          - type
+                                      type: array
+                                    repository_links:
+                                      items:
+                                        type: string
+                                      type: array
+                                    runbook_links:
+                                      items:
+                                        type: string
+                                      type: array
+                                    tags:
+                                      items:
+                                        type: string
+                                      type: array
+                                    tier:
+                                      anyOf:
+                                        - enum:
+                                            - 1
+                                          type: number
+                                        - enum:
+                                            - 2
+                                          type: number
+                                        - enum:
+                                            - 3
+                                          type: number
+                                        - enum:
+                                            - 4
+                                          type: number
                                   required:
-                                    - members
+                                    - owner
+                                    - tier
+                                    - tags
+                                    - runbook_links
+                                    - documentation_links
+                                    - repository_links
+                                    - relationships
                               required:
                                 - group
                       required:
@@ -52232,12 +52291,71 @@ paths:
                   additionalProperties: false
                   type: object
                   properties:
-                    members:
+                    documentation_links:
                       items:
                         type: string
                       type: array
+                    owner:
+                      type: string
+                    relationships:
+                      items:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          name:
+                            type: string
+                          type:
+                            anyOf:
+                              - enum:
+                                  - related
+                                type: string
+                              - enum:
+                                  - child
+                                type: string
+                              - enum:
+                                  - parent
+                                type: string
+                              - enum:
+                                  - dependency
+                                type: string
+                        required:
+                          - name
+                          - type
+                      type: array
+                    repository_links:
+                      items:
+                        type: string
+                      type: array
+                    runbook_links:
+                      items:
+                        type: string
+                      type: array
+                    tags:
+                      items:
+                        type: string
+                      type: array
+                    tier:
+                      anyOf:
+                        - enum:
+                            - 1
+                          type: number
+                        - enum:
+                            - 2
+                          type: number
+                        - enum:
+                            - 3
+                          type: number
+                        - enum:
+                            - 4
+                          type: number
                   required:
-                    - members
+                    - owner
+                    - tier
+                    - tags
+                    - runbook_links
+                    - documentation_links
+                    - repository_links
+                    - relationships
               required:
                 - group
       responses: {}
