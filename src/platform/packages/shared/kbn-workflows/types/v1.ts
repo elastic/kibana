@@ -14,6 +14,7 @@ import { WorkflowSchema } from '../spec/schema';
 export enum ExecutionStatus {
   // In progress
   PENDING = 'pending',
+  WAITING = 'waiting',
   WAITING_FOR_INPUT = 'waiting_for_input',
   RUNNING = 'running',
 
