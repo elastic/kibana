@@ -31,12 +31,7 @@ export interface TraceContextLogEventsProps {
   spanId?: string;
 }
 export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEventsProps) {
-  const {
-    discoverShared,
-    data: dataService,
-    uiSettings,
-    embeddable,
-  } = getUnifiedDocViewerServices();
+  const { data: dataService, embeddable } = getUnifiedDocViewerServices();
 
   const { indexes } = useDataSourcesContext();
 
@@ -69,7 +64,7 @@ export function TraceContextLogEvents({ traceId, spanId }: TraceContextLogEvents
     <ContentFrameworkSection
       title={logsTitle}
       description={logsDescription}
-      id="logs"
+      id="traceContextLogEvents"
       children={
         <LazySavedSearchComponent
           query={query}

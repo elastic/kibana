@@ -19,6 +19,7 @@ import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/publ
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { IToasts } from '@kbn/core/public';
 import type { UnifiedDocViewerStart } from './plugin';
 export interface UnifiedDocViewerServices {
@@ -32,4 +33,5 @@ export interface UnifiedDocViewerServices {
   unifiedDocViewer: UnifiedDocViewerStart;
   share: SharePluginStart;
   core: CoreStart;
+  embeddable: EmbeddableStart;
 }
