@@ -9,11 +9,11 @@ import { useCallback } from 'react';
 import type { FieldPath } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { OnechatEsqlParam, OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { EsqlParam, EsqlToolFormData } from '../types/tool_form_types';
 import { i18nMessages } from '../i18n';
 
 export const useEsqlParamsValidation = () => {
-  const { getValues, setValue, trigger } = useFormContext<OnechatEsqlToolFormData>();
+  const { getValues, setValue, trigger } = useFormContext<EsqlToolFormData>();
 
   const triggerEsqlParamWarnings = useCallback(() => {
     const esql = getValues('esql');
@@ -37,10 +37,10 @@ export const useEsqlParamsValidation = () => {
   }, [getValues, setValue]);
 
   const triggerEsqlParamFieldsValidation = useCallback(
-    (fieldsToValidate: Array<keyof OnechatEsqlParam>) => {
+    (fieldsToValidate: Array<keyof EsqlParam>) => {
       const fieldPaths = getValues('params').flatMap((_, i) =>
         fieldsToValidate.map((field) => `params.${i}.${field}`)
-      ) as Array<FieldPath<OnechatEsqlToolFormData>>;
+      ) as Array<FieldPath<EsqlToolFormData>>;
       trigger(fieldPaths);
     },
     [trigger, getValues]

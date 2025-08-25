@@ -14,30 +14,22 @@ import { z } from '@kbn/zod';
 import { get } from 'lodash';
 import { useCallback } from 'react';
 import type { Resolver } from 'react-hook-form';
-import type { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { EsqlToolFormData } from '../types/tool_form_types';
 
 const i18nMessages = {
-  name: {
-    requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.name.requiredError', {
-      defaultMessage: 'Name is required.',
+  toolId: {
+    requiredError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.requiredError', {
+      defaultMessage: 'Tool ID is required.',
     }),
-    formatError: i18n.translate('xpack.onechat.tools.newTool.validation.name.formatError', {
+    formatError: i18n.translate('xpack.onechat.tools.newTool.validation.toolId.formatError', {
       defaultMessage:
-        'Name must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores.',
+        'Tool ID must start and end with a letter or number, and can only contain lowercase letters, numbers, and underscores.',
     }),
-    reservedError: (name: string) =>
-      i18n.translate('xpack.onechat.tools.newTool.validation.name.reservedError', {
-        defaultMessage: 'Name "{name}" is reserved. Please choose a different name.',
-        values: { name },
+    reservedError: (toolId: string) =>
+      i18n.translate('xpack.onechat.tools.newTool.validation.toolId.reservedError', {
+        defaultMessage: 'Tool ID "{toolId}" is reserved. Please choose a different tool ID.',
+        values: { toolId },
       }),
-  },
-  description: {
-    requiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.description.requiredError',
-      {
-        defaultMessage: 'Description is required.',
-      }
-    ),
   },
   // Specific errors will be provided by the ES|QL editor
   esql: {
@@ -62,12 +54,6 @@ const i18nMessages = {
           'Parameter name must start with a letter or underscore and contain only letters, numbers, and underscores.',
       }
     ),
-    descriptionRequiredError: i18n.translate(
-      'xpack.onechat.tools.newTool.validation.params.descriptionRequiredError',
-      {
-        defaultMessage: 'Parameter description is required.',
-      }
-    ),
     duplicateError: (name: string) =>
       i18n.translate('xpack.onechat.tools.newTool.validation.params.duplicateError', {
         defaultMessage: 'Duplicate parameter: "{name}".',
@@ -76,7 +62,7 @@ const i18nMessages = {
   },
 };
 
-export const useEsqlToolFormValidationResolver = (): Resolver<OnechatEsqlToolFormData> => {
+export const useEsqlToolFormValidationResolver = (): Resolver<EsqlToolFormData> => {
   return useCallback(async (data) => {
     try {
       const values = await esqlFormValidationSchema.parseAsync(data);
@@ -112,17 +98,17 @@ export const useEsqlToolFormValidationResolver = (): Resolver<OnechatEsqlToolFor
 
 export const esqlFormValidationSchema = z
   .object({
-    name: z
+    toolId: z
       .string()
-      .min(1, { message: i18nMessages.name.requiredError })
-      .regex(idRegexp, { message: i18nMessages.name.formatError })
+      .min(1, { message: i18nMessages.toolId.requiredError })
+      .regex(idRegexp, { message: i18nMessages.toolId.formatError })
       .refine(
         (name) => !isReservedToolId(name),
         (name) => ({
-          message: i18nMessages.name.reservedError(name),
+          message: i18nMessages.toolId.reservedError(name),
         })
       ),
-    description: z.string().min(1, { message: i18nMessages.description.requiredError }),
+    description: z.string(),
     esql: z
       .string()
       .min(1, { message: i18nMessages.esql.requiredError })
@@ -142,7 +128,7 @@ export const esqlFormValidationSchema = z
             .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, {
               message: i18nMessages.params.nameFormatError,
             }),
-          description: z.string().min(1, { message: i18nMessages.params.descriptionRequiredError }),
+          description: z.string(),
           type: z.nativeEnum(EsqlToolFieldType),
         })
       )

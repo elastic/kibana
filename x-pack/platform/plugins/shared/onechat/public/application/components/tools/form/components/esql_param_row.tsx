@@ -25,11 +25,11 @@ import type { FieldArrayWithId, FieldError } from 'react-hook-form';
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useEsqlParamsValidation } from '../hooks/use_esql_params_validation';
 import { i18nMessages } from '../i18n';
-import type { OnechatEsqlToolFormData } from '../types/esql_tool_form_types';
+import type { EsqlToolFormData } from '../types/tool_form_types';
 
 interface EsqlParamRowProps {
   index: number;
-  paramField: FieldArrayWithId<OnechatEsqlToolFormData, 'params', 'id'>;
+  paramField: FieldArrayWithId<EsqlToolFormData, 'params', 'id'>;
   removeParamField: (index: number) => void;
 }
 
@@ -40,7 +40,7 @@ export const EsqlParamRow: React.FC<EsqlParamRowProps> = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
-  const { control, formState } = useFormContext<OnechatEsqlToolFormData>();
+  const { control, formState } = useFormContext<EsqlToolFormData>();
   const { errors, isSubmitted } = formState;
 
   const { triggerEsqlParamWarnings, triggerEsqlParamFieldsValidation } = useEsqlParamsValidation();

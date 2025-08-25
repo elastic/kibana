@@ -7,13 +7,13 @@
 
 import React from 'react';
 import { useSearchParams } from 'react-router-dom-v5-compat';
-import { useCreateTool } from '../../../hooks/tools/use_create_tools';
-import { EsqlTool } from './esql_tool';
-import { OnechatEsqlToolFormMode } from './form/esql_tool_form';
+import { useCreateTool } from '../../hooks/tools/use_create_tools';
+import { Tool } from './tool';
+import { ToolFormMode } from './form/tool_form';
 
 export const TOOL_SOURCE_QUERY_PARAM = 'source_id';
 
-export const CreateEsqlTool: React.FC = () => {
+export const CreateTool: React.FC = () => {
   const [searchParams] = useSearchParams();
 
   const { sourceTool, isSubmitting, isLoading, createTool } = useCreateTool({
@@ -21,8 +21,8 @@ export const CreateEsqlTool: React.FC = () => {
   });
 
   return (
-    <EsqlTool
-      mode={OnechatEsqlToolFormMode.Create}
+    <Tool
+      mode={ToolFormMode.Create}
       isLoading={isLoading}
       isSubmitting={isSubmitting}
       tool={sourceTool}

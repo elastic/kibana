@@ -7,10 +7,10 @@
 
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { EditEsqlTool } from '../components/tools/esql/edit_esql_tool';
+import { EditTool } from '../components/tools/edit_tool';
 import { useBreadcrumb } from '../hooks/use_breadcrumbs';
-import { labels } from '../utils/i18n';
 import { appPaths } from '../utils/app_paths';
+import { labels } from '../utils/i18n';
 
 export const OnechatToolEditPage = () => {
   const { toolId } = useParams<{ toolId: string }>();
@@ -24,5 +24,5 @@ export const OnechatToolEditPage = () => {
       path: appPaths.tools.edit({ toolId }),
     },
   ]);
-  return <EditEsqlTool />;
+  return <EditTool />;
 };

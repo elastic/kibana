@@ -24,44 +24,38 @@ import type {
   CreateToolResponse,
   UpdateToolPayload,
   UpdateToolResponse,
-} from '../../../../../common/http_api/tools';
-import { useNavigation } from '../../../hooks/use_navigation';
-import { appPaths } from '../../../utils/app_paths';
-import { labels } from '../../../utils/i18n';
+} from '../../../../common/http_api/tools';
+import { useNavigation } from '../../hooks/use_navigation';
+import { appPaths } from '../../utils/app_paths';
+import { labels } from '../../utils/i18n';
 import {
   transformEsqlFormDataForCreate,
   transformEsqlFormDataForUpdate,
   transformEsqlToolToFormData,
-} from '../../../utils/transform_esql_form_data';
-import { OnechatEsqlToolForm, OnechatEsqlToolFormMode } from './form/esql_tool_form';
-import type { OnechatEsqlToolFormData } from './form/types/esql_tool_form_types';
-import { useEsqlToolForm } from '../../../hooks/tools/use_esql_tool_form';
+} from '../../utils/transform_esql_form_data';
+import { ToolForm, ToolFormMode } from './form/tool_form';
+import type { EsqlToolFormData } from './form/types/tool_form_types';
+import { useEsqlToolForm } from '../../hooks/tools/use_esql_tool_form';
 
-interface EsqlToolBaseProps {
+interface ToolBaseProps {
   tool?: EsqlToolDefinitionWithSchema;
   isLoading: boolean;
   isSubmitting: boolean;
 }
 
-interface EsqlToolCreateProps extends EsqlToolBaseProps {
-  mode: OnechatEsqlToolFormMode.Create;
+interface ToolCreateProps extends ToolBaseProps {
+  mode: ToolFormMode.Create;
   saveTool: (data: CreateToolPayload) => Promise<CreateToolResponse>;
 }
 
-interface EsqlToolEditProps extends EsqlToolBaseProps {
-  mode: OnechatEsqlToolFormMode.Edit;
+interface ToolEditProps extends ToolBaseProps {
+  mode: ToolFormMode.Edit;
   saveTool: (data: UpdateToolPayload) => Promise<UpdateToolResponse>;
 }
 
-export type EsqlToolProps = EsqlToolCreateProps | EsqlToolEditProps;
+export type ToolProps = ToolCreateProps | ToolEditProps;
 
-export const EsqlTool: React.FC<EsqlToolProps> = ({
-  mode,
-  tool,
-  isLoading,
-  isSubmitting,
-  saveTool,
-}) => {
+export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting, saveTool }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToOnechatUrl } = useNavigation();
   const form = useEsqlToolForm();
@@ -73,8 +67,8 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
   }, [reset]);
 
   const handleSave = useCallback(
-    async (data: OnechatEsqlToolFormData) => {
-      if (mode === OnechatEsqlToolFormMode.Edit) {
+    async (data: EsqlToolFormData) => {
+      if (mode === ToolFormMode.Edit) {
         await saveTool(transformEsqlFormDataForUpdate(data));
       } else {
         await saveTool(transformEsqlFormDataForCreate(data));
@@ -112,7 +106,7 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
       <KibanaPageTemplate>
         <KibanaPageTemplate.Header
           pageTitle={
-            mode === OnechatEsqlToolFormMode.Edit
+            mode === ToolFormMode.Edit
               ? labels.tools.editEsqlToolTitle
               : labels.tools.newEsqlToolTitle
           }
@@ -127,7 +121,7 @@ export const EsqlTool: React.FC<EsqlToolProps> = ({
               <EuiLoadingSpinner size="xxl" />
             </EuiFlexGroup>
           ) : (
-            <OnechatEsqlToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
+            <ToolForm mode={mode} formId={esqlToolFormId} saveTool={handleSave} />
           )}
         </KibanaPageTemplate.Section>
         <KibanaPageTemplate.BottomBar
