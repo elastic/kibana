@@ -16,7 +16,6 @@ const { realpathSync } = require('fs');
 const { sanitizeSvg } = require('./fs_sanitizations');
 const { fsEventBus, FS_CONFIG_EVENT } = require('@kbn/security-hardening/fs-event-bus');
 
-const allowedExtensions = ['.txt', '.md', '.log', '.json', '.yml', '.yaml', '.csv', '.svg', '.png'];
 const allowedMimeTypes = [
   'text/plain',
   'text/markdown',
@@ -34,6 +33,19 @@ let magicBytes = require('magic-bytes.js');
 
 const isDevOrCI = process.env.NODE_ENV !== 'production' || process.env.CI === 'true';
 const baseSafePaths = [join(REPO_ROOT, 'data'), join(REPO_ROOT, '.es')];
+
+const allowedExtensions = [
+  '.txt',
+  '.md',
+  '.log',
+  '.json',
+  '.yml',
+  '.yaml',
+  '.csv',
+  '.svg',
+  '.png',
+  ...(isDevOrCI ? ['.cjs'] : []),
+];
 
 const tmpPath = tmpdir();
 
@@ -62,6 +74,7 @@ const devOrCIPaths = [
   join(REPO_ROOT, 'target'),
   join(REPO_ROOT, 'x-pack'),
   join(REPO_ROOT, 'scripts'),
+  join(REPO_ROOT, '.vscode'),
 ];
 
 const safePaths = [...baseSafePaths, ...(isDevOrCI ? devOrCIPaths : [])];
