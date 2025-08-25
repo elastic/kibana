@@ -76,11 +76,6 @@ export class LogsSharedPlugin implements LogsSharedClientPluginClass {
       theme,
     });
 
-    discoverShared.features.registry.register({
-      id: 'observability-logs-overview',
-      getLogsOverview: () => LogsOverview,
-    });
-
     if (!observabilityAIAssistant) {
       return {
         logViews,

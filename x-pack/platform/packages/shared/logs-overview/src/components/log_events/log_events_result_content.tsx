@@ -10,7 +10,6 @@ import { type ISearchStartSearchSource } from '@kbn/data-plugin/public';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { LazySavedSearchComponent } from '@kbn/saved-search-component';
-import type { NonPersistedDisplayOptions } from '@kbn/discover-plugin/public';
 import React from 'react';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
@@ -23,7 +22,6 @@ export interface LogEventsResultContentProps {
     start: string;
     end: string;
   };
-  displayOptions?: NonPersistedDisplayOptions;
 }
 
 export interface LogEventsResultContentDependencies {
