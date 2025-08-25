@@ -7,68 +7,87 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import type { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
+import { render, screen, waitFor } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
 import type { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
 import { useKibana } from '../../../../common/lib/kibana';
-jest.mock('../../../../common/lib/kibana');
 
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
+
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
 }));
 
+const getNavigation = jest.fn();
+const navigateToUrl = jest.fn();
+
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
+
 describe('view in app', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    mockUseKibana.mockReturnValue({
+      services: {
+        application: {
+          navigateToUrl,
+          navigateToApp: jest.fn(),
+        },
+        http: {
+          basePath: {
+            prepend: jest.fn((path: string) => path),
+          },
+        },
+        alerting: {
+          getNavigation,
+        },
+      },
+    } as unknown as ReturnType<typeof useKibana>);
+  });
+
   describe('link to the app that created the rule', () => {
     it('is disabled when there is no navigation', async () => {
       const rule = mockRule();
-      const { alerting } = useKibana().services;
-      let component: ReactWrapper;
-      await act(async () => {
-        // use mount as we need useEffect to run
-        component = mountWithIntl(<ViewInApp rule={rule} />);
+      getNavigation.mockResolvedValueOnce(null);
 
-        await waitForUseEffect();
+      renderWithIntl(<ViewInApp rule={rule} />);
+      const button = await screen.findByRole('button', { name: /view in app/i });
 
-        expect(component!.find('button').prop('disabled')).toBe(true);
-        expect(component!.text()).toBe('View in app');
+      expect(button).toBeDisabled();
+      expect(button).toHaveTextContent('View in app');
 
-        expect(alerting!.getNavigation).toBeCalledWith(rule.id);
-      });
+      expect(getNavigation).toBeCalledWith(rule.id);
     });
 
     it('enabled when there is navigation', async () => {
+      const user = userEvent.setup();
+
       const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
-      const {
-        application: { navigateToApp },
-      } = useKibana().services;
 
-      let component: ReactWrapper;
-      act(async () => {
-        // use mount as we need useEffect to run
-        component = mountWithIntl(<ViewInApp rule={rule} />);
+      getNavigation.mockResolvedValueOnce('/rule');
 
-        await waitForUseEffect();
+      renderWithIntl(<ViewInApp rule={rule} />);
+      const button = screen.getByRole('button', { name: /view in app/i });
 
-        expect(component!.find('button').prop('disabled')).toBe(undefined);
-
-        component!.find('button').prop('onClick')!({
-          currentTarget: {},
-        } as React.MouseEvent<{}, MouseEvent>);
-
-        expect(navigateToApp).toBeCalledWith('siem', '/rule');
+      await waitFor(() => {
+        expect(button).not.toBeDisabled();
       });
+
+      await user.click(button);
+
+      expect(navigateToUrl).toBeCalledWith('/rule');
     });
   });
 });
-
-function waitForUseEffect() {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
-}
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {

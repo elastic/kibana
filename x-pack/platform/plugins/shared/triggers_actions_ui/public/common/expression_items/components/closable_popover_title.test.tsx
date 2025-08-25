@@ -6,26 +6,30 @@
  */
 
 import * as React from 'react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { ClosablePopoverTitle } from './closable_popover_title';
+import userEvent from '@testing-library/user-event';
 
 describe('closable popover title', () => {
-  it('renders with defined options', () => {
+  it('renders with defined options', async () => {
     const onClose = jest.fn();
-    const children = <div className="foo" />;
-    const wrapper = mount(
-      <ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>
-    );
-    expect(wrapper.contains(<div className="foo" />)).toBeTruthy();
+    const children = <div data-test-subj="data_test_subj" />;
+    render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
+
+    expect(screen.getByRole('button', { name: /close/i })).toBeInTheDocument();
+    expect(await screen.findByTestId('data_test_subj')).toBeInTheDocument();
   });
 
-  it('onClose function gets called', () => {
+  it('onClose function gets called', async () => {
+    const user = userEvent.setup();
+
     const onClose = jest.fn();
-    const children = <div className="foo" />;
-    const wrapper = mount(
-      <ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>
-    );
-    wrapper.find('EuiButtonIcon').simulate('click');
+    const children = <div />;
+    render(<ClosablePopoverTitle onClose={onClose}>{children}</ClosablePopoverTitle>);
+
+    const closeButton = screen.getByRole('button', { name: /close/i });
+    await user.click(closeButton);
+
     expect(onClose).toHaveBeenCalled();
   });
 });
