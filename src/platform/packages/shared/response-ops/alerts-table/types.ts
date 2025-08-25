@@ -92,7 +92,17 @@ type UseCasesAddToExistingCaseModal = (
   }) => void;
 };
 
-type UseRemoveAlertFromCaseModal = (props?: Record<string, unknown>) => {
+type UseRemoveAlertFromCaseModal = ({
+  alertId,
+  caseId,
+  onClose,
+  onSuccess,
+}: {
+  alertId: string[];
+  caseId: string;
+  onClose: () => void;
+  onSuccess: () => void;
+}) => {
   open: () => void;
   close: () => void;
   onSuccess: () => void;
