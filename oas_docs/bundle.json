@@ -58529,15 +58529,121 @@
                                   "group": {
                                     "additionalProperties": false,
                                     "properties": {
-                                      "members": {
+                                      "documentation_links": {
                                         "items": {
                                           "type": "string"
                                         },
                                         "type": "array"
+                                      },
+                                      "metadata": {
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
+                                      "owner": {
+                                        "type": "string"
+                                      },
+                                      "relationships": {
+                                        "items": {
+                                          "additionalProperties": false,
+                                          "properties": {
+                                            "name": {
+                                              "type": "string"
+                                            },
+                                            "type": {
+                                              "anyOf": [
+                                                {
+                                                  "enum": [
+                                                    "related"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "enum": [
+                                                    "child"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "enum": [
+                                                    "parent"
+                                                  ],
+                                                  "type": "string"
+                                                },
+                                                {
+                                                  "enum": [
+                                                    "dependency"
+                                                  ],
+                                                  "type": "string"
+                                                }
+                                              ]
+                                            }
+                                          },
+                                          "required": [
+                                            "name",
+                                            "type"
+                                          ],
+                                          "type": "object"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "repository_links": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "runbook_links": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "tags": {
+                                        "items": {
+                                          "type": "string"
+                                        },
+                                        "type": "array"
+                                      },
+                                      "tier": {
+                                        "anyOf": [
+                                          {
+                                            "enum": [
+                                              1
+                                            ],
+                                            "type": "number"
+                                          },
+                                          {
+                                            "enum": [
+                                              2
+                                            ],
+                                            "type": "number"
+                                          },
+                                          {
+                                            "enum": [
+                                              3
+                                            ],
+                                            "type": "number"
+                                          },
+                                          {
+                                            "enum": [
+                                              4
+                                            ],
+                                            "type": "number"
+                                          }
+                                        ]
                                       }
                                     },
                                     "required": [
-                                      "members"
+                                      "owner",
+                                      "tier",
+                                      "metadata",
+                                      "tags",
+                                      "runbook_links",
+                                      "documentation_links",
+                                      "repository_links",
+                                      "relationships"
                                     ],
                                     "type": "object"
                                   }
@@ -58987,15 +59093,121 @@
                   "group": {
                     "additionalProperties": false,
                     "properties": {
-                      "members": {
+                      "documentation_links": {
                         "items": {
                           "type": "string"
                         },
                         "type": "array"
+                      },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
+                      "owner": {
+                        "type": "string"
+                      },
+                      "relationships": {
+                        "items": {
+                          "additionalProperties": false,
+                          "properties": {
+                            "name": {
+                              "type": "string"
+                            },
+                            "type": {
+                              "anyOf": [
+                                {
+                                  "enum": [
+                                    "related"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": [
+                                    "child"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": [
+                                    "parent"
+                                  ],
+                                  "type": "string"
+                                },
+                                {
+                                  "enum": [
+                                    "dependency"
+                                  ],
+                                  "type": "string"
+                                }
+                              ]
+                            }
+                          },
+                          "required": [
+                            "name",
+                            "type"
+                          ],
+                          "type": "object"
+                        },
+                        "type": "array"
+                      },
+                      "repository_links": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "runbook_links": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "tags": {
+                        "items": {
+                          "type": "string"
+                        },
+                        "type": "array"
+                      },
+                      "tier": {
+                        "anyOf": [
+                          {
+                            "enum": [
+                              1
+                            ],
+                            "type": "number"
+                          },
+                          {
+                            "enum": [
+                              2
+                            ],
+                            "type": "number"
+                          },
+                          {
+                            "enum": [
+                              3
+                            ],
+                            "type": "number"
+                          },
+                          {
+                            "enum": [
+                              4
+                            ],
+                            "type": "number"
+                          }
+                        ]
                       }
                     },
                     "required": [
-                      "members"
+                      "owner",
+                      "tier",
+                      "metadata",
+                      "tags",
+                      "runbook_links",
+                      "documentation_links",
+                      "repository_links",
+                      "relationships"
                     ],
                     "type": "object"
                   }
