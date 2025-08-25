@@ -24,6 +24,18 @@ export const dataCascadeImplStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
     willChange: 'transform',
     zIndex: euiTheme.levels.header,
     background: euiTheme.colors.backgroundBasePlain,
+
+    // preserves the round edges on the top bar on scroll
+    '&[data-scrolled="true"]::before': {
+      content: '""',
+      position: 'absolute',
+      height: '100%',
+      width: '100%',
+      borderRadius: euiTheme.border.radius.small,
+      boxShadow: `inset ${euiTheme.border.color} 0px ${euiTheme.border.width.thin} 0px`,
+      top: `calc(100% - ${euiTheme.border.radius.small} + ${euiTheme.border.width.thin})`,
+      pointerEvents: 'none',
+    },
   }),
   cascadeTreeGridHeaderScrolled: css({
     borderBottom: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
