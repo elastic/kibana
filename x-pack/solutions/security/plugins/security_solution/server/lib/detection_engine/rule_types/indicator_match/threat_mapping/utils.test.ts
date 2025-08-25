@@ -701,8 +701,7 @@ describe('utils', () => {
         const encoded = encodeThreatMatchNamedQuery({
           id: 'id',
           index: 'index',
-          field: 'field',
-          value: 'value',
+          threatMappingIndex: 0,
           queryType: 'mq',
         });
 
@@ -715,8 +714,7 @@ describe('utils', () => {
         const query: ThreatMatchNamedQuery = {
           id: 'my_id',
           index: 'index',
-          field: 'threat.indicator.domain',
-          value: 'host.name',
+          threatMappingIndex: 0,
           queryType: 'mq',
         };
 
@@ -731,10 +729,8 @@ describe('utils', () => {
         const query: ThreatMatchNamedQuery = {
           id: 'my_id',
           index: 'index',
-          field: 'threat.indicator.domain',
-          value: 'host.name',
+          threatMappingIndex: 0,
           queryType: 'mq',
-          negate: true,
         };
 
         const encoded = encodeThreatMatchNamedQuery(query);
@@ -746,8 +742,7 @@ describe('utils', () => {
 
       it('can decode if some parameters not passed', () => {
         const query: ThreatTermNamedQuery = {
-          field: 'threat.indicator.domain',
-          value: 'host.name',
+          threatMappingIndex: 0,
           queryType: 'tq',
         };
 
@@ -759,40 +754,38 @@ describe('utils', () => {
       });
 
       it('raises an error if the input is invalid', () => {
-        const badInput = 'nope';
+        const badInput = 'id__SEP__index__SEP__0';
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"nope"}'
+          'Decoded query is invalid. Decoded value: {"id":"id","index":"index","threatMappingIndex":0}'
         );
       });
 
-      it('raises an error if the query is missing a value for match query', () => {
+      it('raises an error if the query has NaN for threatMappingIndex', () => {
         const badQuery: ThreatMatchNamedQuery = {
           id: 'my_id',
           index: 'index',
-          // @ts-expect-error field intentionally undefined
-          field: undefined,
-          value: 'host.name',
+          // @ts-expect-error
+          threatMappingIndex: 'nan',
           queryType: 'mq',
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"my_id","index":"index","field":"","value":"host.name","queryType":"mq"}'
+          'Decoded threat mapping index is invalid. Decoded value: nan'
         );
       });
 
-      it('raises an error if the query is invalid a value for term query', () => {
+      it('raises an error if the query has NaN for threatMappingIndex for term query', () => {
         const badQuery: ThreatTermNamedQuery = {
-          // @ts-expect-error field intentionally undefined
-          field: undefined,
-          value: 'host.name',
+          // @ts-expect-error
+          threatMappingIndex: 'nan',
           queryType: 'tq',
         };
         const badInput = encodeThreatMatchNamedQuery(badQuery);
 
         expect(() => decodeThreatMatchNamedQuery(badInput)).toThrowError(
-          'Decoded query is invalid. Decoded value: {"id":"","index":"","field":"","value":"host.name","queryType":"tq"}'
+          'Decoded threat mapping index is invalid. Decoded value: nan'
         );
       });
     });
