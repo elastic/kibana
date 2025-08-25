@@ -31,6 +31,7 @@ import { GcpCredentialsForm } from './gcp_credentials_form/gcp_credential_form';
 import { AzureCredentialsFormAgentless } from './azure_credentials_form/azure_credentials_form_agentless';
 import { AzureCredentialsForm } from './azure_credentials_form/azure_credentials_form';
 import { useLoadCloudSetup } from './hooks/use_load_cloud_setup';
+import { CloudConnectorSetup } from './cloud_connector/cloud_connector_setup';
 import { CloudSetupProvider } from './cloud_setup_context';
 import { AWS_PROVIDER, GCP_PROVIDER, AZURE_PROVIDER } from './constants';
 import { useCloudSetup } from './hooks/use_cloud_setup_context';
@@ -248,17 +249,33 @@ const CloudIntegrationSetup = memo<CloudIntegrationSetupProps>(
         )}
 
         {selectedProvider === AWS_PROVIDER && setupTechnology === SetupTechnology.AGENTLESS && (
-          <AwsCredentialsFormAgentless
-            input={input}
-            newPolicy={newPolicy}
-            packageInfo={packageInfo}
-            updatePolicy={updatePolicy}
-            isEditPage={isEditPage}
-            setupTechnology={setupTechnology}
-            hasInvalidRequiredVars={hasInvalidRequiredVars}
-            showCloudConnectors={showCloudConnectors}
-            cloud={cloud}
-          />
+          <>
+            {showCloudConnectors ? (
+              <CloudConnectorSetup
+                templateName={templateName}
+                input={input}
+                newPolicy={newPolicy}
+                packageInfo={packageInfo}
+                updatePolicy={updatePolicy}
+                isEditPage={isEditPage}
+                hasInvalidRequiredVars={hasInvalidRequiredVars}
+                cloud={cloud}
+                cloudProvider={selectedProvider}
+              />
+            ) : (
+              <AwsCredentialsFormAgentless
+                input={input}
+                newPolicy={newPolicy}
+                packageInfo={packageInfo}
+                updatePolicy={updatePolicy}
+                isEditPage={isEditPage}
+                setupTechnology={setupTechnology}
+                hasInvalidRequiredVars={hasInvalidRequiredVars}
+                showCloudConnectors={showCloudConnectors}
+                cloud={cloud}
+              />
+            )}
+          </>
         )}
         {selectedProvider === AWS_PROVIDER && setupTechnology !== SetupTechnology.AGENTLESS && (
           <AwsCredentialsForm
