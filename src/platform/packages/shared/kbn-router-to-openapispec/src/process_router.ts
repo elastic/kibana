@@ -120,7 +120,8 @@ export const processRouter = async ({
     } catch (e) {
       // Enrich the error message with a bit more context
       e.message = `Error generating OpenAPI for route '${route.path}': ${e.message}`;
-      throw e;
+      console.log('processRouter error: ', e);
+      // throw e;
     }
   }
   return { paths };

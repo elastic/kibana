@@ -7,300 +7,331 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, isZod } from '@kbn/zod';
-import { isPassThroughAny } from '@kbn/zod-helpers';
-import zodToJsonSchema from 'zod-to-json-schema';
+import { isZod, z } from '@kbn/zod';
 import type { OpenAPIV3 } from 'openapi-types';
+import { toOpenAPI30Nullable } from './post_process_mutations/nullable';
 
-import type { KnownParameters } from '../../type';
+import type { KnownParameters, OpenAPIConverter } from '../../type';
 import { validatePathParameters } from '../common';
 
-// Adapted from from https://github.com/jlalmes/trpc-openapi/blob/aea45441af785518df35c2bc173ae2ea6271e489/src/utils/zod.ts#L1
+export const is = isZod;
 
 const createError = (message: string): Error => {
   return new Error(`[Zod converter] ${message}`);
 };
 
-function assertInstanceOfZodType(schema: unknown): asserts schema is z.ZodTypeAny {
-  if (!isZod(schema)) {
-    throw createError('Expected schema to be an instance of Zod');
+/**
+ * Asserts that the provided schema is an instance of provided Zod type
+ * or else throws an error with the provided message.
+ */
+function assertZodType<T extends z.ZodType>(
+  schema: unknown,
+  type: new (...args: any[]) => T,
+  message: string
+): asserts schema is T {
+  if (!(schema instanceof type)) {
+    throw createError(message);
   }
 }
 
-const instanceofZodTypeKind = <Z extends z.ZodFirstPartyTypeKind>(
-  type: z.ZodTypeAny,
-  zodTypeKind: Z
-): type is InstanceType<(typeof z)[Z]> => {
-  return type?._def?.typeName === zodTypeKind;
-};
-
-const instanceofZodTypeObject = (type: z.ZodTypeAny): type is z.ZodObject<z.ZodRawShape> => {
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodObject);
-};
-
-type ZodTypeLikeVoid = z.ZodVoid | z.ZodUndefined | z.ZodNever;
-
-const instanceofZodTypeLikeVoid = (type: z.ZodTypeAny): type is ZodTypeLikeVoid => {
-  return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodVoid) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUndefined) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNever)
-  );
-};
-
-const unwrapZodLazy = (type: z.ZodTypeAny): z.ZodTypeAny => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodLazy(type._def.getter());
+type JSONSchema = z.core.JSONSchema.BaseSchema;
+/**
+ * Asserts that the provided schema is an instance of provided Zod type
+ * or else throws an error with the provided message.
+ */
+const assertJSONSchemaType = (
+  schema: JSONSchema,
+  type: NonNullable<JSONSchema['type']>,
+  message: string
+): asserts schema => {
+  if (schema.type !== type) {
+    throw createError(message);
   }
-  return type;
 };
 
-const unwrapZodOptionalDefault = (
-  type: z.ZodTypeAny
-): {
-  description: z.ZodTypeAny['description'];
-  defaultValue: unknown;
-  isOptional: boolean;
-  innerType: z.ZodTypeAny;
-} => {
-  let description: z.ZodTypeAny['description']; // To track the outer description if exists
-  let defaultValue: unknown;
-  let isOptional = false;
-  let innerType = type;
+// Keeps tracks of shared schemas that are used across multiple OpenAPI components.
+const openApiRefPathPrefix = '#/components/schemas/';
+const zodRefPathPrefix = '#/definitions/';
+type SharedSchemas = ReturnType<OpenAPIConverter['convert']>['shared'];
+let sharedSchemaKeyCounter = 0;
+const shared: SharedSchemas = {};
+const stringifiedSnapshots = new Map<string, string>(); // Keep a copy for performance
 
-  while (
-    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)
-  ) {
-    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodOptional)) {
-      isOptional = innerType.isOptional();
-      description = !description ? innerType.description : description;
-      innerType = innerType.unwrap();
+function postProcessJsonOutput(json: z.core.JSONSchema.BaseSchema) {
+  if (!json || typeof json !== 'object') {
+    return json;
+  }
+
+  // Remove the $schema property if it exists
+  if (typeof json.$schema !== 'undefined') {
+    delete json.$schema;
+  }
+
+  // Convert to string once for all processing
+  let jsonString = JSON.stringify(json, (key, value) => {
+    // Remove the `const` property, not supported in OpenAPI 3.0
+    if (key === 'const') {
+      return undefined; // Remove the const property
     }
-    if (instanceofZodTypeKind(innerType, z.ZodFirstPartyTypeKind.ZodDefault)) {
-      defaultValue = innerType._def.defaultValue();
-      description = !description ? innerType.description : description;
-      innerType = innerType.removeDefault();
-    }
-  }
+    return value;
+  });
 
-  return { description, defaultValue, isOptional, innerType };
-};
+  // Process shared schemas if definitions exist
+  if (json.definitions) {
+    Object.entries(json.definitions).forEach(([defKey, defValue]) => {
+      // Check if the stringified defValue is already in shared schemas
+      const valueString = JSON.stringify(defValue);
 
-const unwrapZodType = (type: z.ZodTypeAny, unwrapPreprocess: boolean): z.ZodTypeAny => {
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return unwrapZodType(unwrapZodLazy(type), unwrapPreprocess);
-  }
+      // Look for existing matching schema by stringified content
+      const existingKey = stringifiedSnapshots.get(valueString);
 
-  if (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)
-  ) {
-    const { innerType } = unwrapZodOptionalDefault(type);
-    return unwrapZodType(innerType, unwrapPreprocess);
-  }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'refinement') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-    if (type._def.effect.type === 'transform') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-    if (unwrapPreprocess && type._def.effect.type === 'preprocess') {
-      return unwrapZodType(type._def.schema, unwrapPreprocess);
-    }
-  }
-  return type;
-};
-
-interface NativeEnumType {
-  [k: string]: string | number;
-  [nu: number]: string;
-}
-
-type ZodTypeLikeString =
-  | z.ZodString
-  | z.ZodOptional<ZodTypeLikeString>
-  | z.ZodDefault<ZodTypeLikeString>
-  | z.ZodEffects<ZodTypeLikeString, unknown, unknown>
-  | z.ZodUnion<[ZodTypeLikeString, ...ZodTypeLikeString[]]>
-  | z.ZodIntersection<ZodTypeLikeString, ZodTypeLikeString>
-  | z.ZodLazy<ZodTypeLikeString>
-  | z.ZodLiteral<string>
-  | z.ZodEnum<[string, ...string[]]>
-  | z.ZodNativeEnum<NativeEnumType>;
-
-const zodSupportsCoerce = 'coerce' in z;
-
-type ZodTypeCoercible = z.ZodNumber | z.ZodBoolean | z.ZodBigInt | z.ZodDate;
-
-const instanceofZodTypeCoercible = (_type: z.ZodTypeAny): _type is ZodTypeCoercible => {
-  const type = unwrapZodType(_type, false);
-  return (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNumber) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBoolean) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodBigInt) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDate)
-  );
-};
-
-const instanceofZodTypeLikeString = (
-  _type: z.ZodTypeAny,
-  allowMixedUnion: boolean
-): _type is ZodTypeLikeString => {
-  const type = unwrapZodType(_type, false);
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    if (type._def.effect.type === 'preprocess') {
-      return true;
-    }
-  }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodUnion)) {
-    return !type._def.options.some(
-      (option) =>
-        !instanceofZodTypeLikeString(option, allowMixedUnion) &&
-        !(allowMixedUnion && instanceofZodTypeCoercible(option))
-    );
-  }
-
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodArray)) {
-    return instanceofZodTypeLikeString(type._def.type, allowMixedUnion);
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodIntersection)) {
-    return (
-      instanceofZodTypeLikeString(type._def.left, allowMixedUnion) &&
-      instanceofZodTypeLikeString(type._def.right, allowMixedUnion)
-    );
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLiteral)) {
-    return typeof type._def.value === 'string';
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEnum)) {
-    return true;
-  }
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodNativeEnum)) {
-    return !Object.values(type._def.values).some((value) => typeof value === 'number');
-  }
-  return instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodString);
-};
-
-const convertObjectMembersToParameterObjects = (
-  shape: z.ZodRawShape,
-  isPathParameter = false,
-  knownParameters: KnownParameters = {}
-): OpenAPIV3.ParameterObject[] => {
-  return Object.entries(shape).map(([shapeKey, subShape]) => {
-    const typeWithoutLazy = unwrapZodLazy(subShape);
-    const {
-      description: outerDescription,
-      isOptional,
-      defaultValue,
-      innerType: typeWithoutOptionalDefault,
-    } = unwrapZodOptionalDefault(typeWithoutLazy);
-
-    // Except for path parameters, OpenAPI supports mixed unions with `anyOf` e.g. for query parameters
-    if (!instanceofZodTypeLikeString(typeWithoutOptionalDefault, !isPathParameter)) {
-      if (zodSupportsCoerce) {
-        if (!instanceofZodTypeCoercible(typeWithoutOptionalDefault)) {
-          throw createError(
-            `Input parser key: "${shapeKey}" must be ZodString, ZodNumber, ZodBoolean, ZodBigInt or ZodDate`
-          );
-        }
+      if (existingKey) {
+        // Schema already exists, replace references with existing defKey
+        const oldRef = `${zodRefPathPrefix}${defKey}`;
+        const newRef = `${openApiRefPathPrefix}${existingKey}`;
+        jsonString = jsonString.replaceAll(`"${oldRef}"`, `"${newRef}"`);
       } else {
-        throw createError(`Input parser key: "${shapeKey}" must be ZodString`);
+        // Schema doesn't exist, create new entry
+        const newKey = `__schema${sharedSchemaKeyCounter++}`;
+        const newRef = `${openApiRefPathPrefix}${newKey}`;
+
+        // Process the schema defValue to replace any internal references
+        let processedValue = defValue;
+        const valueJsonString = JSON.stringify(defValue);
+
+        // Replace any internal zod references in the schema defValue itself
+        const updatedValueString = valueJsonString.replaceAll(
+          `"${zodRefPathPrefix}`,
+          `"${openApiRefPathPrefix}`
+        );
+        if (updatedValueString !== valueJsonString) {
+          processedValue = JSON.parse(updatedValueString);
+        }
+
+        // Store in shared schemas and stringified snapshots
+        shared[newKey] = processedValue;
+        stringifiedSnapshots.set(valueString, newKey);
+
+        // Replace references with new defKey
+        const oldRef = `${zodRefPathPrefix}${defKey}`;
+        jsonString = jsonString.replaceAll(`"${oldRef}"`, `"${newRef}"`);
       }
-    }
+    });
+  }
 
-    const {
-      schema: { description: schemaDescription, ...openApiSchemaObject },
-    } = convert(typeWithoutOptionalDefault);
+  // Parse back to object once
+  json = JSON.parse(jsonString);
 
-    if (typeof defaultValue !== 'undefined') {
-      openApiSchemaObject.default = defaultValue;
+  // Remove definitions after processing
+  if (json.definitions) {
+    delete json.definitions;
+  }
+
+  // Convert Zod nullability (OpenAPI 3.1) to OpenAPI 3.0 nullability
+  json = toOpenAPI30Nullable(json);
+
+  return json;
+}
+
+function getCustomOpenApiMetadata(schema: z.core.$ZodType) {
+  // If the schema has a custom OpenAPI metadata method, apply it
+  console.log(
+    'getCustomOpenApiMetadata>>>>>>>>checking schema:',
+    schema.constructor.name,
+    'hasMethod:',
+    typeof (schema as any).getOpenAPIMetadata === 'function'
+  );
+  if (typeof (schema as any).getOpenAPIMetadata === 'function') {
+    console.log('getCustomOpenApiMetadata>>>>>>>>schema:', schema);
+    const openAPIMetadata = (schema as any).getOpenAPIMetadata();
+    console.log('getCustomOpenApiMetadata>>>>>>>>openAPIMetadata:', openAPIMetadata);
+    if (openAPIMetadata && typeof openAPIMetadata === 'object') {
+      // Apply all OpenAPI metadata properties to ensure nothing is lost
+      return openAPIMetadata;
     }
+  }
+  return undefined;
+}
+
+function toJSON(schema: z.ZodType) {
+  // If no wrapper is found, this is considered the innermost type.
+  // Check for unsupported types that should be coerced.
+
+  // let customOpenApiMetadata: z.core.JSONSchema.BaseSchema | undefined;
+  const json = z.toJSONSchema(schema, {
+    io: 'input',
+    target: 'draft-7',
+    unrepresentable: 'any',
+    override: (ctx) => {
+      // Check for custom OpenAPI metadata first
+      // const openApiMetadata = getCustomOpenApiMetadata(ctx.zodSchema);
+      // if (openApiMetadata) {
+      //   // Use the custom OpenAPI metadata directly as the JSON schema
+      //   ctx.jsonSchema = openApiMetadata;
+      //   // customOpenApiMetadata = openApiMetadata;
+      //   return;
+      // }
+
+      // Apply coercion for unrepresentable types if no custom metadata
+      ctx.jsonSchema = coerceUnrepresentableTypeIfNeeded(
+        ctx.zodSchema,
+        ctx.jsonSchema as z.core.JSONSchema.BaseSchema
+      );
+    },
+  });
+
+  // // If the schema has custom OpenAPI metadata, return it directly
+  // if (customOpenApiMetadata) {
+  //   return {
+  //     json: customOpenApiMetadata,
+  //     definitions: {},
+  //   };
+  // }
+
+  return postProcessJsonOutput(json);
+}
+
+function isZodEmptyType(type: z.ZodType): type is z.ZodVoid | z.ZodUndefined | z.ZodNever {
+  return type instanceof z.ZodVoid || type instanceof z.ZodUndefined || type instanceof z.ZodNever;
+}
+
+export function isUndefined(type: z.ZodType): type is z.ZodUndefined | z.ZodVoid {
+  return isZodEmptyType(type) || type.isOmittedFromOpenAPI();
+}
+
+/**
+ * Recursively unwraps a Zod schema to get the innermost, or "starting," type.
+ *
+ * @param schema The Zod schema to unwrap.
+ * @returns The innermost Zod schema that is not a wrapper.
+ */
+export function getZodInnerType(schema: z.ZodType): z.ZodType {
+  if (schema instanceof z.ZodPipe) {
+    return getZodInnerType(schema.in as z.ZodType);
+  }
+
+  // If schema has `unwrap` method, recursively unwrap it.
+  if ('unwrap' in schema && typeof schema.unwrap === 'function') {
+    return getZodInnerType(schema.unwrap());
+  }
+
+  return schema;
+}
+
+/**
+ * Coerces unrepresentable Zod types to a cloned JSON Schema type.
+ */
+function coerceUnrepresentableTypeIfNeeded(
+  schema: z.core.$ZodType,
+  json: z.core.JSONSchema.BaseSchema
+): z.core.JSONSchema.BaseSchema {
+  if (schema instanceof z.ZodDate) {
+    json.type = 'string';
+    json.format = 'date';
+  }
+
+  if (schema instanceof z.ZodBigInt) {
+    json.type = 'string';
+    json.format = 'bigint';
+  }
+
+  return json;
+}
+
+/**
+ * Checks if a Zod schema is suitable for a Request Body or Response Body in OpenAPI.
+ * These can generally represent any valid JSON structure.
+ */
+export function isAllowedAsRequestBodyOrResponseSchema(schema: z.ZodType): boolean {
+  const inner = getZodInnerType(schema);
+
+  // Zod types which are typically "unrepresentable" in OpenAPI
+  return !(
+    inner instanceof z.ZodSymbol ||
+    inner instanceof z.ZodUndefined ||
+    inner instanceof z.ZodVoid ||
+    inner instanceof z.ZodNever ||
+    inner instanceof z.ZodNaN ||
+    inner instanceof z.ZodPromise
+  );
+}
+
+const convertJsonSchemaToOpenAPIParam = (
+  schema: JSONSchema,
+  isPathParameter = false
+): OpenAPIV3.ParameterObject[] => {
+  assertJSONSchemaType(schema, 'object', 'Expected schema to be an object');
+  return Object.entries(schema.properties).map(([shapeKey, subShape]) => {
+    const isOptional = schema.required?.includes(shapeKey);
+    const { description, ...json } = subShape;
 
     return {
       name: shapeKey,
       in: isPathParameter ? 'path' : 'query',
-      required: isPathParameter ? !knownParameters[shapeKey]?.optional : !isOptional,
-      schema: openApiSchemaObject,
-      description: outerDescription || schemaDescription,
+      required: isPathParameter || isOptional,
+      schema: json as OpenAPIV3.SchemaObject,
+      description,
     };
   });
 };
 
-// Returns a z.ZodRawShape to passes through all known parameters with z.any
-const getPassThroughShape = (knownParameters: KnownParameters, isPathParameter = false) => {
-  const passThroughShape: z.ZodRawShape = {};
-  for (const [key, { optional }] of Object.entries(knownParameters)) {
-    passThroughShape[key] = optional && !isPathParameter ? z.string().optional() : z.string();
-  }
-  return passThroughShape;
+/**
+ * Returns a loose object with a custom description for pass-through payload.
+ * @param description
+ */
+const getPassThroughBodyObject = (description: string) => {
+  return z.looseObject({}).describe(description);
 };
 
 export const convertQuery = (schema: unknown) => {
-  assertInstanceOfZodType(schema);
-  const unwrappedSchema = unwrapZodType(schema, true);
+  assertZodType(schema, z.ZodType, 'Expected schema to be an instance of Zod');
+  assertZodType(schema, z.ZodObject, 'Query schema must be an _object_ schema validator!');
 
-  if (isPassThroughAny(unwrappedSchema)) {
-    return {
-      query: convertObjectMembersToParameterObjects(getPassThroughShape({}, false), true),
-      shared: {},
-    };
-  }
+  const jsonSchema = toJSON(schema);
 
-  if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw createError('Query schema must be an _object_ schema validator!');
-  }
-  const shape = unwrappedSchema.shape;
   return {
-    query: convertObjectMembersToParameterObjects(shape, false),
+    query: convertJsonSchemaToOpenAPIParam(jsonSchema, false),
     shared: {},
   };
 };
 
 export const convertPathParameters = (schema: unknown, knownParameters: KnownParameters) => {
-  assertInstanceOfZodType(schema);
-  const unwrappedSchema = unwrapZodType(schema, true);
+  assertZodType(schema, z.ZodType, 'Expected schema to be an instance of Zod');
+
   const paramKeys = Object.keys(knownParameters);
-  const paramsCount = paramKeys.length;
-
-  if (paramsCount === 0 && instanceofZodTypeLikeVoid(unwrappedSchema)) {
-    return { params: [], shared: {} };
-  }
-
-  if (isPassThroughAny(unwrappedSchema)) {
-    return {
-      params: convertObjectMembersToParameterObjects(
-        getPassThroughShape(knownParameters, true),
-        true
-      ),
-      shared: {},
-    };
-  }
-
-  if (!instanceofZodTypeObject(unwrappedSchema)) {
-    throw createError('Parameters schema must be an _object_ schema validator!');
-  }
-  const shape = unwrappedSchema.shape;
-  const schemaKeys = Object.keys(shape);
+  const jsonSchema = toJSON(schema);
+  const schemaKeys = Object.keys(jsonSchema.properties ?? {});
   validatePathParameters(paramKeys, schemaKeys);
+
   return {
-    params: convertObjectMembersToParameterObjects(shape, true),
+    params: convertJsonSchemaToOpenAPIParam(jsonSchema, true),
     shared: {},
   };
 };
 
-export const convert = (schema: z.ZodTypeAny) => {
+export const convert = (schema: z.ZodType): ReturnType<OpenAPIConverter['convert']> => {
+  assertZodType(schema, z.ZodType, 'Expected schema to be an instance of Zod');
+  if (!isAllowedAsRequestBodyOrResponseSchema(schema)) {
+    throw createError('Schema is not allowed as a request body or response schema');
+  }
+
+  let convertionOutput: ReturnType<typeof toJSON>;
+
+  try {
+    convertionOutput = toJSON(schema);
+  } catch (e) {
+    // Use custom OpenAPI metadata if available, or fallback to a generic pass-through object
+    convertionOutput =
+      getCustomOpenApiMetadata(schema) ??
+      toJSON(
+        getPassThroughBodyObject(
+          'Could not convert the schema to OpenAPI equivalent, passing through as any.'
+        )
+      );
+  }
+
   return {
-    shared: {},
-    schema: zodToJsonSchema(schema, {
-      target: 'openApi3',
-      $refStrategy: 'none',
-    }) as OpenAPIV3.SchemaObject,
+    shared,
+    schema: convertionOutput as OpenAPIV3.SchemaObject,
   };
 };
-
-export const is = isZod;
