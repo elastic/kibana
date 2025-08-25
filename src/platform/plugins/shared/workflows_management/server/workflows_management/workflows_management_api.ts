@@ -144,7 +144,8 @@ export class WorkflowsManagementApi {
       spaceId,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
@@ -169,7 +170,7 @@ export class WorkflowsManagementApi {
       spaceId,
     };
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
-    return await workflowsExecutionEngine.executeWorkflow(
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
@@ -178,6 +179,7 @@ export class WorkflowsManagementApi {
       },
       context
     );
+    return executeResponse.workflowExecutionId;
   }
 
   public async getWorkflowExecutions(
