@@ -171,14 +171,15 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
   }));
 
   const spacesWarningText = i18n.translate('indexPatternManagement.dataViewTable.deleteWarning', {
-    defaultMessage: 'Data views are deleted from every space they are shared in.',
+    defaultMessage:
+      'Deleting a data view affects every saved object that uses it, and it is deleted from every space it is shared in. This action cannot be undone.',
   });
 
   const relationshipCalloutText = i18n.translate(
     'indexPatternManagement.dataViewTable.deleteDanger',
     {
       defaultMessage:
-        'One or more data views are used by other objects in Kibana. Please review each relationship before deleting. ',
+        'Deleting a data view affects every saved object that uses it, and it is deleted from every space it is shared in. One or more data views are used by other objects in Kibana. Please review each relationship before deleting. This action cannot be undone.',
     }
   );
 
@@ -190,11 +191,7 @@ const DeleteModalMsgRender: React.FC<ModalProps> = ({ views, hasSpaces, relation
     <div>
       {showRelationshipsCallout ? (
         <>
-          <EuiCallOut
-            color="danger"
-            iconType="warning"
-            title={relationshipCalloutText + spacesWarningText}
-          />
+          <EuiCallOut color="danger" iconType="warning" title={relationshipCalloutText} />
         </>
       ) : (
         <EuiCallOut color="warning" iconType="warning" title={spacesWarningText} />
