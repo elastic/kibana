@@ -15,7 +15,11 @@ import type { MetricStyle } from '@elastic/charts';
 import type { ToolbarPopoverProps } from '../../../shared_components';
 import { ToolbarPopover } from '../../../shared_components';
 import type { MetricVisualizationState, ValueFontMode } from '../types';
-import { metricStateDefaults } from '../constants';
+import {
+  METRIC_LAYOUT_BY_POSITION,
+  metricStateDefaults,
+  type MetricLayoutWithDefault,
+} from '../constants';
 import {
   PrimaryAlignmentOption,
   SecondaryAlignmentOption,
@@ -30,31 +34,23 @@ export interface TitlesAndTextPopoverProps {
   groupPosition?: ToolbarPopoverProps['groupPosition'];
 }
 
-/** Default config based on Primary Metric position */
-const DEFAULT_LAYOUT_CONFIG: Record<
-  string,
-  Pick<MetricVisualizationState, 'titleWeight' | 'primaryAlign'>
-> = {
-  top: {
-    titleWeight: 'normal',
-    primaryAlign: 'left',
-  },
-  bottom: {
-    titleWeight: 'bold',
-    primaryAlign: 'right',
-  },
-};
-
 const getDefaultLayoutConfig = (
-  newPrimaryPosition: 'top' | 'bottom',
-  hasSecondaryMetric: boolean
-): Pick<MetricVisualizationState, 'titleWeight' | 'primaryAlign' | 'secondaryAlign'> => {
-  return {
-    ...DEFAULT_LAYOUT_CONFIG[newPrimaryPosition],
-    ...(hasSecondaryMetric && newPrimaryPosition === 'top'
-      ? { secondaryAlign: 'left' }
-      : { secondaryAlign: 'right' }),
-  };
+  newPrimaryPosition: 'bottom' | 'top',
+  { hasIcon, hasSecondaryMetric }: { hasIcon: boolean; hasSecondaryMetric: boolean }
+): MetricLayoutWithDefault => {
+  let config = { ...METRIC_LAYOUT_BY_POSITION[newPrimaryPosition] };
+
+  if (!hasIcon) {
+    const { iconAlign, ...rest } = config;
+    config = rest;
+  }
+
+  if (!hasSecondaryMetric) {
+    const { secondaryAlign, ...rest } = config;
+    config = rest;
+  }
+
+  return config;
 };
 
 export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
@@ -63,6 +59,7 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
   groupPosition,
 }) => {
   const hasSecondaryMetric = !!state.secondaryMetricAccessor;
+  const hasIcon = !!(state.icon && state.icon !== 'empty');
   return (
     <ToolbarPopover
       title={i18n.translate('xpack.lens.metric.toolbarTitlesText.label', {
@@ -116,12 +113,12 @@ export const TitlesAndTextPopover: FC<TitlesAndTextPopoverProps> = ({
           setState({
             ...state,
             primaryPosition: newPrimaryPosition,
-            ...getDefaultLayoutConfig(newPrimaryPosition, hasSecondaryMetric),
+            ...getDefaultLayoutConfig(newPrimaryPosition, { hasIcon, hasSecondaryMetric }),
           });
         }}
       />
 
-      {state.icon && state.icon !== 'empty' && (
+      {hasIcon && (
         <IconAlignmentOption
           value={state.iconAlign ?? metricStateDefaults.iconAlign}
           onChange={(newIconAlign) => {

@@ -26,23 +26,23 @@ type MetricVisualizationStateOptionals = Pick<
   OptionalKeys<MetricVisualizationState>
 >;
 
-/**
- * Defaults for select optional Metric vis state options
- */
-export const metricStateDefaults: Required<
-  Pick<
-    MetricVisualizationStateOptionals,
-    | 'titlesTextAlign'
-    | 'primaryAlign'
-    | 'secondaryAlign'
-    | 'iconAlign'
-    | 'valueFontMode'
-    | 'primaryPosition'
-    | 'titleWeight'
-    | 'secondaryLabelPosition'
-    | 'applyColorTo'
-  >
-> = {
+type MetricStateOptinalsWithDefault = Pick<
+  MetricVisualizationStateOptionals,
+  | 'titlesTextAlign'
+  | 'primaryAlign'
+  | 'secondaryAlign'
+  | 'iconAlign'
+  | 'valueFontMode'
+  | 'primaryPosition'
+  | 'titleWeight'
+  | 'secondaryLabelPosition'
+  | 'applyColorTo'
+>;
+
+type MetricStateDefaults = Required<MetricStateOptinalsWithDefault>;
+
+/** Defaults for select optional Metric vis state options */
+export const metricStateDefaults: MetricStateDefaults = {
   titlesTextAlign: 'left',
   primaryAlign: 'right',
   secondaryAlign: 'right',
@@ -52,6 +52,30 @@ export const metricStateDefaults: Required<
   titleWeight: 'bold',
   secondaryLabelPosition: 'before',
   applyColorTo: 'background',
+};
+
+export type MetricLayoutWithDefault = Required<
+  Pick<MetricStateOptinalsWithDefault, 'titlesTextAlign' | 'titleWeight' | 'primaryAlign'>
+> & {
+  iconAlign?: MetricStateOptinalsWithDefault['iconAlign'];
+  secondaryAlign?: MetricStateOptinalsWithDefault['secondaryAlign'];
+};
+
+export const METRIC_LAYOUT_BY_POSITION: Record<'bottom' | 'top', MetricLayoutWithDefault> = {
+  bottom: {
+    titlesTextAlign: 'left',
+    titleWeight: 'bold',
+    primaryAlign: 'right',
+    iconAlign: 'left',
+    secondaryAlign: 'right',
+  },
+  top: {
+    titlesTextAlign: 'left',
+    titleWeight: 'normal',
+    primaryAlign: 'left',
+    iconAlign: 'right',
+    secondaryAlign: 'left',
+  },
 };
 
 export const SECONDARY_DEFAULT_STATIC_COLOR = '#E4E8F1';

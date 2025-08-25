@@ -234,25 +234,6 @@ describe('TitlesAndTextPopover', () => {
     expect(screen.queryByTestId('lens-icon-alignment-btn')).not.toBeInTheDocument();
   });
 
-  it('should set default config when primary metric postion is selected to top', () => {
-    renderToolbarOptions({ ...fullState });
-    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
-    textOptionsButton.click();
-
-    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
-
-    positionBtnGroup.select('Top');
-
-    expect(mockSetState).toHaveBeenCalledWith(
-      expect.objectContaining({
-        primaryPosition: 'top',
-        primaryAlign: 'left',
-        titleWeight: 'normal',
-        secondaryAlign: 'left',
-      })
-    );
-  });
-
   it('should set deafault config when primary metric postion is selected to bottom', () => {
     renderToolbarOptions({ ...fullState, primaryPosition: 'top' });
     const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
@@ -265,9 +246,32 @@ describe('TitlesAndTextPopover', () => {
     expect(mockSetState).toHaveBeenCalledWith(
       expect.objectContaining({
         primaryPosition: 'bottom',
-        primaryAlign: 'right',
+        titlesTextAlign: 'left',
         titleWeight: 'bold',
+        primaryAlign: 'right',
+        iconAlign: 'left',
         secondaryAlign: 'right',
+      })
+    );
+  });
+
+  it('should set default config when primary metric postion is selected to top', () => {
+    renderToolbarOptions({ ...fullState });
+    const textOptionsButton = screen.getByTestId('lnsTextOptionsButton');
+    textOptionsButton.click();
+
+    const positionBtnGroup = new EuiButtonGroupTestHarness('lens-primary-position-btn');
+
+    positionBtnGroup.select('Top');
+
+    expect(mockSetState).toHaveBeenCalledWith(
+      expect.objectContaining({
+        primaryPosition: 'top',
+        titlesTextAlign: 'left',
+        titleWeight: 'normal',
+        primaryAlign: 'left',
+        iconAlign: 'right',
+        secondaryAlign: 'left',
       })
     );
   });
