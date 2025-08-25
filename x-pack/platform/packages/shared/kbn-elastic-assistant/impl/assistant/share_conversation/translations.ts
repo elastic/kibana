@@ -90,14 +90,14 @@ export const PRIVATE_ERROR = i18n.translate(
 export const SHARED_SUCCESS = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.sharedSuccess',
   {
-    defaultMessage: 'Successfully shared conversation with all space users',
+    defaultMessage: 'Successfully shared conversation with all users in the space',
   }
 );
 
 export const SHARED_ERROR = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.sharedError',
   {
-    defaultMessage: 'Could not share conversation with all space users',
+    defaultMessage: 'Could not share conversation with all users in the space',
   }
 );
 

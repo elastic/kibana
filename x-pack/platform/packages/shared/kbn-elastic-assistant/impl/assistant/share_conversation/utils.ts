@@ -8,9 +8,9 @@
 import type { Conversation } from '../../..';
 
 export enum ConversationSharedState {
-  // all users
+  // all users in the space
   Shared = 'shared',
-  // selected users
+  // selected users in the space
   Restricted = 'restricted',
   // not shared, only visible to conversation owner
   Private = 'private',

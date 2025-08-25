@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiButton, EuiCallOut, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { getConversationSharedState, getSharedIcon } from '../share_conversation/utils';
 import { DUPLICATE } from '../use_conversation/translations';
 import type { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
@@ -56,6 +57,10 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
       setCurrentConversation,
     ]
   );
+  const sharedIcon = useMemo(
+    () => getSharedIcon(getConversationSharedState(selectedConversation)),
+    [selectedConversation]
+  );
   return localStorageShowConversation ? (
     <EuiCallOut
       data-test-subj="sharedConversationCallout"
@@ -65,7 +70,7 @@ const SharedConversationCalloutComponent: React.FC<Props> = ({
       `}
       size="s"
       title={i18n.CONVERSATION_SHARED_TITLE}
-      iconType="users"
+      iconType={sharedIcon}
       onDismiss={onDismiss}
     >
       {i18n.DISABLED_OWNERSHIP}

@@ -140,12 +140,12 @@ export const getComments: GetComments =
         const isLastComment = index === currentConversation.messages.length - 1;
         const isUser = message.role === 'user';
         const replacements = currentConversation.replacements;
-
+        const user = isUser
+          ? message.user ?? getCurrentConversationOwner(currentConversation)
+          : undefined;
         const messageProps = {
           timelineAvatar: isUser ? (
-            <SecurityUserAvatar
-              user={message.user ?? getCurrentConversationOwner(currentConversation)}
-            />
+            <SecurityUserAvatar user={user} />
           ) : (
             <AssistantAvatar name="machine" size="l" color="subdued" />
           ),
@@ -154,13 +154,7 @@ export const getComments: GetComments =
               ? new Date().toLocaleString()
               : new Date(message.timestamp).toLocaleString()
           ),
-          username: isUser ? (
-            <SecurityUserName
-              user={message.user ?? getCurrentConversationOwner(currentConversation)}
-            />
-          ) : (
-            i18n.ASSISTANT
-          ),
+          username: isUser ? <SecurityUserName user={user} /> : i18n.ASSISTANT,
           eventColor: message.isError ? ('danger' as EuiPanelProps['color']) : undefined,
         };
 

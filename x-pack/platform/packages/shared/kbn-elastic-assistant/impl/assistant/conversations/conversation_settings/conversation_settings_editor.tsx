@@ -213,7 +213,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           } else if (conversationSharedState === ConversationSharedState.Restricted) {
             users = nextUsers ?? [];
           }
-          // For Global, users remains []
+          // For ConversationSharedState.Shared (globally), users remains []
           const updatedConversation = {
             ...conversationUpdates,
             users,
