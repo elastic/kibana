@@ -9,16 +9,20 @@ import React, { useCallback } from 'react';
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiToolTip, EuiIcon, EuiBadge, EuiLink } from '@elastic/eui';
+import { EuiBadge, EuiIcon, EuiLink, EuiToolTip } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import {
   VISIBLE_PRIVATE,
-  VISIBLE_GLOBAL,
+  VISIBLE_RESTRICTED,
   VISIBLE_SHARED,
 } from '../../share_conversation/translations';
-import { getConversationSharedState, getSharedIcon } from '../../share_conversation/utils';
+import {
+  ConversationSharedState,
+  getConversationSharedState,
+  getSharedIcon,
+} from '../../share_conversation/utils';
 import type { Conversation } from '../../../assistant_context/types';
 import type { AIConnector } from '../../../connectorland/connector_selector';
 import { getConnectorTypeTitle } from '../../../connectorland/helpers';
@@ -111,10 +115,10 @@ export const useConversationsTable = () => {
             const conversationSharedState = getConversationSharedState(conversation);
             const icon = getSharedIcon(conversationSharedState);
             const tooltipContent =
-              conversationSharedState === 'global'
-                ? VISIBLE_GLOBAL
-                : conversationSharedState === 'shared'
+              conversationSharedState === ConversationSharedState.Shared
                 ? VISIBLE_SHARED
+                : conversationSharedState === ConversationSharedState.Restricted
+                ? VISIBLE_RESTRICTED
                 : VISIBLE_PRIVATE;
             return (
               <EuiToolTip content={tooltipContent}>
