@@ -23,6 +23,7 @@ import type {
   ProductFeatureSiemMigrationsKey,
   ProductFeatureTimelineFeatureKey,
   ProductFeatureNotesFeatureKey,
+  ProductFeatureRulesFeatureKey,
 } from './product_features_keys';
 
 export type { ProductFeatureKeyType };
@@ -79,6 +80,11 @@ export type ProductFeaturesNotesConfig = Map<
   ProductFeatureKibanaConfig
 >;
 
+export type ProductFeaturesRulesConfig = Map<
+  ProductFeatureRulesFeatureKey,
+  ProductFeatureKibanaConfig
+>;
+
 export type ProductFeaturesSiemMigrationsConfig = Map<
   ProductFeatureSiemMigrationsKey,
   ProductFeatureKibanaConfig
@@ -100,4 +106,5 @@ export interface ProductFeaturesConfigurator {
   timeline: () => ProductFeaturesConfig;
   notes: () => ProductFeaturesConfig;
   siemMigrations: () => ProductFeaturesConfig;
+  rules: () => ProductFeaturesConfig;
 }

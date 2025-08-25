@@ -12,9 +12,11 @@ export enum ProductFeatureSecurityKey {
   /** Enables Configurations page for AI SOC */
   configurations = 'configurations',
 
+  // TODO should be the rules feature ???
   /** Elastic endpoint detections, includes alerts, rules, investigations */
   detections = 'detections',
 
+  // TODO should be the rules feature ???
   /** Enables external detections for AI SOC, includes alerts_summary, basic_rules*/
   externalDetections = 'external_detections',
   /**
@@ -110,6 +112,7 @@ export enum ProductFeatureSecurityKey {
   /** Enables Endpoint Workflow Insights */
   securityWorkflowInsights = 'security_workflow_insights',
 
+  // TODO move under the rules feature
   /**
    * Enables customization of prebuilt Elastic rules
    */
@@ -157,6 +160,13 @@ export enum ProductFeatureSiemMigrationsKey {
   siemMigrations = 'siem_migrations',
 }
 
+export enum ProductFeatureRulesFeatureKey {
+  /**
+   * Enables Rules
+   */
+  rules = 'rules',
+}
+
 // Merges the two enums.
 export const ProductFeatureKey = {
   ...ProductFeatureSecurityKey,
@@ -166,6 +176,7 @@ export const ProductFeatureKey = {
   ...ProductFeatureSiemMigrationsKey,
   ...ProductFeatureTimelineFeatureKey,
   ...ProductFeatureNotesFeatureKey,
+  ...ProductFeatureRulesFeatureKey,
 };
 // We need to merge the value and the type and export both to replicate how enum works.
 export type ProductFeatureKeyType =
@@ -175,7 +186,8 @@ export type ProductFeatureKeyType =
   | ProductFeatureAttackDiscoveryKey
   | ProductFeatureSiemMigrationsKey
   | ProductFeatureTimelineFeatureKey
-  | ProductFeatureNotesFeatureKey;
+  | ProductFeatureNotesFeatureKey
+  | ProductFeatureRulesFeatureKey;
 
 export const ALL_PRODUCT_FEATURE_KEYS = Object.freeze(Object.values(ProductFeatureKey));
 

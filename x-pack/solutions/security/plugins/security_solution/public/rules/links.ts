@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { RULES_FEATURE_ID } from '@kbn/security-solution-features/constants';
 import {
   COVERAGE_OVERVIEW_PATH,
   EXCEPTIONS_PATH,
@@ -38,7 +39,7 @@ export const links: LinkItem = {
   hideTimeline: true,
   skipUrlState: true,
   globalNavPosition: 2,
-  capabilities: `${SECURITY_FEATURE_ID}.show`,
+  capabilities: `${RULES_FEATURE_ID}.show`,
   links: [
     {
       id: SecurityPageName.rules,
@@ -53,7 +54,8 @@ export const links: LinkItem = {
           defaultMessage: 'SIEM Rules',
         }),
       ],
-      capabilities: [[`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
+      // TODO Remove `${SECURITY_FEATURE_ID}.detections` ? Check if AI4SOC needs it
+      capabilities: [[`${RULES_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`]],
       links: [
         {
           id: SecurityPageName.rulesAdd,
@@ -101,7 +103,7 @@ export const links: LinkItem = {
         }
       ),
       path: COVERAGE_OVERVIEW_PATH,
-      capabilities: `${SECURITY_FEATURE_ID}.detections`,
+      capabilities: `${RULES_FEATURE_ID}.show`,
       globalSearchKeywords: [
         i18n.translate('xpack.securitySolution.appLinks.coverageOverviewDashboard', {
           defaultMessage: 'MITRE ATT&CK Coverage',
