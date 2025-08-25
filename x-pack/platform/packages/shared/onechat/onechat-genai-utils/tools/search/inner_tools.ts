@@ -66,19 +66,8 @@ export const createRelevanceSearchTool = ({
       name: relevanceSearchToolName,
       responseFormat: 'content_and_artifact',
       schema: z.object({
-        term: z.string().describe('Term to search for'),
-        index: z
-          .string()
-          .optional()
-          .describe(
-            '(optional) Index to search against. If not provided, will use index explorer to find the best index to use.'
-          ),
-        fields: z
-          .array(z.string())
-          .optional()
-          .describe(
-            '(optional) Fields to perform fulltext search on. If not provided, will use all searchable fields.'
-          ),
+        term: z.string().describe('Term to search for.'),
+        index: z.string().describe('Index to search against.'),
         size: z
           .number()
           .optional()
@@ -87,11 +76,7 @@ export const createRelevanceSearchTool = ({
       }),
       description: `Find relevant documents in an index based on a simple fulltext search.
 
-    - The 'index' parameter can be used to specify which index to search against. If not provided, the tool will use the index explorer to find the best index to use.
-    - The 'fields' parameter can be used to specify which fields to search on. If not provided, the tool will use all searchable fields.
-
-    It is perfectly fine not to not specify both 'index' and 'fields'. Those should only be used when you already know about the index and fields you want to search on,
-    e.g if the user explicitly specified them.`,
+      Will search for documents in the specified index, performing a match query against the provided term(s).`,
     }
   );
 };
@@ -136,7 +121,13 @@ export const createNaturalLanguageSearchTool = ({
         query: z.string().describe('A natural language query expressing the search request'),
         index: z.string().describe('Index to search against'),
       }),
-      description: `Given a natural language query, run a DSL search query on one index and return matching documents.`,
+      description: `Given a natural language query, generate and execute the corresponding search request and returns the results in a tabular format
+
+Example of natural language queries which can be passed to the tool:
+  - "show me the last 5 documents from the index"
+  - "what is the average order value?"
+  - "list all products where status is 'in_stock' and price is less than 50"
+  - "how many errors were logged in the past hour?"`,
     }
   );
 };

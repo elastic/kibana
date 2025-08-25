@@ -99,7 +99,7 @@ export const createSearchToolGraph = ({
       } else {
         return {
           indexIsValid: false,
-          error: `Could not figure out which index to use'`,
+          error: `Could not figure out which index to use`,
         };
       }
     }
