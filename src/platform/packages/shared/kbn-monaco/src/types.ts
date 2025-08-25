@@ -34,7 +34,7 @@ export interface LanguageProvidersModule<Deps = unknown> {
     code: string,
     callbacks?: Deps
   ) => Promise<{ errors: monaco.editor.IMarkerData[]; warnings: monaco.editor.IMarkerData[] }>;
-  getSuggestionProvider: (callbacks?: Deps) => monaco.languages.CompletionItemProvider;
+  getSuggestionProvider: (callbacks?: Deps, isMultiline?: boolean) => monaco.languages.CompletionItemProvider;
   getSignatureProvider?: (callbacks?: Deps) => monaco.languages.SignatureHelpProvider;
   getHoverProvider?: (callbacks?: Deps) => monaco.languages.HoverProvider;
   getCodeActionProvider?: (callbacks?: Deps) => monaco.languages.CodeActionProvider;
