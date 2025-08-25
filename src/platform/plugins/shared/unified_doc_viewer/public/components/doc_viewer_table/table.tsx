@@ -14,6 +14,7 @@ import type {
   EuiDataGridProps,
   EuiDataGridCellPopoverElementProps,
   EuiSwitchEvent,
+  RenderCellValue,
 } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -75,8 +76,8 @@ const PAGE_SIZE = 'discover:pageSize';
 export const HIDE_NULL_VALUES = 'unifiedDocViewer:hideNullValues';
 export const SHOW_ONLY_SELECTED_FIELDS = 'unifiedDocViewer:showOnlySelectedFields';
 
-const GRID_COLUMN_FIELD_NAME = 'name';
-const GRID_COLUMN_FIELD_VALUE = 'value';
+export const GRID_COLUMN_FIELD_NAME = 'name';
+export const GRID_COLUMN_FIELD_VALUE = 'value';
 
 const GRID_PROPS: Pick<EuiDataGridProps, 'columnVisibility' | 'rowHeightsOptions' | 'gridStyle'> = {
   columnVisibility: {
@@ -124,6 +125,19 @@ const updatePageSize = (newPageSize: number, storage: Storage) => {
   storage.set(PAGE_SIZE, newPageSize);
 };
 
+export interface DocViewerTableProps extends DocViewRenderProps {
+  fieldNames?: string[];
+  availableFeatures?: {
+    hideNullValuesToggle?: boolean;
+    selectedOnlyToggle?: boolean;
+    pinColumn?: boolean;
+    dataGridHeader?: boolean;
+    filterBar?: boolean;
+  };
+  customRenderCellValue?: RenderCellValue;
+  customRenderCellPopover?: React.JSXElementConstructor<EuiDataGridCellPopoverElementProps>;
+}
+
 export const DocViewerTable = ({
   columns,
   columnsMeta,
@@ -134,9 +148,20 @@ export const DocViewerTable = ({
   decreaseAvailableHeightBy,
   onAddColumn,
   onRemoveColumn,
-}: DocViewRenderProps) => {
-  const styles = useMemoCss(componentStyles);
-
+  availableFeatures = {
+    hideNullValuesToggle: true,
+    selectedOnlyToggle: true,
+    pinColumn: true,
+    dataGridHeader: true,
+    filterBar: true,
+  },
+  customRenderCellValue,
+  customRenderCellPopover,
+  fieldNames = [],
+}: DocViewerTableProps) => {
+  const styles = useMemoCss(
+    componentStyles({ hideDataGridHeader: !availableFeatures.dataGridHeader })
+  );
   const isEsqlMode = Array.isArray(textBasedHits);
   const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
   const { fieldFormats, storage, uiSettings, toasts } = getUnifiedDocViewerServices();
@@ -210,7 +235,8 @@ export const DocViewerTable = ({
     [columns]
   );
 
-  const isShowOnlySelectedFieldsDisabled = !fieldsFromColumns?.length;
+  const isShowOnlySelectedFieldsDisabled =
+    !fieldsFromColumns?.length || !availableFeatures.selectedOnlyToggle;
 
   const shouldShowOnlySelectedFields = useMemo(
     () => showOnlySelectedFields && !isShowOnlySelectedFieldsDisabled,
@@ -218,6 +244,10 @@ export const DocViewerTable = ({
   );
 
   const displayedFieldNames = useMemo(() => {
+    if (fieldNames.length) {
+      return fieldNames;
+    }
+
     if (shouldShowOnlySelectedFields) {
       return getVisibleColumns(
         fieldsFromColumns,
@@ -248,6 +278,7 @@ export const DocViewerTable = ({
     columnsMeta,
     isEsqlMode,
     uiSettings,
+    fieldNames,
   ]);
 
   const { pinnedRows, restRows, allFields } = useMemo(
@@ -257,20 +288,29 @@ export const DocViewerTable = ({
           if (!shouldShowOnlySelectedFields && !shouldShowFieldHandler(curFieldName)) {
             return acc;
           }
-          const shouldHideNullValue =
-            isEsqlMode && areNullValuesHidden && flattened[curFieldName] == null;
+          const shouldHideNullValue = availableFeatures.hideNullValuesToggle
+            ? isEsqlMode && areNullValuesHidden && flattened[curFieldName] == null
+            : false;
+
           if (shouldHideNullValue) {
             return acc;
           }
 
-          const isPinned = pinnedFields.includes(curFieldName);
+          const isPinned = availableFeatures.pinColumn
+            ? pinnedFields.includes(curFieldName)
+            : false;
+
           const row = fieldToItem(curFieldName, isPinned);
 
           if (isPinned) {
             acc.pinnedRows.push(row);
           } else {
-            if (onFilterField(row)) {
-              // filter only unpinned fields
+            if (availableFeatures.filterBar) {
+              if (onFilterField(row)) {
+                // filter only unpinned fields
+                acc.restRows.push(row);
+              }
+            } else {
               acc.restRows.push(row);
             }
           }
@@ -299,6 +339,9 @@ export const DocViewerTable = ({
       onFilterField,
       pinnedFields,
       shouldShowFieldHandler,
+      availableFeatures.hideNullValuesToggle,
+      availableFeatures.pinColumn,
+      availableFeatures.filterBar,
     ]
   );
 
@@ -397,11 +440,11 @@ export const DocViewerTable = ({
           rowIndex={rowIndex}
           columnId={columnId}
           isDetails={isDetails}
-          onFindSearchTermMatch={onFindSearchTermMatch}
+          onFindSearchTermMatch={availableFeatures.filterBar ? onFindSearchTermMatch : undefined}
         />
       );
     },
-    [rows, tableFiltersProps.searchTerm, onFindSearchTermMatch]
+    [rows, tableFiltersProps.searchTerm, onFindSearchTermMatch, availableFeatures.filterBar]
   );
 
   const renderCellPopover = useCallback(
@@ -456,13 +499,16 @@ export const DocViewerTable = ({
         <EuiSpacer size="s" />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={false}>
-        <TableFilters {...tableFiltersProps} allFields={allFields} />
-      </EuiFlexItem>
-
-      <EuiFlexItem grow={false}>
-        <EuiSpacer size="s" />
-      </EuiFlexItem>
+      {availableFeatures.filterBar && (
+        <>
+          <EuiFlexItem grow={false}>
+            <TableFilters {...tableFiltersProps} allFields={allFields} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiSpacer size="s" />
+          </EuiFlexItem>
+        </>
+      )}
 
       <EuiFlexItem grow={false}>
         <EuiFlexGroup
@@ -473,7 +519,7 @@ export const DocViewerTable = ({
           alignItems="center"
           gutterSize="m"
         >
-          {filter && (
+          {filter && availableFeatures.selectedOnlyToggle && (
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 label={i18n.translate('unifiedDocViewer.showOnlySelectedFields.switchLabel', {
@@ -488,7 +534,7 @@ export const DocViewerTable = ({
               />
             </EuiFlexItem>
           )}
-          {isEsqlMode && (
+          {isEsqlMode && availableFeatures.hideNullValuesToggle && (
             <EuiFlexItem grow={false}>
               <EuiSwitch
                 label={i18n.translate('unifiedDocViewer.hideNullValues.switchLabel', {
@@ -531,10 +577,12 @@ export const DocViewerTable = ({
             columns={gridColumns}
             toolbarVisibility={false}
             rowCount={rows.length}
-            renderCellValue={renderCellValue}
-            renderCellPopover={renderCellPopover}
+            renderCellValue={customRenderCellValue ? customRenderCellValue : renderCellValue}
+            renderCellPopover={
+              customRenderCellPopover ? customRenderCellPopover : renderCellPopover
+            }
             pagination={pagination}
-            leadingControlColumns={leadingControlColumns}
+            leadingControlColumns={availableFeatures.pinColumn ? leadingControlColumns : undefined}
           />
         </EuiFlexItem>
       )}
@@ -542,78 +590,86 @@ export const DocViewerTable = ({
   );
 };
 
-const componentStyles = {
-  fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
-    css({
-      minBlockSize: 0,
-      display: 'block',
+const componentStyles = ({ hideDataGridHeader }: { hideDataGridHeader: boolean }) => {
+  return {
+    fieldsGridWrapper: ({ euiTheme }: UseEuiTheme) =>
+      css({
+        minBlockSize: 0,
+        display: 'block',
 
-      '.euiDataGridRow': {
-        '&:hover': {
-          // we keep using a deprecated shade until proper token is available
-          backgroundColor: euiTheme.colors.lightestShade,
+        '.euiDataGridRow': {
+          '&:hover': {
+            // we keep using a deprecated shade until proper token is available
+            backgroundColor: euiTheme.colors.lightestShade,
+          },
         },
-      },
-    }),
-  fieldsGrid: (themeContext: UseEuiTheme) => {
-    const { euiTheme } = themeContext;
-    const { fontSize } = euiFontSize(themeContext, 's');
+      }),
+    fieldsGrid: (themeContext: UseEuiTheme) => {
+      const { euiTheme } = themeContext;
+      const { fontSize } = euiFontSize(themeContext, 's');
 
-    return css({
-      '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
-        borderTop: 'none',
-      },
-
-      '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
-        borderBottom: euiTheme.border.thin,
-      },
-
-      '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
-        paddingTop: 0,
-        paddingBottom: 0,
-      },
-
-      '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
-        padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
-      },
-
-      '.kbnDocViewer__fieldName': {
-        padding: euiTheme.size.xs,
-        paddingLeft: 0,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-
-        '.euiDataGridRowCell__popover &': {
-          fontSize,
+      return css({
+        '&.euiDataGrid--noControls.euiDataGrid--bordersHorizontal .euiDataGridHeader': {
+          borderTop: 'none',
         },
-      },
 
-      '.kbnDocViewer__fieldName_icon': {
-        paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
-        lineHeight: euiTheme.font.lineHeightMultiplier,
-      },
+        '&.euiDataGrid--headerUnderline .euiDataGridHeader': {
+          borderBottom: euiTheme.border.thin,
+        },
 
-      '.kbnDocViewer__fieldName_multiFieldBadge': {
-        margin: `${euiTheme.size.xs} 0`,
-        fontWeight: euiTheme.font.weight.regular,
-        fontFamily: euiTheme.font.family,
-      },
+        '& [data-gridcell-column-id="name"] .euiDataGridRowCell__content': {
+          paddingTop: 0,
+          paddingBottom: 0,
+        },
 
-      '.kbnDocViewer__fieldsGrid__pinAction': {
-        opacity: 0,
-      },
+        '& [data-gridcell-column-id="pin_field"] .euiDataGridRowCell__content': {
+          padding: `calc(${euiTheme.size.xs} / 2) 0 0 ${euiTheme.size.xs}`,
+        },
 
-      '& [data-gridcell-column-id="pin_field"]:focus-within': {
+        '.kbnDocViewer__fieldName': {
+          padding: euiTheme.size.xs,
+          paddingLeft: 0,
+          lineHeight: euiTheme.font.lineHeightMultiplier,
+
+          '.euiDataGridRowCell__popover &': {
+            fontSize,
+          },
+        },
+
+        '.kbnDocViewer__fieldName_icon': {
+          paddingTop: `calc(${euiTheme.size.xs} * 1.5)`,
+          lineHeight: euiTheme.font.lineHeightMultiplier,
+        },
+
+        '.kbnDocViewer__fieldName_multiFieldBadge': {
+          margin: `${euiTheme.size.xs} 0`,
+          fontWeight: euiTheme.font.weight.regular,
+          fontFamily: euiTheme.font.family,
+        },
+
         '.kbnDocViewer__fieldsGrid__pinAction': {
+          opacity: 0,
+        },
+
+        '& [data-gridcell-column-id="pin_field"]:focus-within': {
+          '.kbnDocViewer__fieldsGrid__pinAction': {
+            opacity: 1,
+          },
+        },
+
+        '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
           opacity: 1,
         },
-      },
-
-      '.euiDataGridRow:hover .kbnDocViewer__fieldsGrid__pinAction': {
-        opacity: 1,
-      },
-    });
-  },
-  noFieldsFound: css({
-    minHeight: 300,
-  }),
+        ...(hideDataGridHeader
+          ? {
+              '.euiDataGridHeader': { height: '20px' }, // use euiTheme variable
+              '.euiDataGridHeaderCell': { display: 'none' },
+            }
+          : {}),
+      });
+    },
+    noFieldsFound: css({
+      minHeight: 300,
+    }),
+  };
 };
