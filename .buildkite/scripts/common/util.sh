@@ -145,18 +145,18 @@ set_serverless_release_sha() {
 
   if [[ ! "$GITHUB_SERVERLESS_RELEASE_SHA" ]]; then
     GITHUB_SERVERLESS_RELEASE_REV="$(node scripts/get_serverless_release_sha)"
-    if [$? -ne 0]; then
+    if [ $? -ne 0 ]; then
       echo "Failed to obtain current serverless release SHA."
       return 1
     fi
-    GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse GITHUB_SERVERLESS_RELEASE_REV)"
-    if [$? -ne 0]; then
+    GITHUB_SERVERLESS_RELEASE_SHA="$(git rev-parse $GITHUB_SERVERLESS_RELEASE_REV)"
+    if [ $? -ne 0 ]; then
       echo "Failed to expand current serverless release SHA (may be an emergency release branch?)."
       return 1
     fi
     buildkite-agent meta-data set current-serverless-release-sha "$GITHUB_SERVERLESS_RELEASE_SHA"
   fi
-
+  echo "Determined current serverless release SHA (from QA): $GITHUB_SERVERLESS_RELEASE_SHA"
   export GITHUB_SERVERLESS_RELEASE_SHA
 }
 
