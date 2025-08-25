@@ -32,8 +32,8 @@ export const useMigrationNameStep = ({
       return undefined; // profile is still loading
     }
 
-    // localized date and time (e.g., "Wed, 01 Jan 2025 12:00:00 PM")
-    const datetime = moment(Date.now()).format('dddd, D MMM YYYY, h:mm:ss A');
+    // localized date and time according to the locale including seconds
+    const datetime = moment(Date.now()).format('ddd , ll, LTS');
 
     const userName = currentUserProfile?.user.full_name ?? currentUserProfile?.user.username;
 
