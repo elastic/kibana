@@ -13,6 +13,7 @@
     { "path": "../../tsconfig.json" },
     "@kbn/babel-register",
     "@kbn/security-hardening",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",
