@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FC } from 'react';
 import {
   createColumnHelper,
   getCoreRowModel,
@@ -14,11 +15,12 @@ import {
   useReactTable,
   type Table,
   type TableOptions,
-  type ColumnDef,
+  type CellContext,
 } from '@tanstack/react-table';
+export { flexRender } from '@tanstack/react-table';
 import { useRef } from 'react';
+import type { LeafNode } from '../../../store_provider';
 import {
-  LeafNode,
   useDataCascadeActions,
   useDataCascadeState,
   type GroupNode,
@@ -37,13 +39,15 @@ interface TableProps<G>
     | 'onExpandedChange'
     | 'getRowCanExpand'
   > {
-  columns: (columnsHelper: ReturnType<typeof createColumnHelper<G>>) => ColumnDef<G>[];
   allowExpandMultiple: boolean;
+  header: FC<{ table: Table<G> }>;
+  rowCell: FC<CellContext<G, unknown>>;
 }
 
 export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
-  columns,
   allowExpandMultiple,
+  header: Header,
+  rowCell: RowCell,
   ...rest
 }: TableProps<G>) => {
   const tableRef = useRef<Table<G>>();
@@ -54,7 +58,13 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
   tableRef.current = useReactTable<G>({
     data: state.groupNodes,
     state: state.table,
-    columns: columns(columnHelper),
+    columns: [
+      columnHelper.display({
+        id: 'cascade',
+        header: Header,
+        cell: RowCell,
+      }),
+    ],
     getCoreRowModel: getCoreRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     getRowCanExpand: () => true,
@@ -112,9 +122,5 @@ export const useTableHelper = <G extends GroupNode, L extends LeafNode>({
     ...rest,
   });
 
-  return {
-    get table() {
-      return tableRef.current!;
-    },
-  };
+  return tableRef.current;
 };

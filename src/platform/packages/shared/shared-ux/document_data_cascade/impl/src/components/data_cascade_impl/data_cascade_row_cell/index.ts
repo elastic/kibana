@@ -8,4 +8,3 @@
  */
 
 export { CascadeRowCellPrimitive } from './cascade_row_cell';
-export type { CascadeRowCellPrimitiveProps } from './cascade_row_cell';
