@@ -14,6 +14,7 @@ import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
+import { extractErrorMessage } from '@kbn/ml-error-utils';
 import type {
   AnomaliesTableData,
   ExplorerJob,
@@ -125,6 +126,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
               ? get(tableData, ['examplesByJobId', item.jobId, item.entityValue])
               : undefined;
           let definition;
+          let categoryDefinitionError: string | undefined;
 
           if (examples !== undefined) {
             try {
@@ -141,7 +143,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
                 definition.terms = `${definition.regex.substring(0, MAX_CHARS)}...`;
               }
             } catch (error) {
-              // Do nothing
+              categoryDefinitionError = extractErrorMessage(error);
             }
           }
 
@@ -153,6 +155,7 @@ export const AnomaliesTable: FC<AnomaliesTableProps> = React.memo(
               anomaly={item}
               examples={examples}
               definition={definition}
+              categoryDefinitionError={categoryDefinitionError}
               isAggregatedData={isShowingAggregatedData}
               filter={filter}
               influencerFilter={influencerFilter}
