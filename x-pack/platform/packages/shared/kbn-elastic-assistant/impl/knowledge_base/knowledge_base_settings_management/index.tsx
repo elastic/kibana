@@ -439,6 +439,7 @@ export const KnowledgeBaseSettingsManagement: React.FC<Params> = React.memo(({ d
               entry={selectedEntry as IndexEntry}
               originalEntry={originalEntry as IndexEntry}
               dataViews={dataViews}
+              http={http}
               setEntry={
                 setSelectedEntry as React.Dispatch<React.SetStateAction<Partial<IndexEntry>>>
               }
