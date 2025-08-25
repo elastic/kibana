@@ -41,7 +41,6 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
     if (retryState.attempt <= this.node.configuration['max-attempts']) {
       // If the retry attempt is within the allowed limit, re-enter the retry step
       // Call setWorkflowError with undefined to exit catchError loop and continue execution
-      this.workflowRuntime.setWorkflowError(undefined);
       this.workflowRuntime.goToStep(this.node.id);
       const delayInMs = this.node.configuration.delay
         ? parseDuration(this.node.configuration.delay)
@@ -52,6 +51,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
         return;
       }
 
+      this.workflowRuntime.setWorkflowError(undefined);
       return;
     }
 
@@ -90,6 +90,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
     this.workflowLogger.logDebug(
       `Waiting for ${this.node.configuration.delay} before next attempt.`
     );
+    this.workflowRuntime.setWorkflowError(undefined);
     await new Promise((resolve) => setTimeout(resolve, delay));
   }
 
@@ -101,6 +102,7 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
     const resumeExecutionTask = await this.workflowTaskManager.scheduleResumeTask({
       runAt,
       workflowRunId: workflowExecution.id,
+      spaceId: workflowExecution.spaceId,
     });
     this.workflowLogger.logDebug(
       `Scheduled resume execution task with ID "${resumeExecutionTask.taskId}" for ${
@@ -111,5 +113,6 @@ export class EnterRetryNodeImpl implements StepImplementation, StepErrorCatcher 
       ...stepState,
       resumeExecutionTaskId: resumeExecutionTask.taskId,
     });
+    this.workflowRuntime.setWorkflowError(undefined);
   }
 }

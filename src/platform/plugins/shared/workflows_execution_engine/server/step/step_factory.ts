@@ -24,8 +24,7 @@ import { AtomicStepImpl } from './atomic_step/atomic_step_impl';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WaitStepImpl } from './wait_step/wait_step';
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
-import { EnterRetryNodeImpl } from './retry_step/enter_retry_node_impl';
-import { ExitRetryNodeImpl } from './retry_step/exit_retry_node_impl';
+import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './retry_step';
 // Import specific step implementations
 // import { ForEachStepImpl } from './foreach-step'; // To be created
 // import { IfStepImpl } from './if-step'; // To be created

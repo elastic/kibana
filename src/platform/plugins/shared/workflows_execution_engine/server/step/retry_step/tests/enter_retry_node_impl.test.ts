@@ -138,6 +138,7 @@ describe('EnterRetryNodeImpl', () => {
         it('should clear workflow error', async () => {
           await underTest.catchError();
           expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+          expect(workflowRuntime.setWorkflowError).toHaveBeenCalledTimes(1);
         });
 
         it('should go to retry step again', async () => {
@@ -158,6 +159,7 @@ describe('EnterRetryNodeImpl', () => {
           workflowRuntime.setWorkflowError = jest.fn();
           workflowRuntime.getWorkflowExecution = jest.fn().mockReturnValue({
             id: 'fake-execution-1',
+            spaceId: 'fake-space-1',
           });
           workflowRuntime.setStepState = jest.fn();
         });
@@ -165,6 +167,7 @@ describe('EnterRetryNodeImpl', () => {
         it('should clear workflow error', async () => {
           await underTest.catchError();
           expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+          expect(workflowRuntime.setWorkflowError).toHaveBeenCalledTimes(1);
         });
 
         it('should set step to wait status', async () => {
@@ -177,6 +180,7 @@ describe('EnterRetryNodeImpl', () => {
           expect(workflowTaskManager.scheduleResumeTask).toHaveBeenCalledWith(
             expect.objectContaining({
               workflowRunId: 'fake-execution-1',
+              spaceId: 'fake-space-1',
             })
           );
         });
@@ -215,6 +219,7 @@ describe('EnterRetryNodeImpl', () => {
           await jest.advanceTimersByTimeAsync(5000);
           await runPromise;
           expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+          expect(workflowRuntime.setWorkflowError).toHaveBeenCalledTimes(1);
         });
 
         it('should wait for provided delay and then go to retry step', async () => {
