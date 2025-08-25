@@ -261,50 +261,89 @@ export const combineQueries = ({
   kqlQuery,
   kqlMode,
 }: CombineQueries): CombinedQuery | null => {
-  const kuery: Query = { query: '', language: kqlQuery.language };
   if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && isEmpty(filters)) {
     return null;
-  } else if (isDataProviderEmpty(dataProviders) && isEmpty(kqlQuery.query) && !isEmpty(filters)) {
+  }
+
+  const queries: Query[] = [];
+
+  // Add data providers query (always KQL)
+  if (!isDataProviderEmpty(dataProviders)) {
+    const dataProviderQuery = buildGlobalQuery(dataProviders, browserFields);
+    if (dataProviderQuery) {
+      queries.push({ query: dataProviderQuery, language: 'kuery' });
+    }
+  }
+
+  // Add search bar query (respecting its language)
+  if (!isEmpty(kqlQuery.query)) {
+    queries.push({ query: kqlQuery.query, language: kqlQuery.language });
+  }
+
+  // For AND mode, use default buildEsQuery behavior
+  if (kqlMode === 'filter' || queries.length <= 1) {
     const [filterQuery, kqlError] = convertToBuildEsQuery({
       config,
-      queries: [kuery],
+      queries,
       dataViewSpec,
       dataView,
       filters,
     });
 
+    const displayQuery = queries.map((q) => `(${q.query})`).join(' AND ');
+
     return {
       filterQuery,
       kqlError,
-      baseKqlQuery: kuery,
+      baseKqlQuery: { query: displayQuery, language: kqlQuery.language || 'kuery' },
     };
   }
 
-  const operatorKqlQuery = kqlMode === 'filter' ? 'and' : 'or';
+  // For OR mode with multiple queries, we need custom handling
+  // Convert each query separately
+  const esQueries = queries
+    .map((query) => {
+      const [esQuery] = convertToBuildEsQuery({
+        config,
+        queries: [query],
+        dataView,
+        dataViewSpec,
+        filters: [],
+      });
+      return esQuery ? JSON.parse(esQuery) : null;
+    })
+    .filter(Boolean);
 
-  const postpend = (q: string) => `${!isEmpty(q) ? `(${q})` : ''}`;
+  // Build the OR query
+  const orQuery =
+    esQueries.length > 1 ? { bool: { should: esQueries, minimum_should_match: 1 } } : esQueries[0];
 
-  const globalQuery = buildGlobalQuery(dataProviders, browserFields); // based on Data Providers
+  // Apply filters on top
+  let finalQuery = orQuery;
+  if (filters.length > 0) {
+    const [filterQuery] = convertToBuildEsQuery({
+      config,
+      dataView,
+      queries: [],
+      dataViewSpec,
+      filters,
+    });
 
-  const querySuffix = postpend(kqlQuery.query as string); // based on Unified Search bar
+    if (filterQuery && orQuery) {
+      const parsedFilters = JSON.parse(filterQuery);
+      finalQuery = {
+        bool: {
+          must: [parsedFilters, orQuery],
+        },
+      };
+    }
+  }
 
-  const queryPrefix = globalQuery ? `(${globalQuery})` : '';
-
-  const queryOperator = queryPrefix && querySuffix ? operatorKqlQuery : '';
-
-  kuery.query = `(${queryPrefix} ${queryOperator} ${querySuffix})`;
-
-  const [filterQuery, kqlError] = convertToBuildEsQuery({
-    config,
-    queries: [kuery],
-    dataViewSpec,
-    dataView,
-    filters,
-  });
+  const displayQuery = queries.map((q) => `(${q.query})`).join(' OR ');
 
   return {
-    filterQuery,
-    kqlError,
-    baseKqlQuery: kuery,
+    filterQuery: finalQuery ? JSON.stringify(finalQuery) : undefined,
+    kqlError: undefined,
+    baseKqlQuery: { query: displayQuery, language: kqlQuery.language || 'kuery' },
   };
 };
