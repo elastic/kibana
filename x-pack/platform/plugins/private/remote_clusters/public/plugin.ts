@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { Subscription } from 'rxjs';
+import type { CoreSetup, Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+import type { Subscription } from 'rxjs';
 
 import { PLUGIN } from '../common/constants';
 import { init as initBreadcrumbs } from './application/services/breadcrumb';
@@ -16,7 +16,7 @@ import { init as initHttp } from './application/services/http';
 import { init as initUiMetric } from './application/services/ui_metric';
 import { init as initNotification } from './application/services/notification';
 import { init as initRedirect } from './application/services/redirect';
-import { Dependencies, ClientConfigType } from './types';
+import type { Dependencies, ClientConfigType } from './types';
 import { RemoteClustersLocatorDefinition } from './locator';
 
 export interface RemoteClustersPluginSetup {

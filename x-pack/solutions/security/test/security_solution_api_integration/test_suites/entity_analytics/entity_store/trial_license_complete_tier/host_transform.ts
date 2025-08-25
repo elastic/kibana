@@ -5,14 +5,14 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { Ecs, EcsHost } from '@elastic/ecs';
+import type { Ecs, EcsHost } from '@elastic/ecs';
 import type {
   IndexRequest,
   MappingTypeMapping,
   SearchHit,
   SearchTotalHits,
 } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '@kbn/ftr-common-functional-services';
+import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import type { GetEntityStoreStatusResponse } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/status.gen';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
 import { EntityStoreUtils } from '../../utils';

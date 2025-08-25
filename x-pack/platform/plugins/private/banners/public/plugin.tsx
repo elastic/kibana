@@ -6,11 +6,11 @@
  */
 
 import React from 'react';
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { Banner } from './components';
 import { getBannerInfo } from './get_banner_info';
-import { BannerPluginStartDependencies } from './types';
+import type { BannerPluginStartDependencies } from './types';
 
 export class BannersPlugin implements Plugin<{}, {}, {}, BannerPluginStartDependencies> {
   constructor(_context: PluginInitializerContext) {}

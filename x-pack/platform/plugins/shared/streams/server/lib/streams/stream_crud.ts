@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   ClusterComponentTemplate,
   IndicesDataStream,
   IndicesGetIndexTemplateIndexTemplateItem,
   IngestPipeline,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
-import { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
+import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { ClassicIngestStreamEffectiveLifecycle } from '@kbn/streams-schema';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
 
 interface BaseParams {

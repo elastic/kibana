@@ -7,9 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 import { SavedObjectsClient } from '@kbn/core/server';
-import { ElasticsearchErrorDetails } from '@kbn/es-errors';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
+import type { ConnectorStatus, FilteringRule, Connector } from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -26,13 +27,10 @@ import {
   updateConnectorStatus,
   updateFiltering,
   updateFilteringDraft,
-  ConnectorStatus,
-  FilteringRule,
   SyncJobType,
   cancelSyncs,
   isResourceNotFoundException,
   isStatusTransitionException,
-  Connector,
   fetchConnectorByIndexName,
 } from '@kbn/search-connectors';
 

@@ -7,33 +7,36 @@
 
 /* eslint-disable max-classes-per-file */
 
-import { Client, errors } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
   HOST_METADATA_GET_ROUTE,
   METADATA_DATASTREAM,
   METADATA_UNITED_INDEX,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
-import {
-  deleteIndexedHostsAndAlerts,
+import type {
   DeleteIndexedHostsAndAlertsResponse,
   IndexedHostsAndAlertsResponse,
+} from '@kbn/security-solution-plugin/common/endpoint/index_data';
+import {
+  deleteIndexedHostsAndAlerts,
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
 import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
-import { DeepPartial } from 'utility-types';
-import { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
+import type { DeepPartial } from 'utility-types';
+import type { HostInfo, HostMetadata } from '@kbn/security-solution-plugin/common/endpoint/types';
 import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { EndpointMetadataGenerator } from '@kbn/security-solution-plugin/common/endpoint/data_generators/endpoint_metadata_generator';
 import { merge } from 'lodash';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
-import seedrandom from 'seedrandom';
+import type seedrandom from 'seedrandom';
 import { fetchFleetLatestAvailableAgentVersion } from '@kbn/security-solution-plugin/common/endpoint/utils/fetch_fleet_version';
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
 import { isServerlessKibanaFlavor } from '@kbn/security-solution-plugin/common/endpoint/utils/kibana_status';
 import { DEFAULT_SPACE_ID, addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { createKbnClient } from '@kbn/security-solution-plugin/scripts/endpoint/common/stack_services';
@@ -42,7 +45,7 @@ import {
   startMetadataTransforms,
   stopMetadataTransforms,
 } from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
+import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export type IndexedHostsAndAlertsResponseExtended = IndexedHostsAndAlertsResponse & {
   unloadEndpointData(): Promise<DeleteIndexedHostsAndAlertsResponse>;

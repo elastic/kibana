@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HeatmapStyle, RecursivePartial } from '@elastic/charts';
-import { EuiThemeComputed } from '@elastic/eui';
+import type { HeatmapStyle, RecursivePartial } from '@elastic/charts';
+import type { EuiThemeComputed } from '@elastic/eui';
 
 export function getMonitorStatusChartTheme(
   euiTheme: EuiThemeComputed,

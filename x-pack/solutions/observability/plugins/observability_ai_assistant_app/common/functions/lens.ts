@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FromSchema } from 'json-schema-to-ts';
+import type { FromSchema } from 'json-schema-to-ts';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { LENS_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/common';
 

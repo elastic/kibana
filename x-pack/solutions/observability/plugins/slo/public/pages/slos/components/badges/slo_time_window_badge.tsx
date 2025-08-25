@@ -7,13 +7,11 @@
 
 import { EuiBadge, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  SLODefinitionResponse,
-  SLOWithSummaryResponse,
-  rollingTimeWindowTypeSchema,
-} from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema } from '@kbn/slo-schema';
 import moment from 'moment';
-import React, { MouseEvent, useCallback } from 'react';
+import type { MouseEvent } from 'react';
+import React, { useCallback } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import { SLOS_PATH } from '../../../../../common/locators/paths';
 import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duration';

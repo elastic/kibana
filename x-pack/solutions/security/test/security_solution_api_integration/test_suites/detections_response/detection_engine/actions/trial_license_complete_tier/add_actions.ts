@@ -8,7 +8,7 @@
 import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getCases } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import { waitForCases } from '../../../utils/cases';
 import {
@@ -18,7 +18,7 @@ import {
   getRuleForAlertTesting,
   createRule,
 } from '../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createWebHookRuleAction,
   fetchRule,

@@ -17,8 +17,7 @@ import { validatePackagePolicy } from '../../services';
 
 import { StepConfigurePackagePolicy } from './step_configure_package';
 
-// FLAKY: https://github.com/elastic/kibana/issues/201598
-describe.skip('StepConfigurePackage', () => {
+describe('StepConfigurePackage', () => {
   let packageInfo: PackageInfo;
   let packagePolicy: NewPackagePolicy;
   const mockUpdatePackagePolicy = jest.fn().mockImplementation((val: any) => {
@@ -30,7 +29,7 @@ describe.skip('StepConfigurePackage', () => {
 
   let testRenderer: TestRenderer;
   let renderResult: ReturnType<typeof testRenderer.render>;
-  const render = () => {
+  const render = (isAgentlessSelected = false) => {
     const validationResults = validatePackagePolicy(packagePolicy, packageInfo, load);
 
     renderResult = testRenderer.render(
@@ -40,6 +39,7 @@ describe.skip('StepConfigurePackage', () => {
         updatePackagePolicy={mockUpdatePackagePolicy}
         validationResults={validationResults}
         submitAttempted={false}
+        isAgentlessSelected={isAgentlessSelected}
       />
     );
   };
@@ -64,6 +64,23 @@ describe.skip('StepConfigurePackage', () => {
               type: 'logfile',
               title: 'Collect logs from Nginx instances',
               description: 'Collecting Nginx access and error logs',
+            },
+          ],
+          multiple: true,
+        },
+        {
+          name: 'agentless_supported',
+          title: 'Agentless Supported',
+          description: 'Collect endpoint health the agentless way',
+          deployment_modes: {
+            default: { enabled: false },
+            agentless: { enabled: true },
+          },
+          inputs: [
+            {
+              type: 'httpjson',
+              title: 'Some agentless input',
+              description: 'Collect endpoint health the agentless way',
             },
           ],
           multiple: true,
@@ -111,6 +128,7 @@ describe.skip('StepConfigurePackage', () => {
       policy_id: '',
       policy_ids: [''],
       enabled: true,
+      supports_agentless: true,
       inputs: [
         {
           type: 'logfile',
@@ -125,6 +143,20 @@ describe.skip('StepConfigurePackage', () => {
                 tags: { value: ['nginx-access'], type: 'text' },
                 preserve_original_event: { value: false, type: 'bool' },
                 processors: { type: 'yaml' },
+              },
+            },
+          ],
+        },
+        {
+          type: 'httpjson',
+          policy_template: 'agentless_supported',
+          enabled: true,
+          streams: [
+            {
+              enabled: true,
+              data_stream: { type: 'http', dataset: 'nginx.access' },
+              vars: {
+                url: { value: 'http://localhost:8080', type: 'text' },
               },
             },
           ],
@@ -168,5 +200,20 @@ describe.skip('StepConfigurePackage', () => {
         await renderResult.findByText('Collect logs from Nginx instances')
       ).toBeInTheDocument();
     });
+  });
+
+  it('renders only agentless-supported policy templates when agentless is selected', async () => {
+    render(true);
+    expect(renderResult.queryByText('Some agentless input')).toBeInTheDocument();
+    expect(
+      await renderResult.queryByText('Collect logs from Nginx instances')
+    ).not.toBeInTheDocument();
+  });
+
+  it('renders all non-agentless policy templates when agentless is not selected', async () => {
+    render();
+
+    expect(await renderResult.queryByText('Collect logs from Nginx instances')).toBeInTheDocument();
+    expect(await renderResult.queryByText('Some agentless input')).not.toBeInTheDocument();
   });
 });

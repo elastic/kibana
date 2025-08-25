@@ -16,7 +16,7 @@ import {
   defaultNamespace,
   getInitialTestLogs,
 } from './data';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 import { logsNginxMappings } from './custom_mappings/custom_integration_mappings';
 

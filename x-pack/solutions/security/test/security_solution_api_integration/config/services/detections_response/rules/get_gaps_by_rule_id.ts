@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type SuperTest from 'supertest';
-import { FindGapsResponse } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
+import type { FindGapsResponse } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import { routeWithNamespace } from '../route_with_namespace';
 
 export const getGapsByRuleId = async (
@@ -18,6 +18,7 @@ export const getGapsByRuleId = async (
   const response = (await supertest
     .post(routeWithNamespace(`/internal/alerting/rules/gaps/_find`, namespace))
     .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'kibana')
     .send({
       rule_id: ruleId,
       start,

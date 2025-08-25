@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 import type { ICommand } from './registry';
 
 import { commandsMetadata } from '../definitions/generated/commands/commands';
-import { ElasticsearchCommandDefinition } from '../definitions/types';
+import type { ElasticsearchCommandDefinition } from '../definitions/types';
 
 export function mergeCommandWithGeneratedCommandData(command: ICommand): ICommand {
   const generatedMetadata = (commandsMetadata as Record<string, ElasticsearchCommandDefinition>)[

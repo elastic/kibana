@@ -10,7 +10,7 @@ import Url from 'url';
 import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
 import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
 import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endpoint/common/utils';
-import { FtrProviderContext } from './ftr_provider_context';
+import type { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';

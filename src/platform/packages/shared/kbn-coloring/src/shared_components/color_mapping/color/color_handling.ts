@@ -8,12 +8,14 @@
  */
 
 import chroma from 'chroma-js';
-import { KbnPalette, KbnPalettes } from '@kbn/palettes';
-import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/common';
-import { ColorMapping } from '../config';
+import type { KbnPalettes } from '@kbn/palettes';
+import { KbnPalette } from '@kbn/palettes';
+import type { RawValue, SerializedValue } from '@kbn/data-plugin/common';
+import { deserializeField } from '@kbn/data-plugin/common';
+import type { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
-import { ColorMappingInputData } from '../categorical_color_mapping';
-import { GradientColorMode } from '../config/types';
+import type { ColorMappingInputData } from '../categorical_color_mapping';
+import type { GradientColorMode } from '../config/types';
 import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
 import { getColorAssignmentMatcher } from './color_assignment_matcher';
 import { getValueKey } from './utils';

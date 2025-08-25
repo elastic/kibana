@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
-import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import type { CreateTimelinesResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
   getTimelines,
   createBasicTimeline,

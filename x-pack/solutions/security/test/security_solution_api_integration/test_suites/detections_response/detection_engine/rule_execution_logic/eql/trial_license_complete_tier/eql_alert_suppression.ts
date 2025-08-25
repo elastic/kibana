@@ -9,7 +9,7 @@ import expect from 'expect';
 import { v4 as uuidv4 } from 'uuid';
 import { sortBy, partition } from 'lodash';
 
-import {
+import type {
   DetectionAlert,
   EqlRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -26,8 +26,8 @@ import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_U
 import { getSuppressionMaxSignalsWarning as getSuppressionMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
-import { SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
+import type { SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   deleteAllRules,
@@ -45,7 +45,7 @@ import {
   fetchRule,
   previewRuleWithExceptionEntries,
 } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 const getQuery = (id: string) => `any where id == "${id}"`;
@@ -73,9 +73,7 @@ export default ({ getService }: FtrProviderContext) => {
   ) => partition(alerts, (alert) => alert?._source?.['kibana.alert.group.index'] == null);
 
   // NOTE: Add to second quality gate after feature is GA
-  // Failing: See https://github.com/elastic/kibana/issues/202940
-  // Failing: See https://github.com/elastic/kibana/issues/202940
-  describe.skip('@ess @serverless Alert Suppression for EQL rules', () => {
+  describe('@ess @serverless Alert Suppression for EQL rules', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/solutions/security/test/fixtures/es_archives/security_solution/ecs_compliant'
@@ -3181,7 +3179,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('does not suppress alerts outside of duration when query with 3 sequences', async () => {
+      // Failing: See https://github.com/elastic/kibana/issues/202940
+      it.skip('does not suppress alerts outside of duration when query with 3 sequences', async () => {
         const id = uuidv4();
         const dateNow = Date.now();
         const timestampSequenceEvent1 = new Date(dateNow - 5000).toISOString();

@@ -10,8 +10,8 @@
 import React, { useEffect, useMemo } from 'react';
 import { BehaviorSubject, map, merge } from 'rxjs';
 
-import { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { initializeUnsavedChanges } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
@@ -19,10 +19,10 @@ import { initializeTitleManager, titleComparators } from '@kbn/presentation-publ
 
 import { IMAGE_CLICK_TRIGGER } from '../actions';
 import { ImageEmbeddable as ImageEmbeddableComponent } from '../components/image_embeddable';
-import { FileImageMetadata } from '../imports';
+import type { FileImageMetadata } from '../imports';
 import { coreServices, filesService } from '../services/kibana_services';
 import { IMAGE_EMBEDDABLE_TYPE } from './constants';
-import { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
+import type { ImageConfig, ImageEmbeddableApi, ImageEmbeddableSerializedState } from './types';
 
 export const getImageEmbeddableFactory = ({
   embeddableEnhanced,

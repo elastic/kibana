@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import {
   datasetNames,
   getInitialTestLogs,

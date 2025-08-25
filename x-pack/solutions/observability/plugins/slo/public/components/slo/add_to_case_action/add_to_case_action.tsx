@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { sloDetailsHistoryLocatorID } from '@kbn/observability-plugin/common';
 import { encode } from '@kbn/rison';
-import { ALL_VALUE, SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import React, { useEffect } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useUrlAppState } from '../../../pages/slo_details/components/history/hooks/use_url_app_state';

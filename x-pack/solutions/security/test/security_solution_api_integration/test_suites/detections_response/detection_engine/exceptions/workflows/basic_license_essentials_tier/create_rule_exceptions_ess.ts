@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { CreateRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { CreateRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRuleSOById,
   createRuleThroughAlertingEndpoint,
@@ -21,7 +21,7 @@ import {
   deleteAllAlerts,
 } from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getRuleExceptionItemMock = (): CreateRuleExceptionListItemSchema => ({
   description: 'Exception item for rule default exception list',

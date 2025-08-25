@@ -6,7 +6,7 @@
  */
 
 import { ENABLE_PRIVILEGED_USER_MONITORING_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { KbnClient } from '@kbn/test';
+import type { KbnClient } from '@kbn/test';
 
 export const enablePrivmonSetting = async (kibanaServer: KbnClient, space: string = 'default') => {
   await kibanaServer.uiSettings.update(

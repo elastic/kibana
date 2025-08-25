@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -57,7 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({});
     });
 
-    describe('search', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/232481
+    // FLAKY: https://github.com/elastic/kibana/issues/232496
+    describe.skip('search', function () {
       beforeEach(async () => {
         await dataGrid.clickRowToggle();
         await discover.isShowingDocViewer();

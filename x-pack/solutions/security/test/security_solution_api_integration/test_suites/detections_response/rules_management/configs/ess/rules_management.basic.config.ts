@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { LOGGING_CONFIG, FLEET_PLUGIN_READY_LOG_MESSAGE_REGEXP } from '../constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

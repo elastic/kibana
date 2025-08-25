@@ -8,14 +8,14 @@
 import type SuperTest from 'supertest';
 import { chunk } from 'lodash';
 import type { ToolingLog } from '@kbn/tooling-log';
-import moment from 'moment';
+import type moment from 'moment';
 import {
   INTERNAL_ALERTING_BACKFILL_SCHEDULE_API_PATH,
   INTERNAL_ALERTING_BACKFILL_API_PATH,
   INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
 } from '@kbn/alerting-plugin/common';
-import { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
-import { FindBackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
+import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
+import type { FindBackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import { waitFor } from '../../../../config/services/detections_response';
 export interface TimeRange {
   startDate: moment.Moment;

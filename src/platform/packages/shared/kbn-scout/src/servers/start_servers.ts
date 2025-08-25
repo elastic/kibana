@@ -9,12 +9,12 @@
 
 import dedent from 'dedent';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 import { runElasticsearch } from './run_elasticsearch';
 import { getExtraKbnOpts, runKibanaServer } from './run_kibana_server';
-import { StartServerOptions } from './flags';
+import type { StartServerOptions } from './flags';
 import { loadServersConfig } from '../config';
 import { silence } from '../common';
 import { getPlaywrightGrepTag } from '../playwright/utils';

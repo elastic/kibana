@@ -19,11 +19,11 @@ import {
 
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
 
-import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
-import { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
+import type { AlertSuppression } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { createRule } from '../../../../../../config/services/detections_response';
 import {
   getAlerts,
@@ -35,7 +35,7 @@ import {
   setAlertStatus,
   dataGeneratorFactory,
 } from '../../../../utils';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {

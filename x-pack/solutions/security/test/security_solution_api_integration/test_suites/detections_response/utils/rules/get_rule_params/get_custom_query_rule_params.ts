@@ -6,7 +6,7 @@
  */
 
 import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { CreateRulePropsRewrites } from './types';
+import type { CreateRulePropsRewrites } from './types';
 
 /**
  * Returns custom query rule params that is easy for most basic testing of output of alerts.

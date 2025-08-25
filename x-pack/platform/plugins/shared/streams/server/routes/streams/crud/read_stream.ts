@@ -10,16 +10,16 @@ import {
   findInheritedLifecycle,
   getInheritedFieldsFromAncestors,
 } from '@kbn/streams-schema';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { partition } from 'lodash';
-import { AssetClient } from '../../../lib/streams/assets/asset_client';
-import { StreamsClient } from '../../../lib/streams/client';
+import type { AssetClient } from '../../../lib/streams/assets/asset_client';
+import type { StreamsClient } from '../../../lib/streams/client';
 import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { addAliasesForNamespacedFields } from '../../../lib/streams/component_templates/logs_layer';
-import { DashboardLink } from '../../../../common/assets';
+import type { DashboardLink } from '../../../../common/assets';
 import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
 
 export async function readStream({

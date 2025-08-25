@@ -7,7 +7,7 @@
 
 import expect from 'expect';
 import { KNOWLEDGE_BASE_ENTRIES_TABLE_MAX_PAGE_SIZE } from '@kbn/elastic-assistant-plugin/common/constants';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { createEntry, createEntryForUser } from '../utils/create_entry';
 import { findEntries } from '../utils/find_entry';
 import {

@@ -7,8 +7,8 @@
 
 import supertest from 'supertest';
 import { format as formatUrl } from 'url';
-import { IEsSearchResponse } from '@kbn/search-types';
-import { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless/shared/services';
+import type { IEsSearchResponse } from '@kbn/search-types';
+import type { RoleCredentials } from '@kbn/test-suites-xpack-platform/serverless/shared/services';
 import type { SendOptions } from '@kbn/ftr-common-functional-services';
 import type { SendOptions as SecureSearchSendOptions } from './search_secure';
 import type { FtrProviderContext } from '../../ftr_provider_context';

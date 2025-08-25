@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { Response } from 'superagent';
+import type { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
+import type {
   GetDraftTimelinesResponse,
   PatchTimelineResponse,
   SavedTimeline,
 } from '@kbn/security-solution-plugin/common/api/timeline';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { FtrProviderContext } from '../configs/ftr_provider_context';
+import type { FtrProviderContext } from '../configs/ftr_provider_context';
 
 export function TimelineTestServiceProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { MetricsGrid } from './metrics_grid';
-import { MetricField } from '../types';
+import type { MetricField } from '../types';
 
 export const MetricsGridSection: React.FC<{
   indexPattern: string;

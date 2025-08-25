@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
-import TestAgent from 'supertest/lib/agent';
-import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
+import type TestAgent from 'supertest/lib/agent';
+import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
 import {
   createBasicTimeline,
   createBasicTimelineTemplate,

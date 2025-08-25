@@ -20,7 +20,7 @@ import { getCreateExceptionListDetectionSchemaMock } from '@kbn/lists-plugin/com
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { AuthType } from '@kbn/stack-connectors-plugin/common/auth/constants';
-import { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { BaseDefaultableFields } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import moment from 'moment';
 import {
   binaryToString,
@@ -37,9 +37,10 @@ import {
 import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { deleteAllGaps } from '../../../utils/event_log/delete_all_gaps';
-import { GapEvent, generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
+import type { GapEvent } from '../../../utils/event_log/generate_gaps_for_rule';
+import { generateGapsForRule } from '../../../utils/event_log/generate_gaps_for_rule';
 import { getGapsByRuleId } from '../../../../../config/services/detections_response/rules/get_gaps_by_rule_id';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -91,8 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const createWebHookConnector = () => createConnector(getWebHookAction());
   const createSlackConnector = () => createConnector(getSlackAction());
 
-  // Failing: See https://github.com/elastic/kibana/issues/224615
-  describe.skip('@ess @serverless @skipInServerless perform_bulk_action', () => {
+  describe('@ess @serverless perform_bulk_action', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');

@@ -5,10 +5,14 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/public/types';
-import { NewPackagePolicy, NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/common';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
-import {
+import type { CloudSetup } from '@kbn/cloud-plugin/public/types';
+import type {
+  NewPackagePolicy,
+  NewPackagePolicyInput,
+  PackageInfo,
+} from '@kbn/fleet-plugin/common';
+import type { SetupTechnology } from '@kbn/fleet-plugin/public';
+import type {
   AWS_ORGANIZATION_ACCOUNT,
   AWS_SETUP_FORMAT,
   AWS_SINGLE_ACCOUNT,

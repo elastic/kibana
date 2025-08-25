@@ -6,7 +6,7 @@
  */
 import React, { useContext } from 'react';
 import { i18n } from '@kbn/i18n';
-import { CloudProviderConfig, CloudProviders } from '../types';
+import type { CloudProviderConfig, CloudProviders } from '../types';
 import {
   AWS_PROVIDER,
   GCP_PROVIDER,

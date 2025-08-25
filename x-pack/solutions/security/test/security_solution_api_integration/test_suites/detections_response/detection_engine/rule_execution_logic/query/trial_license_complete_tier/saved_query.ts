@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import { flattenWithPrefix } from '@kbn/securitysolution-rules';
 
-import { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -23,7 +23,7 @@ import {
   deleteAllAlerts,
   getRuleForAlertTesting,
 } from '../../../../../../config/services/detections_response';
-import { FtrProviderContext } from '../../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 /**

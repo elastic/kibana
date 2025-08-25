@@ -12,7 +12,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { OnSaveProps, SaveModalState, SavedObjectSaveModal } from '.';
+import type { OnSaveProps, SaveModalState } from '.';
+import { SavedObjectSaveModal } from '.';
 
 interface SaveModalDocumentInfo {
   id?: string;

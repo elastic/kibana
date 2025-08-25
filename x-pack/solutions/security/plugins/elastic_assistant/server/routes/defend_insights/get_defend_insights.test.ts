@@ -14,10 +14,8 @@ import type { DefendInsightsDataClient } from '../../lib/defend_insights/persist
 import { transformESSearchToDefendInsights } from '../../lib/defend_insights/persistence/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { getDefendInsightsRequest } from '../../__mocks__/request';
-import {
-  ElasticAssistantRequestHandlerContextMock,
-  requestContextMock,
-} from '../../__mocks__/request_context';
+import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__/request_context';
 import { serverMock } from '../../__mocks__/server';
 import { isDefendInsightsEnabled, updateDefendInsightsLastViewedAt } from './helpers';
 import { getDefendInsightsRoute } from './get_defend_insights';

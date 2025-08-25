@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { ChartContent } from './chart_content';
 import { ChartHeader } from './chart_header';
-import { MetricField } from '../../types';
+import type { MetricField } from '../../types';
 
 interface MetricChartProps {
   metric: MetricField;
