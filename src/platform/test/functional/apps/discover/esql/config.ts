@@ -10,10 +10,16 @@
 import type { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../../../config.base.js'));
+  const functionalConfig = (
+    await readConfigFile(require.resolve('../../../config.base.js'))
+  ).getAll();
 
   return {
-    ...functionalConfig.getAll(),
+    ...functionalConfig,
     testFiles: [require.resolve('.')],
+    esTestCluster: {
+      ...functionalConfig.esTestCluster,
+      serverArgs: ['xpack.security.enabled=true'],
+    },
   };
 }

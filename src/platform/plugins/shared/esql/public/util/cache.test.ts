@@ -122,6 +122,28 @@ describe('cacheNonParametrizedAsyncFunction', () => {
     expect(fn.mock.calls.length).toBe(2);
     expect(value2).toBe('value2');
   });
+
+  it('blocks and refreshes the value when forceRefresh flag is set', async () => {
+    let time = 1;
+    let value = 'value1';
+    const now = jest.fn(() => time);
+    const fn = jest.fn(async () => value);
+    const cached = cacheNonParametrizedAsyncFunction(fn, 100, 20, now);
+
+    const value1 = await cached();
+
+    expect(fn.mock.calls.length).toBe(1);
+    expect(value1).toBe('value1');
+
+    time = 5;
+    value = 'value2';
+
+    // Force refresh should call the original function
+    const value2 = await cached({ forceRefresh: true });
+
+    expect(fn.mock.calls.length).toBe(2);
+    expect(value2).toBe('value2');
+  });
 });
 
 describe('cacheParametrizedAsyncFunction', () => {

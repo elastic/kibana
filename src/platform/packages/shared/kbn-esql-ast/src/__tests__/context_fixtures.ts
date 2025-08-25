@@ -208,9 +208,14 @@ export const mockContext: ICommandContext = {
     type: 'observability',
     tier: 'complete',
   },
+  appId: 'discover',
 };
 
-export const getMockCallbacks = (): ICommandCallbacks => {
+export type MockedICommandCallbacks = {
+  [key in keyof ICommandCallbacks]: jest.Mocked<ICommandCallbacks[key]>;
+};
+
+export const getMockCallbacks = (): MockedICommandCallbacks => {
   const expectedFields = getFieldNamesByType('any');
   return {
     getByType: jest
@@ -219,5 +224,6 @@ export const getMockCallbacks = (): ICommandCallbacks => {
     getSuggestedUserDefinedColumnName: jest.fn(),
     getColumnsForQuery: jest.fn(),
     hasMinimumLicenseRequired: jest.fn().mockReturnValue(true),
+    canCreateLookupIndex: jest.fn().mockReturnValue(true),
   };
 };

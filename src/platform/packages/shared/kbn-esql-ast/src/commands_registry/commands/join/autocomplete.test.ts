@@ -10,10 +10,11 @@ import {
   mockContext,
   lookupIndexFields,
   getMockCallbacks,
+  type MockedICommandCallbacks,
 } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
 import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import type { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks, ICommandContext } from '../../types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 
@@ -36,7 +37,7 @@ const joinExpectSuggestions = (
 };
 
 describe('JOIN Autocomplete', () => {
-  let mockCallbacks: ICommandCallbacks;
+  let mockCallbacks: MockedICommandCallbacks;
   beforeEach(() => {
     jest.clearAllMocks();
 
@@ -45,7 +46,7 @@ describe('JOIN Autocomplete', () => {
     (mockCallbacks.getColumnsForQuery as jest.Mock).mockResolvedValue([...lookupIndexFields]);
   });
 
-  const suggest = async (query: string) => {
+  const suggest = async (query: string, contextOverrides: Partial<ICommandContext> = {}) => {
     const correctedQuery = correctQuerySyntax(query);
     const { ast } = parse(correctedQuery, { withFormatting: true });
     const cursorPosition = query.length;
@@ -53,7 +54,14 @@ describe('JOIN Autocomplete', () => {
     if (!command) {
       throw new Error('Command not found in the parsed query');
     }
-    return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
+
+    return autocomplete(
+      query,
+      command,
+      mockCallbacks,
+      { ...mockContext, ...contextOverrides },
+      cursorPosition
+    );
   };
   describe('<type> JOIN ...', () => {
     test('suggests command on first character', async () => {
@@ -76,17 +84,73 @@ describe('JOIN Autocomplete', () => {
   });
 
   describe('... <index> ...', () => {
-    test('can suggest lookup indices (and aliases)', async () => {
+    test('can suggest lookup indices (and aliases), and a create index command', async () => {
       const suggestions = await suggest('FROM index | LEFT JOIN ');
       const labels = suggestions.map((s) => s.label);
 
       expect(labels).toEqual([
+        'Create lookup index',
         'join_index',
         'join_index_with_alias',
         'lookup_index',
         'join_index_alias_1',
         'join_index_alias_2',
       ]);
+
+      const createIndexCommandSuggestion = suggestions.find(
+        (s) => s.label === 'Create lookup index'
+      );
+
+      expect(createIndexCommandSuggestion).toEqual({
+        command: {
+          arguments: [{ indexName: '' }],
+          id: 'esql.lookup_index.create',
+          title: 'Click to create',
+        },
+        detail: 'Click to create',
+        filterText: '',
+        kind: 'Issue',
+        label: 'Create lookup index',
+        sortText: '0-0',
+        text: '',
+      });
+    });
+
+    test('does not suggest create index command for other apps than Discover', async () => {
+      const suggestions = await suggest('FROM index | LEFT JOIN ', { appId: 'dashboard' });
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).not.toContain('Create lookup index');
+    });
+
+    test('does not suggest the create index command when a user does not have required privileges', async () => {
+      (mockCallbacks.canCreateLookupIndex as jest.Mock).mockResolvedValueOnce(false);
+      const suggestions = await suggest('FROM index | LEFT JOIN ', { appId: 'discover' });
+      const labels = suggestions.map((s) => s.label);
+
+      expect(labels).not.toContain('Create lookup index');
+    });
+
+    test('suggests create index command with the user input', async () => {
+      const suggestions = await suggest('FROM index | LEFT JOIN new_join_index');
+
+      const createIndexCommandSuggestion = suggestions.find(
+        (s) => s.label === 'Create lookup index "new_join_index"'
+      );
+
+      expect(createIndexCommandSuggestion).toEqual({
+        command: {
+          arguments: [{ indexName: 'new_join_index' }],
+          id: 'esql.lookup_index.create',
+          title: 'Click to create',
+        },
+        detail: 'Click to create',
+        filterText: 'new_join_index',
+        kind: 'Issue',
+        label: 'Create lookup index "new_join_index"',
+        sortText: '0-0',
+        text: 'new_join_index',
+      });
     });
 
     test('discriminates between indices and aliases', async () => {

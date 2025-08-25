@@ -456,3 +456,51 @@ export function printFunctionSignature(arg: ESQLFunction): string {
   }
   return '';
 }
+
+export function getLookupIndexCreateSuggestion(indexName?: string): ISuggestionItem {
+  return {
+    label: indexName
+      ? i18n.translate(
+          'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexWithName',
+
+          {
+            defaultMessage: 'Create lookup index "{indexName}"',
+
+            values: { indexName },
+          }
+        )
+      : i18n.translate('kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndex', {
+          defaultMessage: 'Create lookup index',
+        }),
+
+    text: indexName,
+
+    kind: 'Issue',
+
+    filterText: indexName,
+
+    detail: i18n.translate(
+      'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+      {
+        defaultMessage: 'Click to create',
+      }
+    ),
+
+    sortText: '0-0',
+
+    command: {
+      id: `esql.lookup_index.create`,
+
+      title: i18n.translate(
+        'kbn-esql-validation-autocomplete.esql.autocomplete.createLookupIndexDetailLabel',
+
+        {
+          defaultMessage: 'Click to create',
+        }
+      ),
+
+      arguments: [{ indexName }],
+    },
+  } as ISuggestionItem;
+}
