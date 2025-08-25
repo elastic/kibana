@@ -44,7 +44,7 @@ const allowedExtensions = [
   '.csv',
   '.svg',
   '.png',
-  ...(isDevOrCI ? ['.cjs', '.js', '.ts'] : []),
+  ...(isDevOrCI ? ['.cjs', '.js', '.ts', '.jsonc'] : []),
 ];
 
 const tmpPath = tmpdir();
