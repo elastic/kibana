@@ -6200,14 +6200,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/guided-onboarding-plugin@link:src/platform/plugins/shared/guided_onboarding":
-  version "0.0.0"
-  uid ""
-
-"@kbn/guided-onboarding@link:src/platform/packages/shared/kbn-guided-onboarding":
-  version "0.0.0"
-  uid ""
-
 "@kbn/handlebars@link:src/platform/packages/private/kbn-handlebars":
   version "0.0.0"
   uid ""
