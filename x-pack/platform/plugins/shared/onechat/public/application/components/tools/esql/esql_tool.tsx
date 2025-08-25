@@ -15,7 +15,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { EsqlToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
+import type { EsqlToolDefinitionWithSchema } from '@kbn/onechat-common';
+import { ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';

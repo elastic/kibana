@@ -21,7 +21,7 @@ import {
 } from '@elastic/eui';
 import React, { useState } from 'react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
-import { ToolDefinition } from '@kbn/onechat-common';
+import type { ToolDefinition } from '@kbn/onechat-common';
 import { i18n } from '@kbn/i18n';
 import { CodeEditor } from '@kbn/code-editor';
 import { useExecuteTool } from '../../../hooks/tools/use_execute_tools';

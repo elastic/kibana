@@ -10,7 +10,7 @@ import type {
   ToolDefinitionWithSchema,
   SerializedOnechatError,
 } from '@kbn/onechat-common';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export interface ListToolsResponse {
   results: ToolDefinitionWithSchema[];

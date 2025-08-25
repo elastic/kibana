@@ -6,7 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import { ExecuteToolResponse } from '../../../../common/http_api/tools';
+import type { ExecuteToolResponse } from '../../../../common/http_api/tools';
 import { useOnechatServices } from '../use_onechat_service';
 
 export interface ExecuteToolParams {
