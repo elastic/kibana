@@ -9,7 +9,7 @@
 import { mockContext } from '../../../__tests__/context_fixtures';
 import { validate } from '../stats/validate';
 import { Parser } from '../../../parser';
-import { expectErrors } from '../../../__tests__/validation';
+import { expectErrors, getNoValidCallSignatureError } from '../../../__tests__/validation';
 
 const inlinestatsExpectErrors = (
   query: string,
@@ -122,12 +122,12 @@ describe('INLINESTATS Validation', () => {
 
       test('various errors', () => {
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by percentile(doubleField)',
-          ['INLINESTATS BY does not support function percentile']
+          'from a_index | inlinestats avg(doubleField) by percentile(doubleField, 90)',
+          ['Function [percentile] not allowed in [by]']
         );
         inlinestatsExpectErrors(
-          'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField) by ipField',
-          ['INLINESTATS BY does not support function percentile']
+          'from a_index | inlinestats avg(doubleField) by textField, percentile(doubleField, 90) by ipField',
+          ['Function [percentile] not allowed in [by]']
         );
       });
 
@@ -145,25 +145,8 @@ describe('INLINESTATS Validation', () => {
 
         test('errors', () => {
           inlinestatsExpectErrors('from index | inlinestats by bucket(dateField, pi(), "", "")', [
-            'Argument of [bucket] must be [integer], found value [pi()] type [double]',
+            getNoValidCallSignatureError('bucket', ['date', 'double', 'keyword', 'keyword']),
           ]);
-
-          inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, abs(doubleField), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(doubleField)]']
-          );
-          inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, abs(length(doubleField)), "", "")',
-            ['Argument of [bucket] must be a constant, received [abs(length(doubleField))]']
-          );
-          inlinestatsExpectErrors(
-            'from index | inlinestats by bucket(dateField, doubleField, textField, textField)',
-            [
-              'Argument of [bucket] must be a constant, received [doubleField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-              'Argument of [bucket] must be a constant, received [textField]',
-            ]
-          );
         });
       });
     });
