@@ -392,7 +392,7 @@ async function deleteAssets(
         })
       ),
       // Delete knowledge base content for this package
-      deletePackageKnowledgeBase(esClient, name, version),
+      deletePackageKnowledgeBase(esClient, name),
     ]);
   } catch (err) {
     // in the rollback case, partial installs are likely, so missing assets are not an error

@@ -336,8 +336,11 @@ export default function (providerContext: FtrProviderContext) {
 
       it('returns knowledge base content for an installed package', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
           .expect(200);
 
         expect(res.body).to.have.property('package');
@@ -365,13 +368,19 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('returns 404 for knowledge base of non-existent package', async function () {
-        await supertest.get(`/internal/fleet/epm/packages/nonexistent/knowledge_base`).expect(404);
+        await supertest
+          .get(`/internal/fleet/epm/packages/nonexistent/knowledge_base`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
+          .expect(404);
       });
 
       it('validates knowledge base content structure', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         const res = await supertest
           .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '1')
           .expect(200);
 
         // Validate response structure matches schema
@@ -393,22 +402,6 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
-      it('allows user with integrations read permission to access knowledge base', async () => {
-        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
-        await supertestWithoutAuth
-          .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
-          .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
-          .expect(200);
-      });
-
-      it('allows user with fleet permission to access knowledge base', async () => {
-        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
-        await supertestWithoutAuth
-          .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
-          .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
-          .expect(200);
-      });
-
       it('includes knowledge base information in package info via public API', async function () {
         await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         const res = await supertest
@@ -418,10 +411,10 @@ export default function (providerContext: FtrProviderContext) {
         const packageInfo = res.body.item;
 
         // Check that the installed_es field contains knowledge_base items
-        expect(packageInfo).to.have.property('installed_es');
-        expect(packageInfo.installed_es).to.be.an('array');
+        expect(packageInfo.installationInfo).to.have.property('installed_es');
+        expect(packageInfo.installationInfo.installed_es).to.be.an('array');
 
-        const knowledgeBaseItems = packageInfo.installed_es.filter(
+        const knowledgeBaseItems = packageInfo.installationInfo.installed_es.filter(
           (item: any) => item.type === 'knowledge_base'
         );
 

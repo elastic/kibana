@@ -1542,15 +1542,13 @@ owner: elastic`,
 
       expect(result).toEqual({
         package: {
-          package_name: 'nginx',
-          version: '1.0.0',
-          installed_at: mockInstalledAt,
+          name: 'nginx',
         },
         items: mockKnowledgeBaseItems,
       });
 
       // Validate that installed_at matches the expected timestamp
-      expect(result!.package.installed_at).toBe(mockInstalledAt);
+      expect(result!.items[0].installed_at).toBe(mockInstalledAt);
     });
 
     it('should return knowledge base content with latest version', async () => {
@@ -1581,9 +1579,7 @@ owner: elastic`,
 
       expect(result).toEqual({
         package: {
-          package_name: 'nginx',
-          version: '1.2.0',
-          installed_at: mockInstalledAt,
+          name: 'nginx',
         },
 
         items: mockKnowledgeBaseItems,
