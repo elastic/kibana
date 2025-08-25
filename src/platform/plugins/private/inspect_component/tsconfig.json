@@ -26,5 +26,6 @@
     "@kbn/repo-info",
     "@kbn/core-http-router-server-mocks",
     "@kbn/test-jest-helpers",
+    "@kbn/logging"
   ]
 }

@@ -30,11 +30,15 @@ export class InspectComponentPluginServer implements Plugin {
 
   public setup(core: CoreSetup) {
     if (this.isDev) {
-      import('./routes/routes').then(({ registerInspectComponentRoutes }) => {
-        if (this.isEnabled) {
-          registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
-        }
-      });
+      import('./routes/routes')
+        .then(({ registerInspectComponentRoutes }) => {
+          if (this.isEnabled) {
+            registerInspectComponentRoutes({ httpService: core.http, logger: this.logger });
+          }
+        })
+        .catch(() => {
+          this.logger.error('Failed to load plugin dependencies');
+        });
     }
 
     return {};

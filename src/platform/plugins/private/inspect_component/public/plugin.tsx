@@ -9,15 +9,18 @@
 
 import React from 'react';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { Logger } from '@kbn/logging';
 import type { ConfigSchema } from '../server/config';
 
 export class InspectComponentPluginPublic implements Plugin {
   private readonly isDev: boolean;
   private readonly isEnabled: boolean;
+  private readonly logger: Logger;
 
   constructor(initializerContext: PluginInitializerContext) {
     const { enabled } = initializerContext.config.get<ConfigSchema>();
     this.isEnabled = enabled;
+    this.logger = initializerContext.logger.get();
     this.isDev = initializerContext.env.mode.dev;
   }
 
@@ -29,15 +32,19 @@ export class InspectComponentPluginPublic implements Plugin {
     if (this.isDev) {
       Promise.all([
         import('./components/inspect/inspect_button'),
-        import('@kbn/react-kibana-mount').then((m) => ({ toMountPoint: m.toMountPoint })),
-      ]).then(([{ InspectButton }, { toMountPoint }]) => {
-        if (this.isEnabled) {
-          core.chrome.navControls.registerRight({
-            order: 1002,
-            mount: toMountPoint(<InspectButton core={core} />, core.rendering),
-          });
-        }
-      });
+        import('@kbn/react-kibana-mount'),
+      ])
+        .then(([{ InspectButton }, { toMountPoint }]) => {
+          if (this.isEnabled) {
+            core.chrome.navControls.registerRight({
+              order: 1002,
+              mount: toMountPoint(<InspectButton core={core} />, core.rendering),
+            });
+          }
+        })
+        .catch(() => {
+          this.logger.error('Failed to load plugin dependencies');
+        });
     }
     return {};
   }
