@@ -8,7 +8,7 @@
  */
 
 import { mapMatchAll } from './map_match_all';
-import { MatchAllFilter } from '@kbn/es-query';
+import type { MatchAllFilter } from '@kbn/es-query';
 
 describe('filter_manager/lib', () => {
   describe('mapMatchAll()', () => {

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EntityDefinition, ENTITY_SCHEMA_VERSION_V1, MetadataField } from '@kbn/entities-schema';
-import { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { EntityDefinition, MetadataField } from '@kbn/entities-schema';
+import { ENTITY_SCHEMA_VERSION_V1 } from '@kbn/entities-schema';
+import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
 import {
   initializePathScript,
   cleanScript,

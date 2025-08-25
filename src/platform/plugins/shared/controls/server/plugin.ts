@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Plugin } from '@kbn/core/server';
-import { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
-import { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
+import type { CoreSetup, Plugin } from '@kbn/core/server';
+import type { PluginSetup as DataSetup } from '@kbn/data-plugin/server';
+import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
+import type { PluginSetup as UnifiedSearchSetup } from '@kbn/unified-search-plugin/server';
 import { setupOptionsListSuggestionsRoute } from './options_list/options_list_suggestions_route';
 import { controlGroupContainerPersistableStateServiceFactory } from './control_group/control_group_container_factory';
 import { optionsListPersistableStateServiceFactory } from './options_list/options_list_embeddable_factory';

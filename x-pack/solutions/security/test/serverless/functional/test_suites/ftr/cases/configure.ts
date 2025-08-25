@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
 import { navigateToCasesApp } from '@kbn/test-suites-xpack-platform/serverless/shared/lib/cases/helpers';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const owner = SECURITY_SOLUTION_OWNER;
 

@@ -8,7 +8,7 @@
 import { EuiFormRow, EuiIcon, EuiSelect, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { CollapseFunction } from '../../common/expressions';
+import type { CollapseFunction } from '../../common/expressions';
 
 const options = [
   { text: i18n.translate('xpack.lens.collapse.none', { defaultMessage: 'None' }), value: '' },

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Writable } from 'stream';
+import type { Writable } from 'stream';
 import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -19,7 +19,7 @@ import type {
   TaskRunResult,
 } from '@kbn/reporting-common/types';
 
-import { ConfigSchema } from './config_schema';
+import type { ConfigSchema } from './config_schema';
 import type { ExportType } from './export_type';
 
 export interface ReportingServerPluginSetup {

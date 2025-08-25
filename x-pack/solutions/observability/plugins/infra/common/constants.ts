@@ -38,7 +38,7 @@ export const TIEBREAKER_FIELD = '_doc';
 
 // processes
 export const TOP_N = 10;
-export const MANDATORY_PROCESS_FIELDS = [
+export const MANDATORY_PROCESS_FIELDS_ECS = [
   'system.process.cpu.total.pct',
   'system.process.memory.rss.pct',
   'system.process.cpu.start_time',
@@ -46,6 +46,11 @@ export const MANDATORY_PROCESS_FIELDS = [
   'user.name',
   'process.pid',
   'process.command_line',
+];
+export const MANDATORY_PROCESS_FIELDS_SEMCONV = [
+  'process.pid',
+  'process.command_line',
+  'process.owner',
 ];
 export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
 

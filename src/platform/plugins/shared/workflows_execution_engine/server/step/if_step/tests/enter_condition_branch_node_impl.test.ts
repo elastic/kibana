@@ -8,7 +8,7 @@
  */
 
 import { EnterConditionBranchNodeImpl } from '../enter_condition_branch_node_impl';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 
 describe('EnterConditionBranchNodeImpl', () => {
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;

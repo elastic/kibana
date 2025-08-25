@@ -44,6 +44,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       ? `${ELASTIC_DOCS}deploy-manage/deploy/elastic-cloud/serverless`
       : `${ELASTIC_DOCS}get-started`,
     apiReference: `${API_DOCS}`,
+    serverlessReleaseNotes: `${ELASTIC_DOCS}release-notes/cloud-serverless`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
       upgradingStackOnCloud: `${ELASTIC_DOCS}deploy-manage/upgrade/deployment-or-cluster`,
@@ -483,9 +484,10 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         mlAnomalyDetection: `${ELASTIC_DOCS}explore-analyze/machine-learning/anomaly-detection`,
       },
       detectionEngineOverview: `${ELASTIC_DOCS}solutions/security/detect-and-alert`,
-      // TODO: Follow-up PR for creating an aiAssistant category adding all relevant doc links
-      aiAssistant: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant`,
-      aiAssistantKnowledgeBaseIndexEntries: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base#knowledge-base-add-knowledge-index`,
+      aiAssistant: {
+        home: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant`,
+        knowledgeBaseIndexEntries: `${ELASTIC_DOCS}solutions/security/ai/ai-assistant-knowledge-base#knowledge-base-add-knowledge-index`,
+      },
       signalsMigrationApi: isServerless
         ? `${KIBANA_APIS}group/endpoint-security-detections-api`
         : `${KIBANA_SERVERLESS_APIS}group/endpoint-security-detections-api`,

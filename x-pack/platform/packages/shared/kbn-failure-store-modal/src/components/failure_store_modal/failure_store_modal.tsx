@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -23,10 +24,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
+import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   useForm,
   FIELD_TYPES,
-  FormSchema,
   Form,
   useFormIsModified,
   UseField,

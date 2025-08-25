@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import { ESQLAstQueryExpression } from '../../../types';
+import type { ESQLAstQueryExpression } from '../../../types';
 import type { ESQLAst, ESQLCommand, ESQLMessage } from '../../../types';
 import { Walker } from '../../../walker';
-import { ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandContext, ICommandCallbacks } from '../../types';
 import { validateCommandArguments } from '../../../definitions/utils/validation';
 import { esqlCommandRegistry } from '../..';
 import { errors } from '../../../definitions/utils';

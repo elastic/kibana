@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { KeyboardEvent, forwardRef, ForwardedRef } from 'react';
+import type { KeyboardEvent, ForwardedRef } from 'react';
+import React, { forwardRef } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiButtonIconProps, EuiToolTip, IconType, useEuiTheme } from '@elastic/eui';
+import type { EuiButtonIconProps, IconType } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
-import { MenuItem } from '../../../types';
+import type { MenuItem } from '../../../types';
 import { useTooltip } from '../../hooks/use_tooltip';
 import { BetaBadge } from '../beta_badge';
 

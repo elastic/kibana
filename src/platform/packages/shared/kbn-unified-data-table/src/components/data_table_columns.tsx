@@ -9,22 +9,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import type { EuiListGroupItemProps, RenderCellValue } from '@elastic/eui';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
   type EuiDataGridControlColumn,
-  EuiListGroupItemProps,
   type EuiDataGridColumnSortingConfig,
-  RenderCellValue,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
-import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { SOURCE_COLUMN } from '../utils/columns';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import type { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnsMeta } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -42,7 +41,7 @@ import {
   DataTableScoreColumnHeader,
   DataTableTimeColumnHeader,
 } from './data_table_column_header';
-import { UnifiedDataTableProps } from './data_table';
+import type { UnifiedDataTableProps } from './data_table';
 import { UnifiedDataTableSummaryColumnHeader } from './data_table_summary_column_header';
 import { isSortable } from '../hooks/use_sorting';
 
