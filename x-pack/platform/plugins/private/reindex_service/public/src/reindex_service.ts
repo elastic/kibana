@@ -11,8 +11,14 @@ import type {
   ReindexOperation,
   ReindexOperationCancelResponse,
 } from '@kbn/upgrade-assistant-pkg-common';
-import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
+// import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
 import { sendRequest } from '@kbn/es-ui-shared-plugin/public';
+import type { ReindexArgs } from '../../common';
+
+// same as -
+// import { UA_BASE_PATH } from '@kbn/upgrade-assistant-pkg-common';
+// bundle size is smaller if its duplicated
+const UA_BASE_PATH = '/api/upgrade_assistant';
 
 export class ReindexService {
   private client: HttpSetup;
@@ -28,10 +34,11 @@ export class ReindexService {
     });
   }
 
-  public async startReindex(indexName: string) {
+  public async startReindex(reindexArgs: Omit<ReindexArgs, 'reindexOptions'>) {
     return sendRequest<ReindexOperation>(this.client, {
       method: 'post',
-      path: `${UA_BASE_PATH}/reindex/${indexName}`,
+      path: `${UA_BASE_PATH}/reindex`,
+      body: reindexArgs,
     });
   }
 

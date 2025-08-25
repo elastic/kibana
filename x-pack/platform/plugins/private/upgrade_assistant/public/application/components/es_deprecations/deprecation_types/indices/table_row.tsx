@@ -8,6 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiTableRowCell, EuiTableRow } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type {
   EnrichedDeprecationInfo,
   IndicesResolutionType,
@@ -143,10 +144,20 @@ const IndexTableRowCells: React.FunctionComponent<TableRowProps> = ({
 export const IndexTableRow: React.FunctionComponent<TableRowProps> = (props) => {
   const {
     services: { api },
+    kibanaVersionInfo,
   } = useAppContext();
 
+  const version = new Version();
+  version.setup(
+    [
+      kibanaVersionInfo.currentMajor,
+      kibanaVersionInfo.currentMinor,
+      kibanaVersionInfo.currentPatch,
+    ].join('.')
+  );
+
   return (
-    <IndexStatusProvider deprecation={props.deprecation} api={api}>
+    <IndexStatusProvider deprecation={props.deprecation} api={api} version={version}>
       <IndexTableRowCells {...props} />
     </IndexStatusProvider>
   );

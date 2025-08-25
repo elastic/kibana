@@ -14,15 +14,53 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import { REINDEX_OP_TYPE, getRollupJobByIndexName } from '@kbn/upgrade-assistant-pkg-server';
-import type { Version } from '@kbn/upgrade-assistant-pkg-server';
 import type { FlatSettings } from '@kbn/upgrade-assistant-pkg-server';
 import type {
   ReindexOperation,
-  ReindexOptions,
   ReindexSavedObject,
+  Version,
 } from '@kbn/upgrade-assistant-pkg-common';
 import { ReindexStatus, ReindexStep } from '@kbn/upgrade-assistant-pkg-common';
-import { generateNewIndexName } from './index_settings';
+import type { ReindexArgs } from '../../../common';
+
+export interface QueueSettings {
+  /**
+   * A Unix timestamp of when the reindex operation was enqueued.
+   *
+   * @remark
+   * This is used by the reindexing scheduler to determine execution
+   * order.
+   */
+  queuedAt: number;
+
+  /**
+   * A Unix timestamp of when the reindex operation was started.
+   *
+   * @remark
+   * Updating this field is useful for _also_ updating the saved object "updated_at" field
+   * which is used to determine stale or abandoned reindex operations.
+   *
+   * For now this is used by the reindex worker scheduler to determine whether we have
+   * A queue item at the start of the queue.
+   *
+   */
+  startedAt?: number;
+}
+
+export interface ReindexOptions {
+  /**
+   * Whether to treat the index as if it were closed. This instructs the
+   * reindex strategy to first open the index, perform reindexing and
+   * then close the index again.
+   */
+  openAndClose?: boolean;
+
+  /**
+   * Set this key to configure a reindex operation as part of a
+   * batch to be run in series.
+   */
+  queueSettings?: QueueSettings;
+}
 
 // TODO: base on elasticsearch.requestTimeout?
 export const LOCK_WINDOW = moment.duration(90, 'seconds');
@@ -37,7 +75,14 @@ export interface ReindexActions {
    * @param indexName
    * @param opts Additional options when creating the reindex operation
    */
-  createReindexOp(indexName: string, opts?: ReindexOptions): Promise<ReindexSavedObject>;
+  createReindexOp({
+    indexName,
+    newIndexName,
+    settings,
+    reindexOptions,
+  }: Omit<ReindexArgs, 'reindexOptions'> & {
+    reindexOptions?: ReindexOptions;
+  }): Promise<ReindexSavedObject>;
 
   /**
    * Deletes a reindexOp.
@@ -127,13 +172,22 @@ export const reindexActionsFactory = (
 
   // ----- Public interface
   return {
-    async createReindexOp(indexName: string, opts?: ReindexOptions) {
+    async createReindexOp({
+      indexName,
+      newIndexName,
+      reindexOptions,
+      settings: indexSettings,
+    }: Omit<ReindexArgs, 'reindexOptions'> & {
+      reindexOptions?: ReindexOptions;
+    }): Promise<ReindexSavedObject> {
       // gets rollup job if it exists and needs stopping, otherwise returns undefined
       const rollupJob = await getRollupJobByIndexName(esClient, log, indexName);
 
+      const settings = indexSettings ? JSON.stringify(indexSettings) : undefined;
+
       return client.create<ReindexOperation>(REINDEX_OP_TYPE, {
         indexName,
-        newIndexName: generateNewIndexName(indexName, versionService),
+        newIndexName,
         status: ReindexStatus.inProgress,
         lastCompletedStep: ReindexStep.created,
         locked: null,
@@ -141,8 +195,9 @@ export const reindexActionsFactory = (
         reindexTaskPercComplete: null,
         errorMessage: null,
         runningReindexCount: null,
-        reindexOptions: opts,
+        reindexOptions,
         rollupJob,
+        settings,
       });
     },
 

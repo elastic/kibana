@@ -7,35 +7,24 @@
 
 import { schema } from '@kbn/config-schema';
 import { errors } from '@elastic/elasticsearch';
+import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
 
 import { versionCheckHandlerWrapper, REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-pkg-server';
-import type { ReindexStatusResponse } from '@kbn/upgrade-assistant-pkg-common';
 import { API_BASE_PATH_UPRGRADE_ASSISTANT } from '../constants';
-import type { ReindexWorker } from '../lib';
-import { reindexServiceFactory, generateNewIndexName } from '../lib';
-import { reindexActionsFactory } from '../lib/reindex_actions';
 import type { RouteDependencies } from '../../types';
 import { mapAnyErrorToKibanaHttpResponse } from './map_any_error_to_kibana_http_response';
-import { reindexHandler } from '../lib/reindex_handler';
 
-export function registerReindexIndicesRoutes(
-  {
-    credentialStore,
-    router,
-    licensing,
-    log,
-    getSecurityPlugin,
-    lib: { handleEsError },
-    version,
-  }: RouteDependencies,
-  getWorker: () => ReindexWorker
-) {
+export function registerReindexIndicesRoutes({
+  router,
+  version,
+  getReindexService,
+}: RouteDependencies) {
   const BASE_PATH = `${API_BASE_PATH_UPRGRADE_ASSISTANT}/reindex`;
 
   // Start reindex for an index
   router.post(
     {
-      path: `${BASE_PATH}/{indexName}`,
+      path: `${BASE_PATH}`,
       security: {
         authz: {
           enabled: false,
@@ -43,8 +32,19 @@ export function registerReindexIndicesRoutes(
         },
       },
       validate: {
-        params: schema.object({
+        body: schema.object({
           indexName: schema.string(),
+          newIndexName: schema.string(),
+          reindexOptions: schema.maybe(
+            schema.object({
+              enqueue: schema.maybe(schema.boolean()),
+            })
+          ),
+          settings: schema.maybe(
+            schema.object({
+              index: schema.recordOf(schema.string(), schema.any()),
+            })
+          ),
         }),
       },
     },
@@ -53,22 +53,19 @@ export function registerReindexIndicesRoutes(
         savedObjects: { getClient },
         elasticsearch: { client: esClient },
       } = await core;
-      const { indexName } = request.params;
+
+      const { indexName, newIndexName } = request.body;
       try {
-        const result = await reindexHandler({
+        const reindexService = (await getReindexService()).getScopedClient({
           savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
           dataClient: esClient,
-          indexName,
-          log,
-          licensing,
           request,
-          credentialStore,
-          security: getSecurityPlugin(),
-          version,
         });
 
-        // Kick the worker on this node to immediately pickup the new reindex operation.
-        getWorker().forceRefresh();
+        const result = await reindexService.reindexOrResume({
+          indexName,
+          newIndexName,
+        });
 
         return response.ok({
           body: result,
@@ -105,47 +102,14 @@ export function registerReindexIndicesRoutes(
       } = await core;
       const { getClient } = savedObjects;
       const { indexName } = request.params;
-      const asCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        asCurrentUser,
-        log,
-        version
-      );
-      const reindexService = reindexServiceFactory(
-        asCurrentUser,
-        reindexActions,
-        log,
-        licensing,
-        version
-      );
 
       try {
-        const hasRequiredPrivileges = await reindexService.hasRequiredPrivileges(indexName);
-        const reindexOp = await reindexService.findReindexOperation(indexName);
-        // If the user doesn't have privileges than querying for warnings is going to fail.
-        const warnings = hasRequiredPrivileges
-          ? await reindexService.detectReindexWarnings(indexName)
-          : [];
-
-        const isTruthy = (value?: string | boolean): boolean => value === true || value === 'true';
-        const { aliases, settings, isInDataStream, isFollowerIndex } =
-          await reindexService.getIndexInfo(indexName);
-
-        const body: ReindexStatusResponse = {
-          reindexOp: reindexOp ? reindexOp.attributes : undefined,
-          warnings,
-          hasRequiredPrivileges,
-          meta: {
-            indexName,
-            reindexName: generateNewIndexName(indexName, version),
-            aliases: Object.keys(aliases),
-            isFrozen: isTruthy(settings?.frozen),
-            isReadonly: isTruthy(settings?.verified_read_only),
-            isInDataStream,
-            isFollowerIndex,
-          },
-        };
+        const reindexService = (await getReindexService()).getScopedClient({
+          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          dataClient: esClient,
+          request,
+        });
+        const body = await reindexService.getStatus(indexName);
 
         return response.ok({
           body,
@@ -182,23 +146,14 @@ export function registerReindexIndicesRoutes(
       } = await core;
       const { indexName } = request.params;
       const { getClient } = savedObjects;
-      const callAsCurrentUser = esClient.asCurrentUser;
-      const reindexActions = reindexActionsFactory(
-        getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
-        callAsCurrentUser,
-        log,
-        version
-      );
-      const reindexService = reindexServiceFactory(
-        callAsCurrentUser,
-        reindexActions,
-        log,
-        licensing,
-        version
-      );
 
       try {
-        await reindexService.cancelReindexing(indexName);
+        const reindexService = (await getReindexService()).getScopedClient({
+          savedObjects: getClient({ includedHiddenTypes: [REINDEX_OP_TYPE] }),
+          dataClient: esClient,
+          request,
+        });
+        await reindexService.cancel(indexName);
 
         return response.ok({ body: { acknowledged: true } });
       } catch (error) {

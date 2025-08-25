@@ -13,6 +13,8 @@ import type { MockRouter } from '../__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from '../__mocks__/routes.mock';
 import { createRequestMock } from '../__mocks__/request.mock';
 import { handleEsError } from '@kbn/es-ui-shared-plugin/server';
+import { ReindexServiceWrapper } from '../lib/reindex_service_wrapper';
+import type { Version } from '@kbn/upgrade-assistant-pkg-common';
 
 const mockReindexService = {
   hasRequiredPrivileges: jest.fn(),
@@ -60,10 +62,27 @@ describe('reindex API', () => {
       router: mockRouter,
       licensing: licensingMock.createSetup(),
       lib: { handleEsError },
-      getSecurityPlugin: () => securityMock.createStart(),
+      getSecurityPlugin: () => Promise.resolve(securityMock.createStart()),
       version: { getMajorVersion: () => 8 },
+      getReindexService: () =>
+        Promise.resolve(
+          new ReindexServiceWrapper({
+            soClient: {} as any,
+            credentialStore,
+            clusterClient: {} as any,
+            logger: {
+              debug: jest.fn(),
+              get: () => ({
+                debug: jest.fn(),
+              }),
+            } as any,
+            licensing: licensingMock.createStart(),
+            security: securityMock.createStart(),
+            version: { getMajorVersion: () => 8 } as unknown as Version,
+          })
+        ),
     };
-    registerBatchReindexIndicesRoutes(routeDependencies, () => worker);
+    registerBatchReindexIndicesRoutes(routeDependencies);
 
     mockReindexService.hasRequiredPrivileges.mockResolvedValue(true);
     mockReindexService.detectReindexWarnings.mockReset();
@@ -86,9 +105,6 @@ describe('reindex API', () => {
   });
 
   describe('POST /api/upgrade_assistant/reindex/batch', () => {
-    const queueSettingsArg = {
-      enqueue: true,
-    };
     it('creates a collection of index operations', async () => {
       mockReindexService.createReindexOperation
         .mockResolvedValueOnce({
@@ -106,26 +122,34 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/batch',
       })(
         routeHandlerContextMock,
-        createRequestMock({ body: { indexNames: ['theIndex1', 'theIndex2', 'theIndex3'] } }),
+        createRequestMock({
+          body: {
+            indexNames: [
+              { indexName: 'theIndex1', newIndexName: 'theIndex1Reindexed' },
+              { indexName: 'theIndex2', newIndexName: 'theIndex2Reindexed' },
+              { indexName: 'theIndex3', newIndexName: 'theIndex3Reindexed' },
+            ],
+          },
+        }),
         kibanaResponseFactory
       );
 
       // It called create correctly
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        1,
-        'theIndex1',
-        queueSettingsArg
-      );
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        2,
-        'theIndex2',
-        queueSettingsArg
-      );
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        3,
-        'theIndex3',
-        queueSettingsArg
-      );
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(1, {
+        indexName: 'theIndex1',
+        newIndexName: 'theIndex1Reindexed',
+        opts: { enqueue: true },
+      });
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(2, {
+        indexName: 'theIndex2',
+        newIndexName: 'theIndex2Reindexed',
+        opts: { enqueue: true },
+      });
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(3, {
+        indexName: 'theIndex3',
+        newIndexName: 'theIndex3Reindexed',
+        opts: { enqueue: true },
+      });
 
       // It returned the right results
       expect(resp.status).toEqual(200);
@@ -157,22 +181,30 @@ describe('reindex API', () => {
         pathPattern: '/api/upgrade_assistant/reindex/batch',
       })(
         routeHandlerContextMock,
-        createRequestMock({ body: { indexNames: ['theIndex1', 'theIndex2', 'theIndex3'] } }),
+        createRequestMock({
+          body: {
+            indexNames: [
+              { indexName: 'theIndex1', newIndexName: 'theIndex1Reindexed' },
+              { indexName: 'theIndex2', newIndexName: 'theIndex2Reindexed' },
+              { indexName: 'theIndex3', newIndexName: 'theIndex3Reindexed' },
+            ],
+          },
+        }),
         kibanaResponseFactory
       );
 
       // It called create correctly
       expect(mockReindexService.createReindexOperation).toHaveBeenCalledTimes(2);
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        1,
-        'theIndex1',
-        queueSettingsArg
-      );
-      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(
-        2,
-        'theIndex3',
-        queueSettingsArg
-      );
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(1, {
+        indexName: 'theIndex1',
+        newIndexName: 'theIndex1Reindexed',
+        opts: { enqueue: true },
+      });
+      expect(mockReindexService.createReindexOperation).toHaveBeenNthCalledWith(2, {
+        indexName: 'theIndex3',
+        newIndexName: 'theIndex3Reindexed',
+        opts: { enqueue: true },
+      });
 
       // It returned the right results
       expect(resp.status).toEqual(200);

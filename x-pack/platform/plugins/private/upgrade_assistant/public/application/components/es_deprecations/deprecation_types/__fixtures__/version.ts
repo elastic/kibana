@@ -5,6 +5,13 @@
  * 2.0.
  */
 
-export { type CredentialStore, credentialStoreFactory } from './credential_store';
-export { reindexServiceFactory } from './reindex_service';
-export { ReindexWorker } from './worker';
+export const getMockVersionInfo = () => {
+  const currentMajor = 8;
+
+  return {
+    currentVersion: {},
+    currentMajor,
+    prevMajor: currentMajor - 1,
+    nextMajor: currentMajor + 1,
+  };
+};

@@ -9,8 +9,9 @@ import expect from '@kbn/expect';
 
 import { REINDEX_OP_TYPE } from '@kbn/upgrade-assistant-plugin/common/types';
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
-import { generateNewIndexName } from '@kbn/reindex-service-plugin/server';
-import { getIndexState, Version } from '@kbn/upgrade-assistant-pkg-server';
+import { generateNewIndexName } from '@kbn/upgrade-assistant-plugin/public';
+import { getIndexState } from '@kbn/upgrade-assistant-pkg-server';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 import type { ResolveIndexResponseFromES } from '@kbn/upgrade-assistant-pkg-server';
 import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -68,8 +69,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`/api/upgrade_assistant/reindex`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('dummydata');
@@ -122,8 +127,12 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`/api/upgrade_assistant/reindex`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+        })
         .expect(200);
 
       const lastState = await waitForReindexToComplete('dummydata');
@@ -162,8 +171,12 @@ export default function ({ getService }: FtrProviderContext) {
       await es.indices.create({ index: 'reindexed-v8-dummydata' });
 
       const { body } = await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`/api/upgrade_assistant/reindex`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+        })
         .expect(200);
 
       expect(body.indexName).to.equal('dummydata');
@@ -198,8 +211,12 @@ export default function ({ getService }: FtrProviderContext) {
 
       // Reindex
       await supertest
-        .post(`/api/upgrade_assistant/reindex/dummydata`)
+        .post(`/api/upgrade_assistant/reindex`)
         .set('kbn-xsrf', 'xxx')
+        .send({
+          indexName: 'dummydata',
+          newIndexName: generateNewIndexName('dummydata', versionService),
+        })
         .expect(200);
       const lastState = await waitForReindexToComplete('dummydata');
 

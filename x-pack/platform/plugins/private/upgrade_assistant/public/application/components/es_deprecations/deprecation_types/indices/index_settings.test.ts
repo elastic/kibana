@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Version } from '@kbn/upgrade-assistant-pkg-server';
+import { Version } from '@kbn/upgrade-assistant-pkg-common';
 
 import { getMockVersionInfo } from '../__fixtures__/version';
 
