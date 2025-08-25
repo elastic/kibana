@@ -30,7 +30,6 @@ import {
   TYPE,
   VERSION,
   MAX_ATTEMPTS,
-  MAX_CONCURRENCY,
   SCHEDULE,
 } from './constants';
 import { createEntitySnapshotIndex } from '../../elasticsearch_assets/entity_snapshot_index';
@@ -69,7 +68,6 @@ export async function registerEntityStoreSnapshotTask({
       description: `Creates a snapshot every 24h and handles additional data transformations.`,
       timeout: TIMEOUT,
       maxAttempts: MAX_ATTEMPTS,
-      maxConcurrency: MAX_CONCURRENCY,
       stateSchemaByVersion,
       createTaskRunner: (context: RunContext) => {
         return {
