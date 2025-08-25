@@ -36,9 +36,15 @@ export const command = {
     const kbnUiSharedDepsNpmPath = 'src/platform/packages/private/kbn-ui-shared-deps-npm';
     const kbnUiSharedDepsSrcPath = 'src/platform/packages/private/kbn-ui-shared-deps-src';
     const kbnMonacoPath = 'src/platform/packages/shared/kbn-monaco';
+    const kbnServiceWorkerPath = 'src/platform/packages/private/shared-ux/serviceworker';
 
     const watchesFinished = [];
-    for (const packageName of [kbnUiSharedDepsSrcPath, kbnMonacoPath, kbnUiSharedDepsNpmPath]) {
+    for (const packageName of [
+      kbnUiSharedDepsSrcPath,
+      kbnMonacoPath,
+      kbnUiSharedDepsNpmPath,
+      kbnServiceWorkerPath,
+    ]) {
       watchesFinished.push(
         watchPackage(packageName, {
           quiet,
