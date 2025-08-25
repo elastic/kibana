@@ -20,15 +20,20 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { i18n } from '@kbn/i18n';
+import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import { parseWorkflowYamlToJSON } from '../../common/lib/yaml_utils';
 import { WORKFLOW_ZOD_SCHEMA_LOOSE } from '../../common/schema';
 import type { SchedulerService } from '../scheduler/scheduler_service';
 import type { WorkflowsService } from './workflows_management_service';
 
 export interface GetWorkflowsParams {
-  triggerType?: 'schedule' | 'event';
+  triggerType?: 'schedule' | 'event' | 'manual';
   limit: number;
-  offset: number;
+  page: number;
+  createdBy?: string[];
+  enabled?: boolean[];
+  query?: string;
   _full?: boolean;
 }
 
@@ -62,7 +67,8 @@ export interface WorkflowExecutionLogsDto {
 export class WorkflowsManagementApi {
   constructor(
     private readonly workflowsService: WorkflowsService,
-    private schedulerService: SchedulerService | null = null
+    private schedulerService: SchedulerService | null = null,
+    private readonly getWorkflowsExecutionEngine: () => Promise<WorkflowsExecutionEnginePluginStart>
   ) {}
 
   public setSchedulerService(schedulerService: SchedulerService) {
@@ -85,13 +91,36 @@ export class WorkflowsManagementApi {
     return await this.workflowsService.createWorkflow(workflow, spaceId, request);
   }
 
+  public async cloneWorkflow(
+    workflow: WorkflowDetailDto,
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<WorkflowDetailDto> {
+    const clonedYaml = this.workflowsService.updateYAMLFields(workflow.yaml, {
+      name: `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+        defaultMessage: 'Copy',
+      })}`,
+    });
+    return await this.workflowsService.createWorkflow({ yaml: clonedYaml }, spaceId, request);
+  }
+
   public async updateWorkflow(
     id: string,
     workflow: Partial<EsWorkflow>,
     spaceId: string,
     request: KibanaRequest
   ): Promise<UpdatedWorkflowResponseDto | null> {
-    return await this.workflowsService.updateWorkflow(id, workflow, spaceId, request);
+    const originalWorkflow = await this.workflowsService.getWorkflow(id, spaceId);
+    if (!originalWorkflow) {
+      throw new Error(`Workflow with id ${id} not found`);
+    }
+    return await this.workflowsService.updateWorkflow(
+      id,
+      workflow,
+      originalWorkflow,
+      spaceId,
+      request
+    );
   }
 
   public async deleteWorkflows(
@@ -110,7 +139,13 @@ export class WorkflowsManagementApi {
     if (!this.schedulerService) {
       throw new Error('Scheduler service not set');
     }
-    return await this.schedulerService.runWorkflow(workflow, spaceId, inputs);
+    const context = {
+      ...inputs,
+      spaceId,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(workflow, context);
+    return executeResponse.workflowExecutionId;
   }
 
   public async testWorkflow(
@@ -130,17 +165,21 @@ export class WorkflowsManagementApi {
     }
 
     const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
-
-    return await this.schedulerService.runWorkflow(
+    const context = {
+      ...inputs,
+      spaceId,
+    };
+    const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
+    const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
         id: 'test-workflow',
         name: workflowToCreate.name,
-        status: workflowToCreate.status,
+        enabled: workflowToCreate.enabled,
         definition: workflowToCreate.definition,
       },
-      spaceId,
-      inputs
+      context
     );
+    return executeResponse.workflowExecutionId;
   }
 
   public async getWorkflowExecutions(
@@ -198,5 +237,13 @@ export class WorkflowsManagementApi {
       limit: params.limit || 100,
       offset: params.offset || 0,
     };
+  }
+
+  public async getWorkflowStats(spaceId: string) {
+    return await this.workflowsService.getWorkflowStats(spaceId);
+  }
+
+  public async getWorkflowAggs(fields: string[] = [], spaceId: string) {
+    return await this.workflowsService.getWorkflowAggs(fields, spaceId);
   }
 }

@@ -28,7 +28,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'cisAddIntegration',
   ]);
 
-  describe('Agentless cloud', function () {
+  // https://github.com/elastic/kibana/issues/229298
+  describe.skip('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;
