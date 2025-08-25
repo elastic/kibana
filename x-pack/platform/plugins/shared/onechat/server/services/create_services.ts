@@ -17,10 +17,12 @@ import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './runner';
 import { ConversationServiceImpl } from './conversation';
 import { createChatService } from './chat';
+import { DataCatalogService } from './data_catalog';
 
 interface ServiceInstances {
   tools: ToolsService;
   agents: AgentsService;
+  data_catalog: DataCatalogService;
 }
 
 export class ServiceManager {
@@ -32,11 +34,13 @@ export class ServiceManager {
     this.services = {
       tools: new ToolsService(),
       agents: new AgentsService(),
+      data_catalog: new DataCatalogService(),
     };
 
     this.internalSetup = {
       tools: this.services.tools.setup({ logger }),
       agents: this.services.agents.setup({ logger }),
+      dataCatalog: this.services.data_catalog.setup({ logger }),
     };
 
     return this.internalSetup;
@@ -74,6 +78,8 @@ export class ServiceManager {
       toolsService: tools,
     });
 
+    const dataCatalog = this.services.data_catalog.start({});
+
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,
@@ -105,6 +111,7 @@ export class ServiceManager {
       conversations,
       runnerFactory,
       chat,
+      dataCatalog,
     };
 
     return this.internalStart;

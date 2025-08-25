@@ -69,6 +69,9 @@ export class OnechatPlugin
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
+      data_catalog: {
+        register: serviceSetups.dataCatalog.register.bind(serviceSetups.dataCatalog),
+      },
     };
   }
 
@@ -84,7 +87,7 @@ export class OnechatPlugin
       inference,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, agents, runnerFactory, dataCatalog } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
@@ -97,6 +100,9 @@ export class OnechatPlugin
         execute: async (args) => {
           return agents.execute(args);
         },
+      },
+      data_catalog: {
+        getCatalog: () => dataCatalog.getCatalog(),
       },
     };
   }

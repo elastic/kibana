@@ -16,6 +16,7 @@ import { registerApp } from './application';
 import { ChatService, ConversationService, AgentService, type WorkChatServices } from './services';
 import { IntegrationService } from './services/integration/integration_service';
 import { IntegrationRegistry } from './services/integration/integration_registry';
+import { WorkspaceDataTypeDescriptor, DocumentDataTypeDescriptor } from './data_types';
 
 export class WorkChatAppPlugin
   implements
@@ -32,7 +33,8 @@ export class WorkChatAppPlugin
   constructor(context: PluginInitializerContext) {}
 
   public setup(
-    core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>
+    core: CoreSetup<WorkChatAppPluginStartDependencies, WorkChatAppPluginStart>,
+    { onechat }: WorkChatAppPluginSetupDependencies
   ): WorkChatAppPluginSetup {
     registerApp({
       core,
@@ -43,6 +45,10 @@ export class WorkChatAppPlugin
         return this.services;
       },
     });
+
+    // Register custom data type descriptors
+    onechat.dataTypeRegistry.register(new WorkspaceDataTypeDescriptor());
+    onechat.dataTypeRegistry.register(new DocumentDataTypeDescriptor());
 
     return {
       integrations: {
