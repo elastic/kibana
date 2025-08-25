@@ -15,6 +15,7 @@ const config = {
   maxWorkers: '50%',
   collectCoverage: false,
   passWithNoTests: true,
+  reporters: ['jest-silent-reporter'],
 };
 
 module.exports = config;

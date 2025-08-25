@@ -15,7 +15,7 @@ module.exports = (overrides = {}) => {
       corejs: false,
     },
     defer_requires: {
-      enabled: true,
+      enabled: false,
     },
     ...overrides,
   };
