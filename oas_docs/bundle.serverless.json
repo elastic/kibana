@@ -58408,8 +58408,7 @@
                 },
                 "required": [
                   "stream",
-                  "where",
-                  "status"
+                  "where"
                 ],
                 "type": "object"
               }
