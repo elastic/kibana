@@ -14,3 +14,4 @@ export {
   type Changelog,
   type BreakingChangesLog,
 } from './changelog_utils';
+export { mapInputsToIngestionMethods } from './map_ingestion_method';

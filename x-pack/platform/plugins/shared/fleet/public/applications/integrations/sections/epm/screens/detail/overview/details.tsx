@@ -39,6 +39,8 @@ import { AssetTitleMap, DisplayedAssetsFromPackageInfo, ServiceTitleMap } from '
 import { ChangelogModal } from '../settings/changelog_modal';
 import { useChangelog } from '../hooks';
 
+import { mapInputsToIngestionMethods } from '../utils';
+
 import { NoticeModal } from './notice_modal';
 import { LicenseModal } from './license_modal';
 
@@ -202,6 +204,22 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
       });
     }
 
+    // Ingestion method details
+    const ingestionMethods = mapInputsToIngestionMethods(packageInfo.policy_templates);
+    if (ingestionMethods.size > 0) {
+      items.push({
+        title: (
+          <EuiTextColor color="subdued">
+            <FormattedMessage
+              id="xpack.fleet.epm.ingestionMethodsLabel"
+              defaultMessage="Ingestion methods"
+            />
+          </EuiTextColor>
+        ),
+        description: Array.from(ingestionMethods).join(', '),
+      });
+    }
+
     // Subscription details
     items.push({
       title: (
@@ -314,6 +332,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo, integrationInfo }) 
     packageInfo.source?.license,
     packageInfo.owner.type,
     packageInfo.version,
+    packageInfo.policy_templates,
     config?.hideDashboards,
     toggleLicenseModal,
     toggleNoticeModal,
