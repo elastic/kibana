@@ -320,7 +320,7 @@ const getPointConfig: GetPointConfigFn = ({
   pointsRadius,
 }) => {
   return {
-    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'auto'),
+    visible: pointVisibility ?? (showPoints || markSizeAccessor ? 'always' : 'never'),
     radius: pointsRadius,
     fill: markSizeAccessor ? ColorVariant.Series : undefined,
   };
