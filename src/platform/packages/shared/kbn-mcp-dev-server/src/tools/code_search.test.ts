@@ -26,7 +26,7 @@ describe('codeSearchTool', () => {
 
     await codeSearchTool.handler({ query: 'test query' });
     expect(mockSearch).toHaveBeenCalledWith({
-      index: 'semantic-code-search',
+      index: 'kibana-code-search',
       size: 10,
       _source: [
         'filePath',
@@ -62,7 +62,7 @@ describe('codeSearchTool', () => {
 
     await codeSearchTool.handler({ query: 'test query', kql: 'language:typescript' });
     expect(mockSearch).toHaveBeenCalledWith({
-      index: 'semantic-code-search',
+      index: 'kibana-code-search',
       size: 10,
       _source: [
         'filePath',
