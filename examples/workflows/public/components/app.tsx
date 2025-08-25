@@ -65,7 +65,7 @@ workflow:
   name: New workflow
   enabled: false
   triggers:
-    - type: triggers.elastic.manual
+    - type: manual
   steps:
     - name: step-with-console-log-1
       type: console

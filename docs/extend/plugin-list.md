@@ -52,7 +52,6 @@ mapped_pages:
 | [files](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/files/README.md) | The files service provides functionality to manage, retrieve, share files in Kibana. |
 | [filesManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/files_management/README.md) | Minimal interface for admins to manage files in Kibana. |
 | [ftrApis](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/ftr_apis/README.md) | This plugin exposes a set of APIs used internally during functional tests by the FTR. |
-| [guidedOnboarding](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/guided_onboarding/README.md) | This plugin contains the code for the Guided Onboarding project. Guided onboarding consists of guides for Solutions (Enterprise Search, Observability, Security) that can be completed as a checklist of steps. The guides help users to ingest their data and to navigate to the correct Solutions pages. |
 | [home](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/home/README.md) | Moves the legacy ui/registry/feature_catalogue module for registering "features" that should be shown in the home page's feature catalogue to a service within a "home" plugin. The feature catalogue refered to here should not be confused with the "feature" plugin for registering features used to derive UI capabilities for feature controls. |
 | [imageEmbeddable](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/image_embeddable/README.md) | This plugin contains image embeddable. Image embeddable allows to embed images into the dashboard. Images can be added either by URL or by uploading the image file via file service. |
 | [inputControlVis](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/input_control_vis/README.md) | Contains the input control visualization allowing to place custom filter controls on a dashboard. |
@@ -65,6 +64,7 @@ mapped_pages:
 | [links](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/links/README.md) | This plugin adds the Links panel which allows authors to create hard links to navigate on click and bring all context from the source dashboard to the destination dashboard. |
 | [management](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/management/README.md) | This plugins contains the "Stack Management" page framework. It offers navigation and an API to link individual management section into it. This plugin does not contain any individual management section itself. |
 | [mapsEms](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/maps_ems/README.md) | Utility plugin: |
+| [metricsExperience](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/metrics_experience/README.md) | Exposes the services, components, and API endpoints required for the Metrics Experience in Discover. |
 | [navigation](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/navigation/README.md) | The Navigation plugin provides essential navigation components and services for Kibana. It serves as a central hub for navigation-related functionality across the application. |
 | [newsfeed](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/newsfeed/README.md) | The newsfeed plugin adds a NewsfeedNavButton to the top navigation bar and renders the content in the flyout. Content is fetched from the remote (https://feeds.elastic.co) once a day, with periodic checks if the content needs to be refreshed. All newsfeed content is hosted remotely. |
 | [noDataPage](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/no_data_page/README.md) | Helps to globally configure the no data page components |
@@ -100,8 +100,8 @@ mapped_pages:
 | [visTypeVislib](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/vislib) | WARNING: Missing or empty README. |
 | [visTypeXy](https://github.com/elastic/kibana/blob/main/src/platform/plugins/private/vis_types/xy) | WARNING: Missing or empty README. |
 | [visualizations](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/visualizations) | WARNING: Missing or empty README. |
-| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | WARNING: Missing or empty README. |
-| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This directory contains the foundational structure for the Workflows plugin. |
+| [workflowsExecutionEngine](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_execution_engine/README.md) | Stateless execution engine for workflows. |
+| [workflowsManagement](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/workflows_management/README.md) | This plugin contains the Workflows management application and APIs. |
 
 ## x-pack/plugins [_x_packplugins]
 

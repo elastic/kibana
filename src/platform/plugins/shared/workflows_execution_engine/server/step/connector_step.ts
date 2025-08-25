@@ -70,8 +70,8 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
           tags: ['console', 'log'],
         });
         // eslint-disable-next-line no-console
-        console.log(step.with?.message);
-        return { output: step.with?.message, error: undefined };
+        console.log(withInputs.message);
+        return { output: withInputs.message, error: undefined };
       } else if (step.type === 'delay') {
         const delayTime = step.with?.delay ?? 1000;
         // this.contextManager.logDebug(`Delaying for ${delayTime}ms`);
@@ -90,10 +90,17 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
       const output = await this.connectorExecutor.execute(
         stepType,
         step['connector-id']!,
-        renderedInputs
+        renderedInputs,
+        step.spaceId
       );
 
-      return { output, error: undefined };
+      const { data, status, message } = output;
+
+      if (status === 'ok') {
+        return { output: data, error: undefined };
+      } else {
+        return await this.handleFailure(message);
+      }
     } catch (error) {
       return await this.handleFailure(error);
     }
