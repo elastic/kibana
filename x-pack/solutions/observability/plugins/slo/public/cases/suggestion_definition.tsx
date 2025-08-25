@@ -9,6 +9,7 @@ import { lazy } from 'react';
 import type { AttachmentFramework } from '@kbn/cases-plugin/public/client/attachment_framework/types';
 import type { SLOSuggestion } from '../../common/cases/suggestions';
 import type { LazyWithContextProviders } from '../utils/get_lazy_with_context_providers';
+import { SLO_SUGGESTION_COMPONENT_ID } from '../../common/cases/constants';
 
 export const registerSloSuggestion = (
   attachmentFramework: AttachmentFramework,
@@ -23,7 +24,7 @@ export const registerSloSuggestion = (
   const children = lazy(() => Promise.resolve({ default: WrappedWithProviders }));
 
   attachmentFramework.registerSuggestion<SLOSuggestion>({
-    id: 'slo',
+    id: SLO_SUGGESTION_COMPONENT_ID,
     owner: 'observability',
     children,
   });

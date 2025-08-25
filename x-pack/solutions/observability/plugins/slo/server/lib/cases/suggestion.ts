@@ -11,6 +11,7 @@ import type { SuggestionType } from '@kbn/cases-plugin/server';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { AttachmentFramework } from '@kbn/cases-plugin/server/attachment_framework/types';
 import type { AttachmentItem } from '@kbn/cases-plugin/common/types/domain';
+import { SLO_SUGGESTION_COMPONENT_ID } from '../../../common/cases/constants';
 import { buildSloHistoryAttachment } from '../../../common/cases/attachments';
 import type { SLOSuggestion } from '../../../common/cases/suggestions';
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
@@ -107,7 +108,7 @@ export function getSLOByServiceName(
               };
               return {
                 id: `${item.payload.id}-${item.payload.instanceId}`,
-                componentId: 'slo',
+                componentId: SLO_SUGGESTION_COMPONENT_ID,
                 data: [item],
               };
             }),
