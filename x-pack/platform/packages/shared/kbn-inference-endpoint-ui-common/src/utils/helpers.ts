@@ -8,13 +8,7 @@
 import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isEmpty } from 'lodash/fp';
 import { FieldType } from '../types/types';
-import type {
-  FieldsConfiguration,
-  FieldType,
-  Config,
-  ConfigEntryView,
-  InferenceProvider,
-} from '../types/types';
+import type { Config, ConfigEntryView, InferenceProvider } from '../types/types';
 import type { OverrideFieldsContentType } from '../types/dynamic_config/types';
 import * as LABELS from '../translations';
 

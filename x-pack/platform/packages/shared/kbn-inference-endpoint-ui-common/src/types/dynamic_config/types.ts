@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ServiceProviderKeys } from '../../constants';
+import type { ServiceProviderKeys } from '../../constants';
 import type { FieldsConfiguration } from '../types';
 
 export interface SelectOption {
