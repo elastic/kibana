@@ -102,7 +102,6 @@ describe('CreateCaseForm', () => {
     expect(await screen.findByTestId('caseTags')).toBeInTheDocument();
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
     expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
-    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
     expect(screen.queryByText('caseOwnerSelector')).not.toBeInTheDocument();
   });
@@ -115,7 +114,6 @@ describe('CreateCaseForm', () => {
     expect(await screen.findByTestId('caseTags')).toBeInTheDocument();
     expect(await screen.findByTestId('caseDescription')).toBeInTheDocument();
     expect(await screen.findByTestId('caseSyncAlerts')).toBeInTheDocument();
-    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
     expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
     expect(await screen.findByTestId('caseOwnerSelector')).toBeInTheDocument();
   });
@@ -133,6 +131,23 @@ describe('CreateCaseForm', () => {
     appMockRenderer.render(<CreateCaseForm {...casesFormProps} />);
 
     expect(screen.queryByText('Sync alert')).not.toBeInTheDocument();
+  });
+
+  it('should not render connectors on basic license', () => {
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />);
+    expect(screen.queryByTestId('caseConnectors')).not.toBeInTheDocument();
+  });
+
+  it('should render connectors on gold license', async () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'gold' },
+    });
+
+    renderWithTestingProviders(<CreateCaseForm {...casesFormProps} />, {
+      wrapperProps: { license },
+    });
+
+    expect(await screen.findByTestId('caseConnectors')).toBeInTheDocument();
   });
 
   it('should not render the assignees on basic license', () => {

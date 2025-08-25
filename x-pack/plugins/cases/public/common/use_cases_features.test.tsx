@@ -52,6 +52,8 @@ describe('useCasesFeatures', () => {
         metricsFeatures: [],
         caseAssignmentAuthorized: false,
         pushToServiceAuthorized: false,
+        observablesAuthorized: false,
+        connectorsAuthorized: false,
       });
     }
   );
@@ -74,6 +76,8 @@ describe('useCasesFeatures', () => {
       metricsFeatures: [CaseMetricsFeature.CONNECTORS],
       caseAssignmentAuthorized: false,
       pushToServiceAuthorized: false,
+      observablesAuthorized: false,
+      connectorsAuthorized: false,
     });
   });
 
@@ -84,8 +88,27 @@ describe('useCasesFeatures', () => {
       type === 'platinum' || type === 'enterprise' || type === 'trial' ? true : false,
     ]);
 
+  it('allows gold features on gold license', () => {
+    const license = licensingMock.createLicense({
+      license: { type: 'gold' },
+    });
+
+    const { result } = renderHook<React.PropsWithChildren<{}>, UseCasesFeatures>(
+      () => useCasesFeatures(),
+      {
+        wrapper: ({ children }) => <TestProviders license={license}>{children}</TestProviders>,
+      }
+    );
+
+    expect(result.current).toEqual(
+      expect.objectContaining({
+        connectorsAuthorized: true,
+      })
+    );
+  });
+
   it.each(licenseTests)(
-    'allows platinum features on a platinum license',
+    'allows platinum features on a platinum license (license = %s)',
     async (type, expectedResult) => {
       const license = licensingMock.createLicense({
         license: { type },
@@ -98,13 +121,16 @@ describe('useCasesFeatures', () => {
         }
       );
 
-      expect(result.current).toEqual({
-        isAlertsEnabled: true,
-        isSyncAlertsEnabled: true,
-        metricsFeatures: [],
-        caseAssignmentAuthorized: expectedResult,
-        pushToServiceAuthorized: expectedResult,
-      });
+      expect(result.current).toEqual(
+        expect.objectContaining({
+          isAlertsEnabled: true,
+          isSyncAlertsEnabled: true,
+          metricsFeatures: [],
+          caseAssignmentAuthorized: expectedResult,
+          pushToServiceAuthorized: expectedResult,
+          observablesAuthorized: expectedResult,
+        })
+      );
     }
   );
 });

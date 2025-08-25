@@ -13,6 +13,8 @@ import { useLicense } from './use_license';
 export interface UseCasesFeatures {
   isAlertsEnabled: boolean;
   isSyncAlertsEnabled: boolean;
+  observablesAuthorized: boolean;
+  connectorsAuthorized: boolean;
   caseAssignmentAuthorized: boolean;
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
@@ -20,8 +22,9 @@ export interface UseCasesFeatures {
 
 export const useCasesFeatures = (): UseCasesFeatures => {
   const { features } = useCasesContext();
-  const { isAtLeastPlatinum } = useLicense();
+  const { isAtLeastGold, isAtLeastPlatinum } = useLicense();
   const hasLicenseGreaterThanPlatinum = isAtLeastPlatinum();
+  const hasLicenseWithAtLeastGold = isAtLeastGold();
 
   const casesFeatures = useMemo(
     () => ({
@@ -38,8 +41,16 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       metricsFeatures: features.metrics,
       caseAssignmentAuthorized: hasLicenseGreaterThanPlatinum,
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
+      observablesAuthorized: hasLicenseGreaterThanPlatinum,
+      connectorsAuthorized: hasLicenseWithAtLeastGold,
     }),
-    [features.alerts.enabled, features.alerts.sync, features.metrics, hasLicenseGreaterThanPlatinum]
+    [
+      features.alerts.enabled,
+      features.alerts.sync,
+      features.metrics,
+      hasLicenseGreaterThanPlatinum,
+      hasLicenseWithAtLeastGold,
+    ]
   );
 
   return casesFeatures;
