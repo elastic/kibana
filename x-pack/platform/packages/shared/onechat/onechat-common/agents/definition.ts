@@ -51,6 +51,10 @@ export interface AgentDefinition {
    */
   description: string;
   /**
+   * Optional labels used to organize or filter agents
+   */
+  labels?: string[];
+  /**
    * Configuration associated with this agent
    */
   configuration: AgentConfiguration;

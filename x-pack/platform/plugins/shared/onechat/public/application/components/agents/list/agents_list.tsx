@@ -5,51 +5,166 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import { EuiBasicTable, EuiFlexGroup, EuiLink, EuiText } from '@elastic/eui';
+import React, { useMemo, useState, useCallback } from 'react';
+import type {
+  EuiBasicTableColumn,
+  EuiTableActionsColumnType,
+  EuiTableComputedColumnType,
+  EuiTableFieldDataColumnType,
+} from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInMemoryTable,
+  EuiLink,
+  EuiText,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AgentDefinition } from '@kbn/onechat-common';
+import { oneChatDefaultAgentId, type AgentDefinition } from '@kbn/onechat-common';
 import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
+import { AgentDeleteModal } from './agent_delete_modal';
+import { searchParamNames } from '../../../search_param_names';
+
+const columnNames = {
+  name: i18n.translate('xpack.onechat.agents.nameColumn', { defaultMessage: 'Name' }),
+  labels: i18n.translate('xpack.onechat.agents.labelsColumn', { defaultMessage: 'Labels' }),
+};
+
+const actionLabels = {
+  chat: i18n.translate('xpack.onechat.agents.actions.chat', { defaultMessage: 'Chat' }),
+  chatDescription: i18n.translate('xpack.onechat.agents.actions.chatDescription', {
+    defaultMessage: 'Chat with agent',
+  }),
+  edit: i18n.translate('xpack.onechat.agents.actions.edit', { defaultMessage: 'Edit' }),
+  editDescription: i18n.translate('xpack.onechat.agents.actions.editDescription', {
+    defaultMessage: 'Edit agent',
+  }),
+  clone: i18n.translate('xpack.onechat.agents.actions.clone', { defaultMessage: 'Clone' }),
+  cloneDescription: i18n.translate('xpack.onechat.agents.actions.cloneDescription', {
+    defaultMessage: 'Clone agent',
+  }),
+  delete: i18n.translate('xpack.onechat.agents.actions.delete', { defaultMessage: 'Delete' }),
+  deleteDescription: i18n.translate('xpack.onechat.agents.actions.deleteDescription', {
+    defaultMessage: 'Delete agent',
+  }),
+};
 
 export const AgentsList: React.FC = () => {
   const { agents, isLoading, error } = useOnechatAgents();
-
   const { createOnechatUrl } = useNavigation();
 
-  const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(
-    () => [
-      {
-        field: 'name',
-        name: i18n.translate('xpack.onechat.agents.nameLabel', { defaultMessage: 'Name' }),
-        valign: 'top',
-        render: (name: string, item: AgentDefinition) => (
-          <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: item.id }))}>
-            {name}
-          </EuiLink>
-        ),
-      },
-      {
-        field: 'description',
-        name: i18n.translate('xpack.onechat.agents.descriptionLabel', {
-          defaultMessage: 'Description',
-        }),
-        valign: 'top',
-        render: (description: string) => <EuiText size="s">{description}</EuiText>,
-      },
-      {
-        field: 'configuration.instructions',
-        name: i18n.translate('xpack.onechat.agents.instructionsLabel', {
-          defaultMessage: 'Instructions',
-        }),
-        valign: 'top',
-        render: (instructions: string) => <EuiText size="s">{instructions}</EuiText>,
-      },
-    ],
-    [createOnechatUrl]
-  );
+  const [deletingAgent, setDeletingAgent] = useState<AgentDefinition | null>(null);
+  const openDeleteModal = useCallback((agent: AgentDefinition) => {
+    setDeletingAgent(agent);
+  }, []);
+  const closeDeleteModal = useCallback(() => {
+    setDeletingAgent(null);
+  }, []);
+
+  const columns: Array<EuiBasicTableColumn<AgentDefinition>> = useMemo(() => {
+    const agentAvatar: EuiTableComputedColumnType<AgentDefinition> = {
+      width: '48px',
+      align: 'center',
+      render: (agent) =>
+        // TODO: Add avatar for custom agents
+        agent.id === oneChatDefaultAgentId ? <EuiIcon type="logoElastic" size="xl" /> : null,
+    };
+
+    const agentNameAndDescription: EuiTableFieldDataColumnType<AgentDefinition> = {
+      field: 'name',
+      name: columnNames.name,
+      render: (name: string, agent: AgentDefinition) => (
+        <EuiFlexGroup direction="column" gutterSize="xs">
+          <EuiFlexItem grow={false}>
+            <EuiLink href={createOnechatUrl(appPaths.agents.edit({ agentId: agent.id }))}>
+              {name}
+            </EuiLink>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{agent.description}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    };
+
+    const agentLabels: EuiTableFieldDataColumnType<AgentDefinition> = {
+      field: 'labels',
+      name: columnNames.labels,
+      render: (labels?: string[]) => (
+        <EuiFlexGroup direction="row" wrap>
+          {labels?.map((label) => (
+            <EuiFlexItem key={label} grow={false}>
+              <EuiBadge>{label}</EuiBadge>
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      ),
+    };
+
+    const agentActions: EuiTableActionsColumnType<AgentDefinition> = {
+      actions: [
+        {
+          type: 'icon',
+          icon: 'comment',
+          name: actionLabels.chat,
+          description: actionLabels.chatDescription,
+          isPrimary: true,
+          href: (agent) =>
+            createOnechatUrl(appPaths.chat.new, { [searchParamNames.agentId]: agent.id }),
+        },
+        {
+          type: 'icon',
+          icon: 'pencil',
+          name: actionLabels.edit,
+          description: actionLabels.editDescription,
+          isPrimary: true,
+          showOnHover: true,
+          href: (agent) => createOnechatUrl(appPaths.agents.edit({ agentId: agent.id })),
+        },
+        {
+          type: 'icon',
+          icon: 'copy',
+          name: actionLabels.clone,
+          description: actionLabels.cloneDescription,
+          href: (agent) =>
+            createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agent.id }),
+        },
+        {
+          // Have to use a custom action to display the danger color
+          // Can use default action if this proposal is implemented: https://github.com/elastic/eui/discussions/8735
+          render: (agent) => {
+            return (
+              <EuiToolTip position="right" content={actionLabels.deleteDescription} delay="long">
+                <EuiFlexGroup direction="row" alignItems="center" gutterSize="s">
+                  <EuiIcon type="trash" color="danger" />
+                  <EuiLink
+                    onClick={() => {
+                      if (agent.id === oneChatDefaultAgentId) {
+                        return;
+                      }
+                      openDeleteModal(agent);
+                    }}
+                    color="danger"
+                  >
+                    {actionLabels.delete}
+                  </EuiLink>
+                </EuiFlexGroup>
+              </EuiToolTip>
+            );
+          },
+          // Don't display delete action for default agent
+          available: (agent) => agent.id !== oneChatDefaultAgentId,
+        },
+      ],
+    };
+
+    return [agentAvatar, agentNameAndDescription, agentLabels, agentActions];
+  }, [createOnechatUrl, openDeleteModal]);
 
   const errorMessage = useMemo(
     () =>
@@ -61,15 +176,35 @@ export const AgentsList: React.FC = () => {
     [error]
   );
 
+  const labelOptions = useMemo(() => {
+    const labels = agents.flatMap((agent) => agent.labels ?? []);
+    return Array.from(new Set(labels)).map((label) => ({ value: label }));
+  }, [agents]);
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="s">
-      <EuiBasicTable
-        loading={isLoading}
-        columns={columns}
+    <>
+      <EuiInMemoryTable
         items={agents}
-        itemId="id"
+        itemId={(agent) => agent.id}
+        columns={columns}
+        sorting={true}
+        selection={{ selectable: (agent) => agent.id !== oneChatDefaultAgentId }}
+        search={{
+          box: { incremental: true },
+          filters: [
+            {
+              type: 'field_value_selection',
+              name: 'Labels',
+              multiSelect: 'and',
+              options: labelOptions,
+            },
+          ],
+        }}
+        loading={isLoading}
         error={errorMessage}
+        responsiveBreakpoint={false}
       />
-    </EuiFlexGroup>
+      <AgentDeleteModal agent={deletingAgent} onClose={closeDeleteModal} />
+    </>
   );
 };

@@ -31,18 +31,18 @@ import { useAgentDelete } from '../../../hooks/agents/use_agent_delete';
 import { ToolsSelection } from './tools_selection';
 
 export interface AgentFormProps {
-  agentId?: string;
+  editingAgentId?: string;
 }
 
 type AgentFormData = Omit<AgentDefinition, 'type'>;
 
-export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
+export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId }) => {
   const { navigateToOnechatUrl } = useNavigation();
   const {
     services: { notifications },
   } = useKibana();
 
-  const isCreateMode = !agentId;
+  const isCreateMode = !editingAgentId;
 
   const onSaveSuccess = () => {
     notifications.toasts.addSuccess(
@@ -99,7 +99,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
     tools,
     error,
   } = useAgentEdit({
-    agentId,
+    editingAgentId,
     onSaveSuccess,
     onSaveError,
   });
@@ -318,7 +318,7 @@ export const AgentForm: React.FC<AgentFormProps> = ({ agentId }) => {
               <EuiButton
                 color="danger"
                 iconType="trash"
-                onClick={() => deleteAgent(agentId!)}
+                onClick={() => deleteAgent(editingAgentId!)}
                 disabled={isFormDisabled}
                 isLoading={isDeleting}
               >
