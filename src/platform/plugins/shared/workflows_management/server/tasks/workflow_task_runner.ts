@@ -62,7 +62,7 @@ export function createWorkflowTaskRunner({
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
-            status: workflow.status,
+            enabled: workflow.enabled,
             definition: workflow.definition,
             executionGraph: convertToSerializableGraph(executionGraph),
           };
