@@ -48,6 +48,7 @@ export class DashboardPageControls extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
+  private readonly panelActions = this.ctx.getService('dashboardPanelActions');
 
   private readonly common = this.ctx.getPageObject('common');
 
@@ -402,7 +403,11 @@ export class DashboardPageControls extends FtrService {
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.testSubjects.click(
+        `optionsList-control-${controlId}`,
+        500,
+        await this.panelActions.getContainerTopOffset()
+      );
       await this.retry.waitForWithTimeout('popover to open', 500, async () => {
         return await this.testSubjects.exists(`optionsList-control-popover`);
       });
