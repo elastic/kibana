@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { TypeOf, schema } from '@kbn/config-schema';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import type { HttpServiceSetup } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
+import { Type } from 'js-yaml';
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import {
@@ -23,7 +24,11 @@ import {
 } from '../content_management/v1';
 import {
   dashboardAttributesSchemaRequest,
+  rpcProcdureResult,
   dashboardCreateRequestAttributesSchema,
+  dashboardGetRequestAPISchema,
+  dashboardItemAPIResponseSchema,
+  rpcProcedureResultSchema,
 } from '../content_management/v1/cm_services';
 
 interface RegisterAPIRoutesArgs {
@@ -58,6 +63,36 @@ const commonRouteConfig = {
     },
   },
 } as const;
+
+const formatResult = (item: TypeOf<typeof dashboardItemAPIResponseSchema>) => {
+  const {
+    id,
+    type,
+    attributes,
+    createdAt,
+    updatedAt,
+    createdBy,
+    updatedBy,
+    error,
+    managed,
+    ...rest
+  } = item;
+  return {
+    id,
+    type,
+    data: { ...attributes, ...rest },
+    meta: { createdAt, updatedAt, createdBy, updatedBy, error, managed },
+  };
+};
+
+const formatRequest = (data: TypeOf<typeof dashboardAttributesSchemaRequest>) => {
+  const { id, type, ...attributes } = data;
+  return {
+    id,
+    type,
+    attributes,
+  };
+};
 
 export function registerAPIRoutes({
   http,
@@ -124,7 +159,12 @@ export function registerAPIRoutes({
         return res.badRequest({ body: e });
       }
 
-      return res.ok({ body: result });
+      console.log('create dashboard response---', result);
+
+      const formattedResult = formatResult(result.item);
+      return res.ok({
+        body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
+      });
     }
   );
 
@@ -176,7 +216,11 @@ export function registerAPIRoutes({
         }
         return res.badRequest({ body: e.output.payload });
       }
-      return res.ok({ body: result });
+
+      const formattedResult = formatResult(result.item);
+      return res.ok({
+        body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
+      });
     }
   );
 
@@ -246,9 +290,12 @@ export function registerAPIRoutes({
       }
 
       const body = {
-        items: result.hits,
+        items: result.hits.map(formatResult),
         total: result.pagination.total,
       };
+
+      console.log('search result-----', result.hits);
+
       return res.ok({ body });
     }
   );
@@ -302,8 +349,11 @@ export function registerAPIRoutes({
 
         return res.badRequest(e.message);
       }
-
-      return res.ok({ body: result });
+      console.log('result-----', result);
+      const formattedResult = formatResult(result.item);
+      return res.ok({
+        body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
+      });
     }
   );
 

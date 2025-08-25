@@ -17,6 +17,7 @@ import {
   SearchResult,
   UpdateIn,
 } from '@kbn/content-management-plugin/common';
+import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { WithRequiredProperty } from '@kbn/utility-types';
 import {
   dashboardItemSchema,
@@ -34,6 +35,7 @@ import {
   dashboardResponseMetaSchema,
   mayBeDashboardItemSchema,
   dashboardCreateRequestAttributesSchema,
+  dashboardItemAPIRequestSchema,
 } from './cm_services';
 import { CONTENT_ID } from '../../../common/content_management';
 
@@ -63,9 +65,12 @@ export type FindDashboardsByIdResponseAttributes = Omit<
   panels: Array<DashboardPanel | DashboardSection>;
 };
 
-export type DashboardItem = TypeOf<typeof dashboardItemSchema>;
+export type DashboardItem = TypeOf<typeof dashboardItemAPIRequestSchema>;
 export type MaybeDashboardItem = TypeOf<typeof mayBeDashboardItemSchema>;
-export type PartialDashboardItem = Omit<MaybeDashboardItem, 'data'>;
+export type PartialDashboardItem = Omit<DashboardItem, 'attributes' | 'references'> & {
+  attributes: Partial<DashboardAttributes>;
+  references: SavedObjectReference[] | undefined;
+};
 
 export type GridData = WithRequiredProperty<TypeOf<typeof panelGridDataSchema>, 'i'>;
 
@@ -91,6 +96,4 @@ export type DashboardUpdateOptions = TypeOf<typeof dashboardUpdateOptionsSchema>
 
 export type DashboardSearchIn = SearchIn<typeof CONTENT_ID>;
 export type DashboardSearchOptions = TypeOf<typeof dashboardSearchOptionsSchema>;
-export type DashboardSearchOut = SearchResult<
-  TypeOf<typeof dashboardItemSchema>
->;
+export type DashboardSearchOut = SearchResult<TypeOf<typeof dashboardItemSchema>>;

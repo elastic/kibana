@@ -12,7 +12,7 @@ import { pick } from 'lodash';
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
 import { transformDashboardOut, transformReferencesOut } from './transforms';
-import type { MaybeDashboardItem, PartialDashboardItem } from './types';
+import type { DashboardItem, PartialDashboardItem } from './types';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
@@ -48,7 +48,7 @@ export function savedObjectToItem(
     allowedReferences?: string[];
     getTagNamesFromReferences?: (references: SavedObjectReference[]) => string[];
   } = {}
-): SavedObjectToItemReturn<MaybeDashboardItem | PartialDashboardItem> {
+): SavedObjectToItemReturn<DashboardItem | PartialDashboardItem> {
   const {
     id,
     type,
@@ -70,45 +70,26 @@ export function savedObjectToItem(
     );
     const references = transformReferencesOut(savedObject.references ?? []);
 
-    const attributesOut = allowedAttributes
-      ? pick(dashboardState, allowedAttributes)
-      : dashboardState;
-
-    if (error) {
-      return {
-        item: {
-          error,
-        },
-        error: null,
-      };
-    }
-
     return {
       item: {
-        data: {
-          ...attributesOut,
-          references: allowedReferences
-            ? references?.filter((reference) => allowedReferences.includes(reference.type))
-            : references,
-          spaces: namespaces,
-          version,
-        },
-        meta: {
-          updatedAt,
-          updatedBy,
-          createdAt,
-          createdBy,
-          ...(managed ? { managed } : {}),
-        },
         id,
         type,
+        updatedAt,
+        updatedBy,
+        createdAt,
+        createdBy,
+        attributes: allowedAttributes ? pick(dashboardState, allowedAttributes) : dashboardState,
+        error,
+        namespaces,
+        references: allowedReferences
+          ? references?.filter((reference) => allowedReferences.includes(reference.type))
+          : references,
+        version,
+        managed,
       },
       error: null,
     };
   } catch (e) {
-    return {
-      item: null,
-      error: e,
-    };
+    return { item: null, error: e };
   }
 }

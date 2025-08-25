@@ -14,6 +14,8 @@ import { createOptionsSchemas, updateOptionsSchema } from '@kbn/content-manageme
 import type { ContentManagementServicesDefinition as ServicesDefinition } from '@kbn/object-versioning';
 import { FilterStateStore } from '@kbn/es-query';
 import { SortDirection } from '@kbn/data-plugin/common/search';
+import { contentType } from 'mime-types';
+import { strictObject } from '@kbn/zod';
 import {
   DASHBOARD_GRID_COLUMN_COUNT,
   DEFAULT_PANEL_HEIGHT,
@@ -314,11 +316,18 @@ export const dashboardCreateRequestAttributesSchema = schema.object({
 });
 
 export const dashboardUpdateRequestAttributesSchema = schema.object({
-  // ...searchResultsAttributes,
-  // ...dashboardRequestAttributes,
-  // type: schema.maybe(schema.string()),
-  // references: schema.maybe(schema.arrayOf(referenceSchema)),
-  // spaces: schema.maybe(schema.arrayOf(schema.string())),
+  ...searchResultsAttributes,
+  ...dashboardRequestAttributes,
+  type: schema.maybe(schema.string()),
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
+});
+
+export const dashboardResponseAttributesSchema = schema.object({
+  ...searchResultsAttributes,
+  ...dashboardRequestAttributes,
+  references: schema.maybe(schema.arrayOf(referenceSchema)),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const dashboardAttributesSchemaRequest = dashboardCreateRequestAttributesSchema.extends(
@@ -331,6 +340,7 @@ export const dashboardAttributesSchema = schema.object({
   version: schema.string(),
   references: schema.maybe(schema.arrayOf(referenceSchema)),
   spaces: schema.maybe(schema.arrayOf(schema.string())),
+  namespaces: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const dashboardAttributesSchemaResponse = dashboardAttributesSchema.extends(
@@ -343,6 +353,7 @@ export const dashboardResponseMetaSchema = schema.object({
   updatedBy: schema.maybe(schema.string()),
   createdBy: schema.maybe(schema.string()),
   managed: schema.maybe(schema.boolean()),
+  error: schema.maybe(apiError),
 });
 
 export const dashboardSearchOptionsSchema = schema.maybe(
@@ -424,11 +435,164 @@ export const dashboardGetResultSchema = schema.object(
 
 export const dashboardSearchResultsSchema = dashboardItemSchema;
 
+export const dashboardItemAPIResponseSchema = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    version: schema.maybe(schema.string()),
+    createdAt: schema.maybe(schema.string()),
+    updatedAt: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    updatedBy: schema.maybe(schema.string()),
+    managed: schema.maybe(schema.boolean()),
+    error: schema.maybe(apiError),
+    attributes: dashboardResponseAttributesSchema,
+    references: schema.arrayOf(referenceSchema),
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    originId: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const dashboardItemAPIRequestSchema = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    version: schema.maybe(schema.number()),
+    createdAt: schema.maybe(schema.string()),
+    updatedAt: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    updatedBy: schema.maybe(schema.string()),
+    managed: schema.maybe(schema.boolean()),
+    error: schema.maybe(apiError),
+    attributes: dashboardAttributesSchemaResponse,
+    references: schema.arrayOf(referenceSchema),
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    originId: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const dashboardGetResultAPISchema = schema.object(
+  {
+    item: dashboardItemAPIResponseSchema,
+    meta: schema.object(
+      {
+        outcome: schema.oneOf([
+          schema.literal('exactMatch'),
+          schema.literal('aliasMatch'),
+          schema.literal('conflict'),
+        ]),
+        aliasTargetId: schema.maybe(schema.string()),
+        aliasPurpose: schema.maybe(
+          schema.oneOf([
+            schema.literal('savedObjectConversion'),
+            schema.literal('savedObjectImport'),
+          ])
+        ),
+      },
+      { unknowns: 'forbid' }
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const dashboardGetRequestAPISchema = schema.object(
+  {
+    item: dashboardItemAPIRequestSchema,
+    meta: schema.object(
+      {
+        outcome: schema.oneOf([
+          schema.literal('exactMatch'),
+          schema.literal('aliasMatch'),
+          schema.literal('conflict'),
+        ]),
+        aliasTargetId: schema.maybe(schema.string()),
+        aliasPurpose: schema.maybe(
+          schema.oneOf([
+            schema.literal('savedObjectConversion'),
+            schema.literal('savedObjectImport'),
+          ])
+        ),
+      },
+      { unknowns: 'forbid' }
+    ),
+  },
+  { unknowns: 'forbid' }
+);
+
+export const rpcProcedureResultSchema = schema.object({
+  contentTypeId: schema.string(),
+  result: schema.object({ hits: schema.arrayOf(dashboardItemAPIResponseSchema) }),
+});
+
+const dashboardStorageAttributesSchemaResponse = dashboardAttributesSchema.extends({
+  // Responses always include the panel index (for panels) and gridData.i (for panels + sections)
+  panels: schema.arrayOf(
+    schema.oneOf([
+      panelSchema.extends({
+        panelIndex: schema.string(),
+        gridData: panelGridDataSchema.extends({
+          i: schema.string(),
+        }),
+      }),
+      sectionSchema.extends({
+        gridData: sectionGridDataSchema.extends({
+          i: schema.string(),
+        }),
+        panels: schema.arrayOf(
+          panelSchema.extends({
+            panelIndex: schema.string(),
+            gridData: panelGridDataSchema.extends({
+              i: schema.string(),
+            }),
+          })
+        ),
+      }),
+    ]),
+    { defaultValue: [] }
+  ),
+});
+
+export const dashboardStorageSchema = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    version: schema.maybe(schema.string()),
+    createdAt: schema.maybe(schema.string()),
+    updatedAt: schema.maybe(schema.string()),
+    createdBy: schema.maybe(schema.string()),
+    updatedBy: schema.maybe(schema.string()),
+    managed: schema.maybe(schema.boolean()),
+    error: schema.maybe(apiError),
+    attributes: dashboardStorageAttributesSchemaResponse,
+    references: schema.arrayOf(referenceSchema),
+    namespaces: schema.maybe(schema.arrayOf(schema.string())),
+    originId: schema.maybe(schema.string()),
+  },
+  { unknowns: 'allow' }
+);
+
+export const dashboardStorageCreateResultSchema = schema.object(
+  {
+    id: schema.string(),
+    type: schema.string(),
+    data: dashboardAttributesSchemaResponse,
+    meta: dashboardResponseMetaSchema.extends(dashboardGetResultMetaSchemaSettings),
+  },
+  { unknowns: 'forbid' }
+);
+
 export const serviceDefinition: ServicesDefinition = {
   get: {
+    in: {
+      data: {
+        schema: dashboardGetRequestAPISchema,
+      },
+    },
     out: {
       result: {
-        schema: dashboardGetResultSchema,
+        schema: dashboardGetResultAPISchema,
       },
     },
   },
@@ -443,7 +607,7 @@ export const serviceDefinition: ServicesDefinition = {
     },
     out: {
       result: {
-        schema: dashboardCreateResultSchema,
+        schema: dashboardItemAPIResponseSchema,
       },
     },
   },

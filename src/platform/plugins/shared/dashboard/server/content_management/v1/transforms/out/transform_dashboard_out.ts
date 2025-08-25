@@ -59,6 +59,6 @@ export function transformDashboardOut(
     timeRestore: timeRestore ?? false,
     ...(timeTo && { timeTo }),
     title,
-    version,
+    ...(version && { version }),
   };
 }

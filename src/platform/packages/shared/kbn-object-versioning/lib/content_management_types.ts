@@ -12,6 +12,7 @@ import type { ObjectTransforms, Version, VersionableObject } from './types';
 export interface ServicesDefinition {
   get?: {
     in?: {
+      data?: VersionableObject<any, any, any, any>;
       options?: VersionableObject<any, any, any, any>;
     };
     out?: {
@@ -70,6 +71,7 @@ export interface ServicesDefinition {
 export interface ServiceTransforms {
   get: {
     in: {
+      data: ObjectTransforms<any, any, any, any>;
       options: ObjectTransforms<any, any, any, any>;
     };
     out: {

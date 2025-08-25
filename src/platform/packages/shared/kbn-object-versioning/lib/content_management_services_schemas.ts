@@ -47,6 +47,7 @@ const getSchemas = getOptionalInOutSchemas({
   in: schema.maybe(
     schema.object(
       {
+        data: schema.maybe(versionableObjectSchema),
         options: schema.maybe(versionableObjectSchema),
       },
       { unknowns: 'forbid' }

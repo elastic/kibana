@@ -32,7 +32,7 @@ export class RpcService<Context extends object | void = void, Names extends stri
     if (!procedure) throw new Error(`Procedure [${name}] is not registered.`);
 
     const { fn, schemas } = procedure;
-
+    console.log('get rpc dashboard input---', input);
     // 1. Validate input
     if (schemas?.in) {
       const error = validate(input, schemas.in);
@@ -47,7 +47,8 @@ export class RpcService<Context extends object | void = void, Names extends stri
 
     // 2. Execute procedure
     const result = await fn(context, input);
-console.log('----procedure result-----', JSON.stringify(result, null, 2));
+    console.log('get rpc dashboard result---', result);
+
     // 3. Validate output
     if (schemas?.out) {
       const error = validate(result, schemas.out);

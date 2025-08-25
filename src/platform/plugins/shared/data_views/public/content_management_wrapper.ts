@@ -43,6 +43,8 @@ export class ContentMagementWrapper implements PersistenceAPI {
         fields: options.fields,
       },
     });
+    console.log('ContentMagementWrapper find------', JSON.stringify(results, null, 2));
+
     return results.hits;
   }
 
@@ -70,7 +72,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
 
     console.log('ContentMagementWrapper------', JSON.stringify(response, null, 2));
 
-    return response;
+    return response.item;
   }
 
   async update(
@@ -89,7 +91,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
     });
 
     // cast is necessary since its the full object and not just the changes
-    return response as SavedObject<DataViewAttributes>;
+    return response.item as SavedObject<DataViewAttributes>;
   }
 
   async create(attributes: DataViewAttributes, options: DataViewCrudTypes['CreateOptions']) {
@@ -102,7 +104,7 @@ export class ContentMagementWrapper implements PersistenceAPI {
       options,
     });
 
-    return result;
+    return result.item;
   }
 
   async delete(id: string) {

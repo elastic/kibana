@@ -46,16 +46,16 @@ const SAVED_OBJECTS_PER_PAGE_SETTING = 'savedObjects:perPage';
 const toTableListViewSavedObject = (
   hit: DashboardSearchOut['hits'][number]
 ): DashboardSavedObjectUserContent => {
-  const { title, description, timeRestore,references } = hit.data;
+  const { title, description, timeRestore } = hit.attributes;
   return {
     type: 'dashboard',
     id: hit.id,
-    updatedAt: hit.meta.updatedAt!,
-    createdAt: hit.meta.createdAt,
-    createdBy: hit.meta.createdBy,
-    updatedBy: hit.meta.updatedBy,
-    references: references ?? [],
-    managed: hit.meta.managed,
+    updatedAt: hit.updatedAt!,
+    createdAt: hit.createdAt,
+    createdBy: hit.createdBy,
+    updatedBy: hit.updatedBy,
+    references: hit.references ?? [],
+    managed: hit.managed,
     attributes: {
       title,
       description,

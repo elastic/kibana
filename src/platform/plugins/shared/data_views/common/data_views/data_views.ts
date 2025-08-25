@@ -804,33 +804,28 @@ export class DataViewsService {
    */
 
   savedObjectToSpec = (savedObject: SavedObject<DataViewAttributes>): DataViewSpec => {
-
-    console.log('savedobjecttospec------', JSON.stringify(savedObject, null, 2))
+    console.log('savedobjecttospec------', JSON.stringify(savedObject, null, 2));
 
     const {
       id,
-      type,
-      meta,
-      data,
+      version,
+      namespaces,
+      attributes: {
+        title,
+        timeFieldName,
+        fields,
+        sourceFilters,
+        fieldFormatMap,
+        runtimeFieldMap,
+        typeMeta,
+        type,
+        fieldAttrs,
+        allowNoIndex,
+        name,
+        allowHidden,
+      },
     } = savedObject;
-    const {
-      title,
-      timeFieldName,
-      sourceFilters,
-      fields,
-      typeMeta,
-      fieldFormatMap,
-      fieldAttrs,
-      allowNoIndex = true,
-      allowHidden = false,
-      name,
-      runtimeFieldMap,
-    } = data;
 
-    const {
-    namespaces,
-    version,
-    } = meta;
     const parsedSourceFilters = sourceFilters ? JSON.parse(sourceFilters) : undefined;
     const parsedTypeMeta = typeMeta ? JSON.parse(typeMeta) : undefined;
     const parsedFieldFormatMap = fieldFormatMap ? JSON.parse(fieldFormatMap) : {};
@@ -875,7 +870,7 @@ export class DataViewsService {
     refreshFields: boolean = false
   ): Promise<DataView> => {
     const savedObject = await this.savedObjectsClient.get(id);
-console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2))
+    console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2));
     return this.initFromSavedObject(savedObject, displayErrors, refreshFields);
   };
 
@@ -964,8 +959,8 @@ console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2))
     }
 
     spec.fields = fields;
-    spec.fieldFormats = savedObject.data.fieldFormatMap
-      ? JSON.parse(savedObject.data.fieldFormatMap)
+    spec.fieldFormats = savedObject.attributes.fieldFormatMap
+      ? JSON.parse(savedObject.attributes.fieldFormatMap)
       : {};
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);
@@ -1072,21 +1067,16 @@ console.log('getSavedObjectAndInit------', JSON.stringify(savedObject, null, 2))
   ): Promise<DataView> => {
     const dataViewFromCache = this.dataViewCache.get(id)?.then(async (dataView) => {
       if (dataView && refreshFields) {
-        console.log('get index pattern refreshFields-----', id);
         await this.refreshFields(dataView, displayErrors);
       }
-      console.log('get index pattern refreshFields 2-----', dataView);
       return dataView;
     });
 
     let indexPatternPromise: Promise<DataView>;
     if (dataViewFromCache) {
-      console.log('get index pattern dataViewFromCache-----', dataViewFromCache);
       indexPatternPromise = dataViewFromCache;
     } else {
-      console.log('get index pattern from saved object-----', id);
       indexPatternPromise = this.getSavedObjectAndInit(id, displayErrors, refreshFields);
-      console.log('get index pattern from saved object 2-----', indexPatternPromise);
       this.dataViewCache.set(id, indexPatternPromise);
     }
 

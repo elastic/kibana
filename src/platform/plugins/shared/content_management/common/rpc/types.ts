@@ -16,6 +16,16 @@ export interface ProcedureSchemas {
 
 export type ItemResult<T = unknown, M = void> = M extends void
   ? {
+      item: T;
+      meta?: never;
+    }
+  : {
+      item: T;
+      meta: M;
+    };
+
+export type DataResult<T = unknown, M = void> = M extends void
+  ? {
       data: T;
       meta?: never;
     }

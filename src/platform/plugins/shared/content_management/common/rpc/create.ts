@@ -12,7 +12,7 @@ import type { Version } from '@kbn/object-versioning';
 import { itemResultSchema } from './common';
 import { versionSchema } from './constants';
 
-import type { DashboardItemResult, ProcedureSchemas } from './types';
+import type { ItemResult, ProcedureSchemas } from './types';
 
 export const createSchemas: ProcedureSchemas = {
   in: schema.object(
@@ -45,4 +45,4 @@ export interface CreateIn<
   options?: Options;
 }
 
-export type CreateResult<T = unknown, M = void> = DashboardItemResult<T, M>;
+export type CreateResult<T = unknown, M = void> = ItemResult<T, M>;

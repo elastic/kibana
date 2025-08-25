@@ -31,6 +31,7 @@ import type {
   DashboardUpdateOptions,
   DashboardUpdateOut,
   DashboardSearchOptions,
+  DashboardItem,
 } from './latest';
 import {
   dashboardAttributesSchemaResponse,
@@ -199,31 +200,24 @@ export class DashboardStorage {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
 
-    // Handle the null case
-    if (!item || !('data' in item)) {
-      throw Boom.badRequest('No item returned from savedObjectToItem');
-    }
-
-    const response: TypeOf<typeof dashboardGetResultSchema> = {
-      data: item.data,
-      meta: { ...item.meta, aliasPurpose, aliasTargetId, outcome },
-      id: item.id,
-      type: item.type,
-    };
-
+    const response = { item, meta: { aliasPurpose, aliasTargetId, outcome } };
+    console.log('get dashboard response---', response);
     const validationError = transforms.get.out.result.validate(response);
+    console.log('00--------------');
     if (validationError) {
       if (this.throwOnResultValidationError) {
+        console.log('dashboard_storage Get validationError---', validationError);
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
+        console.log('dashboard_storage Get validationError 2---', validationError);
         this.logger.warn(`Invalid response. ${validationError.message}`);
       }
     }
 
     // Validate response and DOWN transform to the request version
     const { value, error: resultError } = transforms.get.out.result.down<
-      TypeOf<typeof dashboardGetResultSchema>,
-      TypeOf<typeof dashboardGetResultSchema>
+      DashboardGetOut,
+      DashboardGetOut
     >(
       response,
       undefined, // do not override version
@@ -231,9 +225,10 @@ export class DashboardStorage {
     );
 
     if (resultError) {
+      console.log(`resultError--------`, JSON.stringify(resultError));
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
-console.log('get dashboard result---', JSON.stringify(value, null, 2));
+    console.log('get dashboard result---', value.item);
     return value;
   }
 
@@ -297,10 +292,11 @@ console.log('get dashboard result---', JSON.stringify(value, null, 2));
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }
-
+    console.log('dashboard_storage Create item---', JSON.stringify(item));
     const validationError = transforms.create.out.result.validate(item);
     if (validationError) {
       if (this.throwOnResultValidationError) {
+        console.log('dashboard_storage Create validationError---', validationError);
         throw Boom.badRequest(`Invalid response. ${validationError.message}`);
       } else {
         this.logger.warn(`Invalid response. ${validationError.message}`);
@@ -309,20 +305,14 @@ console.log('get dashboard result---', JSON.stringify(value, null, 2));
 
     // Validate DB response and DOWN transform to the request version
     const { value, error: resultError } = transforms.create.out.result.down<
-      CreateResult<
-        TypeOf<typeof dashboardAttributesSchemaResponse>,
-        TypeOf<typeof dashboardResponseMetaSchema>
-      >,
-      CreateResult<
-        TypeOf<typeof dashboardAttributesSchemaResponse>,
-        TypeOf<typeof dashboardResponseMetaSchema>
-      >
+      CreateResult<DashboardItem>
     >(
-      item,
+      { item },
       undefined, // do not override version
       { validate: false } // validation is done above
     );
     if (resultError) {
+      console.log('dashboard_storage Create resultError---', resultError);
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);
     }
 
@@ -346,7 +336,8 @@ console.log('get dashboard result---', JSON.stringify(value, null, 2));
       DashboardAttributes
     >(data);
     if (dataError) {
-      console.error('dashboard_storage Data error in update:', dataError);
+      console.error('dashboard_storage Data error in update:', data);
+      console.log('dashboard_storage Data error in update:', dataError);
       throw Boom.badRequest(`Invalid data. ${dataError.message}`);
     }
 
@@ -401,7 +392,7 @@ console.log('get dashboard result---', JSON.stringify(value, null, 2));
       DashboardUpdateOut,
       DashboardUpdateOut
     >(
-      item,
+      { item },
       undefined, // do not override version
       { validate: false } // validation is done above
     );

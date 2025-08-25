@@ -47,17 +47,7 @@ export const savedObjectSchema = (attributesSchema: ObjectType<any>) =>
 export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
   schema.object(
     {
-      data: schema.object({
-        title: schema.string(),
-        timeFieldName: schema.maybe(schema.string()),
-        allowNoIndex: schema.maybe(schema.boolean()),
-        fields: schema.maybe(schema.arrayOf(schema.string())),
-        name: schema.maybe(schema.string()),
-        sourceFilters: schema.maybe(schema.arrayOf(schema.string())),
-        fieldFormatMap: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-      }, { unknowns: 'allow' }),
-      type: schema.string(),
-      id: schema.string(),
+      item: soSchema,
       meta: schema.object(
         {
           outcome: schema.oneOf([
@@ -72,15 +62,6 @@ export const objectTypeToGetResultSchema = (soSchema: ObjectType<any>) =>
               schema.literal('savedObjectImport'),
             ])
           ),
-          version: schema.string(),
-          managed: schema.boolean(),
-          references: schema.maybe(referencesSchema),
-          updatedAt: schema.maybe(schema.string()),
-          createdAt: schema.maybe(schema.string()),
-          namespaces: schema.maybe(schema.arrayOf(schema.string())),
-          updatedBy: schema.maybe(schema.string()),
-          createdBy: schema.maybe(schema.string()),
-          error: schema.maybe(apiError),
         },
         { unknowns: 'forbid' }
       ),
