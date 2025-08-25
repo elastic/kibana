@@ -10,7 +10,7 @@ import { EuiHorizontalRule, EuiLink, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { SecuritySolutionLinkAnchor } from '../../../../common/components/links';
 import {
-  RuleTranslationResult,
+  MigrationTranslationResult,
   SiemMigrationStatus,
 } from '../../../../../common/siem_migrations/constants';
 import { getRuleDetailsUrl } from '../../../../common/components/link_to';
@@ -52,7 +52,7 @@ const ActionName = ({
   }
 
   // Installable
-  if (migrationRule.translation_result === RuleTranslationResult.FULL) {
+  if (migrationRule.translation_result === MigrationTranslationResult.FULL) {
     return (
       <EuiLink
         disabled={disableActions}

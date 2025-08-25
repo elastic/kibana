@@ -7,7 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { ResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
 import type {
   RuleMigrationResourceData,
@@ -36,7 +36,7 @@ export const useMacrosFileUploadStep = ({
       const macrosIndexed: Record<string, RuleMigrationResourceData> = Object.fromEntries(
         macrosFromFile.map((macro) => [macro.name, macro])
       );
-      const resourceIdentifier = new ResourceIdentifier('splunk');
+      const resourceIdentifier = new RuleResourceIdentifier('splunk');
       const macrosToUpsert: RuleMigrationResourceData[] = [];
       let missingMacrosIt: string[] = missingMacros;
 

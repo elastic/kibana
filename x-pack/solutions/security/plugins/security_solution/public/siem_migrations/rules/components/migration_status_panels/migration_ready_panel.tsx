@@ -56,14 +56,14 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const migrationPanelDescription = useMemo(() => {
     if (migrationStats.last_execution?.error) {
-      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.rules.total);
+      return i18n.RULE_MIGRATION_ERROR_DESCRIPTION(migrationStats.items.total);
     }
 
     if (isStopped) {
-      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.rules.total);
+      return i18n.RULE_MIGRATION_STOPPED_DESCRIPTION(migrationStats.items.total);
     }
-    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.rules.total);
-  }, [migrationStats.last_execution?.error, migrationStats.rules.total, isStopped]);
+    return i18n.RULE_MIGRATION_READY_DESCRIPTION(migrationStats.items.total);
+  }, [migrationStats.last_execution?.error, migrationStats.items.total, isStopped]);
 
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="m">

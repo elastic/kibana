@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
 
-import { RuleTranslationResult } from '../../../../../common/siem_migrations/constants';
+import { MigrationTranslationResult } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import {
@@ -167,7 +167,7 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
             )}
           </TabContentPadding>
         ),
-        disabled: migrationRule.translation_result === RuleTranslationResult.UNTRANSLATABLE,
+        disabled: migrationRule.translation_result === MigrationTranslationResult.UNTRANSLATABLE,
       }),
       [
         ruleDetailsToOverview,
