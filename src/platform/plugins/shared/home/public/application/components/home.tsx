@@ -162,7 +162,7 @@ export class Home extends Component<HomeProps, State> {
   private renderTabs(tabs: { id: string; name: string; content: React.ReactNode }[]) {
     const { selectedTabId } = this.state;
     return (
-      <KibanaPageTemplate.Section bottomBorder paddingSize="s">
+      <KibanaPageTemplate.Section bottomBorder paddingSize="m">
         <EuiFlexGroup gutterSize="m">
           <EuiFlexItem>
             <EuiTabs
@@ -180,7 +180,7 @@ export class Home extends Component<HomeProps, State> {
                 </EuiTab>
               ))}
             </EuiTabs>
-            <div style={{ marginTop: 16 }}>
+            <div css={{ marginTop: 16, display: 'flex', flexGrow: 1 }}>
               {tabs.find((tab) => tab.id === selectedTabId)?.content}
             </div>
           </EuiFlexItem>
