@@ -101,7 +101,7 @@ export const MetricsAndGroupByToolbarItems = ({
       )}
 
       {allowSchemaSelection && (
-        <EuiFlexItem>
+        <EuiFlexItem grow={false}>
           <SchemaSelector
             value={preferredSchema ?? 'ecs'}
             schemas={schemas}

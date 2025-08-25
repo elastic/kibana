@@ -218,6 +218,17 @@ describe('Add Integration - Real API', () => {
   });
 });
 
+describe('It should handle non existing package', () => {
+  beforeEach(() => {
+    login();
+  });
+  it('should display error when visiting a non existing package details page', () => {
+    cy.visit('/app/integrations/detail/packagedonotexists');
+
+    cy.contains('[packagedonotexists] package not installed or found in registry').should('exist');
+  });
+});
+
 // Enable when we are ready to provide more testing for the tabular view of installed integrations.
 describe.skip('Dashboards link for installed integration - Real API', () => {
   const integration = 'apache';
