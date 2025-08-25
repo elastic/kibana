@@ -7,22 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JobAppParamsCSV, JobAppParamsCsvV2 } from '@kbn/reporting-export-types-csv-common';
-import { CSV_JOB_TYPE_V2, CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import type { JobAppParamsCsvV2 } from '@kbn/reporting-export-types-csv-common';
+import { CSV_JOB_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import type { LocatorParams, BaseParams } from '@kbn/reporting-common/types';
 import type { ReportingAPIClient } from '../../reporting_api_client';
 
-export type CsvSearchModeParams =
-  | {
-      isEsqlMode: false;
-      searchSource: SerializedSearchSourceFields;
-      columns: string[] | undefined;
-    }
-  | {
-      isEsqlMode: true;
-      locatorParams: LocatorParams[];
-    };
+export interface CsvSearchModeParams {
+  locatorParams: LocatorParams[];
+}
 
 interface GetSearchCsvJobParams {
   apiClient: ReportingAPIClient;
@@ -35,37 +27,19 @@ export const getSearchCsvJobParams = ({
   searchModeParams,
   title,
 }: GetSearchCsvJobParams): {
-  reportType: typeof CSV_JOB_TYPE_V2 | typeof CSV_JOB_TYPE;
+  reportType: typeof CSV_JOB_TYPE_V2;
   decoratedJobParams: BaseParams;
 } => {
-  // only csv v2 supports esql reports
-  // TODO: whole csv reporting should move to v2 https://github.com/elastic/kibana/issues/151190
-  const reportType = searchModeParams.isEsqlMode ? CSV_JOB_TYPE_V2 : CSV_JOB_TYPE;
-
   const commonJobParams = {
     title,
     objectType: 'search',
   };
 
-  if (searchModeParams.isEsqlMode) {
-    // csv v2 uses locator params
-
-    return {
-      reportType,
-      decoratedJobParams: apiClient.getDecoratedJobParams<JobAppParamsCsvV2>({
-        ...commonJobParams,
-        locatorParams: searchModeParams.locatorParams,
-      }),
-    };
-  }
-
-  // csv v1 uses search source and columns
   return {
-    reportType,
-    decoratedJobParams: apiClient.getDecoratedJobParams<JobAppParamsCSV>({
+    reportType: CSV_JOB_TYPE_V2,
+    decoratedJobParams: apiClient.getDecoratedJobParams<JobAppParamsCsvV2>({
       ...commonJobParams,
-      columns: searchModeParams.columns,
-      searchSource: searchModeParams.searchSource,
+      locatorParams: searchModeParams.locatorParams,
     }),
   };
 };
