@@ -16,7 +16,7 @@ import {
 import type { CspBenchmarkRulesStates } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import type { UseCspOptions } from '../types';
 
-const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*'];
+const MISCONFIGURATIONS_SOURCE_FIELDS = ['result.*', 'rule.*', 'resource.*', 'observer.*'];
 interface AggregationBucket {
   doc_count?: number;
 }
@@ -45,6 +45,12 @@ export const getFindingsCountAggQueryMisconfiguration = () => ({
         [RESULT_EVALUATION.PASSED]: { match: { 'result.evaluation': RESULT_EVALUATION.PASSED } },
         [RESULT_EVALUATION.FAILED]: { match: { 'result.evaluation': RESULT_EVALUATION.FAILED } },
       },
+    },
+  },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 10,
     },
   },
 });
@@ -180,6 +186,12 @@ export const getFindingsCountAggQueryVulnerabilities = () => ({
           },
         },
       },
+    },
+  },
+  by_datastream_dataset: {
+    terms: {
+      field: 'data_stream.dataset',
+      size: 10,
     },
   },
 });

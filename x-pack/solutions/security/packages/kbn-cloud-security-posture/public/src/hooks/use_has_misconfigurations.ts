@@ -18,6 +18,7 @@ export const useHasMisconfigurations = (field: string, value: string) => {
 
   const passedFindings = data?.count.passed || 0;
   const failedFindings = data?.count.failed || 0;
+  const vendorList = data?.vendor || [];
 
   const hasMisconfigurationFindings = passedFindings > 0 || failedFindings > 0;
 
@@ -25,5 +26,6 @@ export const useHasMisconfigurations = (field: string, value: string) => {
     passedFindings,
     failedFindings,
     hasMisconfigurationFindings,
+    vendorList,
   };
 };
