@@ -62,7 +62,7 @@ export const Expression = ({
       ref={divRef}
       style={{
         width: '100%',
-        height: height,
+        height,
         overflow: 'hidden',
       }}
     >
