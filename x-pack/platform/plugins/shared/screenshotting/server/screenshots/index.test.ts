@@ -10,7 +10,8 @@ import type { Logger, PackageInfo } from '@kbn/core/server';
 import { httpServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { lastValueFrom, of, throwError } from 'rxjs';
-import { ScreenshotOptions, Screenshots } from '.';
+import type { ScreenshotOptions } from '.';
+import { Screenshots } from '.';
 import {
   SCREENSHOTTING_APP_ID,
   SCREENSHOTTING_EXPRESSION,

@@ -7,7 +7,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ScopedModel } from '@kbn/onechat-server';
-import { executeEsql, EsqlResponse } from './steps/execute_esql';
+import type { EsqlResponse } from './steps/execute_esql';
+import { executeEsql } from './steps/execute_esql';
 import { generateEsql } from './generate_esql';
 
 export const naturalLanguageSearch = async ({

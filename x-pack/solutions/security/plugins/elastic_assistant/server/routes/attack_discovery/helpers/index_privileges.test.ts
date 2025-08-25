@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { AttackDiscoveryAlertsPrivilegesParams } from './index_privileges';
 import {
-  AttackDiscoveryAlertsPrivilegesParams,
   hasReadAttackDiscoveryAlertsPrivileges,
   hasReadWriteAttackDiscoveryAlertsPrivileges,
 } from './index_privileges';

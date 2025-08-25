@@ -9,7 +9,8 @@
 export * from './ui_session.mock';
 export * from './search_session_saved_object.mock';
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 export function LocaleWrapper({ children }: { children?: ReactNode }) {

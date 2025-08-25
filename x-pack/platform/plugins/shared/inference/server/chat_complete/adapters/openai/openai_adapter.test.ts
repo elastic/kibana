@@ -6,7 +6,7 @@
  */
 
 import { isNativeFunctionCallingSupportedMock } from './openai_adapter.test.mocks';
-import OpenAI from 'openai';
+import type OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { pick } from 'lodash';
@@ -19,7 +19,7 @@ import {
   MessageRole,
 } from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
-import { InferenceExecutor } from '../../utils/inference_executor';
+import type { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
 
 function createOpenAIChunk({

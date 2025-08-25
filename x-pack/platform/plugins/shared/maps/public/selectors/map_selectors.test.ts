@@ -43,12 +43,12 @@ import {
   getSpatialFiltersLayer,
 } from './map_selectors';
 
-import { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
+import type { LayerDescriptor, VectorLayerDescriptor } from '../../common/descriptor_types';
 import { buildGeoShapeFilter } from '../../common/elasticsearch_util';
-import { ILayer } from '../classes/layers/layer';
-import { Filter } from '@kbn/es-query';
+import type { ILayer } from '../classes/layers/layer';
+import type { Filter } from '@kbn/es-query';
 import { ESSearchSource } from '../classes/sources/es_search_source';
-import { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
+import type { GeoJsonFileSource } from '../classes/sources/geojson_file_source';
 import { getDefaultMapSettings } from '../reducers/map/default_map_settings';
 
 describe('getDataFilters', () => {

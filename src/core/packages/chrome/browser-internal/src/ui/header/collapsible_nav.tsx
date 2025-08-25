@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiCollapsibleNavProps } from '@elastic/eui';
 import {
   EuiThemeProvider,
   EuiCollapsibleNav,
@@ -15,7 +16,6 @@ import {
   EuiHorizontalRule,
   EuiListGroup,
   EuiListGroupItem,
-  EuiCollapsibleNavProps,
   EuiButton,
   useEuiTheme,
 } from '@elastic/eui';
@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import { groupBy, sortBy } from 'lodash';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { AppCategory } from '@kbn/core-application-common';

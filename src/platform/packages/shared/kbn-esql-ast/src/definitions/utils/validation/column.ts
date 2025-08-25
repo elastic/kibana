@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { ESQLColumn, ESQLIdentifier, ESQLMessage } from '../../../types';
-import { ICommandContext } from '../../../commands_registry/types';
+import type { ICommandContext } from '../../../commands_registry/types';
 import { errors } from '../errors';
 import { getColumnExists } from '../columns';
 import { isParametrized } from '../../../ast/is';

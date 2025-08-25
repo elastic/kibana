@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import type { Plugin } from '@kbn/core/server';
 import {
-  Plugin,
   type CoreSetup,
   type CoreStart,
   type PluginInitializerContext,
@@ -19,7 +19,7 @@ import {
   UPGRADE_TRIGGER_DEF_PREFIX_ID,
   TRIAL_TRIGGER_DEF_ID,
 } from '../common/constants';
-import { ServerConfigSchema } from '../common/config';
+import type { ServerConfigSchema } from '../common/config';
 
 interface ProductInterceptServerPluginSetup {
   cloud: CloudSetup;

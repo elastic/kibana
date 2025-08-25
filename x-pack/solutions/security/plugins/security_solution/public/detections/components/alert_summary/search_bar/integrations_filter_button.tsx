@@ -19,6 +19,7 @@ import type { EuiSelectableOption } from '@elastic/eui/src/components/selectable
 import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/selectable/selectable';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { RELATED_INTEGRATION } from '../../../constants';
 import { updateFiltersArray } from '../../../utils/filter';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -31,8 +32,6 @@ const INTEGRATIONS_BUTTON = i18n.translate(
     defaultMessage: 'Integrations',
   }
 );
-
-export const FILTER_KEY = 'signal.rule.rule_id';
 
 export interface IntegrationFilterButtonProps {
   /**
@@ -80,7 +79,7 @@ export const IntegrationFilterButton = memo(({ integrations }: IntegrationFilter
         const existingFilters = filterManager.getFilters();
         const newFilters: Filter[] = updateFiltersArray(
           existingFilters,
-          FILTER_KEY,
+          RELATED_INTEGRATION,
           ruleId,
           changedOption.checked === 'on'
         );

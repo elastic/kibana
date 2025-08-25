@@ -10,12 +10,11 @@ import { fireEvent, render as testingLibraryRender, screen, waitFor } from '@tes
 import { FormProvider, useForm } from 'react-hook-form';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
-import {
-  SaveNewPlaygroundButton,
-  SaveNewPlaygroundButtonProps,
-} from './save_new_playground_button';
+import type { SaveNewPlaygroundButtonProps } from './save_new_playground_button';
+import { SaveNewPlaygroundButton } from './save_new_playground_button';
 import { useKibana } from '../hooks/use_kibana';
-import { PlaygroundForm, PlaygroundFormFields } from '../types';
+import type { PlaygroundForm } from '../types';
+import { PlaygroundFormFields } from '../types';
 import { LOCAL_STORAGE_KEY as PLAYGROUND_SESSION_LOCAL_STORAGE_KEY } from '../providers/unsaved_form_provider';
 
 // Mock dependencies
@@ -33,7 +32,7 @@ jest.mock('./saved_playground/save_playground_modal', () => ({
         data-test-subj="modal-save-button"
         onClick={() => onNavigateToNewPlayground('test-playground-id')}
       >
-        Save Playground
+        Save RAG Playground
       </button>
       <button data-test-subj="modal-close-button" onClick={onClose}>
         Close

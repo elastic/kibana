@@ -18,14 +18,18 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-import { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
-import { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
-import { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
-import { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
-import { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { CreateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/create_endpoint_list_item/create_endpoint_list_item.gen';
+import type { DeleteEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
+import {} from '@kbn/securitysolution-endpoint-exceptions-common/api/delete_endpoint_list_item/delete_endpoint_list_item.gen';
+import type { FindEndpointListItemsRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
+import {} from '@kbn/securitysolution-endpoint-exceptions-common/api/find_endpoint_list_item/find_endpoint_list_item.gen';
+import type { ReadEndpointListItemRequestQueryInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
+import {} from '@kbn/securitysolution-endpoint-exceptions-common/api/read_endpoint_list_item/read_endpoint_list_item.gen';
+import type { UpdateEndpointListItemRequestBodyInput } from '@kbn/securitysolution-endpoint-exceptions-common/api/update_endpoint_list_item/update_endpoint_list_item.gen';
+
+import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

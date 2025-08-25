@@ -6,7 +6,7 @@
  */
 
 import type { CallToolRequest } from '@modelcontextprotocol/sdk/types.js';
-import { JsonSchemaObject } from '@n8n/json-schema-to-zod';
+import type { JsonSchemaObject } from '@n8n/json-schema-to-zod';
 
 export type GatewayToolInputSchema = CallToolRequest['params']['arguments'];
 

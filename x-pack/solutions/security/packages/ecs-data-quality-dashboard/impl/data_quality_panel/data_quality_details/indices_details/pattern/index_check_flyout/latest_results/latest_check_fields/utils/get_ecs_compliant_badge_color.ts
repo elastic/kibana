@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EcsCompliantFieldMetadata } from '../../../../../../../types';
+import type { EcsCompliantFieldMetadata } from '../../../../../../../types';
 import { isTimestampFieldMissing } from './is_timestamp_field_missing';
 
 /**

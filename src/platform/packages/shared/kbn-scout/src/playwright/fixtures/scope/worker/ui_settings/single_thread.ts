@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
+import type { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
 import { isValidUTCDate, formatTime } from '../../../../utils';
 import { coreWorkerFixtures } from '../core_fixtures';
-import { UiSettingsFixture } from '.';
+import type { UiSettingsFixture } from '.';
 
 /**
  * This fixture provides a way to interact with Kibana UI settings.

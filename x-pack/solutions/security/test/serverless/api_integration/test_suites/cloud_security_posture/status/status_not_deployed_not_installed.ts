@@ -8,8 +8,8 @@ import expect from '@kbn/expect';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { createPackagePolicy } from '../helper';
-import { FtrProviderContext } from '../../../ftr_provider_context';
-import { RoleCredentials } from '../../../services';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
+import type { RoleCredentials } from '../../../services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

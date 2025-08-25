@@ -9,7 +9,7 @@ import {
   settingsObjectType,
   settingsObjectId,
 } from '@kbn/uptime-plugin/server/legacy_uptime/lib/saved_objects/uptime_settings';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeCommonProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '../../../types';
+import type { ExpressionFunctionDefinition } from '../../../types';
 import { getAvailableShapes, Shape } from '../../renderers/shape';
 import { help as strings, errors } from '../../../i18n/functions/dict/shape';
 
