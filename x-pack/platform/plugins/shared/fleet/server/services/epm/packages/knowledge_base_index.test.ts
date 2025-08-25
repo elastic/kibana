@@ -15,7 +15,6 @@ import {
   saveKnowledgeBaseContentToIndex,
   getPackageKnowledgeBaseFromIndex,
   deletePackageKnowledgeBase,
-  updatePackageKnowledgeBaseVersion,
 } from './knowledge_base_index';
 
 // Mock the app context service
@@ -70,9 +69,7 @@ describe('knowledge_base_index', () => {
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
         query: {
-          bool: {
-            must: [{ match: { package_name: 'test-package' } }, { match: { version: '1.0.0' } }],
-          },
+          match: { package_name: 'test-package' },
         },
       });
 
@@ -111,7 +108,7 @@ describe('knowledge_base_index', () => {
       expect(new Date(installedAt1).getTime()).toBeLessThanOrEqual(new Date(afterCall).getTime());
     });
 
-    it('should return early when no knowledge base content provided', async () => {
+    it('should delete existing content even when no new content provided', async () => {
       await saveKnowledgeBaseContentToIndex({
         esClient: mockEsClient,
         pkgName: 'test-package',
@@ -119,11 +116,16 @@ describe('knowledge_base_index', () => {
         knowledgeBaseContent: [],
       });
 
-      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+        query: {
+          match: { package_name: 'test-package' },
+        },
+      });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
 
-    it('should return early when knowledge base content is undefined', async () => {
+    it('should delete existing content even when knowledge base content is undefined', async () => {
       await saveKnowledgeBaseContentToIndex({
         esClient: mockEsClient,
         pkgName: 'test-package',
@@ -131,7 +133,12 @@ describe('knowledge_base_index', () => {
         knowledgeBaseContent: undefined as any,
       });
 
-      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
+        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
+        query: {
+          match: { package_name: 'test-package' },
+        },
+      });
       expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
   });
@@ -224,105 +231,8 @@ describe('knowledge_base_index', () => {
       });
     });
 
-    it('should delete by package name and version', async () => {
-      await deletePackageKnowledgeBase(mockEsClient, 'test-package', '1.0.0');
-
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          bool: {
-            must: [{ match: { package_name: 'test-package' } }, { match: { version: '1.0.0' } }],
-          },
-        },
-      });
-    });
-  });
-
-  describe('updatePackageKnowledgeBaseVersion', () => {
-    const mockKnowledgeBaseContent: KnowledgeBaseItem[] = [
-      {
-        fileName: 'updated.md',
-        content: 'Updated content',
-      },
-    ];
-
-    beforeEach(() => {
-      (mockEsClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValue(true);
-      (mockEsClient.indices.exists as jest.Mock).mockResolvedValue(true);
-    });
-
-    it('should update package knowledge base with new version', async () => {
-      await updatePackageKnowledgeBaseVersion({
-        esClient: mockEsClient,
-        pkgName: 'test-package',
-        oldVersion: '1.0.0',
-        newVersion: '2.0.0',
-        knowledgeBaseContent: mockKnowledgeBaseContent,
-      });
-
-      // Should delete all existing content for the package
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
-        },
-      });
-
-      // Should index new content with new version
-      expect(mockEsClient.bulk).toHaveBeenCalledWith({
-        operations: [
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-updated.md' } },
-          {
-            package_name: 'test-package',
-            filename: 'updated.md',
-            content: 'Updated content',
-            version: '2.0.0',
-            installed_at: expect.any(String),
-          },
-        ],
-        refresh: 'wait_for',
-      });
-    });
-
-    it('should handle fresh install without old version', async () => {
-      await updatePackageKnowledgeBaseVersion({
-        esClient: mockEsClient,
-        pkgName: 'test-package',
-        newVersion: '1.0.0',
-        knowledgeBaseContent: mockKnowledgeBaseContent,
-      });
-
-      // Should still delete all existing content for the package (fresh install case)
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
-        },
-      });
-
-      expect(mockEsClient.bulk).toHaveBeenCalledWith({
-        operations: [
-          { index: { _index: INTEGRATION_KNOWLEDGE_INDEX, _id: 'test-package-updated.md' } },
-          {
-            package_name: 'test-package',
-            filename: 'updated.md',
-            content: 'Updated content',
-            version: '1.0.0',
-            installed_at: expect.any(String),
-          },
-        ],
-        refresh: 'wait_for',
-      });
-    });
-
-    it('should only delete when no knowledge base content provided', async () => {
-      await updatePackageKnowledgeBaseVersion({
-        esClient: mockEsClient,
-        pkgName: 'test-package',
-        oldVersion: '1.0.0',
-        newVersion: '2.0.0',
-        knowledgeBaseContent: [],
-      });
+    it('should delete by package name', async () => {
+      await deletePackageKnowledgeBase(mockEsClient, 'test-package');
 
       expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
         index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
@@ -330,27 +240,6 @@ describe('knowledge_base_index', () => {
           match: { package_name: 'test-package' },
         },
       });
-
-      expect(mockEsClient.bulk).not.toHaveBeenCalled();
-    });
-
-    it('should handle undefined knowledge base content', async () => {
-      await updatePackageKnowledgeBaseVersion({
-        esClient: mockEsClient,
-        pkgName: 'test-package',
-        oldVersion: '1.0.0',
-        newVersion: '2.0.0',
-        knowledgeBaseContent: undefined as any,
-      });
-
-      expect(mockEsClient.deleteByQuery).toHaveBeenCalledWith({
-        index: `${INTEGRATION_KNOWLEDGE_INDEX}*`,
-        query: {
-          match: { package_name: 'test-package' },
-        },
-      });
-
-      expect(mockEsClient.bulk).not.toHaveBeenCalled();
     });
   });
 });

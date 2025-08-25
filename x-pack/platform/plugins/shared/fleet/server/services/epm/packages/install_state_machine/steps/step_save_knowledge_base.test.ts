@@ -4,10 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ElasticsearchClient } from '@kbn/core/server';
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+
+import type { ArchiveIterator, ArchiveEntry } from '../../../../../../common/types/models/epm';
 
 import { saveKnowledgeBaseContentToIndex } from '../../knowledge_base_index';
+import type { InstallContext } from '../_state_machine_package_install';
+
+import { stepSaveKnowledgeBase, cleanupKnowledgeBaseStep } from './step_save_knowledge_base';
 
 // Mock the app context service
 jest.mock('../../../../app_context', () => ({
@@ -18,101 +23,625 @@ jest.mock('../../../../app_context', () => ({
       info: jest.fn(),
       debug: jest.fn(),
     }),
+    getO11yAndSecurityAssistantsStatus: jest.fn().mockResolvedValue({
+      securityAssistantStatus: true,
+      observabilityAssistantStatus: true,
+    }),
   },
 }));
 
-let esClient: jest.Mocked<ElasticsearchClient>;
+// Mock the knowledge base index module
+jest.mock('../../knowledge_base_index');
 
-describe('saveKnowledgeBaseContent', () => {
+// Mock the es assets reference module
+jest.mock('../../es_assets_reference', () => ({
+  updateEsAssetReferences: jest.fn().mockResolvedValue([]),
+}));
+
+// Mock the utils module
+jest.mock('../../utils', () => ({
+  withPackageSpan: jest.fn().mockImplementation((description, fn) => fn()),
+}));
+
+let esClient: jest.Mocked<ElasticsearchClient>;
+let savedObjectsClient: jest.Mocked<SavedObjectsClientContract>;
+
+describe('stepSaveKnowledgeBase', () => {
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    savedObjectsClient = savedObjectsClientMock.create();
     jest.clearAllMocks();
   });
 
-  it('should save knowledge base content to the system index', async () => {
-    const knowledgeBaseContent = [
+  const createMockArchiveIterator = (entries: ArchiveEntry[]): ArchiveIterator => ({
+    traverseEntries: jest.fn().mockImplementation(async (onEntry, filterFn) => {
+      for (const entry of entries) {
+        if (!filterFn || filterFn(entry.path)) {
+          await onEntry(entry);
+        }
+      }
+    }),
+    getPaths: jest.fn().mockResolvedValue(entries.map((e) => e.path)),
+  });
+
+  const createMockContext = (
+    archiveIterator: ArchiveIterator,
+    packageName = 'test-package'
+  ): InstallContext =>
+    ({
+      packageInstallContext: {
+        packageInfo: {
+          name: packageName,
+          version: '1.0.0',
+          title: 'Test Package',
+          owner: 'test',
+        } as any,
+        paths: [],
+        archiveIterator,
+      },
+      esClient,
+      savedObjectsClient,
+      installedPkg: undefined,
+      esReferences: [],
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: 'default',
+      logger: {
+        error: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+        debug: jest.fn(),
+      } as any,
+    } as InstallContext);
+
+  it('should extract and save knowledge base files from archive', async () => {
+    const entries: ArchiveEntry[] = [
       {
-        fileName: 'test-guide.md',
-        content: '# Test Guide\n\nThis is a test knowledge base document.',
+        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+        buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
       },
       {
-        fileName: 'troubleshooting.md',
-        content: '# Troubleshooting\n\nCommon issues and solutions.',
+        path: 'test-package-1.0.0/docs/knowledge_base/troubleshooting.md',
+        buffer: Buffer.from('# Troubleshooting\n\nCommon issues and solutions.', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/manifest.yml', // Should be ignored
+        buffer: Buffer.from('name: test-package', 'utf8'),
       },
     ];
 
-    // Mock the methods that are actually called by saveKnowledgeBaseContentToIndex
-    (esClient.indices.existsIndexTemplate as jest.Mock).mockResolvedValueOnce(true);
-    (esClient.indices.exists as jest.Mock).mockResolvedValueOnce(true);
-    esClient.deleteByQuery.mockResolvedValueOnce({} as any);
-    esClient.bulk.mockResolvedValueOnce({
-      took: 1,
-      errors: false,
-      items: [],
-    } as any);
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
 
-    await saveKnowledgeBaseContentToIndex({
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that the archive iterator was called with the correct filter
+    expect(mockArchiveIterator.traverseEntries).toHaveBeenCalledWith(
+      expect.any(Function),
+      expect.any(Function)
+    );
+
+    // Verify that saveKnowledgeBaseContentToIndex was called with extracted knowledge base items
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
       esClient,
       pkgName: 'test-package',
       pkgVersion: '1.0.0',
-      knowledgeBaseContent,
-    });
-
-    // Verify that deleteByQuery was called to clean up existing documents
-    expect(esClient.deleteByQuery).toHaveBeenCalledWith({
-      index: '.integration_knowledge*',
-      query: {
-        bool: {
-          must: [{ match: { package_name: 'test-package' } }, { match: { version: '1.0.0' } }],
-        },
-      },
-    });
-
-    // Verify that bulk was called with the correct operations
-    expect(esClient.bulk).toHaveBeenCalledWith({
-      operations: [
-        { index: { _index: '.integration_knowledge', _id: 'test-package-test-guide.md' } },
+      knowledgeBaseContent: [
         {
-          package_name: 'test-package',
-          filename: 'test-guide.md',
-          content: '# Test Guide\n\nThis is a test knowledge base document.',
-          version: '1.0.0',
-          installed_at: expect.any(String),
+          fileName: 'guide.md',
+          content: '# User Guide\n\nThis is a comprehensive guide.',
         },
-        { index: { _index: '.integration_knowledge', _id: 'test-package-troubleshooting.md' } },
         {
-          package_name: 'test-package',
-          filename: 'troubleshooting.md',
+          fileName: 'troubleshooting.md',
           content: '# Troubleshooting\n\nCommon issues and solutions.',
-          version: '1.0.0',
-          installed_at: expect.any(String),
         },
       ],
-      refresh: 'wait_for',
     });
   });
 
-  it('should not save anything if knowledge base content is empty', async () => {
-    await saveKnowledgeBaseContentToIndex({
-      esClient,
-      pkgName: 'test-package',
-      pkgVersion: '1.0.0',
-      knowledgeBaseContent: [],
-    });
+  it('should not save anything when no knowledge base files exist in archive', async () => {
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/manifest.yml',
+        buffer: Buffer.from('name: test-package', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/README.md',
+        buffer: Buffer.from('# README', 'utf8'),
+      },
+    ];
 
-    expect(esClient.bulk).not.toHaveBeenCalled();
-    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Verify that saveKnowledgeBaseContentToIndex was not called
+    expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
   });
 
-  it('should not save anything if knowledge base content is null', async () => {
-    await saveKnowledgeBaseContentToIndex({
+  it('should skip files without buffers', async () => {
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+        buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+      },
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/missing.md',
+        // No buffer
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
       esClient,
       pkgName: 'test-package',
       pkgVersion: '1.0.0',
-      knowledgeBaseContent: null as any,
+      knowledgeBaseContent: [
+        {
+          fileName: 'guide.md',
+          content: '# User Guide\n\nThis is a comprehensive guide.',
+        },
+      ],
+    });
+  });
+
+  it('should not save when assistants are disabled', async () => {
+    // Mock assistants as disabled
+    const { appContextService } = jest.requireMock('../../../../app_context');
+    appContextService.getO11yAndSecurityAssistantsStatus.mockResolvedValueOnce({
+      securityAssistantStatus: false,
+      observabilityAssistantStatus: false,
     });
 
-    expect(esClient.bulk).not.toHaveBeenCalled();
-    expect(esClient.deleteByQuery).not.toHaveBeenCalled();
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+        buffer: Buffer.from('# User Guide\n\nThis is a comprehensive guide.', 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    // Should not save when assistants are disabled
+    expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
+  });
+
+  it('should handle Unicode content correctly', async () => {
+    const unicodeContent = '# Guide 🚀\n\n测试 Unicode 内容 Ñoño café';
+    const entries: ArchiveEntry[] = [
+      {
+        path: 'test-package-1.0.0/docs/knowledge_base/unicode.md',
+        buffer: Buffer.from(unicodeContent, 'utf8'),
+      },
+    ];
+
+    const mockArchiveIterator = createMockArchiveIterator(entries);
+    const context = createMockContext(mockArchiveIterator);
+
+    await stepSaveKnowledgeBase(context);
+
+    expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+      esClient,
+      pkgName: 'test-package',
+      pkgVersion: '1.0.0',
+      knowledgeBaseContent: [
+        {
+          fileName: 'unicode.md',
+          content: unicodeContent,
+        },
+      ],
+    });
+  });
+
+  describe('Package Upgrade Scenarios', () => {
+    it('should call saveKnowledgeBaseContentToIndex for package upgrades', async () => {
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-2.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Updated Guide', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      // Mock an existing installed package with different version
+      context.installedPkg = {
+        attributes: {
+          name: 'test-package',
+          version: '1.0.0',
+        },
+      } as any;
+
+      context.packageInstallContext.packageInfo.version = '2.0.0';
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '2.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# Updated Guide',
+          },
+        ],
+      });
+    });
+
+    it('should use saveKnowledgeBaseContentToIndex for fresh installs', async () => {
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Guide', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      // No existing installed package (fresh install)
+      context.installedPkg = undefined;
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# Guide',
+          },
+        ],
+      });
+    });
+
+    it('should use saveKnowledgeBaseContentToIndex for reinstalls of same version', async () => {
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Guide', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      // Mock existing installed package with same version
+      context.installedPkg = {
+        attributes: {
+          name: 'test-package',
+          version: '1.0.0', // Same version as new package
+        },
+      } as any;
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# Guide',
+          },
+        ],
+      });
+    });
+  });
+
+  describe('Error Handling', () => {
+    it('should throw FleetError when saveKnowledgeBaseContentToIndex fails', async () => {
+      const mockError = new Error('Elasticsearch connection failed');
+      const mockSaveKnowledgeBase = saveKnowledgeBaseContentToIndex as jest.MockedFunction<
+        typeof saveKnowledgeBaseContentToIndex
+      >;
+      mockSaveKnowledgeBase.mockRejectedValueOnce(mockError);
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Guide', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await expect(stepSaveKnowledgeBase(context)).rejects.toThrow(
+        'Error saving knowledge base content: Error: Elasticsearch connection failed'
+      );
+    });
+
+    it('should throw FleetError when saveKnowledgeBaseContentToIndex fails during upgrade', async () => {
+      const mockError = new Error('Save operation failed');
+      (saveKnowledgeBaseContentToIndex as jest.Mock).mockRejectedValueOnce(mockError);
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-2.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Updated Guide', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      context.installedPkg = {
+        attributes: {
+          name: 'test-package',
+          version: '1.0.0',
+        },
+      } as any;
+      context.packageInstallContext.packageInfo.version = '2.0.0';
+
+      await expect(stepSaveKnowledgeBase(context)).rejects.toThrow(
+        'Error saving knowledge base content: Error: Save operation failed'
+      );
+    });
+
+    it('should handle archive traversal errors gracefully', async () => {
+      const mockArchiveIterator = {
+        traverseEntries: jest.fn().mockRejectedValue(new Error('Archive corruption')),
+        getPaths: jest.fn().mockResolvedValue([]),
+      };
+
+      const context = createMockContext(mockArchiveIterator as any);
+
+      await expect(stepSaveKnowledgeBase(context)).rejects.toThrow('Archive corruption');
+    });
+  });
+
+  describe('ES Asset References', () => {
+    it('should update ES asset references with knowledge base assets', async () => {
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+      updateEsAssetReferences.mockResolvedValueOnce([
+        { id: 'test-package-guide.md', type: 'knowledge_base' },
+        { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
+      ]);
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Guide', 'utf8'),
+        },
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/troubleshooting.md',
+          buffer: Buffer.from('# Troubleshooting', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(updateEsAssetReferences).toHaveBeenCalledWith(savedObjectsClient, 'test-package', [], {
+        assetsToAdd: [
+          { id: 'test-package-guide.md', type: 'knowledge_base' },
+          { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
+        ],
+      });
+
+      // Check that context was updated with new references
+      expect(context.esReferences).toEqual([
+        { id: 'test-package-guide.md', type: 'knowledge_base' },
+        { id: 'test-package-troubleshooting.md', type: 'knowledge_base' },
+      ]);
+    });
+
+    it('should not update ES asset references when no knowledge base files exist', async () => {
+      const { updateEsAssetReferences } = jest.requireMock('../../es_assets_reference');
+
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/manifest.yml',
+          buffer: Buffer.from('name: test-package', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(updateEsAssetReferences).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle empty knowledge base content array', async () => {
+      // Mock extractKnowledgeBaseFromArchive to return empty array
+      const mockArchiveIterator = {
+        traverseEntries: jest.fn().mockImplementation(async (onEntry, filterFn) => {
+          // Simulate no matching files
+        }),
+        getPaths: jest.fn().mockResolvedValue([]),
+      };
+
+      const context = createMockContext(mockArchiveIterator as any);
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(saveKnowledgeBaseContentToIndex).not.toHaveBeenCalled();
+    });
+
+    it('should handle files with different path structures', async () => {
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'nested/test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Nested Guide', 'utf8'),
+        },
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/subfolder/advanced.md',
+          buffer: Buffer.from('# Advanced Topics', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# Nested Guide',
+          },
+          {
+            fileName: 'subfolder/advanced.md',
+            content: '# Advanced Topics',
+          },
+        ],
+      });
+    });
+
+    it('should only process .md files in knowledge_base directory', async () => {
+      const entries: ArchiveEntry[] = [
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/guide.md',
+          buffer: Buffer.from('# Guide', 'utf8'),
+        },
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/image.png',
+          buffer: Buffer.from('binary data', 'utf8'),
+        },
+        {
+          path: 'test-package-1.0.0/docs/knowledge_base/config.json',
+          buffer: Buffer.from('{"config": true}', 'utf8'),
+        },
+      ];
+
+      const mockArchiveIterator = createMockArchiveIterator(entries);
+      const context = createMockContext(mockArchiveIterator);
+
+      await stepSaveKnowledgeBase(context);
+
+      // Should only process the .md file
+      expect(saveKnowledgeBaseContentToIndex).toHaveBeenCalledWith({
+        esClient,
+        pkgName: 'test-package',
+        pkgVersion: '1.0.0',
+        knowledgeBaseContent: [
+          {
+            fileName: 'guide.md',
+            content: '# Guide',
+          },
+        ],
+      });
+    });
+  });
+});
+
+describe('cleanupKnowledgeBaseStep', () => {
+  beforeEach(() => {
+    esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    savedObjectsClient = savedObjectsClientMock.create();
+    jest.clearAllMocks();
+  });
+
+  const createCleanupContext = (
+    retryFromLastState = false,
+    force = false,
+    initialState = 'save_knowledge_base'
+  ): InstallContext =>
+    ({
+      esClient,
+      savedObjectsClient,
+      packageInstallContext: {} as any,
+      installType: 'install',
+      installSource: 'registry',
+      spaceId: 'default',
+      esReferences: [],
+      installedPkg: {
+        attributes: {
+          name: 'test-package',
+          version: '1.0.0',
+        },
+      } as any,
+      retryFromLastState,
+      force,
+      initialState,
+      logger: {
+        debug: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+        info: jest.fn(),
+      } as any,
+    } as InstallContext);
+
+  it('should delete knowledge base content during retry from SAVE_KNOWLEDGE_BASE state', async () => {
+    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const context = createCleanupContext(true, false, 'save_knowledge_base');
+
+    await cleanupKnowledgeBaseStep(context);
+
+    expect(deletePackageKnowledgeBase).toHaveBeenCalledWith(esClient, 'test-package');
+    expect(context.logger.debug).toHaveBeenCalledWith(
+      'Retry transition - clean up package knowledge base content'
+    );
+  });
+
+  it('should not clean up when force is true', async () => {
+    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const context = createCleanupContext(true, true, 'save_knowledge_base');
+
+    await cleanupKnowledgeBaseStep(context);
+
+    expect(deletePackageKnowledgeBase).not.toHaveBeenCalled();
+  });
+
+  it('should not clean up when not retrying from last state', async () => {
+    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const context = createCleanupContext(false, false, 'save_knowledge_base');
+
+    await cleanupKnowledgeBaseStep(context);
+
+    expect(deletePackageKnowledgeBase).not.toHaveBeenCalled();
+  });
+
+  it('should not clean up when initial state is not SAVE_KNOWLEDGE_BASE', async () => {
+    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const context = createCleanupContext(true, false, 'install_kibana_assets');
+
+    await cleanupKnowledgeBaseStep(context);
+
+    expect(deletePackageKnowledgeBase).not.toHaveBeenCalled();
+  });
+
+  it('should not clean up when esClient is missing', async () => {
+    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const context = createCleanupContext(true, false, 'save_knowledge_base');
+    context.esClient = undefined as any;
+
+    await cleanupKnowledgeBaseStep(context);
+
+    expect(deletePackageKnowledgeBase).not.toHaveBeenCalled();
+  });
+
+  it('should not clean up when installedPkg is missing', async () => {
+    const { deletePackageKnowledgeBase } = jest.requireMock('../../knowledge_base_index');
+    const context = createCleanupContext(true, false, 'save_knowledge_base');
+    context.installedPkg = undefined;
+
+    await cleanupKnowledgeBaseStep(context);
+
+    expect(deletePackageKnowledgeBase).not.toHaveBeenCalled();
   });
 });

@@ -16,7 +16,6 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   saveKnowledgeBaseContentToIndex,
   INTEGRATION_KNOWLEDGE_INDEX,
-  updatePackageKnowledgeBaseVersion,
   getPackageKnowledgeBaseFromIndex,
 } from '../services/epm/packages/knowledge_base_index';
 import { getPackageKnowledgeBase } from '../services/epm/packages/get';
@@ -105,11 +104,17 @@ describe('Knowledge Base End-to-End Integration Test', () => {
         fileName: 'setup-guide.md',
         content:
           '# Setup Guide\n\nThis guide helps you set up the integration.\n\n## Prerequisites\n\n- Node.js 16+\n- Elasticsearch cluster',
+        version: '1.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/knowledge_base/setup-guide.md',
       },
       {
         fileName: 'troubleshooting.md',
         content:
           '# Troubleshooting\n\n## Common Issues\n\n### Connection Problems\n\nIf you experience connection issues, check your network settings.',
+        version: '1.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/knowledge_base/troubleshooting.md',
       },
     ];
 
@@ -132,8 +137,8 @@ describe('Knowledge Base End-to-End Integration Test', () => {
 
     // Verify that the retrieved content matches what was saved
     expect(retrievedKnowledgeBase).toBeDefined();
-    expect(retrievedKnowledgeBase?.package.package_name).toBe('test-integration');
-    expect(retrievedKnowledgeBase?.package.version).toBe('1.2.0');
+    expect(retrievedKnowledgeBase?.package.name).toBe('test-integration');
+    expect(retrievedKnowledgeBase?.items[0].version).toBe('1.2.0');
     expect(retrievedKnowledgeBase?.items).toHaveLength(2);
 
     // Check the first knowledge base item
@@ -184,6 +189,9 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       {
         fileName: 'old-guide.md',
         content: '# Old Guide\n\nThis is the old version of the guide.',
+        version: '1.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/knowledge_base/old-guide.md',
       },
     ];
 
@@ -192,10 +200,16 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       {
         fileName: 'new-guide.md',
         content: '# New Guide\n\nThis is the updated version of the guide.',
+        version: '2.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/knowledge_base/new-guide.md',
       },
       {
         fileName: 'features.md',
         content: '# New Features\n\nNew features in version 2.0.0.',
+        version: '2.0.0',
+        installed_at: new Date().toISOString(),
+        path: '/knowledge_base/features.md',
       },
     ];
 
@@ -218,12 +232,11 @@ describe('Knowledge Base End-to-End Integration Test', () => {
     expect(v1Result?.items).toHaveLength(1);
     expect(v1Result?.items[0].fileName).toBe('old-guide.md');
 
-    // Step 2: Upgrade to version 2.0.0 using the upgrade function
-    await updatePackageKnowledgeBaseVersion({
+    // Step 2: Upgrade to version 2.0.0 using the save function (which handles upgrades)
+    await saveKnowledgeBaseContentToIndex({
       esClient,
       pkgName: 'test-package',
-      oldVersion: '1.0.0',
-      newVersion: '2.0.0',
+      pkgVersion: '2.0.0',
       knowledgeBaseContent: knowledgeBaseContentV2,
     });
 
@@ -244,7 +257,7 @@ describe('Knowledge Base End-to-End Integration Test', () => {
       pkgName: 'test-package',
     });
     expect(newVersionResult?.items).toHaveLength(2);
-    expect(newVersionResult?.package.version).toBe('2.0.0');
+    expect(newVersionResult?.items[0].version).toBe('2.0.0');
 
     const newGuide = newVersionResult?.items.find((item) => item.fileName === 'new-guide.md');
     expect(newGuide?.content).toContain('New Guide');

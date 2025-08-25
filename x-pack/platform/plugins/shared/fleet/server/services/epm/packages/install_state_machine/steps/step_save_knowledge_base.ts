@@ -5,58 +5,91 @@
  * 2.0.
  */
 
+import path from 'path';
+
 import { FleetError } from '../../../../../errors';
 import { appContextService } from '../../../../app_context';
 import {
   saveKnowledgeBaseContentToIndex,
   deletePackageKnowledgeBase,
-  updatePackageKnowledgeBaseVersion,
 } from '../../knowledge_base_index';
 import type { InstallContext } from '../_state_machine_package_install';
 import { INSTALL_STATES } from '../../../../../../common/types';
 import { withPackageSpan } from '../../utils';
-import { ElasticsearchAssetType } from '../../../../../../common/types/models/epm';
+import {
+  ElasticsearchAssetType,
+  type ArchiveIterator,
+  type ArchiveEntry,
+} from '../../../../../../common/types/models/epm';
 import { updateEsAssetReferences } from '../../es_assets_reference';
+import type { KnowledgeBaseItem } from '../../../../../../common/types/models/epm';
+export const KNOWLEDGE_BASE_PATH = 'docs/knowledge_base/';
+
+/**
+ * Extract knowledge base files directly from the package archive
+ */
+async function extractKnowledgeBaseFromArchive(
+  archiveIterator: ArchiveIterator,
+  pkgName: string,
+  pkgVersion: string
+): Promise<KnowledgeBaseItem[]> {
+  const knowledgeBaseItems: KnowledgeBaseItem[] = [];
+
+  await archiveIterator.traverseEntries(
+    async (entry: ArchiveEntry) => {
+      if (entry.buffer) {
+        const content = entry.buffer.toString('utf8');
+        const knowledgeBaseIndex = entry.path.indexOf(KNOWLEDGE_BASE_PATH);
+        // remove the leading path (docs/knowledge_base/) so we aren't storing it in the field in ES
+        const fileName =
+          knowledgeBaseIndex >= 0
+            ? entry.path.substring(knowledgeBaseIndex + KNOWLEDGE_BASE_PATH.length)
+            : path.basename(entry.path);
+
+        knowledgeBaseItems.push({
+          fileName,
+          content,
+        });
+      }
+    },
+    (entryPath: string) => entryPath.includes(KNOWLEDGE_BASE_PATH) && entryPath.endsWith('.md')
+  );
+
+  return knowledgeBaseItems;
+}
 
 export async function stepSaveKnowledgeBase(context: InstallContext): Promise<void> {
-  const { packageInstallContext, esClient, installedPkg, savedObjectsClient } = context;
-  const { packageInfo } = packageInstallContext;
+  const { packageInstallContext, esClient, savedObjectsClient } = context;
+  const { packageInfo, archiveIterator } = packageInstallContext;
 
   let esReferences = context.esReferences ?? [];
 
+  // Extract knowledge base content directly from the archive
+  const knowledgeBaseItems = await extractKnowledgeBaseFromArchive(
+    archiveIterator,
+    packageInfo.name,
+    packageInfo.version
+  );
+
   // Save knowledge base content if present
-  if (packageInfo.knowledge_base && packageInfo.knowledge_base.length > 0) {
+  if (knowledgeBaseItems && knowledgeBaseItems.length > 0) {
     try {
       // First, check that one (or both) of the ai assistants are enabled via api calls
       const { securityAssistantStatus, observabilityAssistantStatus } =
         await appContextService.getO11yAndSecurityAssistantsStatus();
 
       if (securityAssistantStatus || observabilityAssistantStatus) {
-        // Check if this is an upgrade (existing package with different version)
-        const isUpgrade = installedPkg && installedPkg.attributes.version !== packageInfo.version;
-        const oldVersion = installedPkg?.attributes.version;
-
-        if (isUpgrade) {
-          // Handle package upgrade - this will delete all old versions and save new one
-          await updatePackageKnowledgeBaseVersion({
-            esClient,
-            pkgName: packageInfo.name,
-            oldVersion,
-            newVersion: packageInfo.version,
-            knowledgeBaseContent: packageInfo.knowledge_base,
-          });
-        } else {
-          // Handle fresh install - use existing logic
-          await saveKnowledgeBaseContentToIndex({
-            esClient,
-            pkgName: packageInfo.name,
-            pkgVersion: packageInfo.version,
-            knowledgeBaseContent: packageInfo.knowledge_base,
-          });
-        }
+        // Save knowledge base content - this handles both fresh installs and upgrades
+        // by always deleting existing content for the package before saving new content
+        await saveKnowledgeBaseContentToIndex({
+          esClient,
+          pkgName: packageInfo.name,
+          pkgVersion: packageInfo.version,
+          knowledgeBaseContent: knowledgeBaseItems,
+        });
 
         // Add knowledge base asset references to esReferences
-        const knowledgeBaseAssetRefs = packageInfo.knowledge_base.map((item) => ({
+        const knowledgeBaseAssetRefs = knowledgeBaseItems.map((item) => ({
           id: `${packageInfo.name}-${item.fileName}`,
           type: ElasticsearchAssetType.knowledgeBase,
         }));
@@ -88,18 +121,13 @@ export async function cleanupKnowledgeBaseStep(context: InstallContext) {
     retryFromLastState &&
     initialState === INSTALL_STATES.SAVE_KNOWLEDGE_BASE &&
     esClient &&
-    installedPkg?.attributes?.name &&
-    installedPkg.attributes.version
+    installedPkg?.attributes?.name
   ) {
     logger.debug('Retry transition - clean up package knowledge base content');
     await withPackageSpan(
       'Retry transition - clean up package knowledge base content',
       async () => {
-        await deletePackageKnowledgeBase(
-          esClient,
-          installedPkg.attributes.name,
-          installedPkg.attributes.version
-        );
+        await deletePackageKnowledgeBase(esClient, installedPkg.attributes.name);
       }
     );
   }

@@ -152,10 +152,7 @@ export interface PackageInstallContext {
 
 export type ArchivePackage = PackageSpecManifest &
   // should an uploaded package be able to specify `internal`?
-  Pick<
-    RegistryPackage,
-    'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch' | 'knowledge_base'
-  >;
+  Pick<RegistryPackage, 'readme' | 'assets' | 'data_streams' | 'internal' | 'elasticsearch'>;
 
 export interface BundledPackage {
   name: string;
@@ -824,9 +821,7 @@ export interface KnowledgeBaseItem {
 
 export interface PackageKnowledgeBase {
   package: {
-    package_name: string;
-    version: string;
-    installed_at: string;
+    name: string;
   };
 
   items: KnowledgeBaseItem[];

@@ -578,12 +578,8 @@ export async function getPackageInfo({
   const { filteredDataStreams, filteredPolicyTemplates } =
     getFilteredDataStreamsAndPolicyTemplates(packageInfo);
 
-  // Remove knowledge_base from packageInfo since it's handled separately by step_save_knowledge_base
-  // and shouldn't be exposed at the package level in API responses
-  const { knowledge_base: knowledgeBase, ...packageInfoWithoutKB } = packageInfo;
-
   const updated = {
-    ...packageInfoWithoutKB,
+    ...packageInfo,
     ...additions,
     data_streams: filteredDataStreams,
     policy_templates: filteredPolicyTemplates,
@@ -986,16 +982,9 @@ export async function getPackageKnowledgeBase(options: {
       return undefined;
     }
 
-    // Use the installed_at timestamp from the first knowledge base item
-    // All items for the same package should have the same installation timestamp
-    const installedAt = knowledgeBaseItems[0]?.installed_at || new Date().toISOString();
-    const pkgVersion = knowledgeBaseItems[0]?.version;
-
     return {
       package: {
-        package_name: pkgName,
-        version: pkgVersion || 'unknown',
-        installed_at: installedAt,
+        name: pkgName,
       },
       items: knowledgeBaseItems,
     };

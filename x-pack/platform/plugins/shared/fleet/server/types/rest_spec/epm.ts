@@ -328,17 +328,15 @@ export const GetInfoResponseSchema = schema.object({
 });
 export const GetKnowledgeBaseResponseSchema = schema.object({
   package: schema.object({
-    package_name: schema.string(),
-    version: schema.string(),
-    installed_at: schema.string(),
+    name: schema.string(),
   }),
   items: schema.arrayOf(
     schema.object({
       fileName: schema.string(),
       content: schema.string(),
-      path: schema.maybe(schema.string()),
-      installed_at: schema.maybe(schema.string()),
-      version: schema.maybe(schema.string()),
+      path: schema.string(),
+      installed_at: schema.string(),
+      version: schema.string(),
     })
   ),
 });
