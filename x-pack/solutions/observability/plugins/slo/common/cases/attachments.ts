@@ -6,7 +6,6 @@
  */
 
 import type { CaseAttachmentWithoutOwner } from '@kbn/cases-plugin/common';
-import { AttachmentType } from '@kbn/cases-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export function buildSloHistoryAttachment({
@@ -17,7 +16,7 @@ export function buildSloHistoryAttachment({
   pathAndQuery?: string;
 }): CaseAttachmentWithoutOwner {
   return {
-    type: AttachmentType.persistableState,
+    type: 'persistableState' as Extract<CaseAttachmentWithoutOwner['type'], 'persistableState'>,
     persistableStateAttachmentTypeId: '.page',
     persistableStateAttachmentState: {
       type: 'slo_history',

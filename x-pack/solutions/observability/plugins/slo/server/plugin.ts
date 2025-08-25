@@ -248,15 +248,20 @@ export class SLOPlugin
       logFactory: this.initContext.logger,
     });
 
-    core.getStartServices().then(([coreStart]) => {
-      if (plugins.cases?.attachmentFramework) {
-        registerSloSuggestion({
-          attachmentFramework: plugins.cases.attachmentFramework,
-          coreStart,
-          logger: this.initContext.logger.get('cases-suggestion'),
-        });
-      }
-    });
+    core
+      .getStartServices()
+      .then(([coreStart]) => {
+        if (plugins.cases?.attachmentFramework) {
+          registerSloSuggestion({
+            attachmentFramework: plugins.cases.attachmentFramework,
+            coreStart,
+            logger: this.initContext.logger.get('cases-suggestion'),
+          });
+        }
+      })
+      .catch((err) => {
+        this.logger.debug('Cannot register SLO suggestion', err.message);
+      });
 
     return {};
   }
