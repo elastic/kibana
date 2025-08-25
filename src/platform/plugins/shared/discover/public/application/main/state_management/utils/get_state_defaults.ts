@@ -19,6 +19,7 @@ import {
   getSortArray,
 } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DiscoverAppState } from '../discover_app_state_container';
 import type { DiscoverServices } from '../../../../build_services';
@@ -36,15 +37,25 @@ export function getStateDefaults({
   savedSearch,
   overrideDataView,
   services,
+  enableEsqlByDefault = false,
 }: {
   savedSearch: SavedSearch | undefined;
   overrideDataView?: DataView;
   services: DiscoverServices;
+  enableEsqlByDefault?: boolean;
 }) {
   const searchSource = savedSearch?.searchSource;
   const { data, uiSettings, storage } = services;
   const dataView = overrideDataView ?? searchSource?.getField('index');
-  const query = searchSource?.getField('query') || data.query.queryString.getDefaultQuery();
+  const savedQuery = searchSource?.getField('query');
+
+  const shouldUseEsqlByDefault = !savedQuery && enableEsqlByDefault && dataView;
+  const query =
+    savedQuery ||
+    (shouldUseEsqlByDefault
+      ? { esql: getInitialESQLQuery(dataView) }
+      : data.query.queryString.getDefaultQuery());
+
   const isEsqlQuery = isOfAggregateQueryType(query);
   const sort = getSortArray(savedSearch?.sort ?? [], dataView!, isEsqlQuery);
   const columns = getDefaultColumns(savedSearch, uiSettings);

@@ -274,10 +274,33 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
       expect(state.appState.getState().sort).toEqual([['bytes', 'desc']]);
+      state.actions.stopSyncing();
+    });
+
+    test('Empty URL with enableEsqlByDefault true should create ES|QL query', async () => {
+      const { state, customizationService } = await getState('/');
+      await state.internalState.dispatch(
+        state.injectCurrentTab(internalStateActions.initializeSession)({
+          initializeSessionParams: {
+            stateContainer: state,
+            customizationService,
+            discoverSessionId: undefined,
+            dataViewSpec: undefined,
+            defaultUrlState: undefined,
+            shouldClearAllTabs: false,
+            enableEsqlByDefault: true,
+          },
+        })
+      );
+      expect(state.appState.getState().query).toEqual({
+        esql: 'FROM the-data-view-title | LIMIT 10',
+      });
+      expect(state.appState.getState().dataSource).toEqual(createEsqlDataSource());
       state.actions.stopSyncing();
     });
   });
@@ -447,6 +470,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -476,6 +500,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -519,6 +544,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -546,6 +572,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -573,6 +600,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -613,6 +641,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -641,6 +670,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -673,6 +703,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -706,6 +737,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -739,6 +771,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -759,6 +792,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -781,6 +815,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -810,6 +845,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -832,6 +868,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -872,6 +909,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -903,6 +941,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: {},
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -937,6 +976,7 @@ describe('Discover state', () => {
               }),
             },
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -968,6 +1008,7 @@ describe('Discover state', () => {
             dataViewSpec: dataViewSpecMock,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -994,6 +1035,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1019,6 +1061,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1041,6 +1084,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1067,6 +1111,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1117,6 +1162,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1154,6 +1200,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1181,6 +1228,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1213,6 +1261,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1248,6 +1297,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1275,6 +1325,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1289,6 +1340,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1306,6 +1358,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1331,6 +1384,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );
@@ -1385,6 +1439,7 @@ describe('Discover state', () => {
             dataViewSpec: undefined,
             defaultUrlState: undefined,
             shouldClearAllTabs: false,
+            enableEsqlByDefault: false,
           },
         })
       );

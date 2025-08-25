@@ -372,16 +372,19 @@ export function getInitialState({
   savedSearch,
   overrideDataView,
   services,
+  enableEsqlByDefault = false,
 }: {
   initialUrlState: DiscoverAppState | undefined;
   savedSearch: SavedSearch | undefined;
   overrideDataView?: DataView | undefined;
   services: DiscoverServices;
+  enableEsqlByDefault?: boolean;
 }) {
   const defaultAppState = getStateDefaults({
     savedSearch,
     overrideDataView,
     services,
+    enableEsqlByDefault,
   });
   const mergedState = { ...defaultAppState, ...initialUrlState };
 
