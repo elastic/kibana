@@ -6,12 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_BULK_ACTION,
   API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
-import {
+import type {
   PerformAnonymizationFieldsBulkActionRequestBody,
   PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas';

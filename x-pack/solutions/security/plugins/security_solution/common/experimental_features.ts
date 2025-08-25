@@ -201,6 +201,12 @@ export const allowedExperimentalValues = Object.freeze({
   bulkFillRuleGapsEnabled: true,
 
   /**
+   * Allows users to see the advanced setting that changes the behavior of the suppression window on alert closure
+   */
+
+  continueSuppressionWindowAdvancedSettingEnabled: false,
+
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -247,6 +253,11 @@ export const allowedExperimentalValues = Object.freeze({
   defendInsights: true,
 
   /**
+   * Removes Endpoint Exceptions from Rules/Alerts pages, and shows it instead in Manage/Assets.
+   */
+  endpointExceptionsMovedUnderManagement: false,
+
+  /**
    * Disables flyout history and new preview navigation
    */
   newExpandableFlyoutNavigationDisabled: false,
@@ -285,13 +296,14 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables advanced mode for Trusted Apps creation and update
    */
-  trustedAppsAdvancedMode: false,
+  trustedAppsAdvancedMode: true,
 
   /**
    * Enables Trusted Devices artifact management for device control protections.
    * Allows users to manage trusted USB and external devices
    */
   trustedDevices: false,
+
   /**
    * Enables the ability to import and migration dashboards through automatic migration service
    */

@@ -24,7 +24,6 @@ import { updateConversationRoute } from './user_conversations/update_route';
 import { findUserConversationsRoute } from './user_conversations/find_route';
 import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
 import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
-import { getKnowledgeBaseIndicesRoute } from './knowledge_base/get_knowledge_base_indices';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
 import { getEvaluateRoute } from './evaluate/get_evaluate';
@@ -86,8 +85,6 @@ jest.mock('./user_conversations/bulk_actions_route');
 const bulkActionConversationsRouteMock = bulkActionConversationsRoute as jest.Mock;
 jest.mock('./user_conversations/append_conversation_messages_route');
 const appendConversationMessageRouteMock = appendConversationMessageRoute as jest.Mock;
-jest.mock('./knowledge_base/get_knowledge_base_indices');
-const getKnowledgeBaseIndicesRouteMock = getKnowledgeBaseIndicesRoute as jest.Mock;
 jest.mock('./knowledge_base/get_knowledge_base_status');
 const getKnowledgeBaseStatusRouteMock = getKnowledgeBaseStatusRoute as jest.Mock;
 jest.mock('./knowledge_base/post_knowledge_base');
@@ -205,10 +202,6 @@ describe('registerRoutes', () => {
 
   it('should call `appendConversationMessageRouteMock`', () => {
     expect(appendConversationMessageRouteMock).toHaveBeenCalledWith(server.router);
-  });
-
-  it('should call `getKnowledgeBaseIndicesRouteMock`', () => {
-    expect(getKnowledgeBaseIndicesRouteMock).toHaveBeenCalledWith(server.router);
   });
 
   it('should call `getKnowledgeBaseStatusRouteMock`', () => {

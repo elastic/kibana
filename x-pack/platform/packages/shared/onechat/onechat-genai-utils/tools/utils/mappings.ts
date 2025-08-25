@@ -57,7 +57,7 @@ export const flattenMappings = ({ mappings }: { mappings: MappingTypeMapping }):
  */
 export const cleanupMapping = (mapping: MappingTypeMapping): MappingTypeMapping => {
   const recurseKeys = ['properties', 'fields'];
-  const fieldsToKeep = ['type', 'dynamic', '_meta', 'enabled'];
+  const fieldsToKeep = ['type', 'dynamic', '_meta', 'meta', 'briefing', 'description', 'enabled'];
 
   function recursiveCleanup(obj: Record<string, any>): Record<string, any> {
     if (Array.isArray(obj)) {

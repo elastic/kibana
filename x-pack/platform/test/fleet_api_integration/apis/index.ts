@@ -6,7 +6,7 @@
  */
 
 import { setupTestUsers } from './test_users';
-import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
 export default function ({ loadTestFile, getService }: FtrProviderContext) {
   // total runtime ~ 4m

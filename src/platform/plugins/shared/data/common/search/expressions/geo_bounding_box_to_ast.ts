@@ -9,7 +9,7 @@
 
 import { camelCase, chain, isNil, omit } from 'lodash';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionGeoBoundingBox, GeoBoundingBox } from './geo_bounding_box';
+import type { ExpressionFunctionGeoBoundingBox, GeoBoundingBox } from './geo_bounding_box';
 import { geoPointToAst } from './geo_point_to_ast';
 
 const GEO_POINTS = ['top_left', 'bottom_right', 'top_right', 'bottom_left'];

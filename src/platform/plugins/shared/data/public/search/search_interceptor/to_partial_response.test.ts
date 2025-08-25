@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { toPartialResponseAfterTimeout } from './to_partial_response';
 

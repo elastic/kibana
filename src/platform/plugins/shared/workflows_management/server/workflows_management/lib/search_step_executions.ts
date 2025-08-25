@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { EsWorkflowStepExecution } from '@kbn/workflows';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { EsWorkflowStepExecution } from '@kbn/workflows';
 
-interface SearchStepExectionsParams {
+interface SearchStepExecutionsParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   stepsExecutionIndex: string;
   workflowExecutionId: string;
+  spaceId: string;
 }
 
 export const searchStepExecutions = async ({
@@ -22,15 +23,32 @@ export const searchStepExecutions = async ({
   logger,
   stepsExecutionIndex,
   workflowExecutionId,
-}: SearchStepExectionsParams): Promise<EsWorkflowStepExecution[]> => {
+  spaceId,
+}: SearchStepExecutionsParams): Promise<EsWorkflowStepExecution[]> => {
   try {
     logger.info(`Searching workflows in index ${stepsExecutionIndex}`);
     const response = await esClient.search<EsWorkflowStepExecution>({
       index: stepsExecutionIndex,
       query: {
-        match: { workflowRunId: workflowExecutionId },
+        bool: {
+          must: [
+            { match: { workflowRunId: workflowExecutionId } },
+            {
+              bool: {
+                should: [
+                  { term: { spaceId } },
+                  // Backward compatibility for objects without spaceId
+                  { bool: { must_not: { exists: { field: 'spaceId' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
       },
-      sort: 'startedAt:dsc',
+      sort: 'startedAt:desc',
+      from: 0,
+      size: 1000, // TODO: without it, it returns up to 10 results by default. We should improve this.
     });
 
     logger.info(

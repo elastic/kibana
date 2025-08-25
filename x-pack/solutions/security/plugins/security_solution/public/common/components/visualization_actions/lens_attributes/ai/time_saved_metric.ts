@@ -61,7 +61,11 @@ export const getTimeSavedMetricLensAttributes: MyGetLensAttributes = ({
                   params: {
                     tinymathAst: {
                       args: [
-                        { args: ['countColumnX0', 8], name: 'multiply', type: 'function' },
+                        {
+                          args: ['countColumnX0', minutesPerAlert],
+                          name: 'multiply',
+                          type: 'function',
+                        },
                         60,
                       ],
                       location: { max: 14, min: 0 },

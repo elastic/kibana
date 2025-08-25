@@ -10,7 +10,8 @@
 import type { AnySchema } from 'joi';
 import typeDetect from 'type-detect';
 import { internals } from '../internals';
-import { Type, TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import type { TypeOptions, ExtendsDeepOptions, UnknownOptions } from './type';
+import { Type } from './type';
 import { ValidationError } from '../errors';
 
 export type Props = Record<string, Type<any>>;

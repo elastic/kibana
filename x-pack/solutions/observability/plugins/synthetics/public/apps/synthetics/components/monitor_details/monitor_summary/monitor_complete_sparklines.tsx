@@ -9,7 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { SUCCESSFUL_LABEL } from './monitor_complete_count';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface Props {

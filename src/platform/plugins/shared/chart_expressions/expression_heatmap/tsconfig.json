@@ -32,6 +32,7 @@
     "@kbn/transpose-utils",
     "@kbn/ebt-tools",
     "@kbn/react-kibana-context-theme",
+    "@kbn/chart-test-jest-helpers",
   ],
   "exclude": [
     "target/**/*",

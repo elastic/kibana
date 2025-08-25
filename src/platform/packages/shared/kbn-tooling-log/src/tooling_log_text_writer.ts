@@ -11,9 +11,10 @@ import { format } from 'util';
 
 import chalk from 'chalk';
 
-import { LogLevel, parseLogLevel, ParsedLogLevel } from './log_levels';
-import { Writer } from './writer';
-import { Message, MessageTypes } from './message';
+import type { LogLevel, ParsedLogLevel } from './log_levels';
+import { parseLogLevel } from './log_levels';
+import type { Writer } from './writer';
+import type { Message, MessageTypes } from './message';
 
 const { magentaBright, yellow, red, blue, green, dim } = chalk;
 const PREFIX_INDENT = ' '.repeat(6);

@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { AgentIcon } from '@kbn/custom-icons';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 const SERVICE_OVERVIEW_LOCATOR_ID = 'serviceOverviewLocator';

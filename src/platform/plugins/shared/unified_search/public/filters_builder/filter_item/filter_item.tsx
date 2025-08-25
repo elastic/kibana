@@ -22,7 +22,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { Filter } from '@kbn/es-query';
 import { buildEmptyFilter, getFilterParams, BooleanRelation } from '@kbn/es-query';
-import { DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { cx } from '@emotion/css';
 
 import { css } from '@emotion/react';
@@ -34,7 +34,7 @@ import { FiltersBuilderContextType } from '../context';
 import { FilterGroup } from '../filter_group';
 import type { Path } from '../types';
 import { getFieldFromFilter, getOperatorFromFilter } from '../../filter_bar/filter_editor';
-import { Operator } from '../../filter_bar/filter_editor';
+import type { Operator } from '../../filter_bar/filter_editor';
 import { getGroupedFilters } from '../utils/filters_builder';
 import {
   cursorAddCss,

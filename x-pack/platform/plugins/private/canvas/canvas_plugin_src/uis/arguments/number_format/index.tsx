@@ -6,13 +6,14 @@
  */
 
 import React from 'react';
-import { Assign } from '@kbn/utility-types';
+import type { Assign } from '@kbn/utility-types';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
-import { NumberFormatArgInput, Props as ComponentProps } from './number_format';
+import type { Props as ComponentProps } from './number_format';
+import { NumberFormatArgInput } from './number_format';
 import { templateFromReactComponent } from '../../../../public/lib/template_from_react_component';
-import { ArgumentFactory } from '../../../../types/arguments';
+import type { ArgumentFactory } from '../../../../types/arguments';
 import { ArgumentStrings } from '../../../../i18n';
-import { SetupInitializer } from '../../../plugin';
+import type { SetupInitializer } from '../../../plugin';
 
 const { NumberFormat: strings } = ArgumentStrings;
 
