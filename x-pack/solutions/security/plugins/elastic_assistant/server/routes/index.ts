@@ -6,7 +6,7 @@
  */
 
 // Actions Connector Execute (LLM Wrapper)
-export { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
+export { postActionsConnectorExecuteRoute, postActionsConnectorExecuteMetadataRoute } from './post_actions_connector_execute';
 
 // Attack Discovery
 export { postAttackDiscoveryRoute } from './attack_discovery/post/post_attack_discovery';

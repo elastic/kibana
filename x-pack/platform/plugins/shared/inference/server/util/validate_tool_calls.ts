@@ -53,7 +53,9 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
 
     if (!valid) {
       throw createToolValidationError(
-        `Tool call arguments for ${toolCall.function.name} (${toolCall.toolCallId}) were invalid`,
+        `Tool call arguments for ${toolCall.function.name} (${
+          toolCall.toolCallId
+        }) were invalid: ${JSON.stringify(toolCall.function.arguments, null, 2)}`,
         {
           name: toolCall.function.name,
           errorsText: validator.errorsText(),

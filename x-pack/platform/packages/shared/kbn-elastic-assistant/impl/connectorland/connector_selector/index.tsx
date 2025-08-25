@@ -44,6 +44,7 @@ interface Props {
 export type AIConnector = ActionConnector & {
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
+  isDefault?: boolean;
 };
 
 export const ConnectorSelector: React.FC<Props> = React.memo(

@@ -71,7 +71,13 @@ export const streamGraph = async ({
     end: streamEnd,
     push,
     responseWithHeaders,
-  } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
+    // @TODO: update type tool_calls
+  } = streamFactory<{ type: string; payload?: string; toolCalls?: any[] }>(
+    request.headers,
+    logger,
+    false,
+    false
+  );
 
   let didEnd = false;
   const handleStreamEnd = (finalResponse: string, isError = false) => {

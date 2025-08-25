@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type React from 'react';
-import { useCallback, useState } from 'react';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import React, { useCallback, useMemo, useState } from 'react';
+import { HttpSetup } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { useKnowledgeBaseStatus } from '../api/knowledge_base/use_knowledge_base_status';
@@ -21,6 +20,8 @@ import type { Conversation } from '../../..';
 import { useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { useAssistantSpaceId, useAssistantLastConversation } from '../use_space_aware_context';
+import { clientSideToolsForSecurityAssistant } from '../registered_ai_client_tools';
+
 
 export interface UseChatSendProps {
   currentConversation?: Conversation;
@@ -130,6 +131,7 @@ export const useChatSend = ({
         message: userMessage.content ?? '',
         conversationId: convo.id,
         replacements,
+        clientSideTools: clientSideToolsForSecurityAssistant,
       });
 
       assistantTelemetry?.reportAssistantMessageSent({
@@ -198,6 +200,7 @@ export const useChatSend = ({
       // do not send any new messages, the previous conversation is already stored
       conversationId: currentConversation.id,
       replacements: {},
+      clientSideTools: clientSideToolsForSecurityAssistant,
     });
 
     const responseMessage: ClientMessage = getMessageFromRawResponse(rawResponse);

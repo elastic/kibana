@@ -67,6 +67,16 @@ export const ScreenContext = z.object({
    * The local timezone of the user.
    */
   timeZone: z.string().optional(),
+  /**
+   * Tool with clientside callback
+   */
+  // clientSideTools: z.array(z.object({
+  //   name: z.string(),
+  //   description: z.string(),
+  //   callback: z.any().optional(),
+  // })).optional(),
+  //@TODO: update type for tool
+  clientSideTools: z.array(z.any()).optional(),
 });
 
 export type BulkCrudActionSummary = z.infer<typeof BulkCrudActionSummary>;

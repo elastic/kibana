@@ -262,6 +262,7 @@ export const chatCompleteRoute = (
               responseLanguage: request.body.responseLanguage,
               savedObjectsClient,
               ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
+              clientSideTools: request.body.clientSideTools ?? [],
             }),
             timeout,
           ]);

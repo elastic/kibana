@@ -63,6 +63,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   traceOptions,
   responseLanguage = 'English',
   timeout,
+  metadataStore,
 }) => {
   const logger = parentLogger.get('defaultAssistantGraph');
   const llmClass = getLlmClass(llmType);
@@ -234,6 +235,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
     contentReferencesStore,
+    metadataStore,
   });
 
   const conversationMessages = await getConversationWithNewMessage({

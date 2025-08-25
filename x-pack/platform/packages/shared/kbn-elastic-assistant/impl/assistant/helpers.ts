@@ -44,7 +44,7 @@ export const getDefaultConnector = (
 ): AIConnector | undefined => {
   const validConnectors = connectors?.filter((connector) => !connector.isMissingSecrets);
   if (validConnectors?.length) {
-    return validConnectors[0];
+    return validConnectors.find((connector) => connector.isDefault) || validConnectors[0];
   }
 
   return undefined;

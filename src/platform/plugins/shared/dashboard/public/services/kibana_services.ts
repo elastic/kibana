@@ -50,6 +50,7 @@ export let spacesService: SpacesApi | undefined;
 export let uiActionsService: UiActionsPublicStart;
 export let urlForwardingService: UrlForwardingStart;
 export let usageCollectionService: UsageCollectionStart | undefined;
+export let inferenceService: InferencePublicStart | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 
@@ -73,6 +74,7 @@ export const setKibanaServices = (kibanaCore: CoreStart, deps: DashboardStartDep
   uiActionsService = deps.uiActions;
   urlForwardingService = deps.urlForwarding;
   usageCollectionService = deps.usageCollection;
+  inferenceService = deps.inference;
 
   servicesReady$.next(true);
 };

@@ -20,8 +20,8 @@ export const useToolsTags = ({ includeSystemTools }: UseToolTagsProps = {}) => {
 
     // Return unique tags across all tools
     return [
-      ...tools.reduce((tagsSet, tool) => {
-        tool.tags.forEach((tag) => tagsSet.add(tag));
+      ...tools?.reduce((tagsSet, tool) => {
+        tool.tags?.forEach((tag) => tagsSet.add(tag));
         return tagsSet;
       }, new Set<string>()),
     ];

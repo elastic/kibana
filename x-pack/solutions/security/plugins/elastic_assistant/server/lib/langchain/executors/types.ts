@@ -78,6 +78,7 @@ export interface AgentExecutorParams<T extends boolean> {
   traceOptions?: TraceOptions;
   responseLanguage?: string;
   timeout?: number;
+  metadataStore?: ToolExecutionMetadataStore;
 }
 
 export interface StaticReturnType {

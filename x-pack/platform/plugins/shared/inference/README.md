@@ -9,9 +9,9 @@ external LLM APIs. Its goals are:
 
 ## Usage with langchain
 
-The inference APIs are meant to be usable directly, and self-sufficient to power any RAG workflow. 
+The inference APIs are meant to be usable directly, and self-sufficient to power any RAG workflow.
 
-However, we're also exposing a way to use langchain while benefiting from the inference APIs, 
+However, we're also exposing a way to use langchain while benefiting from the inference APIs,
 via the `getChatModel` API exposed from the inference plugin's start contract.
 
 ```ts
@@ -45,7 +45,7 @@ The following concepts are commonly used throughout the plugin:
 
 Performing inference, or more globally communicating with the LLM, is done using stack connectors.
 
-The subset of connectors that can be used for inference are called `genAI`, or `inference` connectors. 
+The subset of connectors that can be used for inference are called `genAI`, or `inference` connectors.
 Calling any inference APIs with the ID of a connector that is not inference-compatible will result in the API throwing an error.
 
 The list of inference connector types:
@@ -203,7 +203,7 @@ const message = await lastValueFrom(
 
 #### Defining and using tools
 
-Tools are defined as a record, with a `description` and optionally a `schema`. The reason why it's a record is because of type-safety. 
+Tools are defined as a record, with a `description` and optionally a `schema`. The reason why it's a record is because of type-safety.
 This allows us to have fully typed tool calls (e.g. when the name of the tool being called is `x`, its arguments are typed as the schema of `x`).
 
 The description and schema of a tool will be converted and sent to the LLM, so it's important
@@ -352,9 +352,9 @@ const response = inferenceClient.outputApi({
     'You are a helpful assistant and your current task is to extract informations from the provided document',
   input: `
     Please find all the animals and vegetables that are mentioned in the following document:
-    
+
     ## Document
-    
+
     ${theDoc}
   `,
 });
@@ -419,9 +419,9 @@ There are **two** kinds of rules and both share the common `{ enabled: boolean }
   The referenced inference model is executed server-side to find entities in free text.  Only classes
   listed in `allowedEntityClasses` are taken into account (omit the field to accept all).
 
-> Currently this feature has only been validated with Elastic’s publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).  
+> Currently this feature has only been validated with Elastic’s publicly hosted NER model [`elastic/distilbert-base-uncased-finetuned-conll03-english`](https://huggingface.co/elastic/distilbert-base-uncased-finetuned-conll03-english).
 
-Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, the first matching rule wins and later ones are skipped for that entity. 
+Rules are evaluated **top-to-bottom**. If two rules overlap on the same entity, the first matching rule wins and later ones are skipped for that entity.
 
 ### Configuring rules
 

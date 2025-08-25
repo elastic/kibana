@@ -39,14 +39,18 @@
       "serverless",
       "noDataPage",
       "observabilityAIAssistant",
-      "lens"
+      "lens",
+      "inference",
+      "onechat"
     ],
     "requiredBundles": [
       "kibanaReact",
       "kibanaUtils",
       "presentationUtil",
       "presentationPanel",
-      "savedObjects"
+      "savedObjects",
+      "inference",
+      "aiClientTools"
     ]
   }
 }

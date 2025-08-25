@@ -10,6 +10,8 @@ export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
 export const POST_ACTIONS_CONNECTOR_EXECUTE =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
+export const POST_ACTIONS_CONNECTOR_EXECUTE_METADATA =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/metadata` as const;
 
 export const ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL =
   `${ELASTIC_AI_ASSISTANT_URL}/current_user/conversations` as const;
