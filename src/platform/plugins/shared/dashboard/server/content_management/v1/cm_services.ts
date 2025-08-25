@@ -317,6 +317,14 @@ export const dashboardItemSchema = schema.object(
     references: schema.arrayOf(referenceSchema),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     originId: schema.maybe(schema.string()),
+    accessControl: schema.maybe(
+      schema.object({
+        owner: schema.string(),
+        accessMode: schema.maybe(
+          schema.oneOf([schema.literal('default'), schema.literal('read_only')])
+        ),
+      })
+    ),
   },
   { unknowns: 'allow' }
 );

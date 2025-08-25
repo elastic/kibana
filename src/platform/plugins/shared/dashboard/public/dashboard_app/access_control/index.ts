@@ -7,28 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { PLUGIN_ID, API_ENDPOINT } from './constants';
-
-export type {
-  ProcedureSchemas,
-  ProcedureName,
-  GetIn,
-  GetResult,
-  BulkGetIn,
-  BulkGetResult,
-  CreateIn,
-  CreateResult,
-  UpdateIn,
-  UpdateResult,
-  DeleteIn,
-  DeleteResult,
-  SearchIn,
-  SearchQuery,
-  SearchResult,
-  MSearchIn,
-  MSearchQuery,
-  MSearchResult,
-  MSearchOut,
-  ChangeAccessModeIn,
-  ChangeAccessModeResult,
-} from './rpc';
+export { AccessModeContainer } from './access_mode_container';
+export type { AccessControl, AccessMode } from './types';

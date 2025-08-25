@@ -49,6 +49,7 @@ import { type TracksOverlays } from '@kbn/presentation-util';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams, DashboardSettings, DashboardState } from '../../common';
+import type { AccessControl } from '../dashboard_app/access_control';
 import type { DashboardAttributes, GridData } from '../../server/content_management';
 import type {
   LoadDashboardReturn,
@@ -155,6 +156,7 @@ export type DashboardApi = CanExpandPanels &
     setTags: (tags: string[]) => void;
     setTimeRange: (timeRange?: TimeRange | undefined) => void;
     unifiedSearchFilters$: PublishesUnifiedSearch['filters$'];
+    accessControl$: PublishingSubject<AccessControl>;
   };
 
 export interface DashboardInternalApi {
