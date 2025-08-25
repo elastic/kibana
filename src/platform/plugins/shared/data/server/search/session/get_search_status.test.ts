@@ -9,7 +9,7 @@
 
 import { SearchStatus } from './types';
 import { getSearchStatus } from './get_search_status';
-import { SearchSessionRequestInfo } from '../../../common';
+import type { SearchSessionRequestInfo } from '../../../common';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 const getInternalClientMock = (status = jest.fn()) => {
