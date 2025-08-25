@@ -16,7 +16,7 @@ import type { YamlValidationError, YamlValidationErrorSeverity } from '../model/
 import { MUSTACHE_REGEX_GLOBAL } from '../../../../common/lib/regex';
 import { MarkerSeverity, getSeverityString } from './utils';
 import { getWorkflowGraph } from '../../../entities/workflows/lib/get_workflow_graph';
-import { getContextSchemaForPath } from '../../../features/workflow_context/lib/get_context_for_path';
+// Removed workflow_context dependency
 import { isValidSchemaPath } from '../../../../common/lib/zod_utils';
 import { parseVariablePath } from '../../../../common/lib/parse_variable_path';
 
@@ -95,9 +95,7 @@ export function useYamlValidation({
           let errorMessage: string | null = null;
           const severity: YamlValidationErrorSeverity = 'warning';
 
-          const path = getCurrentPath(yamlDocument, matchStart);
-          const context = getContextSchemaForPath(result.data, workflowGraph, path);
-
+          // Simplified validation - removed complex context-aware validation
           if (!match.groups?.key) {
             errorMessage = `Variable is not defined`;
           } else {
@@ -105,11 +103,7 @@ export function useYamlValidation({
             if (parsedPath?.errors) {
               errorMessage = parsedPath.errors.join(', ');
             }
-            if (parsedPath?.propertyPath) {
-              if (!isValidSchemaPath(context, parsedPath.propertyPath)) {
-                errorMessage = `Variable ${parsedPath.propertyPath} is invalid`;
-              }
-            }
+            // Removed schema path validation since we removed workflow_context
           }
 
           // Add marker for validation issues

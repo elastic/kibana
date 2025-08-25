@@ -117,8 +117,9 @@ export const WorkflowYAMLEditor = ({
     }
   }, [validateMustacheExpressionsEverywhere, isEditorMounted]);
 
+  // Removed completion provider - no autocomplete functionality
   const completionProvider = useMemo(() => {
-    return getCompletionItemProvider(WORKFLOW_ZOD_SCHEMA_LOOSE);
+    return null;
   }, []);
 
   const editorOptions = useMemo<monaco.editor.IStandaloneEditorConstructionOptions>(
