@@ -49290,8 +49290,7 @@
                                                       },
                                                       "required": [
                                                         "destination",
-                                                        "where",
-                                                        "status"
+                                                        "where"
                                                       ],
                                                       "type": "object"
                                                     },
@@ -61721,8 +61720,7 @@
                                       },
                                       "required": [
                                         "destination",
-                                        "where",
-                                        "status"
+                                        "where"
                                       ],
                                       "type": "object"
                                     },
