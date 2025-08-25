@@ -5,24 +5,11 @@
  * 2.0.
  */
 
-import { ProductFeatureTimelineFeatureKey } from '../product_features_keys';
-import type { ProductFeatureKibanaConfig } from '../types';
+import { ProductFeatureTimelineKey } from '../product_features_keys';
+import type { ProductFeaturesConfig } from '../types';
 
-/**
- * App features privileges configuration for the timeline feature.
- * These are the configs that are shared between both offering types (ess and serverless).
- * They can be extended on each offering plugin to register privileges using different way on each offering type.
- *
- * Privileges can be added in different ways:
- * - `privileges`: the privileges that will be added directly into the main Security feature.
- * - `subFeatureIds`: the ids of the sub-features that will be added into the Security subFeatures entry.
- * - `subFeaturesPrivileges`: the privileges that will be added into the existing Security subFeature with the privilege `id` specified.
- */
-export const timelineDefaultProductFeaturesConfig: Record<
-  ProductFeatureTimelineFeatureKey,
-  ProductFeatureKibanaConfig
-> = {
-  [ProductFeatureTimelineFeatureKey.timeline]: {
+export const timelineProductFeaturesConfig: ProductFeaturesConfig<ProductFeatureTimelineKey> = {
+  [ProductFeatureTimelineKey.timeline]: {
     privileges: {
       all: {
         api: ['timeline_read', 'timeline_write'],
