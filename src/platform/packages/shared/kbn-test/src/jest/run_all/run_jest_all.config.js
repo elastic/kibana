@@ -7,13 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import moment from 'moment-timezone';
-import type { IUiSettingsClient } from '@kbn/core/public';
+const { REPO_ROOT } = require('@kbn/repo-info');
 
-/**
- * Get timeZone from uiSettings
- */
-export function getTimeZone(uiSettings: IUiSettingsClient) {
-  const timeZone = uiSettings.get('dateFormat:tz');
-  return moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
-}
+/** @type {import('jest').Config} */
+const config = {
+  rootDir: REPO_ROOT,
+  maxWorkers: '50%',
+  collectCoverage: false,
+  passWithNoTests: true,
+  reporters: ['jest-silent-reporter'],
+};
+
+module.exports = config;

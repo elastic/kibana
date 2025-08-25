@@ -5,7 +5,7 @@
  * 2.0.
  */
 import 'moment-timezone';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useDefaultTimezone } from './use_default_timezone';
 

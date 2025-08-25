@@ -9,7 +9,7 @@ import { isEqual } from 'lodash';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import { useUrlState } from '@kbn/ml-url-state';
 import { useTimefilter } from '@kbn/ml-date-picker';
 import type { IUiSettingsClient } from '@kbn/core/public';

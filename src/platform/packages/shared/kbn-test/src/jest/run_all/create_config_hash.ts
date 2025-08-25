@@ -6,14 +6,13 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import type { Config } from '@jest/types';
+import objectHash from 'object-hash';
 
-import moment from 'moment-timezone';
-import type { IUiSettingsClient } from '@kbn/core/public';
-
-/**
- * Get timeZone from uiSettings
- */
-export function getTimeZone(uiSettings: IUiSettingsClient) {
-  const timeZone = uiSettings.get('dateFormat:tz');
-  return moment.tz.zone(timeZone)?.name ?? moment.tz.guess(true);
+export function createConfigHash(obj: Config.InitialOptions): string {
+  // Create a stable key excluding fields we are allowed to merge or normalize
+  const { roots, rootDir, ...rest } = obj;
+  return objectHash({
+    rest,
+  });
 }

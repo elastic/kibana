@@ -54,57 +54,47 @@ echo "
   output in your test temporarily, you can modify 'src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
 "
 
-while read -r config; do
-  echo "--- $ node scripts/jest --config $config"
+echo "--- Grouping and running configs via scripts/jest_all.js"
 
-  # --trace-warnings to debug
-  # Node.js process-warning detected:
-  # Warning: Closing file descriptor 24 on garbage collection
-  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+# Build a comma-separated list for --config
+configs_csv=$(echo "$configs" | paste -sd, -)
 
-  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
-    cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
-  fi
+cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings --no-experimental-require-module"
+if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+  cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
+fi
+cmd=$cmd"\" node ./scripts/jest_all --config=\"$configs_csv\" $parallelism --coverage=false --passWithNoTests"
 
-  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+echo "actual full command is:"
+echo "$cmd"
+echo ""
 
-  echo "actual full command is:"
-  echo "$cmd"
-  echo ""
+start=$(date +%s)
+set +e;
+eval "$cmd"
+lastCode=$?
+set -e;
 
-  start=$(date +%s)
+timeSec=$(($(date +%s)-start))
+if [[ $timeSec -gt 60 ]]; then
+  min=$((timeSec/60))
+  sec=$((timeSec-(min*60)))
+  duration="${min}m ${sec}s"
+else
+  duration="${timeSec}s"
+fi
 
-  # prevent non-zero exit code from breaking the loop
-  set +e;
-  eval "$cmd"
-  lastCode=$?
-  set -e;
-
-  timeSec=$(($(date +%s)-start))
-  if [[ $timeSec -gt 60 ]]; then
-    min=$((timeSec/60))
-    sec=$((timeSec-(min*60)))
-    duration="${min}m ${sec}s"
-  else
-    duration="${timeSec}s"
-  fi
-
-  results+=("- $config
+results+=("- grouped-configs
     duration: ${duration}
     result: ${lastCode}")
 
-  if [ $lastCode -ne 0 ]; then
-    exitCode=10
-    echo "Jest exited with code $lastCode"
-    echo "^^^ +++"
-
-    if [[ "$failedConfigs" ]]; then
-      failedConfigs="${failedConfigs}"$'\n'"$config"
-    else
-      failedConfigs="$config"
-    fi
-  fi
-done <<< "$configs"
+if [ $lastCode -ne 0 ]; then
+  exitCode=10
+  echo "Jest exited with code $lastCode"
+  echo "^^^ +++"
+  # On failure, mark all configs as failed so retry mechanism can pick them up
+  failedConfigs="$configs"
+fi
 
 if [[ "$failedConfigs" ]]; then
   buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
