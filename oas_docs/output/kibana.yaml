@@ -53651,7 +53651,6 @@ paths:
                                                     required:
                                                       - destination
                                                       - where
-                                                      - status
                                                   type: array
                                               required:
                                                 - fields
@@ -60171,7 +60170,6 @@ paths:
                                     required:
                                       - destination
                                       - where
-                                      - status
                                   type: array
                               required:
                                 - fields
