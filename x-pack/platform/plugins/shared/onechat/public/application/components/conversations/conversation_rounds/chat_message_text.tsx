@@ -7,7 +7,7 @@
 
 import { css } from '@emotion/css';
 import classNames from 'classnames';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiCodeBlock,
   EuiTable,
@@ -22,10 +22,8 @@ import {
 } from '@elastic/eui';
 import type { TabularDataResult } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
-// import { vizLanguagePlugin } from './markdown_plugins/viz_code_block';
 import { type PluggableList } from 'unified';
 import type { ConversationRoundStep } from '@kbn/onechat-common';
-import { useConversationRounds } from '../../../hooks/use_conversation';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import { esqlLanguagePlugin, loadingCursorPlugin, toolResultPlugin } from './markdown_plugins';
@@ -62,26 +60,10 @@ const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor
  * Component handling markdown support to the assistant's responses.
  * Also handles "loading" state by appending the blinking cursor.
  */
-function ChatMessageText({ content, steps }: Props) {
+export function ChatMessageText({ content, steps }: Props) {
   const containerClassName = css`
     overflow-wrap: anywhere;
   `;
-
-  // Use a ref to track the render count
-  const renderCount = useRef(1);
-
-  // This log will appear on every single render
-  console.log(
-    `ChatMessageText is RENDERING (render #${renderCount.current}). Content: "${content.substring(
-      0,
-      30
-    )}..."`
-  );
-
-  // Increment the render count after each render
-  useEffect(() => {
-    renderCount.current += 1;
-  });
 
   // const conversationRounds = useConversationRounds();
   const { pluginsStart } = useOnechatServices();
@@ -199,5 +181,3 @@ function ChatMessageText({ content, steps }: Props) {
     </EuiText>
   );
 }
-
-export const MemoizedChatMessageText = React.memo(ChatMessageText);

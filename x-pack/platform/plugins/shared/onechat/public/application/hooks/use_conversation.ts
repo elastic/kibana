@@ -7,9 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
-import type { Conversation } from '@kbn/onechat-common';
 import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { isEmpty } from 'lodash';
 import { useSendMessage } from '../context/send_message_context';
 import { queryKeys } from '../query_keys';
 import { newConversationId } from '../utils/new_conversation';
@@ -17,26 +15,16 @@ import { useConversationId } from './use_conversation_id';
 import { useIsSendingMessage } from './use_is_sending_message';
 import { useOnechatServices } from './use_onechat_service';
 
-export const useConversation = <K extends keyof Conversation>(
-  selector?: K
-): K extends never ? Conversation | undefined : Conversation[K] | undefined => {
-  const { conversationsService } = useOnechatServices();
+const useConversation = () => {
   const conversationId = useConversationId();
-  const isSendingMessage = useIsSendingMessage();
+  const { conversationsService } = useOnechatServices();
   const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
-
-  const { data } = useQuery({
+  const isSendingMessage = useIsSendingMessage();
+  const { data: conversation } = useQuery({
     queryKey,
+    // Disable query if we are on a new conversation or if there is a message currently being sent
+    // Otherwise a refetch will overwrite our optimistic updates
     enabled: Boolean(conversationId) && !isSendingMessage,
-    // The select function is now dynamic based on the selector argument
-    select: (conversation) => {
-      // If a selector is provided, return that slice of the conversation.
-      if (selector) {
-        return conversation?.[selector];
-      }
-      // Otherwise, return the entire conversation object.
-      return conversation;
-    },
     queryFn: () => {
       if (!conversationId) {
         return Promise.reject(new Error('Invalid conversation id'));
@@ -45,32 +33,33 @@ export const useConversation = <K extends keyof Conversation>(
     },
   });
 
-  return data;
+  return useMemo(() => ({ conversation }), [conversation]);
 };
 
 export const useAgentId = () => {
-  const agentId = useConversation('agent_id');
-  return agentId ?? oneChatDefaultAgentId;
+  const { conversation } = useConversation();
+  return conversation?.agent_id ?? oneChatDefaultAgentId;
 };
 
 export const useConversationTitle = () => {
-  const title = useConversation('title');
-  return title ?? '';
+  const { conversation } = useConversation();
+  return conversation?.title ?? '';
 };
 
 export const useConversationRounds = () => {
-  const rounds = useConversation('rounds');
+  const { conversation } = useConversation();
   const { pendingMessage, error } = useSendMessage();
 
   const conversationRounds = useMemo(() => {
+    const rounds = conversation?.rounds ?? [];
     if (Boolean(error) && pendingMessage) {
       return [
-        ...(rounds ?? []),
+        ...rounds,
         { input: { message: pendingMessage }, response: { message: '' }, steps: [] },
       ];
     }
-    return rounds ?? [];
-  }, [error, pendingMessage, rounds]);
+    return rounds;
+  }, [conversation?.rounds, error, pendingMessage]);
 
   return conversationRounds;
 };
@@ -78,5 +67,5 @@ export const useConversationRounds = () => {
 export const useHasActiveConversation = () => {
   const conversationId = useConversationId();
   const conversationRounds = useConversationRounds();
-  return Boolean(conversationId || !isEmpty(conversationRounds));
+  return Boolean(conversationId || conversationRounds.length > 0);
 };
