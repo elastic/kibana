@@ -25,6 +25,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Controller } from 'react-hook-form';
+import { labels } from '../../../../utils/i18n';
 
 interface AgentSettingsTabProps {
   control: any;
@@ -143,6 +144,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             label={i18n.translate('xpack.onechat.agents.form.customInstructionsLabel', {
               defaultMessage: 'Custom Instructions',
             })}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {labels.agents.settings.optionalLabel}
+              </EuiText>
+            }
           >
             <Controller
               name="configuration.instructions"
@@ -192,9 +198,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
             label={i18n.translate('xpack.onechat.agents.form.labelsLabel', {
               defaultMessage: 'Labels',
             })}
-            helpText={i18n.translate('xpack.onechat.agents.form.labelsHelp', {
-              defaultMessage: 'Add labels to organize and filter agents.',
-            })}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                {labels.agents.settings.optionalLabel}
+              </EuiText>
+            }
           >
             <Controller
               name="labels"
@@ -342,6 +350,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 label={i18n.translate('xpack.onechat.agents.form.avatarColorLabel', {
                   defaultMessage: 'Avatar color',
                 })}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {labels.agents.settings.optionalLabel}
+                  </EuiText>
+                }
               >
                 <Controller
                   name="avatar_color"
@@ -357,6 +370,11 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                 label={i18n.translate('xpack.onechat.agents.form.avatarSymbolLabel', {
                   defaultMessage: 'Avatar symbol',
                 })}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {labels.agents.settings.optionalLabel}
+                  </EuiText>
+                }
               >
                 <Controller
                   name="avatar_symbol"

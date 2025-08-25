@@ -27,9 +27,11 @@ export const ActiveToolsStatus: React.FC<ActiveToolsStatusProps> = ({
   warningThreshold,
 }) => {
   const isOverThreshold = activeToolsCount > warningThreshold;
+  const isZeroTools = activeToolsCount === 0;
+  const shouldShowWarning = isOverThreshold || isZeroTools;
 
-  const statusColor = isOverThreshold ? 'warning' : 'success';
-  const iconType = isOverThreshold ? 'alert' : 'checkInCircleFilled';
+  const statusColor = shouldShowWarning ? 'warning' : 'success';
+  const iconType = shouldShowWarning ? 'alert' : 'checkInCircleFilled';
 
   return (
     <EuiPanel hasBorder={true} hasShadow={false} paddingSize="m">
