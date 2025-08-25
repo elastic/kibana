@@ -88,7 +88,7 @@ export const WaterfallFlyout = ({
       data-test-subj="waterfallFlyout"
       aria-labelledby="flyoutTitle"
     >
-      <FlyoutContainer size="s" onClose={onFlyoutClose}>
+      <FlyoutContainer size="s" onClose={onFlyoutClose} aria-labelledby="flyoutTitle">
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="s">
             <h2 id="flyoutTitle">
