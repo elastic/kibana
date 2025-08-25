@@ -136,7 +136,8 @@ describe('generate_semconv', () => {
         },
         'webengine.description': {
           name: 'webengine.description',
-          description: 'Additional description of the web engine (e.g. detailed version and edition information).',
+          description:
+            'Additional description of the web engine (e.g. detailed version and edition information).',
           type: 'keyword',
         },
       });
@@ -447,7 +448,7 @@ describe('generate_semconv', () => {
         description: 'Registry field description',
         type: 'keyword',
       });
-      
+
       expect(result.totalFields['metrics.collision']).toEqual({
         name: 'metrics.collision',
         description: 'Metric group',
