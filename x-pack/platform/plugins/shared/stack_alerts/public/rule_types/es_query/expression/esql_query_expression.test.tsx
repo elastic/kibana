@@ -7,7 +7,7 @@
 
 import type { PropsWithChildren } from 'react';
 import React from 'react';
-import { fireEvent, render, waitFor, screen, act } from '@testing-library/react';
+import { fireEvent, render, waitFor, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -94,40 +94,38 @@ describe('EsqlQueryRuleTypeExpression', () => {
   });
 
   test('should render EsqlQueryRuleTypeExpression with chosen time field', async () => {
-    await act(async () => {
-      render(
-        <EsqlQueryExpression
-          unifiedSearch={unifiedSearchMock}
-          ruleInterval="1m"
-          ruleThrottle="1m"
-          alertNotifyWhen="onThrottleInterval"
-          ruleParams={{
-            ...defaultEsqlQueryExpressionParams,
-            timeField: 'event.ingested',
-            esqlQuery: { esql: 'FROM *' },
-          }}
-          setRuleParams={() => {}}
-          setRuleProperty={() => {}}
-          errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
-          data={dataMock}
-          dataViews={dataViewMock}
-          defaultActionGroupId=""
-          actionGroups={[]}
-          charts={chartsStartMock}
-          onChangeMetaData={() => {}}
-        />,
-        {
-          wrapper: AppWrapper,
-        }
-      );
-    });
+    render(
+      <EsqlQueryExpression
+        unifiedSearch={unifiedSearchMock}
+        ruleInterval="1m"
+        ruleThrottle="1m"
+        alertNotifyWhen="onThrottleInterval"
+        ruleParams={{
+          ...defaultEsqlQueryExpressionParams,
+          timeField: 'event.ingested',
+          esqlQuery: { esql: 'FROM *' },
+        }}
+        setRuleParams={() => {}}
+        setRuleProperty={() => {}}
+        errors={{ esqlQuery: [], timeField: [], timeWindowSize: [], groupBy: [] }}
+        data={dataMock}
+        dataViews={dataViewMock}
+        defaultActionGroupId=""
+        actionGroups={[]}
+        charts={chartsStartMock}
+        onChangeMetaData={() => {}}
+      />,
+      {
+        wrapper: AppWrapper,
+      }
+    );
 
     const timeFieldText = await screen.findByText('event.ingested');
     expect(timeFieldText).toBeInTheDocument();
   });
 
   it('should render EsqlQueryRuleTypeExpression with expected components', () => {
-    const result = render(
+    render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
         ruleInterval="1m"
@@ -149,18 +147,18 @@ describe('EsqlQueryRuleTypeExpression', () => {
       }
     );
 
-    expect(result.getByTestId('queryEsqlEditor')).toBeInTheDocument();
-    expect(result.getByTestId('timeFieldSelect')).toBeInTheDocument();
-    expect(result.getByTestId('timeWindowSizeNumber')).toBeInTheDocument();
-    expect(result.getByTestId('timeWindowUnitSelect')).toBeInTheDocument();
-    expect(result.getByTestId('groupByRadioGroup')).toBeInTheDocument();
-    expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
-    expect(result.queryByTestId('testQueryError')).not.toBeInTheDocument();
+    expect(screen.getByTestId('queryEsqlEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('timeFieldSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('timeWindowSizeNumber')).toBeInTheDocument();
+    expect(screen.getByTestId('timeWindowUnitSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('groupByRadioGroup')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('testQueryError')).not.toBeInTheDocument();
   });
 
   test('should render Test Query button disabled if alert params are invalid', async () => {
     hasExpressionValidationErrors.mockReturnValue(true);
-    const result = render(
+    render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
         ruleInterval="1m"
@@ -182,7 +180,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
       }
     );
 
-    const button = result.getByTestId('testQuery');
+    const button = screen.getByTestId('testQuery');
     expect(button).toBeInTheDocument();
     expect(button).toBeDisabled();
   });
@@ -285,7 +283,7 @@ describe('EsqlQueryRuleTypeExpression', () => {
 
   test('should show error message if Test Query is throws error', async () => {
     fetchFieldsFromESQL.mockRejectedValue('Error getting test results.!');
-    const result = render(
+    render(
       <EsqlQueryExpression
         unifiedSearch={unifiedSearchMock}
         ruleInterval="1m"
@@ -307,10 +305,10 @@ describe('EsqlQueryRuleTypeExpression', () => {
       }
     );
 
-    fireEvent.click(result.getByTestId('testQuery'));
+    fireEvent.click(screen.getByTestId('testQuery'));
     await waitFor(() => expect(fetchFieldsFromESQL).toBeCalled());
 
-    expect(result.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
-    expect(result.getByTestId('testQueryError')).toBeInTheDocument();
+    expect(screen.queryByTestId('testQuerySuccess')).not.toBeInTheDocument();
+    expect(screen.getByTestId('testQueryError')).toBeInTheDocument();
   });
 });

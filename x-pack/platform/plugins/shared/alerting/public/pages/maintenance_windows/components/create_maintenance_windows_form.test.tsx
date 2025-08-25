@@ -81,54 +81,56 @@ describe('CreateMaintenanceWindowForm', () => {
     });
 
     useUiSetting.mockReturnValue('America/New_York');
-    appMockRenderer = createAppMockRenderer();
   });
 
   it('renders all form fields except the recurring form fields', async () => {
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
-    expect(result.getByTestId('title-field')).toBeInTheDocument();
-    expect(result.getByTestId('date-field')).toBeInTheDocument();
-    expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
-    expect(result.queryByTestId('timezone-field')).not.toBeInTheDocument();
+    expect(screen.getByTestId('title-field')).toBeInTheDocument();
+    expect(screen.getByTestId('date-field')).toBeInTheDocument();
+    expect(screen.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('recurring-form')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('timezone-field')).not.toBeInTheDocument();
   });
 
   it('renders timezone field when the kibana setting is set to browser', async () => {
     useUiSetting.mockReturnValue('Browser');
 
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
     await waitFor(() => {
       expect(
-        result.queryByTestId('maintenanceWindowCategorySelectionLoading')
+        screen.queryByTestId('maintenanceWindowCategorySelectionLoading')
       ).not.toBeInTheDocument();
     });
 
-    expect(result.getByTestId('title-field')).toBeInTheDocument();
-    expect(result.getByTestId('date-field')).toBeInTheDocument();
-    expect(result.getByTestId('recurring-field')).toBeInTheDocument();
-    expect(result.queryByTestId('recurring-form')).not.toBeInTheDocument();
-    expect(result.getByTestId('timezone-field')).toBeInTheDocument();
+    expect(screen.getByTestId('title-field')).toBeInTheDocument();
+    expect(screen.getByTestId('date-field')).toBeInTheDocument();
+    expect(screen.getByTestId('recurring-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('recurring-form')).not.toBeInTheDocument();
+    expect(screen.getByTestId('timezone-field')).toBeInTheDocument();
   });
 
   it('should initialize the form when no initialValue provided', () => {
-    const result = appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
 
-    const titleInput = within(result.getByTestId('title-field')).getByTestId(
+    const titleInput = within(screen.getByTestId('title-field')).getByTestId(
       'createMaintenanceWindowFormNameInput'
     );
-    const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
+    const dateInputs = within(screen.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId(
+    const recurringInput = within(screen.getByTestId('recurring-field')).getByTestId(
       'createMaintenanceWindowRepeatSwitch'
     );
 
@@ -145,7 +147,8 @@ describe('CreateMaintenanceWindowForm', () => {
       return 'America/Los_Angeles';
     });
 
-    const result = appMockRenderer.render(
+    appMockRenderer = createAppMockRenderer();
+    appMockRenderer.render(
       <CreateMaintenanceWindowForm
         {...formProps}
         initialValue={{
@@ -158,17 +161,17 @@ describe('CreateMaintenanceWindowForm', () => {
       />
     );
 
-    const titleInput = within(result.getByTestId('title-field')).getByTestId(
+    const titleInput = within(screen.getByTestId('title-field')).getByTestId(
       'createMaintenanceWindowFormNameInput'
     );
-    const dateInputs = within(result.getByTestId('date-field')).getAllByLabelText(
+    const dateInputs = within(screen.getByTestId('date-field')).getAllByLabelText(
       // using the aria-label to query for the date-picker input
       'Press the down key to open a popover containing a calendar.'
     );
-    const recurringInput = within(result.getByTestId('recurring-field')).getByTestId(
+    const recurringInput = within(screen.getByTestId('recurring-field')).getByTestId(
       'createMaintenanceWindowRepeatSwitch'
     );
-    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId(
+    const timezoneInput = within(screen.getByTestId('timezone-field')).getByTestId(
       'comboBoxSearchInput'
     );
 

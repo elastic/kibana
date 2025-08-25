@@ -34,9 +34,9 @@ const logger = loggingSystemMock.createLogger();
 
 describe('TheHive - renderParameterTemplates', () => {
   it('should rendered subActionParams with variables', () => {
-    const result = renderParameterTemplates(logger, params, variables);
+    const view = renderParameterTemplates(logger, params, variables);
 
-    expect(result.subActionParams).toEqual({
+    expect(view.subActionParams).toEqual({
       title: 'title',
       description: 'description',
       type: 'type',
@@ -54,9 +54,9 @@ describe('TheHive - renderParameterTemplates', () => {
       ...params,
       subActionParams: { ...params.subActionParams, isRuleSeverity: false },
     };
-    const result = renderParameterTemplates(logger, paramswithoutRuleSeverity, variables);
+    const view = renderParameterTemplates(logger, paramswithoutRuleSeverity, variables);
 
-    expect(result.subActionParams).toEqual({
+    expect(view.subActionParams).toEqual({
       title: 'title',
       description: 'description',
       type: 'type',
@@ -74,8 +74,8 @@ describe('TheHive - renderParameterTemplates', () => {
     jest.spyOn(Mustache, 'render').mockImplementation(() => {
       throw new Error(errorMessage);
     });
-    const result = renderParameterTemplates(logger, params, variables);
-    expect(result.subActionParams).toEqual({
+    const view = renderParameterTemplates(logger, params, variables);
+    expect(view.subActionParams).toEqual({
       body: 'error rendering mustache template "{"observables":[{"datatype":"url","data":"{{url}}"}],"tags":["test"]}": test error',
       description: 'error rendering mustache template "description": test error',
       severity: 2,

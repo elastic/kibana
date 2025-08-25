@@ -98,8 +98,8 @@ describe('useLoadRuleAggregations', () => {
           consumers: [],
         })
       );
-      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
     });
+    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
   });
 
   it('should call loadRuleAggregation API with params and handle result', async () => {
@@ -138,8 +138,8 @@ describe('useLoadRuleAggregations', () => {
           consumers: ['bar'],
         })
       );
-      expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
     });
+    expect(result.current.rulesStatusesTotal).toEqual(MOCK_AGGS.ruleExecutionStatus);
   });
 
   it('should call onError if API fails', async () => {

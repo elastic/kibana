@@ -8,7 +8,7 @@
 import React from 'react';
 import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
@@ -76,59 +76,63 @@ describe('ConnectorFields renders', () => {
     }));
   });
   test('open ai connector fields are rendered', async () => {
-    const { getAllByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={openAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(openAiConnector.config.apiUrl);
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      openAiConnector.config.apiUrl
+    );
+    expect(screen.getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
       openAiConnector.config.apiProvider
     );
-    expect(getAllByTestId('config.organizationId-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.organizationId-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.projectId-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('open-ai-api-doc')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('open-ai-api-keys-doc')[0]).toBeInTheDocument();
   });
 
   test('azure ai connector fields are rendered', async () => {
-    const { getAllByTestId, queryByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={azureConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(azureConnector.config.apiUrl);
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+      azureConnector.config.apiUrl
+    );
+    expect(screen.getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
       azureConnector.config.apiProvider
     );
-    expect(getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
-    expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
-    expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('azure-ai-api-doc')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('azure-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(screen.queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('config.projectId-input')).not.toBeInTheDocument();
   });
 
   test('other open ai connector fields are rendered', async () => {
-    const { getAllByTestId, queryByTestId } = render(
+    render(
       <ConnectorFormTestProvider connector={otherOpenAiConnector}>
         <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
       </ConnectorFormTestProvider>
     );
-    expect(getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiUrl-input')[0]).toHaveValue(
       otherOpenAiConnector.config.apiUrl
     );
-    expect(getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
+    expect(screen.getAllByTestId('config.apiProvider-select')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('config.apiProvider-select')[0]).toHaveValue(
       otherOpenAiConnector.config.apiProvider
     );
-    expect(getAllByTestId('other-ai-api-doc')[0]).toBeInTheDocument();
-    expect(getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
-    expect(queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
-    expect(queryByTestId('config.projectId-input')).not.toBeInTheDocument();
+    expect(screen.getAllByTestId('other-ai-api-doc')[0]).toBeInTheDocument();
+    expect(screen.getAllByTestId('other-ai-api-keys-doc')[0]).toBeInTheDocument();
+    expect(screen.queryByTestId('config.organizationId-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('config.projectId-input')).not.toBeInTheDocument();
   });
   describe('Headers', () => {
     it('toggles headers as expected', async () => {
@@ -274,39 +278,39 @@ describe('ConnectorFields renders', () => {
 
   describe('Dashboard link', () => {
     it('Does not render if isEdit is false and dashboardUrl is defined', async () => {
-      const { queryByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={openAiConnector}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Does not render if isEdit is true and dashboardUrl is null', async () => {
       mockDashboard.mockImplementation((id: string) => ({
         dashboardUrl: null,
       }));
-      const { queryByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={openAiConnector}>
           <ConnectorFields readOnly={false} isEdit registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      expect(queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('link-gen-ai-token-dashboard')).not.toBeInTheDocument();
     });
     it('Renders if isEdit is true and dashboardUrl is defined', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={openAiConnector}>
           <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      expect(getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
+      expect(screen.getByTestId('link-gen-ai-token-dashboard')).toBeInTheDocument();
     });
     it('On click triggers redirect with correct saved object id', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={openAiConnector}>
           <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
-      fireEvent.click(getByTestId('link-gen-ai-token-dashboard'));
+      fireEvent.click(screen.getByTestId('link-gen-ai-token-dashboard'));
       expect(navigateToUrl).toHaveBeenCalledWith(`https://dashboardurl.com/123`);
     });
   });
@@ -318,15 +322,13 @@ describe('ConnectorFields renders', () => {
     });
 
     it('connector validation succeeds when connector config is valid', async () => {
-      const { getByTestId } = render(
+      render(
         <ConnectorFormTestProvider connector={openAiConnector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
@@ -347,15 +349,14 @@ describe('ConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      await act(async () => {
-        await userEvent.click(res.getByTestId('form-test-provide-submit'));
-      });
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });
@@ -376,20 +377,20 @@ describe('ConnectorFields renders', () => {
         },
       };
 
-      const res = render(
+      render(
         <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
           <ConnectorFields readOnly={false} isEdit={false} registerPreSubmitValidator={() => {}} />
         </ConnectorFormTestProvider>
       );
 
-      await userEvent.clear(res.getByTestId(field));
+      await userEvent.clear(screen.getByTestId(field));
       if (value !== '') {
-        await userEvent.type(res.getByTestId(field), value, {
+        await userEvent.type(screen.getByTestId(field), value, {
           delay: 10,
         });
       }
 
-      await userEvent.click(res.getByTestId('form-test-provide-submit'));
+      await userEvent.click(screen.getByTestId('form-test-provide-submit'));
       await waitFor(async () => {
         expect(onSubmit).toHaveBeenCalled();
       });

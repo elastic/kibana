@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { fireEvent, render, screen, waitFor, cleanup } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { RuleEventLogListTableProps } from './rule_event_log_list_table';
@@ -103,7 +103,6 @@ describe('rule_event_log_list_table', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    cleanup();
   });
 
   it('renders correctly', async () => {
@@ -123,9 +122,9 @@ describe('rule_event_log_list_table', () => {
       RULE_EXECUTION_DEFAULT_INITIAL_VISIBLE_COLUMNS.forEach((column) => {
         expect(screen.getByTestId(`dataGridHeaderCell-${column}`)).toBeInTheDocument();
       });
-      expect(screen.getByTestId('eventLogStatusFilter')).toBeInTheDocument();
-      expect(screen.getAllByText('rule execution #1').length).toEqual(4);
     });
+    expect(screen.getByTestId('eventLogStatusFilter')).toBeInTheDocument();
+    expect(screen.getAllByText('rule execution #1').length).toEqual(4);
   });
 
   it('should display loading spinner if loading event logs', async () => {
@@ -146,10 +145,15 @@ describe('rule_event_log_list_table', () => {
     render(<RuleEventLogListWithProvider ruleId={ruleMock.id} />);
 
     const timeStampCell = screen.getByTestId('dataGridHeaderCell-timestamp');
-    fireEvent.click(timeStampCell.querySelector('button')!);
+
+    const button = within(timeStampCell).getByRole('button');
+    fireEvent.click(button);
 
     const timeStampCellPopover = screen.getByTestId('dataGridHeaderCellActionGroup-timestamp');
-    fireEvent.click(timeStampCellPopover.querySelectorAll('li')[0]!.querySelector('button')!);
+    const firstListItemButton = within(timeStampCellPopover).getByRole('button', {
+      name: 'Sort A-Z',
+    });
+    fireEvent.click(firstListItemButton);
 
     await waitFor(() => {
       expect(useLoadRuleEventLogs).toHaveBeenLastCalledWith(
@@ -169,10 +173,14 @@ describe('rule_event_log_list_table', () => {
     render(<RuleEventLogListWithProvider ruleId={ruleMock.id} />);
 
     const timeStampCell = screen.getByTestId('dataGridHeaderCell-timestamp');
-    fireEvent.click(timeStampCell.querySelector('button')!);
+    const button = within(timeStampCell).getByRole('button');
+    fireEvent.click(button);
 
     const timeStampCellPopover = screen.getByTestId('dataGridHeaderCellActionGroup-timestamp');
-    fireEvent.click(timeStampCellPopover.querySelectorAll('li')[1]!.querySelector('button')!);
+    const firstListItemButton = within(timeStampCellPopover).getByRole('button', {
+      name: 'Sort Z-A',
+    });
+    fireEvent.click(firstListItemButton);
 
     await waitFor(() => {
       expect(useLoadRuleEventLogs).toHaveBeenLastCalledWith(
@@ -511,7 +519,7 @@ describe('rule_event_log_list_table', () => {
       render(<RuleEventLogListWithProvider ruleId={ruleMock.id} />);
 
       await waitFor(() => {
-        expect(screen.queryByTestId('exceedLimitLogsCallout')).toBeInTheDocument();
+        expect(screen.getByTestId('exceedLimitLogsCallout')).toBeInTheDocument();
       });
     });
 

@@ -64,17 +64,16 @@ describe('useGetRuleTagsQuery', () => {
 
     rerender();
     await waitFor(() => {
-      expect(mockGetRuleTags).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          search: 'test',
-          perPage: 50,
-          page: 1,
-        })
-      );
-
       expect(result.current.tags).toEqual(MOCK_TAGS);
-      expect(result.current.hasNextPage).toEqual(false);
     });
+    expect(result.current.hasNextPage).toEqual(false);
+    expect(mockGetRuleTags).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        search: 'test',
+        perPage: 50,
+        page: 1,
+      })
+    );
   });
 
   it('should support pagination', async () => {
@@ -100,16 +99,15 @@ describe('useGetRuleTagsQuery', () => {
 
     rerender();
     await waitFor(() => {
-      expect(mockGetRuleTags).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          perPage: 5,
-          page: 1,
-        })
-      );
-
       expect(result.current.tags).toEqual(['a', 'b', 'c', 'd', 'e']);
-      expect(result.current.hasNextPage).toEqual(true);
     });
+    expect(result.current.hasNextPage).toEqual(true);
+    expect(mockGetRuleTags).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        perPage: 5,
+        page: 1,
+      })
+    );
 
     mockGetRuleTags.mockResolvedValue({
       data: ['a', 'b', 'c', 'd', 'e'],
@@ -155,16 +153,15 @@ describe('useGetRuleTagsQuery', () => {
 
     rerender();
     await waitFor(() => {
-      expect(mockGetRuleTags).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          perPage: 5,
-          page: 1,
-        })
-      );
-
-      expect(result.current.tags).toEqual([]);
       expect(result.current.hasNextPage).toEqual(false);
     });
+    expect(result.current.tags).toEqual([]);
+    expect(mockGetRuleTags).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        perPage: 5,
+        page: 1,
+      })
+    );
   });
 
   it('should call onError if API fails', async () => {

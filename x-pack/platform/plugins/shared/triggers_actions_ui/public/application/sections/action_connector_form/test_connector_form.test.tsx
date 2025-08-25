@@ -156,9 +156,9 @@ describe('test_connector_form', () => {
 
     await waitFor(() => {
       expect(screen.getByTestId('executionModeFieldTest')).toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
     });
+    expect(screen.queryByTestId('executionModeFieldActionForm')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('executionModeFieldUndefined')).not.toBeInTheDocument();
   });
 
   it('renders successful results', async () => {

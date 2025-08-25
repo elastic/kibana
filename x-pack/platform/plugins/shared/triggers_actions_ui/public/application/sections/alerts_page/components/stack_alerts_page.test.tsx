@@ -11,6 +11,7 @@ import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_a
 import { alertsTableQueryClient } from '@kbn/response-ops-alerts-table/query_client';
 import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
+import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
 import { getRuleTypes } from '@kbn/response-ops-rules-apis/apis/get_rule_types';
@@ -38,8 +39,10 @@ jest.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => ({
 jest.mock('../../../../common/get_experimental_features');
 jest.mocked(getIsExperimentalFeatureEnabled).mockReturnValue(false);
 
+let appMockRender: AppMockRenderer;
+
 describe('StackAlertsPage', () => {
-  const appMockRender = createAppMockRenderer({
+  appMockRender = createAppMockRenderer({
     additionalServices: {},
   });
 

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor, screen, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { mockBrowserFields } from '../../mock';
 import { FIELD_BROWSER_WIDTH } from '../../helpers';
@@ -27,106 +27,106 @@ const renderComponent = (props: Partial<FieldBrowserProps> = {}) =>
 
 describe('FieldsBrowser', () => {
   it('should render the Fields button, which displays the fields browser on click', () => {
-    const result = renderComponent();
+    renderComponent();
 
-    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
+    expect(screen.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 
   describe('toggleShow', () => {
     it('should NOT render the fields browser until the Fields button is clicked', () => {
-      const result = renderComponent();
+      renderComponent();
 
-      expect(result.queryByTestId('fields-browser-container')).toBeNull();
+      expect(screen.queryByTestId('fields-browser-container')).toBeNull();
     });
 
     it('should render the fields browser when the Fields button is clicked', async () => {
-      const result = renderComponent();
+      renderComponent();
 
-      result.getByTestId('show-field-browser').click();
+      screen.getByTestId('show-field-browser').click();
       await waitFor(() => {
         // the container is rendered now
-        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
-        // by default, no categories are selected
-        expect(result.getByTestId('category-badges')).toHaveTextContent('');
-        // the view: all button is shown by default
-        result.getByText('View: all');
+        expect(screen.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
+      // by default, no categories are selected
+      expect(screen.getByTestId('category-badges')).toHaveTextContent('');
+      // the view: all button is shown by default
+      screen.getByText('View: all');
     });
   });
 
   describe('updateSelectedCategoryIds', () => {
     it('should add a selected category, which creates the category badge', async () => {
-      const result = renderComponent();
+      renderComponent();
 
-      result.getByTestId('show-field-browser').click();
+      screen.getByTestId('show-field-browser').click();
       await waitFor(() => {
-        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+        expect(screen.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
 
       await act(async () => {
-        result.getByTestId('categories-filter-button').click();
+        screen.getByTestId('categories-filter-button').click();
       });
       await act(async () => {
-        result.getByTestId('categories-selector-option-base').click();
+        screen.getByTestId('categories-selector-option-base').click();
       });
 
-      expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
+      expect(screen.getByTestId('category-badge-base')).toBeInTheDocument();
     });
 
     it('should remove a selected category, which deletes the category badge', async () => {
-      const result = renderComponent();
+      renderComponent();
 
-      result.getByTestId('show-field-browser').click();
+      screen.getByTestId('show-field-browser').click();
       await waitFor(() => {
-        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+        expect(screen.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
 
       await act(async () => {
-        result.getByTestId('categories-filter-button').click();
+        screen.getByTestId('categories-filter-button').click();
       });
       await act(async () => {
-        result.getByTestId('categories-selector-option-base').click();
+        screen.getByTestId('categories-selector-option-base').click();
       });
-      expect(result.getByTestId('category-badge-base')).toBeInTheDocument();
+      expect(screen.getByTestId('category-badge-base')).toBeInTheDocument();
 
       await act(async () => {
-        result.getByTestId('category-badge-unselect-base').click();
+        screen.getByTestId('category-badge-unselect-base').click();
       });
-      expect(result.queryByTestId('category-badge-base')).toBeNull();
+      expect(screen.queryByTestId('category-badge-base')).toBeNull();
     });
 
     it('should update the available categories according to the search input', async () => {
-      const result = renderComponent();
+      renderComponent();
 
-      result.getByTestId('show-field-browser').click();
+      screen.getByTestId('show-field-browser').click();
       await waitFor(() => {
-        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+        expect(screen.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
 
-      result.getByTestId('categories-filter-button').click();
+      screen.getByTestId('categories-filter-button').click();
       await waitForEuiPopoverOpen();
-      expect(result.getByTestId('categories-selector-option-base')).toBeVisible();
+      expect(screen.getByTestId('categories-selector-option-base')).toBeVisible();
 
-      fireEvent.change(result.getByTestId('field-search'), { target: { value: 'client' } });
+      fireEvent.change(screen.getByTestId('field-search'), { target: { value: 'client' } });
       await waitFor(() => {
-        expect(result.queryByTestId('categories-selector-option-base')).toBeNull();
+        expect(screen.queryByTestId('categories-selector-option-base')).toBeNull();
       });
-      expect(result.queryByTestId('categories-selector-option-client')).toBeInTheDocument();
+      expect(screen.getByTestId('categories-selector-option-client')).toBeInTheDocument();
     });
   });
 
   it('should render the Fields Browser button as a settings gear when the isEventViewer prop is true', () => {
     const isEventViewer = true;
-    const result = renderComponent({ isEventViewer });
+    renderComponent({ isEventViewer });
 
-    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
+    expect(screen.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 
   it('should render the Fields Browser button as a settings gear when the isEventViewer prop is false', () => {
     const isEventViewer = false;
 
-    const result = renderComponent({ isEventViewer, width: FIELD_BROWSER_WIDTH });
-    expect(result.getByTestId('show-field-browser')).toBeInTheDocument();
+    renderComponent({ isEventViewer, width: FIELD_BROWSER_WIDTH });
+    expect(screen.getByTestId('show-field-browser')).toBeInTheDocument();
   });
 
   describe('options.preselectedCategoryIds', () => {
@@ -134,19 +134,22 @@ describe('FieldsBrowser', () => {
       const agentFieldsCount = Object.keys(mockBrowserFields.agent?.fields || {}).length;
 
       // Narrowing the selection to 'agent' only
-      const result = renderComponent({ options: { preselectedCategoryIds: ['agent'] } });
+      renderComponent({ options: { preselectedCategoryIds: ['agent'] } });
 
-      result.getByTestId('show-field-browser').click();
+      screen.getByTestId('show-field-browser').click();
 
       // Wait for the modal to open
       await waitFor(() => {
-        expect(result.getByTestId('fields-browser-container')).toBeInTheDocument();
+        expect(screen.getByTestId('fields-browser-container')).toBeInTheDocument();
       });
 
       // Check if there are only 4 fields in the table
-      expect(result.queryByTestId('field-table')?.querySelectorAll('tbody tr')).toHaveLength(
-        agentFieldsCount
-      );
+      const table = screen.queryByTestId('field-table');
+      expect(table).not.toBe(null);
+      const rowGroups = within(table!).getAllByRole('rowgroup');
+      const tbody = rowGroups[1];
+      const dataRows = within(tbody).getAllByRole('row');
+      expect(dataRows).toHaveLength(agentFieldsCount);
     });
   });
 });

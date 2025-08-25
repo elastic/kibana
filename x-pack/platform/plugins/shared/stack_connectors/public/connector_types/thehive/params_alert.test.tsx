@@ -61,28 +61,28 @@ describe('TheHiveParamsFields renders', () => {
   it('all Params fields is rendered', () => {
     const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
 
-    expect(getByTestId('titleInput')).toBeInTheDocument();
-    expect(getByTestId('descriptionTextArea')).toBeInTheDocument();
-    expect(getByTestId('tagsInput')).toBeInTheDocument();
-    expect(getByTestId('severitySelectInput')).toBeInTheDocument();
-    expect(getByTestId('rule-severity-toggle')).toBeInTheDocument();
-    expect(getByTestId('tlpSelectInput')).toBeInTheDocument();
-    expect(getByTestId('typeInput')).toBeInTheDocument();
-    expect(getByTestId('sourceInput')).toBeInTheDocument();
-    expect(getByTestId('sourceRefInput')).toBeInTheDocument();
-    expect(getByTestId('bodyJsonEditor')).toBeInTheDocument();
+    expect(screen.getByTestId('titleInput')).toBeInTheDocument();
+    expect(screen.getByTestId('descriptionTextArea')).toBeInTheDocument();
+    expect(screen.getByTestId('tagsInput')).toBeInTheDocument();
+    expect(screen.getByTestId('severitySelectInput')).toBeInTheDocument();
+    expect(screen.getByTestId('rule-severity-toggle')).toBeInTheDocument();
+    expect(screen.getByTestId('tlpSelectInput')).toBeInTheDocument();
+    expect(screen.getByTestId('typeInput')).toBeInTheDocument();
+    expect(screen.getByTestId('sourceInput')).toBeInTheDocument();
+    expect(screen.getByTestId('sourceRefInput')).toBeInTheDocument();
+    expect(screen.getByTestId('bodyJsonEditor')).toBeInTheDocument();
 
-    expect(getByTestId('severitySelectInput')).toHaveValue('2');
-    expect(getByTestId('tlpSelectInput')).toHaveValue('2');
-    expect(getByTestId('rule-severity-toggle')).not.toBeChecked();
+    expect(screen.getByTestId('severitySelectInput')).toHaveValue('2');
+    expect(screen.getByTestId('tlpSelectInput')).toHaveValue('2');
+    expect(screen.getByTestId('rule-severity-toggle')).not.toBeChecked();
   });
 
   it('hides the severity select input when rule severity toggle is enabled', () => {
-    const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
-    const ruleSeverityToggleEl = getByTestId('rule-severity-toggle');
+    render(<TheHiveParamsAlertFields {...defaultProps} />);
+    const ruleSeverityToggleEl = screen.getByTestId('rule-severity-toggle');
 
     fireEvent.click(ruleSeverityToggleEl);
-    expect(getByTestId('rule-severity-toggle')).toBeEnabled();
+    expect(screen.getByTestId('rule-severity-toggle')).toBeEnabled();
     expect(editAction).toHaveBeenCalledWith(
       'subActionParams',
       { ...subActionParams, severity: 2, isRuleSeverity: true },

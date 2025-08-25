@@ -25,7 +25,7 @@ describe('AlertsSolutionSelector', () => {
         onSolutionChange={jest.fn()}
       />
     );
-    expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
+    expect(screen.getByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
     expect(screen.getAllByRole('option')).toHaveLength(3);
     expect(screen.getByText('Observability')).toBeInTheDocument();
@@ -42,7 +42,7 @@ describe('AlertsSolutionSelector', () => {
         onSolutionChange={onSolutionChange}
       />
     );
-    expect(screen.queryByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
+    expect(screen.getByTestId(SOLUTION_SELECTOR_SUBJ)).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button'));
     await userEvent.click(screen.getByText('Observability'));
     expect(onSolutionChange).toHaveBeenCalledWith('observability');

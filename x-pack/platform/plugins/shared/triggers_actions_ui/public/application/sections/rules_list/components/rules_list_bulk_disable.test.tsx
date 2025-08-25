@@ -9,12 +9,12 @@ import { usePerformanceContext } from '@kbn/ebt-tools';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
-  cleanup,
   fireEvent,
   render,
   screen,
   waitFor,
   waitForElementToBeRemoved,
+  within,
 } from '@testing-library/react';
 import * as React from 'react';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
@@ -174,10 +174,10 @@ describe('Rules list Bulk Disable', () => {
   afterEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
-    cleanup();
   });
 
   beforeEach(async () => {
+    // eslint-disable-next-line testing-library/no-render-in-lifecycle
     renderWithProviders(<RulesList />);
     await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -208,9 +208,12 @@ describe('Rules list Bulk Disable', () => {
 
     expect(bulkDisableRules).toHaveBeenCalled();
 
-    expect(screen.getByTestId('checkboxSelectRow-1').closest('tr')).not.toHaveClass(
-      'euiTableRow-isSelected'
-    );
+    const rows = screen.getAllByRole('row');
+    const row = rows.find((r) => {
+      const checkbox = within(r).queryByTestId('checkboxSelectRow-1');
+      return checkbox !== null;
+    });
+    expect(row).not.toHaveClass('euiTableRow-isSelected');
   });
 
   describe('Toast', () => {
