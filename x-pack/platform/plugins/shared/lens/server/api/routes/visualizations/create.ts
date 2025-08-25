@@ -20,7 +20,7 @@ import {
   lensCreateOptionsSchema,
   lensSavedObjectSchema,
 } from '../../../content_management/v1';
-import { RegisterAPIRouteFn } from '../../types';
+import type { RegisterAPIRouteFn } from '../../types';
 
 export const registerLensVisualizationsCreateAPIRoute: RegisterAPIRouteFn = (
   router,

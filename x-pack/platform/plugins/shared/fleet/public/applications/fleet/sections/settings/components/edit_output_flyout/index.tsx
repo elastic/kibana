@@ -31,6 +31,7 @@ import {
   EuiText,
   EuiAccordion,
   EuiCode,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -225,11 +226,13 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
     );
   };
 
+  const modalTitleId = useGeneratedHtmlId();
+
   return (
-    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH}>
+    <EuiFlyout onClose={onClose} maxWidth={MAX_FLYOUT_WIDTH} aria-labelledby={modalTitleId}>
       <EuiFlyoutHeader hasBorder={true}>
         <EuiTitle size="m">
-          <h2 id="FleetEditOutputFlyoutTitle">
+          <h2 id={modalTitleId}>
             {!output ? (
               <FormattedMessage
                 id="xpack.fleet.settings.editOutputFlyout.createTitle"

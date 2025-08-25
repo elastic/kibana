@@ -9,7 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart } from '@kbn/core/public';
 
 import {
   EuiLink,
@@ -26,11 +26,11 @@ import {
   htmlIdGenerator,
 } from '@elastic/eui';
 
-import { Index } from '@kbn/index-management-plugin/common';
+import type { Index } from '@kbn/index-management-plugin/common';
 import { loadPolicies, addLifecyclePolicyToIndex } from '../../application/services/api';
 import { showApiError } from '../../application/services/api_errors';
 import { toasts } from '../../application/services/notification';
-import { PolicyFromES } from '../../../common/types';
+import type { PolicyFromES } from '../../../common/types';
 
 interface Props {
   indexName: string;
@@ -239,7 +239,10 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
   render() {
     const { policies, isLoading } = this.state;
     const { indexName, closeModal, getUrlForApp } = this.props;
-    const modalTitleId = htmlIdGenerator()('confirmModalTitle');
+    const idGenerator = htmlIdGenerator();
+    const modalTitleId = idGenerator('modal');
+    const confirmModalId = idGenerator('confirmModal');
+
     const title = (
       <FormattedMessage
         id="xpack.indexLifecycleMgmt.indexManagementTable.addLifecyclePolicyConfirmModal.modalTitle"
@@ -251,9 +254,9 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     );
     if (!isLoading && !policies.length) {
       return (
-        <EuiModal onClose={closeModal}>
+        <EuiModal onClose={closeModal} aria-labelledby={modalTitleId}>
           <EuiModalHeader>
-            <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+            <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
           </EuiModalHeader>
 
           <EuiModalBody>
@@ -286,9 +289,9 @@ export class AddLifecyclePolicyConfirmModal extends Component<Props, State> {
     }
     return (
       <EuiConfirmModal
-        aria-labelledby={modalTitleId}
+        aria-labelledby={confirmModalId}
         title={title}
-        titleProps={{ id: modalTitleId }}
+        titleProps={{ id: confirmModalId }}
         onCancel={closeModal}
         onConfirm={this.addPolicy}
         cancelButtonText={

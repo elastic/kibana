@@ -7752,7 +7752,7 @@
               "\nThe event type"
             ],
             "signature": [
-              "\"click\" | \"contextmenu\" | \"dblclick\" | \"mousemove\" | \"mouseup\" | \"mousedown\" | \"mouseout\" | \"mouseover\" | \"mouseenter\" | \"mouseleave\""
+              "\"click\" | \"dblclick\" | \"contextmenu\" | \"mousemove\" | \"mouseup\" | \"mousedown\" | \"mouseout\" | \"mouseover\" | \"mouseenter\" | \"mouseleave\""
             ],
             "path": "node_modules/maplibre-gl/dist/maplibre-gl.d.ts",
             "deprecated": false,

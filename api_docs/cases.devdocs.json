@@ -1014,6 +1014,20 @@
           "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerSetup.config",
+          "type": "Object",
+          "tags": [],
+          "label": "config",
+          "description": [],
+          "signature": [
+            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "setup",
@@ -1114,6 +1128,20 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "cases",
+          "id": "def-server.CasesServerStart.config",
+          "type": "Object",
+          "tags": [],
+          "label": "config",
+          "description": [],
+          "signature": [
+            "{ readonly enabled: boolean; readonly stack: Readonly<{} & { enabled: boolean; }>; readonly analytics: Readonly<{} & { index: Readonly<{} & { enabled: boolean; }>; }>; readonly markdownPlugins: Readonly<{} & { lens: boolean; }>; readonly files: Readonly<{ maxSize?: number | undefined; } & { allowedMimeTypes: string[]; }>; }"
+          ],
+          "path": "x-pack/platform/plugins/shared/cases/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

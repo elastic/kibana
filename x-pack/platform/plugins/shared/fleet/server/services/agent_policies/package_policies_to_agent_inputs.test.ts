@@ -30,6 +30,22 @@ packageInfoCache.set('limited_package-0.0.0', {
     },
   ],
 });
+packageInfoCache.set('mock_package_agentless-0.0.0', {
+  name: 'mock_package_agentless',
+  version: '0.0.0',
+  policy_templates: [
+    {
+      multiple: true,
+      deployment_modes: {
+        agentless: {
+          organization: 'elastic',
+          division: 'engineering',
+          team: 'security-service-integrations',
+        },
+      },
+    },
+  ],
+});
 
 describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
   const mockPackagePolicy: PackagePolicy = {
@@ -924,6 +940,110 @@ describe('Fleet - storedPackagePoliciesToAgentInputs', () => {
           },
         },
         inputVar: 'input-value',
+      },
+    ]);
+  });
+
+  it('returns agent inputs with add fields process from global data tags excluding agentless defaults', async () => {
+    expect(
+      await storedPackagePoliciesToAgentInputs(
+        [
+          {
+            ...mockPackagePolicy,
+            name: 'mock_package_agentless-policy',
+            package: {
+              name: 'mock_package_agentless',
+              title: 'Mock package agentless',
+              version: '0.0.0',
+            },
+            inputs: [
+              {
+                ...mockInput,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+              {
+                ...mockInput2,
+                compiled_input: {
+                  inputVar: 'input-value',
+                },
+                streams: [],
+              },
+            ],
+          },
+        ],
+        packageInfoCache,
+        undefined,
+        undefined,
+        [
+          { name: 'testName', value: 'testValue' },
+          { name: 'testName2', value: 'testValue2' },
+          { name: 'organization', value: 'elastic' },
+          { name: 'division', value: 'engineering' },
+          { name: 'team', value: 'security-service-integrations' },
+          { name: 'organization', value: 'foo' },
+        ]
+      )
+    ).toEqual([
+      {
+        id: 'test-logs-some-uuid',
+        name: 'mock_package_agentless-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+                organization: 'foo',
+              },
+              target: '',
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-logs',
+        data_stream: { namespace: 'default' },
+        use_output: 'default',
+        meta: {
+          package: {
+            name: 'mock_package_agentless',
+            version: '0.0.0',
+          },
+        },
+        inputVar: 'input-value',
+      },
+      {
+        id: 'test-metrics-some-template-some-uuid',
+        data_stream: {
+          namespace: 'default',
+        },
+        inputVar: 'input-value',
+        meta: {
+          package: {
+            name: 'mock_package_agentless',
+            version: '0.0.0',
+          },
+        },
+        name: 'mock_package_agentless-policy',
+        package_policy_id: 'some-uuid',
+        processors: [
+          {
+            add_fields: {
+              target: '',
+              fields: {
+                testName: 'testValue',
+                testName2: 'testValue2',
+                organization: 'foo',
+              },
+            },
+          },
+        ],
+        revision: 1,
+        type: 'test-metrics',
+        use_output: 'default',
       },
     ]);
   });

@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { AGENTLESS_DISABLED_INPUTS } from '../constants';
+import {
+  AGENTLESS_DISABLED_INPUTS,
+  AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+  AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+  AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+} from '../constants';
 import { PackagePolicyValidationError } from '../errors';
 import type { NewPackagePolicyInput, PackageInfo, RegistryPolicyTemplate } from '../types';
 
@@ -41,19 +46,24 @@ function extractRegistryInputsForDeploymentMode(
   return inputs;
 }
 
+// Checks if a package has a policy template that supports agentless
+// Provide a specific integration policy template name to check if it alone supports agentless
 export const isAgentlessIntegration = (
-  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
+  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined,
+  integrationToEnable?: string
 ) => {
-  if (
-    packageInfo?.policy_templates &&
-    packageInfo?.policy_templates.length > 0 &&
-    !!packageInfo?.policy_templates.find(
-      (policyTemplate) => policyTemplate?.deployment_modes?.agentless.enabled === true
-    )
-  ) {
-    return true;
+  if (integrationToEnable) {
+    return Boolean(
+      packageInfo?.policy_templates?.find(({ name }) => name === integrationToEnable)
+        ?.deployment_modes?.agentless?.enabled === true
+    );
   }
-  return false;
+
+  return Boolean(
+    packageInfo?.policy_templates?.some(
+      (policyTemplate) => policyTemplate?.deployment_modes?.agentless?.enabled === true
+    )
+  );
 };
 
 export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyName: string) => {
@@ -103,6 +113,15 @@ export function isInputAllowedForDeploymentMode(
     return true;
   }
 
+  // Check first if policy_template for input supports the deployment type
+  if (
+    packageInfo &&
+    input.policy_template &&
+    !integrationSupportsDeploymentMode(deploymentMode, packageInfo, input.policy_template)
+  ) {
+    return false;
+  }
+
   // Find the registry input definition for this input type and policy template
   const registryInput = extractRegistryInputsForDeploymentMode(packageInfo).find(
     (rInput) =>
@@ -125,6 +144,24 @@ export function isInputAllowedForDeploymentMode(
   return true; // Allow all inputs for default mode when deployment_modes is not specified
 }
 
+const integrationSupportsDeploymentMode = (
+  deploymentMode: string,
+  packageInfo: PackageInfo,
+  integrationName: string
+) => {
+  if (deploymentMode === 'agentless') {
+    return isAgentlessIntegration(packageInfo, integrationName);
+  }
+
+  const integration = packageInfo.policy_templates?.find(({ name }) => name === integrationName);
+
+  if (integration?.deployment_modes?.default) {
+    return integration.deployment_modes?.default.enabled;
+  }
+
+  return true;
+};
+
 /*
  * Throw error if trying to enabling an input that is not allowed in agentless
  */
@@ -143,3 +180,44 @@ export function validateDeploymentModesForInputs(
     }
   });
 }
+
+/**
+ * Derive global data tags for agentless agent policies from package agentless info.
+ */
+export const getAgentlessGlobalDataTags = (packageInfo?: PackageInfo) => {
+  if (
+    !packageInfo?.policy_templates &&
+    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
+  ) {
+    return undefined;
+  }
+  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
+    (policy) => policy.deployment_modes
+  );
+
+  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
+  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
+  if (
+    agentlessInfo === undefined ||
+    !agentlessInfo.organization ||
+    !agentlessInfo.division ||
+    !agentlessInfo.team
+  ) {
+    return undefined;
+  }
+
+  return [
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_ORGANIZATION,
+      value: agentlessInfo.organization,
+    },
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_DIVISION,
+      value: agentlessInfo.division,
+    },
+    {
+      name: AGENTLESS_GLOBAL_TAG_NAME_TEAM,
+      value: agentlessInfo.team,
+    },
+  ];
+};

@@ -7,7 +7,7 @@
 
 import type { Type } from '@kbn/config-schema';
 import type { Logger } from '@kbn/logging';
-import type { LicenseType } from '@kbn/licensing-plugin/common/types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 import type { Method, AxiosRequestConfig } from 'axios';
 import type { KibanaRequest } from '@kbn/core-http-server';

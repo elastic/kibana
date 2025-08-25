@@ -6,10 +6,8 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Location } from 'history';
-import { parse } from 'query-string';
 import { i18n } from '@kbn/i18n';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
@@ -22,8 +20,9 @@ import {
   EuiContextMenu,
   EuiPopover,
 } from '@elastic/eui';
+import type { Location } from 'history';
 
-import { Pipeline } from '../../../../common/types';
+import type { Pipeline } from '../../../../common/types';
 import { useKibana, SectionLoading } from '../../../shared_imports';
 import { UIM_PIPELINES_LIST_LOAD } from '../../constants';
 import {
@@ -42,8 +41,8 @@ import { getErrorText } from '../utils';
 import { PipelineFlyout } from './pipeline_flyout';
 
 const getPipelineNameFromLocation = (location: Location) => {
-  const { pipeline } = parse(location.search.substring(1));
-  return pipeline;
+  const params = new URLSearchParams(location.search);
+  return params.get('pipeline');
 };
 
 export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
@@ -51,9 +50,10 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   location,
 }) => {
   const { services } = useKibana();
-  const pipelineNameFromLocation = getPipelineNameFromLocation(location);
 
-  const [showFlyout, setShowFlyout] = useState<boolean>(false);
+  const pipelineNameFromLocation = getPipelineNameFromLocation(history.location);
+
+  const [showFlyout, setShowFlyout] = useState<boolean>(pipelineNameFromLocation !== null);
   const [showPopover, setShowPopover] = useState<boolean>(false);
 
   const [pipelinesToDelete, setPipelinesToDelete] = useState<Pipeline[]>([]);
@@ -67,12 +67,6 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
     services.breadcrumbs.setBreadcrumbs('home');
   }, [services.metric, services.breadcrumbs]);
 
-  useEffect(() => {
-    if (pipelineNameFromLocation && data?.length) {
-      setShowFlyout(true);
-    }
-  }, [pipelineNameFromLocation, data]);
-
   const goToEditPipeline = (pipelineName: string) => {
     const encodedParam = encodeURIComponent(pipelineName);
     history.push(getEditPath({ pipelineName: encodedParam }));
@@ -81,6 +75,11 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   const goToClonePipeline = (clonedPipelineName: string) => {
     const encodedParam = encodeURIComponent(clonedPipelineName);
     history.push(getClonePath({ clonedPipelineName: encodedParam }));
+  };
+
+  const goToCreatePipeline = (pipelineName: string) => {
+    const encodedParam = encodeURIComponent(pipelineName);
+    history.push(getCreatePath({ pipelineName: encodedParam }));
   };
 
   const goHome = () => {
@@ -252,14 +251,22 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
         onDeletePipelineClick={setPipelinesToDelete}
         onClonePipelineClick={goToClonePipeline}
         pipelines={data as Pipeline[]}
+        openFlyout={(name) => {
+          const params = new URLSearchParams(history.location.search);
+          params.set('pipeline', name);
+          history.push({
+            pathname: '',
+            search: params.toString(),
+          });
+          setShowFlyout(true);
+        }}
       />
 
-      {showFlyout && (
+      {showFlyout && pipelineNameFromLocation && (
         <PipelineFlyout
-          pipeline={pipelineNameFromLocation}
-          onClose={() => {
-            goHome();
-          }}
+          ingestPipeline={pipelineNameFromLocation}
+          onClose={goHome}
+          onCreateClick={goToCreatePipeline}
           onEditClick={goToEditPipeline}
           onCloneClick={goToClonePipeline}
           onDeleteClick={setPipelinesToDelete}

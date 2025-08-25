@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KueryNode } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import {
   EuiConfirmModal,
@@ -20,11 +20,9 @@ import {
   EuiButtonEmpty,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import {
-  withBulkRuleOperations,
-  ComponentOpts as BulkOperationsComponentOpts,
-} from '../../common/components/with_bulk_rule_api_operations';
-import { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
+import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import type { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
 import { SnoozePanel, futureTimeToInterval } from './rule_snooze';
 import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -135,6 +133,8 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
     return deleteConfirmPlural(numberOfSelectedRules);
   }, [rules, filter, numberOfSelectedRules]);
 
+  const modalTitleId = useGeneratedHtmlId();
+
   if (bulkEditAction === 'unsnooze' && (rules.length || filter)) {
     return (
       <EuiConfirmModal
@@ -164,9 +164,9 @@ export const BulkSnoozeModal = (props: BulkSnoozeModalProps) => {
 
   if (bulkEditAction === 'snooze' && (rules.length || filter)) {
     return (
-      <EuiModal onClose={onClose}>
+      <EuiModal onClose={onClose} aria-labelledby={modalTitleId}>
         <EuiModalHeader>
-          <EuiModalHeaderTitle>
+          <EuiModalHeaderTitle id={modalTitleId}>
             <FormattedMessage
               id="xpack.triggersActionsUI.sections.rulesList.bulkSnoozeModal.modalTitle"
               defaultMessage="Add snooze now"

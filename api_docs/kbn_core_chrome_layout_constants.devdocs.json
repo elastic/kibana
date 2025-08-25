@@ -46,7 +46,7 @@
         "tags": [],
         "label": "APP_MAIN_SCROLL_CONTAINER_ID",
         "description": [
-          "\nThe ID of the main scroll container in the application.\n`document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID)` can be used to find the main scroll container"
+          "\nThe ID of the main scroll container in the application.\n`document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID)` can be used to find the main scroll container."
         ],
         "signature": [
           "\"app-main-scroll\""
@@ -55,8 +55,77 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.MAIN_CONTENT_SELECTORS",
+        "type": "Array",
+        "tags": [],
+        "label": "MAIN_CONTENT_SELECTORS",
+        "description": [
+          "\nThe ID of the main content container in the application, regardless of the type of the layout used.\n`document.querySelector(MAIN_CONTENT_SELECTORS.join(','))` can be used to find the main content container.\n\nTODO: Potentially allow this to be customizable per-plugin"
+        ],
+        "signature": [
+          "string[]"
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/core-chrome-layout-constants",
+        "id": "def-common.euiIncludeSelectorInFocusTrap",
+        "type": "Object",
+        "tags": [],
+        "label": "euiIncludeSelectorInFocusTrap",
+        "description": [
+          "\nThe selector for elements that should be included in the focus trap of a flyout.\nThis will allow the flyout focus trap to include header and sidenav by default."
+        ],
+        "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.euiIncludeSelectorInFocusTrap.prop",
+            "type": "Object",
+            "tags": [],
+            "label": "prop",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-chrome-layout-constants",
+                "id": "def-common.euiIncludeSelectorInFocusTrap.prop.dataeuiincludesinflyoutfocustrap",
+                "type": "boolean",
+                "tags": [],
+                "label": "'data-eui-includes-in-flyout-focus-trap'",
+                "description": [],
+                "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/core-chrome-layout-constants",
+            "id": "def-common.euiIncludeSelectorInFocusTrap.selector",
+            "type": "string",
+            "tags": [],
+            "label": "selector",
+            "description": [],
+            "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

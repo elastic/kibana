@@ -8,7 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import _ from 'lodash';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,
@@ -26,7 +26,7 @@ import {
   EVENT_ACTION_EXEC,
   EVENT_ACTION_FORK,
 } from '../../common/constants';
-import { ProcessEvent } from '../../common';
+import type { ProcessEvent } from '../../common';
 import { searchAlerts } from './alerts_route';
 import { searchProcessWithIOEvents } from './io_events_route';
 

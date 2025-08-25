@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FunctionDefinition, FunctionDefinitionTypes } from '@kbn/esql-ast';
+import type { FunctionDefinition } from '@kbn/esql-ast';
+import { FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { Location } from '@kbn/esql-ast/src/commands_registry/types';
 import { setTestFunctions } from '@kbn/esql-ast/src/definitions/utils/test_functions';
 import { setup } from './helpers';
@@ -351,49 +352,6 @@ describe('function validation', () => {
       await expectErrors('FROM a_index | EVAL TEST("", "")', []);
     });
 
-    it('validates "all" parameter (wildcard)', async () => {
-      setTestFunctions([
-        {
-          name: 'supports_all',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', supportsWildcard: true }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-        {
-          name: 'does_not_support_all',
-          type: FunctionDefinitionTypes.SCALAR,
-          description: '',
-          locationsAvailable: [Location.EVAL],
-          signatures: [
-            {
-              params: [{ name: 'arg1', type: 'keyword', supportsWildcard: false }],
-              returnType: 'keyword',
-            },
-          ],
-        },
-      ]);
-
-      const { expectErrors } = await setup();
-
-      await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*)', []);
-      await expectErrors('FROM a_index | EVAL SUPPORTS_ALL(*, "")', [
-        // It may seem strange that these are syntax errors, but the grammar actually doesn't allow
-        // for a function to support the asterisk and have additional arguments. Testing it here so we'll
-        // be notified if that changes.
-        `SyntaxError: extraneous input ')' expecting <EOF>`,
-        `SyntaxError: no viable alternative at input 'SUPPORTS_ALL(*,'`,
-      ]);
-      await expectErrors('FROM a_index | EVAL DOES_NOT_SUPPORT_ALL(*)', [
-        'Using wildcards (*) in does_not_support_all is not allowed',
-      ]);
-    });
-
     it('casts string arguments to dates', async () => {
       setTestFunctions([
         {
@@ -691,7 +649,6 @@ describe('function validation', () => {
           'SORT does not support function stats_fn',
         ]);
         await expectErrors('FROM a_index | STATS ROW_FN()', [
-          'At least one aggregation function required in [STATS], found [ROW_FN()]',
           'STATS does not support function row_fn',
         ]);
         await expectErrors('ROW WHERE_FN()', ['ROW does not support function where_fn']);
@@ -822,6 +779,181 @@ describe('function validation', () => {
       });
 
       // @TODO — test function aliases
+    });
+  });
+
+  describe('License-based validation', () => {
+    beforeEach(() => {
+      setTestFunctions([
+        {
+          type: FunctionDefinitionTypes.GROUPING,
+          name: 'platinum_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'keyword',
+                  optional: false,
+                },
+              ],
+              license: 'platinum',
+              returnType: 'keyword',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'text',
+                  optional: false,
+                },
+              ],
+              license: 'platinum',
+              returnType: 'keyword',
+            },
+          ],
+          locationsAvailable: [Location.STATS, Location.STATS_BY],
+          license: 'platinum',
+        },
+        {
+          type: FunctionDefinitionTypes.AGG,
+          name: 'platinum_partial_function_mock',
+          description: '',
+          signatures: [
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_point',
+                  optional: false,
+                },
+              ],
+              returnType: 'cartesian_shape',
+            },
+            {
+              params: [
+                {
+                  name: 'field',
+                  type: 'cartesian_shape',
+                  optional: false,
+                },
+              ],
+              license: 'platinum',
+              returnType: 'cartesian_shape',
+            },
+          ],
+          locationsAvailable: [Location.STATS, Location.STATS_BY],
+        },
+      ]);
+    });
+
+    it('Should Validate Platinum Functions With Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+        []
+      );
+    });
+
+    it('Should Prevent Platinum Function Validation Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK()',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+      );
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(keywordField)',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.']
+      );
+
+      await expectErrors(
+        'FROM a_index | STATS col0 = AVG(doubleField) BY PLATINUM_FUNCTION_MOCK(wrongField)',
+        ['PLATINUM_FUNCTION_MOCK requires a PLATINUM license.', 'Unknown column [wrongField]']
+      );
+
+      await expectErrors(
+        'FROM index | STATS result =PLATINUM_FUNCTION_MOCK(PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0])))',
+        [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+    });
+
+    it('Should Validate Cartesian Shape Input for Partial Platinum Function With Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() === 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        []
+      );
+    });
+
+    it('Should Prevent Cartesian Shape Input for Partial Platinum Function Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE([0,0]))',
+        [
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+
+      await expectErrors(
+        'FROM index | STATS extent = PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(0))',
+        [
+          'Argument of [to_cartesianshape] must be [cartesian_point], found value [0] type [integer]',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+
+      await expectErrors(
+        'FROM index | STATS result =PLATINUM_PARTIAL_FUNCTION_MOCK(TO_CARTESIANSHAPE(PLATINUM_FUNCTION_MOCK()))',
+        [
+          'PLATINUM_FUNCTION_MOCK requires a PLATINUM license.',
+          "PLATINUM_PARTIAL_FUNCTION_MOCK with 'field' of type 'cartesian_shape' requires a PLATINUM license.",
+        ]
+      );
+    });
+
+    it('Should Report Various Non-License Errors for Platinum Partial Function Without Platinum License', async () => {
+      const { expectErrors, callbacks } = await setup();
+
+      callbacks.getLicense = jest.fn(async () => ({
+        hasAtLeast: (license?: string) => license?.toLowerCase() !== 'platinum',
+      }));
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK()', [
+        'Error: [platinum_partial_function_mock] function expects exactly one argument, got 0.',
+      ]);
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(0)', [
+        'Argument of [platinum_partial_function_mock] must be [cartesian_point], found value [0] type [integer]',
+      ]);
+
+      await expectErrors('FROM index | STATS result = PLATINUM_PARTIAL_FUNCTION_MOCK(WrongField)', [
+        'Unknown column [WrongField]',
+      ]);
     });
   });
 });

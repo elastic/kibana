@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
+import type { EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
 
 import { stripTrailingSlash } from '../../../../common/strip_slashes';
 
@@ -14,7 +14,7 @@ import {
   type GeneratedReactRouterProps,
   generateReactRouterProps,
 } from '../react_router_helpers/generate_react_router_props';
-import { ReactRouterProps } from '../types';
+import type { ReactRouterProps } from '../types';
 
 interface Params {
   items?: Array<EuiSideNavItemTypeEnhanced<unknown>>; // Primarily passed if using `items` to determine isSelected - if not, you can just set `items` outside of this helper

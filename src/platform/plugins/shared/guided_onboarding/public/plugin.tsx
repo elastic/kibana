@@ -9,7 +9,7 @@
 
 import ReactDOM from 'react-dom';
 import React from 'react';
-import {
+import type {
   CoreSetup,
   CoreStart,
   Plugin,
@@ -24,7 +24,8 @@ import type {
   GuidedOnboardingPluginStart,
 } from './types';
 import { GuidePanel } from './components';
-import { ApiService, apiService } from './services/api.service';
+import type { ApiService } from './services/api.service';
+import { apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin
   implements Plugin<GuidedOnboardingPluginSetup, GuidedOnboardingPluginStart>

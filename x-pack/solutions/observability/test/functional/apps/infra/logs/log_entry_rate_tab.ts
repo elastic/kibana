@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const PageObjects = getPageObjects(['security']);
@@ -70,11 +70,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('when indices exists', () => {
         before(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.load(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         after(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+          await esArchiver.unload(
+            'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+          );
         });
 
         it('shows setup page when indices exist', async () => {

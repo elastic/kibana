@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   DASHBOARD_APP_ID,
   DISCOVER_APP_ID,
   DISCOVER_ESQL_LOCATOR,

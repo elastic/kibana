@@ -7,108 +7,46 @@
 
 import React from 'react';
 
-import {
-  EuiCallOut,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiLink,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
-
-import { ConfigEntryView } from '../../types/types';
-import { ConfigurationField } from './configuration_field';
-import { ConfigFieldTitularComponent } from './titular_component_registry';
-import * as LABELS from '../../translations';
+import { EuiFlexGroup } from '@elastic/eui';
+import type { ConfigEntryView } from '../../types/types';
+import { ItemFormRow } from './item_form_row';
 
 interface ConfigurationFormItemsProps {
-  isLoading: boolean;
-  items: ConfigEntryView[];
-  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
+  dataTestSubj?: string;
+  descriptionLinks?: Record<string, React.ReactNode>;
   direction?: 'column' | 'row' | 'rowReverse' | 'columnReverse' | undefined;
   isEdit?: boolean;
+  isLoading: boolean;
   isPreconfigured?: boolean;
   isInternalProvider?: boolean;
+  items: ConfigEntryView[];
+  setConfigEntry: (key: string, value: string | number | boolean | null) => void;
 }
 
 export const ConfigurationFormItems: React.FC<ConfigurationFormItemsProps> = ({
-  isLoading,
-  items,
-  setConfigEntry,
+  dataTestSubj,
+  descriptionLinks,
   direction,
   isEdit,
   isPreconfigured,
   isInternalProvider,
+  isLoading,
+  items,
+  setConfigEntry,
 }) => {
   return (
-    <EuiFlexGroup direction={direction} data-test-subj="configuration-fields">
+    <EuiFlexGroup direction={direction} data-test-subj={dataTestSubj}>
       {items.map((configEntry) => {
-        const { key, isValid, label, sensitive, description, validationErrors, required } =
-          configEntry;
-
-        // toggle and sensitive textarea labels go next to the element, not in the row
-        const rowLabel = description ? (
-          <EuiFlexGroup gutterSize="xs">
-            <EuiFlexItem>
-              <p>{label}</p>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        ) : (
-          <p>{label}</p>
-        );
-
-        const helpText =
-          isInternalProvider && key === 'model_id' && !isPreconfigured ? (
-            <>
-              {description}{' '}
-              <EuiLink
-                href="https://www.elastic.co/guide/en/elasticsearch/reference/current/inference-apis.html#default-enpoints"
-                external
-                target="_blank"
-              >
-                {LABELS.LEARN_MORE}
-              </EuiLink>
-            </>
-          ) : (
-            description
-          );
-
-        const optionalLabel = !required ? (
-          <EuiText color="subdued" size="xs">
-            {LABELS.OPTIONALTEXT}
-          </EuiText>
-        ) : undefined;
-
         return (
-          <EuiFlexItem key={key}>
-            <ConfigFieldTitularComponent configKey={key} />
-            <EuiFormRow
-              label={rowLabel}
-              fullWidth
-              helpText={helpText}
-              error={validationErrors}
-              isInvalid={!isValid}
-              labelAppend={optionalLabel}
-              data-test-subj={`configuration-formrow-${key}`}
-            >
-              <ConfigurationField
-                configEntry={configEntry}
-                isLoading={isLoading}
-                setConfigValue={(value) => {
-                  setConfigEntry(key, value);
-                }}
-                isEdit={isEdit}
-                isPreconfigured={isPreconfigured}
-              />
-            </EuiFormRow>
-            {sensitive ? (
-              <>
-                <EuiSpacer size="s" />
-                <EuiCallOut size="s" color="warning" title={LABELS.RE_ENTER_SECRETS(label)} />
-              </>
-            ) : null}
-          </EuiFlexItem>
+          <ItemFormRow
+            configEntry={configEntry}
+            descriptionLinks={descriptionLinks}
+            isPreconfigured={isPreconfigured}
+            isInternalProvider={isInternalProvider}
+            isEdit={isEdit}
+            isLoading={isLoading}
+            setConfigEntry={setConfigEntry}
+          />
         );
       })}
     </EuiFlexGroup>

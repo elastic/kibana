@@ -5,25 +5,23 @@
  * 2.0.
  */
 
-import { kea, MakeLogicType } from 'kea';
+import type { MakeLogicType } from 'kea';
+import { kea } from 'kea';
 
-import { HttpError, Status } from '../../../../../../../common/types/api';
+import type { HttpError } from '../../../../../../../common/types/api';
+import { Status } from '../../../../../../../common/types/api';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
-import {
-  CreateModelApiLogic,
-  CreateModelApiLogicActions,
-} from '../../../../api/ml_models/create_model_api_logic';
-import {
-  StartModelApiLogic,
-  StartModelApiLogicActions,
-} from '../../../../api/ml_models/start_model_api_logic';
+import type { CreateModelApiLogicActions } from '../../../../api/ml_models/create_model_api_logic';
+import { CreateModelApiLogic } from '../../../../api/ml_models/create_model_api_logic';
+import type { StartModelApiLogicActions } from '../../../../api/ml_models/start_model_api_logic';
+import { StartModelApiLogic } from '../../../../api/ml_models/start_model_api_logic';
 import { IndexViewLogic } from '../../index_view_logic';
 
-import {
-  MLInferenceLogic,
+import type {
   MLInferenceProcessorsActions,
   MLInferenceProcessorsValues,
 } from './ml_inference_logic';
+import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface ModelSelectActions {
   clearModelPlaceholderFlag: MLInferenceProcessorsActions['clearModelPlaceholderFlag'];

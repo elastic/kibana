@@ -20,6 +20,7 @@
     "@kbn/config-schema",
     "@kbn/inference-plugin",
     "@kbn/onechat-server",
+    "@kbn/onechat-browser",
     "@kbn/core-http-server",
     "@kbn/onechat-common",
     "@kbn/core-elasticsearch-server",
@@ -57,5 +58,7 @@
     "@kbn/safer-lodash-set",
     "@kbn/core-http-server-mocks",
     "@kbn/cloud-plugin",
+    "@kbn/es-errors",
+    "@kbn/kibana-utils-plugin",
   ]
 }

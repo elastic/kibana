@@ -8,7 +8,7 @@
  */
 
 import { defaultConfig } from './serverless.base.config';
-import { ScoutServerConfig } from '../../types';
+import type { ScoutServerConfig } from '../../types';
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,

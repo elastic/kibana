@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 function createTestJobAndDatafeed() {
   const timestamp = Date.now();
@@ -69,7 +69,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('anomaly detection alert', function () {
     before(async () => {
-      await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
+      await esArchiver.loadIfNeeded('x-pack/platform/test/fixtures/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
 

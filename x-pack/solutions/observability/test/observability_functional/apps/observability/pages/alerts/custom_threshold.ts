@@ -7,7 +7,7 @@
 
 import { Key } from 'selenium-webdriver';
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -32,7 +32,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     const DATA_VIEW_2_NAME = 'test-data-view-name_2';
 
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.load(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       // create two data views
       await observability.alerts.common.createDataView({
         supertest,
@@ -53,7 +55,9 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs');
+      await esArchiver.unload(
+        'x-pack/solutions/observability/test/fixtures/es_archives/infra/metrics_and_logs'
+      );
       // This also deletes the created data views
       await kibanaServer.savedObjects.cleanStandardList();
     });

@@ -6,12 +6,13 @@
  */
 
 import React, { useCallback, useRef } from 'react';
-import { CoreStart } from '@kbn/core/public';
-import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import { type DragDropAction, DragDropIdentifier, RootDragDropProvider } from '@kbn/dom-drag-drop';
+import type { CoreStart } from '@kbn/core/public';
+import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
+import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import {
+import type {
   DatasourceMap,
   FramePublicAPI,
   VisualizationMap,
@@ -25,7 +26,7 @@ import { ConfigPanelWrapper } from './config_panel';
 import { FrameLayout } from './frame_layout';
 import { SuggestionPanelWrapper } from './suggestion_panel';
 import { WorkspacePanel } from './workspace_panel';
-import { EditorFrameStartPlugins } from '../service';
+import type { EditorFrameStartPlugins } from '../service';
 import { getTopSuggestionForField, switchToSuggestion } from './suggestion_helpers';
 import {
   useLensSelector,
@@ -38,7 +39,7 @@ import {
 } from '../../state_management';
 import type { LensInspector } from '../../lens_inspector_service';
 import { ErrorBoundary, showMemoizedErrorNotification } from '../../lens_ui_errors';
-import { IndexPatternServiceAPI } from '../../data_views_service/service';
+import type { IndexPatternServiceAPI } from '../../data_views_service/service';
 import { getLongMessage } from '../../user_messages_utils';
 
 export interface EditorFrameProps {

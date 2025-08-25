@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHomePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -151,8 +151,9 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clearSearchTerm() {
-      const input = await testSubjects.find('infraSearchField');
+      const input = await testSubjects.find('queryInput');
       await input.clearValueWithKeyboard();
+      await input.pressKeys(browser.keys.ENTER);
       return input;
     },
 
@@ -451,11 +452,11 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickQueryBar() {
-      await testSubjects.click('infraSearchField');
+      await testSubjects.click('queryInput');
     },
 
     async inputQueryData() {
-      const queryBar = await testSubjects.find('infraSearchField');
+      const queryBar = await testSubjects.find('queryInput');
       await queryBar.type('h');
     },
 
@@ -483,6 +484,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async ensureKubernetesTourIsClosed() {
       await testSubjects.missingOrFail('infra-kubernetesTour-text');
+    },
+
+    async ensureKubernetesFeedbackLinkIsVisible() {
+      return testSubjects.existOrFail('infra-kubernetes-feedback-link');
     },
 
     async clickDismissKubernetesTourButton() {

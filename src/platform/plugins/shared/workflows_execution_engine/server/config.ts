@@ -7,13 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
-//  This exports static code and TypeScript types,
-//  as well as, Kibana Platform `plugin()` initializer.
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import type { PluginConfigDescriptor } from '@kbn/core/server';
 
-export const config = {
-  schema: schema.object({
-    enabled: schema.boolean({ defaultValue: false }),
+const configSchema = schema.object({
+  enabled: schema.boolean({ defaultValue: false }),
+  logging: schema.object({
+    console: schema.boolean({ defaultValue: false }),
   }),
+});
+
+export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
+
+export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
+  schema: configSchema,
 };
-export type MyPluginConfigType = TypeOf<typeof config.schema>;

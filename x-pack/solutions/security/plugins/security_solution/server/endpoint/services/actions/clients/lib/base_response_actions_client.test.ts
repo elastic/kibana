@@ -329,6 +329,7 @@ describe('ResponseActionsClientImpl base class', () => {
         case_ids: undefined,
         hosts: undefined,
         parameters: undefined,
+        // @ts-expect-error TS2322 due to type overload
         file: undefined,
       };
 

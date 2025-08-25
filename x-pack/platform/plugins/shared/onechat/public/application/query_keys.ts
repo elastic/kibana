@@ -20,5 +20,6 @@ export const queryKeys = {
   },
   tools: {
     all: ['tools', 'list'] as const,
+    byId: (toolId?: string) => ['tools', toolId],
   },
 };

@@ -248,7 +248,7 @@ export const mobileServiceDetailRoute = {
       '/mobile-services/{serviceName}/service-map': page({
         tabKey: 'service-map',
         title: i18n.translate('xpack.apm.views.serviceMap.title', {
-          defaultMessage: 'Service Map',
+          defaultMessage: 'Service map',
         }),
         element: <ServiceMapServiceDetail />,
         searchBarOptions: {

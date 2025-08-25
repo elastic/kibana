@@ -50,11 +50,6 @@ import {
   getCaseSavedObjectsFromES,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/api';
 import {
-  createAlertsIndex,
-  deleteAllAlerts,
-  deleteAllRules,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
-import {
   globalRead,
   noKibanaPrivileges,
   obsOnly,
@@ -70,6 +65,11 @@ import {
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/users';
 import { getAlertById } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/alerts';
 import type { User } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/authentication/types';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+  deleteAllRules,
+} from '../../../../../common/utils/detections_response';
 import {
   getSecuritySolutionAlerts,
   createSecuritySolutionAlerts,
@@ -547,14 +547,14 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('alerts', () => {
       describe('security_solution', () => {
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
           await createAlertsIndex(supertest, log);
         });
 
         afterEach(async () => {
           await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
-          await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/auditbeat/hosts');
         });
 
         const createCommentAndRefreshIndex = async ({
@@ -845,11 +845,11 @@ export default ({ getService }: FtrProviderContext): void => {
         const apmIndex = '.alerts-observability.apm.alerts';
 
         beforeEach(async () => {
-          await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         afterEach(async () => {
-          await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+          await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
         });
 
         const bulkCreateAlertsAndVerifyCaseIdsInAlertSchema = async (totalCases: number) => {

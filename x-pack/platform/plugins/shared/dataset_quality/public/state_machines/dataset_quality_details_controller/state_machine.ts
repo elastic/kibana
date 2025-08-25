@@ -7,8 +7,9 @@
 
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { getDateISORange } from '@kbn/timerange';
-import { assign, createMachine, DoneInvokeEvent, InterpreterFrom, raise } from 'xstate';
-import {
+import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { assign, createMachine, raise } from 'xstate';
+import type {
   Dashboard,
   DataStreamDetails,
   DataStreamSettings,
@@ -21,17 +22,17 @@ import {
   UpdateFieldLimitResponse,
 } from '../../../common/api_types';
 import { indexNameToDataStreamParts } from '../../../common/utils';
-import { IDataStreamDetailsClient } from '../../services/data_stream_details';
-import { IDataStreamsStatsClient } from '../../services/data_streams_stats';
-import { DatasetQualityStartDeps } from '../../types';
+import type { IDataStreamDetailsClient } from '../../services/data_stream_details';
+import type { IDataStreamsStatsClient } from '../../services/data_streams_stats';
+import type { DatasetQualityStartDeps } from '../../types';
 import { fetchNonAggregatableDatasetsFailedNotifier } from '../common/notifications';
-import {
+import type {
   DatasetQualityDetailsControllerContext,
   DatasetQualityDetailsControllerEvent,
   DatasetQualityDetailsControllerTypeState,
 } from './types';
 
-import { IntegrationType } from '../../../common/data_stream_details';
+import type { IntegrationType } from '../../../common/data_stream_details';
 import {
   assertBreakdownFieldEcsFailedNotifier,
   fetchDataStreamDetailsFailedNotifier,
@@ -772,7 +773,11 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
         canReadFailureStore: (context) => {
           return (
             'dataStreamSettings' in context &&
-            Boolean(context.dataStreamSettings.datasetUserPrivileges?.canReadFailureStore)
+            Boolean(
+              context.dataStreamSettings.datasetUserPrivileges?.datasetsPrivilages[
+                context.dataStream
+              ].canReadFailureStore
+            )
           );
         },
       },

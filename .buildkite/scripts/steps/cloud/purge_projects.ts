@@ -13,7 +13,8 @@ import { getKibanaDir } from '#pipeline-utils';
 
 async function getPrProjects() {
   // BOOKMARK - List of Kibana project types
-  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)$/;
+  const match =
+    /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability|chat)(?:-(ai_soc|logs_essentials))?$/;
   try {
     // BOOKMARK - List of Kibana project types
     return (

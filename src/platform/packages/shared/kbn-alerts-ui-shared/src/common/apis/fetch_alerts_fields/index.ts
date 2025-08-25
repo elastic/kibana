@@ -8,4 +8,4 @@
  */
 
 export * from './fetch_alerts_fields';
-export * from './types';
+export type * from './types';

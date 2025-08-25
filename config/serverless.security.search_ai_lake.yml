@@ -82,9 +82,6 @@ xpack.fleet.integrationsHomeOverride: '/app/security/configurations/integrations
 xpack.fleet.prereleaseEnabledByDefault: true
 xpack.fleet.internal.registry.searchAiLakePackageAllowlistEnabled: true
 
-# Pin the prebuilt rules package version to the version that contains promotion rules
-xpack.securitySolution.prebuiltRulesPackageVersion: '9.1.2-beta.3'
-
 # Elastic Managed LLM
 xpack.actions.preconfigured:
   Elastic-Managed-LLM:

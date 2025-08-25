@@ -8,9 +8,9 @@
  */
 
 import { convertToMovingAverageParams } from './moving_average';
-import { Metric } from '../../../../common/types';
+import type { Metric } from '../../../../common/types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';
-import { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import type { MovingAverageParams } from '@kbn/visualizations-plugin/common/convert_to_lens';
 
 describe('convertToMovingAverageParams', () => {
   const metric: Metric = {

@@ -8,7 +8,7 @@
 import { random, times } from 'lodash';
 import moment from 'moment';
 import { v4 } from 'uuid';
-import { Doc } from '../types';
+import type { Doc } from '../types';
 
 const MIN_DURRATION = 300 * 1000; // 5m
 const MAX_DURRATION = 12 * 60 * 60 * 1000; // 12 hours

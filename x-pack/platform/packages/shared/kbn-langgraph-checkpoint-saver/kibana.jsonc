@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/langgraph-checkpoint-saver",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}
