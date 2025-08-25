@@ -62,7 +62,12 @@ export class StepFactory {
       case 'exit-foreach':
         return new ExitForeachNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'enter-retry':
-        return new EnterRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
+        return new EnterRetryNodeImpl(
+          step as any,
+          this.workflowRuntime,
+          this.workflowTaskManager,
+          this.workflowLogger
+        );
       case 'exit-retry':
         return new ExitRetryNodeImpl(step as any, this.workflowRuntime, this.workflowLogger);
       case 'enter-if':
