@@ -38,6 +38,7 @@ import { StatusService } from '@kbn/core-status-server-internal';
 import { UiSettingsService } from '@kbn/core-ui-settings-server-internal';
 import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal';
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
+import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -104,6 +105,7 @@ export class Server {
   private readonly security: SecurityService;
   private readonly userProfile: UserProfileService;
   private readonly injection: CoreInjectionService;
+  private readonly dataStreams: DataStreamsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -158,6 +160,7 @@ export class Server {
     this.userSettingsService = new UserSettingsService(core);
     this.security = new SecurityService(core);
     this.userProfile = new UserProfileService(core);
+    this.dataStreams = new DataStreamsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -304,6 +307,8 @@ export class Server {
       executionContext: executionContextSetup,
     });
 
+    const dataStreamsSetup = this.dataStreams.setup();
+
     const metricsSetup = await this.metrics.setup({
       http: httpSetup,
       elasticsearchService: elasticsearchServiceSetup,
@@ -403,6 +408,7 @@ export class Server {
       security: securitySetup,
       userProfile: userProfileSetup,
       injection: injectionSetup,
+      dataStreams: dataStreamsSetup,
     };
 
     const container = injectionSetup.getContainer();
@@ -443,6 +449,10 @@ export class Server {
     this.uptimePerStep.elasticsearch = {
       waitTime: elasticsearchStart.metrics.elasticsearchWaitTime,
     };
+
+    const dataStreamsStart = await this.dataStreams.start({
+      elasticsearch: elasticsearchStart,
+    });
 
     const deprecationsStart = this.deprecations.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
@@ -509,6 +519,7 @@ export class Server {
       userProfile: userProfileStart,
       pricing: pricingStart,
       injection: injectionStart,
+      dataStreams: dataStreamsStart,
     };
 
     this.coreApp.start(this.coreStart);
