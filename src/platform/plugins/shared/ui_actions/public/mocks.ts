@@ -55,6 +55,7 @@ const createStartContract = (): Start => {
     registerAction: jest.fn(),
     registerActionAsync: jest.fn(),
     registerTrigger: jest.fn(),
+    start: jest.fn(),
   };
 
   return startContract;

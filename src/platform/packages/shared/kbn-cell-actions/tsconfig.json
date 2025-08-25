@@ -23,6 +23,7 @@
     "@kbn/data-views-plugin",
     "@kbn/core-notifications-browser",
     "@kbn/utility-types",
+    "@kbn/ui-actions-browser",
   ],
   "exclude": ["target/**/*"]
 }

@@ -7,5 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { buildContextMenuForActions } from './build_eui_context_menu_panels';
-export { openContextMenu } from './open_context_menu';
+export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';
+export const ACTION_VISUALIZE_GEO_FIELD = 'ACTION_VISUALIZE_GEO_FIELD';
+export const ACTION_VISUALIZE_LENS_FIELD = 'ACTION_VISUALIZE_LENS_FIELD';

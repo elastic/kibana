@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions/incompatible_action_error';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
 import {
   ADD_IMAGE_EMBEDDABLE_ACTION_ID,
   IMAGE_EMBEDDABLE_TYPE,

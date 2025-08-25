@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_DATA_TABLE_ACTION_ID, DATA_TABLE_ID } from './constants';
 

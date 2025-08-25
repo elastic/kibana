@@ -108,5 +108,6 @@
     "@kbn/lock-manager",
     "@kbn/object-utils",
     "@kbn/licensing-types",
+    "@kbn/ui-actions-browser",
   ]
 }

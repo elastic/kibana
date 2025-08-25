@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { asyncMap } from '@kbn/std';
+import type { CoreStart } from '@kbn/core/public';
+import type { Trigger } from '../triggers';
 import type { TriggerRegistry, ActionRegistry, TriggerToActionsRegistry } from '../types';
 import type { Action, ActionDefinition, FrequentCompatibilityChangeAction } from '../actions';
-import { ActionInternal } from '../actions';
+import { ActionInternal } from '../actions/action_internal';
 import { TriggerInternal } from '../triggers/trigger_internal';
 import type { TriggerContract } from '../triggers/trigger_contract';
 import { UiActionsExecutionService } from './ui_actions_execution_service';
@@ -27,10 +28,11 @@ export interface UiActionsServiceParams {
 }
 
 export class UiActionsService {
-  public readonly executionService = new UiActionsExecutionService();
+  public readonly executionService: UiActionsExecutionService;
   protected readonly triggers: TriggerRegistry;
   protected readonly actions: ActionRegistry;
   protected readonly triggerToActions: TriggerToActionsRegistry;
+  private notificationsService?: CoreStart['notifications'];
 
   constructor({
     triggers = new Map(),
@@ -40,7 +42,15 @@ export class UiActionsService {
     this.triggers = triggers;
     this.actions = actions;
     this.triggerToActions = triggerToActions;
+    this.executionService = new UiActionsExecutionService();
   }
+
+  protected readonly getNotificationsService = () => this.notificationsService;
+
+  public readonly start = (core: CoreStart) => {
+    this.executionService.start(core);
+    this.notificationsService = core.notifications;
+  };
 
   public readonly registerTrigger = (trigger: Trigger) => {
     if (this.triggers.has(trigger.id)) {
@@ -79,7 +89,7 @@ export class UiActionsService {
       throw new Error(`Action [action.id = ${definition.id}] already registered.`);
     }
 
-    const action = new ActionInternal(definition);
+    const action = new ActionInternal(definition, this.getNotificationsService);
 
     this.actions.set(action.id, async () => action as unknown as ActionInternal<object>);
 
@@ -95,7 +105,7 @@ export class UiActionsService {
     }
 
     this.actions.set(id, async () => {
-      const action = new ActionInternal(await getDefinition());
+      const action = new ActionInternal(await getDefinition(), this.getNotificationsService);
       return action as unknown as ActionInternal<object>;
     });
   };

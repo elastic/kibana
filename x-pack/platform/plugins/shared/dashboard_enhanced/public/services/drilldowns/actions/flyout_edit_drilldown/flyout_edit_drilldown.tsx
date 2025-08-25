@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { type PresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
@@ -26,7 +26,7 @@ import {
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
 import type { StartDependencies } from '../../../../plugin';

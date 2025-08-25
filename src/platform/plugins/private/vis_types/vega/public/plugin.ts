@@ -18,7 +18,7 @@ import type { MapsEmsPluginPublicStart } from '@kbn/maps-ems-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src/triggers/dashboard_app_panel_trigger';
 import {
   setNotifications,
   setData,

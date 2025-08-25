@@ -46,12 +46,6 @@ import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
-  ACTION_VISUALIZE_FIELD,
-  VISUALIZE_FIELD_TRIGGER,
-  ADD_PANEL_TRIGGER,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from '@kbn/ui-actions-plugin/public';
-import {
   VISUALIZE_EDITOR_TRIGGER,
   AGG_BASED_VISUALIZATION_TRIGGER,
 } from '@kbn/visualizations-plugin/public';
@@ -70,6 +64,11 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import {
+  ACTION_VISUALIZE_FIELD,
+  ACTION_VISUALIZE_LENS_FIELD,
+} from '@kbn/ui-actions-browser/src/actions';
+import { ADD_PANEL_TRIGGER, VISUALIZE_FIELD_TRIGGER } from '@kbn/ui-actions-browser/src/triggers';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,

@@ -8,8 +8,8 @@
  */
 
 import { uiActionsPluginMock } from '../mocks';
-import { createHelloWorldAction } from './test_samples';
-import type { ActionDefinition } from '../actions';
+import { createHelloWorldAction } from '@kbn/ui-actions-browser/src/test_samples';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { Trigger } from '@kbn/ui-actions-browser';
 

@@ -54,6 +54,7 @@
     "@kbn/react-hooks",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/shared-ux-utility",
+    "@kbn/ui-actions-browser",
   ],
   "exclude": ["target/**/*", ".storybook/**/*.js"]
 }

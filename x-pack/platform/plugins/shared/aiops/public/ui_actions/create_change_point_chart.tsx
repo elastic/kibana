@@ -11,7 +11,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '@kbn/aiops-change-point-detection/constants';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 

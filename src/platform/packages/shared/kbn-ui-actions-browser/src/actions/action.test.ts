@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { defaultTrigger } from '@kbn/ui-actions-browser';
-import type { ActionExecutionContext } from '..';
-import { createAction } from '..';
+import { defaultTrigger } from '../triggers';
+import type { ActionExecutionContext } from './action';
+import { createAction } from './create_action';
 
 const sayHelloAction = createAction<{ amICompatible: boolean }>({
   id: 'test',

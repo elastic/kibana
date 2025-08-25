@@ -24,7 +24,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 
 import { type DashboardApi, DASHBOARD_API_TYPE } from '../dashboard_api/types';
 import { coreServices } from '../services/kibana_services';

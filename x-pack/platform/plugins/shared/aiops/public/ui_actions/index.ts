@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { type UiActionsSetup, ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { type UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import {
   categorizeFieldTrigger,
   CATEGORIZE_FIELD_TRIGGER,
 } from '@kbn/ml-ui-actions/src/aiops/ui_actions';
 import type { CoreStart } from '@kbn/core/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src/triggers/dashboard_app_panel_trigger';
 import type { AiopsPluginStartDeps } from '../types';
 
 export function registerAiopsUiActions(

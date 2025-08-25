@@ -8,7 +8,7 @@
  */
 
 import { CONTEXT_MENU_TRIGGER, PANEL_NOTIFICATION_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
+import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-browser/src/triggers/dashboard_app_panel_trigger';
 import type { DashboardStartDependencies } from '../plugin';
 import {
   ACTION_ADD_SECTION,

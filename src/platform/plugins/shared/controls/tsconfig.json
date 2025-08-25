@@ -43,7 +43,8 @@
     "@kbn/search-types",
     "@kbn/controls-constants",
     "@kbn/controls-schemas",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": ["target/**/*"]
 }

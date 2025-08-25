@@ -34,7 +34,8 @@
     "@kbn/projects-solutions-groups",
     "@kbn/esql-ast",
     "@kbn/presentation-util",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": [
     "target/**/*",

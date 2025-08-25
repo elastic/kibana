@@ -24,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
-import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
+import { buildContextMenuForActions } from '@kbn/ui-actions-browser/src/context_menu';
 
 import { css } from '@emotion/react';
 import type { EmbeddableApiContext, PublishesTitle, ViewMode } from '@kbn/presentation-publishing';
@@ -32,7 +32,7 @@ import {
   apiCanLockHoverActions,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import type { ActionWithContext } from '@kbn/ui-actions-plugin/public/context_menu/build_eui_context_menu_panels';
+import type { ActionWithContext } from '@kbn/ui-actions-browser/src/context_menu';
 import { Subscription, switchMap } from 'rxjs';
 import { uiActions } from '../../kibana_services';
 import {

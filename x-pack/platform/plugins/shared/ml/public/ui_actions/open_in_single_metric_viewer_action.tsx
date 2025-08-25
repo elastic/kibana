@@ -8,10 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { apiIsOfType, type EmbeddableApiContext } from '@kbn/presentation-publishing';
-import {
-  IncompatibleActionError,
-  type UiActionsActionDefinition,
-} from '@kbn/ui-actions-plugin/public';
+import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import type { SingleMetricViewerEmbeddableApi } from '../embeddables';
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '../embeddables';

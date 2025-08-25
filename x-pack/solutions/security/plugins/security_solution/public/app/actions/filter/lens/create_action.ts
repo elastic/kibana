@@ -13,7 +13,7 @@ import {
 } from '@kbn/cell-actions/actions/utils';
 import { hasBlockingError } from '@kbn/presentation-publishing';
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
 import { isLensApi } from '@kbn/lens-plugin/public';

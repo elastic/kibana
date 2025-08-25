@@ -8,8 +8,8 @@
 import { useCallback, useMemo } from 'react';
 import type { Action, Trigger } from '@kbn/ui-actions-plugin/public';
 
-import { createAction } from '@kbn/ui-actions-plugin/public';
-import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
+import type { ActionDefinition } from '@kbn/ui-actions-browser/src/actions';
 import type { LensProps } from '@kbn/cases-plugin/public/types';
 import { useKibana } from '../../lib/kibana/kibana_react';
 import { useAddToExistingCase } from './use_add_to_existing_case';

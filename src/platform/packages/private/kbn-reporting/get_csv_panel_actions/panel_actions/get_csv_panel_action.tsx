@@ -40,7 +40,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import type { ClientConfigType } from '@kbn/reporting-public/types';
 import { checkLicense } from '@kbn/reporting-public/license_check';
 import type { CsvSearchModeParams } from '@kbn/reporting-public/share/shared/get_search_csv_job_params';

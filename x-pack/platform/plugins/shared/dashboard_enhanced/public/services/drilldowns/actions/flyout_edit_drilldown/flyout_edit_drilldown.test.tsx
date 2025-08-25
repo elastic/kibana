@@ -15,7 +15,6 @@ import {
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { BehaviorSubject } from 'rxjs';
 import { flyoutEditDrilldownAction } from './flyout_edit_drilldown';
-import type { ActionDefinitionContext } from '@kbn/ui-actions-plugin/public/actions';
 
 jest.mock('../../../kibana_services', () => {
   return {
@@ -31,6 +30,7 @@ jest.mock('../../../kibana_services', () => {
   };
 });
 import { coreServices } from '../../../kibana_services';
+import type { ActionDefinitionContext } from '@kbn/ui-actions-browser/src/actions';
 
 const dynamicActionsState$ = new BehaviorSubject<DynamicActionsSerializedState['enhancements']>({
   dynamicActions: { events: [{} as SerializedEvent] },

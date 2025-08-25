@@ -8,7 +8,7 @@
  */
 
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 
 export const SAMPLE_PANEL_LINK = 'samplePanelLink';
 

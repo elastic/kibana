@@ -11,7 +11,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiFlyoutBody } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { ActionDefinition } from '../../actions';
+import type { ActionDefinition } from '../actions';
 
 type StartServices = Pick<CoreStart, 'overlays' | 'rendering'>;
 

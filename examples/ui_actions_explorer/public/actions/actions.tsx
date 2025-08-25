@@ -13,7 +13,7 @@ import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
 import { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 
 export const USER_TRIGGER = 'USER_TRIGGER';
 export const COUNTRY_TRIGGER = 'COUNTRY_TRIGGER';

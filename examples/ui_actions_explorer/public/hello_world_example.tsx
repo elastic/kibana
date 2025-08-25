@@ -12,7 +12,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiSpacer, EuiText, EuiModalBody, EuiLink, EuiSwitch } from '@elastic/eui';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import type { CoreStart } from '@kbn/core/public';
 import { HELLO_WORLD_TRIGGER_ID, ACTION_HELLO_WORLD } from '@kbn/ui-actions-examples-plugin/public';
 

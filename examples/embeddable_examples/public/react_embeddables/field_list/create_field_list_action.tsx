@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { apiCanAddNewPanel } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { embeddableExamplesGrouping } from '../embeddable_examples_grouping';
 import { ADD_FIELD_LIST_ACTION_ID, FIELD_LIST_ID } from './constants';
 import type { FieldListSerializedState } from './types';

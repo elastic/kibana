@@ -6,7 +6,7 @@
  */
 
 import type { CellValueContext } from '@kbn/embeddable-plugin/public';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import copy from 'copy-to-clipboard';
 import { hasBlockingError } from '@kbn/presentation-publishing';
 import { isLensApi } from '@kbn/lens-plugin/public';

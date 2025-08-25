@@ -21,7 +21,7 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-browser/src/actions';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

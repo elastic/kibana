@@ -20,7 +20,8 @@
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-browser",
     "@kbn/core-theme-browser-mocks",
-    "@kbn/presentation-publishing"
+    "@kbn/presentation-publishing",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": [
     "target/**/*",

@@ -18,36 +18,20 @@ export type {
   UiActionsPublicSetup as UiActionsSetup,
   UiActionsPublicStart as UiActionsStart,
 } from './plugin';
-export type { UiActionsServiceParams } from './service';
-export { UiActionsService } from './service';
-export type { Action, ActionDefinition as UiActionsActionDefinition } from './actions';
-export { ActionInternal, createAction, IncompatibleActionError } from './actions';
-export { buildContextMenuForActions } from './context_menu';
+export type { UiActionsServiceParams } from '@kbn/ui-actions-browser/src/service';
+export type {
+  Action,
+  ActionDefinition as UiActionsActionDefinition,
+  ActionDefinitionContext,
+  ActionExecutionContext,
+  ActionExecutionMeta,
+  ActionMenuItemProps,
+  FrequentCompatibilityChangeAction,
+} from '@kbn/ui-actions-browser/src/actions';
 export type {
   Presentable as UiActionsPresentable,
   PresentableGroup as UiActionsPresentableGroup,
   PresentableGrouping as UiActionsPresentableGrouping,
 } from '@kbn/ui-actions-browser/src/types';
 export type { Trigger, RowClickContext } from '@kbn/ui-actions-browser/src/triggers';
-export {
-  VISUALIZE_FIELD_TRIGGER,
-  visualizeFieldTrigger,
-  VISUALIZE_GEO_FIELD_TRIGGER,
-  visualizeGeoFieldTrigger,
-  ROW_CLICK_TRIGGER,
-  rowClickTrigger,
-  ADD_PANEL_TRIGGER,
-  addPanelMenuTrigger,
-} from '@kbn/ui-actions-browser/src/triggers';
-export type { VisualizeFieldContext } from './types';
-export {
-  ACTION_VISUALIZE_FIELD,
-  ACTION_VISUALIZE_GEO_FIELD,
-  ACTION_VISUALIZE_LENS_FIELD,
-} from './types';
-export type {
-  ActionExecutionContext,
-  ActionExecutionMeta,
-  ActionMenuItemProps,
-  FrequentCompatibilityChangeAction,
-} from './actions';
+export type { VisualizeFieldContext } from '@kbn/ui-actions-browser/src/types';

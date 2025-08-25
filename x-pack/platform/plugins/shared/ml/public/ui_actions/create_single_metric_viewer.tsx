@@ -10,7 +10,7 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-browser/src/actions';
 import { HttpService } from '../application/services/http_service';
 import type { MlApi } from '../application/services/ml_api_service';
 import { ML_APP_NAME, PLUGIN_ICON, PLUGIN_ID } from '../../common/constants/app';

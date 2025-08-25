@@ -7,4 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './test_samples';
+export type {
+  Action,
+  ActionDefinition,
+  ActionDefinitionContext,
+  ActionMenuItemProps,
+  ActionContext,
+  ActionExecutionContext,
+  ActionExecutionMeta,
+  FrequentCompatibilityChangeAction,
+} from './action';
+export { createAction } from './create_action';
+export { IncompatibleActionError } from './incompatible_action_error';
+export {
+  ACTION_VISUALIZE_FIELD,
+  ACTION_VISUALIZE_GEO_FIELD,
+  ACTION_VISUALIZE_LENS_FIELD,
+} from './constants';

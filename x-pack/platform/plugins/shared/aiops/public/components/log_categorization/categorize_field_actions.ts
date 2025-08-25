@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { createAction } from '@kbn/ui-actions-plugin/public';
+import { createAction } from '@kbn/ui-actions-browser/src/actions';
 import type { CoreStart } from '@kbn/core/public';
 import { ACTION_CATEGORIZE_FIELD, type CategorizeFieldContext } from '@kbn/ml-ui-actions';
 import type { AiopsPluginStartDeps } from '../../types';
