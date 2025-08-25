@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import type {
   AlertsClient,
   RuleRegistryPluginStartContract,

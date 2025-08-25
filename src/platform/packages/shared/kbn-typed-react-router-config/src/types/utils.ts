@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as t from 'io-ts';
+import type * as t from 'io-ts';
 
 export type MaybeOutputOf<T> = T extends t.Type<any> ? [t.OutputOf<T>] : [];
 export type NormalizePath<T extends string> = T extends `//${infer TRest}`

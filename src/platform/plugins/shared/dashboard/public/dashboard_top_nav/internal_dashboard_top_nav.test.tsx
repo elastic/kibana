@@ -10,12 +10,12 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 
-import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
 import { render } from '@testing-library/react';
 
-import { DashboardApi } from '../dashboard_api/types';
+import type { DashboardApi } from '../dashboard_api/types';
 import { DashboardContext } from '../dashboard_api/use_dashboard_api';
 import { buildMockDashboardApi } from '../mocks';
 import { dataService, navigationService } from '../services/kibana_services';

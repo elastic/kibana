@@ -22,15 +22,95 @@ describe('alerts', () => {
       per_page: 1,
       page: 1,
       aggregations: {
-        counts: {
+        by_owner: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
           buckets: [
-            { topAlertsPerBucket: { value: 12 } },
-            { topAlertsPerBucket: { value: 5 } },
-            { topAlertsPerBucket: { value: 3 } },
+            {
+              key: 'cases',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+              references: {
+                cases: {
+                  max: {
+                    value: 2,
+                  },
+                },
+              },
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+              references: {
+                cases: {
+                  max: {
+                    value: 1,
+                  },
+                },
+              },
+            },
+            {
+              key: 'observability',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+            },
           ],
         },
-        references: { cases: { max: { value: 1 } } },
-        uniqueAlertCommentsCount: { value: 5 },
       },
     });
 
@@ -46,11 +126,32 @@ describe('alerts', () => {
 
       expect(res).toEqual({
         all: {
-          total: 5,
-          daily: 3,
-          weekly: 5,
+          total: 12,
+          daily: 12,
+          weekly: 12,
           monthly: 12,
+          maxOnACase: 2,
+        },
+        obs: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
+          maxOnACase: 0,
+        },
+        sec: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
           maxOnACase: 1,
+        },
+        main: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
+          maxOnACase: 2,
         },
       });
     });
@@ -59,74 +160,83 @@ describe('alerts', () => {
       await getAlertsTelemetryData({ savedObjectsClient: telemetrySavedObjectsClient, logger });
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
-          counts: {
-            date_range: {
-              field: 'cases-comments.attributes.created_at',
-              format: 'dd/MM/yyyy',
-              ranges: [
-                {
-                  from: 'now-1d',
-                  to: 'now',
+          by_owner: {
+            aggs: {
+              counts: {
+                date_range: {
+                  field: 'cases-comments.attributes.created_at',
+                  format: 'dd/MM/yyyy',
+                  ranges: [
+                    {
+                      from: 'now-1d',
+                      to: 'now',
+                    },
+                    {
+                      from: 'now-1w',
+                      to: 'now',
+                    },
+                    {
+                      from: 'now-1M',
+                      to: 'now',
+                    },
+                  ],
                 },
-                {
-                  from: 'now-1w',
-                  to: 'now',
+                aggregations: {
+                  topAlertsPerBucket: {
+                    cardinality: {
+                      field: 'cases-comments.attributes.alertId',
+                    },
+                  },
                 },
-                {
-                  from: 'now-1M',
-                  to: 'now',
+              },
+              references: {
+                aggregations: {
+                  cases: {
+                    aggregations: {
+                      ids: {
+                        terms: {
+                          field: 'cases-comments.references.id',
+                        },
+                        aggregations: {
+                          reverse: {
+                            reverse_nested: {},
+                            aggregations: {
+                              topAlerts: {
+                                cardinality: {
+                                  field: 'cases-comments.attributes.alertId',
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      max: {
+                        max_bucket: {
+                          buckets_path: 'ids>reverse.topAlerts',
+                        },
+                      },
+                    },
+                    filter: {
+                      term: {
+                        'cases-comments.references.type': 'cases',
+                      },
+                    },
+                  },
                 },
-              ],
-            },
-            aggregations: {
-              topAlertsPerBucket: {
+                nested: {
+                  path: 'cases-comments.references',
+                },
+              },
+              uniqueAlertCommentsCount: {
                 cardinality: {
                   field: 'cases-comments.attributes.alertId',
                 },
               },
             },
-          },
-          references: {
-            aggregations: {
-              cases: {
-                aggregations: {
-                  ids: {
-                    terms: {
-                      field: 'cases-comments.references.id',
-                    },
-                    aggregations: {
-                      reverse: {
-                        reverse_nested: {},
-                        aggregations: {
-                          topAlerts: {
-                            cardinality: {
-                              field: 'cases-comments.attributes.alertId',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  max: {
-                    max_bucket: {
-                      buckets_path: 'ids>reverse.topAlerts',
-                    },
-                  },
-                },
-                filter: {
-                  term: {
-                    'cases-comments.references.type': 'cases',
-                  },
-                },
-              },
-            },
-            nested: {
-              path: 'cases-comments.references',
-            },
-          },
-          uniqueAlertCommentsCount: {
-            cardinality: {
-              field: 'cases-comments.attributes.alertId',
+            terms: {
+              field: 'cases-comments.attributes.owner',
+              include: ['securitySolution', 'observability', 'cases'],
+              size: 3,
             },
           },
         },

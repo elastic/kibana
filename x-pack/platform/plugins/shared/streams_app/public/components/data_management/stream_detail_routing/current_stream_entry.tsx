@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { EuiBreadcrumb, EuiBreadcrumbs, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import { EuiBreadcrumbs, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams, getAncestorsAndSelf, isRoot } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
+import { getAncestorsAndSelf, isRoot } from '@kbn/streams-schema';
 import React from 'react';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 

@@ -10,6 +10,7 @@ import { format, parse } from 'url';
 import { castArray, first, pick, pickBy } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { FunctionRegistrationParameters } from '.';
+import { KIBANA_FUNCTION_NAME } from '..';
 
 export function registerKibanaFunction({
   functions,
@@ -19,7 +20,7 @@ export function registerKibanaFunction({
 }) {
   functions.registerFunction(
     {
-      name: 'kibana',
+      name: KIBANA_FUNCTION_NAME,
       description:
         'Call Kibana APIs on behalf of the user. Only call this function when the user has explicitly requested it, and you know how to call it, for example by querying the knowledge base or having the user explain it to you. Assume that pathnames, bodies and query parameters may have changed since your knowledge cut off date.',
       descriptionForUser: 'Call Kibana APIs on behalf of the user',

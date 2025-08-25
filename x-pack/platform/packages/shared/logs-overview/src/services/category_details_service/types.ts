@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ISearchGeneric } from '@kbn/search-types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ISearchGeneric } from '@kbn/search-types';
 import { type DataView } from '@kbn/data-views-plugin/common';
 
 export interface LogCategoryDetailsParams {

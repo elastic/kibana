@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { GuidedOnboardingPluginStart } from '.';
+import type { GuidedOnboardingPluginStart } from '.';
 
 const apiServiceMock: jest.Mocked<GuidedOnboardingPluginStart> = {
   guidedOnboardingApi: {

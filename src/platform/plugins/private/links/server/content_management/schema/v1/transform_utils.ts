@@ -8,9 +8,9 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import { Reference } from '@kbn/content-management-utils/src/types';
-import { LinksItem } from '../../../../common/content_management';
-import { LinksState, StoredLinksState } from './types';
+import type { Reference } from '@kbn/content-management-utils/src/types';
+import type { LinksItem } from '../../../../common/content_management';
+import type { LinksState, StoredLinksState } from './types';
 import {
   extractReferences,
   injectReferences,

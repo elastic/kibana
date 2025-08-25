@@ -120,6 +120,20 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
           ],
         },
         {
+          title: i18nStrings.stackManagement.ai.title,
+          breadcrumbStatus: 'hidden',
+          children: [
+            {
+              link: 'management:genAiSettings',
+              breadcrumbStatus: 'hidden',
+            },
+            {
+              link: 'management:securityAiAssistantManagement',
+              breadcrumbStatus: 'hidden',
+            },
+          ],
+        },
+        {
           title: i18nStrings.stackManagement.content.title,
           breadcrumbStatus: 'hidden',
           children: [
@@ -157,10 +171,6 @@ export const createStackManagementNavigationTree = (): NodeDefinition => ({
           children: [
             {
               link: 'management:settings',
-              breadcrumbStatus: 'hidden',
-            },
-            {
-              link: 'management:securityAiAssistantManagement',
               breadcrumbStatus: 'hidden',
             },
           ],

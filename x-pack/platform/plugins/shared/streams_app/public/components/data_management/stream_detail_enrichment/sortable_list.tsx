@@ -6,12 +6,8 @@
  */
 
 import React from 'react';
-import {
-  DragDropContextProps,
-  EuiDroppableProps,
-  EuiDragDropContext,
-  EuiDroppable,
-} from '@elastic/eui';
+import type { DragDropContextProps, EuiDroppableProps } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable } from '@elastic/eui';
 
 interface SortableListProps {
   onDragItem: DragDropContextProps['onDragEnd'];

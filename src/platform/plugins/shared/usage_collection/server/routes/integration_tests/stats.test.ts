@@ -10,20 +10,18 @@
 import { BehaviorSubject } from 'rxjs';
 
 import {
+  type CoreStatus,
   type MetricsServiceSetup,
-  ServiceStatus,
+  type ServiceStatus,
   ServiceStatusLevels,
-  CoreStatus,
 } from '@kbn/core/server';
 import {
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
 } from '@kbn/core/server/mocks';
-import {
-  createHttpService,
-  HttpIntegrationServiceSetupContractMock,
-} from '@kbn/core-http-server-mocks';
+import type { HttpIntegrationServiceSetupContractMock } from '@kbn/core-http-server-mocks';
+import { createHttpService } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
 import supertest from 'supertest';
 import { CollectorSet } from '../../collector';

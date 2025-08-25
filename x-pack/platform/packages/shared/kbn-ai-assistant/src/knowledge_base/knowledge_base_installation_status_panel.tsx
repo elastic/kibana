@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { KnowledgeBaseState } from '@kbn/observability-ai-assistant-plugin/public';
-import { UseKnowledgeBaseResult } from '../hooks';
+import { InferenceModelState } from '@kbn/observability-ai-assistant-plugin/public';
+import type { UseKnowledgeBaseResult } from '../hooks';
 import { SelectModelAndInstallKnowledgeBase } from './select_model_and_install_knowledge_base';
 import { SettingUpKnowledgeBase } from './setting_up_knowledge_base';
 import { InspectKnowledgeBasePopover } from './inspect_knowlegde_base_popover';
@@ -78,8 +78,8 @@ export const KnowledgeBaseInstallationStatusPanel = ({
 }: {
   knowledgeBase: UseKnowledgeBaseResult;
 }) => {
-  switch (knowledgeBase.status.value?.kbState) {
-    case KnowledgeBaseState.NOT_INSTALLED:
+  switch (knowledgeBase.status.value?.inferenceModelState) {
+    case InferenceModelState.NOT_INSTALLED:
       return (
         <EuiFlexItem grow={false}>
           <SelectModelAndInstallKnowledgeBase
@@ -88,18 +88,18 @@ export const KnowledgeBaseInstallationStatusPanel = ({
           />
         </EuiFlexItem>
       );
-    case KnowledgeBaseState.MODEL_PENDING_DEPLOYMENT:
+    case InferenceModelState.MODEL_PENDING_DEPLOYMENT:
       return <WarmUpModel knowledgeBase={knowledgeBase} pendingDeployment />;
-    case KnowledgeBaseState.DEPLOYING_MODEL:
+    case InferenceModelState.DEPLOYING_MODEL:
       return (
         <>
           <SettingUpKnowledgeBase />
           <InspectKnowledgeBasePopover knowledgeBase={knowledgeBase} />
         </>
       );
-    case KnowledgeBaseState.MODEL_PENDING_ALLOCATION:
+    case InferenceModelState.MODEL_PENDING_ALLOCATION:
       return <WarmUpModel knowledgeBase={knowledgeBase} />;
-    case KnowledgeBaseState.ERROR:
+    case InferenceModelState.ERROR:
       return (
         <>
           <EuiText color="subdued" size="s">

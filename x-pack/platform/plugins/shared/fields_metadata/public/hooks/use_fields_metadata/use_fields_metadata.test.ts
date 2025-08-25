@@ -7,10 +7,11 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import { createUseFieldsMetadataHook, UseFieldsMetadataParams } from './use_fields_metadata';
-import { FindFieldsMetadataResponsePayload } from '../../../common/latest';
+import type { UseFieldsMetadataParams } from './use_fields_metadata';
+import { createUseFieldsMetadataHook } from './use_fields_metadata';
+import type { FindFieldsMetadataResponsePayload } from '../../../common/latest';
 import { createFieldsMetadataServiceStartMock } from '../../services/fields_metadata/fields_metadata_service.mock';
-import { IFieldsMetadataClient } from '../../services/fields_metadata';
+import type { IFieldsMetadataClient } from '../../services/fields_metadata';
 
 const fields: FindFieldsMetadataResponsePayload['fields'] = {
   '@timestamp': {

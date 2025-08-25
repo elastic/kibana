@@ -15,3 +15,11 @@ export interface IndexAutocompleteItem {
   mode: 'lookup' | 'time_series' | string;
   aliases: string[];
 }
+
+export interface ESQLSourceResult {
+  name: string;
+  hidden: boolean;
+  title?: string;
+  dataStreams?: Array<{ name: string; title?: string }>;
+  type?: string;
+}

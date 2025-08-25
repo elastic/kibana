@@ -15,14 +15,14 @@ const streams = [
   testContentPackEntry({
     name: 'logs',
     routing: [
-      { destination: 'logs.foo', if: { always: {} } },
-      { destination: 'logs.hello', if: { always: {} } },
+      { destination: 'logs.foo', where: { always: {} } },
+      { destination: 'logs.hello', where: { always: {} } },
     ],
     queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
   }),
   testContentPackEntry({
     name: 'logs.foo',
-    routing: [{ destination: 'logs.foo.bar', if: { always: {} } }],
+    routing: [{ destination: 'logs.foo.bar', where: { always: {} } }],
   }),
   testContentPackEntry({ name: 'logs.foo.bar' }),
   testContentPackEntry({
@@ -48,14 +48,14 @@ describe('content pack export', () => {
         name: ROOT_STREAM_ID,
         fields: { inherited_field_1: { type: 'keyword' } },
         routing: [
-          { destination: 'foo', if: { always: {} } },
-          { destination: 'hello', if: { always: {} } },
+          { destination: 'foo', where: { always: {} } },
+          { destination: 'hello', where: { always: {} } },
         ],
         queries: [{ id: 'logs-query', title: 'logs-query', kql: { query: 'logs' } }],
       }),
       testContentPackEntry({
         name: 'foo',
-        routing: [{ destination: 'foo.bar', if: { always: {} } }],
+        routing: [{ destination: 'foo.bar', where: { always: {} } }],
       }),
       testContentPackEntry({ name: 'foo.bar' }),
       testContentPackEntry({
@@ -89,7 +89,7 @@ describe('content pack export', () => {
     expect(sortBy(exportedStreams, 'name')).toEqual([
       testContentPackEntry({
         name: ROOT_STREAM_ID,
-        routing: [{ destination: 'hello', if: { always: {} } }],
+        routing: [{ destination: 'hello', where: { always: {} } }],
       }),
       testContentPackEntry({
         name: 'hello',
