@@ -18,9 +18,9 @@ import { FieldWithoutActions } from '../../../components/field_without_actions';
 import { Section } from '../../../components/section';
 
 export interface SpanDurationSummaryProps {
-  spanDuration: number;
-  spanName: string;
-  serviceName: string;
+  spanDuration?: number;
+  spanName?: string;
+  serviceName?: string;
   isOtelSpan: boolean;
 }
 
@@ -41,7 +41,7 @@ export function SpanDurationSummary({
     isOtelSpan,
   });
 
-  return (
+  return spanDuration != null ? (
     <Section
       title={i18n.translate(
         'unifiedDocViewer.observability.traces.docViewerSpanOverview.spanDurationSummary.title',
@@ -73,39 +73,43 @@ export function SpanDurationSummary({
             />
           </EuiText>
         </FieldWithoutActions>
-        <EuiHorizontalRule margin="xs" />
 
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiTitle size="xxxs">
-              <h3>
-                {i18n.translate(
-                  'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
-                  {
-                    defaultMessage: 'Latency',
-                  }
+        {spanName && serviceName && (
+          <>
+            <EuiHorizontalRule margin="xs" />
+            <EuiFlexGroup>
+              <EuiFlexItem>
+                <EuiTitle size="xxxs">
+                  <h3>
+                    {i18n.translate(
+                      'unifiedDocViewer.observability.traces.docViewerTransactionOverview.spanDurationSummary.latency.title',
+                      {
+                        defaultMessage: 'Latency',
+                      }
+                    )}
+                  </h3>
+                </EuiTitle>
+
+                {(latencyChartLoading || latencyChartData) && (
+                  <DurationDistributionChart
+                    data={latencyChartData?.spanDistributionChartData ?? []}
+                    markerValue={latencyChartData?.percentileThresholdValue ?? 0}
+                    markerCurrentEvent={spanDuration}
+                    hasData={!!latencyChartData}
+                    loading={latencyChartLoading}
+                    hasError={latencyChartHasError}
+                    eventType={ProcessorEvent.span}
+                    showAxisTitle={false}
+                    showLegend={false}
+                    isOtelData={isOtelSpan}
+                    dataTestSubPrefix="docViewerSpanOverview"
+                  />
                 )}
-              </h3>
-            </EuiTitle>
-
-            {(latencyChartLoading || latencyChartData) && (
-              <DurationDistributionChart
-                data={latencyChartData?.spanDistributionChartData ?? []}
-                markerValue={latencyChartData?.percentileThresholdValue ?? 0}
-                markerCurrentEvent={spanDuration}
-                hasData={!!latencyChartData}
-                loading={latencyChartLoading}
-                hasError={latencyChartHasError}
-                eventType={ProcessorEvent.span}
-                showAxisTitle={false}
-                showLegend={false}
-                isOtelData={isOtelSpan}
-                dataTestSubPrefix="docViewerSpanOverview"
-              />
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </>
+        )}
       </>
     </Section>
-  );
+  ) : null;
 }

@@ -87,6 +87,7 @@ export function SpanOverview({
     : flattenedDoc[SPAN_DURATION_FIELD];
 
   const traceId = flattenedDoc[TRACE_ID_FIELD];
+  const spanId = flattenedDoc[SPAN_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
   const containerHeight = containerRef
@@ -125,7 +126,7 @@ export function SpanOverview({
                 <SpanSummaryTitle
                   spanName={flattenedDoc[SPAN_NAME_FIELD]}
                   formattedSpanName={formattedDoc[SPAN_NAME_FIELD]}
-                  spanId={flattenedDoc[SPAN_ID_FIELD]}
+                  spanId={spanId}
                   formattedSpanId={formattedDoc[SPAN_ID_FIELD]}
                   showActions={showActions}
                 />
@@ -153,20 +154,22 @@ export function SpanOverview({
                   />
                 </EuiFlexItem>
               )}
-              <EuiFlexItem>
-                <EuiSpacer size="m" />
-                <Trace
-                  fields={fieldConfigurations}
-                  fieldMappings={dataViewFields}
-                  traceId={flattenedDoc[TRACE_ID_FIELD]}
-                  docId={flattenedDoc[SPAN_ID_FIELD]}
-                  displayType="span"
-                  dataView={dataView}
-                  tracesIndexPattern={indexes.apm.traces}
-                  showWaterfall={showWaterfall}
-                  showActions={showActions}
-                />
-              </EuiFlexItem>
+              {traceId && spanId && (
+                <EuiFlexItem>
+                  <EuiSpacer size="m" />
+                  <Trace
+                    fields={fieldConfigurations}
+                    fieldMappings={dataViewFields}
+                    traceId={traceId}
+                    docId={spanId}
+                    displayType="span"
+                    dataView={dataView}
+                    tracesIndexPattern={indexes.apm.traces}
+                    showWaterfall={showWaterfall}
+                    showActions={showActions}
+                  />
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           </FieldActionsProvider>
         </RootSpanProvider>

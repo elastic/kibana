@@ -8,12 +8,13 @@
  */
 
 import type { DataTableRecord } from '@kbn/discover-utils';
-import { DATASTREAM_TYPE_FIELD, getFieldValue, PROCESSOR_EVENT_FIELD } from '@kbn/discover-utils';
+import { getFieldValue, PROCESSOR_EVENT_FIELD, TRANSACTION_NAME_FIELD } from '@kbn/discover-utils';
 import { TRACES_PRODUCT_FEATURE_ID } from '../../../../../../common/constants';
-import type { DocumentProfileProvider } from '../../../../profiles';
+import type { DataSourceContext, DocumentProfileProvider } from '../../../../profiles';
 import { DocumentType, SolutionType } from '../../../../profiles';
 import { createGetDocViewer } from './accessors';
 import type { ProfileProviderServices } from '../../../profile_provider_services';
+import type { ContextWithProfileId } from '../../../../profile_service';
 
 const OBSERVABILITY_TRACES_TRANSACTION_DOCUMENT_PROFILE_ID =
   'observability-traces-transaction-document-profile';
@@ -34,36 +35,42 @@ export const createObservabilityTracesTransactionDocumentProfileProvider = ({
       logs: logsContextService.getAllLogsIndexPattern() ?? '',
     }),
   },
-  resolve: ({ record, rootContext }) => {
+  resolve: ({ record, rootContext, dataSourceContext }) => {
     const isObservabilitySolutionView = rootContext.solutionType === SolutionType.Observability;
 
     if (!isObservabilitySolutionView) {
       return { isMatch: false };
     }
 
-    const isTransactionRecord = getIsTransactionRecord({
+    return resolveTransactionRecord({
       record,
+      dataSourceContext,
     });
-
-    if (!isTransactionRecord) {
-      return { isMatch: false };
-    }
-
-    return {
-      isMatch: true,
-      context: {
-        type: DocumentType.Transaction,
-      },
-    };
   },
 });
 
-const getIsTransactionRecord = ({ record }: { record: DataTableRecord }) => {
-  return isTransactionDocument(record);
+const resolveTransactionRecord = ({
+  record,
+  dataSourceContext,
+}: {
+  record: DataTableRecord;
+  dataSourceContext: ContextWithProfileId<DataSourceContext>;
+}) => {
+  const isMatchingRecord = dataSourceContext.category === 'traces' && isTransactionDocument(record);
+
+  return isMatchingRecord
+    ? ({
+        isMatch: true,
+        context: {
+          type: DocumentType.Transaction,
+        },
+      } as const)
+    : ({ isMatch: false } as const);
 };
 
 const isTransactionDocument = (record: DataTableRecord) => {
-  const dataStreamType = getFieldValue(record, DATASTREAM_TYPE_FIELD);
   const processorEvent = getFieldValue(record, PROCESSOR_EVENT_FIELD);
-  return dataStreamType === 'traces' && processorEvent === 'transaction';
+  const transactionName = getFieldValue(record, TRANSACTION_NAME_FIELD);
+
+  return processorEvent === 'transaction' || !!transactionName;
 };

@@ -88,9 +88,9 @@ interface TransactionLatencyChartData {
 }
 
 interface UseTransactionLatencyChartParams {
-  transactionName: string;
-  transactionType: string;
-  serviceName: string;
+  transactionName?: string;
+  transactionType?: string;
+  serviceName?: string;
 }
 
 export const useTransactionLatencyChart = ({

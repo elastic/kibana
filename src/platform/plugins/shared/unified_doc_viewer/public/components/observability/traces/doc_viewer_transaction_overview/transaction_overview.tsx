@@ -9,7 +9,7 @@
 
 import React, { useMemo, useState } from 'react';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   SERVICE_NAME_FIELD,
   TRACE_ID_FIELD,
@@ -111,7 +111,6 @@ export function TransactionOverview({
             }
           >
             <EuiFlexItem>
-              <EuiSpacer size="m" />
               <TransactionSummaryTitle
                 serviceName={flattenedDoc[SERVICE_NAME_FIELD]}
                 transactionName={flattenedDoc[TRANSACTION_NAME_FIELD]}
@@ -144,20 +143,17 @@ export function TransactionOverview({
             )}
             <EuiFlexItem>
               {traceId && transactionId && (
-                <>
-                  <EuiSpacer size="m" />
-                  <Trace
-                    fields={fieldConfigurations}
-                    fieldMappings={dataViewFields}
-                    traceId={traceId}
-                    docId={transactionId}
-                    displayType="transaction"
-                    dataView={dataView}
-                    tracesIndexPattern={indexes.apm.traces}
-                    showWaterfall={showWaterfall}
-                    showActions={showActions}
-                  />
-                </>
+                <Trace
+                  fields={fieldConfigurations}
+                  fieldMappings={dataViewFields}
+                  traceId={traceId}
+                  docId={transactionId}
+                  displayType="transaction"
+                  dataView={dataView}
+                  tracesIndexPattern={indexes.apm.traces}
+                  showWaterfall={showWaterfall}
+                  showActions={showActions}
+                />
               )}
             </EuiFlexItem>
           </EuiFlexGroup>
