@@ -16,6 +16,11 @@ export const POLICIES_TAB = i18n.translate('xpack.securitySolution.policiesTab',
   defaultMessage: 'Policies',
 });
 
+export const ENDPOINT_EXCEPTIONS_TAB = i18n.translate(
+  'xpack.securitySolution.endpointExceptionsTab',
+  { defaultMessage: 'Endpoint exceptions' }
+);
+
 export const TRUSTED_APPS_TAB = i18n.translate('xpack.securitySolution.trustedAppsTab', {
   defaultMessage: 'Trusted applications',
 });
