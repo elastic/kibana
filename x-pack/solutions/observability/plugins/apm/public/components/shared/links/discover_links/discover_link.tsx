@@ -30,10 +30,11 @@ interface Props {
       };
     };
   };
+  dataTestSubj: string;
   children: React.ReactNode;
 }
 
-export const getDiscoverHref = ({
+const getDiscoverHref = ({
   basePath,
   location,
   query,
@@ -59,7 +60,7 @@ export const getDiscoverHref = ({
   return href;
 };
 
-export function DiscoverLink({ query = {}, ...rest }: Props) {
+export function DiscoverLink({ query = {}, dataTestSubj, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
   const { dataView } = useAdHocApmDataView();
@@ -75,5 +76,5 @@ export function DiscoverLink({ query = {}, ...rest }: Props) {
     dataViewId: dataView?.id ?? '',
   });
 
-  return <EuiLink data-test-subj="apmDiscoverLinkLink" {...rest} href={href} />;
+  return <EuiLink data-test-subj={dataTestSubj} {...rest} href={href} />;
 }

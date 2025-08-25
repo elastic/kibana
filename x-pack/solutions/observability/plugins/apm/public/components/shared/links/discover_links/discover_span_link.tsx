@@ -30,5 +30,11 @@ export function DiscoverSpanLink({
   readonly spanId: string;
   children?: ReactNode;
 }) {
-  return <DiscoverLink query={getDiscoverQuery(spanId)} children={children} />;
+  return (
+    <DiscoverLink
+      dataTestSubj="apmDiscoverSpanLink"
+      query={getDiscoverQuery(spanId)}
+      children={children}
+    />
+  );
 }

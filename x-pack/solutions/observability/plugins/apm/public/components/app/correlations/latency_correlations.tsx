@@ -52,6 +52,7 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { ViewInDiscoverButton } from '../../shared/links/discover_links/view_in_discover_button';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -325,6 +326,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             eventType={ProcessorEvent.transaction}
             totalDocCount={response.totalDocCount}
           />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <ViewInDiscoverButton dataTestSubj="apmLatencyCorrelationsViewInDiscoverButton" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

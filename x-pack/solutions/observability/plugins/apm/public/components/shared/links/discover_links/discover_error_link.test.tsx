@@ -29,7 +29,7 @@ describe('DiscoverErrorLink', () => {
   it('should render with correct query without kuery', () => {
     renderWithContext(<DiscoverErrorLink error={mockError} />);
 
-    const link = screen.getByTestId('apmDiscoverLinkLink');
+    const link = screen.getByTestId('apmDiscoverErrorLink');
     expect(link).toHaveAttribute(
       'href',
       expect.stringContaining('service.name:"myServiceName" AND error.grouping_key:"myGroupingKey"')
@@ -41,7 +41,7 @@ describe('DiscoverErrorLink', () => {
 
     renderWithContext(<DiscoverErrorLink error={mockError} kuery={kuery} />);
 
-    const link = screen.getByTestId('apmDiscoverLinkLink');
+    const link = screen.getByTestId('apmDiscoverErrorLink');
     expect(link).toHaveAttribute(
       'href',
       expect.stringContaining(

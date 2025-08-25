@@ -48,7 +48,13 @@ function DiscoverErrorLink({
   readonly error: ErrorForDiscoverQuery;
   readonly kuery?: string;
 }) {
-  return <DiscoverLink query={getDiscoverQuery(error, kuery)} children={children} />;
+  return (
+    <DiscoverLink
+      query={getDiscoverQuery(error, kuery)}
+      children={children}
+      dataTestSubj="apmDiscoverErrorLink"
+    />
+  );
 }
 
 export { DiscoverErrorLink };
