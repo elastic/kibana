@@ -38,7 +38,6 @@ const createStartContract = (): Start => {
     },
     dataViews: dataViewsMock,
     datatableUtilities: createDatatableUtilitiesMock(),
-    indexPatterns: dataViewsMock, // Deprecated alias for dataViews
     search: searchServiceMock.createStartContract(),
     fieldFormats: fieldFormatsServiceMock.createStartContract(),
     query: queryStartMock,
