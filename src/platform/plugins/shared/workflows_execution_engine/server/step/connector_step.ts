@@ -32,12 +32,13 @@ export class ConnectorStepImpl extends StepBase<ConnectorStep> {
   }
 
   public async _run(): Promise<RunStepResult> {
+    // TODO: remove this random failure logic
     // Generate a random value from 1 to 100 for potential use in steps
     if (this.step.name.includes('random') && this.step.name.includes('fail')) {
       const getRandomValue = () => Math.floor(Math.random() * 100) + 1;
       const randomValue = getRandomValue();
 
-      if (randomValue % 3 === 0) {
+      if (randomValue % 2 === 0) {
         throw new Error(`Failing step due to random value: ${randomValue}`);
       }
 
