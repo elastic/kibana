@@ -58400,7 +58400,6 @@ paths:
               required:
                 - stream
                 - where
-                - status
       responses: {}
       summary: Fork a stream
       tags:
