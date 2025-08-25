@@ -58535,6 +58535,12 @@
                                         },
                                         "type": "array"
                                       },
+                                      "metadata": {
+                                        "additionalProperties": {
+                                          "type": "string"
+                                        },
+                                        "type": "object"
+                                      },
                                       "owner": {
                                         "type": "string"
                                       },
@@ -58632,6 +58638,7 @@
                                     "required": [
                                       "owner",
                                       "tier",
+                                      "metadata",
                                       "tags",
                                       "runbook_links",
                                       "documentation_links",
@@ -59092,6 +59099,12 @@
                         },
                         "type": "array"
                       },
+                      "metadata": {
+                        "additionalProperties": {
+                          "type": "string"
+                        },
+                        "type": "object"
+                      },
                       "owner": {
                         "type": "string"
                       },
@@ -59189,6 +59202,7 @@
                     "required": [
                       "owner",
                       "tier",
+                      "metadata",
                       "tags",
                       "runbook_links",
                       "documentation_links",
