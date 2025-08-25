@@ -341,11 +341,9 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         expect(res.body).to.have.property('package');
-        expect(res.body.package).to.have.property('package_name');
-        expect(res.body.package).to.have.property('version');
-        expect(res.body.package).to.have.property('installed_at');
+        expect(res.body.package).to.have.property('name');
         expect(res.body).to.have.property('items');
-        expect(res.body.package.package_name).to.equal(knowledgeBasePkgName);
+        expect(res.body.package.name).to.equal(knowledgeBasePkgName);
         expect(res.body.items).to.be.an('array');
         expect(res.body.items).to.have.length(3); // overview, troubleshooting, configuration
 
@@ -377,17 +375,21 @@ export default function (providerContext: FtrProviderContext) {
           .expect(200);
 
         // Validate response structure matches schema
-        expect(res.body.package.package_name).to.be.a('string');
-        expect(res.body.package.version).to.be.a('string');
-        expect(res.body.package.installed_at).to.be.a('string');
+        expect(res.body.package.name).to.be.a('string');
         expect(res.body.items).to.be.an('array');
 
         // Validate knowledge base content items structure
         res.body.items.forEach((item: any) => {
           expect(item).to.have.property('fileName');
           expect(item).to.have.property('content');
+          expect(item).to.have.property('path');
+          expect(item).to.have.property('installed_at');
+          expect(item).to.have.property('version');
           expect(item.fileName).to.be.a('string');
           expect(item.content).to.be.a('string');
+          expect(item.path).to.be.a('string');
+          expect(item.installed_at).to.be.a('string');
+          expect(item.version).to.be.a('string');
         });
       });
 
