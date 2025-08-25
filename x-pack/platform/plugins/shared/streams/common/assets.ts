@@ -39,7 +39,6 @@ export function isQueryLink(item: AssetLink): item is QueryLink {
 type OmitFrom<T, K> = T extends any ? (K extends keyof T ? Omit<T, K> : never) : never;
 
 export type AssetLinkRequest = OmitFrom<AssetLink, 'asset.uuid'>;
-
 export type AssetUnlinkRequest = Pick<AssetLink, 'asset.type' | 'asset.id'>;
 
 interface AssetBase<TAssetType extends AssetType> extends AssetLinkBase<TAssetType> {

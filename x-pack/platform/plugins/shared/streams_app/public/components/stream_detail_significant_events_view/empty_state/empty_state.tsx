@@ -9,7 +9,12 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { AssetImage } from '../../asset_image';
 
-export function SignificantEventsViewEmptyState({ onAddClick }: { onAddClick: () => void }) {
+interface Props {
+  onAddClick: () => void;
+  onIdentifySystemClick: () => void;
+}
+
+export function SignificantEventsViewEmptyState({ onAddClick, onIdentifySystemClick }: Props) {
   return (
     <EuiFlexGroup direction="column" alignItems="center" justifyContent="center">
       <EuiSpacer size="m" />
@@ -31,6 +36,11 @@ export function SignificantEventsViewEmptyState({ onAddClick }: { onAddClick: ()
         <EuiButton iconType="plusInCircle" fill onClick={() => onAddClick()}>
           {i18n.translate('xpack.streams.significantEvents.emptyState.addEvent', {
             defaultMessage: 'Add new event',
+          })}
+        </EuiButton>
+        <EuiButton iconType="sparkles" onClick={() => onIdentifySystemClick()}>
+          {i18n.translate('xpack.streams.significantEvents.emptyState.identifySystem', {
+            defaultMessage: 'Identify system',
           })}
         </EuiButton>
       </EuiFlexGroup>

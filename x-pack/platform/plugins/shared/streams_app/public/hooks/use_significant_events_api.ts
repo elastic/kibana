@@ -25,7 +25,10 @@ interface SignificantEventsApi {
   upsertQuery: (query: StreamQueryKql) => Promise<void>;
   removeQuery: (id: string) => Promise<void>;
   bulk: (operations: SignificantEventsApiBulkOperation[]) => Promise<void>;
-  generate: (connectorId: string) => SignificantEventsGenerateResponse;
+  generate: (
+    connectorId: string,
+    method: 'log_patterns' | 'zero_shot'
+  ) => SignificantEventsGenerateResponse;
 }
 
 export function useSignificantEventsApi({ name }: { name: string }): SignificantEventsApi {
@@ -44,14 +47,8 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
       await streamsRepositoryClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
         signal,
         params: {
-          path: {
-            name,
-            queryId: id,
-          },
-          body: {
-            kql,
-            title,
-          },
+          path: { name, queryId: id },
+          body: { kql, title },
         },
       });
     },
@@ -60,41 +57,22 @@ export function useSignificantEventsApi({ name }: { name: string }): Significant
         'DELETE /api/streams/{name}/queries/{queryId} 2023-10-31',
         {
           signal,
-          params: {
-            path: {
-              name,
-              queryId: id,
-            },
-          },
+          params: { path: { name, queryId: id } },
         }
       );
     },
     bulk: async (operations) => {
       await streamsRepositoryClient.fetch('POST /api/streams/{name}/queries/_bulk 2023-10-31', {
         signal,
-        params: {
-          path: {
-            name,
-          },
-          body: {
-            operations,
-          },
-        },
+        params: { path: { name }, body: { operations } },
       });
     },
-    generate: (connectorId: string) => {
+    generate: (connectorId: string, method: 'log_patterns' | 'zero_shot') => {
       return streamsRepositoryClient.stream(
         `GET /api/streams/{name}/significant_events/_generate 2023-10-31`,
         {
           signal,
-          params: {
-            path: {
-              name,
-            },
-            query: {
-              connectorId,
-            },
-          },
+          params: { path: { name }, query: { connectorId, method } },
         }
       );
     },

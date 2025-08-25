@@ -29,7 +29,7 @@ export const Create: StoryFn<{}> = () => {
         `
       )}
     >
-      <SignificantEventsViewEmptyState onAddClick={() => {}} />
+      <SignificantEventsViewEmptyState onAddClick={() => {}} onIdentifySystemClick={() => {}} />
     </EuiPanel>
   );
 };
