@@ -7,19 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter } from '@kbn/es-query';
-import type { PublishingSubject } from '../../publishing_subject';
-// import type { HasParentApi } from '../has_parent_api';
+import { Filter } from '@kbn/es-query';
+import { PublishingSubject } from '../../publishing_subject';
 
 export interface AppliesFilters {
-  // extends HasParentApi<{ autoApplyFilters$: PublishingSubject<boolean> }> {
-  // draftFilters$: PublishingSubject<Filter[] | undefined>;
   appliedFilters$: PublishingSubject<Filter[] | undefined>;
-  hasDraftFilters$: PublishingSubject<boolean>;
-  commitFilters: () => void;
 }
 
 export const apiAppliesFilters = (unknownApi: unknown): unknownApi is AppliesFilters => {
-  console.log(unknownApi);
   return Boolean(unknownApi && (unknownApi as AppliesFilters)?.appliedFilters$ !== undefined);
 };

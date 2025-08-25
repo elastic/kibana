@@ -117,7 +117,6 @@ export const connectToQueryState = <S extends QueryState>(
   if (initialDirty) {
     stateContainer.set({ ...stateContainer.get(), ...initialState });
   }
-  // console.log('initialDirty', initialDirty);
 
   // to ignore own state updates
   let updateInProgress = false;
@@ -156,11 +155,9 @@ export const connectToQueryState = <S extends QueryState>(
         })
       )
       .subscribe((newState) => {
-        console.log(' state$', { newState });
         stateContainer.set({ ...stateContainer.get(), ...newState });
       }),
     stateContainer.state$.subscribe((state) => {
-      console.log('stateContainer.state$', { state });
       updateInProgress = true;
 
       // cloneDeep is required because services are mutating passed objects

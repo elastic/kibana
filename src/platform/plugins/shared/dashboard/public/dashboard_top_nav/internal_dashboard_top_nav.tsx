@@ -95,7 +95,7 @@ export function InternalDashboardTopNav({
     query,
     title,
     viewMode,
-    hasUnpublishedFilters,
+    unpublishedFilters,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.focusedPanelId$,
@@ -105,9 +105,9 @@ export function InternalDashboardTopNav({
     dashboardApi.query$,
     dashboardApi.title$,
     dashboardApi.viewMode$,
-    dashboardApi.childHasUnpublishedFilters$
+    dashboardApi.unpublishedChildFilters$
   );
-  console.log({ hasUnpublishedFilters });
+  // console.log({ unpublishedFilters });
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -400,9 +400,7 @@ export function InternalDashboardTopNav({
         //   dashboardApi.setFilters(cleanFiltersForSerialize(newFilters));
         // }}
 
-        dirtyState={
-          hasUnpublishedFilters ? { hasUnpublishedFilters: hasUnpublishedFilters } : undefined
-        }
+        dirtyState={unpublishedFilters?.length ? { filters: unpublishedFilters } : undefined}
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

@@ -11,7 +11,7 @@ import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import { apiAppliesFilters, type AppliesFilters } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { BehaviorSubject, combineLatestWith, distinctUntilChanged, filter, map, tap } from 'rxjs';
+import { BehaviorSubject, combineLatestWith, filter, map } from 'rxjs';
 import type { initializeLayoutManager } from './layout_manager';
 import type { initializeSettingsManager } from './settings_manager';
 import type { initializeUnifiedSearchManager } from './unified_search_manager';
@@ -25,9 +25,7 @@ export const initializeFiltersManager = (
   // await layoutManager.internalApi.untilAllChildrenAreAvailable();
 
   const childFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
-  const childHasUnpublishedFilters$ = new BehaviorSubject<boolean>(false);
-
-  // const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
+  const unpublishedChildFilters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const filterManagerSubscription = combineCompatibleChildrenApis<
     AppliesFilters,
     Filter[] | undefined
@@ -40,56 +38,26 @@ export const initializeFiltersManager = (
       const allOutputFilters = values.filter(
         (childOutputFilters) => childOutputFilters && childOutputFilters.length > 0
       ) as Filter[][];
-      console.log(allOutputFilters);
       return allOutputFilters && allOutputFilters.length > 0 ? allOutputFilters.flat() : undefined;
     }
-  ).subscribe((allChildFilters) => childFilters$.next(allChildFilters));
+  ).subscribe((allChildFilters) => unpublishedChildFilters$.next(allChildFilters));
 
-  const childHasUnpublishedFiltersSubscription = combineCompatibleChildrenApis<
-    AppliesFilters,
-    boolean | undefined
-  >(
-    { children$: layoutManager.api.children$ },
-    'hasDraftFilters$',
-    apiAppliesFilters,
-    false,
-    (values) => {
-      console.log({ values });
-      return values.some((unapplied) => unapplied);
-    }
-  )
-    .pipe(
-      tap((changes) => {
-        console.log('HAS UNSAVED', changes);
-      }),
-      distinctUntilChanged()
-    )
-    .subscribe((hasUnapplied) => childHasUnpublishedFilters$.next(Boolean(hasUnapplied)));
-
-  //
   const publishFilters = () => {
-    // console.log(' child', child);
-    for (const child of Object.values(layoutManager.api.children$.getValue())) {
-      if (apiAppliesFilters(child)) {
-        child.commitFilters();
-      }
+    const published = childFilters$.getValue();
+    const unpublished = unpublishedChildFilters$.getValue();
+    if (!deepEqual(published, unpublished)) {
+      childFilters$.next(unpublished);
+      unpublishedChildFilters$.next(undefined);
     }
-
-    // const published = childFilters$.getValue();
-    // const unpublished = unpublishedChildFilters$.getValue();
-    // if (!deepEqual(published, unpublished)) {
-    //   childFilters$.next(unpublished);
-    //   unpublishedChildFilters$.next(undefined);
-    // }
   };
-  // const autoPublishFiltersSubscription = unpublishedChildFilters$
-  //   .pipe(
-  //     combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
-  //     filter(([_, autoApplyFilters]) => autoApplyFilters)
-  //   )
-  //   .subscribe(([filters, autoApplyFilters]) => {
-  //     publishFilters();
-  //   });
+  const autoPublishFiltersSubscription = unpublishedChildFilters$
+    .pipe(
+      combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
+      filter(([_, autoApplyFilters]) => autoApplyFilters)
+    )
+    .subscribe(([filters, autoApplyFilters]) => {
+      publishFilters();
+    });
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   filterManagerSubscription.add(
@@ -106,11 +74,10 @@ export const initializeFiltersManager = (
   );
 
   return {
-    api: { filters$, childFilters$, publishFilters, childHasUnpublishedFilters$ },
+    api: { filters$, childFilters$, unpublishedChildFilters$, publishFilters },
     cleanup: () => {
-      // autoPublishFiltersSubscription.unsubscribe();
+      autoPublishFiltersSubscription.unsubscribe();
       filterManagerSubscription.unsubscribe();
-      childHasUnpublishedFiltersSubscription.unsubscribe();
     },
   };
 };
