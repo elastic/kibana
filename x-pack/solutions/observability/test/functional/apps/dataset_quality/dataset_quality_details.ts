@@ -433,7 +433,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     });
 
     describe('navigation', () => {
-      it('should go to log explorer page when the open in log explorer button is clicked', async () => {
+      it('should go to discover page when the open in discover button is clicked', async () => {
         await PageObjects.datasetQuality.navigateToDetails({
           dataStream: regularDataStreamName,
         });
@@ -444,10 +444,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await logExplorerButton.click();
 
-        // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(regularDatasetName);
+        // Confirm dataset selector text in discover
+        await retry.try(async () => {
+          const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+          originalExpect(datasetSelectorText).toMatch(regularDataStreamName);
+        });
       });
 
       it('should go to discover for degraded docs when the button next to breakdown selector is clicked', async () => {
