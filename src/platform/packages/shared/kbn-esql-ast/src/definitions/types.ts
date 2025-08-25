@@ -261,7 +261,7 @@ export interface ValidationErrors {
     message: string;
     type: {
       fn: string;
-      validArgCounts: string;
+      validArgCounts: number[];
       actual: number;
     };
   };

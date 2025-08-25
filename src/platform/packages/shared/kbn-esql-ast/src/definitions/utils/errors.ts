@@ -98,10 +98,13 @@ Expected one of:
     case 'wrongNumberArgsVariadic':
       return {
         message: i18n.translate('kbn-esql-ast.esql.validation.wrongNumberArgsVariadic', {
-          defaultMessage: '[{fn}] expected [{validArgCounts}] arguments, but got {actual}.',
+          defaultMessage: '[{fn}] expected {validArgCounts} arguments, but got {actual}.',
           values: {
             fn: out.fn,
-            validArgCounts: out.validArgCounts,
+            validArgCounts: i18n.formatList(
+              'disjunction',
+              Array.from(out.validArgCounts).map(String)
+            ),
             actual: out.actual,
           },
         }),
@@ -592,7 +595,7 @@ export const errors = {
     } else {
       return errors.byId('wrongNumberArgsVariadic', fn.location, {
         fn: fn.name,
-        validArgCounts: Array.from(validArgCounts).join(', '),
+        validArgCounts: Array.from(validArgCounts),
         actual: arity,
       });
     }

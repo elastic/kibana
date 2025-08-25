@@ -413,6 +413,14 @@ describe('function validation', () => {
               ],
               returnType: 'integer',
             },
+            {
+              params: [
+                { name: 'arg1', type: 'integer' },
+                { name: 'arg2', type: 'integer' },
+                { name: 'arg3', type: 'integer' },
+              ],
+              returnType: 'integer',
+            },
           ],
         },
         {
@@ -463,10 +471,10 @@ describe('function validation', () => {
 
       // several signatures, different arities
       await expectErrors('FROM a_index | EVAL TEST()', [
-        '[test] expected [1, 2] arguments, but got 0.',
+        '[test] expected 1, 2, or 3 arguments, but got 0.',
       ]);
-      await expectErrors('FROM a_index | EVAL TEST(1, 1, 1)', [
-        '[test] expected [1, 2] arguments, but got 3.',
+      await expectErrors('FROM a_index | EVAL TEST(1, 1, 1, 1)', [
+        '[test] expected 1, 2, or 3 arguments, but got 4.',
       ]);
 
       // exact number of arguments
