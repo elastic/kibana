@@ -8,13 +8,10 @@
  */
 
 import type { graphlib } from '@dagrejs/dagre';
-import type { StepContext, WorkflowContext, WorkflowSchema, WorkflowYaml } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { StepContext, WorkflowContext } from '@kbn/workflows';
 import type { WorkflowExecutionRuntimeManager } from './workflow_execution_runtime_manager';
 
 export interface ContextManagerInit {
-  workflow: z.infer<typeof WorkflowSchema>;
-  event: any;
   // New properties for logging
   workflowExecutionGraph: graphlib.Graph;
   workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
@@ -23,14 +20,10 @@ export interface ContextManagerInit {
 export class WorkflowContextManager {
   private workflowExecutionGraph: graphlib.Graph;
   private workflowExecutionRuntime: WorkflowExecutionRuntimeManager;
-  private workflow: WorkflowYaml;
-  private event: unknown;
 
   constructor(init: ContextManagerInit) {
     this.workflowExecutionGraph = init.workflowExecutionGraph;
     this.workflowExecutionRuntime = init.workflowExecutionRuntime;
-    this.workflow = init.workflow;
-    this.event = init.event;
   }
 
   public getContext(): StepContext {
@@ -99,12 +92,12 @@ export class WorkflowContextManager {
       },
       workflow: {
         id: workflowExecution.workflowId, // This can be set based on the workflow ID
-        name: this.workflow.name,
-        enabled: this.workflow.enabled,
+        name: workflowExecution.workflowDefinition.name,
+        enabled: workflowExecution.workflowDefinition.enabled,
         spaceId: workflowExecution.spaceId,
       },
-      consts: this.workflow.consts || {},
-      event: this.event,
+      consts: workflowExecution.workflowDefinition.consts || {},
+      event: workflowExecution.context?.event,
     };
   }
 

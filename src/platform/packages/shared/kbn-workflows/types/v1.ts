@@ -30,7 +30,7 @@ export interface EsWorkflowExecution {
   workflowId: string;
   isTestRun: boolean;
   status: ExecutionStatus;
-  context: Record<string, string>;
+  context: Record<string, any>;
   workflowDefinition: WorkflowYaml;
   /** Serialized graphlib.Graph */
   executionGraph?: any;
