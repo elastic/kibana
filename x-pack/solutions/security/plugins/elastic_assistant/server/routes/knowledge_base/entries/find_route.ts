@@ -29,7 +29,7 @@ import { performChecks } from '../../helpers';
 import { transformESSearchToKnowledgeBaseEntry } from '../../../ai_assistant_data_clients/knowledge_base/transforms';
 import type { EsKnowledgeBaseEntrySchema } from '../../../ai_assistant_data_clients/knowledge_base/types';
 import { getKBUserFilter } from './utils';
-import { SECURITY_LABS_RESOURCE } from '../constants';
+import { DEFEND_INSIGHTS_RESOURCE, SECURITY_LABS_RESOURCE } from '../constants';
 
 export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
@@ -112,6 +112,12 @@ export const findKnowledgeBaseEntriesRoute = (router: ElasticAssistantPluginRout
               bucketId: 'securityLabsId',
               kbResource: SECURITY_LABS_RESOURCE as KnowledgeBaseResource,
               name: 'Security Labs',
+              required: true,
+            },
+            {
+              bucketId: 'defendInsightsId',
+              kbResource: DEFEND_INSIGHTS_RESOURCE as KnowledgeBaseResource,
+              name: 'Defend Insights',
               required: true,
             },
           ]

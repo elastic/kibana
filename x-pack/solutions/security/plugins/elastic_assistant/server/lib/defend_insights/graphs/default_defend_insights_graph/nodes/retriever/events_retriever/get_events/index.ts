@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DateMath, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { DateMath } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
 import type { DefendInsightType, Replacements } from '@kbn/elastic-assistant-common';
@@ -15,33 +15,16 @@ import {
   transformRawData,
 } from '@kbn/elastic-assistant-common';
 
-import { getQuery } from './queries';
-
-interface AggregationResponse {
-  unique_process_executable: {
-    buckets: Array<{
-      key: string;
-      doc_count: number;
-      latest_event: {
-        hits: {
-          hits: Array<{
-            _id: string;
-            _source: {
-              agent: { id: string };
-              process: { executable: string };
-            };
-          }>;
-        };
-      };
-    }>;
-  };
-}
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../../../../../../ai_assistant_data_clients/knowledge_base';
+import { getEventsForInsightType } from './retrievers';
+import { enrichEvents } from './enrichers';
 
 export const getAnonymizedEvents = async ({
   insightType,
   endpointIds,
   anonymizationFields,
   esClient,
+  kbDataClient,
   onNewReplacements,
   replacements,
   size,
@@ -52,6 +35,7 @@ export const getAnonymizedEvents = async ({
   endpointIds: string[];
   anonymizationFields?: AnonymizationFieldResponse[];
   esClient: ElasticsearchClient;
+  kbDataClient: AIAssistantKnowledgeBaseDataClient | null;
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
   size?: number;
@@ -62,19 +46,14 @@ export const getAnonymizedEvents = async ({
     return [];
   }
 
-  const query = getQuery(insightType, { endpointIds, size, gte: start, lte: end });
-  // TODO add support for other insight types
-  const result = await esClient.search<SearchResponse, AggregationResponse>(query);
-  const fileEvents = (result.aggregations?.unique_process_executable.buckets ?? []).map(
-    (bucket) => {
-      const latestEvent = bucket.latest_event.hits.hits[0];
-      return {
-        _id: [latestEvent._id],
-        'agent.id': [latestEvent._source.agent.id],
-        'process.executable': [latestEvent._source.process.executable],
-      };
-    }
-  );
+  const events = await getEventsForInsightType(insightType, esClient, {
+    endpointIds,
+    size,
+    gte: start,
+    lte: end,
+  });
+
+  const enrichedEvents = await enrichEvents(insightType, events, { kbDataClient });
 
   let localReplacements = { ...(replacements ?? {}) };
   const localOnNewReplacements = (newReplacements: Replacements) => {
@@ -83,7 +62,7 @@ export const getAnonymizedEvents = async ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  return fileEvents.map((event) =>
+  return enrichedEvents.map((event) =>
     transformRawData({
       anonymizationFields,
       currentReplacements: localReplacements, // <-- the latest local replacements

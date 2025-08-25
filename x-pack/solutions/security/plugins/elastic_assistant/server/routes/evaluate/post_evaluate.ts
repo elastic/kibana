@@ -250,6 +250,7 @@ export const postEvaluateRoute = (
                 connectorTimeout: RESPONSE_TIMEOUT,
                 datasetName,
                 esClient,
+                kbDataClient,
                 esClientInternalUser,
                 evaluationId,
                 evaluatorConnectorId,
