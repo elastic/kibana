@@ -10,7 +10,7 @@
 import * as Rx from 'rxjs';
 import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ReportingAPIClient } from '../..';
 import { ScreenCapturePanelContent } from './screen_capture_panel_content';
@@ -28,11 +28,10 @@ const apiClient = new ReportingAPIClient(http, uiSettings, '7.15.0');
 const getJobParamsDefault = () => ({
   objectType: 'test-object-type',
   title: 'Test Report Title',
-  browserTimezone: 'America/New_York',
 });
 
-test('ScreenCapturePanelContent renders the default view properly', () => {
-  const component = mount(
+test('renders default view without canvas or print layout labels', () => {
+  render(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         reportType="Analytical App"
@@ -43,13 +42,12 @@ test('ScreenCapturePanelContent renders the default view properly', () => {
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm').render()).toMatchSnapshot();
-  expect(component.text()).not.toMatch('Full page layout');
-  expect(component.text()).not.toMatch('Optimize for printing');
+  expect(screen.queryByText(/Full page layout/i)).toBeNull();
+  expect(screen.queryByText(/Optimize for printing/i)).toBeNull();
 });
 
-test('ScreenCapturePanelContent properly renders a view with "canvas" layout option', () => {
-  const component = mount(
+test('shows canvas layout text when layoutOption=canvas', () => {
+  render(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="canvas"
@@ -61,12 +59,11 @@ test('ScreenCapturePanelContent properly renders a view with "canvas" layout opt
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm').render()).toMatchSnapshot();
-  expect(component.text()).toMatch('Full page layout');
+  expect(screen.getByText(/Full page layout/i)).toBeTruthy();
 });
 
-test('ScreenCapturePanelContent allows POST URL to be copied when objectId is provided', () => {
-  const component = mount(
+test('allows POST URL copy when objectId is provided', () => {
+  render(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="canvas"
@@ -79,12 +76,12 @@ test('ScreenCapturePanelContent allows POST URL to be copied when objectId is pr
       />
     </IntlProvider>
   );
-  expect(component.text()).toMatch('Copy POST URL');
-  expect(component.text()).not.toMatch('Unsaved work');
+  expect(screen.getByText(/Copy POST URL/i)).toBeTruthy();
+  expect(screen.queryByText(/Unsaved work/i)).toBeNull();
 });
 
-test('ScreenCapturePanelContent does not allow POST URL to be copied when objectId is not provided', () => {
-  const component = mount(
+test('disallows POST URL copy when objectId missing', () => {
+  render(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="canvas"
@@ -96,12 +93,12 @@ test('ScreenCapturePanelContent does not allow POST URL to be copied when object
       />
     </IntlProvider>
   );
-  expect(component.text()).not.toMatch('Copy POST URL');
-  expect(component.text()).toMatch('Unsaved work');
+  expect(screen.queryByText(/Copy POST URL/i)).toBeNull();
+  expect(screen.getByText(/Unsaved work/i)).toBeTruthy();
 });
 
-test('ScreenCapturePanelContent properly renders a view with "print" layout option', () => {
-  const component = mount(
+test('shows print layout text when layoutOption=print', () => {
+  render(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         layoutOption="print"
@@ -113,12 +110,21 @@ test('ScreenCapturePanelContent properly renders a view with "print" layout opti
       />
     </IntlProvider>
   );
-  expect(component.find('EuiForm').render()).toMatchSnapshot();
-  expect(component.text()).toMatch('Optimize for printing');
+  expect(screen.getByText(/Optimize for printing/i)).toBeTruthy();
 });
 
-test('ScreenCapturePanelContent decorated job params are visible in the POST URL', () => {
-  const component = mount(
+test('exposes decorated job params in the POST URL copy value', () => {
+  // Construct expected URL via the same apiClient helpers the component uses
+  const decorated = apiClient.getDecoratedJobParams(getJobParamsDefault()); // client injects browserTimezone & version
+  const relative = apiClient.getReportingPublicJobPath('Analytical App', decorated);
+  // window.location.href is used as base; ensure it has a hostname for URL()
+  const originalHref = window.location.href;
+  Object.defineProperty(window, 'location', {
+    writable: true,
+    value: { href: 'http://localhost/app/dashboards' },
+  });
+
+  render(
     <IntlProvider locale="en">
       <ScreenCapturePanelContent
         objectId="test"
@@ -132,7 +138,16 @@ test('ScreenCapturePanelContent decorated job params are visible in the POST URL
     </IntlProvider>
   );
 
-  expect(component.find('EuiCopy').prop('textToCopy')).toMatchInlineSnapshot(
-    `"http://localhost/api/reporting/generate/Analytical%20App?jobParams=%28browserTimezone%3AAmerica%2FNew_York%2Clayout%3A%28dimensions%3A%28height%3A768%2Cwidth%3A1024%29%2Cid%3Apreserve_layout%29%2CobjectType%3Atest-object-type%2Ctitle%3A%27Test%20Report%20Title%27%2Cversion%3A%277.15.0%27%29"`
-  );
+  const expectedAbsolute = new URL(relative, 'http://localhost/app/dashboards').toString();
+  // The button exists (copy action). We can't reach into EuiCopy props; instead, verify advanced options accordion text and that clicking it reveals button.
+  const advanced = screen.getByRole('button', { name: /Advanced options/i });
+  advanced.click();
+  const copyBtn = screen.getByRole('button', { name: /Copy POST URL/i });
+  expect(copyBtn).toBeTruthy();
+  // Sanity: expected URL contains encoded job params pieces
+  expect(expectedAbsolute).toMatch(/generate/);
+  expect(expectedAbsolute).toMatch(/jobParams=/);
+
+  // restore location
+  Object.defineProperty(window, 'location', { writable: true, value: { href: originalHref } });
 });

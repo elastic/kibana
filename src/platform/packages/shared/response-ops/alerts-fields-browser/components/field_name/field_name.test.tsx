@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
-
+import { render, screen } from '@testing-library/react';
 import { FieldName } from './field_name';
 
 const timestampFieldId = '@timestamp';
@@ -24,18 +23,16 @@ describe('FieldName', () => {
   });
 
   test('it renders the field name', () => {
-    const wrapper = mount(<FieldName {...defaultProps} />);
-
-    expect(
-      wrapper.find(`[data-test-subj="field-${timestampFieldId}-name"]`).first().text()
-    ).toEqual(timestampFieldId);
+    render(<FieldName {...defaultProps} />);
+    expect(screen.getByTestId(`field-${timestampFieldId}-name`)).toHaveTextContent(
+      timestampFieldId
+    );
   });
 
   test('it highlights the text specified by the `highlight` prop', () => {
     const highlight = 'stamp';
+    render(<FieldName {...defaultProps} highlight={highlight} />);
 
-    const wrapper = mount(<FieldName {...{ ...defaultProps, highlight }} />);
-
-    expect(wrapper.find('mark').first().text()).toEqual(highlight);
+    expect(screen.getByText(highlight, { selector: 'mark' })).toBeInTheDocument();
   });
 });

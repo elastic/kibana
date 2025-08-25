@@ -10,8 +10,8 @@
 import React from 'react';
 import type { AlertFieldsTableProps } from '.';
 import { AlertFieldsTable } from '.';
-import type { ReactWrapper } from 'enzyme';
-import { mount } from 'enzyme';
+import { render, screen, within, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 
 describe('AlertFieldsTable', () => {
   const defaultProps = {
@@ -82,22 +82,35 @@ describe('AlertFieldsTable', () => {
       _index: '.internal.alerts-stack.alerts-default-000001',
     },
   } as unknown as AlertFieldsTableProps;
-  let wrapper: ReactWrapper;
+  const getBodyRows = () => {
+    const rowgroups = screen.getAllByRole('rowgroup');
+    const body = rowgroups.find((g) => g.tagName === 'TBODY');
+    if (!body) throw new Error('tbody rowgroup not found');
+    return within(body).getAllByRole('row');
+  };
 
-  beforeEach(async () => {
-    wrapper = mount(<AlertFieldsTable {...defaultProps} />);
+  it('paginates the results', async () => {
+    const user = userEvent.setup();
+    render(<AlertFieldsTable {...defaultProps} />);
+  
+    expect(getBodyRows()).toHaveLength(25);
+
+    const next = screen.getByTestId('pagination-button-next');
+    await user.click(next);
+
+    // Wait for caption to reflect page 2 (or any async re-render) then assert row count
+    await screen.findByText(/Page 2 of/i);
+    expect(getBodyRows()).toHaveLength(8);
   });
 
-  it('should paginate the results', () => {
-    expect(wrapper.find('tbody tr')).toHaveLength(25);
-    wrapper.find(`[data-test-subj="pagination-button-next"]`).last().simulate('click');
-    expect(wrapper.find('tbody tr')).toHaveLength(8);
-  });
+  it('filters rows according to search string', async () => {
+    render(<AlertFieldsTable {...defaultProps} />);
 
-  it('should filter the rows according to the search string', async () => {
-    wrapper
-      .find('input[type="search"]')
-      .simulate('keyup', { target: { value: 'kibana.alert.status' } });
-    expect(wrapper.find('tbody tr')).toHaveLength(1);
+  const search = screen.getByRole('searchbox');
+  fireEvent.change(search, { target: { value: 'kibana.alert.status' } });
+
+    // Wait for filtered caption (1 rows out of 1) or the specific field cell
+    await screen.findByText('kibana.alert.status');
+    expect(getBodyRows()).toHaveLength(1);
   });
 });

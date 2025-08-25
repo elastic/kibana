@@ -7,52 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mount } from 'enzyme';
 import React from 'react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { Search } from './search';
 
 describe('Search', () => {
-  test('it renders the field search input with the expected placeholder text when the searchInput prop is empty', () => {
-    const wrapper = mount(
-      <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />
-    );
-
-    expect(wrapper.find('[data-test-subj="field-search"]').first().props().placeholder).toEqual(
-      'Field name'
-    );
+  test('renders placeholder text when searchInput is empty', () => {
+    render(<Search isSearching={false} onSearchInputChange={jest.fn()} searchInput="" />);
+    expect(screen.getByPlaceholderText('Field name')).toBeInTheDocument();
   });
 
-  test('it renders the "current" search value in the input when searchInput is not empty', () => {
-    const searchInput = 'aFieldName';
-
-    const wrapper = mount(
-      <Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={searchInput} />
-    );
-
-    expect(wrapper.find('input').props().value).toEqual(searchInput);
+  test('renders the current search value when searchInput is not empty', () => {
+    const value = 'aFieldName';
+    render(<Search isSearching={false} onSearchInputChange={jest.fn()} searchInput={value} />);
+    expect(screen.getByDisplayValue(value)).toBeInTheDocument();
   });
 
-  test('it renders the field search input with a spinner when isSearching is true', () => {
-    const wrapper = mount(
-      <Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />
-    );
+  test('shows loading spinner when isSearching is true', () => {
+    render(<Search isSearching={true} onSearchInputChange={jest.fn()} searchInput="" />);
 
-    expect(wrapper.find('.euiLoadingSpinner').first().exists()).toBe(true);
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
   });
 
-  test('it invokes onSearchInputChange when the user types in the search field', () => {
+  test('invokes onSearchInputChange on user typing', async () => {
     const onSearchInputChange = jest.fn();
+    const user = userEvent.setup();
 
-    const wrapper = mount(
-      <Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />
-    );
+    render(<Search isSearching={false} onSearchInputChange={onSearchInputChange} searchInput="" />);
 
-    wrapper
-      .find('input')
-      .first()
-      .simulate('change', { target: { value: 'timestamp' } });
-    wrapper.update();
+    const input = screen.getByTestId('field-search');
 
-    expect(onSearchInputChange).toBeCalled();
+    await user.type(input, 'timestamp');
+    
+    expect(onSearchInputChange).toHaveBeenCalled();
   });
 });
