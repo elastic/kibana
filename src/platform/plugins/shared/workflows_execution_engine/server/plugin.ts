@@ -84,7 +84,7 @@ export class WorkflowsExecutionEnginePlugin
 
           return {
             async run() {
-              const { workflowRunId } = taskInstance.params as StartWorkflowExecutionParams; // TODO: define type
+              const { workflowRunId } = taskInstance.params as StartWorkflowExecutionParams;
               const [, pluginsStart] = await core.getStartServices();
               const { actions, taskManager } =
                 pluginsStart as WorkflowsExecutionEnginePluginStartDeps;
@@ -153,12 +153,11 @@ export class WorkflowsExecutionEnginePlugin
       workflow: WorkflowExecutionEngineModel,
       context: Record<string, any>
     ) => {
-      const workflowExecutionId = generateUuid();
       const workflowCreatedAt = new Date();
 
       const triggeredBy = context.triggeredBy || 'manual'; // 'manual' or 'scheduled'
       const workflowExecution = {
-        id: workflowExecutionId,
+        id: generateUuid(),
         spaceId: context.spaceId,
         workflowId: workflow.id,
         workflowDefinition: workflow.definition,
@@ -172,10 +171,10 @@ export class WorkflowsExecutionEnginePlugin
       } as Partial<EsWorkflowExecution>; // EsWorkflowExecution (add triggeredBy to type if needed)
       await this.workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const taskInstance = {
-        id: `workflow:${workflowExecutionId}:${context.triggeredBy}`,
+        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
         taskType: 'workflow:run',
         params: {
-          workflowExecutionId,
+          workflowRunId: workflowExecution.id,
           workflow,
         },
         state: {
@@ -188,7 +187,7 @@ export class WorkflowsExecutionEnginePlugin
       };
 
       await plugins.taskManager.schedule(taskInstance);
-      return workflowExecutionId;
+      return workflowExecution.id!;
     };
 
     return {
