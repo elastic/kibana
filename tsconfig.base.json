@@ -128,6 +128,8 @@
       "@kbn/babel-preset/*": ["packages/kbn-babel-preset/*"],
       "@kbn/babel-register": ["src/platform/packages/shared/kbn-babel-register"],
       "@kbn/babel-register/*": ["src/platform/packages/shared/kbn-babel-register/*"],
+      "@kbn/babel-require-transformer": ["packages/kbn-babel-require-transformer"],
+      "@kbn/babel-require-transformer/*": ["packages/kbn-babel-require-transformer/*"],
       "@kbn/babel-transform": ["src/platform/packages/private/kbn-babel-transform"],
       "@kbn/babel-transform/*": ["src/platform/packages/private/kbn-babel-transform/*"],
       "@kbn/banners-plugin": ["x-pack/platform/plugins/private/banners"],
