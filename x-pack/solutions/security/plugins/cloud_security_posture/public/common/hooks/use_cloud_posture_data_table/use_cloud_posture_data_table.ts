@@ -60,7 +60,7 @@ export const useCloudPostureDataTable = ({
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
 
   const onChangeItemsPerPage = useCallback(
-    (newPageSize: any) => {
+    (newPageSize: number) => {
       setPageSize(newPageSize);
       setUrlQuery({
         pageIndex: 0,
@@ -82,7 +82,7 @@ export const useCloudPostureDataTable = ({
   }, [setUrlQuery]);
 
   const onChangePage = useCallback(
-    (newPageIndex: any) => {
+    (newPageIndex: number) => {
       setUrlQuery({
         pageIndex: newPageIndex,
       });
@@ -91,7 +91,7 @@ export const useCloudPostureDataTable = ({
   );
 
   const onSort = useCallback(
-    (sort: any) => {
+    (sort: string[][]) => {
       setUrlQuery({
         sort,
       });
@@ -100,7 +100,7 @@ export const useCloudPostureDataTable = ({
   );
 
   const setTableOptions = useCallback(
-    ({ page, sort }: any) => {
+    ({ page, sort }: CriteriaWithPagination<object>) => {
       setPageSize(page.size);
       setUrlQuery({
         sort,
@@ -120,7 +120,7 @@ export const useCloudPostureDataTable = ({
   });
 
   const handleUpdateQuery = useCallback(
-    (query: any) => {
+    (query: URLQuery) => {
       setUrlQuery({ ...query, pageIndex: 0 });
     },
     [setUrlQuery]

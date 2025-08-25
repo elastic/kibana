@@ -29,10 +29,9 @@ export const WorkflowSettingsSchema = z.object({
 export const AlertRuleTriggerSchema = z.object({
   type: z.literal('alert'),
   enabled: z.boolean().optional().default(true),
-  with: z.union([
-    z.object({ rule_id: z.string().min(1) }),
-    z.object({ rule_name: z.string().min(1) }),
-  ]),
+  with: z
+    .union([z.object({ rule_id: z.string().min(1) }), z.object({ rule_name: z.string().min(1) })])
+    .optional(),
 });
 
 export const ScheduledTriggerSchema = z.object({
@@ -267,6 +266,7 @@ export const WorkflowSchema = z.object({
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
 export const WorkflowContextSchema = z.object({
+  spaceId: z.string(),
   workflowRunId: z.string(),
   event: z.any().optional(),
   consts: z.record(z.string(), z.any()).optional(),
