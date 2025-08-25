@@ -125,6 +125,43 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    describe('POST /api/chat/tools/_execute', () => {
+      before(async () => {
+        const testTool = {
+          type: 'esql',
+          description: 'A test tool',
+          tags: ['test'],
+          configuration: {
+            query: 'FROM .internal.alerts-observability.logs.alerts-default-000001 | LIMIT 3',
+            params: {},
+          },
+          id: 'execute-test-tool',
+        };
+
+        await supertest
+          .post('/api/chat/tools')
+          .set('kbn-xsrf', 'kibana')
+          .send(testTool)
+          .expect(200);
+
+        createdToolIds.push(testTool.id);
+      });
+
+      it('should execute a new ES|QL tool successfully', async () => {
+        const executeRequest = {
+          tool_id: 'execute-test-tool',
+          tool_params: {},
+        };
+        const response = await supertest
+          .post('/api/chat/tools/_execute')
+          .set('kbn-xsrf', 'kibana')
+          .send(executeRequest)
+          .expect(200);
+
+        expect(response.body).to.have.property('results');
+      });
+    });
+
     describe('GET /api/chat/tools/get-test-tool', () => {
       let testToolId: string;
 
@@ -176,8 +213,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('GET /api/chat/tools', () => {
-      const testToolIds: string[] = [];
-
       before(async () => {
         for (let i = 0; i < 3; i++) {
           const testTool = {
@@ -191,7 +226,6 @@ export default function ({ getService }: FtrProviderContext) {
             .send(testTool)
             .expect(200);
 
-          testToolIds.push(testTool.id);
           createdToolIds.push(testTool.id);
         }
       });
