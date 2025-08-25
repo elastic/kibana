@@ -36,41 +36,6 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  // Helper function to install package and create mock knowledge base content
-  const installPackageWithKnowledgeBase = async (name: string, version: string) => {
-    // First install the package normally
-    await installPackage(name, version);
-
-    // Then add mock knowledge base content to ES directly for testing
-    await es.index({
-      index: '.integration_knowledge',
-      id: `${name}-overview.md`,
-      document: {
-        package_name: name,
-        filename: 'overview.md',
-        content: `# ${name} Integration Overview\n\nThis is an overview of the ${name} integration for testing purposes.\n\n## Features\n- Log collection\n- Metric collection\n- Error monitoring`,
-        version,
-        path: 'docs/knowledge_base/overview.md',
-        installed_at: new Date().toISOString(),
-      },
-      refresh: 'wait_for',
-    });
-
-    await es.index({
-      index: '.integration_knowledge',
-      id: `${name}-troubleshooting.md`,
-      document: {
-        package_name: name,
-        filename: 'troubleshooting.md',
-        content: `# ${name} Troubleshooting Guide\n\n## Common Issues\n\n### Configuration Problems\nCheck your configuration files...\n\n### Connection Issues\nVerify network connectivity...`,
-        version,
-        path: 'docs/knowledge_base/troubleshooting.md',
-        installed_at: new Date().toISOString(),
-      },
-      refresh: 'wait_for',
-    });
-  };
-
   // Helper function to clean up knowledge base content
   const cleanupKnowledgeBase = async (name: string) => {
     try {
@@ -355,38 +320,50 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Knowledge Base', () => {
+      const knowledgeBasePkgName = 'knowledge_base_test';
+      const knowledgeBasePkgVersion = '1.0.0';
+
       afterEach(async () => {
         // Clean up knowledge base content after each test to avoid conflicts
-        await cleanupKnowledgeBase(testPkgName);
+        await cleanupKnowledgeBase(knowledgeBasePkgName);
+        // Uninstall the knowledge base test package
+        try {
+          await uninstallPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        } catch (error) {
+          // Ignore errors if package is not installed
+        }
       });
 
       it('returns knowledge base content for an installed package', async function () {
-        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         const res = await supertest
-          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
           .expect(200);
 
-        expect(res.body).to.have.property('package.package_name');
-        expect(res.body).to.have.property('package.version');
-        expect(res.body).to.have.property('package.installed_at');
+        expect(res.body).to.have.property('package');
+        expect(res.body.package).to.have.property('package_name');
+        expect(res.body.package).to.have.property('version');
+        expect(res.body.package).to.have.property('installed_at');
         expect(res.body).to.have.property('items');
-        expect(res.body.package.package_name).to.equal(testPkgName);
+        expect(res.body.package.package_name).to.equal(knowledgeBasePkgName);
         expect(res.body.items).to.be.an('array');
-        expect(res.body.items).to.have.length(2);
+        expect(res.body.items).to.have.length(3); // overview, troubleshooting, configuration
 
         // Verify the content structure
         const overviewDoc = res.body.items.find((item: any) => item.fileName === 'overview.md');
         const troubleshootingDoc = res.body.items.find(
           (item: any) => item.fileName === 'troubleshooting.md'
         );
+        const configurationDoc = res.body.items.find(
+          (item: any) => item.fileName === 'configuration.md'
+        );
 
         expect(overviewDoc).to.not.be(undefined);
         expect(troubleshootingDoc).to.not.be(undefined);
-        expect(overviewDoc.content).to.contain('Integration Overview');
+        expect(configurationDoc).to.not.be(undefined);
+        expect(overviewDoc.content).to.contain('Knowledge Base Test Integration Overview');
         expect(troubleshootingDoc.content).to.contain('Troubleshooting Guide');
-
-        await uninstallPackage(testPkgName, testPkgVersion);
-        await cleanupKnowledgeBase(testPkgName);
+        expect(configurationDoc.content).to.contain('Configuration Guide');
       });
 
       it('returns 404 for knowledge base of non-existent package', async function () {
@@ -394,9 +371,9 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('validates knowledge base content structure', async function () {
-        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         const res = await supertest
-          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
           .expect(200);
 
         // Validate response structure matches schema
@@ -412,29 +389,64 @@ export default function (providerContext: FtrProviderContext) {
           expect(item.fileName).to.be.a('string');
           expect(item.content).to.be.a('string');
         });
-
-        await uninstallPackage(testPkgName, testPkgVersion);
-        await cleanupKnowledgeBase(testPkgName);
       });
 
       it('allows user with integrations read permission to access knowledge base', async () => {
-        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         await supertestWithoutAuth
-          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
           .auth(testUsers.fleet_all_int_read.username, testUsers.fleet_all_int_read.password)
           .expect(200);
-        await uninstallPackage(testPkgName, testPkgVersion);
-        await cleanupKnowledgeBase(testPkgName);
       });
 
       it('allows user with fleet permission to access knowledge base', async () => {
-        await installPackageWithKnowledgeBase(testPkgName, testPkgVersion);
+        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
         await supertestWithoutAuth
-          .get(`/internal/fleet/epm/packages/${testPkgName}/knowledge_base`)
+          .get(`/internal/fleet/epm/packages/${knowledgeBasePkgName}/knowledge_base`)
           .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
           .expect(200);
-        await uninstallPackage(testPkgName, testPkgVersion);
-        await cleanupKnowledgeBase(testPkgName);
+      });
+
+      it('includes knowledge base information in package info via public API', async function () {
+        await installPackage(knowledgeBasePkgName, knowledgeBasePkgVersion);
+        const res = await supertest
+          .get(`/api/fleet/epm/packages/${knowledgeBasePkgName}/${knowledgeBasePkgVersion}`)
+          .expect(200);
+
+        const packageInfo = res.body.item;
+
+        // Check that the installed_es field contains knowledge_base items
+        expect(packageInfo).to.have.property('installed_es');
+        expect(packageInfo.installed_es).to.be.an('array');
+
+        const knowledgeBaseItems = packageInfo.installed_es.filter(
+          (item: any) => item.type === 'knowledge_base'
+        );
+
+        // Should have knowledge base items indexed
+        expect(knowledgeBaseItems.length).to.be.greaterThan(0);
+        expect(knowledgeBaseItems.length).to.equal(3); // overview, troubleshooting, configuration
+
+        // Verify knowledge base items have correct structure and IDs
+        const expectedIds = [
+          `${knowledgeBasePkgName}-overview.md`,
+          `${knowledgeBasePkgName}-troubleshooting.md`,
+          `${knowledgeBasePkgName}-configuration.md`,
+        ];
+
+        const actualIds = knowledgeBaseItems.map((item: any) => item.id).sort();
+        expectedIds.sort();
+
+        expect(actualIds).to.eql(expectedIds);
+
+        // Verify all items have the correct type
+        knowledgeBaseItems.forEach((item: any) => {
+          expect(item).to.have.property('id');
+          expect(item).to.have.property('type');
+          expect(item.type).to.equal('knowledge_base');
+          expect(item.id).to.be.a('string');
+          expect(item.id).to.match(new RegExp(`^${knowledgeBasePkgName}-.*\\.md$`));
+        });
       });
     });
   });
