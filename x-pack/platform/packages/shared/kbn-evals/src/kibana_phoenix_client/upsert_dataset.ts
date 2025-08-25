@@ -10,24 +10,37 @@ import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { ExampleWithId } from '../types';
 import { diffExamples } from './diff_examples';
 
-const UPSERT_DATASET = /* GraphQL */ `
-  mutation UpsertDataset(
-    $datasetId: ID!
-    $exampleIdsToDelete: [ID!]!
-    $examplesToAdd: [DatasetExampleInput!]!
-  ) {
+const MUTATION_OPERATIONS = {
+  delete: {
+    param: '$exampleIdsToDelete: [ID!]!',
+    operation: `
     deleteDatasetExamples(input: { exampleIds: $exampleIdsToDelete }) {
       dataset {
         name
       }
-    }
+    }`,
+  },
+  add: {
+    param: '$examplesToAdd: [DatasetExampleInput!]!',
+    operation: `
     addExamplesToDataset(input: { datasetId: $datasetId, examples: $examplesToAdd }) {
       dataset {
         name
       }
+    }`,
+  },
+} as const;
+
+function buildUpsertMutation(operations: Array<keyof typeof MUTATION_OPERATIONS>): string {
+  const params = ['$datasetId: ID!', ...operations.map((op) => MUTATION_OPERATIONS[op].param)].join(
+    ', '
+  );
+  const operationStrings = operations.map((op) => MUTATION_OPERATIONS[op].operation).join('');
+  return /* GraphQL */ `
+    mutation UpsertDataset(${params}) {${operationStrings}
     }
-  }
-`;
+  `;
+}
 
 async function graphQLRequest<T>(
   client: PhoenixClient,
@@ -67,14 +80,24 @@ export async function upsertDataset({
   const operations = diffExamples(storedExamples, nextExamples);
 
   if (operations.toDelete.length || operations.toAdd.length) {
+    const requiredOperations: Array<keyof typeof MUTATION_OPERATIONS> = [];
+    const mutationVariables: Record<string, unknown> = { datasetId };
+
+    if (operations.toDelete.length > 0) {
+      requiredOperations.push('delete');
+      mutationVariables.exampleIdsToDelete = operations.toDelete;
+    }
+    if (operations.toAdd.length > 0) {
+      requiredOperations.push('add');
+      mutationVariables.examplesToAdd = operations.toAdd;
+    }
+
+    const mutation = buildUpsertMutation(requiredOperations);
+
     await graphQLRequest<{ addExamplesToDataset: { dataset: { name: string } } }>(
       phoenixClient,
-      UPSERT_DATASET,
-      {
-        datasetId,
-        exampleIdsToDelete: operations.toDelete,
-        examplesToAdd: operations.toAdd,
-      }
+      mutation,
+      mutationVariables
     );
   }
 }
