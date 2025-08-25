@@ -64,6 +64,7 @@ describe('State', () => {
       group: {
         owner: 'test_user',
         tier: 1,
+        metadata: {},
         tags: [],
         relationships: [],
         documentation_links: [],
@@ -132,6 +133,7 @@ describe('State', () => {
                 group: {
                   owner: 'test_user',
                   tier: 1,
+                  metadata: {},
                   tags: [],
                   relationships: [],
                   documentation_links: [],
@@ -170,6 +172,7 @@ describe('State', () => {
                 group: {
                   owner: 'test_user',
                   tier: 1,
+                  metadata: {},
                   tags: [],
                   relationships: [],
                   documentation_links: [],
@@ -208,6 +211,7 @@ describe('State', () => {
                 group: {
                   owner: 'test_user',
                   tier: 1,
+                  metadata: {},
                   tags: [],
                   relationships: [],
                   documentation_links: [],
@@ -330,6 +334,7 @@ function streamThatCascadesTooMuch(stateDependenciesMock: any) {
               group: {
                 owner: 'test_user',
                 tier: 1,
+                metadata: {},
                 tags: [],
                 relationships: [],
                 documentation_links: [],
