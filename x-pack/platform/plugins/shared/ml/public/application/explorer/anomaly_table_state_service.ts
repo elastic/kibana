@@ -131,6 +131,9 @@ export class AnomalyTableStateService extends StateService {
               tableSeverity,
               influencersFilterQuery,
             ]) => {
+              // Clear previous error before starting a new load cycle
+              this._tableError$.next(null);
+
               return this.loadAnomaliesTableData(
                 selectedCells,
                 selectedJobs,
