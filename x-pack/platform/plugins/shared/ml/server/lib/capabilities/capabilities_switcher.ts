@@ -59,6 +59,10 @@ function getSwitcher(
         mlCaps.canUseAiops = false;
       }
 
+      if (capabilities.fileUpload.show === false) {
+        mlCaps.canFindFileStructure = false;
+      }
+
       // full license, leave capabilities as they were
       if (mlEnabled && isFullLicense(license)) {
         return { ml: applyEnabledFeatures(mlCaps, enabledFeatures, isServerless) };

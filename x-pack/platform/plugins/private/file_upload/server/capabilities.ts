@@ -16,6 +16,7 @@ export const setupCapabilities = (
     return {
       fileUpload: {
         show: true,
+        canImport: true,
       },
     };
   });
@@ -38,7 +39,8 @@ export const setupCapabilities = (
       if (!hasImportPermission) {
         return {
           fileUpload: {
-            show: false,
+            ...capabilities.fileUpload,
+            canImport: false,
           },
         };
       }
