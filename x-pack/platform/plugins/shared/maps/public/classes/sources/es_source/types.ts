@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Query } from '@kbn/data-plugin/common';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';

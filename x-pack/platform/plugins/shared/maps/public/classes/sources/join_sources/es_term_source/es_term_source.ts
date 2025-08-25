@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
 import type { ISearchSource } from '@kbn/data-plugin/public';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import {
   AGG_TYPE,
   DEFAULT_MAX_BUCKETS_LIMIT,

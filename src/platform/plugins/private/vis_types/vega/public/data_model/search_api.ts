@@ -15,7 +15,7 @@ import type { SearchRequest, DataPublicPluginStart } from '@kbn/data-plugin/publ
 import { getSearchParamsFromRequest } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { search as dataPluginSearch } from '@kbn/data-plugin/public';
-import type { RequestResponder } from '@kbn/inspector-plugin/public';
+import type { RequestResponder } from '@kbn/inspector-common';
 import type { VegaInspectorAdapters } from '../vega_inspector';
 
 /** @internal **/

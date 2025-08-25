@@ -9,7 +9,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { Start as InspectorStartContract, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-common';
 import type { SearchResponseWarning } from './types';
 
 /**

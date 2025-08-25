@@ -11,6 +11,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-i18n-browser",
     "@kbn/es-types",
+    "@kbn/inspector-common",
   ],
   "exclude": ["target/**/*"]
 }

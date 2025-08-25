@@ -9,7 +9,7 @@
 
 import type { PackageInfo } from '@kbn/core/server';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { RequestAdapter } from '@kbn/inspector-common';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { WarningHandlerCallback } from '@kbn/search-response-warnings';
 import type { ISearchGeneric } from '@kbn/search-types';

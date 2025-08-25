@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { Query } from '@kbn/es-query';
 import {
   getWarningsTitle,

@@ -10,7 +10,7 @@
 import { EuiSearchBar } from '@elastic/eui';
 import { findClusters } from './find_clusters';
 import { LOCAL_CLUSTER_KEY } from './local_cluster';
-import type { Request } from '../../../../../../common/adapters/request/types';
+import type { Request } from '@kbn/inspector-common';
 
 const request = {
   response: {

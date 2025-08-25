@@ -19,7 +19,7 @@ import { GEOJSON_FEATURE_ID_PROPERTY_NAME } from '@kbn/maps-plugin/public';
 import type { DataFilters } from '@kbn/maps-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { GeoJsonWithMeta, ITooltipProperty } from '@kbn/maps-plugin/public';
 import type { IField } from '@kbn/maps-plugin/public';
 import type { Attribution, ImmutableSourceProperty } from '@kbn/maps-plugin/public';

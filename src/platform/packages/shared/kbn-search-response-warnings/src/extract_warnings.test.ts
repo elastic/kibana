@@ -10,7 +10,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { RequestAdapter } from '@kbn/inspector-plugin/common/adapters/request';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { extractWarnings } from './extract_warnings';
 
 const mockInspectorService = {} as InspectorStartContract;

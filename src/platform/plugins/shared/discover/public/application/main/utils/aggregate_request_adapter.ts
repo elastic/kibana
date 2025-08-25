@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Request } from '@kbn/inspector-plugin/public';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { Request } from '@kbn/inspector-common';
+import { RequestAdapter } from '@kbn/inspector-common';
 
 /**
  * A request adapter that aggregates multiple separate adapters into one to allow inspection

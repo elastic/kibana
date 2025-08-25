@@ -17,7 +17,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram, type UseUnifiedHistogramOptions } from './use_discover_histogram';
 import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
-import { RequestAdapter } from '@kbn/inspector-plugin/public';
+import { RequestAdapter } from '@kbn/inspector-common';
 import type { UnifiedHistogramState } from '@kbn/unified-histogram';
 import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram/mocks';

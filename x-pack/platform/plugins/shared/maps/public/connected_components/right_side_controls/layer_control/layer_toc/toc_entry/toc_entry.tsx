@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiIcon,

@@ -9,8 +9,9 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { handleWarnings } from './handle_warnings';
+import type { RequestAdapter } from '@kbn/inspector-common';
 
 describe('handleWarnings', () => {
   const coreStart = coreMock.createStart();

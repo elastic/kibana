@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { DataRequestContext } from '../../../actions';
 import type { DataRequestMeta, DataFilters } from '../../../../common/descriptor_types';
 
