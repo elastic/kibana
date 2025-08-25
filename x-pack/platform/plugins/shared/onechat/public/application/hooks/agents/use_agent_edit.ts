@@ -31,6 +31,9 @@ const emptyState = (): AgentEditState => ({
   id: '',
   name: '',
   description: '',
+  labels: [],
+  avatar_color: '',
+  avatar_symbol: '',
   configuration: {
     instructions: '',
     tools: defaultToolSelection,
@@ -62,6 +65,7 @@ export function useAgentEdit({
     mutationFn: (data: AgentEditState) => agentService.create(data),
     onSuccess: (result) => {
       queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.all });
+      queryClient.invalidateQueries({ queryKey: queryKeys.agentProfiles.byId(result.id) });
       onSaveSuccess(result);
     },
     onError: (err: Error) => {
