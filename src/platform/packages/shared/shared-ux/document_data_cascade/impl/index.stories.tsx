@@ -8,7 +8,7 @@
  */
 
 import React, { type ComponentProps } from 'react';
-import { StoryObj, Meta } from '@storybook/react';
+import type { StoryObj, Meta } from '@storybook/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -18,11 +18,11 @@ import {
   EuiButtonEmpty,
   EuiBasicTable,
   EuiHealth,
-  HorizontalAlignment,
   EuiStat,
+  type HorizontalAlignment,
 } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
-import { DataCascade, DataCascadeRow, DataCascadeRowCell, LeafNode } from '.';
+import { DataCascade, DataCascadeRow, DataCascadeRowCell, type LeafNode } from '.';
 import { getESQLStatsQueryMeta } from './src/lib/parse_esql';
 
 /**
@@ -103,7 +103,6 @@ export const CascadeGridImplementation: StoryObj<
               // eslint-disable-next-line no-console -- Handle group by change if needed
               console.log('Group By Changed:', groupBy);
             }}
-            stickyGroupRoot
           >
             <DataCascadeRow
               onCascadeGroupNodeExpanded={async ({ row, nodePath, nodePathMap }) => {
