@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 
 import {
   EuiFieldNumber,
@@ -22,7 +21,6 @@ import {
   EuiButtonEmpty,
   EuiCopy,
   EuiButton,
-  useEuiFontSize,
   EuiText,
 } from '@elastic/eui';
 import {
@@ -34,8 +32,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import * as LABELS from '../translations';
-import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE, internalProviderKeys } from '../constants';
-import type { Config, ConfigEntryView } from '../types/types';
+import { CHAT_COMPLETION_TASK_TYPE, DEFAULT_TASK_TYPE } from '../constants';
+import type { Config } from '../types/types';
 import type { TaskTypeOption } from '../utils/helpers';
 import { buttonCss, accordionCss } from './inference_service_form_fields';
 
@@ -65,7 +63,6 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
   isEdit,
   allowContextWindowLength,
 }) => {
-  const xsFontSize = useEuiFontSize('xs').fontSize;
   const { euiTheme } = useEuiTheme();
   const { setFieldValue } = useFormContext();
 
@@ -240,12 +237,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
             />
           </h4>
         </EuiTitle>
-        <EuiText
-          css={css`
-            font-size: ${xsFontSize};
-            color: ${euiTheme.colors.textSubdued};
-          `}
-        >
+        <EuiText size="xs" color="subdued">
           <FormattedMessage
             id="xpack.inferenceEndpointUICommon.components.additionalInfo.inferenceEndpointHelpLabel"
             defaultMessage="Inference endpoints provide a simplified method for using this configuration, ecpecially from the API"
