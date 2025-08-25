@@ -56,8 +56,30 @@ export const PreviewImage = ({ element }: Props) => {
   useEffect(() => {
     const generateScreenshot = async () => {
       try {
-        const canvas = await domtoimage.toCanvas(element);
-        setScreenshot(canvas.toDataURL('image/png'));
+        if (element instanceof SVGElement) {
+          const svgData = new XMLSerializer().serializeToString(element);
+          const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(svgBlob);
+
+          const img = new Image();
+          await new Promise<void>((resolve, reject) => {
+            img.onload = () => resolve();
+            img.onerror = reject;
+            img.src = url;
+          });
+
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width || CARD_WIDTH;
+          canvas.height = img.height || CARD_HEIGHT;
+          const ctx = canvas.getContext('2d');
+          ctx?.drawImage(img, 0, 0);
+
+          setScreenshot(canvas.toDataURL('image/png'));
+          URL.revokeObjectURL(url);
+        } else {
+          const canvas = await domtoimage.toCanvas(element);
+          setScreenshot(canvas.toDataURL('image/png'));
+        }
       } catch (err) {
         return;
       } finally {
