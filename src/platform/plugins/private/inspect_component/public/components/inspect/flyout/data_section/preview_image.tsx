@@ -110,7 +110,19 @@ export const PreviewImage = ({ element }: Props) => {
           css={cardCss}
           paddingSize="xs"
         >
-          <EuiImage alt={PREVIEW_ALT_TEXT} src={screenshot} />
+          <EuiImage
+            alt={PREVIEW_ALT_TEXT}
+            src={screenshot}
+            // Using css prop doesn't work here
+            style={{
+              width: '100%',
+              height: 'auto',
+              maxHeight: `${HEIGHT}px`,
+              objectFit: 'contain',
+              display: 'block',
+              margin: '0 auto',
+            }}
+          />
         </EuiCard>
       </EuiSkeletonRectangle>
       <EuiSpacer size="l" />
