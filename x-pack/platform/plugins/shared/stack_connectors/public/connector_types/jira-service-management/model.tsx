@@ -20,7 +20,7 @@ import type {
   JiraServiceManagementActionConfig,
   JiraServiceManagementActionSecrets,
 } from '../../../server/connector_types';
-import { JiraServiceManagementConnectorTypeParams, ValidationParams } from './types';
+import type { JiraServiceManagementConnectorTypeParams, ValidationParams } from './types';
 import { DEFAULT_ALIAS } from './constants';
 
 const SELECT_MESSAGE = i18n.translate(
