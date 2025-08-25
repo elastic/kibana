@@ -140,6 +140,7 @@ export const useDatasetQualityDetailsState = () => {
     integrationDashboardsLoading: state.matches(
       'initializing.checkAndLoadIntegrationAndDashboards.loadingIntegrationDashboards'
     ),
+    failureStoreUpdating: state.matches('initializing.failureStoreUpdate.updating'),
   }));
 
   const isQualityIssueFlyoutOpen = useSelector(service, (state) =>
@@ -160,8 +161,30 @@ export const useDatasetQualityDetailsState = () => {
     [service]
   );
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+    }) => {
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        data: {
+          ...dataStreamDetails,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
+        },
+      });
+    },
+    [dataStreamDetails, service]
+  );
+
   const hasFailureStore = Boolean(dataStreamDetails?.hasFailureStore);
   const canShowFailureStoreInfo = canUserReadFailureStore && hasFailureStore;
+  const defaultRetentionPeriod = dataStreamDetails?.defaultRetentionPeriod;
+  const customRetentionPeriod = dataStreamDetails?.customRetentionPeriod;
 
   return {
     service,
@@ -180,6 +203,7 @@ export const useDatasetQualityDetailsState = () => {
     timeRange,
     loadingState,
     updateTimeRange,
+    updateFailureStore,
     dataStreamSettings,
     integrationDetails,
     canUserAccessDashboards,
@@ -189,5 +213,7 @@ export const useDatasetQualityDetailsState = () => {
     canShowFailureStoreInfo,
     expandedQualityIssue,
     isQualityIssueFlyoutOpen,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
   };
 };
