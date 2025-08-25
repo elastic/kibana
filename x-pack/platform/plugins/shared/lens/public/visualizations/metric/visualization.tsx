@@ -55,9 +55,13 @@ export const showingBar = (
   Boolean(state.showBar && state.maxAccessor);
 
 export const getDefaultColor = (state: MetricVisualizationState, isMetricNumeric?: boolean) => {
-  return showingBar(state) && isMetricNumeric
-    ? euiLightVars.euiColorPrimary
-    : euiThemeVars.euiColorEmptyShade;
+  if (showingBar(state) && isMetricNumeric) {
+    return euiLightVars.euiColorPrimary;
+  }
+  if (state.applyColorTo === 'value') {
+    return euiThemeVars.euiColorVisText0;
+  }
+  return euiThemeVars.euiColorEmptyShade;
 };
 
 export const supportedDataTypes = new Set(['string', 'boolean', 'number', 'ip', 'date']);
@@ -329,8 +333,9 @@ const removeMetricDimension = (state: MetricVisualizationState) => {
 
 const removeSecondaryMetricDimension = (state: MetricVisualizationState) => {
   delete state.secondaryMetricAccessor;
-  delete state.secondaryPrefix;
+  delete state.secondaryLabel;
   delete state.secondaryTrend;
+  delete state.secondaryLabelPosition;
 };
 
 const removeMaxDimension = (state: MetricVisualizationState) => {
@@ -343,6 +348,30 @@ const removeBreakdownByDimension = (state: MetricVisualizationState) => {
   delete state.breakdownByAccessor;
   delete state.collapseFn;
   delete state.maxCols;
+};
+
+/**
+ * Checks if the given MetricVisualizationState contains any legacy properties
+ * that require migration to the latest state shape.
+ */
+const hasLegacyStateProperties = (state: MetricVisualizationState) => {
+  return (
+    typeof state.secondaryPrefix !== 'undefined' || typeof state.valuesTextAlign !== 'undefined'
+  );
+};
+
+const migrateLegacyStateIfNeeded = (state: MetricVisualizationState) => {
+  if (hasLegacyStateProperties(state)) {
+    const { secondaryPrefix, valuesTextAlign, ...restState } = state;
+    return {
+      ...restState,
+      secondaryLabel:
+        secondaryPrefix && !state.secondaryLabel ? secondaryPrefix : state.secondaryLabel,
+      primaryAlign: state.primaryAlign ?? valuesTextAlign,
+      secondaryAlign: state.secondaryAlign ?? valuesTextAlign,
+    };
+  }
+  return state;
 };
 
 export const getMetricVisualization = ({
@@ -395,14 +424,16 @@ export const getMetricVisualization = ({
   getSuggestions,
 
   initialize(addNewLayer, state, mainPalette) {
-    return (
-      state ?? {
+    if (!state) {
+      return {
         layerId: addNewLayer(),
         layerType: layerTypes.DATA,
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
-      }
-    );
+      };
+    }
+    return migrateLegacyStateIfNeeded(state);
   },
+
   triggers: [VIS_EVENT_TO_TRIGGER.filter],
 
   getConfiguration(props) {
@@ -577,8 +608,9 @@ export const getMetricVisualization = ({
       return {
         state: {
           ...state,
-          secondaryPrefix: undefined,
+          secondaryLabel: undefined,
           secondaryTrend: getDefaultConfigForMode(colorMode),
+          secondaryLabelPosition: 'before',
         },
         references: [],
       };

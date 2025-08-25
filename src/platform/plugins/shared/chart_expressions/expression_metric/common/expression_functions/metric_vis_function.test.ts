@@ -27,9 +27,14 @@ describe('interpreter/functions#metricVis', () => {
     maxCols: 1,
     inspectorTableId: 'random-id',
     titlesTextAlign: 'left',
-    valuesTextAlign: 'right',
+    primaryAlign: 'right',
+    secondaryAlign: 'right',
     iconAlign: 'left',
     valueFontSize: 'default',
+    primaryPosition: 'bottom',
+    titleWeight: 'bold',
+    secondaryLabelPosition: 'before',
+    applyColorTo: 'background',
   };
 
   it('should pass over overrides from variables', async () => {
