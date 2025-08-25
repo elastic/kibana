@@ -244,7 +244,6 @@ class SavedObjectFinderUiClass extends React.Component<
   };
 
   public render() {
-    console.log({ query: this.state.query });
     const {
       onChoose,
       savedObjectMetaData,

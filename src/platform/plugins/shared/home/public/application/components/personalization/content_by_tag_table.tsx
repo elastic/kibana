@@ -8,7 +8,6 @@
  */
 import React from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer, EuiBadge, EuiButtonEmpty, EuiPopover } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { ContentClientProvider } from '@kbn/content-management-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';

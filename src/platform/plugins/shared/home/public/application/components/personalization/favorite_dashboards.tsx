@@ -16,7 +16,6 @@ import {
   EuiLink,
   EuiButton,
 } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { i18n } from '@kbn/i18n';
 import { useFavorites } from '@kbn/content-management-favorites-public';
 

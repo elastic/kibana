@@ -19,7 +19,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { ChromeRecentlyAccessedHistoryItem } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 
