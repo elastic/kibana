@@ -50,7 +50,7 @@ describe('FieldBrowserModal', () => {
 
   test('invokes onHide when Close button clicked', async () => {
     const user = userEvent.setup();
-    renderComponent();    
+    renderComponent();
 
     const closeButtons = screen.getAllByTestId('close');
     await user.click(closeButtons[closeButtons.length - 1]);

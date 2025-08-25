@@ -39,7 +39,7 @@ describe('Search', () => {
     const input = screen.getByTestId('field-search');
 
     await user.type(input, 'timestamp');
-    
+
     expect(onSearchInputChange).toHaveBeenCalled();
   });
 });

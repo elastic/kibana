@@ -194,7 +194,8 @@ describe('ServiceNowITOMParamsFields', () => {
 
   describe('UI updates', () => {
     const cases: Array<{ testId: string; key: string; value: string }> = [
-      { testId: 'sourceInput', key: 'source', value: 'New Source' },      { testId: 'descriptionTextArea', key: 'description', value: 'Some description' },
+      { testId: 'sourceInput', key: 'source', value: 'New Source' },
+      { testId: 'descriptionTextArea', key: 'description', value: 'Some description' },
       { testId: 'nodeInput', key: 'node', value: 'new.node' },
       { testId: 'typeInput', key: 'type', value: 'New Type' },
       { testId: 'resourceInput', key: 'resource', value: '/tmp' },
