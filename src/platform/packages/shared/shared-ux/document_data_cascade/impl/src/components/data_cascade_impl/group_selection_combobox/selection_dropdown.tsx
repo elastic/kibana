@@ -29,7 +29,7 @@ import { useDataCascadeState, useDataCascadeActions } from '../../../store_provi
 
 const MAX_SELECTABLE_COLUMNS = 3;
 
-interface SelectionDropdownProps {
+export interface SelectionDropdownProps {
   onSelectionChange?: (groupByColumn: string[]) => void;
 }
 

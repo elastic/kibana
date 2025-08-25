@@ -8,5 +8,4 @@
  */
 
 export { CascadeRowPrimitive } from './cascade_row';
-export type { CascadeRowPrimitiveProps } from './cascade_row';
 export { getCascadeRowNodePath, getCascadeRowNodePathValueRecord } from '../../../lib/utils';
