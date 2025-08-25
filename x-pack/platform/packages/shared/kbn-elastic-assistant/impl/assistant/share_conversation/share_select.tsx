@@ -103,15 +103,6 @@ const ShareSelectComponent: React.FC<Props> = ({
         'data-test-subj': ConversationSharedState.Private,
       },
       {
-        value: ConversationSharedState.Global,
-        'data-test-subj': ConversationSharedState.Global,
-        inputDisplay: renderSelectedOption(
-          i18n.GLOBAL,
-          getSharedIcon(ConversationSharedState.Global)
-        ),
-        dropdownDisplay: renderOption(i18n.GLOBAL, i18n.VISIBLE_GLOBAL),
-      },
-      {
         value: ConversationSharedState.Shared,
         'data-test-subj': ConversationSharedState.Shared,
         inputDisplay: renderSelectedOption(
@@ -119,6 +110,15 @@ const ShareSelectComponent: React.FC<Props> = ({
           getSharedIcon(ConversationSharedState.Shared)
         ),
         dropdownDisplay: renderOption(i18n.SHARED, i18n.VISIBLE_SHARED),
+      },
+      {
+        value: ConversationSharedState.Restricted,
+        'data-test-subj': ConversationSharedState.Restricted,
+        inputDisplay: renderSelectedOption(
+          i18n.RESTRICTED,
+          getSharedIcon(ConversationSharedState.Restricted)
+        ),
+        dropdownDisplay: renderOption(i18n.RESTRICTED, i18n.VISIBLE_RESTRICTED),
       },
     ],
     [renderOption, renderSelectedOption]
@@ -134,7 +134,7 @@ const ShareSelectComponent: React.FC<Props> = ({
         onChange={onChange}
         valueOfSelected={value}
       />
-      {value === ConversationSharedState.Shared && (
+      {value === ConversationSharedState.Restricted && (
         <>
           <EuiSpacer />
           <ShareUserSelect

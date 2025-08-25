@@ -83,7 +83,7 @@ describe('AssistantBody', () => {
   it('shows owner callout when conversation is shared and user is owner', () => {
     render(
       <TestProviders>
-        <AssistantBody {...baseProps} conversationSharedState={ConversationSharedState.Global} />
+        <AssistantBody {...baseProps} conversationSharedState={ConversationSharedState.Shared} />
       </TestProviders>
     );
     expect(screen.getByTestId('ownerSharedConversationCallout')).toBeInTheDocument();
@@ -95,7 +95,7 @@ describe('AssistantBody', () => {
         <AssistantBody
           {...baseProps}
           isConversationOwner={false}
-          conversationSharedState={ConversationSharedState.Global}
+          conversationSharedState={ConversationSharedState.Shared}
         />
       </TestProviders>
     );

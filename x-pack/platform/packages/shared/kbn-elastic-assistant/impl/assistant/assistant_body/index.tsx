@@ -147,7 +147,7 @@ export const AssistantBody: FunctionComponent<Props> = ({
         {isConversationOwner && conversationSharedState !== ConversationSharedState.Private && (
           <SharedConversationOwnerCallout
             id={currentConversation?.id ?? ''}
-            isGloballyShared={conversationSharedState === ConversationSharedState.Global}
+            isGloballyShared={conversationSharedState === ConversationSharedState.Shared}
           />
         )}
       </EuiFlexItem>

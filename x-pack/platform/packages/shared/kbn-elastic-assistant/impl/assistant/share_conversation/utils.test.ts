@@ -20,7 +20,7 @@ describe('getConversationSharedState', () => {
 
   it('returns Global when users array is empty', () => {
     const convo = { ...alertConvo, users: [] };
-    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.Global);
+    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.Shared);
   });
 
   it('returns Private when users array has length 1', () => {
@@ -30,16 +30,16 @@ describe('getConversationSharedState', () => {
 
   it('returns Shared when users array has length > 1', () => {
     const convo = { ...alertConvo, users: [alertConvo.createdBy, { id: 'user2' }] };
-    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.Shared);
+    expect(getConversationSharedState(convo)).toBe(ConversationSharedState.Restricted);
   });
 });
 
 describe('getSharedIcon', () => {
   it('returns globe for Global', () => {
-    expect(getSharedIcon(ConversationSharedState.Global)).toBe('globe');
+    expect(getSharedIcon(ConversationSharedState.Shared)).toBe('globe');
   });
   it('returns users for Shared', () => {
-    expect(getSharedIcon(ConversationSharedState.Shared)).toBe('users');
+    expect(getSharedIcon(ConversationSharedState.Restricted)).toBe('users');
   });
   it('returns lock for Private', () => {
     expect(getSharedIcon(ConversationSharedState.Private)).toBe('lock');

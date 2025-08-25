@@ -136,7 +136,7 @@ describe(
       assertCalloutState('shared-by-me');
       closeToast();
       openShareMenu();
-      assertShareMenuStatus('Global');
+      assertShareMenuStatus('Shared');
       toggleConversationSideMenu();
       assertSharedConversationIcon(mockConvo1.title);
       assertNotSharedConversationIcon(mockConvo2.title);
@@ -160,7 +160,7 @@ describe(
       submitShareModal();
       assertCalloutState('shared-by-me');
       openShareMenu();
-      assertShareMenuStatus('Shared');
+      assertShareMenuStatus('Restricted');
       // Opens to selected share since conversation is shared with selected users
       selectShareModal();
       assertShareUser(isServerless ? 'test_user' : secondaryUser);

@@ -14,26 +14,26 @@ export const VISIBILITY = i18n.translate('xpack.elasticAssistant.assistant.visib
 export const VISIBLE_PRIVATE = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.visibleToYou',
   {
-    defaultMessage: 'This conversation is only visible to you.',
-  }
-);
-
-export const VISIBLE_GLOBAL = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.visibleGlobal',
-  {
-    defaultMessage: 'All team members can view this conversation.',
+    defaultMessage: 'Only visible to you.',
   }
 );
 
 export const VISIBLE_SHARED = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.visibleShared',
   {
-    defaultMessage: 'Selected team members can view this conversation.',
+    defaultMessage: 'Visible to all space members.',
   }
 );
 
-export const SHARED = i18n.translate('xpack.elasticAssistant.assistant.visibility.shared', {
-  defaultMessage: 'Shared',
+export const VISIBLE_RESTRICTED = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.visibleRestricted',
+  {
+    defaultMessage: 'Only visible to selected space members.',
+  }
+);
+
+export const RESTRICTED = i18n.translate('xpack.elasticAssistant.assistant.visibility.restricted', {
+  defaultMessage: 'Restricted',
 });
 
 export const SHARE = i18n.translate('xpack.elasticAssistant.assistant.visibility.share', {
@@ -44,8 +44,8 @@ export const PRIVATE = i18n.translate('xpack.elasticAssistant.assistant.visibili
   defaultMessage: 'Private',
 });
 
-export const GLOBAL = i18n.translate('xpack.elasticAssistant.assistant.visibility.global', {
-  defaultMessage: 'Global',
+export const SHARED = i18n.translate('xpack.elasticAssistant.assistant.visibility.shared', {
+  defaultMessage: 'Shared',
 });
 export const SELECT_VISIBILITY_ARIA_LABEL = i18n.translate(
   'xpack.elasticAssistant.assistant.visibility.selectVisibilityAriaLabel',
@@ -87,29 +87,29 @@ export const PRIVATE_ERROR = i18n.translate(
   }
 );
 
-export const GLOBAL_SUCCESS = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.privateSuccess',
-  {
-    defaultMessage: 'Successfully shared conversation globally',
-  }
-);
-
-export const GLOBAL_ERROR = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.privateError',
-  {
-    defaultMessage: 'Could not share conversation globally',
-  }
-);
-
 export const SHARED_SUCCESS = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.privateSuccess',
+  'xpack.elasticAssistant.assistant.visibility.sharedSuccess',
+  {
+    defaultMessage: 'Successfully shared conversation with all space users',
+  }
+);
+
+export const SHARED_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.sharedError',
+  {
+    defaultMessage: 'Could not share conversation with all space users',
+  }
+);
+
+export const RESTRICTED_SUCCESS = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.restrictedSuccess',
   {
     defaultMessage: 'Successfully shared conversation with selected users',
   }
 );
 
-export const SHARED_ERROR = i18n.translate(
-  'xpack.elasticAssistant.assistant.visibility.privateError',
+export const RESTRICTED_ERROR = i18n.translate(
+  'xpack.elasticAssistant.assistant.visibility.restrictedError',
   {
     defaultMessage: 'Could not share conversation with selected users',
   }

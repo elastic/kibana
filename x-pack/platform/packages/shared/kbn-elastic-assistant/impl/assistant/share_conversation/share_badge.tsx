@@ -61,16 +61,6 @@ const ShareBadgeComponent: React.FC<Props> = ({
         isGroupLabel: false,
       },
       {
-        checked: conversationSharedState === ConversationSharedState.Global ? 'on' : undefined,
-        key: ConversationSharedState.Global,
-        data: {
-          description: i18n.VISIBLE_GLOBAL,
-        },
-        'data-test-subj': ConversationSharedState.Global,
-        label: i18n.GLOBAL,
-        isGroupLabel: false,
-      },
-      {
         checked: conversationSharedState === ConversationSharedState.Shared ? 'on' : undefined,
         key: ConversationSharedState.Shared,
         data: {
@@ -78,6 +68,16 @@ const ShareBadgeComponent: React.FC<Props> = ({
         },
         'data-test-subj': ConversationSharedState.Shared,
         label: i18n.SHARED,
+        isGroupLabel: false,
+      },
+      {
+        checked: conversationSharedState === ConversationSharedState.Restricted ? 'on' : undefined,
+        key: ConversationSharedState.Restricted,
+        data: {
+          description: i18n.VISIBLE_RESTRICTED,
+        },
+        'data-test-subj': ConversationSharedState.Restricted,
+        label: i18n.RESTRICTED,
         isGroupLabel: false,
       },
     ],
@@ -121,14 +121,14 @@ const ShareBadgeComponent: React.FC<Props> = ({
         await refetchCurrentUserConversations();
         refetchCurrentConversation({});
         toasts?.addSuccess({
-          title: i18n.GLOBAL_SUCCESS,
+          title: i18n.SHARED_SUCCESS,
         });
       } else {
         throw new Error('No conversation available to share globally');
       }
     } catch (error) {
       toasts?.addError(error, {
-        title: i18n.GLOBAL_ERROR,
+        title: i18n.SHARED_ERROR,
       });
     }
   }, [
@@ -153,11 +153,11 @@ const ShareBadgeComponent: React.FC<Props> = ({
       ) {
         unshareConversation();
       } else if (
-        selectedOption.key === ConversationSharedState.Global &&
-        conversationSharedState !== ConversationSharedState.Global
+        selectedOption.key === ConversationSharedState.Shared &&
+        conversationSharedState !== ConversationSharedState.Shared
       ) {
         shareConversationGlobal();
-      } else if (selectedOption.key === ConversationSharedState.Shared) {
+      } else if (selectedOption.key === ConversationSharedState.Restricted) {
         setIsModalOpen(true);
       }
       setIsPopoverOpen(false);

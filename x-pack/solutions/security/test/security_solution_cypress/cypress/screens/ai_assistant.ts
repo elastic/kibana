@@ -54,10 +54,9 @@ export const OPENAI_CONNECTOR_OPTION = '[data-test-subj="action-option-OpenAI"]'
 export const SECRETS_APIKEY_INPUT = '[data-test-subj="secrets.apiKey-input"]';
 export const SHARE_BADGE_BUTTON = '[data-test-subj="shareBadgeButton"]';
 export const SHARE_SELECT = '[data-test-subj="shareSelect"]';
+export const RESTRICTED_SELECT_OPTION = 'li[data-test-subj="restricted"]';
 export const SHARED_SELECT_OPTION = 'li[data-test-subj="shared"]';
-export const GLOBAL_SELECT_OPTION = 'li[data-test-subj="global"]';
 export const PRIVATE_SELECT_OPTION = 'li[data-test-subj="private"]';
-export const OPTION_DESCRIPTION = '[data-test-subj="optionDescription"]';
 export const OWNER_SHARED_CALLOUT = '[data-test-subj="ownerSharedConversationCallout"]';
 export const SHARED_CALLOUT = '[data-test-subj="sharedConversationCallout"]';
 export const SHARE_MODAL = '[data-test-subj="shareConversationModal"]';

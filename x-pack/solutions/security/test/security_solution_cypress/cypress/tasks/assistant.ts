@@ -50,7 +50,7 @@ import {
   SHARE_BADGE_BUTTON,
   SHARE_SELECT,
   PRIVATE_SELECT_OPTION,
-  SHARED_SELECT_OPTION,
+  RESTRICTED_SELECT_OPTION,
   OWNER_SHARED_CALLOUT,
   SHARED_CALLOUT,
   SHARE_MODAL,
@@ -67,7 +67,7 @@ import {
   SHARE_MODAL_COPY_URL,
   DUPLICATE,
   CONVO_CONTEXT_MENU_DUPLICATE,
-  GLOBAL_SELECT_OPTION,
+  SHARED_SELECT_OPTION,
 } from '../screens/ai_assistant';
 import { SUCCESS_TOASTER_HEADER } from '../screens/alerts_detection_rules';
 
@@ -272,22 +272,22 @@ export const openShareMenu = () => {
   cy.get(SHARE_BADGE_BUTTON).click();
   cy.get(SHARE_SELECT).should('be.visible');
 };
-export const assertShareMenuStatus = (type: 'Private' | 'Global' | 'Shared') => {
+export const assertShareMenuStatus = (type: 'Private' | 'Shared' | 'Restricted') => {
   cy.get(SHARE_BADGE_BUTTON).should('have.attr', 'title').and('include', type);
   cy.get(PRIVATE_SELECT_OPTION).should(
     'have.attr',
     'aria-checked',
     type === 'Private' ? 'true' : 'false'
   );
+  cy.get(RESTRICTED_SELECT_OPTION).should(
+    'have.attr',
+    'aria-checked',
+    type === 'Restricted' ? 'true' : 'false'
+  );
   cy.get(SHARED_SELECT_OPTION).should(
     'have.attr',
     'aria-checked',
     type === 'Shared' ? 'true' : 'false'
-  );
-  cy.get(GLOBAL_SELECT_OPTION).should(
-    'have.attr',
-    'aria-checked',
-    type === 'Global' ? 'true' : 'false'
   );
 };
 
@@ -307,11 +307,11 @@ export const selectPrivate = () => {
 };
 
 export const selectGlobal = () => {
-  cy.get(GLOBAL_SELECT_OPTION).click();
+  cy.get(SHARED_SELECT_OPTION).click();
 };
 
 export const selectShareModal = () => {
-  cy.get(SHARED_SELECT_OPTION).click();
+  cy.get(RESTRICTED_SELECT_OPTION).click();
   cy.get(SHARE_MODAL).should('exist');
 };
 

@@ -494,7 +494,7 @@ describe('useCurrentConversation', () => {
     await waitFor(() => expect(result.current.conversationSharedState).toEqual('private'));
   });
 
-  it('should set conversationSharedState={shared}', async () => {
+  it('should set conversationSharedState={restricted}', async () => {
     const conversation = {
       ...mockData.welcome_id,
       users: [MOCK_CURRENT_USER, { name: 'another-user' }],
@@ -507,10 +507,10 @@ describe('useCurrentConversation', () => {
       await result.current.setCurrentConversation(conversation);
     });
 
-    await waitFor(() => expect(result.current.conversationSharedState).toEqual('shared'));
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('restricted'));
   });
 
-  it('should set conversationSharedState={global}', async () => {
+  it('should set conversationSharedState={shared}', async () => {
     const conversation = {
       ...mockData.welcome_id,
       users: [],
@@ -523,6 +523,6 @@ describe('useCurrentConversation', () => {
       await result.current.setCurrentConversation(conversation);
     });
 
-    await waitFor(() => expect(result.current.conversationSharedState).toEqual('global'));
+    await waitFor(() => expect(result.current.conversationSharedState).toEqual('shared'));
   });
 });

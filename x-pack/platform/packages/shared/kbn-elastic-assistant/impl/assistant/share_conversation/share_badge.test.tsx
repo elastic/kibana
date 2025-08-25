@@ -67,7 +67,7 @@ describe('ShareBadge', () => {
       </TestProviders>
     );
     fireEvent.click(screen.getByTestId('shareBadgeButton'));
-    const sharedOption = screen.getByTestId(ConversationSharedState.Shared);
+    const sharedOption = screen.getByTestId(ConversationSharedState.Restricted);
     fireEvent.click(sharedOption);
     await waitFor(() => {
       expect(screen.getByTestId('share-modal')).toBeInTheDocument();
@@ -77,7 +77,7 @@ describe('ShareBadge', () => {
   it('calls unshareConversation when Private is selected', async () => {
     render(
       <TestProviders providerContext={{ toasts: toastsMock }}>
-        <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.Global} />
+        <ShareBadge {...defaultProps} conversationSharedState={ConversationSharedState.Shared} />
       </TestProviders>
     );
     fireEvent.click(screen.getByTestId('shareBadgeButton'));
@@ -96,7 +96,7 @@ describe('ShareBadge', () => {
       </TestProviders>
     );
     fireEvent.click(screen.getByTestId('shareBadgeButton'));
-    const globalOption = screen.getByTestId(ConversationSharedState.Global);
+    const globalOption = screen.getByTestId(ConversationSharedState.Shared);
     fireEvent.click(globalOption);
     await waitFor(() => {
       expect(mockUpdateConversationUsers).toHaveBeenCalled();

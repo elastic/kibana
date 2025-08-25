@@ -210,7 +210,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
           let users: User[] = [];
           if (conversationSharedState === ConversationSharedState.Private) {
             users = [getCurrentConversationOwner(selectedConversation)];
-          } else if (conversationSharedState === ConversationSharedState.Shared) {
+          } else if (conversationSharedState === ConversationSharedState.Restricted) {
             users = nextUsers ?? [];
           }
           // For Global, users remains []
@@ -243,7 +243,7 @@ export const ConversationSettingsEditor: React.FC<ConversationSettingsEditorProp
     );
 
     const handleUsersUpdate = useCallback(
-      (users: User[]) => handleOnSharedSelectionChange(ConversationSharedState.Shared, users),
+      (users: User[]) => handleOnSharedSelectionChange(ConversationSharedState.Restricted, users),
       [handleOnSharedSelectionChange]
     );
 

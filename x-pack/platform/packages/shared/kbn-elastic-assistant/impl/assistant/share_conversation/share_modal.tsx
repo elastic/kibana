@@ -97,14 +97,14 @@ const ShareModalComponent: React.FC<Props> = ({
         await refetchCurrentUserConversations();
         refetchCurrentConversation({});
         toasts?.addSuccess({
-          title: i18n.SHARED_SUCCESS,
+          title: i18n.RESTRICTED_SUCCESS,
         });
       } else {
         throw new Error('No conversation available to share');
       }
     } catch (error) {
       toasts?.addError(error, {
-        title: i18n.SHARED_ERROR,
+        title: i18n.RESTRICTED_ERROR,
       });
     }
   }, [

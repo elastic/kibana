@@ -9,9 +9,9 @@ import type { Conversation } from '../../..';
 
 export enum ConversationSharedState {
   // all users
-  Global = 'global',
-  // selected users
   Shared = 'shared',
+  // selected users
+  Restricted = 'restricted',
   // not shared, only visible to conversation owner
   Private = 'private',
 }
@@ -27,21 +27,21 @@ export const getConversationSharedState = (
 
   switch (conversationUsers) {
     case 0:
-      return ConversationSharedState.Global;
+      return ConversationSharedState.Shared;
     case 1:
       // length is 1, default to private
       return ConversationSharedState.Private;
     default:
       // more than 1 user
-      return ConversationSharedState.Shared;
+      return ConversationSharedState.Restricted;
   }
 };
 
 export const getSharedIcon = (sharedState: ConversationSharedState): string => {
   switch (sharedState) {
-    case ConversationSharedState.Global:
-      return 'globe';
     case ConversationSharedState.Shared:
+      return 'globe';
+    case ConversationSharedState.Restricted:
       return 'users';
     case ConversationSharedState.Private:
       return 'lock';
