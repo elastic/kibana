@@ -48,6 +48,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.jira-service-management",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.microsoft_defender_endpoint",
   },
   Object {
