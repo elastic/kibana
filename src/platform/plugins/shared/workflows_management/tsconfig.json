@@ -34,6 +34,7 @@
     "@kbn/security-plugin-types-server",
     "@kbn/react-kibana-context-render",
     "@kbn/embeddable-plugin",
+    "@kbn/spaces-plugin",
     "@kbn/css-utils",
     "@kbn/triggers-actions-ui-plugin",
     "@kbn/alerting-plugin",

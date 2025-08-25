@@ -91,7 +91,7 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
               ...isAvailable('searchPlayground', {
                 id: 'searchPlayground',
                 title: i18n.translate('xpack.serverlessSearch.nav.build.searchPlayground', {
-                  defaultMessage: 'Playground',
+                  defaultMessage: 'RAG Playground',
                 }),
                 link: 'searchPlayground' as AppDeepLinkId,
                 breadcrumbStatus: 'hidden' as 'hidden',

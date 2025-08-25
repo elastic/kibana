@@ -11,10 +11,7 @@ import type { Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { v4 as generateUuid } from 'uuid';
-import {
-  convertToSerializableGraph,
-  convertToWorkflowGraph,
-} from '../../common/lib/build_execution_graph/build_execution_graph';
+import { convertToSerializableGraph, convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 const findWorkflowsByTrigger = (triggerType: string): WorkflowExecutionEngineModel[] => {
@@ -53,6 +50,7 @@ export class SchedulerService {
 
   public async runWorkflow(
     workflow: WorkflowExecutionEngineModel,
+    spaceId: string,
     inputs: Record<string, any>
   ): Promise<string> {
     const executionGraph = convertToWorkflowGraph(workflow.definition);
@@ -64,6 +62,7 @@ export class SchedulerService {
       inputs,
       event: 'event' in inputs ? inputs.event : undefined,
       triggeredBy: 'manual', // <-- mark as manual
+      spaceId,
     };
 
     const taskInstance = {
@@ -87,12 +86,12 @@ export class SchedulerService {
     return workflowRunId;
   }
 
-  public async pushEvent(eventType: string, eventData: Record<string, any>) {
+  public async pushEvent(eventType: string, spaceId: string, eventData: Record<string, any>) {
     try {
-      const worklfowsToRun = findWorkflowsByTrigger(eventType);
+      const workflowsToRun = findWorkflowsByTrigger(eventType);
 
-      for (const workflow of worklfowsToRun) {
-        await this.runWorkflow(workflow, {
+      for (const workflow of workflowsToRun) {
+        await this.runWorkflow(workflow, spaceId, {
           event: eventData,
         });
       }
