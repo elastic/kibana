@@ -6,10 +6,10 @@
  */
 
 import type { CoreSetup } from '@kbn/core/public';
-import { CloudConfigType } from '.';
+import type { CloudConfigType } from '.';
 import { CLOUD_SNAPSHOTS_PATH, CLOUD_USER_BILLING_ADMIN_ROLE } from '../common/constants';
 import { getFullCloudUrl } from '../common/utils';
-import { CloudBasicUrls, CloudPrivilegedUrls } from './types';
+import type { CloudBasicUrls, CloudPrivilegedUrls } from './types';
 
 /**
  * Service that manages all URLs for the Cloud plugin.
