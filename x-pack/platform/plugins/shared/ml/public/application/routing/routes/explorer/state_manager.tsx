@@ -167,19 +167,20 @@ export const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({
 
   return (
     <div className="ml-explorer">
-      <MlPageHeader>
-        <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <AnomalyResultsViewSelector viewId="explorer" selectedJobs={selectedJobs} />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <PageTitle
-              title={i18n.translate('xpack.ml.explorer.pageTitle', {
-                defaultMessage: 'Anomaly Explorer',
-              })}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+      <MlPageHeader
+        leftSideItems={
+          <EuiFlexGroup alignItems="center" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <AnomalyResultsViewSelector viewId="explorer" selectedJobs={selectedJobs} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <PageTitle
+          title={i18n.translate('xpack.ml.explorer.pageTitle', {
+            defaultMessage: 'Anomaly Explorer',
+          })}
+        />
       </MlPageHeader>
       <CasesContext owner={[]} permissions={casesPermissions!}>
         {jobsWithTimeRange.length === 0 ? (

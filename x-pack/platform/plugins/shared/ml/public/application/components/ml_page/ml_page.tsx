@@ -7,12 +7,18 @@
 
 import type { FC } from 'react';
 import React, { createContext, useEffect, useMemo, useState } from 'react';
-import { createHtmlPortalNode, type HtmlPortalNode } from 'react-reverse-portal';
+import { createHtmlPortalNode, type HtmlPortalNode, OutPortal } from 'react-reverse-portal';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
 import type { EuiPaddingSize } from '@elastic/eui';
-import { EuiPageSection, EuiPageHeader } from '@elastic/eui';
+import {
+  EuiPageSection,
+  EuiPageHeader,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPageHeaderSection,
+} from '@elastic/eui';
 import { map, distinctUntilChanged } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
@@ -20,6 +26,7 @@ import { type AppMountParameters } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { DatePickerWrapper } from '@kbn/ml-date-picker';
+import { css } from '@emotion/react';
 import { DEPRECATED_ML_ROUTE_TO_NEW_ROUTE } from '../../../../common/constants/locator';
 import * as routes from '../../routing/routes';
 import * as overviewRoutes from '../../routing/routes/overview_management';
@@ -52,14 +59,34 @@ const ML_APP_SELECTOR = '[data-test-subj="mlApp"]';
 
 export const MlPageControlsContext = createContext<{
   headerPortal: HtmlPortalNode;
+  leftHeaderPortal: HtmlPortalNode;
+  rightHeaderPortal: HtmlPortalNode;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   setIsHeaderMounted: (v: boolean) => void;
   isHeaderMounted: boolean;
+  isLeftSectionMounted: boolean;
+  setIsLeftSectionMounted: (v: boolean) => void;
+  isRightSectionMounted: boolean;
+  setIsRightSectionMounted: (v: boolean) => void;
+  headerRestrictWidth?: boolean | number;
+  setHeaderRestrictWidth: (v: number | undefined) => void;
+  wrapHeader: boolean;
+  setWrapHeader: (v: boolean) => void;
 }>({
   setHeaderActionMenu: () => {},
   headerPortal: createHtmlPortalNode(),
+  leftHeaderPortal: createHtmlPortalNode(),
+  rightHeaderPortal: createHtmlPortalNode(),
   isHeaderMounted: false,
   setIsHeaderMounted: () => {},
+  isLeftSectionMounted: false,
+  setIsLeftSectionMounted: () => {},
+  isRightSectionMounted: false,
+  setIsRightSectionMounted: () => {},
+  headerRestrictWidth: undefined,
+  setHeaderRestrictWidth: () => {},
+  wrapHeader: false,
+  setWrapHeader: () => {},
 });
 
 /**
@@ -109,8 +136,14 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     const { showMLNavMenu } = useEnabledFeatures();
 
     const headerPortalNode = useMemo(() => createHtmlPortalNode(), []);
+    const leftHeaderPortalNode = useMemo(() => createHtmlPortalNode(), []);
+    const rightHeaderPortalNode = useMemo(() => createHtmlPortalNode(), []);
     const [isHeaderMounted, setIsHeaderMounted] = useState(false);
+    const [isLeftSectionMounted, setIsLeftSectionMounted] = useState(false);
+    const [isRightSectionMounted, setIsRightSectionMounted] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [headerRestrictWidth, setHeaderRestrictWidth] = useState<number | undefined>(undefined);
+    const [wrapHeader, setWrapHeader] = useState<boolean>(false);
 
     useEffect(() => {
       const subscriptions = new Subscription();
@@ -172,14 +205,59 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
 
     const activeRoute = useActiveRoute(routeList);
 
-    const rightSideItems = useMemo(() => {
-      return [
-        ...(activeRoute.enableDatePicker
-          ? [<DatePickerWrapper isLoading={isLoading} width="full" />]
-          : []),
-      ];
-    }, [activeRoute.enableDatePicker, isLoading]);
-
+    const headerChildren = useMemo(() => {
+      // This is a workaround for EUI issue, where passing restrictWidth along with children prop,
+      // doesn't apply the max width - https://github.com/elastic/eui/pull/8965
+      const styles = css`
+        inline-size: 100%;
+        max-inline-size: ${headerRestrictWidth}px;
+        margin-inline: auto;
+      `;
+      return (
+        <EuiFlexGroup
+          justifyContent="spaceBetween"
+          css={styles}
+          alignItems="center"
+          wrap={wrapHeader}
+        >
+          <EuiPageHeaderSection>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {isLeftSectionMounted ? (
+                <EuiFlexItem grow={false}>
+                  <OutPortal node={leftHeaderPortalNode} />
+                </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem grow={true}>
+                <MlPageHeaderRenderer />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPageHeaderSection>
+          <EuiPageHeaderSection>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {isRightSectionMounted ? (
+                <EuiFlexItem grow={false}>
+                  <OutPortal node={rightHeaderPortalNode} />
+                </EuiFlexItem>
+              ) : null}
+              {activeRoute.enableDatePicker ? (
+                <EuiFlexItem grow={false}>
+                  <DatePickerWrapper isLoading={isLoading} width="full" />
+                </EuiFlexItem>
+              ) : null}
+            </EuiFlexGroup>
+          </EuiPageHeaderSection>
+        </EuiFlexGroup>
+      );
+    }, [
+      activeRoute.enableDatePicker,
+      headerRestrictWidth,
+      isLeftSectionMounted,
+      isLoading,
+      isRightSectionMounted,
+      leftHeaderPortalNode,
+      rightHeaderPortalNode,
+      wrapHeader,
+    ]);
     useDocTitle(activeRoute);
 
     // The deprecated `KibanaPageTemplate` from`'@kbn/kibana-react-plugin/public'`
@@ -204,8 +282,18 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
         value={{
           setHeaderActionMenu: pageDeps.setHeaderActionMenu,
           headerPortal: headerPortalNode,
+          leftHeaderPortal: leftHeaderPortalNode,
+          rightHeaderPortal: rightHeaderPortalNode,
           setIsHeaderMounted,
           isHeaderMounted,
+          isLeftSectionMounted,
+          setIsLeftSectionMounted,
+          isRightSectionMounted,
+          setIsRightSectionMounted,
+          headerRestrictWidth,
+          setHeaderRestrictWidth,
+          wrapHeader,
+          setWrapHeader,
         }}
       >
         {entryPoint === undefined ? (
@@ -226,8 +314,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
                 : undefined
             }
             pageHeader={{
-              pageTitle: <MlPageHeaderRenderer />,
-              rightSideItems,
+              children: headerChildren,
               restrictWidth: false,
             }}
           >
@@ -240,7 +327,7 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
           </KibanaPageTemplate>
         ) : (
           <>
-            <EuiPageHeader pageTitle={<MlPageHeaderRenderer />} rightSideItems={rightSideItems} />
+            <EuiPageHeader children={headerChildren} />
             <CommonPageWrapper
               headerPortal={headerPortalNode}
               setIsHeaderMounted={setIsHeaderMounted}

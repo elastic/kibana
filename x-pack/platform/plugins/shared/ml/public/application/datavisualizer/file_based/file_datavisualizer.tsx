@@ -24,6 +24,7 @@ import { isFullLicense } from '../../license';
 import { mlNodesAvailable, getMlNodeCount } from '../../ml_nodes_check/check_ml_nodes';
 import { checkPermission } from '../../capabilities/check_capabilities';
 import { MlPageHeader } from '../../components/page_header';
+import { PageTitle } from '../../components/page_title';
 
 export const FileDataVisualizerPage: FC = () => {
   useTimefilter({ timeRangeSelector: false, autoRefreshSelector: false });
@@ -121,9 +122,13 @@ export const FileDataVisualizerPage: FC = () => {
       {FileDataVisualizer !== null ? (
         <>
           <MlPageHeader>
-            <FormattedMessage
-              id="xpack.ml.dataVisualizer.pageHeader"
-              defaultMessage="Data Visualizer"
+            <PageTitle
+              title={
+                <FormattedMessage
+                  id="xpack.ml.dataVisualizer.pageHeader"
+                  defaultMessage="Data Visualizer"
+                />
+              }
             />
           </MlPageHeader>
           <FileDataVisualizer

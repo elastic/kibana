@@ -18,6 +18,7 @@ import { useMlKibana } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { useEnabledFeatures } from '../contexts/ml';
+import { PageTitle } from '../components/page_title';
 
 export const LogRateAnalysisPage: FC = () => {
   const { services } = useMlKibana();
@@ -28,9 +29,13 @@ export const LogRateAnalysisPage: FC = () => {
   return (
     <>
       <MlPageHeader>
-        <FormattedMessage
-          id="xpack.ml.logRateAnalysis.pageHeader"
-          defaultMessage="Log rate analysis"
+        <PageTitle
+          title={
+            <FormattedMessage
+              id="xpack.ml.logRateAnalysis.pageHeader"
+              defaultMessage="Log rate analysis"
+            />
+          }
         />
       </MlPageHeader>
       {dataView && (
