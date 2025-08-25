@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLSingleAstItem } from '../types';
+import type { ESQLSingleAstItem } from '../types';
 
 export const within = (inner: number | ESQLSingleAstItem, outer: ESQLSingleAstItem | undefined) => {
   if (!outer) {
