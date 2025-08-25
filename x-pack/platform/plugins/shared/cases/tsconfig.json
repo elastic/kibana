@@ -87,7 +87,6 @@
     "@kbn/monaco",
     "@kbn/code-editor",
     "@kbn/logging",
-    "@kbn/core-elasticsearch-client-server-mocks",
     "@kbn/core-test-helpers-model-versions",
     "@kbn/alerting-types",
     "@kbn/elastic-assistant-common",
@@ -95,7 +94,8 @@
     "@kbn/dev-utils",
     "@kbn/tooling-log",
     "@kbn/page-attachment-schema",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils"
   ],
   "exclude": ["target/**/*"]
 }
