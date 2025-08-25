@@ -137,6 +137,10 @@ function getFileExtension(path) {
 }
 
 function validateFileExtension(path) {
+  if (isDevOrCI && !process.env.KBN_ENABLE_HARDENED_FS) {
+    return;
+  }
+
   const hasAllowedExtension = allowedExtensions.some((ext) => path.toLowerCase().endsWith(ext));
 
   if (!hasAllowedExtension) {
