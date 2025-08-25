@@ -110,14 +110,16 @@ export const CreateAutomaticImport = React.memo(() => {
         <KibanaPageTemplate.Section grow paddingSize="l">
           {state.step === 1 && <ConnectorStep connector={state.connector} />}
           {state.step === 2 && <IntegrationStep integrationSettings={state.integrationSettings} />}
-          {state.step === 3 && (
-            <DataStreamStep
-              integrationSettings={state.integrationSettings}
-              celInputResult={state.celInputResult}
-              connector={state.connector}
-              isGenerating={state.isGenerating}
-            />
-          )}
+
+          {/* Persist step 3 and hide without unmounting as to preserve the EuiFilePicker State */}
+          <DataStreamStep
+            integrationSettings={state.integrationSettings}
+            celInputResult={state.celInputResult}
+            connector={state.connector}
+            isGenerating={state.isGenerating}
+            isShown={state.step === 3}
+          />
+
           {state.step === 3 && state.showCelCreateFlyout && (
             <CreateCelConfigFlyout
               integrationSettings={state.integrationSettings}
