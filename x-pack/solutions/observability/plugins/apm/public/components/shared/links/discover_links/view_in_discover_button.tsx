@@ -42,31 +42,20 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
     '/dependencies/operation',
     '/traces/explorer/waterfall'
   );
-  const {
-    transactionName,
-    transactionType,
-    spanName,
-    sampleRangeFrom,
-    sampleRangeTo,
-    environment,
-    dependencyName,
-    kuery,
-    rangeFrom,
-    rangeTo,
-    // we need to convert it here since /dependencies/operation uses span instead of transaction,
-    // to avoid changing the routes, we do this workaround
-  } = queryParams as unknown as {
-    transactionName: string;
-    transactionType: string;
-    spanName: string;
-    sampleRangeFrom: number;
-    sampleRangeTo: number;
-    environment: string;
-    dependencyName: string;
-    kuery: string;
-    rangeFrom: string;
-    rangeTo: string;
-  };
+
+  const { rangeFrom, rangeTo, kuery, environment } = queryParams;
+
+  // we need to check if those fields exist before accessing them,
+  // since not all routes include them
+  const transactionName =
+    'transactionName' in queryParams ? queryParams.transactionName : undefined;
+  const transactionType =
+    'transactionType' in queryParams ? queryParams.transactionType : undefined;
+  const spanName = 'spanName' in queryParams ? queryParams.spanName : undefined;
+  const sampleRangeFrom =
+    'sampleRangeFrom' in queryParams ? queryParams.sampleRangeFrom : undefined;
+  const sampleRangeTo = 'sampleRangeTo' in queryParams ? queryParams.sampleRangeTo : undefined;
+  const dependencyName = 'dependencyName' in queryParams ? queryParams.dependencyName : undefined;
 
   const { data = { apmIndexSettings: [] } } = useFetcher(
     (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
@@ -97,7 +86,7 @@ export function ViewInDiscoverButton({ dataTestSubj }: { dataTestSubj: string })
           transactionName || spanName
             ? where(`??nameField == ?name`, {
                 nameField: transactionName ? TRANSACTION_NAME : SPAN_NAME,
-                name: transactionName ?? spanName,
+                name: (transactionName ?? spanName) as string,
               })
             : (query) => query,
           transactionType
