@@ -114,7 +114,8 @@ describe('#getAllFields', () => {
           attributes: {
             host: {
               name: 'test-host',
-              ip: ['10.10.10.10'],
+              ip: ['10.10.10.10', '10.10.10.11'],
+              mac: ['01-33-22-33-71-83', '1E-15-33-68-F8-5B', '1E-8B-55-5B-7F-AA'],
             },
             os: {
               name: 'Ubuntu',
@@ -134,13 +135,17 @@ describe('#getAllFields', () => {
       { name: 'resource.attributes.os.name', value: 'Ubuntu' },
       { name: 'resource.attributes.os.version', value: '18.04' },
       { name: 'resource.attributes.host.name', value: 'test-host' },
-      { name: 'resource.attributes.host.ip', value: ['10.10.10.10'] },
+      { name: 'resource.attributes.host.ip', value: ['10.10.10.10', '10.10.10.11'] },
+      {
+        name: 'resource.attributes.host.mac',
+        value: ['01-33-22-33-71-83', '1E-15-33-68-F8-5B', '1E-8B-55-5B-7F-AA'],
+      },
       { name: 'resource.attributes.cloud.provider', value: 'gcp' },
       { name: 'resource.attributes.cloud.resource_id', value: '1111111111111111111' },
     ]);
   });
 
-  it('should map semconv string ip metadata properly', () => {
+  it('should map semconv string ip and mac metadata properly', () => {
     const result: InfraMetadata = {
       id: 'host1',
       name: 'host1',
@@ -156,6 +161,7 @@ describe('#getAllFields', () => {
           attributes: {
             host: {
               ip: '10.10.10.10',
+              mac: '01-33-22-33-71-83',
             },
           },
         },
@@ -164,6 +170,7 @@ describe('#getAllFields', () => {
 
     expect(getAllFields(result, 'semconv')).toStrictEqual([
       { name: 'resource.attributes.host.ip', value: '10.10.10.10' },
+      { name: 'resource.attributes.host.mac', value: '01-33-22-33-71-83' },
     ]);
   });
 

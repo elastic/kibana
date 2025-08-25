@@ -92,6 +92,7 @@ export const InfraMetadataResourceRT = rt.partial({
     host: rt.partial({
       ip: rt.union([rt.array(rt.string), rt.string]),
       name: rt.string,
+      mac: rt.union([rt.array(rt.string), rt.string]),
     }),
     agent: rt.partial({}),
     cloud: rt.partial({
