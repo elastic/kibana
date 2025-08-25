@@ -90,15 +90,13 @@ export const InfraMetadataAgentRT = rt.partial({
 export const InfraMetadataResourceRT = rt.partial({
   attributes: rt.partial({
     host: rt.partial({
-      ip: rt.string,
+      ip: rt.array(rt.string),
       name: rt.string,
     }),
     agent: rt.partial({}),
     cloud: rt.partial({
       provider: rt.string,
-      resource: rt.partial({
-        id: rt.string,
-      }),
+      resource_id: rt.string,
     }),
     os: rt.partial({
       name: rt.string,

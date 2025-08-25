@@ -114,7 +114,7 @@ describe('#getAllFields', () => {
           attributes: {
             host: {
               name: 'test-host',
-              ip: '10.10.10.10',
+              ip: ['10.10.10.10'],
             },
             os: {
               name: 'Ubuntu',
@@ -122,6 +122,7 @@ describe('#getAllFields', () => {
             },
             cloud: {
               provider: 'gcp',
+              resource_id: '1111111111111111111',
             },
           },
         },
@@ -133,8 +134,9 @@ describe('#getAllFields', () => {
       { name: 'resource.attributes.os.name', value: 'Ubuntu' },
       { name: 'resource.attributes.os.version', value: '18.04' },
       { name: 'resource.attributes.host.name', value: 'test-host' },
-      { name: 'resource.attributes.host.ip', value: '10.10.10.10' },
+      { name: 'resource.attributes.host.ip', value: ['10.10.10.10'] },
       { name: 'resource.attributes.cloud.provider', value: 'gcp' },
+      { name: 'resource.attributes.cloud.resource_id', value: '1111111111111111111' },
     ]);
   });
 
