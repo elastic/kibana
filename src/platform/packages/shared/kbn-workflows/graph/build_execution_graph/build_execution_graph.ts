@@ -296,7 +296,11 @@ function handleStepLevelOperations(currentStep: BaseStep): BaseStep {
   }
 
   if ((currentStep as BaseStep)?.['on-failure']?.retry) {
-    // Retry steps are treated as atomic steps for graph purposes
+    // Wrap the current step in a retry step
+    // and remove the retry from the current step's on-failure to avoid infinite nesting
+    // The retry logic will be handled by the outer retry step
+    // We keep other on-failure properties (like fallback-step, continue) on the inner step
+    // so they can be handled if the retry attempts are exhausted
     return {
       name: `retry_${getNodeId(currentStep)}`,
       type: 'retry',
