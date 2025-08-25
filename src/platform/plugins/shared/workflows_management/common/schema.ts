@@ -75,6 +75,43 @@ const connectors: ConnectorContract[] = [
       })
     ),
   },
+  // Internal Connector Steps
+  {
+    type: 'elasticsearch.request',
+    paramsSchema: z.object({
+      request: z.object({
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']),
+        path: z.string(),
+        headers: z.record(z.string(), z.string()).optional(),
+        body: z.any().optional().describe('Elasticsearch request body'),
+        query: z.record(z.string(), z.string()).optional(),
+      }),
+    }),
+    outputSchema: z.object({
+      response: z.any(),
+      status: z.number(),
+      headers: z.record(z.string(), z.string()),
+      executionTime: z.number(),
+    }),
+  },
+  {
+    type: 'kibana.request',
+    paramsSchema: z.object({
+      request: z.object({
+        method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'OPTIONS']),
+        path: z.string(),
+        headers: z.record(z.string(), z.string()).optional(),
+        body: z.any().optional().describe('Request body for Kibana internal API'),
+        query: z.record(z.string(), z.string()).optional().describe('Query parameters'),
+      }),
+    }),
+    outputSchema: z.object({
+      response: z.any(),
+      status: z.number(),
+      headers: z.record(z.string(), z.string()),
+      executionTime: z.number(),
+    }),
+  },
 ];
 
 export const getOutputSchemaForStepType = (stepType: string) => {
