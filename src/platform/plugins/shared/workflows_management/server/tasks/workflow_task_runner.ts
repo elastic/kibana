@@ -12,10 +12,7 @@ import type { Logger } from '@kbn/core/server';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
-import {
-  convertToSerializableGraph,
-  convertToWorkflowGraph,
-} from '../../common/lib/build_execution_graph/build_execution_graph';
+import { convertToSerializableGraph, convertToWorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowsService } from '../workflows_management/workflows_management_service';
 
 export interface WorkflowTaskParams {
@@ -43,7 +40,7 @@ export function createWorkflowTaskRunner({
   actionsClient: IUnsecuredActionsClient;
 }) {
   return ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
-    const { workflowId } = taskInstance.params as WorkflowTaskParams;
+    const { workflowId, spaceId } = taskInstance.params as WorkflowTaskParams;
     const state = taskInstance.state as WorkflowTaskState;
 
     return {
@@ -52,7 +49,7 @@ export function createWorkflowTaskRunner({
 
         try {
           // Get the workflow
-          const workflow = await workflowsService.getWorkflow(workflowId);
+          const workflow = await workflowsService.getWorkflow(workflowId, spaceId);
           if (!workflow) {
             throw new Error(`Workflow ${workflowId} not found`);
           }
@@ -62,7 +59,7 @@ export function createWorkflowTaskRunner({
           const workflowExecutionModel: WorkflowExecutionEngineModel = {
             id: workflow.id,
             name: workflow.name,
-            status: workflow.status,
+            enabled: workflow.enabled,
             definition: workflow.definition,
             executionGraph: convertToSerializableGraph(executionGraph),
           };
@@ -72,6 +69,7 @@ export function createWorkflowTaskRunner({
             workflowExecutionModel,
             {
               workflowRunId: `scheduled-${Date.now()}`,
+              spaceId,
               inputs: {},
               event: {
                 type: 'scheduled',

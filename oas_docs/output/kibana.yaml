@@ -31120,8 +31120,11 @@ paths:
                     properties:
                       agent_policy_count:
                         type: number
+                      package_policy_count:
+                        type: number
                     required:
                       - agent_policy_count
+                      - package_policy_count
                 required:
                   - response
         '400':
