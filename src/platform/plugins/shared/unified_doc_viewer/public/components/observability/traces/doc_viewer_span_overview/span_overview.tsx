@@ -20,7 +20,7 @@ import {
 } from '@kbn/discover-utils';
 import { getFlattenedSpanDocumentOverview } from '@kbn/discover-utils/src';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
-import React, { useMemo, useRef } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { FieldActionsProvider } from '../../../../hooks/use_field_actions';
 import { useDataViewFields } from '../../../../hooks/use_data_view_fields';
@@ -65,8 +65,8 @@ export function SpanOverview({
   columnsMeta,
   decreaseAvailableHeightBy = DEFAULT_MARGIN_BOTTOM,
 }: SpanOverviewProps) {
-  const containerRef = useRef<HTMLElement>(null);
-  const { fieldFormats, ...rest } = getUnifiedDocViewerServices();
+  const [containerRef, setContainerRef] = useState<HTMLDivElement | null>(null);
+  const { fieldFormats } = getUnifiedDocViewerServices();
   const { formattedDoc, flattenedDoc } = useMemo(
     () => ({
       formattedDoc: getSpanDocumentOverview(hit, { dataView, fieldFormats }),
@@ -90,8 +90,8 @@ export function SpanOverview({
   const traceId = flattenedDoc[TRACE_ID_FIELD];
   const transactionId = flattenedDoc[TRANSACTION_ID_FIELD];
 
-  const containerHeight = containerRef.current
-    ? getTabContentAvailableHeight(containerRef.current, decreaseAvailableHeightBy)
+  const containerHeight = containerRef
+    ? getTabContentAvailableHeight(containerRef, decreaseAvailableHeightBy)
     : 0;
 
   return (
@@ -111,16 +111,14 @@ export function SpanOverview({
             <EuiFlexGroup
               direction="column"
               gutterSize="m"
-              ref={containerRef}
+              ref={setContainerRef}
               css={
                 containerHeight
                   ? css`
-                      height: ${containerHeight}px;
+                      max-height: ${containerHeight}px;
                       overflow: auto;
                     `
-                  : css`
-                      display: block;
-                    `
+                  : undefined
               }
             >
               <EuiFlexItem>
