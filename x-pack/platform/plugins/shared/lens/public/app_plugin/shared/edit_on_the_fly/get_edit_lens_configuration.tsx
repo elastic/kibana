@@ -80,7 +80,8 @@ export const updatingMiddleware =
       if (initExisting.match(action) || initEmpty.match(action)) {
         return;
       }
-      // The user is updating the Visualization parameters, this means he is changing the chart type
+      // The user is updating the Visualization parameters,
+      // this means he is choosing this chart
       setUserChartTypeToLocalStorage(visualization.activeId);
 
       updater(

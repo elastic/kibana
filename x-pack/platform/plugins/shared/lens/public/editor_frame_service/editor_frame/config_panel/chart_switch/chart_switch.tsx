@@ -33,7 +33,6 @@ import { generateId } from '../../../../id_generator/id_generator';
 import type { SelectableEntry } from './chart_switch_selectable';
 import { ChartSwitchSelectable } from './chart_switch_selectable';
 import { ChartSwitchOptionPrepend } from './chart_option';
-import { setUserChartTypeToLocalStorage } from '../../../../settings_storage';
 
 type VisChartSwitchPosition = VisualizationType & {
   visualizationId: string;
@@ -98,7 +97,6 @@ export const ChartSwitch = memo(function ChartSwitch({
   const [searchTerm, setSearchTerm] = useState('');
 
   const commitSelection = (selection: VisualizationSelection) => {
-    setUserChartTypeToLocalStorage(selection.visualizationId);
     switchToSuggestion(
       dispatchLens,
       {
