@@ -16,8 +16,14 @@ const axios = require('axios');
 const puppeteer = require('puppeteer');
 const { faker } = require('@faker-js/faker');
 
-// CLI arg: number of users to create. Defaults to 10 if not provided.
-const totalUsers = parseInt(process.argv[2], 10) || 10;
+// CLI args: number of users to create and optional --no-assistant flag
+const args = process.argv.slice(2);
+const totalUsers =
+  parseInt(
+    args.find((arg) => !arg.startsWith('--')),
+    10
+  ) || 10;
+const noAssistant = args.includes('--no-assistant');
 
 // Elasticsearch and Kibana configuration
 const elasticUrl = 'http://localhost:9200';
@@ -28,19 +34,133 @@ const elasticAuth = {
 };
 
 /**
+ * Creates a restricted role that denies access to the Security Assistant.
+ *
+ * @param {string} roleName - The name of the role to create.
+ */
+const createRestrictedRole = async (roleName) => {
+  const url = `${kibanaUrl}/api/security/role/${roleName}`;
+
+  // First check if the role already exists
+  try {
+    const checkResponse = await axios.get(url, {
+      auth: elasticAuth,
+      headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
+    });
+
+    if (checkResponse.status === 200) {
+      console.log(`ℹ️  Role ${roleName} already exists`);
+      return;
+    }
+  } catch (err) {
+    // Role doesn't exist, continue to create it
+    if (err.response?.status !== 404) {
+      console.error(`❌ Error checking role ${roleName}:`, err.response?.data || err.message);
+      return err;
+    }
+  }
+
+  try {
+    await axios.put(
+      url,
+      {
+        description: '',
+        elasticsearch: {
+          cluster: [],
+          indices: [],
+          run_as: [],
+        },
+        kibana: [
+          {
+            spaces: ['*'],
+            base: [],
+            feature: {
+              searchSynonyms: ['all'],
+              searchQueryRules: ['all'],
+              enterpriseSearch: ['all'],
+              searchPlayground: ['all'],
+              searchInferenceEndpoints: ['all'],
+              enterpriseSearchApplications: ['all'],
+              enterpriseSearchAnalytics: ['all'],
+              discover_v2: ['all'],
+              dashboard_v2: ['all'],
+              canvas: ['all'],
+              maps_v2: ['all'],
+              ml: ['all'],
+              graph: ['all'],
+              streams: ['all'],
+              logs: ['all'],
+              visualize_v2: ['all'],
+              infrastructure: ['all'],
+              apm: ['all'],
+              onechat: ['all'],
+              uptime: ['all'],
+              observabilityCasesV3: ['all'],
+              siemV3: ['all'],
+              securitySolutionCasesV3: ['all'],
+              securitySolutionTimeline: ['all'],
+              securitySolutionNotes: ['all'],
+              slo: ['all'],
+              dev_tools: ['all'],
+              securitySolutionAttackDiscovery: ['all'],
+              securitySolutionSiemMigrations: ['all'],
+              advancedSettings: ['all'],
+              indexPatterns: ['all'],
+              filesManagement: ['all'],
+              filesSharedImage: ['all'],
+              savedObjectsManagement: ['all'],
+              savedQueryManagement: ['all'],
+              savedObjectsTagging: ['all'],
+              osquery: ['all'],
+              actions: ['all'],
+              generalCasesV3: ['all'],
+              observabilityAIAssistant: ['all'],
+              aiAssistantManagementSelection: ['all'],
+              guidedOnboardingFeature: ['all'],
+              rulesSettings: ['all'],
+              maintenanceWindow: ['all'],
+              stackAlerts: ['all'],
+              manageReporting: ['all'],
+              fleetv2: ['all'],
+              fleet: ['all'],
+              dataQuality: ['all'],
+            },
+          },
+        ],
+      },
+      {
+        auth: elasticAuth,
+        headers: { 'Content-Type': 'application/json', 'kbn-xsrf': 'xsrf' },
+      }
+    );
+    console.log(`✅ Created restricted role ${roleName}`);
+  } catch (err) {
+    console.error(`❌ Failed to create role ${roleName}:`, err.response?.data || err.message);
+    return err;
+  }
+};
+
+/**
  * Creates a user in Elasticsearch.
  *
  * @param {string} username - The username of the user to create.
  * @param {string} fullName - The full name of the user.
+ * @param {boolean} restricted - Whether to create a user with restricted Security Assistant access.
  */
-const createUser = async (username, fullName) => {
+const createUser = async (username, fullName, restricted = false) => {
+  // If creating a restricted user, first ensure the restricted role exists
+  const restrictedRoleName = 'security_assistant_restricted';
+  if (restricted) {
+    await createRestrictedRole(restrictedRoleName);
+  }
+
   const url = `${elasticUrl}/_security/user/${username}`;
   try {
     await axios.put(
       url,
       {
         password: 'changeme',
-        roles: ['superuser'],
+        roles: restricted ? [restrictedRoleName] : ['superuser'],
         full_name: fullName,
         email: `${username}@elastic.co`,
       },
@@ -49,7 +169,11 @@ const createUser = async (username, fullName) => {
         headers: { 'Content-Type': 'application/json' },
       }
     );
-    console.log(`✅ Created user ${username} (${fullName})`);
+    console.log(
+      `✅ Created user ${username} (${fullName})${
+        restricted ? ' with Security Assistant restrictions' : ''
+      }`
+    );
   } catch (err) {
     if (err.response?.status === 409) {
       console.log(`ℹ️  User ${username} already exists`);
@@ -104,11 +228,16 @@ const toUsername = (first, last) => {
  * and logs them into Kibana.
  *
  * Run the script with Node.js, optionally specifying the number of users to create (default is 10):
- * Example:
+ * Examples:
  * node x-pack/solutions/security/plugins/elastic_assistant/scripts/create_and_login_users.js 35
+ * node x-pack/solutions/security/plugins/elastic_assistant/scripts/create_and_login_users.js 1 --no-assistant
  */
 (async () => {
-  console.log(`🚀 Creating ${totalUsers} test users...\n`);
+  console.log(
+    `🚀 Creating ${totalUsers} test users${
+      noAssistant ? ' with Security Assistant restrictions' : ''
+    }...\n`
+  );
 
   for (let i = 0; i < totalUsers; i++) {
     const firstName = faker.person.firstName();
@@ -116,7 +245,7 @@ const toUsername = (first, last) => {
     const fullName = `${firstName} ${lastName}`;
     const username = toUsername(firstName, lastName);
 
-    await createUser(username, fullName);
+    await createUser(username, fullName, noAssistant);
     await loginUser(username);
   }
 
